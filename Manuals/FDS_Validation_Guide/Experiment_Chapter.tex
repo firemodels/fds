@@ -1132,9 +1132,7 @@ The authors measured the water cooled gauge heat flux and gas temperature at fou
 
 \subsubsection{Modeling Notes}
 
-The number of radiation angles was increased to 400 in this work to reduce mesh artifacts in the discretization ~\cite{KimYJ_Trouve:FSJ2023}. The number of time steps between updates to the radiation equation was increased from the default 3 to 12 to maintain the same computational time for the radiation solver at the higher spatial resolution.
-The models used the two-step mixing-controlled combustion scheme with a gas phase reaction of propane, C$_3$H$_8$, with a soot yield of 0.024, carbon monoxide yield of 0.005~\cite{SFPE2016:appendix3}. A pilot fuel source of 1~\% of the fuel at the burner had an auto ignition temperature of 0~\degC~and the remaining fuel had a specified auto ignition temperature of 450~\degC~for propane~\cite{SFPE:Beyler}. Local flame extinction was disabled (\ct{SUPPRESSION=F}).
-The top of the fuel surface was defined as a prescribed heat release rate per unit area with a 10~\% random perturbation in the mass flux of fuel across the surface. The front surface temperature of the burner was set to 400~\degC.
+It is assumed that the fuel propane, C$_3$H$_8$, has a soot yield of 0.024 and a carbon monoxide yield of 0.005~\cite{SFPE2016:appendix3}. The front surface temperature of the burner was set to 400~\degC.
 
 
 

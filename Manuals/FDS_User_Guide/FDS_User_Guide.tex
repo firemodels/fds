@@ -339,7 +339,7 @@ Running FDS using MPI requires shared disk access to each computer on which case
 The goal of making FDS and Smokeview publicly available has been to enable practicing engineers to perform fairly sophisticated simulations at a reasonable cost. Thus, FDS and Smokeview have been designed for computers running Microsoft Windows, macOS, and Linux.
 \begin{description}
 \item[MS Windows] An installation package is available for the 64~bit Windows operating system. Running FDS/Smokeview any version of MS Windows released prior to Windows 7 is not recommended.
-\item[macOS] Pre-compiled executables are installed into a user selected directory using an installation script.  macOS 10.4.x or later is recommended. You can always download the latest version of FDS source and compile FDS for other versions of macOS (See Chapter~\ref{info:compilation} for details).  Note that Rosetta allows running FDS compiled on x86-64 architecture on Apple silicon systems (M1 and M2 chips); therefore the FDS executable distributed with the macOS bundle will run on the newer Macs.  However, if compiling the source natively on Apple silicon with GNU and Open MPI, it is not currently possible to use the ULMAT pressure solver (which requires Intel MKL libraries), and hence the complex geometry features (\ct{GEOM} namelist) are not available.
+\item[macOS] Pre-compiled executables are installed into a user selected directory using an installation script.  macOS 10.4.x or later is recommended. You can always download the latest version of FDS source and compile FDS for other versions of macOS (see Chapter~\ref{info:compilation} for details).  Note that Rosetta allows running FDS compiled on x86-64 architecture on Apple silicon systems; therefore the FDS executable distributed with the macOS bundle will run on the newer Macs.  However, if compiling the source natively on Apple silicon with GNU and Open MPI, it is not currently possible to use the ULMAT pressure solver (which requires Intel MKL libraries), instead ULMAT HYPRE may be used (see Sec.~\ref{optional_pressure_solver}).
 \item[Linux] Pre-compiled executables are installed into a user selected directory using an installation script. If the pre-compiled FDS executable does not work (usually because of library incompatibilities), the FDS Fortran source code can be downloaded and compiled (See Chapter~\ref{info:compilation} for details). If Smokeview does not work on the Linux workstation, you can use the Windows version to view FDS output.
 \end{description}
 
@@ -1691,7 +1691,7 @@ There are four reserved \ct{SURF_ID}'s that may be applied to a \ct{VENT} -- \ct
 
 The first special \ct{VENT} is invoked by the parameter \ct{SURF_ID='OPEN'}. This is used only if the \ct{VENT} is applied to the exterior boundary of the computational domain, where it denotes a passive opening to the outside. By default, FDS assumes that the exterior boundary of the computational domain (the \ct{XB}s on the \ct{MESH} line) is a solid wall. To create a totally or partially open domain, use \ct{OPEN} vents on the exterior mesh boundaries. It is sometimes convenient to specify doors or windows that open out to the exterior of the computational domain by simply specifying it to be \ct{OPEN}. However, keep in mind that the pressure boundary condition on such an opening is imperfect, and it is recommended that if the flow through the doorway or window is important, you should extend the domain a few meters rather than use an \ct{OPEN} boundary. You would still have to use the \ct{OPEN} boundary to open up one or more sides of the computational domain, but these openings would be far enough away from the modeled door or window that they would not affect the flow pattern.
 
-By default, it is assumed that ambient conditions exist beyond the \ct{'OPEN'} vent. However, in some cases, you may want to alter this assumption, for example, the temperature. If you assume a temperature other than ambient, specify \ct{TMP_EXTERIOR} along with \ct{SURF_ID='OPEN'}. You can modify the time history of this parameter using a ramp function, \ct{TMP_EXTERIOR_RAMP} (see Section~\ref{info:RAMP_Time} for details about time/temperture ramps). Use this option cautiously -- in many situations if you want to describe the exterior of a building, it is better to include the exterior explicitly in your calculation because the flow in and out of the doors and windows will be more naturally captured. See Sec.~\ref{info:stackeffect} for more details. If you want to specify a non-ambient pressure at the \ct{OPEN} boundary, see Sec.~\ref{info:pressure_boundary}.
+By default, it is assumed that ambient conditions exist beyond the \ct{'OPEN'} vent. However, in some cases, you may want to alter this assumption, for example, the temperature. If you assume a temperature other than ambient, specify \ct{TMP_EXTERIOR} along with \ct{SURF_ID='OPEN'}. You can modify the time history of this parameter using a ramp function, \ct{TMP_EXTERIOR_RAMP} (see Section~\ref{info:RAMP_Time} for details about time/temperature ramps). Use this option cautiously -- in many situations if you want to describe the exterior of a building, it is better to include the exterior explicitly in your calculation because the flow in and out of the doors and windows will be more naturally captured. See Sec.~\ref{info:stackeffect} for more details. If you want to specify a non-ambient pressure at the \ct{OPEN} boundary, see Sec.~\ref{info:pressure_boundary}.
 
 The \ct{OPEN} pressure boundary condition is most stable for flows that are predominantly normal  to the vent, either mostly in or mostly out.  This is because the prescribed pressure at an \ct{OPEN} boundary is ill-conditioned (a small perturbation to the input may lead to large change in the output) if the flow is parallel to the vent.  Suppose, for example, that an outdoor flow is 10 m/s in the $x$ direction and $\pm 0.001$ m/s in the $z$ direction with an \ct{OPEN} top boundary.  The kinetic energy of this flow is roughly $k=50$ m$^2$/s$^2$.  When the vertical velocity is positive (+0.001 m/s) then the prescribed boundary condition for the stagnation pressure is set to $\cH = k = 50$ m$^2$/s$^2$.  But when the vertical velocity is negative (-0.001 m/s) then $\cH = 0$ (see \cite{FDS_Tech_Guide}).  For this reason, \ct{OPEN} vents should be used with care in outdoor applications.  See Section \ref{info:WIND} for an alternative approach.
 
@@ -2245,15 +2245,6 @@ Sphere       & 2        & 0.6     & 0     & 0.5    &                \\ \hline
 
 The length scale, $L$, is specified by \ct{CONVECTION_LENGTH_SCALE} on the \ct{SURF} line. By default, it is 1~m for plates, and the diameter of a sphere or cylinder.
 
-\subsubsection{Impinging Jet Heat Transfer Model}
-\label{info:impinging_jet}
-
-The forced convection heat transfer correlations generally apply to flow parallel to a surface.  When the flow is an impinging jet (normal and toward the surface) then the tangential components of velocity are not well resolved at the impingement point and consequently a fictitiously low value of heat transfer coefficient will be predicted if special consideration is not given to the surface.  If the surface may be subject to an impinging jet or stagnation point flow (in fire, usually this pertains to ceilings above a fire source), consider using impinging jet heat transfer model, applied on \ct{SURF} using \ct{HEAT_TRANSFER_MODEL='IMPINGING JET'}.  The default form of the model is similar to the forced convection correlation, but the Reynolds number is computed using an ``impact velocity'' computed as $U_{\rm{imp}} = \sqrt{2H}$, where $H$ is the stagnation energy per unit mass (see FDS Tech Guide ~\cite{FDS_Math_Guide}).
-\be
-   \NU_{\rm imp} = C_0 + \left( C_1 \, \RE_{\rm imp}^m - C_2 \right) \, \PR^{1/3}  \quad ; \quad \RE_{\rm imp} = \frac{\rho U_{\rm{imp}} L}{\mu}
-\ee
-The default coefficients are $C_0=0$, $C_1=0.055$, $C_2=0$, $m=0.8$.  But custom values may be entered on the \ct{SURF} line as described above.  Again, the default length scale is taken to be $L=1$ m, but may be changed.  This value is usually set to the diameter of the jet source in the literature.  The heat transfer coefficient obtained from $\NU_{\rm imp}$ is compared to that from forced and free convection and the largest value is chosen for the surface.
-
 \subsubsection{Output for Convective Heat Transfer Regime}
 \label{info:convection_regime}
 
@@ -2261,8 +2252,17 @@ It may be useful to visualize which convective heat transfer correlation is bein
 
 \subsubsection{Specified Convective Heat Transfer Coefficient}
 
-To specify the convective heat transfer coefficient, set it to a constant using \\
-\ct{HEAT_TRANSFER_COEFFICIENT} on the \ct{SURF} line in units of \unit{W/(m^2.K)} with optional time dependent ramp using \ct{RAMP_HEAT_TRANSFER_COEFFICIENT}. If the back side of the solid obstruction faces the exterior of the computational domain and the solid conducts heat, the heat transfer coefficient of the back side may be specified using \ct{HEAT_TRANSFER_COEFFICIENT_BACK} with optional time dependent ramp ramp using \ct{RAMP_HEAT_TRANSFER_COEFFICIENT_BACK}. This back side condition is appropriate for a \ct{SURF} line with \ct{BACKING='VOID'} or \ct{BACKING='EXPOSED'}.
+To specify the convective heat transfer coefficient, set it to a constant using \ct{HEAT_TRANSFER_COEFFICIENT} on the \ct{SURF} line in units of \unit{W/(m^2.K)} with optional time dependent ramp using\\\ct{RAMP_HEAT_TRANSFER_COEFFICIENT}. If the back side of the solid obstruction faces the exterior of the computational domain and the solid conducts heat, the heat transfer coefficient of the back side may be specified using \ct{HEAT_TRANSFER_COEFFICIENT_BACK} with optional time dependent ramp ramp using\\\ct{RAMP_HEAT_TRANSFER_COEFFICIENT_BACK}. This back side condition is appropriate for a \ct{SURF} line with \ct{BACKING='VOID'} or \ct{BACKING='EXPOSED'}.
+
+\subsubsection{Impinging Jet Heat Transfer Model}
+\label{info:impinging_jet}
+
+The forced convection heat transfer correlations generally apply to flow parallel to a surface.  When the flow is an impinging jet (normal and toward the surface) then the tangential components of velocity are not well resolved at the impingement point and consequently a fictitiously low value of heat transfer coefficient will be predicted if special consideration is not given to the surface.  If the surface may be subject to an impinging jet or stagnation point flow (in fire, usually this pertains to ceilings above a fire source), consider using impinging jet heat transfer model, applied on \ct{SURF} using \ct{HEAT_TRANSFER_MODEL='IMPINGING JET'}.
+
+The impinging jet model is an extension of the user-specified $h$ that allows you to specify a Gaussian radial profile parameterized by a center point, \ct{XYZ(1:3)}, a width in meters (m),\\\ct{HEAT_TRANSFER_COEFFICIENT_SIGMA}, and the peak value, $h_0$, using \ct{HEAT_TRANSFER_COEFFICIENT}, all on the \ct{SURF} line.  You may determine these parameters using correlations in \cite{Incropera:1}, for example.  Take note that the correlations usually give the average heat transfer coefficient over an area, $\bar{h}$.  It can be shown that the ratio of the peak to average for a Gaussian profile over area $A=\pi \sigma^2$ is $h_0/\bar{h} \approx 1.3$.  An example \ct{SURF} line is given below.
+\begin{lstlisting}
+&SURF ID='WALL', HEAT_TRANSFER_MODEL='IMPINGING JET', XYZ=0,0,1, HEAT_TRANSFER_COEFFICIENT=50, HEAT_TRANSFER_COEFFICIENT_SIGMA=0.5 /
+\end{lstlisting}
 
 \subsubsection{Specifying the Heat Flux at a Solid Surface}
 \label{info:net_and_convective_heat_flux}
@@ -2792,7 +2792,7 @@ The parameters \ct{HRRPUA}, \ct{IGNITION_TEMPERATURE}, \ct{EXTINCTION_TEMPERATUR
 
 FDS has a simple scaling-based pyrolysis model (SPyro) that scales burning rate data collected from a cone calorimeter or similar device to a different material thickness and accounts for the dynamic heat feedback during an FDS simulation. The inputs for this model are similar to Section~\ref{info:specified_burning} with some additional parameters. The frequently used parameters for this model are:
 \begin{itemize}
-\item[\ct{HRRPUA}] (Required) Specified heat release rate per unit area (HRRPUA) for the \ct{SURF} which is multiplied by \ct{RAMP_Q}. Typically, HRRPUA is set to 1.0 \unit{kW/m^2} using this model.
+\item \ct{HRRPUA} (Required) Specified heat release rate per unit area (HRRPUA) for the \ct{SURF} which is multiplied by \ct{RAMP_Q}. Typically, HRRPUA is set to 1.0 \unit{kW/m^2} using this model.
 \item \ct{IGNITION_TEMPERATURE} (Required) Specifies ignition temperature of the material in degrees Celsius.
 \item \ct{INERT_Q_REF} Specifies whether the test data represents an inert test device where pyrolysis occurs without combustion. This flag applies to all specified test data if an array of experimental data is provided. (Default False)
 \item \ct{RAMP_Q} (Required) Specifies the \ct{ID} of a \ct{RAMP} which contains the experimental data with \ct{T} as time and \ct{F} as the measured HRRPUA in \unit{kW/m^2}. The test data should be adjusted so that 0~s in the ramp represents the time the sample started burning/pyrolyzing in the test.
@@ -3550,7 +3550,7 @@ Here is example of how to specify a surface that blows methane with a velocity o
 \end{lstlisting}
 Note that specifying a combination of \ct{VEL} and \ct{MASS_FRACTION} can lead to inaccurate results if the specified velocity is small because diffusion will dominate the mass transport.  To obtain an accurate species mass flux at a boundary, use \ct{MASS_FLUX}.
 
-Alternatively, add \ct{CONVERT_VOLUME_TO_MASS=T} for velocity boundaries (\ct{VEL}, \ct{VOLUME_FLOW}, or \ct{MASS_FLUX_TOTAL}), which converts volume flow to a mass flux based on the specified boundary composition (\ct{MASS_FRACTION}) and temperature (\ct{TMP_FRONT}):
+Alternatively, add \ct{CONVERT_VOLUME_TO_MASS=T} for velocity boundaries (\ct{VEL}, \ct{VOLUME_FLOW}, or\\\ct{MASS_FLUX_TOTAL}), which converts volume flow to a mass flux based on the specified boundary composition (\ct{MASS_FRACTION}) and temperature (\ct{TMP_FRONT}):
 \begin{equation}
 \dot{m}_\alpha^{\prime\prime} = \rho Z_\alpha u = \frac{p_\infty \overline{W}}{R T} Z_\alpha \frac{\dot{Q}}{A}
 \end{equation}
@@ -6374,7 +6374,7 @@ The THIEF model assumes that the cable plastic material has a thermal conductivi
 \subsubsection{Target Particles}
 \label{info:target_particles}
 
-To declare solid particle as being just a target for heat transfer, specify \ct{TARGET_ONLY} on \ct{PART}. When this flag is set and material properties are given, then FDS will compute the particle temperature using the local gas temperature and radiative conditions; however, the particle will not exchange energy or momentum with the gas. When this flag is set, a \ct{CARTESIAN} particle's \ct{SURF} will no longer be treated as a half-thickness plate. This allows the use of backside boundary conditions on \ct{SURF} such as \ct{TMP_GAS_BACK} and \ct{EMISSIVITY_BACK}. If it is still desired to have the \ct{THICKNESS} represent half the thickness of a plate heated from both sides, then set \ct{BACKING='INSULTATED'} on the \ct{SURF} line. Target particles are treated as \ct{STATIC} but can be positioned using \ct{PATH_RAMP} and/or \ct{ORIENTATION_RAMP} on \ct{INIT}.
+To declare that a solid particle is only for recording the heat flux to a location away from a solid surface, specify \ct{TARGET_ONLY=T} on the \ct{PART} line. When this flag is set and material properties are given, FDS will compute the particle temperature using the local gas temperature and radiative conditions; however, the particle will not exchange energy or momentum with the gas. When this flag is set, a \ct{CARTESIAN} particle's \ct{SURF} will no longer be treated as a half-thickness plate. This allows the use of backside boundary conditions on \ct{SURF} such as \ct{TMP_GAS_BACK} and \ct{EMISSIVITY_BACK}. If it is still desired to have the \ct{THICKNESS} represent half the thickness of a plate heated from both sides, then set \ct{BACKING='INSULTATED'} on the \ct{SURF} line. Target particles are treated as \ct{STATIC} but can be positioned using \ct{PATH_RAMP} and/or \ct{ORIENTATION_RAMP} on \ct{INIT}.
 
 \newpage
 
@@ -9152,7 +9152,7 @@ The fields are stored in a comma-separated value (.csv) files.  You have the opt
 FDS will then write \ct{CHID_uvw_tN_mM.csv}, etc., for each time, \ct{N}, and mesh, \ct{M}.
 
 \subsection*{Velocity format}
-The format of the files is very simple.  They are ASCII formatted files, comma-separated, with integer header and double-presicion real data.  The top row just indicates the sctructured mesh extents (relative to a specific mesh).  For velocity, note that the raw data values are face centered with index 1 denoting the + side of the face.  Hence, \ct{IMIN} will usually be 0, representing the left mesh boundary. (It is perhaps easiest to understand the format by just opening a file that FDS has written for you.)
+The format of the files is very simple.  They are ASCII formatted files, comma-separated, with integer header and double-precision real data.  The top row just indicates the structured mesh extents (relative to a specific mesh).  For velocity, note that the raw data values are face centered with index 1 denoting the + side of the face.  Hence, \ct{IMIN} will usually be 0, representing the left mesh boundary. (It is perhaps easiest to understand the format by just opening a file that FDS has written for you.)
 \begin{lstlisting}
   WRITE(LU_UVW) IMIN,IMAX,JMIN,JMAX,KMIN,KMAX
   DO K=KMIN,KMAX
@@ -9178,7 +9178,7 @@ Similarly, for temperature, except temperature is a scalar stored at the cell ce
 \end{lstlisting}
 
 \subsection*{Species format}
-Tracked species are written out as a comma-separed list with each cell as a row in the file.  Similar to temperture, species mass fractions are scalars that live at the cell centers.
+Tracked species are written out as a comma-separated list with each cell as a row in the file.  Similar to temperature, species mass fractions are scalars that live at the cell centers.
 \begin{lstlisting}
   WRITE(LU_UVW) IMIN,IMAX,JMIN,JMAX,KMIN,KMAX
   DO K=KMIN,KMAX
@@ -10558,11 +10558,15 @@ If the heat flux gauge used in an experiment has a temperature other than ambien
 \end{lstlisting}
 By default, the heat transfer coefficient, $h_{\rm c}$, in Eq.~(\ref{gauge_heat_flux}) is calculated at the solid surface to which the device is attached, based on the specified surface properties and characteristics of the surrounding flow field. However, you may specify a fixed \ct{HEAT_TRANSFER_COEFFICIENT} (W/(m$^2 \cdot$K)) for the gauge on the \ct{PROP} line.
 
-\item \ct{'GAUGE HEAT FLUX GAS'} The same as \ct{'GAUGE HEAT FLUX'}, except that it can be located anywhere within the computational domain and not just at a solid surface. It also has an arbitrary \ct{ORIENTATION} vector that points in any desired direction, much like a heat flux gauge. The \ct{ORIENTATION} vector need not be normalized, as in the following:
+\item \ct{'GAUGE HEAT FLUX GAS'} The same as \ct{'GAUGE HEAT FLUX'}, except that it can be located anywhere within the computational domain and not just at a solid surface. It also has an arbitrary \ct{ORIENTATION} vector that points in any desired direction. The \ct{ORIENTATION} vector need not be normalized, as in the following:
 \begin{lstlisting}
-&DEVC ID='hf', QUANTITY='GAUGE HEAT FLUX GAS', XYZ=..., ORIENTATION=-1,1,0/
+&DEVC ID='hf', QUANTITY='GAUGE HEAT FLUX GAS', XYZ=..., ORIENTATION=-1,1,0,
+      PROP_ID='my gauge' /
+&PROP ID='my gauge', GAUGE_EMISSIVITY=0.85, HEAT_TRANSFER_COEFFICIENT=15. /
 \end{lstlisting}
-Note that the parameter \ct{SPATIAL_STATISTIC} is not appropriate for this quantity, meaning that you cannot integrate this quantity over a plane or volume. However, you can use the parameter \ct{POINTS} to create a one-dimensional array of these devices (see Sec.~\ref{info:line_file}). Also, the convective component of the heat flux is calculated based on the assumption that the virtual target is a flat plate normal to the \ct{ORIENTATION} vector, and that the heat transfer coefficient is a function of the local gas temperature and velocity which will not be affected by the virtual device. Alternatively, you can specify \ct{HEAT_TRANSFER_COEFFICIENT} on a \ct{PROP} line whose \ct{ID} is specified on the \ct{DEVC} line.
+The \ct{GAUGE_TEMPERATURE}, $T_{\rm gauge}$, \ct{GAUGE_EMISSIVITY}, $\epsilon_{\rm gauge}$, and \ct{HEAT_TRANSFER_COEFFICIENT}, $h_{\rm c}$ (W/(m$^2$~K)), can be specified using a \ct{PROP} line that is referenced by the \ct{DEVC} line. Their default values are \ct{TMPA}, 1, and 10, respectively.
+
+Note that the parameter \ct{SPATIAL_STATISTIC} is not appropriate for this quantity, meaning that you cannot integrate this quantity over a plane or volume. However, you can use the parameter \ct{POINTS} to create a one-dimensional array of these devices (see Sec.~\ref{info:line_file}).
 
 \item \ct{'RADIOMETER'} Similar to a water-cooled heat flux gauge, except that this quantity measures only the net radiative component:
 \be
@@ -10574,7 +10578,7 @@ The quantity \ct{RADIOMETER} is based on the {\em ellipsoidal radiometer} concep
 
 \item \ct{'RADIOMETER GAS'} The same as \ct{'RADIOMETER'} described above, except it can located anywhere within the computational domain and not just at a solid surface. It also has an arbitrary \ct{ORIENTATION} vector that points in any desired direction, much like a heat flux gauge. The \ct{ORIENTATION} vector need not be normalized, as in the following:
 \begin{lstlisting}
-	&DEVC ID='hf', QUANTITY='RADIOMETER GAS', XYZ=..., ORIENTATION=-1,1,0/
+&DEVC ID='hf', QUANTITY='RADIOMETER GAS', XYZ=..., ORIENTATION=-1,1,0/
 \end{lstlisting}
 Note that the parameter \ct{SPATIAL_STATISTIC} is not appropriate for this quantity, meaning that you cannot integrate this quantity over a plane or volume. However, you can use the parameter \ct{POINTS} to create a one-dimensional array of these devices (see Sec.~\ref{info:line_file}).
 
@@ -11365,30 +11369,30 @@ The \ct{ID} is just a label in the output file. When an output quantity is relat
 \ct{CFL}                                       & Section~\ref{info:TIMING}                         &                   & D,I,P,S      \\ \hline
 \ct{CFL MAX}                                   & Section~\ref{info:TIMING}                         &                   & D            \\ \hline
 \ct{CHEMISTRY SUBITERATIONS}                   & Section~\ref{info:chem_integration}               &                   & D,S          \\ \hline
-\ct{CHI_R}                                    & Section~\ref{info:CHI_R}                          &                   & D,I,S        \\ \hline
+\ct{CHI_R}                                     & Section~\ref{info:CHI_R}                          &                   & D,I,S        \\ \hline
 \ct{COMBUSTION EFFICIENCY}                     & $\delta t/\tau_{\mathrm{mix}}$                    &                   & D,I,P,S      \\ \hline
 \ct{CONDUCTIVITY}                              & Section~\ref{info:CONDUCTIVITY}                   & \si{W/(m.K)}      & D,I,P,S      \\ \hline
-\ct{C_SMAG}                                   & Smagorinsky coefficient                           &                   & D,I,P,S      \\ \hline
+\ct{C_SMAG}                                    & Smagorinsky coefficient                           &                   & D,I,P,S      \\ \hline
 \ct{DENSITY}$^1$                               & Total or species density                          & kg/m$^3$          & D,I,P,S      \\ \hline
 \ct{DIFFUSIVE MASS FLUX X}$^1$                 & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
 \ct{DIFFUSIVE MASS FLUX Y}$^1$                 & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
 \ct{DIFFUSIVE MASS FLUX Z}$^1$                 & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
 \ct{DIFFUSIVITY}$^1$                           & Section~\ref{info:diffusivity}                    & m$^2$/s           & D,I,P,S      \\ \hline
-\ct{DISSIPATION RATE}                          & $\mu / \rho \times $ \ct{STRAIN RATE}            & m$^2$/s$^3$       & D,I,P,S      \\ \hline
+\ct{DISSIPATION RATE}                          & $(\mu / \rho)\, S_{ij}S_{ij}$                     & m$^2$/s$^3$       & D,I,P,S      \\ \hline
 \ct{DIVERGENCE}                                & $\nabla \cdot \bu$                                & 1/s               & D,I,P,S      \\ \hline
 \ct{EFFECTIVE FLAME TEMPERATURE}               & Section~\ref{info:Flame_Temperature}              & $^\circ$C         & D,I,P,S      \\ \hline
 \ct{ENTHALPY}                                  & Section~\ref{info:Enthalpy}                       & kJ/m$^3$          & D,I,P,S      \\ \hline
-\ct{ENTHALPY FLUX X}                           & Section~\ref{info:enthalpy_flux}                  & \unit{kW/m^2}          & D,I,P,S      \\ \hline
-\ct{ENTHALPY FLUX Y}                           & Section~\ref{info:enthalpy_flux}                  & \unit{kW/m^2}          & D,I,P,S      \\ \hline
-\ct{ENTHALPY FLUX Z}                           & Section~\ref{info:enthalpy_flux}                  & \unit{kW/m^2}          & D,I,P,S      \\ \hline
+\ct{ENTHALPY FLUX X}                           & Section~\ref{info:enthalpy_flux}                  & \unit{kW/m^2}     & D,I,P,S      \\ \hline
+\ct{ENTHALPY FLUX Y}                           & Section~\ref{info:enthalpy_flux}                  & \unit{kW/m^2}     & D,I,P,S      \\ \hline
+\ct{ENTHALPY FLUX Z}                           & Section~\ref{info:enthalpy_flux}                  & \unit{kW/m^2}     & D,I,P,S      \\ \hline
 \ct{EXTINCTION}                                & Section~\ref{info:extinct_out}                    &                   & D,S          \\ \hline
 \ct{EXTINCTION COEFFICIENT}                    & Section~\ref{info:visibility}                     & 1/m               & D,I,P,S      \\ \hline
-\ct{F_X, F_Y, F_Z}                          & Momentum terms, $F_x$, $F_y$, $F_z$               & m/s$^2$           & D,I,P,S      \\ \hline
+\ct{F_X, F_Y, F_Z}                             & Momentum terms, $F_x$, $F_y$, $F_z$               & m/s$^2$           & D,I,P,S      \\ \hline
 \ct{H}                                         & $\cH=|\bu|^2/2 + \tp/\rho    $                    & (m/s)$^2$         & D,I,P,S      \\ \hline
 \ct{HRRPUV}                                    & $\dq'''$                                          & kW/m$^3$          & D,I,P,S      \\ \hline
-\ct{HRRPUV REAC}$^6$                           & $\dq'''$ for \ct{REAC_ID}                       & kW/m$^3$          & D,S          \\ \hline
+\ct{HRRPUV REAC}$^6$                           & $\dq'''$ for \ct{REAC_ID}                         & kW/m$^3$          & D,S          \\ \hline
 \ct{IDEAL GAS PRESSURE}                        & $\bar{p}=\rho R T / \overline{W}$                 & Pa                & D,I,P,S      \\ \hline
-\ct{INTEGRATED INTENSITY}                      & $U=\int I \, \d \bs$                              & \unit{kW/m^2}          & D,I,P,S      \\ \hline
+\ct{INTEGRATED INTENSITY}                      & $U=\int I \, \d \bs$                              & \unit{kW/m^2}     & D,I,P,S      \\ \hline
 \ct{INTERNAL ENERGY}                           & $\rho h - \bar{p}$                                & kJ/m$^3$          & D,I,P,S      \\ \hline
 \ct{KINETIC ENERGY}                            & Staggered $(u^2+v^2+w^2)/2$                       & (m/s)$^2$         & D,I,P,S      \\ \hline
 \ct{KOLMOGOROV LENGTH SCALE}                   & Section \ref{info:meshquality}                    & m                 & D,I,P,S      \\ \hline
@@ -11409,8 +11413,10 @@ The \ct{ID} is just a label in the output file. When an output quantity is relat
 \ct{PRESSURE ZONE}                             & Section~\ref{info:ZONE}                           &                   & D,S          \\ \hline
 \ct{Q CRITERION}                               & $\frac{1}{2} [\mathrm{trace}(\nabla \mathbf{u})^2 - \mathrm{trace}( (\nabla \mathbf{u})^2)]$ & 1/s$^2$ & D,I,P,S \\ \hline
 \ct{RADIAL VELOCITY}                           & $(u,v)\cdot(x,y)/\sqrt{x^2+y^2}$                  & m/s               & D,I,P,S      \\ \hline
-\ct{RADIATION LOSS}                            & $\nabla \cdot \bq_r''$                            & kW/m$^3$          & D,I,P,S      \\ \hline
-\ct{RADIATIVE HEAT FLUX GAS}                   & Section~\ref{info:heat_flux}                      & \unit{kW/m^2}          & D            \\ \hline
+\ct{RADIATION ABSORPTION}                      & $\kappa U$                                        & kW/m$^3$          & D,I,P,S      \\ \hline
+\ct{RADIATION EMISSION}                        & $4 \kappa \sigma T^4$                             & kW/m$^3$          & D,I,P,S      \\ \hline
+\ct{RADIATION LOSS}                            & $\nabla \cdot \bq_r''=\kappa (U-4 \sigma T^4)$    & kW/m$^3$          & D,I,P,S      \\ \hline
+\ct{RADIATIVE HEAT FLUX GAS}                   & Section~\ref{info:heat_flux}                      & \unit{kW/m^2}     & D            \\ \hline
 \ct{REAC SOURCE TERM}$^1$                      & $\dot{m}_\alpha^{\prime\prime\prime}$             & kg/m$^3$          & D,I,P,S      \\ \hline
 \ct{RELATIVE HUMIDITY}                         & Section~\ref{info:simple_chemistry}               & \%                & D,I,P,S      \\ \hline
 \ct{RESOLVED KINETIC ENERGY}                   & $k_{res} = (\bar{u}^2+\bar{v}^2+\bar{w}^2)/2$     & (m/s)$^2$         & D,I,P,S      \\ \hline
@@ -11427,7 +11433,7 @@ The \ct{ID} is just a label in the output file. When an output quantity is relat
 \ct{SUBGRID KINETIC ENERGY}                    & Section~\ref{info:meshquality}                    & \si{m^2/s^2}      & D,S          \\ \hline
 \ct{SUM LUMPED MASS FRACTIONS}                 & $\sum_i Z_i$ (should be 1)                        &                   & D,S          \\ \hline
 \ct{SUM PRIMITIVE MASS FRACTIONS}              & $\sum_\alpha Y_\alpha$ (should be 1)              &                   & D,S          \\ \hline
-\ct{TEMPERATURE}                               & Section~\ref{info:Flame_Temperature}                   & $^\circ$C         & D,I,P,S      \\ \hline
+\ct{TEMPERATURE}                               & Section~\ref{info:Flame_Temperature}              & $^\circ$C         & D,I,P,S      \\ \hline
 \ct{TOTAL MASS FLUX X}$^1$                     & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
 \ct{TOTAL MASS FLUX Y}$^1$                     & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
 \ct{TOTAL MASS FLUX Z}$^1$                     & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
@@ -11768,21 +11774,21 @@ properties be specified as well. Simply prescribing as many properties as possib
 \section{\texorpdfstring{{\tt BACK}}{BACK} (Background species)}
 
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
-	\caption[Background species (\ct{BACK} namelist group)]{For more information see Section~\ref{info:BACKGROUND_SPECIES}.}
-	\label{tbl:BACK} \\
-	\hline
-	\multicolumn{5}{|c|}{\ct{BACK} (Background Species Parameters)} \\
-	\hline
-	Keyword             & Type     & Description                      & Units          & Default   \\ \hline \hline
-	\endfirsthead
-	\caption[]{Continued} \\
-	\hline
-	\multicolumn{5}{|c|}{\ct{BACK} (Background Species Parameters)} \\
-	\hline
-	Keyword             & Type     & Description                      & Units          & Default   \\ \hline \hline
-	\endhead
-	\ct{SPEC_ID}                   & Char. Array  & Section \ref{info:BACKGROUND_SPECIES}      &           &        \\ \hline
-	\ct{MASS_FRACTION}             & Real Array   & Section \ref{info:BACKGROUND_SPECIES}      &           &        \\ \hline
+\caption[Background species (\ct{BACK} namelist group)]{For more information see Section~\ref{info:BACKGROUND_SPECIES}.}
+\label{tbl:BACK} \\
+\hline
+\multicolumn{5}{|c|}{\ct{BACK} (Background Species Parameters)} \\
+\hline
+Keyword              & Type         & Description                                & Units     & Default   \\ \hline \hline
+\endfirsthead
+\caption[]{Continued} \\
+\hline
+\multicolumn{5}{|c|}{\ct{BACK} (Background Species Parameters)} \\
+\hline
+Keyword              & Type         & Description                                & Units     & Default   \\ \hline \hline
+\endhead
+\ct{SPEC_ID}         & Char. Array  & Section \ref{info:BACKGROUND_SPECIES}      &           &           \\ \hline
+\ct{MASS_FRACTION}   & Real Array   & Section \ref{info:BACKGROUND_SPECIES}      &           &           \\ \hline
 \end{longtable}
 
 
@@ -13187,7 +13193,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{AIT_EXCLUSION_ZONE(6,:)}           & Real Array     & Section~\ref{info:ignition}                  & m                 &                   \\ \hline
 \ct{AIT_EXCLUSION_ZONE_CTRL_ID(:)}   & Char.~Array    & Section~\ref{info:ignition}                  &                   & \ct{'null'}      \\ \hline
 \ct{AIT_EXCLUSION_ZONE_DEVC_ID(:)}   & Char.~Array    & Section~\ref{info:ignition}                  &                   & \ct{'null'}      \\ \hline
-\ct{AIT_EXCLUSION_ZONE_TEMPERATURE}   & Real           & Section~\ref{info:ait_per_zone}              & $^\circ$C         &                   \\ \hline
+\ct{AIT_EXCLUSION_ZONE_TEMPERATURE(:)}   & Real Array   & Section~\ref{info:ait_per_zone}              & $^\circ$C         &                   \\ \hline
 \ct{AUTO_IGNITION_TEMPERATURE}         & Real           & Section~\ref{info:ignition}                  & $^\circ$C         & -273 $^\circ$C    \\ \hline
 \ct{CHECK_ATOM_BALANCE}                & Logical        & Section~\ref{info:REAC_Diagnostics}          &                   & \ct{T}           \\ \hline
 \ct{CO_YIELD}                           & Real           & Section~\ref{info:simple_chemistry}          & kg/kg             & 0                 \\ \hline
@@ -13216,7 +13222,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{RAMP_CHI_R}                        & Character      & Section~\ref{info:CHI_R}                     &                   &                   \\ \hline
 \ct{REAC_ATOM_ERROR}                   & Real           & Section~\ref{info:REAC_Diagnostics}          & atoms             & 1.E-4             \\ \hline
 \ct{REAC_MASS_ERROR}                   & Real           & Section~\ref{info:REAC_Diagnostics}          & kg/kg             & 1.E-4             \\ \hline
-\ct{REACTYPE}                            & Character      & Section~\ref{info:falloff_reactions}         &                   & ARRHENIUS-TYPE    \\ \hline
+\ct{REACTYPE}                            & Character      & Section~\ref{info:falloff_reactions}         &                   & \ct{'ARRHENIUS-TYPE'}   \\ \hline
 \ct{REVERSE}                             & Logical        & Section~\ref{info:eqbm_reac}                 &                   & \ct{F}           \\ \hline
 \ct{SOOT_YIELD}                         & Real           & Section~\ref{info:simple_chemistry}          & kg/kg             & 0.0               \\ \hline
 \ct{SPEC_ID_N_S(:)}                   & Char.~Array    & Section~\ref{info:finite}                    &                   &                   \\ \hline
@@ -13427,6 +13433,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{HEAT_OF_VAPORIZATION}                              & Real            & Section~\ref{info:specified_burning}      & kJ/kg               &                         \\ \hline
 \ct{HEAT_TRANSFER_COEFFICIENT}                         & Real            & Section~\ref{info:convection}             & \si{W/(m^2.K)}      &                         \\ \hline
 \ct{HEAT_TRANSFER_COEFFICIENT_BACK}                    & Real            & Section~\ref{info:convection}             & \si{W/(m^2.K)}      &                         \\ \hline
+\ct{HEAT_TRANSFER_COEFFICIENT_SIGMA}                   & Real            & Section~\ref{info:impinging_jet}          & m                   &                         \\ \hline
 \ct{HEAT_TRANSFER_MODEL}                               & Character       & Section~\ref{info:convection}             &                     &                         \\ \hline
 \ct{HORIZONTAL}                                          & Logical         & Section~\ref{info:GEOMETRY}               &                     & \ct{F}                 \\ \hline
 \ct{HRRPUA}                                              & Real            & Section~\ref{info:gas_burner}             & \si{kW/m^2}         &                         \\ \hline
@@ -14027,6 +14034,7 @@ Keyword             & Type     & Description                      & Units       
 374  \> \ct{Numerical Instability - FDS stopped.                                   } \> Section~\ref{info:Errors}  \\
 375  \> \ct{OBST ... is VARIABLE_THICKNESS or HT3D and needs a MATL_ID.      } \> Section~\ref{info:HT3D_Limitations}  \\
 376  \> \ct{Meshes must have the same y/z bounds for TUNNEL_PRECONDITIONER.  } \> Section~\ref{tunnel_solver}  \\
+377  \> \ct{SURF ... IMPINGING JET model requires ...                        } \> Section~\ref{info:impinging_jet}  \\
      \>                                                                               \>                                     \\
 381  \> \ct{Need more spectral band limits.                                        } \> Section~\ref{info:RADI_Wide_Band}  \\
 382  \> \ct{Spectral band limits should be given in ascending order.               } \> Section~\ref{info:RADI_Wide_Band}  \\
@@ -14085,7 +14093,7 @@ Keyword             & Type     & Description                      & Units       
 505 \> \ct{Duct has no AREA, DIAMETER, or PERIMTER ...                          } \> Section~\ref{info:HVACduct}  \\
 506 \> \ct{Duct without AREA has no DIAMETER ...                                } \> Section~\ref{info:HVACduct}  \\
 507 \> \ct{If both ROUND and SQUARE are FALSE, Duct with DIAMETER must             } \> Section~\ref{info:HVACduct} \\
-	\> \ct{also have PERIMETER ...}   \\
+    \> \ct{also have PERIMETER ...}   \\
 508 \> \ct{Duct cannot input both PERIMETER and DIAMETER with AREA ...          } \> Section~\ref{info:HVACduct}  \\
 509 \> \ct{Can only specify one of CTRL_ID or DEVC_ID. ...                    } \> Section~\ref{info:HVACduct}  \\
 510 \> \ct{Duct can only have one of damper, fan or aircoil ...                 } \> Section~\ref{info:HVACduct}  \\
@@ -14100,7 +14108,7 @@ Keyword             & Type     & Description                      & Units       
 519 \> \ct{Fan has no ID ...                                                    } \> Section~\ref{info:HVAC}  \\
 520 \> \ct{FAN can only be one of constant volume, quadratic or ramp ...        } \> Section~\ref{info:HVACfan}  \\
 521 \> \ct{IF one of MAX_PRESSURE or MAX_FLOW given, both must be                } \> Section~\ref{info:HVACfan}\\
-	\> \ct{specified ...}   \\
+    \> \ct{specified ...}   \\
 522 \> \ct{MAX_PRESSURE must be > 0 ...                                        } \> Section~\ref{info:HVACfan}  \\
 523 \> \ct{MAX_FLOW must be > 0 ...                                            } \> Section~\ref{info:HVACfan}  \\
 524 \> \ct{Filter has no ID ...                                                 } \> Section~\ref{info:HVAC}  \\
@@ -14114,7 +14122,7 @@ Keyword             & Type     & Description                      & Units       
 532 \> \ct{Can only have one HVAC input with TYPE_ID of                           } \> Section~\ref{info:hvacoutputquantities} \\
     \> \ct{DUCT QUANTITY LIST ...  }  \\
 533 \> \ct{Can only have one HVAC input with TYPE_ID of                           } \> Section~\ref{info:hvacoutputquantities} \\
-	\> \ct{NODE QUANTITY LIST ... }    \\
+    \> \ct{NODE QUANTITY LIST ... }    \\
 534 \> \ct{Both nodes have the same ID ...                                      } \> Section~\ref{info:HVACduct}  \\
 535 \> \ct{Two ducts with the same ID ...                                       } \> Section~\ref{info:HVAC}  \\
 536 \> \ct{Duct ... Node ... does not contain the duct in its duct list.     } \> Section~\ref{info:HVACnode}  \\
