@@ -4572,7 +4572,7 @@ The thermodynamic properties (specific heat, enthalpy, entropy, and other derive
       POLYNOMIAL_COEFF(1:9,2)= 875378.77,-2342.51,7.97,0.0001,-6.26e-08,1.02e-11,-5.71e-16,-9509.90,-22.02,
       ENTHALPY_OF_FORMATION= -190.99912 /
 \end{lstlisting}
-For NASA7 polynomials, the molar specific heat (J/mol/K), molar specific enthalpy (J/mol), and molar specific entropy (J/mol/K) are calculated as follows
+For NASA7 polynomials, the molar specific heat (J/mol/K), molar specific enthalpy (J/mol), and molar specific entropy (J/mol/K) are calculated as follows:
 \be
 \label{eq:NASA7}
 \begin{aligned}
@@ -4581,7 +4581,7 @@ For NASA7 polynomials, the molar specific heat (J/mol/K), molar specific enthalp
 \frac{S_{p,\alpha}(T)}{R} = a_1 \ln(T) + a_2 T + \frac{a_3}{2} T^2 + \frac{a_4}{3} T^3 + \frac{a_5}{4} T^4 + a_7
 \end{aligned}
 \ee
-Where $a_1, a_2, a_3, a_4, a_5, a_6, a_7$ are the polynomial coefficients specified by \ct{POLYNOMIAL_COEFF}.
+where $a_1, a_2, a_3, a_4, a_5, a_6, a_7$ are the polynomial coefficients specified by \ct{POLYNOMIAL_COEFF}.
 
 For NASA9 polynomials, the same values are calculated as follows:
 \be
@@ -4592,7 +4592,7 @@ For NASA9 polynomials, the same values are calculated as follows:
 \frac{S_{p,\alpha}(T)}{R} = -\frac{a_1}{2 T^2} - \frac{a_2}{T} + a_3 \ln(T) + a_4 T + \frac{a_5}{2} T^2 + \frac{a_6}{3} T^3 + \frac{a_7}{4} T^4 + a_9
 \end{aligned}
 \ee
-Where $a_1, a_2, a_3, a_4, a_5, a_6, a_7, a_8, \text{and} \ a_9$ are the polynomial coefficients specified by \ct{POLYNOMIAL_COEFF}.
+where $a_1, a_2, a_3, a_4, a_5, a_6, a_7, a_8, \text{and} \ a_9$ are the polynomial coefficients specified by \ct{POLYNOMIAL_COEFF}.
 
 Also note that if a predefined species name is used and any enthalpy related input in this section is specified for that species, FDS will not use the predefined enthalpy of formation.
 
@@ -5543,7 +5543,7 @@ An important consideration for the time integration of chemical reactions is the
 
 If you have multiple reactions with widely ranging time-scales, you might want to specify \linebreak[4]\ct{CHECK_REALIZABILITY} to be \ct{T} on the \ct{COMB} line, which forces the program to issue a warning if the species mass fractions do not remain between 0 and 1 during the integration scheme.
 
-To solve chemistry using a detailed chemical mechanism (see Section \ref{info:detailedChemMech}), it is recommended to use the CVODE ODE solver from Sundials \cite{cvodeDoc:2024}. The following input line configures FDS to use CVODE for chemistry calculations:
+To solve chemistry using a detailed chemical mechanism (see Sec.~\ref{info:detailedChemMech}), it is recommended to use the CVODE ODE solver from Sundials \cite{cvodeDoc:2024}. The following input line configures FDS to use CVODE for chemistry calculations:
 \begin{lstlisting}
 &COMB ODE_SOLVER='CVODE'/
 \end{lstlisting}
@@ -5559,7 +5559,7 @@ Internally, CVODE assigns default values to several key parameters, as listed be
 \item \ct{MAX_EQUIV_RATIO}=20.0
 \item \ct{DO_CHEM_LOAD_BALANCE}=T
 \end{itemize}
-The parameter \ct{FINITE_RATE_MIN_TEMP} defines the minimum temperature (in ~$^\circ$C) above which chemistry calculation will be performed. CVODE allows specification of relative and absolute tolerances at the species-level using the \ct{ODE_REL_ERROR} and \ct{ODE_ABS_ERROR} parameters in the \ct{SPEC} input line. These tolerances can also be set globally in the \ct{COMB} input line, with species-level settings taking precedence. Currently, CVODE does not allow relative tolerance at the species level. The minimum concentration of a species is determined as the product of \ct{ODE_REL_ERROR} and \ct{ZZ_MIN_GLOBAL}. Concentrations below this threshold are treated as zero.
+The parameter \ct{FINITE_RATE_MIN_TEMP} defines the minimum temperature (in $^\circ$C) above which chemistry calculation will be performed. CVODE allows specification of relative and absolute tolerances at the species level using the \ct{ODE_REL_ERROR} and \ct{ODE_ABS_ERROR} parameters in the \ct{SPEC} input line. These tolerances can also be set globally in the \ct{COMB} input line, with species-level settings taking precedence. Currently, CVODE does not allow relative tolerance at the species level. The minimum concentration of a species is determined as the product of \ct{ODE_REL_ERROR} and \ct{ZZ_MIN_GLOBAL}. Concentrations below this threshold are treated as zero.
 
 Additional optional parameters include \ct{EQUIV_RATIO_CHECK}, \ct{MIN_EQUIV_RATIO}, and \ct{MAX_EQUIV_RATIO}. When \ct{EQUIV_RATIO_CHECK} is enabled (set to true), the chemistry calculation is performed only for those cells for which equivalence ratio is within the specified \ct{MIN_EQUIV_RATIO} and \ct{MAX_EQUIV_RATIO} limits, reducing computational time. Enabling \ct{DO_CHEM_LOAD_BALANCE} significantly accelerates chemistry calculations by distributing the computational load evenly across all MPI processes.
 User can modify the default values of any or all of these parameters as needed using the following line in the FDS input file:
@@ -5694,7 +5694,7 @@ Water sprays can remove aerosols from the air. For example, rain can lower the c
 \section{Vapor Condensation}
 \label{info:condensation}
 
-If a species with liquid properties, e.g. \ct{WATER VAPOR}, is defined with \ct{AEROSOL=T}, then FDS will predict condensation for that species. FDS creates a second species called \ct{ID_COND}. For example if the species is \ct{WATER VAPOR}, then the second species will be called \ct{WATER VAPOR_COND}. This second species will be an aerosol species that tracks the condensed phase. The particle diameter for the condensed vapor is given by \ct{MEAN_DIAMETER}, the condensed species specific heat will use the \ct{SPECIFIC_HEAT_LIQUID} liquid values, and the particle density will use \ct{DENSITY_LIQUID} rather than \ct{DENSITY_SOLID}. The initial mass fraction of condensed phase can be defined with \ct{MASS_FRACTION_COND_0}. Radiative properties should be assigned using \ct{REAL_REFRACTIVE_INDEX} and \ct{COMPLEX_REFRACTIVE_INDEX} unless the species is either \ct{WATER VAPOR} or a predefined fuel species (these are the organic fuels listed in Table~\ref{tab:CFT} that have liquid properties predefined, see Table~\ref{tab:common_gas_species} or Table~\ref{tab:gas_species}). For example, the input below defines \ct{WATER VAPOR} as a condensable species with an initial vapor mass fraction of 0.1 and an initial condensate mass fraction of 0.05.
+If a species with liquid properties, e.g., \ct{WATER VAPOR}, is defined with \ct{AEROSOL=T}, then FDS will predict condensation for that species. FDS creates a second species called \ct{ID_COND}. For example if the species is \ct{WATER VAPOR}, then the second species will be called \ct{WATER VAPOR_COND}. This second species will be an aerosol species that tracks the condensed phase. The particle diameter for the condensed vapor is given by \ct{MEAN_DIAMETER}, the condensed species specific heat will use the \ct{SPECIFIC_HEAT_LIQUID} liquid values, and the particle density will use \ct{DENSITY_LIQUID} rather than \ct{DENSITY_SOLID}. The initial mass fraction of condensed phase can be defined with \ct{MASS_FRACTION_COND_0}. Radiative properties should be assigned using \ct{REAL_REFRACTIVE_INDEX} and \ct{COMPLEX_REFRACTIVE_INDEX} unless the species is either \ct{WATER VAPOR} or a predefined fuel species (these are the organic fuels listed in Table~\ref{tab:CFT} that have liquid properties predefined, see Table~\ref{tab:common_gas_species} or Table~\ref{tab:gas_species}). For example, the input below defines \ct{WATER VAPOR} as a condensable species with an initial vapor mass fraction of 0.1 and an initial condensate mass fraction of 0.05.
 
 The condensation routine requires the presence of nucleation sites to start the condensation process. If condensed gas is already present, the number of condensate particles is used. Otherwise, FDS assumes a background concentration of fine aerosols (pollen, bacterial spores, etc.). The default values is 10,000,000 nucleation sites per cubic meter. This value can be changed by setting \ct{NUCLEATION_SITES} on \ct{MISC}.
 \begin{lstlisting}
@@ -6861,13 +6861,13 @@ Winds are driven by horizontal pressure gradients that push air masses from regi
 \begin{equation}
 \frac{\partial \bu}{\partial t} + \dots = \bF/\rho
 \end{equation}
-The pressure gradient force can be related to the average wind speed, $U$, over the height of the boundary layer, $H$, by~\cite{Stull:2000}
+The magnitude of the pressure gradient force can be related to the average wind speed, $U$, over the height of the boundary layer, $H$, by~\cite{Stull:2000}
 \be
-   \| \bF \| \approx \rho \, C_{\rm D} \, \frac{ U^2 }{H}
+   | \bF | \approx \rho \, C_{\rm D} \, \frac{ U^2 }{H}
 \ee
 where $C_{\rm D}$ is a dimensionless drag coefficient ranging between $2 \times 10^{-3}$ for relatively smooth surfaces to $2 \times 10^{-2}$ for rough or forested surfaces. This relation is appropriate for neutrally stable conditions, i.e. windy and relatively low surface heating. For unstable conditions, i.e., light winds and strong surface heating, the relation becomes
 \be
-   \| \bF \| \approx \rho \, b_{\rm D} \sqrt{g H \frac{\Delta \theta}{\theta} } \, \frac{ U }{H}
+   | \bF | \approx \rho \, b_{\rm D} \sqrt{g H \frac{\Delta \theta}{\theta} } \, \frac{ U }{H}
 \ee
 where $b_{\rm D} = 1.83 \times 10^{-3}$ and $\Delta \theta /\theta$ is the relative change in potential temperature between the ground and the mid-height of the boundary layer. Note that these relationships are approximate. You need to conduct some numerical experiments if you want to match a particular wind measurement.
 
@@ -6907,7 +6907,7 @@ The nondimensional number that determines if the Coriolis force is significant i
 \label{eq:rossby_number}
 \mbox{Ro} = \frac{U}{f_c L}
 \end{equation}
-When the Rossby number is large, the Coriolis force is negligible.  In building fires, this is typically the case, as $U$ and $L$ are of order unity and $f_c = {\cal O}(10^4)$.
+When the Rossby number is large, the Coriolis force is negligible.  In building fires, this is typically the case, as $U$ and $L$ are of order unity and $f_c = {\cal O}(10^{-4} \;\si{rad/s})$.
 
 \begin{figure}[!ht]
 \centering
@@ -7346,7 +7346,7 @@ First, the \ct{PART} line defines a class of solid particles that represent pine
 \end{lstlisting}
 \ct{STATIC=T} specifies that the needles do not move, and \ct{SAMPLING_FACTOR=1} specifies that each needle is to be shown in Smokeview. More importantly, this line specifies a drag coefficient for the needles based on wind tunnel measurements made at NIST~\cite{Falkenstein-Smith:2018}. The force per unit volume exerted by the vegetation is given by:
 \be
-   \bof_{\rm b} = \frac{\rho}{2} \, C_{\rm d} \, C_{\rm s} \, \beta \, \sigma \, \bu \, ||\bu||
+   \bof_{\rm b} = \frac{\rho}{2} \, C_{\rm d} \, C_{\rm s} \, \beta \, \sigma \, \bu \, |\bu|
 \ee
 where $\rho$ is the air density, $C_{\rm d}$ is the drag coefficient, $C_{\rm s}$ is the \ct{SHAPE_FACTOR} (0.25 by default), $\beta$ is the packing ratio (mass per unit volume divided by the material density), $\sigma$ is the surface area to volume ratio (see below), and $\bu$ is the air velocity.
 
@@ -7517,7 +7517,7 @@ The presence of the parameter \ct{MASS_PER_VOLUME} automatically triggers the Bo
 
 The drag exerted on the wind flowing through the vegetation is imposed as a force term in the gas phase grid cell adjacent to the boundary:
 \be
-    \bof_{\rm b} = \frac{\rho}{2} \, C_{\rm s} \, \sigma \, \beta \, C_{\rm d} \, \frac{h_{\rm b}}{\dz} \, \bu ||\bu||
+    \bof_{\rm b} = \frac{\rho}{2} \, C_{\rm s} \, \sigma \, \beta \, C_{\rm d} \, \frac{h_{\rm b}}{\dz} \, \bu |\bu|
 \ee
 where $\rho$ is the density of the gas, $C_{\rm s}$ is the \ct{SHAPE_FACTOR} of the subgrid-scale vegetation (0.25 by default), $\sigma$ is the surface area to volume ratio (\ct{SURFACE_VOLUME_RATIO}), $\beta$ is the packing ratio (mass per volume divided by the solid density), $C_{\rm d}$ is the \ct{DRAG_COEFFICIENT} (2.8 by default), $h_{\rm b}$ is the depth of the vegetation (\ct{THICKNESS(1)}), $\dz$ is the height of the grid cell, and $\bu$ is the gas velocity in the first grid cell.
 
@@ -7754,7 +7754,7 @@ In many cases, it is not necessary or even practical to track every single ember
 \subsection{Ember Ignition}
 \label{info:Ember_Ignition}
 
-When running a Level Set case, if an airborne ember lands on the ground, there is a chance that it might ignite a new fire. To model this behavior if you are using the level set approach for fire spread, specify the parameter \ct{EMBER_IGNITION_POWER_MEAN} on the \ct{SURF} line describing the ground level vegetation. The ember power, in units of kW, is the net radiative and convective energy generated by the ember. The \ct{EMBER_IGNITION_POWER_MEAN} is the mean value of a normal distribution of ignition propensity; that is, there is a 50~\% likelihood that an ember with this power will ignite the surface vegetation. A typical value for the mean is on the order of 0.01~kW (10~W), depending on the ground vegetation. You can also specify the standard deviation of the distribution, \ct{EMBER_IGNITION_POWER_SIGMA}, whose default value is 0.001~kW. The best functional form for ignition probability, and ember ignition itself, is an ongoing topic of research. Therefore, it may be useful to treat this as more of a binary threshold (i.e. a use a small standard deviation). Further, a Lagrangian particle may represent more than one ember. Therefore, the particle weighting factor is used to convert the probability of ignition from a single ember to the probability of at least one ignition from the total number of embers represented. The occurance of ignition will be tested for each time step that a particle is lying on the ground. If ignition occurs, the particle will be removed from the simulation.
+When running a Level Set case, if an airborne ember lands on the ground, there is a chance that it might ignite a new fire. To model this behavior if you are using the level set approach for fire spread, specify the parameter \ct{EMBER_IGNITION_POWER_MEAN} on the \ct{SURF} line describing the ground level vegetation. The ember power, in units of kW, is the net radiative and convective energy generated by the ember. The \ct{EMBER_IGNITION_POWER_MEAN} is the mean value of a normal distribution of ignition propensity; that is, there is a 50~\% likelihood that an ember with this power will ignite the surface vegetation. A typical value for the mean is on the order of 0.01~kW (10~W), depending on the ground vegetation. You can also specify the standard deviation of the distribution, \ct{EMBER_IGNITION_POWER_SIGMA}, whose default value is 0.001~kW. The best functional form for ignition probability, and ember ignition itself, is an ongoing topic of research. Therefore, it may be useful to treat this as more of a binary threshold (i.e. a use a small standard deviation). Further, a Lagrangian particle may represent more than one ember. Therefore, the particle weighting factor is used to convert the probability of ignition from a single ember to the probability of at least one ignition from the total number of embers represented. The occurrence of ignition will be tested for each time step that a particle is lying on the ground. If ignition occurs, the particle will be removed from the simulation.
 
 
 \subsection{Wildfire Spread over Realistic Terrain using QGIS}
@@ -7762,11 +7762,11 @@ When running a Level Set case, if an airborne ember lands on the ground, there i
 
 Wildfire spread over releastic terrain can be modeled in FDS using a plugin to QGIS called qgis2fds: \\
 \href{https://github.com/firetools/qgis2fds}{https://github.com/firetools/qgis2fds} \\
-QGIS is an open source GIS (Geographic Information System) and qgis2fds is a Python script developed by Emanuele Gissi and Ruggero Poletto that embeds topography and landuse data in an FDS input file.
+QGIS is an open source GIS (Geographic Information System) and qgis2fds is a Python script developed by Emanuele Gissi and Ruggero Poletto that embeds topography and land use data in an FDS input file.
 
-A set of sample input files created by qgis2fds reside within the gitHub repository \\
+A set of sample input files created by qgis2fds reside within the GitHub repository \\
 \href{https://github.com/firemodels/cad}{https://github.com/firemodels/cad} \\
-in the folder called \ct{Wildland_Fire_Spread_Example}. There are four cases that demonstrate the four level set fire spread options over a 2~km by 2~km patch of mountainous terrain, as shown in Fig.~\ref{ridge_map}. The first image displays a satellite photograph of the area superimposed on the terrain. The second image displays the same terrain covered by 30~m square tiles, each tile representing one of thirteen different land use categories. This data is provided by LANDFIRE (Landscape Fire and Resource Management Planning Tools), a program managed by the U.S.~Forest Service and the U.S.~Department of the Interior that provides land use and elevation data for the continuental United States.
+in the folder called \ct{Wildland_Fire_Spread_Example}. There are four cases that demonstrate the four level set fire spread options over a 2~km by 2~km patch of mountainous terrain, as shown in Fig.~\ref{ridge_map}. The first image displays a satellite photograph of the area superimposed on the terrain. The second image displays the same terrain covered by 30~m square tiles, each tile representing one of thirteen different land use categories. This data is provided by LANDFIRE (Landscape Fire and Resource Management Planning Tools), a program managed by the U.S.~Forest Service and the U.S.~Department of the Interior that provides land use and elevation data for the continental United States.
 
 For each case, a hypothetical fire spreads from its point of origin in the lower portion of the chosen area over a ridge in the course of 24~h. The results of the four variants of the level set fire spread method are shown in Fig.~\ref{ridge_figs}.
 
@@ -7782,7 +7782,7 @@ A typical input file created with qgis2fds includes the latitude and longitude o
 \begin{figure}[p]
 \includegraphics[trim=0 .75in 0 .75in, clip, width=\textwidth]{FIGURES/Level_Set_Demo_1_s0000.png}
 \includegraphics[trim=0 .75in 0 .75in, clip, width=\textwidth]{FIGURES/Level_Set_Demo_1_s0001.png}
-\caption[Satellite and landuse images for sample wildland fire spread case]{(Top) Satellite image of a 2~km by 2~km patch of terrain. (Bottom) 30~m by 30~m tiles indicating the land use of this same area.}
+\caption[Satellite and land use images for sample wildland fire spread case]{(Top) Satellite image of a 2~km by 2~km patch of terrain. (Bottom) 30~m by 30~m tiles indicating the land use of this same area.}
 \label{ridge_map}
 \end{figure}
 
@@ -8026,9 +8026,9 @@ The water is tracked using a device measuring the accumulated mass per unit area
 \subsection{Specified Entrainment (Velocity Patch)}
 \label{info:velocity_patch}
 
-The details of the sprinkler head geometry and spray atomization are practically impossible to resolve in a fire calculation.  As a result, the local gas phase entrainment by the sprinkler is difficult to predict.  As an alternative, it is possible to specify the local gas velocity in the vicinity of the sprinkler nozzle.  The \ct{PROP} line may be used to specify a polynomial function for a specific velocity component and this function may be ``patched'' into the flow field using a device.  This device is given the quantity \ct{'VELOCITY PATCH'} and is initially inactive.  The velocity patch must be activated with a separate control device, as discussed in Section \ref{info:basic_control}.  You specify the local region for the velocity patch using \ct{XB} for the device.  The polynomial is defined as a second-order Taylor expansion about the point \ct{XYZ} (the default value of \ct{XYZ} is the center of \ct{XB}).  FDS then uses an immersed boundary method to force the local velocity component to satisfy the polynomial.  The polynomial is specified by the coefficients \ct{P0}, \ct{PX(1\!:\!3)}, and \ct{PXX(1\!:\!3,1\!:\!3)}, which represent, respectively, the value of the $k$th velocity component, the first derivatives, and the second derivatives at point \ct{XYZ}.  Note that the first derivatives are represented by a three component array and the second derivatives are represented by a symmetric $3 \times 3$ array---only the upper triangular part needs to be specified.  The polynomial is given by (note that summation of repeated indices is implied):
+The details of the sprinkler head geometry and spray atomization are practically impossible to resolve in a fire calculation.  As a result, the local gas phase entrainment by the sprinkler is difficult to predict.  As an alternative, it is possible to specify the local gas velocity in the vicinity of the sprinkler nozzle.  The \ct{PROP} line may be used to specify a polynomial function for a specific velocity component and this function may be ``patched'' into the flow field using a device.  This device is given the quantity \ct{'VELOCITY PATCH'} and is initially inactive.  The velocity patch must be activated with a separate control device, as discussed in Section \ref{info:basic_control}.  You specify the local region for the velocity patch using \ct{XB} for the device.  The polynomial is defined as a second-order Taylor expansion about the point \ct{XYZ} (the default value of \ct{XYZ} is the center of \ct{XB}).  FDS then uses an immersed boundary method to force the local velocity component to satisfy the polynomial.  The polynomial is specified by the coefficients \ct{P0}, \ct{PX(1:3)}, and \ct{PXX(1:3,1:3)}, which represent, respectively, the value of the $k$th velocity component, the first derivatives, and the second derivatives at point \ct{XYZ}.  Note that the first derivatives are represented by a three component array and the second derivatives are represented by a symmetric $3 \times 3$ array---only the upper triangular part needs to be specified.  The polynomial is given by (note that summation of repeated indices is implied):
 \begin{equation}
-u_k(\mathbf{r}) = \underbrace{(u_k)_0}_{\mbox{\ct{P0}}} \,\,+\,\, r_i \underbrace{\left( \frac{\partial u_k}{\partial x_i} \right)_{\!\!\!0}}_{\mbox{\ct{PX(1\!:\!3)}}} \,\,+\,\,\frac{ r_i r_j}{2} \underbrace{\left(\frac{\partial^2 u_k}{\partial x_i \partial x_j}\right)_{\!\!\!0}}_{\mbox{\ct{PXX(1\!:\!3,1\!:\!3)}}}
+u_k(\mathbf{r}) = \underbrace{(u_k)_0}_{\mbox{\ct{P0}}} \,\,+\,\, r_i \underbrace{\left( \frac{\partial u_k}{\partial x_i} \right)_{\!\!\!0}}_{\mbox{\ct{PX(1:3)}}} \,\,+\,\,\frac{ r_i r_j}{2} \underbrace{\left(\frac{\partial^2 u_k}{\partial x_i \partial x_j}\right)_{\!\!\!0}}_{\mbox{\ct{PXX(1:3,1:3)}}}
 \end{equation}
 The vector $\mathbf{r}$ is the position of the velocity storage location relative to the point \ct{XYZ}.  The specific velocity component is specified on \ct{PROP} by the integer \ct{VELOCITY_COMPONENT}.  Below we provide an example set of \ct{PROP} and \ct{DEVC} lines to specify a parabolic profile for the vertical component of velocity.
 \begin{lstlisting}
@@ -8046,7 +8046,7 @@ In this example, a velocity patch is activated at 10 s in the simulation.  Any $
 &DEVC ID='HD_66', PROP_ID='Acme Heat', XYZ=2.3,4.6,3.4 /
 &PROP ID='Acme Heat', QUANTITY='LINK TEMPERATURE', RTI=132., ACTIVATION_TEMPERATURE=74. /
 \end{lstlisting}
-Like a sprinkler, \ct{RTI} is the Response Time Index in units of $\sqrt{\hbox{m}\cdot \hbox{s}}$. \ct{ACTIVATION_TEMPERATURE} is the link activation temperature in degrees C (Default 74~$^\circ$C). \ct{INITIAL_TEMPERATURE} is the initial temperature of the link in units of $^\circ$C (Default \ct{TMPA}).
+Like a sprinkler, \ct{RTI} is the Response Time Index in units of $\sqrt{\hbox{m}\cdot \hbox{s}}$. \ct{ACTIVATION_TEMPERATURE} is the link activation temperature in degrees Celsius (Default 74~$^\circ$C). \ct{INITIAL_TEMPERATURE} is the initial temperature of the link in units of $^\circ$C (Default \ct{TMPA}).
 
 
 
@@ -8352,9 +8352,9 @@ If you want to design a system of controls and devices that involves multiple ch
 
 If you want a \ct{DEVC} to operate based on the logical state of a \ct{CTRL}, set \ct{QUANTITY='CONTROL'} and set the \ct{CTRL_ID} to the \ct{ID} of the control function. The numerical output in the \ct{CHID_devc.csv} file will be zero when the logical state is \ct{F} and 1 when the logical state is \ct{T}.
 
-The output value of a numerical control function is defined by a \ct{DEVC} line with \ct{QUANTITY='CONTROL VALUE'} and \ct{CTRL_ID} set equal to the \ct{ID} of the control function.  You can then use \ct{SETPOINT} to have the \ct{DEVC} operate a particular output value of the control function. This output cannot be used for a purely logical control function whose only output is a logical state such as \ct{ANY} or \ct{DEADBAND}. For \ct{CUSTOM} the output will be the value of the \ct{RAMP} function, and for \ct{TIME_DELAY} the value will be the evaluated delay.
+The output value of a numerical control function is defined by a \ct{DEVC} line with\\\ct{QUANTITY='CONTROL VALUE'} and \ct{CTRL_ID} set equal to the \ct{ID} of the control function.  You can then use \ct{SETPOINT} to have the \ct{DEVC} operate a particular output value of the control function. This output cannot be used for a purely logical control function whose only output is a logical state such as \ct{ANY} or \ct{DEADBAND}. For \ct{CUSTOM} the output will be the value of the \ct{RAMP} function, and for \ct{TIME_DELAY} the value will be the evaluated delay.
 
-The outputs \ct{QUANTITY='CONTROL'} and \ct{QUANTITY='CONTROL_VALUE'} have the default of \ct{TEMPORAL_STATISTIC='INSTANT VALUE'}.
+The outputs \ct{QUANTITY='CONTROL'} and \ct{QUANTITY='CONTROL_VALUE'} have the default of\\\ct{TEMPORAL_STATISTIC='INSTANT VALUE'}.
 
 The time dependent logical state of each control function is written to the \ct{CHID_ctrl.csv} log file, see Sec.~\ref{out:CTRL}. Each state change of a control function or device with a \ct{SETPOINT} is recorded to the \ct{CHID_devc_ctrl_log.csv} log file, see Sec.~\ref{out:DEVC_CTRL_log}.
 
@@ -8772,7 +8772,7 @@ In this example, a fire spreads radially from a single point as directed by the 
 
 It is possible to externally control some aspects of an FDS simulation while the simulation is running. Any FDS input that has either a \ct{RAMP_ID} (except for the output time ramps on \ct{DUMP} such as \ct{RAMP_BNDF}) or a \ct{CTRL_ID} as one of its inputs can be externally controlled. A \ct{RAMP} can be externally controlled by setting \ct{EXTERNAL_FILE} on \ct{RAMP}. A \ct{CTRL} can be externally controlled by setting \ct{FUNCTION_TYPE='EXTERNAL'}.
 
-When external control is selected, FDS will set the value of the \ct{RAMP} or the logical state of the \ct{CTRL} based on values contained in a csv file whose name is given by \ct{EXTERNAL_FILENAME} on \ct{MISC}. This file will be checked for new values every \ct{DT_EXTERNAL} on \ct{TIME} seconds. Only those inputs whose values are being changed need to specified. For inputs not specified or if the file does not exist or cannot be opened (e.g., locked by the operating system during a file write), the current values will be kept. The initial values are defined with either \ct{INITIAL_VALUE} on \ct{RAMP} or \ct{INITIAL_STATE} on \ct{CTRL}. FDS can be forced to wait if no file is present or use an alternate \ct{EXTERNAL_FILENAME} by specifying \ct{DT_EXTERNAL_HEARTBEAT} and \ct{EXTERNAL_HEARTBEAT_FILENAME} on \ct{TIME}. With this approach FDS looks for \ct{EXTERNAL_HEARTBEAT_FILENAME}. If the file is not found FDS will wait up to \ct{DT_EXTERNAL_HEARTBEAT} seconds. If \ct{EXTERNAL_HEARTBEAT_FILENAME} is still not present, FDS will stop trying to update the external controls.  If \ct{HEARTBEAT_FAIL} on \ct{TIME} is true, FDS will stop the simulation. If \ct{EXTERNAL_HEARTBEAT_FILENAME} is present, FDS will read \ct{EXTERNAL_FILENAME} from it.
+When external control is selected, FDS will set the value of the \ct{RAMP} or the logical state of the \ct{CTRL} based on values contained in a csv file whose name is given by \ct{EXTERNAL_FILENAME} on \ct{MISC}. This file will be checked for new values every \ct{DT_EXTERNAL} on \ct{TIME} seconds. Only those inputs whose values are being changed need to specified. For inputs not specified or if the file does not exist or cannot be opened (e.g., locked by the operating system during a file write), the current values will be kept. The initial values are defined with either \ct{INITIAL_VALUE} on \ct{RAMP} or \ct{INITIAL_STATE} on \ct{CTRL}. FDS can be forced to wait if no file is present or use an alternate \ct{EXTERNAL_FILENAME} by specifying \ct{DT_EXTERNAL_HEARTBEAT} and \ct{EXTERNAL_HEARTBEAT_FILENAME} on \ct{TIME}. With this approach FDS looks for\\\ct{EXTERNAL_HEARTBEAT_FILENAME}. If the file is not found FDS will wait up to \ct{DT_EXTERNAL_HEARTBEAT} seconds. If \ct{EXTERNAL_HEARTBEAT_FILENAME} is still not present, FDS will stop trying to update the external controls.  If \ct{HEARTBEAT_FAIL} on \ct{TIME} is true, FDS will stop the simulation. If \ct{EXTERNAL_HEARTBEAT_FILENAME} is present, FDS will read \ct{EXTERNAL_FILENAME} from it.
 
 The csv file format is:
 \begin{lstlisting}
@@ -9464,9 +9464,9 @@ This case demonstrates the use of baroclinic correction for an axially-symmetric
 
 A common application of FDS is tunnel fires, but simulations of fires in long, relatively tight tunnels that are made up of multiple meshes can exhibit spurious fluctuations in the pressure field that can lead to numerical instabilities. If a numerical instability occurs in a simulation involving a tunnel, you might try the following remedies, which are listed here in order of effectiveness:
 \begin{enumerate}
-\item If (1) the tunnel is made up of multiple meshes that abut end to end along the x-direction, (2) there are no other meshes outside of the tunnel, (3) there are no \ct{OPEN} boundaries on the top, bottom or sides of the tunnel, and (4) the number of MPI processes is equal to the number of meshes; set \ct{TUNNEL_PRECONDITIONER=T} on the \ct{PRES} line. This option instructs FDS to solve a 1-D pressure equation that spans the entire tunnel. This 1-D solution can be thought of as an average pressure field which is added to the 3-D pressure fields that are solved for using the default FFT-based solver on each mesh. The 1-D global solution accelerates the convergence of the overall 3-D pressure field on the entire domain.
+\item If (1) the tunnel is made up of multiple meshes that abut end to end along the x-direction, (2) there are no other meshes outside of the tunnel, (3) there are no \ct{OPEN} boundaries on the top, bottom or sides of the tunnel, and (4) the number of MPI processes is equal to the number of meshes; set\\\ct{TUNNEL_PRECONDITIONER=T} on the \ct{PRES} line. This option instructs FDS to solve a 1-D pressure equation that spans the entire tunnel. This 1-D solution can be thought of as an average pressure field which is added to the 3-D pressure fields that are solved for using the default FFT-based solver on each mesh. The 1-D global solution accelerates the convergence of the overall 3-D pressure field on the entire domain.
 \item You can increase the value of \ct{MAX_PRESSURE_ITERATIONS} which has a default value of 10 in most cases; 20 when the \ct{TUNNEL_PRECONDITIONER} is invoked. If you experience a numerical instability in a tunnel scenario, try setting the \ct{MAX_PRESSURE_ITERATIONS} to 50 as a starting point, and monitor the number of pressure iterations per time step in the \ct{CHID.out} file.
-\item If you are using multiple meshes, reduce the value of \ct{VELOCITY_TOLERANCE} on the \ct{PRES} line to force a tighter match of velocities at the mesh boundaries. The default value of \ct{VELOCITY_TOLERANCE} (with units of m/s) is $\dx/2$. If you set \ct{TUNNEL_PRECONDITIONER=T}, there is less of a need to decrease the \ct{VELOCITY_TOLERANCE} from its default value, but it still may be necessary to increase the \ct{MAX_PRESSURE_ITERATIONS} to account for occasional excursions of pressure.
+\item If you are using multiple meshes, reduce the value of \ct{VELOCITY_TOLERANCE} on the \ct{PRES} line to force a tighter match of velocities at the mesh boundaries. The default value of \ct{VELOCITY_TOLERANCE} (with units of m/s) is $\dx/2$. If you set \ct{TUNNEL_PRECONDITIONER=T}, there is less of a need to decrease the \ct{VELOCITY_TOLERANCE} from its default value, but it still may be necessary to increase the\\\ct{MAX_PRESSURE_ITERATIONS} to account for occasional excursions of pressure.
 \item Create \ct{OPEN} vents at various points along the length of the tunnel, near or at the floor. This models natural leakage in the tunnel, and alleviates, to some extent, wild oscillations in pressure. Note that even if the pressure equation is solved perfectly over the entire domain, the low Mach number assumption will still lead to fictitiously large fluctuations in pressure. The \ct{OPEN} boundaries can help relieve these pressure oscillations. If you do choose to create \ct{OPEN} boundaries along the length of the tunnel, you should {\em not} set \ct{TUNNEL_PRECONDITIONER} to \ct{T}
 \item Reduce the value of \ct{PRESSURE_TOLERANCE} on the \ct{PRES} line to alleviate the mismatch between old and new pressure fields. The default value is $20/\dx^2$~s$^{-2}$. A good value to try would be 1/5 to 1/10 of the default value.
 \item Set \ct{SOLVER='GLMAT'} on the \ct{PRES} line to strictly enforce the matching of normal velocity and pressure at mesh boundaries or \ct{'UGLMAT'} to do what \ct{'GLMAT'} does plus enforce zero normal velocities at solid obstructions. If you use these solvers, you need not set the various tolerances described above or use the \ct{TUNNEL_PRECONDITIONER}. However, these solvers are very expensive, so it is best to try a simple case first to determine how much CPU time the pressure solver consumes.
@@ -14408,6 +14408,8 @@ Table~\ref{tab:sourcefiles} lists the files that make up the FDS source code. Fi
 \item The source code consists entirely of Fortran statements organized into 32 files. Some compilers have a standard optimization level, plus various degrees of ``aggressive'' optimization. Be cautious in using the highest levels of optimization.
 \item To compile FDS, you need a Fortran compiler (2018 or greater) and MPI libraries.
 \item To compile routines for the ULMAT and UGLMAT pressure solvers, Intel Math Kernel Libraries (MKL) are required.
+\item To compile routines for the HYPRE (iterative linear solvers), the HYPRE Library \cite{HYPRE} from Lawrence Livermore National Laboratory is required.
+\item To compile routines for the CVODE (finite-rate chemistry), the Sundials Library \cite{cvodeDoc:2024} from Lawrence Livermore National Laboratory is required.
 \end{itemize}
 
 \begin{table}[ht]
@@ -14419,6 +14421,7 @@ Table~\ref{tab:sourcefiles} lists the files that make up the FDS source code. Fi
 \hline
 File Name  & Description  \\ \hline \hline
 \ct{ccib.f90}   & Complex geometry physics routines \\ \hline
+\ct{chem.f90}   & Finite-rate chemistry routines \\ \hline
 \ct{cons.f90}   & Global arrays and constants \\ \hline
 \ct{ctrl.f90}   & Definitions and routines for control functions \\ \hline
 \ct{data.f90}   & Data for output quantities and thermophysical properties\\ \hline

@@ -640,13 +640,13 @@ A summary of the experiments is provided in Table~\ref{tab:FHWA_Test_Matrix}. Th
 \begin{figure}[!ht]
 \includegraphics[width=\textwidth]{FIGURES/FHWA_Tunnel/Nozzle_A.jpg} 
 \includegraphics[width=\textwidth]{FIGURES/FHWA_Tunnel/Nozzle_B.jpg}
-\caption{Sketches of the two sprinkler configurations in the FHWA/IFAB experiments. The fans and flow straightener are to the left. The cross-hatched squares are access panels. The burner is below Nozzle~A.}
+\caption[Sketches of the FHWA/IFAB experiments]{Sketches of the two sprinkler configurations in the FHWA/IFAB experiments. The fans and flow straightener are to the left. The cross-hatched squares are access panels. The burner is below Nozzle~A.}
 \label{FHWAtunnel1}
 \end{figure}
 
 \begin{table}[!t]
 \centering
-\caption{Summary of the FHWA/IFAB experiments. The HRR and Velocity varied throughout the course of each experiment. Shown are nominal values.}
+\caption[Summary of the FHWA/IFAB experiments]{Summary of the FHWA/IFAB experiments. The HRR and Velocity varied throughout the course of each experiment. Shown are nominal values.}
 \begin{tabular}{|c|c|c|c|c|c|}
 \hline
 Test          & Fuel        & \textcolor{black}{HRR} & Velocity        & Nozzle & Nozzle           \\
@@ -891,8 +891,9 @@ Roger Harrison, a student at the University of Canterbury, New Zealand, performe
 The plume entrainment rate was measured at different heights by varying the exhaust rate of gases from a hood above the compartment.
 Two different test configurations were used to model both detached and adhered spill plumes. A diagram of the test structure is displayed in Figure~\ref{Harrison_Drawing}.
 
-\begin{figure}[p]
-\includegraphics[width=\textwidth]{FIGURES/Harrison_Spill_Plumes/Harrison_Spill_Plumes}
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=5in]{FIGURES/Harrison_Spill_Plumes/Harrison_Spill_Plumes}
 \caption{Geometry of the Harrison Spill Plumes Experiments.}
 \label{Harrison_Drawing}
 \end{figure}
@@ -999,8 +1000,6 @@ No.  & Config. & Material &  HRR (kW)   & HRR (kW)   &               &          
 \label{JH_FRA_instrumentation_fig}
 \end{figure}
 
-\FloatBarrier
-
 \subsubsection{Modeling Notes}
 
 The simulations are performed with a spatial resolution of 2~cm for the quarter-scale, 4~cm for the half scale, and 8~cm for the fullscale.
@@ -1102,27 +1101,26 @@ Lattimer et al. studied the thermal environment created by a fire impinging on a
 The authors measured the water cooled gauge heat flux and gas temperature at four locations along the ceiling. The distances from the back wall were 0.3~m, 0.9~m, 1.5~m, and 2.1~m. Table~\ref{Lattimer_Exp} summarizes the test conditions and measurements from this test series. 
 
 \begin{table*}[htbp!]
-\caption[Lattimer Fire Impinging Ceiling Experiments]{Lattimer fire impinging on a corridor ceiling experiments.}
 \begin{center}
+\caption[Lattimer Fire Impinging Ceiling Experiments]{Lattimer fire impinging on a corridor ceiling experiments.}
 \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|}
 \hline
-    &      &      & \multicolumn{4}{c|}{$\dot{q}''_{\rm gauge}$ (kW/m$^2$)} & \multicolumn{4}{c|}{$T_{\rm gas}$ (\degC)} \\ 
-    Test    & HRR (kW)    & $H$ (m)   &  0.3~m  & 0.9~m & 1.5~m & 2.1~m &  0.3~m  & 0.9~m & 1.5~m & 2.1~m \\  \hline \hline
-1 & 150 & 1.1 &  26.4 & 17.2 &  8.9 &  7.0 &  400 & 354 & 312 & 270 \\ \hline
-2 & 200 & 1.1 &  39.0 & 24.3 & 12.5 &  9.7 &  507 & 444 & 389 & 332 \\ \hline
-3 & 300 & 1.1 &  74.0 & 43.9 & 23.5 & 17.4 &  736 & 633 & 545 & 458 \\ \hline
-4 & 400 & 1.1 & 108.6 & 62.9 & 32.6 & 22.7 &  887 & 770 & 641 & 529 \\ \hline
-5 & 100 & 0.6 &  31.3 & 15.3 &  7.7 &  6.7 &  494 & 426 & 355 & 290 \\ \hline
-6 & 200 & 0.6 &  75.3 & 36.2 & 18.5 & 13.3 &  800 & 658 & 532 & 432 \\ \hline
-7 & 300 & 0.6 & 124.3 & 66.3 & 31.0 & 16.7 & 1026 & 849 & 659 & 527 \\ \hline
-8 & 400 & 0.6 & 152.5 & 82.1 & 47.3 & 27.4 & 1144 & 973 & 788 & 630 \\ \hline
-
+Test & HRR     & $H$ & \multicolumn{4}{c|}{$\dot{q}''_{\rm gauge}$ (kW/m$^2$)} & \multicolumn{4}{c|}{$T_{\rm gas}$ (\degC)} \\ \cline{4-11}
+No.  & (kW)    & (m) &  0.3~m  & 0.9~m & 1.5~m & 2.1~m &  0.3~m  & 0.9~m & 1.5~m & 2.1~m \\  \hline \hline
+1    & 150     & 1.1 &  26.4 & 17.2 &  8.9 &  7.0 &  400 & 354 & 312 & 270 \\ \hline
+2    & 200     & 1.1 &  39.0 & 24.3 & 12.5 &  9.7 &  507 & 444 & 389 & 332 \\ \hline
+3    & 300     & 1.1 &  74.0 & 43.9 & 23.5 & 17.4 &  736 & 633 & 545 & 458 \\ \hline
+4    & 400     & 1.1 & 108.6 & 62.9 & 32.6 & 22.7 &  887 & 770 & 641 & 529 \\ \hline
+5    & 100     & 0.6 &  31.3 & 15.3 &  7.7 &  6.7 &  494 & 426 & 355 & 290 \\ \hline
+6    & 200     & 0.6 &  75.3 & 36.2 & 18.5 & 13.3 &  800 & 658 & 532 & 432 \\ \hline
+7    & 300     & 0.6 & 124.3 & 66.3 & 31.0 & 16.7 & 1026 & 849 & 659 & 527 \\ \hline
+8    & 400     & 0.6 & 152.5 & 82.1 & 47.3 & 27.4 & 1144 & 973 & 788 & 630 \\ \hline
 \end{tabular}
 \end{center}
 \label{Lattimer_Exp}
 \end{table*}
 
-\begin{figure}[htbp!]
+\begin{figure}[!ht]
     \centering
     \includegraphics[width=6in]{FIGURES/Lattimer_Corridor_Ceiling/lattimer_apparatus.png}
     \caption{Lattimer fire impinging on a corridor ceiling experiments~\cite{Lattimer:FTJ:2013}.}
@@ -1142,8 +1140,8 @@ It is assumed that the fuel propane, C$_3$H$_8$, has a soot yield of 0.024 and a
 Lattimer measured the heat flux and gas temperatures from a propane fire against to a tilted wall. The experiments were sponsored by Fire Science Solutions, LLC, and were conducted at Virginia Tech in Blacksburg, Virginia. The wall was 1.5~m high and 0.60~m wide, with the sand burner centered on the wall. All experiments used a square sand burner with a side length of 0.30~m. The fires ranged in size from 20~kW to 75~kW. Heat fluxes and gas temperatures were measured every 0.15~m along the vertical centerline of the wall. The wall was tilted through a linear actuator attached to the back of the mounting frame. The majority of tests moved the wall during exposure to evaluate the impacts on flame separation. A photograph of the apparatus is provided in Figure~\ref{Lattimer_Tilted_Wall_fig}. A summary of the experiments conducted in this study is provided in Table~\ref{Lattimer_Tilted_Wall_tab}.
 
 \begin{table}[!htb]
-\caption[Summary of JH/FRA Rail Car Experiments]{Summary of Lattimer Tilted Wall Experiments.}
 \begin{center}
+\caption[Summary of JH/FRA Rail Car Experiments]{Summary of Lattimer Tilted Wall Experiments.}
 \begin{tabular}{|c|c|c|c|c|c|c|}
 \hline
 Test & HRR  & Angles    & Delay Before & Movement Time      & Delay at         & Test Duration \\
@@ -1871,10 +1869,8 @@ dropped to approximately 15~\% by volume.
 The fuel used in 14 of the tests was heptane, while toluene was used for one test. The HRR was
 determined using oxygen consumption calorimetry. The recommended uncertainty values
 were 17~\% for all of the tests.
-\item[Radiative Fraction:]  The values of radiative fraction and its uncertainty were reported as
-\num{0.44 \pm 0.07} and \num{0.40 \pm 0.09} for heptane and toluene, respectively.
-\item[Soot Yield:]  The values of the soot yield and its uncertainty were reported as \SI{0.0149 \pm 0.0033}{kg/kg}
-and \SI{0.195 \pm 0.052}{kg/kg} for heptane and toluene, respectively.
+\item[Radiative Fraction:]  The radiative fraction was reported to be $0.44 \pm 0.07$ and $0.40 \pm 0.09$ for heptane and toluene, respectively. The uncertainty is expressed as a 95~\% confidence interval.
+\item[Soot Yield:]  The soot yield (mass soot per mass fuel consumed) was reported to be $0.0149 \pm 0.0033$ and $0.195 \pm 0.052$ for heptane and toluene, respectively. The uncertainty is expressed as a 95~\% confidence interval.
 \end{description}
 
 
@@ -2815,7 +2811,7 @@ Approximately 600 angles are used in the radiative transport solver rather than 
 
 Mark Sippola, a doctoral student at the University of California, Berkeley, measured aerosol deposition velocities for various sizes of monodisperse fluorescent particles and various air velocities in a duct \cite{Sippola:2002,Sippola:2010}. The experimental facility consisted of a duct loop with a section for injecting fluorescent aerosol particles. The loop contained four measurement sections with two sections located after a long segment of straight duct such that fully-developed flow profiles existed. The experiments considered here include tests with measurements in the fully-developed flow test sections. Tests included 16 test for straight smooth steel duct and 15 tests in a straight duct lined with insulation. Based upon pressure drop measurements made in the duct, the roughness of the insulated duct was estimated as 1.5~mm. Both ducts had dimensions of 15~cm by 15~cm. The particle diameters were nominally 1~$\mu$m, 3~$\mu$m, 5~$\mu$m, 9~$\mu$m, and 16~$\mu$m. The air velocities in the duct were nominally 2.2~m/s, 5.3~m/s, and 9.0~m/s. In each test section, a total of twelve panels (20~cm by 10~cm) were cut from the duct section to measure the amount of particles deposited to the duct surfaces; four panels each from the duct ceiling, wall, and floor surfaces. Fluorescent measurement techniques and aerosol concentration measurements were used to calculate the deposition velocities of the particles to duct surfaces (ceiling, wall, and floor) in each of the two straight duct sections where the turbulent flow profile was fully developed. The experiments are summarized in Table~\ref{Sippola_Aerosol_Deposition_Summary}.
 
-\begin{table}[h]
+\begin{table}[!ht]
 \caption[Summary of Sippola aerosol deposition experiments selected for model validation]{Summary of Sippola aerosol deposition experiments selected for model validation.}
 \begin{center}
 \begin{tabular}{|c|c|c|c|}
