@@ -4685,7 +4685,7 @@ A 0.8~m by 0.8~m plate with surface temperature 1000~$^\circ$C and emissivity of
 \label{adiabatic_con_flux}
 \label{adiabatic_net_flux}
 
-There are options in FDS to specify either a net (convective and radiative) or convective boundary condition at a solid surface. In these two test cases, \ct{Heat\_Transfer/adiabatic\_con\_flux.fds} and \ct{Heat\_Transfer/adiabatic\_net\_flux.fds}, a sealed cube of side length 2~m has a 0.4~m by 0.4~m area on the floor with a specified convective and net heat flux of 100~kW/m$^2$. The case with the specified convective heat flux boundary has the radiation turned off. The case with the net heat flux boundary has both convection and radiation enabled so that the net flux is 100~kW/m$^2$. The flux is applied for 30~s and then turned off. The pressure in the compartment is expected to rise according to the equation:
+There are options in FDS to specify either a net (convective and radiative) or convective boundary condition at a solid surface. In these two test cases, \ct{Heat_Transfer/adiabatic_con_flux.fds} and\\\ct{Heat_Transfer/adiabatic_net_flux.fds}, a sealed cube of side length 2~m has a 0.4~m by 0.4~m area on the floor with a specified convective and net heat flux of 100~kW/m$^2$. The case with the specified convective heat flux boundary has the radiation turned off. The case with the net heat flux boundary has both convection and radiation enabled so that the net flux is 100~kW/m$^2$. The flux is applied for 30~s and then turned off. The pressure in the compartment is expected to rise according to the equation:
 \be
    \frac{\d p}{\d t} = \frac{(\gamma-1) \, \dot{Q}}{V}
 \ee
