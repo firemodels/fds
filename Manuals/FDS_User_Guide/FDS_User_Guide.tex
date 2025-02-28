@@ -2245,15 +2245,6 @@ Sphere       & 2        & 0.6     & 0     & 0.5    &                \\ \hline
 
 The length scale, $L$, is specified by \ct{CONVECTION_LENGTH_SCALE} on the \ct{SURF} line. By default, it is 1~m for plates, and the diameter of a sphere or cylinder.
 
-\subsubsection{Impinging Jet Heat Transfer Model}
-\label{info:impinging_jet}
-
-The forced convection heat transfer correlations generally apply to flow parallel to a surface.  When the flow is an impinging jet (normal and toward the surface) then the tangential components of velocity are not well resolved at the impingement point and consequently a fictitiously low value of heat transfer coefficient will be predicted if special consideration is not given to the surface.  If the surface may be subject to an impinging jet or stagnation point flow (in fire, usually this pertains to ceilings above a fire source), consider using impinging jet heat transfer model, applied on \ct{SURF} using \ct{HEAT_TRANSFER_MODEL='IMPINGING JET'}.  The default form of the model is similar to the forced convection correlation, but the Reynolds number is computed using an ``impact velocity'' computed as $U_{\rm{imp}} = \sqrt{2H}$, where $H$ is the stagnation energy per unit mass (see FDS Tech Guide ~\cite{FDS_Math_Guide}).
-\be
-   \NU_{\rm imp} = C_0 + \left( C_1 \, \RE_{\rm imp}^m - C_2 \right) \, \PR^{1/3}  \quad ; \quad \RE_{\rm imp} = \frac{\rho U_{\rm{imp}} L}{\mu}
-\ee
-The default coefficients are $C_0=0$, $C_1=0.055$, $C_2=0$, $m=0.8$.  But custom values may be entered on the \ct{SURF} line as described above.  Again, the default length scale is taken to be $L=1$ m, but may be changed.  This value is usually set to the diameter of the jet source in the literature.  The heat transfer coefficient obtained from $\NU_{\rm imp}$ is compared to that from forced and free convection and the largest value is chosen for the surface.
-
 \subsubsection{Output for Convective Heat Transfer Regime}
 \label{info:convection_regime}
 
@@ -2261,8 +2252,17 @@ It may be useful to visualize which convective heat transfer correlation is bein
 
 \subsubsection{Specified Convective Heat Transfer Coefficient}
 
-To specify the convective heat transfer coefficient, set it to a constant using \\
-\ct{HEAT_TRANSFER_COEFFICIENT} on the \ct{SURF} line in units of \unit{W/(m^2.K)} with optional time dependent ramp using \ct{RAMP_HEAT_TRANSFER_COEFFICIENT}. If the back side of the solid obstruction faces the exterior of the computational domain and the solid conducts heat, the heat transfer coefficient of the back side may be specified using \ct{HEAT_TRANSFER_COEFFICIENT_BACK} with optional time dependent ramp ramp using \ct{RAMP_HEAT_TRANSFER_COEFFICIENT_BACK}. This back side condition is appropriate for a \ct{SURF} line with \ct{BACKING='VOID'} or \ct{BACKING='EXPOSED'}.
+To specify the convective heat transfer coefficient, set it to a constant using \ct{HEAT_TRANSFER_COEFFICIENT} on the \ct{SURF} line in units of \unit{W/(m^2.K)} with optional time dependent ramp using\\\ct{RAMP_HEAT_TRANSFER_COEFFICIENT}. If the back side of the solid obstruction faces the exterior of the computational domain and the solid conducts heat, the heat transfer coefficient of the back side may be specified using \ct{HEAT_TRANSFER_COEFFICIENT_BACK} with optional time dependent ramp ramp using\\\ct{RAMP_HEAT_TRANSFER_COEFFICIENT_BACK}. This back side condition is appropriate for a \ct{SURF} line with \ct{BACKING='VOID'} or \ct{BACKING='EXPOSED'}.
+
+\subsubsection{Impinging Jet Heat Transfer Model}
+\label{info:impinging_jet}
+
+The forced convection heat transfer correlations generally apply to flow parallel to a surface.  When the flow is an impinging jet (normal and toward the surface) then the tangential components of velocity are not well resolved at the impingement point and consequently a fictitiously low value of heat transfer coefficient will be predicted if special consideration is not given to the surface.  If the surface may be subject to an impinging jet or stagnation point flow (in fire, usually this pertains to ceilings above a fire source), consider using impinging jet heat transfer model, applied on \ct{SURF} using \ct{HEAT_TRANSFER_MODEL='IMPINGING JET'}.
+
+The impinging jet model is an extension of the user-specified $h$ that allows you to specify a Gaussian radial profile parameterized by a center point, \ct{XYZ(1:3)}, a width in meters (m),\\\ct{HEAT_TRANSFER_COEFFICIENT_SIGMA}, and the peak value, $h_0$, using \ct{HEAT_TRANSFER_COEFFICIENT}, all on the \ct{SURF} line.  You may determine these parameters using correlations in \cite{Incropera:1}, for example.  Take note that the correlations usually give the average heat transfer coefficient over an area, $\bar{h}$.  It can be shown that the ratio of the peak to average for a Gaussian profile over area $A=\pi \sigma^2$ is $h_0/\bar{h} \approx 1.3$.  An example \ct{SURF} line is given below.
+\begin{lstlisting}
+&SURF ID='WALL', HEAT_TRANSFER_MODEL='IMPINGING JET', XYZ=0,0,1, HEAT_TRANSFER_COEFFICIENT=50, HEAT_TRANSFER_COEFFICIENT_SIGMA=0.5 /
+\end{lstlisting}
 
 \subsubsection{Specifying the Heat Flux at a Solid Surface}
 \label{info:net_and_convective_heat_flux}
@@ -10556,7 +10556,7 @@ By default, the heat transfer coefficient, $h_{\rm c}$, in Eq.~(\ref{gauge_heat_
 
 \item \ct{'GAUGE HEAT FLUX GAS'} The same as \ct{'GAUGE HEAT FLUX'}, except that it can be located anywhere within the computational domain and not just at a solid surface. It also has an arbitrary \ct{ORIENTATION} vector that points in any desired direction. The \ct{ORIENTATION} vector need not be normalized, as in the following:
 \begin{lstlisting}
-&DEVC ID='hf', QUANTITY='GAUGE HEAT FLUX GAS', XYZ=..., ORIENTATION=-1,1,0, 
+&DEVC ID='hf', QUANTITY='GAUGE HEAT FLUX GAS', XYZ=..., ORIENTATION=-1,1,0,
       PROP_ID='my gauge' /
 &PROP ID='my gauge', GAUGE_EMISSIVITY=0.85, HEAT_TRANSFER_COEFFICIENT=15. /
 \end{lstlisting}
@@ -13428,6 +13428,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{HEAT_OF_VAPORIZATION}                              & Real            & Section~\ref{info:specified_burning}      & kJ/kg               &                         \\ \hline
 \ct{HEAT_TRANSFER_COEFFICIENT}                         & Real            & Section~\ref{info:convection}             & \si{W/(m^2.K)}      &                         \\ \hline
 \ct{HEAT_TRANSFER_COEFFICIENT_BACK}                    & Real            & Section~\ref{info:convection}             & \si{W/(m^2.K)}      &                         \\ \hline
+\ct{HEAT_TRANSFER_COEFFICIENT_SIGMA}                   & Real            & Section~\ref{info:impinging_jet}          & m                   &                         \\ \hline
 \ct{HEAT_TRANSFER_MODEL}                               & Character       & Section~\ref{info:convection}             &                     &                         \\ \hline
 \ct{HORIZONTAL}                                          & Logical         & Section~\ref{info:GEOMETRY}               &                     & \ct{F}                 \\ \hline
 \ct{HRRPUA}                                              & Real            & Section~\ref{info:gas_burner}             & \si{kW/m^2}         &                         \\ \hline
