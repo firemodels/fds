@@ -2616,6 +2616,7 @@ INTEGER :: III,N,II,JJ,KK,IOR,IW,SURF_INDEX,IIG,JJG,KKG,ICF
 REAL(EB) :: DEPTH
 TYPE (DEVICE_TYPE), POINTER :: DV
 TYPE (MESH_TYPE), POINTER :: M
+LOGICAL :: DO_CFACE
 
 M => MESHES(NM)
 
@@ -2640,7 +2641,18 @@ DEVICE_LOOP: DO N=1,N_DEVC
 
       IF (IOR/=0) CALL GET_WALL_INDEX(NM,IIG,JJG,KKG,IOR,IW)
 
-      IF (IW==0 .AND. CC_IBM)  CALL GET_CFACE_INDEX(NM,IIG,JJG,KKG,DV%X,DV%Y,DV%Z,ICF)
+      IF (CC_IBM)  THEN
+         DO_CFACE=.FALSE.
+         IF(IW==0) DO_CFACE=.TRUE.
+         IF(.NOT.DO_CFACE .AND. IW>0) THEN
+            IF(M%WALL(IW)%BOUNDARY_TYPE/=SOLID_BOUNDARY) THEN
+               DO_CFACE=.TRUE.
+               IW=0
+            ENDIF
+         ENDIF
+         ! Search for CFACE index if no SOLID wall cell is associated to device:
+         IF(DO_CFACE) CALL GET_CFACE_INDEX(NM,IIG,JJG,KKG,DV%X,DV%Y,DV%Z,ICF)
+      ENDIF
 
       IF (IW==0 .AND. ICF==0 .AND. DV%SPATIAL_STATISTIC=='null') THEN
          WRITE(LU_ERR,'(A,A,A)') 'ERROR(427): DEVC ',TRIM(DV%ID),' requires repositioning.'
