@@ -1,14 +1,19 @@
 latt1.fds,HRR (kW),Angle (degrees)
 Lattimer_20_kW_00_degree.fds,20,0
-Lattimer_20_kW_10_degree.fds,20,10
-Lattimer_20_kW_20_degree.fds,20,20
+Lattimer_20_kW_00_degree_coarse.fds,20,0
+Lattimer_20_kW_00_degree_fine.fds,20,0
 Lattimer_35_kW_00_degree.fds,35,0
 Lattimer_35_kW_67_degree.fds,35,67
 Lattimer_75_kW_00_degree.fds,75,0
 Lattimer_75_kW_67_degree.fds,75,67
-Lattimer_50_kW_00_degree.fds,50,0
+Lattimer_50_kW_00_degree_geom.fds,50,0
+Lattimer_50_kW_00_degree_geom_coarse.fds,50,0
+Lattimer_50_kW_00_degree_geom_fine.fds,50,0
+Lattimer_50_kW_00_degree_obst.fds,50,0
 Lattimer_50_kW_11_degree.fds,50,11
 Lattimer_50_kW_23_degree.fds,50,23
 Lattimer_50_kW_35_degree.fds,50,35
+Lattimer_50_kW_35_degree_fine.fds,50,35
+Lattimer_50_kW_35_degree_coarse.fds,50,35
 Lattimer_50_kW_49_degree.fds,50,49
 Lattimer_50_kW_67_degree.fds,50,67
