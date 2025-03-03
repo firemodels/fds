@@ -1,6 +1,6 @@
-&HEAD CHID='Lattimer_50_kW_00_degree_geom', TITLE='Surface temperature on slopped wall' /
+&HEAD CHID='Lattimer_50_kW_00_degree_geom_coarse', TITLE='Surface temperature on slopped wall' /
 
-&MESH ID='Mesh01', IJK=44,28,40, XB=-1.6,-0.5,-0.35,0.35,-0.2,0.8, MULT_ID='MESH'/
+&MESH ID='Mesh01', IJK=22,14,20, XB=-1.6,-0.5,-0.35,0.35,-0.2,0.8, MULT_ID='MESH'/
 &MULT ID='MESH', I_UPPER=1, K_UPPER=1, DX=1.1, DZ=1.0 /
 
 
