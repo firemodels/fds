@@ -9577,7 +9577,7 @@ FDS has various types of output files that store computed data. Some of the file
 \item A list of HVAC output quantities is given in Sec.~\ref{info:hvacoutputquantities}.
 \end{itemize}
 The namelist group \ct{DUMP} contains parameters (Table \ref{tbl:DUMP}) that control the rate at which output files are written, and various other global parameters associated with output files. There can only be one \ct{DUMP} line in the input file.
-By default, FDS outputs all result files to the current working directory. A separate output directory for binary files can be specified by the user by setting \ct{RESULTS_DIR} on the \ct{DUMP} line. A single text file \ct{CHID.smv} is always written with high level information about the case~\cite{Smokeview_Users_Guide}. By default, this file is written in parallel using MPI I/O routines. This feature can be disable setting \ct{SMV_PARALLEL_WRITE=F} in the \ct{DUMP} line, in which case, MPI rank 0 will write the file.
+By default, FDS outputs all result files to the current working directory. A separate output directory for binary files can be specified by the user by setting \ct{RESULTS_DIR} on the \ct{DUMP} line. A single text file \ct{CHID.smv} is always written with high level information about the case~\cite{Smokeview_Users_Guide}. By default, the information is gathered in MPI rank 0 which writes the file. For computations involving parallel file systems and many MPI processes, the file can also be written in parallel using MPI I/O routines setting \ct{SMV_PARALLEL_WRITE=T} in the \ct{DUMP} line.
 
 
 \section{Controlling the Frequency of Output}
