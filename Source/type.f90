@@ -213,7 +213,6 @@ TYPE BOUNDARY_ONE_D_TYPE
    INTEGER :: SURF_INDEX=-1     !< SURFACE index
    INTEGER :: N_CELLS_MAX=0     !< Maximum number of interior cells
    INTEGER :: N_CELLS_INI=0     !< Initial number of interior cells
-   INTEGER :: N_CELLS_OLD=1     !< Maximum number of interior cells for DX_OLD
    INTEGER :: N_LAYERS=0        !< Number of material layers
    INTEGER :: N_MATL=0          !< Number of materials
    INTEGER :: N_LPC=0           !< Number of Lagrangian Particle Classes
