@@ -3562,7 +3562,7 @@ ELSE
    IF (H_FIXED >= 0._EB) THEN
       HEAT_TRANSFER_COEFFICIENT = H_FIXED
    ELSE
-      HEAT_TRANSFER_COEFFICIENT = 1.31_EB*ABS(DELTA_N_TMP)**ONTH  ! Natural convection for vertical plane
+      HEAT_TRANSFER_COEFFICIENT = 1.31_EB*ABS(DELTA_N_TMP)**ONTH  ! Natural convection for vertical plane, Holman, 10th, Tab. 7.2
    ENDIF
    RETURN
 ENDIF
