@@ -2045,7 +2045,7 @@ ENDIF
 
 SELECT CASE(DRAG_LAW)
 
-   ! see J.P. Holman 7th Ed. Fig. 6-10
+   ! see J.P. Holman 10th Ed. Fig. 6-10
    CASE(SPHERE_DRAG)
       IF (RE<1._EB) THEN
          IF (PRESENT(KN)) THEN
@@ -2060,7 +2060,7 @@ SELECT CASE(DRAG_LAW)
          DRAG = 0.44_EB
       ENDIF
 
-   ! see J.P. Holman 7th Ed. Fig. 6-9
+   ! see J.P. Holman 10th Ed. Fig. 6-9
    CASE(CYLINDER_DRAG)
       IF (RE<=1._EB) THEN
          DRAG = 10._EB/(RE**0.8_EB)
