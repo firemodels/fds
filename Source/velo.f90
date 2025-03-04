@@ -3229,7 +3229,6 @@ END SUBROUTINE BAROCLINIC_CORRECTION
 
 
 !> \brief Recompute velocities on wall cells
-!> \param NM Mesh index
 !> \param DT Time step (s)
 !> \param STORE_UN Flag indicating whether normal velocity component is to be saved
 !> \details Ensure that the correct normal derivative of H is used on the projection. It is only used when the Poisson equation

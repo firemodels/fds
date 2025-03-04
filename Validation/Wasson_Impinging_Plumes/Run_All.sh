@@ -5,8 +5,13 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
-$QFDS $DEBUG -p 4  $QUEUE -d $INDIR wasson_50kW_1m_50mm.fds
-$QFDS $DEBUG -p 4  $QUEUE -d $INDIR wasson_50kW_1m_25mm.fds
-$QFDS $DEBUG -p 32 $QUEUE -d $INDIR wasson_50kW_1m_12mm.fds
+$QFDS $DEBUG -p 75  $QUEUE -d $INDIR wasson_test1_12mm.fds
+$QFDS $DEBUG -p 75  $QUEUE -d $INDIR wasson_test2_12mm.fds
+$QFDS $DEBUG -p 50  $QUEUE -d $INDIR wasson_test3_12mm.fds
+$QFDS $DEBUG -p 50  $QUEUE -d $INDIR wasson_test3_25mm.fds
+$QFDS $DEBUG -p 9   $QUEUE -d $INDIR wasson_test3_50mm.fds
+$QFDS $DEBUG -p 100 $QUEUE -d $INDIR wasson_test4_12mm.fds
+$QFDS $DEBUG -p 75  $QUEUE -d $INDIR wasson_test5_12mm.fds
+$QFDS $DEBUG -p 75  $QUEUE -d $INDIR wasson_test6_12mm.fds
 
 echo FDS cases submitted

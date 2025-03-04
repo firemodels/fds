@@ -2166,9 +2166,9 @@ The sphere is generated using the \ct{GEOM} namelist with three levels.  The sur
 \section{Impinging Jet (\texorpdfstring{\ct{impinging_jet}}{impinging\_jet})}
 \label{sec:impinging_jet}
 
-Impinging jet flow poses a challenge for convective heat transfer models because the stagnation velocity goes to zero numerically near the mean stagnation point and hence the computed Reynolds number is fictitiously low leading to an under-prediction of the local heat transfer coefficient.  To handle this problem, the user may specify a special impinging jet heat transfer model, as discussed in the FDS User Guide \cite{FDS_Users_Guide}, which basically uses the forced convection correlation but with a velocity scale obtained from the stagnation pressure, following Huang \cite{Huang:1963,Livingood:1973}.  In this section, we present results from a series of cases designed to confirm the general trend that the highest heat transfer coefficient is found at the stagnation point.  There is no analytical solution to this case.  We take our target correlation to be that of Martin \cite{Martin:1977,Incropera:1}.  The default coefficients of the impinging jet model have been tuned to match the Martin correlation for the specific case discussed below at coarse grid resolution.
+Impinging jet flow poses a challenge for convective heat transfer models because the stagnation velocity goes to zero numerically near the mean stagnation point and hence the computed Reynolds number is fictitiously low leading to an under-prediction of the local heat transfer coefficient.  To handle this problem, the user may specify a special impinging jet heat transfer model, as discussed in the FDS User Guide \cite{FDS_Users_Guide}.  In this section, we present results from a series of cases designed to confirm the general trend that the highest heat transfer coefficient is found at the stagnation point.  There is no analytical solution to this case.  We take our target correlation to be that of Martin \cite{Martin:1977,Incropera:1}.  The model parameters have been tuned to match the Martin correlation for the specific case discussed below.
 
-The set up for the problem is a simple cubic domain 1 m on a side.  The lateral boundaries are open.  The top boundary is held at a fixed 20 C.  A hot jet of air is injected from a 0.2 m by 0.2 m square vent at 100 C.  Two Reynolds numbers are considered by changing the inlet flow velocity [10, 40] m/s.  Three grid resolutions for each Reynolds number are tested, $D/\delta x$ = [7, 14, 28], representing \emph{coarse}, \emph{medium}, and \emph{fine} resolutions.  The cases are fun for roughly flow through times with statistics collected over the last half of the simulation.
+The set up for the problem is a simple cubic domain 1 m on a side.  The lateral boundaries are open.  The top boundary is held at a fixed 20 C.  A hot jet of air is injected from a 0.2 m by 0.2 m square vent at 100 C.  Two Reynolds numbers are considered by changing the inlet flow velocity [10, 40] m/s.  Three grid resolutions for each Reynolds number are tested, $D/\delta x$ = [7, 14, 28], representing \emph{coarse}, \emph{medium}, and \emph{fine} resolutions.  The cases are fun for roughly 100 flow through times with statistics collected over the last half of the simulation.
 
 Figure \ref{fig_impinging_jet_corr} shows FDS results for three grid resolutions compared to the correlation in Martin \cite{Martin:1977,Incropera:1}.  The plots below in Fig.~\ref{fig_impinging_jet_prof} show the profile of Nu along the ceiling.
 
@@ -3587,7 +3587,7 @@ The reaction rate input parameters are shown in the table below. $E$, $a_{\alpha
 \caption[Species evolution in a 0-order 1-step finite rate reaction]{Time evolution of species mass fraction for a one-step zero-order Arrhenius finite rate reaction. The left plot is using RK2-Richardson ODE solver and the right plot is using CVODE ODE solver.}
 \label{fig:Arrhenius_0Order_1step}
 \end{figure}
-The second finite rate test case is a one-step, second-order propane reaction, Eq.~(\ref{eq:1step_propane}). The table below shows the reaction rate input parameters. In this case, $a_{\alpha}=[1,1,0,0]$  for propane, oxygen, carbon monoxide, and water vapor respectively. This makes the reaction second-order as $\mathcal{O}=\sum a_{\alpha}$. Species evolutions for the one-step second-order reaction are shown in Fig.~\ref{fig:Arrhenius_2Order_1step}.
+The second finite rate test case is a one-step, second-order propane reaction, Eq.~(\ref{eq:1step_propane}). The table below shows the reaction rate input parameters. In this case, $a_{\alpha}=[1,1,0,0]$  for propane, oxygen, carbon monoxide, and water vapor respectively. This makes the reaction second-order as $\sum a_{\alpha}=2$. Species evolutions for the one-step second-order reaction are shown in Fig.~\ref{fig:Arrhenius_2Order_1step}.
 \begin{table}[ht]
 \begin{center}
 \caption[Arrhenius values for a single step C$_3$H$_8$ reaction]{Arrhenius values for a single step C$_3$H$_8$ reaction; $\alpha$ = [$\mathrm{C_3H_8}$ $\mathrm{O_2}$ $\mathrm{CO_2}$ $\mathrm{H_2O}$].}
@@ -3600,12 +3600,11 @@ The second finite rate test case is a one-step, second-order propane reaction, E
 \end{table}
 \begin{figure}[h!]
 \centering
-\setlength{\tabcolsep}{-10pt}
-\begin{tabular*}{\textwidth}{lr}
-\includegraphics[trim={20pt 0pt 20pt 0pt}, clip, height=1.8in]{SCRIPT_FIGURES/reactionrate_arrhenius_2order_1step}
-\includegraphics[trim={20pt 0pt 20pt 0pt}, clip, height=1.8in]{SCRIPT_FIGURES/reactionrate_arrhenius_2order_1step_cvode}
-\end{tabular*}
-\caption[Species evolution in a 2-order 1-step finite rate reaction]{Time evolution of species mass fraction for a one-step second-order Arrhenius finite rate reaction. The left plot is using RK2-Richardson ODE solver and the right plot is using CVODE ODE solver.}
+\begin{tabular}{c}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_arrhenius_2order_1step} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_arrhenius_2order_1step_cvode}
+\end{tabular}
+\caption[Species evolution in a 2-order 1-step finite rate reaction]{Time evolution of species mass fraction for a one-step second-order Arrhenius finite rate reaction. The top plot is using RK2-Richardson ODE solver and the bottom plot is using CVODE ODE solver.}
 \label{fig:Arrhenius_2Order_1step}
 \end{figure}
 Multi-step Arrhenius finite rate reactions are also examined. First, we consider a two-step forward propane reaction:
@@ -3661,23 +3660,21 @@ Note: the values of $E$ and $A$ used in these examples are not necessarily repre
 
 \begin{figure}[h!]
 \centering
-\setlength{\tabcolsep}{-10pt}
-\begin{tabular*}{\textwidth}{lr}
-\includegraphics[trim={20pt 0pt 20pt 0pt}, clip, height=1.8in]{SCRIPT_FIGURES/reactionrate_arrhenius_1p75order_2step}
-\includegraphics[trim={20pt 0pt 20pt 0pt}, clip, height=1.8in]{SCRIPT_FIGURES/reactionrate_arrhenius_1p75order_2step_cvode}
-\end{tabular*}
-\caption[Species evolution in a 1.75-order 2-step finite rate reaction]{Time evolution of species mass fraction for a two-step Arrhenius finite rate propane reactions. The left plot is using RK2-Richardson ODE solver and the right plot is using CVODE ODE solver.}
+\begin{tabular}{c}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_arrhenius_1p75order_2step} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_arrhenius_1p75order_2step_cvode}
+\end{tabular}
+\caption[Species evolution in a 1.75-order 2-step finite rate reaction]{Time evolution of species mass fraction for a two-step Arrhenius finite rate propane reactions. The top plot is using RK2-Richardson ODE solver and the bottom plot is using CVODE ODE solver.}
 \label{fig:Arrhenius_175Order_2step}
 \end{figure}
 
 \begin{figure}[h!]
 \centering
-\setlength{\tabcolsep}{-10pt}
-\begin{tabular*}{\textwidth}{lr}
-\includegraphics[height=1.8in]{SCRIPT_FIGURES/reactionrate_arrhenius_1p75order_2stepr}
-\includegraphics[height=1.8in]{SCRIPT_FIGURES/reactionrate_arrhenius_1p75order_2stepr_cvode}
-\end{tabular*}
-\caption[Species evolution in a 1.75-order 2-step reversible finite rate reaction]{Time evolution of species mass fraction for a two-step reversible Arrhenius finite rate propane reactions. The left plot is using RK2-Richardson ODE solver and the right plot is using CVODE ODE solver.}
+\begin{tabular}{c}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_arrhenius_1p75order_2stepr} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_arrhenius_1p75order_2stepr_cvode}
+\end{tabular}
+\caption[Species evolution in a 1.75-order 2-step reversible finite rate reaction]{Time evolution of species mass fraction for a two-step reversible Arrhenius finite rate propane reactions. The top plot is using RK2-Richardson ODE solver and the bottom plot is using CVODE ODE solver.}
 \label{fig:Arrhenius_175Order_2stepR}
 \end{figure}
 
@@ -3698,12 +3695,11 @@ Equilibrium values were determined using Cantera \cite{cantera:2023}. A constant
 
 \begin{figure}[h!]
 \centering
-\setlength{\tabcolsep}{-10pt}
-\begin{tabular*}{\textwidth}{lr}
-\includegraphics[trim={20pt 0pt 20pt 0pt}, clip, height=1.8in]{SCRIPT_FIGURES/reactionrate_equilibrium_species}
-\includegraphics[trim={20pt 0pt 20pt 0pt}, clip, height=1.8in]{SCRIPT_FIGURES/reactionrate_equilibrium_species_cvode}
-\end{tabular*}
-\caption[Species evolution in an equilibrium case]{Time evolution of species mass fraction for a two-step Arrhenius finite rate reaction compared to Cantera values. The left plot is using RK2-Richardson ODE solver and the right plot is using CVODE ODE solver.}
+\begin{tabular}{c}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_equilibrium_species} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_equilibrium_species_cvode}
+\end{tabular}
+\caption[Species evolution in an equilibrium case]{Time evolution of species mass fraction for a two-step Arrhenius finite rate reaction compared to Cantera values. The top plot is using RK2-Richardson ODE solver and the bottom plot is using CVODE ODE solver.}
 \label{fig:Arrhenius_2Order_1stepb}
 \end{figure}
 
@@ -3712,7 +3708,7 @@ Equilibrium values were determined using Cantera \cite{cantera:2023}. A constant
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_equilibrium_temperature} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_equilibrium_pressure} \\
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_equilibrium_temperature_cvode} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_equilibrium_pressure_cvode} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_equilibrium_pressure_cvode}
 \end{tabular*}
 \caption[Temperature and pressure evolution for equilibrium case]{Time evolution of temperature (left) and pressure (right) for two-step Arrhenius finite rate propane reactions compared to Cantera values. The top row is using RK2-Richardson ODE solver and the bottom row is using CVODE ODE solver.}
 \label{fig:Arrhenius_175Order_23stepb}
@@ -3752,12 +3748,11 @@ The original Jones and Lindstedt (1988) paper \cite{Jones_Lindstedt:1988} sugges
 
 \begin{figure}[h!]
 \centering
-\setlength{\tabcolsep}{-10pt}
-\begin{tabular*}{\textwidth}{lr}
-\includegraphics[trim={20pt 0pt 20pt 0pt}, clip, height=1.8in]{SCRIPT_FIGURES/reactionrate_jones_lindstedt_species}
-\includegraphics[trim={20pt 0pt 20pt 0pt}, clip, height=1.8in]{SCRIPT_FIGURES/reactionrate_jones_lindstedt_species_cvode}
-\end{tabular*}
-\caption[Species evolution in Jones-Lindstedt case]{Time evolution of species mass fraction for Jones-Lindstedt four-step Arrhenius finite rate reaction compared to Cantera values. The left plot is using RK2-Richardson ODE solver and the right plot is using CVODE ODE solver.}
+\begin{tabular}{c}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_jones_lindstedt_species} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_jones_lindstedt_species_cvode}
+\end{tabular}
+\caption[Species evolution in Jones-Lindstedt case]{Time evolution of species mass fraction for Jones-Lindstedt four-step Arrhenius finite rate reaction compared to Cantera values. The top plot is using RK2-Richardson ODE solver and the bottom plot is using CVODE ODE solver.}
 \label{fig:jones_lindstedt_species}
 \end{figure}
 
@@ -4092,7 +4087,7 @@ When using a non-predefined fuel, one may have heat of combustion data represent
 \label{1_step_2_step_M}
 \label{1_step_2_step_H}
 
-This verification case checks that single-step and two-step simple chemistry results in the same total heat of combustion. The case consists of four 1 m$^3$ domains with a 20 kW fire in each (one pair defined using {\ct MLRPUA} and the other using {\ct HRRPUA}) that burns for 8.5~s. Each burner is assigned the fuel C$_3$H$_8$ (as a user defined species). In one mesh of each pair, single-step chemistry is used, and in the other mesh, two-step chemistry is used. The total heat released in all meshes should be the same as shown in Fig.~\ref{fig:1_step_2_step}.
+This verification case checks that single-step and two-step simple chemistry results in the same total heat of combustion. The case consists of four 1 m$^3$ domains with a 20 kW fire in each (one pair defined using \ct{MLRPUA} and the other using \ct{HRRPUA}) that burns for 8.5~s. Each burner is assigned the fuel C$_3$H$_8$ (as a user defined species). In one mesh of each pair, single-step chemistry is used, and in the other mesh, two-step chemistry is used. The total heat released in all meshes should be the same as shown in Fig.~\ref{fig:1_step_2_step}.
 \begin{figure}[h!]
    \begin{tabular*}{\textwidth}{lr}
       \includegraphics[height=2.2in]{SCRIPT_FIGURES/1_step_2_step_compare_MLRPUA} &
@@ -4302,38 +4297,38 @@ Fig.~\ref{fig:smoke_detector} shows a comparison of the analytical and simulated
 
 
 \section{Aerosol Behavior}
-\subsection{Gravitational Settling and Deposition of Aerosols\\(\texorpdfstring{\ct{aerosol\_gravitational\_deposition}}{aerosol\_gravitational\_deposition})}
+\subsection{Gravitational Settling and Deposition of Aerosols\\(\texorpdfstring{\ct{aerosol_gravitational_deposition}}{aerosol\_gravitational\_deposition})}
     \label{aerosol_gravitational_deposition}
 
 This verification test consists of two test cases. The second case, \ct{aerosol\_gravitational\_deposition\_2}, reverses the z-component of gravity. The case consists of a box 10~cm on side with adiabatic, free-slip side walls. The box is filled with two gas species each having a molecular weight of 28.8~g/mol, a viscosity of 0.00002~\si{kg/(m.s}, a thermal conductivity of 0.025~\si{W/(m.K}, and specific heat of 1~\si{kJ/(kg.K}, and zero diffusivity. One of the gas species is defined as an aerosol with a diameter of 10~$\mu$m, a solid phase density of 2000~kg/m$^3$, and a solid phase conductivity of 1~\si{W/(m.K}. The initial mass fraction of the aerosol is 0.00001. \ct{STRATIFICATION}, \ct{NOISE}, and all aerosol behaviors except for \ct{GRAVITATIONAL\_SETTLING} and \ct{GRAVITATIONAL\_DEPOSITION} are turned off. Since the box has a constant density over its height, a uniform settling rate over time is expected.
 
 \begin{figure}[ht]
-    \centering
-    \begin{tabular}{c}
-        \includegraphics[height=2.2in]{SCRIPT_FIGURES/aerosol_gravitational_deposition_gas}
-        \includegraphics[height=2.2in]{SCRIPT_FIGURES/aerosol_gravitational_deposition_wall} \\
-        \includegraphics[height=2.2in]{SCRIPT_FIGURES/aerosol_gravitational_deposition_2_gas}
-        \includegraphics[height=2.2in]{SCRIPT_FIGURES/aerosol_gravitational_deposition_2_wall}
-    \end{tabular}
-    \caption[Gas phase soot mass fractions and wall surface densities for gravitational deposition]{Time evolution of soot mass fraction in the gas (left) and soot surface density on the wall (right) for the \ct{aerosol\_gravitational\_deposition} (Top) and \ct{aerosol\_gravitational\_deposition\_2} (Bottom) cases.}
-    \label{fig:gravitational_deposition}
+\noindent
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/aerosol_gravitational_deposition_gas} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/aerosol_gravitational_deposition_wall} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/aerosol_gravitational_deposition_2_gas} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/aerosol_gravitational_deposition_2_wall}
+\end{tabular*}
+\caption[Gas phase soot mass fractions and wall surface densities for gravitational deposition]{Time evolution of soot mass fraction in the gas (left) and soot surface density on the wall (right) for the \ct{aerosol\_gravitational\_deposition} (Top) and \ct{aerosol\_gravitational\_deposition\_2} (Bottom) cases.}
+\label{fig:gravitational_deposition}
 \end{figure}
 
-\subsection{Thermophoretic Settling and Deposition of Aerosols\\(\texorpdfstring{\ct{aerosol\_thermophoretic\_deposition}}{aerosol\_thermophoretic\_deposition})}
+\subsection{Thermophoretic Settling and Deposition of Aerosols\\(\texorpdfstring{\ct{aerosol_thermophoretic_deposition}}{aerosol\_thermophoretic\_deposition})}
     \label{aerosol_thermophoretic_deposition}
 
 This verification test consists of two test cases. The second case, \ct{aerosol\_thermophoretic\_deposition\_2}, reverses the temperature gradient. The case consists of a box 1~cm on side with adiabatic, free-slip side walls and a 100 K temperature gradient over the height of the box. The box is filled with two gas species each having a molecular weight of 28.8~g/mol, a viscosity of 0.00002~\si{kg/(m.s}, a thermal conductivity of 0.025~\si{W/(m.K}, and specific heat of 1~\si{kJ/(kg.K}, and zero diffusivity. One of the gas species is defined as an aerosol with a diameter of 1~$\mu$m, a solid phase density of 2000~kg/m$^3$, and a solid phase conductivity of 1~\si{W/(m.K}. The initial mass fraction of the aerosol is 0.00001. The gas temperature is initialized to its steady-state temperature gradient. \ct{STRATIFICATION}, \ct{NOISE}, and all aerosol behaviors except for \ct{THERMOPHORETIC\_SETTLING} and \ct{THERMOPHORETIC\_DEPOSITION} are turned off. Thermophoretic settling rates are weakly dependent on the gas density. Since there is a temperature gradient, the settlings rates are not uniform over the height of the box. Unlike the gravitational settling case, this means over long enough time periods the overall settling rate is not linear in time; however, for a short time period a near linear settling rate is expected and can be determined analytically
 
 \begin{figure}[ht]
-    \centering
-    \begin{tabular}{c}
-        \includegraphics[height=2.2in]{SCRIPT_FIGURES/aerosol_thermophoretic_deposition_gas}
-        \includegraphics[height=2.2in]{SCRIPT_FIGURES/aerosol_thermophoretic_deposition_wall} \\
-        \includegraphics[height=2.2in]{SCRIPT_FIGURES/aerosol_thermophoretic_deposition_2_gas}
-        \includegraphics[height=2.2in]{SCRIPT_FIGURES/aerosol_thermophoretic_deposition_2_wall}
-    \end{tabular}
-    \caption[Gas phase soot densities and wall surface densities for thermophoretic deposition]{Time evolution of soot density in the gas (left) and soot surface density on the wall (right) for the \ct{aerosol\_thermophoretic\_deposition} (Top) and \ct{aerosol\_thermophoretic\_deposition\_2} (Bottom) cases.}
-    \label{fig:thermophoretic_deposition}
+\noindent
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/aerosol_thermophoretic_deposition_gas} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/aerosol_thermophoretic_deposition_wall} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/aerosol_thermophoretic_deposition_2_gas} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/aerosol_thermophoretic_deposition_2_wall}
+\end{tabular*}
+\caption[Gas phase soot densities and wall surface densities for thermophoretic deposition]{Time evolution of soot density in the gas (left) and soot surface density on the wall (right) for the \ct{aerosol\_thermophoretic\_deposition} (Top) and \ct{aerosol\_thermophoretic\_deposition\_2} (Bottom) cases.}
+\label{fig:thermophoretic_deposition}
 \end{figure}
 
 \subsection{Turbulent Deposition of Aerosols (\texorpdfstring{\ct{aerosol\_turbulent\_deposition}}{aerosol\_turbulent\_deposition})}
@@ -4690,7 +4685,7 @@ A 0.8~m by 0.8~m plate with surface temperature 1000~$^\circ$C and emissivity of
 \label{adiabatic_con_flux}
 \label{adiabatic_net_flux}
 
-There are options in FDS to specify either a net (convective and radiative) or convective boundary condition at a solid surface. In these two test cases, \ct{Heat\_Transfer/adiabatic\_con\_flux.fds} and \ct{Heat\_Transfer/adiabatic\_net\_flux.fds}, a sealed cube of side length 2~m has a 0.4~m by 0.4~m area on the floor with a specified convective and net heat flux of 100~kW/m$^2$. The case with the specified convective heat flux boundary has the radiation turned off. The case with the net heat flux boundary has both convection and radiation enabled so that the net flux is 100~kW/m$^2$. The flux is applied for 30~s and then turned off. The pressure in the compartment is expected to rise according to the equation:
+There are options in FDS to specify either a net (convective and radiative) or convective boundary condition at a solid surface. In these two test cases, \ct{Heat_Transfer/adiabatic_con_flux.fds} and\\\ct{Heat_Transfer/adiabatic_net_flux.fds}, a sealed cube of side length 2~m has a 0.4~m by 0.4~m area on the floor with a specified convective and net heat flux of 100~kW/m$^2$. The case with the specified convective heat flux boundary has the radiation turned off. The case with the net heat flux boundary has both convection and radiation enabled so that the net flux is 100~kW/m$^2$. The flux is applied for 30~s and then turned off. The pressure in the compartment is expected to rise according to the equation:
 \be
    \frac{\d p}{\d t} = \frac{(\gamma-1) \, \dot{Q}}{V}
 \ee

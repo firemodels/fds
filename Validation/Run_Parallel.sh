@@ -30,6 +30,8 @@ cd Harrison_Spill_Plumes;  ./Run_All.sh $OPTIONS; cd ..
 cd Heated_Channel_Flow;  ./Run_All.sh $OPTIONS; cd ..
 cd JH_FRA; ./Run_All.sh $OPTIONS; cd ..
 cd Juelich_SETCOM;  ./Run_All.sh $OPTIONS; cd ..
+cd Lattimer_Corridor_Ceiling;  ./Run_All.sh $OPTIONS; cd ..
+cd Lattimer_Tilted_Wall;  ./Run_All.sh $OPTIONS; cd ..
 cd LEMTA_UGent_Pool_Fires;  ./Run_All.sh $OPTIONS; cd ..
 cd LNG_Dispersion;  ./Run_All.sh $OPTIONS; cd ..
 cd Loughborough_Jet_Fires;  ./Run_All.sh $OPTIONS; cd ..
@@ -76,5 +78,6 @@ cd USFS_Corsica;  ./Run_All.sh $OPTIONS; cd ..
 cd USN_Hangars;  ./Run_All.sh $OPTIONS; cd ..
 cd UWO_Wind_Tunnel;  ./Run_All.sh $OPTIONS; cd ..
 cd VTT;  ./Run_All.sh $OPTIONS; cd ..
+cd Wasson_Impinging_Plumes;  ./Run_All.sh $OPTIONS; cd ..
 cd Waterloo_Methanol;  ./Run_All.sh $OPTIONS; cd ..
 cd Wu_Bakar_Tunnels;  ./Run_All.sh $OPTIONS; cd ..

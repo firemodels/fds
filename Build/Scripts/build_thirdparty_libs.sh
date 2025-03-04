@@ -92,7 +92,7 @@ while [[ $# -gt 0 ]]; do
             break
             ;;
         *)
-	    ARG="${ARG} $1"  # Append unrecognized arguments to ARG
+        ARG="${ARG} $1"  # Append unrecognized arguments to ARG
             shift
             ;;
     esac

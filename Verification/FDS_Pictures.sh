@@ -1,4 +1,4 @@
-$RUNSMV -d Adaptive_Mesh_Refinement random_meshes.fds
+$RUNSMV -p 4 -d Adaptive_Mesh_Refinement random_meshes.fds
 $RUNSMV -d Aerosols propane_flame_deposition.fds
 $RUNSMV -d Complex_Geometry geom_simple.fds
 #$RUNSMV -d Complex_Geometry geom_azim.fds
@@ -26,17 +26,17 @@ $RUNSMV -d Complex_Geometry geom_texture3b.fds
 $RUNSMV -d Complex_Geometry geom_texture4a.fds
 $RUNSMV -d Complex_Geometry geom_texture4b.fds
 $RUNSMV -d Complex_Geometry sphere_radiate.fds
-$RUNSMV -d Complex_Geometry sphere_helium_conserve_3meshes
+$RUNSMV -p 3 -d Complex_Geometry sphere_helium_conserve_3meshes.fds
 $RUNSMV -d Complex_Geometry cone_1mesh.fds
 $RUNSMV -d Controls activate_vents.fds
-$RUNSMV -d Detectors beam_detector.fds
+$RUNSMV -p 8 -d Detectors beam_detector.fds
 $RUNSMV -d Detectors objects_static.fds
 $RUNSMV -d Detectors objects_dynamic.fds
-$RUNSMV -d Fires couch.fds
+$RUNSMV -p 4 -d Fires couch.fds
 $RUNSMV -d Flowfields helium_2d_isothermal.fds
 $RUNSMV -d Flowfields symmetry_test.fds
 $RUNSMV -d Flowfields symmetry_test_2.fds
-$RUNSMV -d Flowfields symmetry_test_mpi.fds
+$RUNSMV -p 8 -d Flowfields symmetry_test_mpi.fds
 $RUNSMV -d Flowfields jet_fan.fds
 $RUNSMV -d Flowfields velocity_bc_test.fds
 $RUNSMV -p 4 -d Heat_Transfer checkerboard.fds
@@ -66,8 +66,8 @@ $RUNSMV -d Miscellaneous obst_cone.fds
 $RUNSMV -d Miscellaneous obst_rotbox.fds
 $RUNSMV -d NS_Analytical_Solution ns2d_64.fds
 $RUNSMV -d Pressure_Effects pressure_boundary.fds
-$RUNSMV -d Pressure_Solver dancing_eddies_embed.fds
-$RUNSMV -d Pressure_Solver dancing_eddies_tight.fds
+$RUNSMV -p 5 -d Pressure_Solver dancing_eddies_embed.fds
+$RUNSMV -p 4 -d Pressure_Solver dancing_eddies_tight.fds
 $RUNSMV -d Scalar_Analytical_Solution move_slug.fds
 $RUNSMV -d Scalar_Analytical_Solution move_slug_fl1.fds
 $RUNSMV -d Scalar_Analytical_Solution shunn3_256.fds

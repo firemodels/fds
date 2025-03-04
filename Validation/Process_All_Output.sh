@@ -112,6 +112,8 @@ PROCESS Heskestad_Flame_Height
 PROCESS Insulation_Materials
 PROCESS JH_FRA
 PROCESS Juelich_SETCOM
+PROCESS Lattimer_Corridor_Ceiling
+PROCESS Lattimer_Tilted_Wall
 PROCESS LEMTA_Spray
 PROCESS LEMTA_UGent_Pool_Fires
 PROCESS LLNL_Enclosure
@@ -181,6 +183,7 @@ PROCESS Vettori_Flat_Ceiling
 PROCESS Vettori_Sloped_Ceiling
 PROCESS VTT
 PROCESS VTT_Sprays
+PROCESS Wasson_Impinging_Plumes
 PROCESS Waterloo_Methanol
 PROCESS WTC
 PROCESS Wu_Bakar_Tunnels
