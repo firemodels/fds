@@ -1379,7 +1379,7 @@ SUBROUTINE RAYLEIGH_HEAT_FLUX_MODEL(H,Z_STAR,REGIME,DZ,TMP_W,TMP_G,K_G,RHO_G,CP_
 ! Rayleigh number scaling in nondimensional thermal wall units
 !
 ! The formulation is based on the discussion of natural convection systems in
-! J.P. Holman, Heat Transfer, 7th Ed., McGraw-Hill, 1990, p. 346.
+! J.P. Holman, Heat Transfer, 10th Ed., McGraw-Hill, 2010, Sec. 7-4.
 
 REAL(EB), INTENT(OUT) :: H,Z_STAR
 REAL(EB), INTENT(IN) :: DZ,TMP_W,TMP_G,K_G,RHO_G,CP_G,MU_G,VEL_G
@@ -1487,7 +1487,7 @@ SUBROUTINE RAYLEIGH_MASS_FLUX_MODEL(H_MASS,Z_STAR,DZ,B_NUMBER,D_FILM,RHO_FILM,MU
 ! Rayleigh number scaling in nondimensional mass transfer wall units
 !
 ! The formulation is based on the discussion of natural convection systems in
-! J.P. Holman, Heat Transfer, 7th Ed., McGraw-Hill, 1990, p. 346.
+! J.P. Holman, Heat Transfer, 10th Ed., McGraw-Hill, 2010, Sec. 7-4.
 
 REAL(EB), INTENT(OUT) :: H_MASS,Z_STAR
 REAL(EB), INTENT(IN) :: DZ,B_NUMBER,D_FILM,RHO_FILM,MU_FILM

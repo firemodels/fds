@@ -1884,7 +1884,7 @@ where $k$ is the $z$ index. The value $u_k$ represents the FDS result for $u$ at
 \section{Pohlhausen thermal boundary layer (\texorpdfstring{\ct{Pohlhausen}}{Pohlhausen})}
 \label{sec:Pohlhausen}
 
-This write up follows Appendix B of \cite{Holman:1}.  The nondimensional temperature as a function of the similarity variable $\eta$ is taken to be
+This write up follows Appendix B of \cite{Holman:2}.  The nondimensional temperature as a function of the similarity variable $\eta$ is taken to be
 \begin{equation}
 \label{eq:pohl_theta}
 \theta(\eta) \equiv \frac{T(\eta) - T_w}{T_\infty - T_w}
@@ -1900,7 +1900,7 @@ Given the boundary conditions $\theta=0$ at $y=0$, $\eta=0$ and $\theta=1$ at $y
 \label{eq:pohl_soln}
 \theta(\eta) = \frac{\displaystyle \int_0^\eta \exp\left( - \frac{\mathrm{Pr}}{2} \int_0^\eta f \d \eta \right) \d \eta}{\displaystyle \int_0^\infty \exp\left( - \frac{\mathrm{Pr}}{2} \int_0^\eta f \d \eta \right)\d \eta}
 \end{equation}
-This solution is plotted in Fig.~\ref{fig:pohlhausen} (left) for different Prandtl numbers (Pr) and may be compared to the plot in Fig.~B-2 of \cite{Holman:1} for verification.
+This solution is plotted in Fig.~\ref{fig:pohlhausen} (left) for different Prandtl numbers (Pr) and may be compared to the plot in Fig.~B-2 of \cite{Holman:2} for verification.
 
 In this test series, the 2-D FDS domain is set 10 m in length and 1 m in height.  The simulation is run as a DNS with the viscosity, conductivity, and specific heat set to provide Prandtl numbers of [0.5, 1, 2].  The grid resolution (after a convergence study) is set to $\delta x=\delta z=1.25$ cm. The inlet velocity is set to 1 m/s with an ambient air temperature of $T_\infty=20$ \si{\degreeCelsius}. The wall boundary is set to a fixed temperature of $T_w=21$ \si{\degreeCelsius}. The outflow is set to \ct{OPEN}.  The top boundary is homogeneous Neumann for velocity and Dirichlet for temperature at $T_\infty=20$ \si{\degreeCelsius}.  The simulation is run to steady state.  The resulting temperature profiles $T(z)$ at $x=5$ m are shown in Fig.~\ref{fig:pohlhausen} (right).
 
@@ -2075,9 +2075,9 @@ Three different grid resolutions are tested for the Cartesian cases: $S/\delta x
 
 Consider thermal convection in an enclosure with a hot floor, cold ceiling, and adiabatic walls. Table~\ref{tab:freeconh} lists values for $C$ and $n$, and the length scale, $L$, is taken as the height of the enclosure, $\delta$.
 \begin{table}[h]
-% see table 7.3 in J.P. Holman 7th Ed.
+% see table 7.3 in J.P. Holman 10th Ed.
 \centering
-\caption[Natural convection correlation parameters for a horizontal enclosure]{Natural convection correlation parameters for a horizontal enclosure, $\mathrm{Nu}=C \, \mathrm{Ra}^n$ \cite{Holman:1}.}
+\caption[Natural convection correlation parameters for a horizontal enclosure]{Natural convection correlation parameters for a horizontal enclosure, $\mathrm{Nu}=C \, \mathrm{Ra}^n$ \cite{Holman:2}.}
 \label{tab:freeconh}
 \begin{tabular}{cll}
 Ra                       & $C$    & $n$ \\
@@ -2109,15 +2109,15 @@ For the complex geometry cases, the grid and gravity vector are rotated by 18 de
 \subsection{Vertical Enclosure (\texorpdfstring{\ct{natconv}}{natconv})}
 \label{sec:natconv}
 
-Consider now thermal convection in an enclosure with walls of fixed temperature and insulated floor and ceiling.  The Nusselt number correlation requires an additional factor to account for the ratio of the height, $H$, to the distance between the walls $\delta$ \cite{Holman:1}:
+Consider now thermal convection in an enclosure with walls of fixed temperature and insulated floor and ceiling.  The Nusselt number correlation requires an additional factor to account for the ratio of the height, $H$, to the distance between the walls $\delta$ \cite{Holman:2}:
 \begin{equation}
 \mathrm{Nu} = C \,\mathrm{Ra}^n \,\left(\frac{H}{\delta}\right)^m
 \end{equation}
 The values of $C$, $n$, and $m$ are given below in Tab.~\ref{tab:freeconv}.
 \begin{table}[h]
-% see table 7.3 in J.P. Holman 7th Ed.
+% see table 7.3 in J.P. Holman 10th Ed.
 \centering
-\caption[Free convection correlation parameters for a vertical enclosure]{Free convection correlation parameters for a vertical enclosure, valid for the ranges Pr=[0.5-2] and $L/\delta$=[11-42] \cite{Holman:1}.}
+\caption[Free convection correlation parameters for a vertical enclosure]{Free convection correlation parameters for a vertical enclosure, valid for the ranges Pr=[0.5-2] and $L/\delta$=[11-42] \cite{Holman:2}.}
 \label{tab:freeconv}
 \begin{tabular}{clll}
 Ra                                   & $C$    & $n$ & $m$  \\
@@ -2148,7 +2148,7 @@ For the complex geometry cases, the grid and gravity vector are rotated by 18 de
 \subsection{Sphere (\texorpdfstring{\ct{free_conv_sphere}}{free\_conv\_sphere})}
 \label{sec:free_conv_sphere}
 
-Consider a heated sphere in the range $1 < {\rm Ra} < 10^9$.  Yuge~\cite{Yuge:1960} and Amato and Tien~\cite{Amato:1972} propose the following Nusselt number correlations for natural convection from a sphere \cite{Holman:1}.
+Consider a heated sphere in the range $1 < {\rm Ra} < 10^9$.  Yuge~\cite{Yuge:1960} and Amato and Tien~\cite{Amato:1972} propose the following Nusselt number correlations for natural convection from a sphere \cite{Holman:2}.
 \be
 \mathrm{Nu} = \left\{ \begin{array}{ll}  2 + 0.43 \, \mathrm{Ra}^{1/4} & 1 < \mathrm{Ra} < 10^5 \\
                                          2 + 0.50 \, \mathrm{Ra}^{1/4} & 3 \times 10^5 < \mathrm{Ra} < 8 \times 10^8 \end{array} \right.
@@ -4685,7 +4685,7 @@ A 0.8~m by 0.8~m plate with surface temperature 1000~$^\circ$C and emissivity of
 \label{adiabatic_con_flux}
 \label{adiabatic_net_flux}
 
-There are options in FDS to specify either a net (convective and radiative) or convective boundary condition at a solid surface. In these two test cases, \ct{Heat\_Transfer/adiabatic\_con\_flux.fds} and \ct{Heat\_Transfer/adiabatic\_net\_flux.fds}, a sealed cube of side length 2~m has a 0.4~m by 0.4~m area on the floor with a specified convective and net heat flux of 100~kW/m$^2$. The case with the specified convective heat flux boundary has the radiation turned off. The case with the net heat flux boundary has both convection and radiation enabled so that the net flux is 100~kW/m$^2$. The flux is applied for 30~s and then turned off. The pressure in the compartment is expected to rise according to the equation:
+There are options in FDS to specify either a net (convective and radiative) or convective boundary condition at a solid surface. In these two test cases, \ct{Heat_Transfer/adiabatic_con_flux.fds} and\\\ct{Heat_Transfer/adiabatic_net_flux.fds}, a sealed cube of side length 2~m has a 0.4~m by 0.4~m area on the floor with a specified convective and net heat flux of 100~kW/m$^2$. The case with the specified convective heat flux boundary has the radiation turned off. The case with the net heat flux boundary has both convection and radiation enabled so that the net flux is 100~kW/m$^2$. The flux is applied for 30~s and then turned off. The pressure in the compartment is expected to rise according to the equation:
 \be
    \frac{\d p}{\d t} = \frac{(\gamma-1) \, \dot{Q}}{V}
 \ee
