@@ -29,9 +29,9 @@ plot_style
 for k=1:11 % Experiments
 
    n_res = 1;
-   if k==8 
-      n_res = 2;
-   end
+%  if k==8 
+%     n_res = 2;
+%  end
 
    for jj=1:n_res
 
