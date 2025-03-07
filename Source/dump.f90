@@ -3132,6 +3132,7 @@ WRITE(LU_OUTPUT,'(//A)')  ' Material Information'
 MATL_LOOP: DO N=1,N_MATL
 
    ML => MATERIAL(N)
+   IF (TRIM(MATL_NAME(N))=='MATERIAL PLACEHOLDER') CYCLE MATL_LOOP ! Don't write the placeholder material for HT3D
 
    WRITE(LU_OUTPUT,'(/I4,1X,A)')    N,TRIM(MATL_NAME(N))
    IF (ML%FYI/='null') WRITE(LU_OUTPUT,'(5X,A)') TRIM(ML%FYI)
