@@ -4660,7 +4660,7 @@ that resulted from combustion.  The following inputs would allow you to do that:
 \end{lstlisting}
 The gas species called \ct{WATER VAPOR SPK} has the same properties as \ct{WATER VAPOR}. The first device records only water that results from droplet evaporation, and the second device records water that originates from both sprinklers and combustion.
 
-By default, duplicate species are considered to be a lumped species and not a primitive species.  That is, by default, a duplicate species cannot be used in a lumped species definition.  Setting \ct{PRIMITIVE=T} will have FDS treat the duplicate species as a primitive species and allow it to be used in a lumped species definition.  Note that when this is done, one can no longer aggregate \ct{SPEC_ID} based outputs over the original and the duplicate species as the aggregation is done on the basis of the primitive species names.  This is demonstrated in the example below.  The species \ct{O2} and \ct{O3} are duplicate species of \ct{OXYGEN}.  \ct{O3} is defined as a primitive species and \ct{O2} is considered only a lumped species.  The initial \ct{DEVC} outputs in order would be 0.3 (0.1 for \ct{OXYGEN} plus 0.2 for \ct{O2}), 0.2 (the \ct{O2} initial value), and 0.3 (the \ct{O3} initial value).  Note the \ct{OXYGEN} output is not 0.6 since the \ct{O3} is defined as a new primitive species.
+By default, duplicate species are considered to be a lumped species and not a primitive species.  That is, by default, a duplicate species cannot be used in a lumped species definition.  Setting \ct{PRIMITIVE=T} will have FDS treat the duplicate species as a primitive species and allow it to be used in a lumped species definition.  Note that when this is done, one can no longer aggregate \ct{SPEC_ID} based outputs over the original and the duplicate species as the aggregation is done on the basis of the primitive species names.  This is demonstrated in the example below.  The species \ct{O2 LUMPED} and \ct{O2 DUPLICATE PRIMITIVE} are duplicate species of \ct{OXYGEN}.  \ct{O2 DUPLICATE PRIMITIVE} is defined as a primitive species and \ct{O2 LUMPED} is considered only a lumped species.  The initial \ct{DEVC} outputs in order would be 0.3 (0.1 for \ct{OXYGEN} plus 0.2 for \ct{O2 LUMPED}), 0.2 (the \ct{O2 LUMPED} initial value), and 0.3 (the \ct{O2 DUPLICATE PRIMITIVE} initial value).  Note the \ct{OXYGEN} output is not 0.6 since the \ct{O2 DUPLICATE PRIMITIVE} is defined as a new primitive species.
 \begin{lstlisting}
 &SPEC ID='NITROGEN',BACKGROUND=T/
 &SPEC ID='OXYGEN',MASS_FRACTION_0=0.1/
@@ -6088,7 +6088,7 @@ distributed about the median value.
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/droplet_distributions_3} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/droplet_distributions_4}
 \end{tabular}
-\caption[Droplet size distributions]{Droplet size distributions. The first three plots are based on a specified CVF (black curves) from which the CNF (red curves) is derived. The fourth plot (lower right) is an example of a specified CNF from which the CVF is derived. The solid lines show the prescribed sampling distribution, while the dashed lines show the actual sampled droplet size distribution, measured with the \ct{HISTOGRAM} functionality.}
+\caption[Droplet size distributions]{Droplet size distributions. The first three plots are based on a specified CVF (red curves) from which the CNF (black curves) is derived. The fourth plot (lower right) is an example of a specified CNF from which the CVF is derived. The solid lines show the prescribed sampling distribution, while the dashed lines show the actual sampled droplet size distribution, measured with the \ct{HISTOGRAM} functionality.}
 \label{droplet_distributions_fig}
 \end{figure}
 
@@ -6244,8 +6244,8 @@ Figure~\ref{hot_rods_image} displays the distribution of radii and the mass of r
 By default, solid particles do not ``stick'' or adhere to solid surfaces like liquid droplets do. However, you can make solid particles act like liquid droplets by setting \ct{ADHERE_TO_SOLID=1} on the \ct{PART} line, in which case the particles will stick and be reassigned a new speed and direction. If the surface is horizontal, the direction is randomly chosen. If vertical, the direction is downwards. The parameters \ct{HORIZONTAL_VELOCITY} and \ct{VERTICAL_VELOCITY} on the \ct{PART} line allow you to control the speed at which particles move horizontally or vertically (downward). The defaults are 0.2~m/s and 0.5~m/s, respectively. If you want the particle to truly stick and not move on a surface, set these values to 0.
 
 
-\subsection{Splitting Particles}
-\label{info:particle_split}
+\subsection{Particle Orientation}
+\label{info:particle_orientation}
 
 If an \ct{ORIENTATION} vector is assigned on a \ct{PART} line, the radiative flux to the particle is calculated as if there is a flat plate normal to the direction of the vector, like a conventional heat flux gauge. That is, the heat flux is not an integrated average over the entire particle but rather the directional heat flux with the given orientation. The reason for this exception to the general rule is that often single particles are used as ``targets'' to record a heat flux at a given point in the domain with a given orientation. These particles can be thought of as tiny heat flux gauges that do not disturb the flow.
 
@@ -6371,7 +6371,7 @@ To use the THIEF model in FDS, add lines similar to the following to the input f
 \end{lstlisting}
 The THIEF model assumes that the cable plastic material has a thermal conductivity of 0.2~\si{W/(m.K)} and a specific heat of 1.5~\si{kJ/(kg.K)}. If you change these values, you are no longer using the THIEF model. The density is the mass per unit length of the cable divided by its cross sectional area. The \ct{THICKNESS} is the radius of the cylindrical cable in units of m. The \ct{LENGTH}, in m, is needed by FDS because it assumes that the cable is a cylindrical segment of a certain length. It has no impact on the simulation, and its value it typically the size of a grid cell. The \ct{ORIENTATION} tells FDS the direction of the prevailing radiative source. \ct{STATIC=T} prevents the cable from moving. The \ct{INIT} line is used to position the cable within the computational domain. The \ct{DEVC} line records the cables inner temperature, in this case 1.5~mm below the surface. This is typically the jacket thickness.
 
-\subsubsection{Target Particles}
+\subsection{Target Particles}
 \label{info:target_particles}
 
 To declare that a solid particle is only for recording the heat flux to a location away from a solid surface, specify \ct{TARGET_ONLY=T} on the \ct{PART} line. When this flag is set and material properties are given, FDS will compute the particle temperature using the local gas temperature and radiative conditions; however, the particle will not exchange energy or momentum with the gas. When this flag is set, a \ct{CARTESIAN} particle's \ct{SURF} will no longer be treated as a half-thickness plate. This allows the use of backside boundary conditions on \ct{SURF} such as \ct{TMP_GAS_BACK} and \ct{EMISSIVITY_BACK}. If it is still desired to have the \ct{THICKNESS} represent half the thickness of a plate heated from both sides, then set \ct{BACKING='INSULTATED'} on the \ct{SURF} line. Target particles are treated as \ct{STATIC} but can be positioned using \ct{PATH_RAMP} and/or \ct{ORIENTATION_RAMP} on \ct{INIT}.
@@ -8354,7 +8354,7 @@ If you want a \ct{DEVC} to operate based on the logical state of a \ct{CTRL}, se
 
 The output value of a numerical control function is defined by a \ct{DEVC} line with\\\ct{QUANTITY='CONTROL VALUE'} and \ct{CTRL_ID} set equal to the \ct{ID} of the control function.  You can then use \ct{SETPOINT} to have the \ct{DEVC} operate a particular output value of the control function. This output cannot be used for a purely logical control function whose only output is a logical state such as \ct{ANY} or \ct{DEADBAND}. For \ct{CUSTOM} the output will be the value of the \ct{RAMP} function, and for \ct{TIME_DELAY} the value will be the evaluated delay.
 
-The outputs \ct{QUANTITY='CONTROL'} and \ct{QUANTITY='CONTROL_VALUE'} have the default of\\\ct{TEMPORAL_STATISTIC='INSTANT VALUE'}.
+The outputs \ct{QUANTITY='CONTROL'} and \ct{QUANTITY='CONTROL VALUE'} have the default of\\\ct{TEMPORAL_STATISTIC='INSTANT VALUE'}.
 
 The time dependent logical state of each control function is written to the \ct{CHID_ctrl.csv} log file, see Sec.~\ref{out:CTRL}. Each state change of a control function or device with a \ct{SETPOINT} is recorded to the \ct{CHID_devc_ctrl_log.csv} log file, see Sec.~\ref{out:DEVC_CTRL_log}.
 
