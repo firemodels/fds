@@ -4746,7 +4746,7 @@ Using the species  \ct{SPRINKLER WATER VAPOR} for the sprinklers would allow you
 \label{info:REAC}
 \label{info:COMB}
 
-Combustion can be modeled in two ways. By default, the reaction of fuel and oxygen is infinitely fast and controlled only by mixing, hence the label {\em mixing-controlled}. The alternative is that the reaction is {\em finite-rate}. The latter approach usually requires very fine grid resolution that is not practical for large-scale fire applications. This chapter describes both methods, with an emphasis on the more commonly used mixing-controlled model.
+Combustion can be modeled in two ways. By default, the reaction of fuel and oxygen is infinitely fast and controlled only by mixing with zero ignition delay---you will often see this model described as ``mixed is burnt''. The alternative is that the reaction is {\em finite-rate}. The latter approach usually requires very fine grid resolution that is not practical for large-scale fire applications. This chapter describes both methods, with an emphasis on the more commonly used mixing-controlled model.
 
 There are two groups of parameters that govern combustion. The first, called the \ct{COMB} namelist group, contains parameters that pertain to any and all reactions. Specific parameters about a particular reaction are specified using the \ct{REAC} namelist group. There can only be one \ct{COMB} line, but multiple \ct{REAC} lines if there are multiple reactions. If you are modeling a fire, you {\em must} specify the fuel and basic stoichiometry using a \ct{REAC} line. You need not specify a \ct{COMB} line unless you want to modify mainly numerical parameters.
 
