@@ -193,6 +193,7 @@ ifeq ($(BUILD_WITH_GPU), ON)
       LFLAGS_GPU = -L/usr/lib64 -lstdc++ -L${ROCM_PATH}/lib -lamdhip64 -lrocsparse -lrocblas -lrocsolver -lrocrand
    else ifeq ($(GPU_ARCH), cuda)
       LFLAGS_GPU = -ldl -L/usr/lib64 -lstdc++ -L${CUDA_DIR}/lib64 -lcudart -lcusparse -lcublas -lcurand -L${CUDA_MATH_DIR}/lib64 -lcusolver
+      LFLAGS_GPU = "$(GPU_HOME)\lib\x64\cudart.lib" "$(GPU_HOME)\lib\x64\cusparse.lib" "$(GPU_HOME)\lib\x64\cublas.lib" "$(GPU_HOME)\lib\x64\curand.lib" "$(GPU_HOME)\lib\x64\cusolver.lib"
    endif
 endif
 
@@ -265,7 +266,7 @@ impi_intel_win : FFLAGS = -D_WIN32 /Qipo /O2 /I$(MPIINCLUDE) /wrap-margin- $(GIT
 impi_intel_win : FCOMPL = $(COMP_FC)
 impi_intel_win : obj = fds_impi_intel_win
 impi_intel_win : setup_win $(objwin_mpi)
-	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL) $(LFLAGS_HYPRE_WIN) $(LFLAGS_SUNDIALS_WIN) $(LFLAGS_HDF5_WIN) $(LFLAGS_LINK_WIN)
+	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL) $(LFLAGS_HYPRE_WIN) $(LFLAGS_SUNDIALS_WIN) $(LFLAGS_HDF5_WIN) $(LFLAGS_LINK_WIN) $(LFLAGS_GPU)
 
 impi_intel_win_vt : MPILIB = "$(IMPI_RELEASE_ROOT)\impi.lib"
 impi_intel_win_vt : MPIINCLUDE = "$(I_MPI_ROOT)\include\mpi"
