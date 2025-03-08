@@ -547,7 +547,6 @@ INTEGER, PARAMETER :: ULMAT_FLAG=3                               !< Integer pres
 INTEGER, PARAMETER :: MKL_PARDISO_FLAG=1                         !< Integer matrix solver library flag for MKL PARDISO
 INTEGER, PARAMETER :: MKL_CPARDISO_FLAG=1                        !< Integer matrix solver library flag for MKL CLUSTER PARDISO
 INTEGER, PARAMETER :: HYPRE_FLAG=2                               !< Integer matrix solver library flag for HYPRE
-INTEGER, PARAMETER :: PETSC_FLAG=3                               !< Integer matrix solver library flag for PETSc
 LOGICAL :: HYPRE_DEVICE_RUN=.TRUE.                               !< Offload hypre solver to GPU if available, otherwise run on CPU
 INTEGER :: ULMAT_SOLVER_LIBRARY=MKL_PARDISO_FLAG                 !< Integer ULMAT library flag (defaults to MKL PARDISO)
 INTEGER :: UGLMAT_SOLVER_LIBRARY=MKL_CPARDISO_FLAG               !< Integer UGLMAT library flag (defaults to MKL CPARDISO)

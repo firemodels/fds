@@ -2482,7 +2482,7 @@ MESH_LOOP: DO NM=1,NMESHES
    WRITE(MYSTR,'(3F13.5)') 0.,0.,0.; CALL ADDSTR
 
    ! Mesh grid dimensions and neighbor information.
-   ! Determine if the six mesh faces abut a single mesh (MESH_NEIGHBOR>0), nothing (MESH_NEIGHBOR=0), 
+   ! Determine if the six mesh faces abut a single mesh (MESH_NEIGHBOR>0), nothing (MESH_NEIGHBOR=0),
    ! or a combination of nothing and/or multiple meshes (MESH_NEIGHBOR=-1). Write six values to GRID line.
 
    DO I=1,6
@@ -2585,7 +2585,7 @@ MESH_LOOP: DO NM=1,NMESHES
       VT=>M%VENTS(N)
       IF (VT%RADIUS>0._EB) N_CVENT=N_CVENT+1
    ENDDO
-   
+
    ! Write out information about vents to Smokeview file
 
    CALL EOL
@@ -2825,12 +2825,12 @@ END SUBROUTINE DUMMY_VENTS
 ! Create EXTERIOR_PATCHes with which Smokeview colors, textures, or contours exterior mesh boundaries.
 SUBROUTINE ADD_EXTERIOR_VENTS
 INTEGER :: NM,FACE_INDEX
-   
+
    MESH_LOOP: DO NM=1,NMESHES
-   
+
       IF (PROCESS(NM)/=MY_RANK) CYCLE
       M => MESHES(NM)
-      
+
       ALLOCATE(M%EXTERIOR_PATCH(10*(6+N_VENT_TOTAL))) ; M%N_EXTERIOR_PATCH = 0
       ALLOCATE(VENT_INDICES(MAX(M%IBAR,M%JBAR),MAX(M%JBAR,M%KBAR),6)) ; VENT_INDICES = 0
 
@@ -11678,7 +11678,7 @@ FILE_LOOP: DO NF=1,N_BNDF
       ! Interpolate the boundary quantity PP at cell corners, PPN
 
       IF (.NOT.BF%CELL_CENTERED) THEN
-         
+
          ! Dont include undetermined values in interpolation for FIRE ARRIVAL TIME
          IF (OUTPUT_QUANTITY(BF%INDEX)%NAME=='FIRE ARRIVAL TIME') THEN
             WHERE(PP>9.E5_FB) IBK=0

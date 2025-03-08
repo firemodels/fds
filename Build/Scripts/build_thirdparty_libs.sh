@@ -78,11 +78,11 @@ while [[ $# -gt 0 ]]; do
 	    export GPU_ARCH="$gpu_arch"
             shift
             ;;
-	--with-gpu)  # Error if --with-gpu is provided without a value
+	    --with-gpu)  # Error if --with-gpu is provided without a value
             echo "Error: --with-gpu requires a value (e.g., --with-gpu=hip, --with-gpu=cuda, or --with-gpu=sycl)" >&2
             exit 1
             ;;
-	--no-libs)
+        --no-libs)
             no_libs=true
             clean_fds=true
             shift

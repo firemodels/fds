@@ -228,50 +228,6 @@ MODULE MKL_CLUSTER_SPARSE_SOLVER
 END MODULE MKL_CLUSTER_SPARSE_SOLVER
 #endif /* WITH_MKL */
 
-#ifdef WITH_PETSC
-MODULE PETSC_ZONE_MESH
-#include <petsc/finclude/petsc.h>
-! #include <petsc/finclude/petscsys.h>
-   USE PETSC
-   IMPLICIT NONE
-   PetscErrorCode :: PETSC_IERR
-
-   TYPE PETSC_ZM_TYPE
-      INTEGER :: NNZ
-      Mat :: A_H    ! System Matrix
-      Vec :: F_H    ! RHS
-      Vec :: X_H    ! Solution vector
-      KSP :: LS     ! Linear solver
-      PC  :: PR     ! Preconditioner
-   END TYPE PETSC_ZM_TYPE
-
-   ! PETSc info for ZONE_MESH defined in PETSC_ZM, ZONE_MESH_TYPE, type.f90.
-   PRIVATE
-   PUBLIC :: PETSC_IERR,PETSC_ZM_TYPE
-
-END MODULE PETSC_ZONE_MESH
-
-MODULE PETSC_ZONE_SOLVE
-#include <petsc/finclude/petsc.h>
-! #include <petsc/finclude/petscsys.h>
-   USE PETSC
-
-   IMPLICIT NONE
-   PetscErrorCode :: PETSC_IERR
-
-   TYPE PETSC_ZS_TYPE
-      Mat :: A_H    ! System Matrix
-      Vec :: F_H    ! RHS
-      Vec :: X_H    ! Solution vector
-      KSP :: LS     ! Linear solver
-      PC  :: PR     ! Preconditioner
-   END TYPE PETSC_ZS_TYPE
-
-   PRIVATE
-   PUBLIC :: PETSC_ZS_TYPE,PETSC_IERR
-END MODULE PETSC_ZONE_SOLVE
-#endif /* WITH_PETSC */
-
 #ifdef WITH_HYPRE
 MODULE HYPRE_INTERFACE
    IMPLICIT NONE(TYPE,EXTERNAL)
