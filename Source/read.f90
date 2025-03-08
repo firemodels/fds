@@ -12056,9 +12056,9 @@ MESH_LOOP_1: DO NM=1,NMESHES
                ! Decide if the VENT is inside or at the boundary of the current MESH.
                ! The factor of 10 is to ensure that a vent that is fairly close to the boundary is counted.
 
-               IF ((XB_MESH(1)-XF)>10._EB*SPACING(XF) .OR. (XS-XB_MESH(2))>10._EB*SPACING(XS) .OR. &
-                   (XB_MESH(3)-YF)>10._EB*SPACING(YF) .OR. (YS-XB_MESH(4))>10._EB*SPACING(YS) .OR. &
-                   (XB_MESH(5)-ZF)>10._EB*SPACING(ZF) .OR. (ZS-XB_MESH(6))>10._EB*SPACING(ZS)) REJECT_VENT = .TRUE.
+               IF (XB_MESH(1)-XF>=0.5_EB*DX(IBP1) .OR. XS-XB_MESH(2)>=0.5_EB*DX(0) .OR. &
+                   XB_MESH(3)-YF>=0.5_EB*DY(JBP1) .OR. YS-XB_MESH(4)>=0.5_EB*DY(0) .OR. &
+                   XB_MESH(5)-ZF>=0.5_EB*DZ(KBP1) .OR. ZS-XB_MESH(6)>=0.5_EB*DZ(0)) REJECT_VENT = .TRUE.
 
                IF (ABS(XB_MESH(1)-XB_MESH(2))<=SPACING(XB_MESH(2))) THEN
                   IF (J1==J2  .OR. K1==K2) REJECT_VENT=.TRUE.

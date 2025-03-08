@@ -1056,7 +1056,7 @@ Whether the calculation is to be run using MPI or not, the rules of prescribing 
 
 The following rules of thumb should also be followed when setting up a multiple mesh calculation:
 \begin{itemize}
-\item Avoid putting mesh boundaries where critical action is expected, especially fire. Sometimes fire spread from mesh to mesh cannot be avoided, but if at all possible try to keep mesh interfaces relatively free of complicated phenomena since the exchange of information across mesh boundaries is not yet as accurate as cell to cell exchanges within one mesh.
+\item When running multi-mesh calculations you need to closely monitor \ct{VELOCITY_ERROR} at mesh interfaces, which is reported in the \ct{CHID.out} file.  Check that you are not consistently hitting the\\\ct{MAX_PRESSURE_ITERATIONS}, which defaults to 10.  If you are, then this indicates a potential problem and you may consider increasing this value to 20 or even 100 in some cases.  Velocity errors are proportional to mass loss errors.  If your errors are too large for your application, you may need to tighten the \ct{VELOCITY_TOLERANCE} or else consider using a different pressure solver, see Sec.~\ref{pressure_solver}.
 \item In general, there is little advantage to overlapping meshes because information is only exchanged at exterior boundaries. This means that a mesh that is completely embedded within another receives information at its exterior boundary, but the larger mesh receives no information from the mesh embedded within. Essentially, the larger, usually coarser, mesh is doing its own simulation of the scenario and is not affected by the smaller, usually finer, mesh embedded within it. Details within the fine mesh, especially related to fire growth and spread, may not be picked up by the coarse mesh. In such cases, it is preferable to isolate the detailed fire behavior within one mesh, and position coarser meshes at the exterior boundary of the fine mesh. Then the fine and coarse meshes mutually exchange information.
 \item Be careful when using the shortcut convention of declaring an entire face of the domain to be an \ct{OPEN} vent. Every mesh takes on this attribute. See Sec.~\ref{info:VENT} for more details.
 \item If a planar obstruction is close to where two meshes abut, make sure that each mesh ``sees'' the obstruction. If the obstruction is even a millimeter outside of one of the meshes, that mesh does not account for it, in which case information is not transferred properly between meshes.
@@ -1072,7 +1072,7 @@ where $n$ is the ratio of fine to coarse cells. The value of 0.001 can be change
 
 \subsubsection{Accuracy of the Multiple Mesh Calculation}
 
-Experiment with different mesh configurations using relatively coarse mesh cells to ensure that information is being transferred properly from mesh to mesh. There are two issues of concern. First, does it appear that the flow is being badly affected by the mesh boundary? If so, try to move the mesh boundaries away from areas of activity. Second, is there too much of a jump in cell size from one mesh to another? If so, consider whether the loss of information moving from a fine to a coarse mesh is tolerable.
+Experiment with different mesh configurations using relatively coarse mesh cells to ensure that information is being transferred properly from mesh to mesh. There are two issues of concern. First, does it appear that the flow is being badly affected by the mesh boundary? If so, check your velocity errors and consider tightening your velocity tolerance or chaning pressure solvers, see Sec.~\ref{pressure_solver}. Second, is there too much of a jump in cell size from one mesh to another? If so, consider whether the loss of information moving from a fine to a coarse mesh is tolerable.  Mesh refinement ratios of more than 4:1 to should be avoided if possible.
 
 
 
@@ -4660,7 +4660,7 @@ that resulted from combustion.  The following inputs would allow you to do that:
 \end{lstlisting}
 The gas species called \ct{WATER VAPOR SPK} has the same properties as \ct{WATER VAPOR}. The first device records only water that results from droplet evaporation, and the second device records water that originates from both sprinklers and combustion.
 
-By default, duplicate species are considered to be a lumped species and not a primitive species.  That is, by default, a duplicate species cannot be used in a lumped species definition.  Setting \ct{PRIMITIVE=T} will have FDS treat the duplicate species as a primitive species and allow it to be used in a lumped species definition.  Note that when this is done, one can no longer aggregate \ct{SPEC_ID} based outputs over the original and the duplicate species as the aggregation is done on the basis of the primitive species names.  This is demonstrated in the example below.  The species \ct{O2} and \ct{O3} are duplicate species of \ct{OXYGEN}.  \ct{O3} is defined as a primitive species and \ct{O2} is considered only a lumped species.  The initial \ct{DEVC} outputs in order would be 0.3 (0.1 for \ct{OXYGEN} plus 0.2 for \ct{O2}), 0.2 (the \ct{O2} initial value), and 0.3 (the \ct{O3} initial value).  Note the \ct{OXYGEN} output is not 0.6 since the \ct{O3} is defined as a new primitive species.
+By default, duplicate species are considered to be a lumped species and not a primitive species.  That is, by default, a duplicate species cannot be used in a lumped species definition.  Setting \ct{PRIMITIVE=T} will have FDS treat the duplicate species as a primitive species and allow it to be used in a lumped species definition.  Note that when this is done, one can no longer aggregate \ct{SPEC_ID} based outputs over the original and the duplicate species as the aggregation is done on the basis of the primitive species names.  This is demonstrated in the example below.  The species \ct{O2 LUMPED} and \ct{O2 DUPLICATE PRIMITIVE} are duplicate species of \ct{OXYGEN}.  \ct{O2 DUPLICATE PRIMITIVE} is defined as a primitive species and \ct{O2 LUMPED} is considered only a lumped species.  The initial \ct{DEVC} outputs in order would be 0.3 (0.1 for \ct{OXYGEN} plus 0.2 for \ct{O2 LUMPED}), 0.2 (the \ct{O2 LUMPED} initial value), and 0.3 (the \ct{O2 DUPLICATE PRIMITIVE} initial value).  Note the \ct{OXYGEN} output is not 0.6 since the \ct{O2 DUPLICATE PRIMITIVE} is defined as a new primitive species.
 \begin{lstlisting}
 &SPEC ID='NITROGEN',BACKGROUND=T/
 &SPEC ID='OXYGEN',MASS_FRACTION_0=0.1/
@@ -4746,7 +4746,7 @@ Using the species  \ct{SPRINKLER WATER VAPOR} for the sprinklers would allow you
 \label{info:REAC}
 \label{info:COMB}
 
-Combustion can be modeled in two ways. By default, the reaction of fuel and oxygen is infinitely fast and controlled only by mixing, hence the label {\em mixing-controlled}. The alternative is that the reaction is {\em finite-rate}. The latter approach usually requires very fine grid resolution that is not practical for large-scale fire applications. This chapter describes both methods, with an emphasis on the more commonly used mixing-controlled model.
+Combustion can be modeled in two ways. By default, the reaction of fuel and oxygen is infinitely fast and controlled only by mixing with zero ignition delay---you will often see this model described as ``mixed is burnt''. The alternative is that the reaction is {\em finite-rate}. The latter approach usually requires very fine grid resolution that is not practical for large-scale fire applications. This chapter describes both methods, with an emphasis on the more commonly used mixing-controlled model.
 
 There are two groups of parameters that govern combustion. The first, called the \ct{COMB} namelist group, contains parameters that pertain to any and all reactions. Specific parameters about a particular reaction are specified using the \ct{REAC} namelist group. There can only be one \ct{COMB} line, but multiple \ct{REAC} lines if there are multiple reactions. If you are modeling a fire, you {\em must} specify the fuel and basic stoichiometry using a \ct{REAC} line. You need not specify a \ct{COMB} line unless you want to modify mainly numerical parameters.
 
@@ -6088,7 +6088,7 @@ distributed about the median value.
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/droplet_distributions_3} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/droplet_distributions_4}
 \end{tabular}
-\caption[Droplet size distributions]{Droplet size distributions. The first three plots are based on a specified CVF (black curves) from which the CNF (red curves) is derived. The fourth plot (lower right) is an example of a specified CNF from which the CVF is derived. The solid lines show the prescribed sampling distribution, while the dashed lines show the actual sampled droplet size distribution, measured with the \ct{HISTOGRAM} functionality.}
+\caption[Droplet size distributions]{Droplet size distributions. The first three plots are based on a specified CVF (red curves) from which the CNF (black curves) is derived. The fourth plot (lower right) is an example of a specified CNF from which the CVF is derived. The solid lines show the prescribed sampling distribution, while the dashed lines show the actual sampled droplet size distribution, measured with the \ct{HISTOGRAM} functionality.}
 \label{droplet_distributions_fig}
 \end{figure}
 
@@ -6244,8 +6244,8 @@ Figure~\ref{hot_rods_image} displays the distribution of radii and the mass of r
 By default, solid particles do not ``stick'' or adhere to solid surfaces like liquid droplets do. However, you can make solid particles act like liquid droplets by setting \ct{ADHERE_TO_SOLID=1} on the \ct{PART} line, in which case the particles will stick and be reassigned a new speed and direction. If the surface is horizontal, the direction is randomly chosen. If vertical, the direction is downwards. The parameters \ct{HORIZONTAL_VELOCITY} and \ct{VERTICAL_VELOCITY} on the \ct{PART} line allow you to control the speed at which particles move horizontally or vertically (downward). The defaults are 0.2~m/s and 0.5~m/s, respectively. If you want the particle to truly stick and not move on a surface, set these values to 0.
 
 
-\subsection{Splitting Particles}
-\label{info:particle_split}
+\subsection{Particle Orientation}
+\label{info:particle_orientation}
 
 If an \ct{ORIENTATION} vector is assigned on a \ct{PART} line, the radiative flux to the particle is calculated as if there is a flat plate normal to the direction of the vector, like a conventional heat flux gauge. That is, the heat flux is not an integrated average over the entire particle but rather the directional heat flux with the given orientation. The reason for this exception to the general rule is that often single particles are used as ``targets'' to record a heat flux at a given point in the domain with a given orientation. These particles can be thought of as tiny heat flux gauges that do not disturb the flow.
 
@@ -6371,7 +6371,7 @@ To use the THIEF model in FDS, add lines similar to the following to the input f
 \end{lstlisting}
 The THIEF model assumes that the cable plastic material has a thermal conductivity of 0.2~\si{W/(m.K)} and a specific heat of 1.5~\si{kJ/(kg.K)}. If you change these values, you are no longer using the THIEF model. The density is the mass per unit length of the cable divided by its cross sectional area. The \ct{THICKNESS} is the radius of the cylindrical cable in units of m. The \ct{LENGTH}, in m, is needed by FDS because it assumes that the cable is a cylindrical segment of a certain length. It has no impact on the simulation, and its value it typically the size of a grid cell. The \ct{ORIENTATION} tells FDS the direction of the prevailing radiative source. \ct{STATIC=T} prevents the cable from moving. The \ct{INIT} line is used to position the cable within the computational domain. The \ct{DEVC} line records the cables inner temperature, in this case 1.5~mm below the surface. This is typically the jacket thickness.
 
-\subsubsection{Target Particles}
+\subsection{Target Particles}
 \label{info:target_particles}
 
 To declare that a solid particle is only for recording the heat flux to a location away from a solid surface, specify \ct{TARGET_ONLY=T} on the \ct{PART} line. When this flag is set and material properties are given, FDS will compute the particle temperature using the local gas temperature and radiative conditions; however, the particle will not exchange energy or momentum with the gas. When this flag is set, a \ct{CARTESIAN} particle's \ct{SURF} will no longer be treated as a half-thickness plate. This allows the use of backside boundary conditions on \ct{SURF} such as \ct{TMP_GAS_BACK} and \ct{EMISSIVITY_BACK}. If it is still desired to have the \ct{THICKNESS} represent half the thickness of a plate heated from both sides, then set \ct{BACKING='INSULTATED'} on the \ct{SURF} line. Target particles are treated as \ct{STATIC} but can be positioned using \ct{PATH_RAMP} and/or \ct{ORIENTATION_RAMP} on \ct{INIT}.
@@ -8354,7 +8354,7 @@ If you want a \ct{DEVC} to operate based on the logical state of a \ct{CTRL}, se
 
 The output value of a numerical control function is defined by a \ct{DEVC} line with\\\ct{QUANTITY='CONTROL VALUE'} and \ct{CTRL_ID} set equal to the \ct{ID} of the control function.  You can then use \ct{SETPOINT} to have the \ct{DEVC} operate a particular output value of the control function. This output cannot be used for a purely logical control function whose only output is a logical state such as \ct{ANY} or \ct{DEADBAND}. For \ct{CUSTOM} the output will be the value of the \ct{RAMP} function, and for \ct{TIME_DELAY} the value will be the evaluated delay.
 
-The outputs \ct{QUANTITY='CONTROL'} and \ct{QUANTITY='CONTROL_VALUE'} have the default of\\\ct{TEMPORAL_STATISTIC='INSTANT VALUE'}.
+The outputs \ct{QUANTITY='CONTROL'} and \ct{QUANTITY='CONTROL VALUE'} have the default of\\\ct{TEMPORAL_STATISTIC='INSTANT VALUE'}.
 
 The time dependent logical state of each control function is written to the \ct{CHID_ctrl.csv} log file, see Sec.~\ref{out:CTRL}. Each state change of a control function or device with a \ct{SETPOINT} is recorded to the \ct{CHID_devc_ctrl_log.csv} log file, see Sec.~\ref{out:DEVC_CTRL_log}.
 
@@ -9577,7 +9577,7 @@ FDS has various types of output files that store computed data. Some of the file
 \item A list of HVAC output quantities is given in Sec.~\ref{info:hvacoutputquantities}.
 \end{itemize}
 The namelist group \ct{DUMP} contains parameters (Table \ref{tbl:DUMP}) that control the rate at which output files are written, and various other global parameters associated with output files. There can only be one \ct{DUMP} line in the input file.
-By default, FDS outputs all result files to the current working directory. A separate output directory for binary files can be specified by the user by setting \ct{RESULTS_DIR} on the \ct{DUMP} line. A single text file \ct{CHID.smv} is always written with high level information about the case~\cite{Smokeview_Users_Guide}. By default, this file is written in parallel using MPI I/O routines. This feature can be disable setting \ct{SMV_PARALLEL_WRITE=F} in the \ct{DUMP} line, in which case, MPI rank 0 will write the file.
+By default, FDS outputs all result files to the current working directory. A separate output directory for binary files can be specified by the user by setting \ct{RESULTS_DIR} on the \ct{DUMP} line. A single text file \ct{CHID.smv} is always written with high level information about the case~\cite{Smokeview_Users_Guide}. By default, the information is gathered in MPI rank 0 which writes the file. For computations involving parallel file systems and many MPI processes, the file can also be written in parallel using MPI I/O routines setting \ct{SMV_PARALLEL_WRITE=T} in the \ct{DUMP} line.
 
 
 \section{Controlling the Frequency of Output}
