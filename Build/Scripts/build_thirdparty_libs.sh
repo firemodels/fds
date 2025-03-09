@@ -82,7 +82,7 @@ while [[ $# -gt 0 ]]; do
             echo "Error: --with-gpu requires a value (e.g., --with-gpu=hip, --with-gpu=cuda, or --with-gpu=sycl)" >&2
             exit 1
             ;;
-	    --no-libs)
+        --no-libs)
             no_libs=true
             clean_fds=true
             shift

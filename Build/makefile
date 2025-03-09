@@ -117,10 +117,11 @@ FFLAGS_HYPRE =
 LFLAGS_HYPRE =
 ifdef HYPRE_HOME # This assumes the HYPRE library is available.
    FFLAGS_HYPRE = -DWITH_HYPRE ${HYPRE_INFO} -I${HYPRE_HOME}/include
+   FFLAGS_HYPRE_WIN = -DWITH_HYPRE ${HYPRE_INFO} /I"${HYPRE_HOME}\include"
    ifeq ($(BUILD_WITH_GPU), ON)
       FFLAGS_HYPRE += -DWITH_HYPRE_DEVICE
+      FFLAGS_HYPRE_WIN += -DWITH_HYPRE_DEVICE
    endif
-   FFLAGS_HYPRE_WIN = -DWITH_HYPRE ${HYPRE_INFO} /I"${HYPRE_HOME}\include"
    LFLAGS_HYPRE = -L${HYPRE_HOME}/lib -lHYPRE -lm
    LFLAGS_HYPRE_WIN = ${HYPRE_HOME}\lib\HYPRE.lib
 endif
@@ -153,6 +154,7 @@ ifeq ($(BUILD_WITH_GPU), ON)
       LFLAGS_GPU = -L/usr/lib64 -lstdc++ -L${ROCM_DIR}/lib -lamdhip64 -lrocsparse -lrocblas -lrocsolver -lrocrand
    else ifeq ($(GPU_ARCH), cuda)
       LFLAGS_GPU = -ldl -L/usr/lib64 -lstdc++ -L${CUDA_DIR}/lib64 -lcudart -lcusparse -lcublas -lcurand -L${CUDA_MATH_DIR}/lib64 -lcusolver
+      LFLAGS_GPU_WIN = "$(GPU_HOME)\lib\x64\cudart.lib" "$(GPU_HOME)\lib\x64\cusparse.lib" "$(GPU_HOME)\lib\x64\cublas.lib" "$(GPU_HOME)\lib\x64\curand.lib" "$(GPU_HOME)\lib\x64\cusolver.lib"
    else ifeq ($(GPU_ARCH), sycl)
       LFLAGS_GPU = -L/usr/lib64 -lstdc++ -L${MKLROOT}/lib -lmkl_sycl -lsycl
    endif
@@ -227,7 +229,7 @@ impi_intel_win : FFLAGS = -D_WIN32 /Qipo /O2 /I$(MPIINCLUDE) /wrap-margin- $(GIT
 impi_intel_win : FCOMPL = $(COMP_FC)
 impi_intel_win : obj = fds_impi_intel_win
 impi_intel_win : setup_win $(objwin_mpi)
-	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL) $(LFLAGS_HYPRE_WIN) $(LFLAGS_SUNDIALS_WIN) $(LFLAGS_HDF5_WIN) $(LFLAGS_LINK_WIN)
+	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL) $(LFLAGS_HYPRE_WIN) $(LFLAGS_SUNDIALS_WIN) $(LFLAGS_HDF5_WIN) $(LFLAGS_LINK_WIN) $(LFLAGS_GPU_WIN)
 
 impi_intel_win_vt : MPILIB = "$(IMPI_RELEASE_ROOT)\impi.lib"
 impi_intel_win_vt : MPIINCLUDE = "$(I_MPI_ROOT)\include\mpi"
@@ -270,7 +272,7 @@ impi_intel_win_db : FFLAGS = -D_WIN32 /Od /nologo /debug:all /I$(MPIINCLUDE) /Z7
 impi_intel_win_db : FCOMPL = $(COMP_FC)
 impi_intel_win_db : obj = fds_impi_intel_win_db
 impi_intel_win_db : setup_win $(objwin_mpi)
-	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL) $(LFLAGS_HYPRE_WIN) $(LFLAGS_SUNDIALS_WIN) $(LFLAGS_HDF5_WIN) $(LFLAGS_LINK_WIN)
+	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL) $(LFLAGS_HYPRE_WIN) $(LFLAGS_SUNDIALS_WIN) $(LFLAGS_HDF5_WIN) $(LFLAGS_LINK_WIN) $(LFLAGS_GPU_WIN)
 
 impi_intel_win_openmp_db : MPILIB = "$(IMPI_DEBUG_ROOT)\impi.lib"
 impi_intel_win_openmp_db : MPIINCLUDE = "$(I_MPI_ROOT)\include\mpi"

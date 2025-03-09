@@ -11,10 +11,25 @@ set no_libs=
 set stopscript=0
 set FDS_BUILDDIR=%CD%
 
+:: Define an array of allowed GPU architectures
+::set allowed_gpus=("cuda")
+
 call :getopts %*
 if %stopscript% == 1 exit /b
 
 goto eof
+
+:: -------------------------------------------------------------
+:: Function to check if a value exists in the allowed list
+::is_valid_gpu
+:: -------------------------------------------------------------
+:: set gpu="$1"
+:: for /l %%x in (1, 1, 1) do (
+::   if allowed_gpus[i] EQU gpu (
+::     return 0
+::   )
+:: )
+::EXIT /b 1
 
 :: -------------------------------------------------------------
 :getopts
@@ -49,6 +64,24 @@ goto eof
    set clean_hdf5=--clean-hdf5
    set valid=1
  )
+ if /I "%1" EQU "--with-gpu" (
+   set BUILD_WITH_GPU=ON
+   set GPU_HOME=%CUDA_PATH%
+   set GPU_ARCH=cuda
+   set with_gpu=true
+   ::set gpu_arch="${1#*=}"
+   :: Check if the value is in the allowed list
+   ::  if (call :is_valid_gpu "$gpu_arch") (
+   ::    echo "Error: Invalid option for --with-gpu. Allowed values: ${allowed_gpus[*]}." >&2
+   ::    exit 1
+   ::  )
+   ::set BUILD_WITH_GPU=ON
+   ::set GPU_ARCH="$gpu_arch"
+   ::if $(GPU_ARCH) EQU cuda (
+   ::   set GPU_HOME=%CUDA_PATH%
+   ::)
+   set valid=1
+)
  if /I "%1" EQU "--no-libs" (
    set no_libs=--no-libs
    set clean_fds=--clean-fds
@@ -89,6 +122,7 @@ echo --clean-sundials - rebuild sundials library
 echo --clean-hdf5     - rebuild hdf5 library
 echo --no-libs        - build without thirdparty libs
 echo --help           - display this message
+echo --with-gpu arch  - build with gpu with cuda
 exit /b
 
 :eof
