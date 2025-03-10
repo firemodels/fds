@@ -291,6 +291,11 @@ MODULE HYPRE_INTERFACE
          INTEGER, INTENT(OUT) :: IERR
       END SUBROUTINE HYPRE_SETEXECUTIONPOLICY
 
+      SUBROUTINE HYPRE_SETMEMORYLOCATION(MEMORY_LOCATION, IERR)
+         INTEGER, INTENT(IN)  :: MEMORY_LOCATION
+         INTEGER, INTENT(OUT) :: IERR
+      END SUBROUTINE HYPRE_SETMEMORYLOCATION
+
       SUBROUTINE HYPRE_IJMATRIXCREATE(COMM, I1, I2, I3, I4, A, IERR)
          USE MPI_F08
          TYPE(MPI_COMM),  INTENT(IN)  :: COMM
@@ -561,6 +566,7 @@ MODULE HYPRE_INTERFACE
              HYPRE_INITIALIZE,                    &  ! subroutine in HYPRE library
              HYPRE_FINALIZE,                      &  ! subroutine in HYPRE library
              HYPRE_SETEXECUTIONPOLICY,            &  ! subroutine in HYPRE library
+             HYPRE_SETMEMORYLOCATION,             &  ! subroutine in HYPRE library
              HYPRE_IJMATRIXCREATE,                &  ! subroutine in HYPRE library
              HYPRE_IJMATRIXSETOBJECTTYPE,         &  ! subroutine in HYPRE library
              HYPRE_IJMATRIXINITIALIZE,            &  ! subroutine in HYPRE library
