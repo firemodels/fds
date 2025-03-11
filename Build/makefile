@@ -11,7 +11,7 @@
 
 VPATH = ../Source
 
-# 3rd part library versions 
+# 3rd part library versions
 HYPRE_VERSION=v2.32.0
 SUNDIALS_VERSION=v6.7.0
 
@@ -405,7 +405,7 @@ type.o : prec.o cons.o imkl.o
 data.o : prec.o func.o cons.o prop.o
 rcal.o : func.o prec.o cons.o
 mesh.o : prec.o type.o
-func.o : prec.o cons.o type.o mesh.o devc.o
+func.o : prec.o prop.o cons.o type.o mesh.o devc.o
 gsmv.o : prec.o func.o cons.o mesh.o
 smvv.o : geom.o prec.o func.o cons.o data.o
 turb.o : prec.o func.o cons.o mesh.o
@@ -439,7 +439,7 @@ type.obj : prec.obj cons.obj imkl.obj
 data.obj : prec.obj func.obj cons.obj prop.obj
 rcal.obj : func.obj prec.obj cons.obj
 mesh.obj : prec.obj type.obj
-func.obj : prec.obj cons.obj type.obj mesh.obj devc.obj
+func.obj : prec.obj prop.obj cons.obj type.obj mesh.obj devc.obj
 gsmv.obj : prec.obj func.obj cons.obj mesh.obj
 smvv.obj : geom.obj prec.obj func.obj cons.obj data.obj
 turb.obj : prec.obj func.obj cons.obj mesh.obj

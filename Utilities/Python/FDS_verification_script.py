@@ -9,8 +9,8 @@ importlib.reload(fdsplotlib) # use for development (while making changes to fdsp
 
 # Scripts to run prior to dataplot
 
-print("ignition_delay...");   subprocess.run(["python","./scripts/cantera_ignition_delay.py"])
-print("reaction_rates...");   subprocess.run(["python","./scripts/cantera_reaction_rates.py"])
+# print("ignition_delay...");   subprocess.run(["python","./scripts/cantera_ignition_delay.py"])
+# print("reaction_rates...");   subprocess.run(["python","./scripts/cantera_reaction_rates.py"])
 
 # Dataplot and scatplot options
 

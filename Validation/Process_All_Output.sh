@@ -74,6 +74,7 @@ FIREMODELS=../..
 # There should exist a line entry for every directory in the Validation directory of the fds repository.
 # If the case is under development, simply comment out the line below.
 
+PROCESS Aalto_Woods
 PROCESS Arup_Tunnel
 PROCESS ATF_Corridors
 PROCESS Atmospheric_Dispersion
@@ -97,6 +98,7 @@ PROCESS Droplet_Evaporation
 PROCESS Edinburgh_Vegetation_Drag
 PROCESS FAA_Cargo_Compartments
 PROCESS FAA_Polymers
+PROCESS FHWA_Tunnel
 PROCESS Fleury_Heat_Flux
 PROCESS FM_Burner
 PROCESS FM_FPRF_Datacenter
@@ -111,6 +113,8 @@ PROCESS Heskestad_Flame_Height
 PROCESS Insulation_Materials
 PROCESS JH_FRA
 PROCESS Juelich_SETCOM
+PROCESS Lattimer_Corridor_Ceiling
+PROCESS Lattimer_Tilted_Wall
 PROCESS LEMTA_Spray
 PROCESS LEMTA_UGent_Pool_Fires
 PROCESS LLNL_Enclosure
@@ -180,6 +184,7 @@ PROCESS Vettori_Flat_Ceiling
 PROCESS Vettori_Sloped_Ceiling
 PROCESS VTT
 PROCESS VTT_Sprays
+PROCESS Wasson_Impinging_Plumes
 PROCESS Waterloo_Methanol
 PROCESS WTC
 PROCESS Wu_Bakar_Tunnels
