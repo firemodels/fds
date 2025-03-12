@@ -17,7 +17,6 @@ chid = 'impinging_jet';
 % plot the correlation
 
 D_h = 0.2;                            % hydraulic diameter of the jet [m]
-dz  = 1/64;                           % grid resolution [m]
 H   = 1;                              % distance from jet to wall [m]
 mu  = 1.822E-05;                      % dynamic viscosity, [kg/m/s]
 k   = 2.566E-02;                      % thermal conductivity [W/m/K]
@@ -43,11 +42,10 @@ K(1)=plot(RE,NU,'k-','linewidth',2); hold on
 res_str = {'coarse','medium','fine'};
 Re_str  = {'1e5','4e5'};
 
-% errors from original implementation (rows = Re_str and cols = res_str)
-E = [0.056918654162878   0.041857745609598   0.116595781318777; ...
-     0.006162200000000   0.063273295539949   0.270795928496828];
+% relative error tolerance
+E_tol = 0.1;
 
-E_FDS = zeros(size(E));
+E_FDS = zeros(3,2);
 
 for j=1:length(res_str)
     for i=1:length(Re_str)
@@ -69,10 +67,9 @@ for j=1:length(res_str)
 
         E_FDS(i,j) = abs(Nu - Nu_fds)/abs(Nu);
 
-%       Temporarily suspend error check
-%       if E_FDS(i,j) > E(i,j)*1.1
-%           disp(['Matlab Warning: impinging jet error = ',num2str(E_FDS(i,j)),' at Re_j=',Re_str{i},', Res=',res_str{j}])
-%       end
+        if E_FDS(i,j) > E_tol
+          disp(['Matlab Warning: impinging jet error = ',num2str(E_FDS(i,j)),' at Re_j=',Re_str{i},', Res=',res_str{j}])
+        end
 
         if i==1
             if j==1

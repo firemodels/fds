@@ -213,7 +213,6 @@ TYPE BOUNDARY_ONE_D_TYPE
    INTEGER :: SURF_INDEX=-1     !< SURFACE index
    INTEGER :: N_CELLS_MAX=0     !< Maximum number of interior cells
    INTEGER :: N_CELLS_INI=0     !< Initial number of interior cells
-   INTEGER :: N_CELLS_OLD=1     !< Maximum number of interior cells for DX_OLD
    INTEGER :: N_LAYERS=0        !< Number of material layers
    INTEGER :: N_MATL=0          !< Number of materials
    INTEGER :: N_LPC=0           !< Number of Lagrangian Particle Classes
@@ -316,7 +315,6 @@ TYPE BOUNDARY_PROP1_TYPE
    REAL(EB) :: U_NORMAL_S=0._EB      !< Estimated normal component of velocity (m/s) at next time step
    REAL(EB) :: U_NORMAL_0=0._EB      !< Initial or specified normal component of velocity (m/s) at surface
    REAL(EB) :: U_TANG=0._EB          !< Tangential velocity (m/s) near surface
-   REAL(EB) :: U_IMPACT=0._EB        !< Impact velocity from stagnation pressure
    REAL(EB) :: RHO_F                 !< Gas density at the wall (kg/m3)
    REAL(EB) :: RHO_G                 !< Gas density in near wall cell (kg/m3)
    REAL(EB) :: RDN=1._EB             !< \f$ 1/ \delta n \f$ at the surface (1/m)
@@ -879,6 +877,7 @@ TYPE SURFACE_TYPE
    REAL(EB) :: HM_FIXED=-1._EB                         ! Frontside mass transfer coefficient (m/s)
    REAL(EB) :: EMISSIVITY_BACK                         ! Backside emissivity
    REAL(EB) :: CONV_LENGTH                             ! Length used in heat transfer correlations
+   REAL(EB) :: HTC_SIGMA=1._EB                         ! Sigma distance of Gaussian profile in IMPINGING JET HTC model (m)
    REAL(EB) :: XYZ(3)                                  ! Starting point for a spreading fire
    REAL(EB) :: FIRE_SPREAD_RATE                        ! Defines speed (m/s) of spread from XYZ
    REAL(EB) :: INNER_RADIUS=0._EB                      ! Inner radius when SURF GEOMETRY = CYLINDRICAL
@@ -908,7 +907,7 @@ TYPE SURFACE_TYPE
    REAL(EB) :: M_DOT_G_PP_ADJUST_FAC=1._EB             !< For MLRPUA, scales the gas production if gas H_o_C /= solid H_o_C
    REAL(EB) :: HOC_EFF                                 !< Effective heat of combustion for S_pyro
    REAL(EB) :: Y_S_EFF                                 !< Effective soot yield for S_pyro
-   REAL(EB) :: CHI_R_EFF                              !< Effective radiative fraction for S_pyro
+   REAL(EB) :: CHI_R_EFF                               !< Effective radiative fraction for S_pyro
    REAL(EB) :: TIME_STEP_FACTOR=10._EB                 !< Maximum amount to reduce solid phase conduction time step
    REAL(EB) :: REMESH_RATIO=0.05                       !< Fraction change in wall node DX to trigger a remesh
 
