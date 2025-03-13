@@ -63,7 +63,7 @@
 \usepackage{needspace}
 
 \newcommand{\nopart}{\expandafter\def\csname Parent-1\endcsname{}} % To fix table of contents in pdf.
-\newcommand\ct[1]{\mbox{\lstinline !#1!}}
+\newcommand{\ct}[1]{\lstinline{#1}}
 
 \usepackage{siunitx}
 
@@ -80,7 +80,7 @@
         columns=fixed,
         extendedchars=true,
         breaklines=true,
-        breakatwhitespace=false,
+        breakatwhitespace=true,
         frame=none,
         showtabs=false,
         showspaces=false,
@@ -89,6 +89,7 @@
         keywordstyle=\color[rgb]{0,0,0},
         commentstyle=\color[rgb]{0,0,0},
         stringstyle=\color[rgb]{0,0,0},
+        literate={\_}{}{0\discretionary{\_}{}{\_}}%
 }
 
 \usepackage{xr-hyper}
