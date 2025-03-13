@@ -467,8 +467,36 @@ The following procedure is intended for a Windows domain network; that is, a net
 \end{enumerate}
 
 
+\subsection{macOS}
 
-\subsection{Linux and macOS}
+To run a single core FDS job on macOS, cd to the working directory and simply type:
+\begin{lstlisting}
+fds job_name.fds
+\end{lstlisting}
+
+Mac systems tend to be single machines, but may have several cores to utilize.  It may be helpful to use the OpenMP version of the code that is provided in the distribution.  To run FDS on macOS with OpenMP do the following:
+\begin{lstlisting}
+export OMP_NUM_THREADS=4 # may be set in ~/.bash_profile as well
+fds_openmp job_name.fds
+\end{lstlisting}
+
+Even if you have only one machine, you may use the cores for MPI (distributed) parallel computing.  You can map one or more meshes to a given MPI process or rank.  On macOS, without OpenMP (one core per MPI process), run a four process job like this:
+\begin{lstlisting}
+mpiexec -n 4 fds job_name.fds
+\end{lstlisting}
+
+To utilize MPI and OpenMP together (4 MPI ranks with 4 OpenMP threads each, requiring 16 total cores) on macOS do:
+\begin{lstlisting}
+export OMP_NUM_THREADS=4
+mpiexec -n 4 fds_openmp job_name.fds
+\end{lstlisting}
+or
+\begin{lstlisting}
+mpiexec -n 4 -x OMP_NUM_THREADS=4 fds_openmp job_name.fds
+\end{lstlisting}
+
+
+\subsection{Linux}
 
 A compute cluster that consists of a rack of dedicated compute nodes usually runs one of several variants of the Linux operating system. In such an environment, it is suggested, or required, that you use a job scheduler like PBS/Torque or Slurm to submit jobs by writing a short script that includes the command that launches the job, the amount of resources you require, and so on. Tips for running FDS under Linux or macOS can be found \href{https://github.com/firemodels/fds/wiki/Installing-and-Running-FDS-on-a-Linux-Cluster}{here}.
 
