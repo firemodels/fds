@@ -472,25 +472,44 @@ The following procedure is intended for a Windows domain network; that is, a net
 
 A compute cluster that consists of a rack of dedicated compute nodes usually runs one of several variants of the Linux operating system. In such an environment, it is suggested, or required, that you use a job scheduler like PBS/Torque or Slurm to submit jobs by writing a short script that includes the command that launches the job, the amount of resources you require, and so on. Tips for running FDS under Linux or macOS can be found \href{https://github.com/firemodels/fds/wiki/Installing-and-Running-FDS-on-a-Linux-Cluster}{here}.
 
-If you opt to run the job without using a job scheduler, you can issue the commands directly at the command prompt:
+If you opt to run the job without using a job scheduler, you can issue the commands directly at the command prompt. It is best to do this only when running short, small jobs, for example when testing a new computer or a new installation. Do not run large, time-consuming jobs this way because your jobs can potentially interfere with other scheduled jobs. Here is an example of how to run a job that uses four meshes where two MPI processes are assigned to node001 and two are assigned to node002:
 \begin{lstlisting}
-export OMP_NUM_THREADS=M
-mpiexec -n N -hostfile hosts.txt /home/username/.../fds job_name.fds >& job_name.err &
+mpiexec -n 4 -host node001,node002 /home/username/.../fds job_name.fds
 \end{lstlisting}
-The file \ct{hosts.txt} looks something like this:
+When the job starts, you should see print out to the screen that looks like this:
 \begin{lstlisting}
-comp1 slots=2
-comp2 slots=1
-comp3 slots=2
+ Starting FDS ...
+
+ MPI Process      0 started on node001
+ MPI Process      1 started on node001
+ MPI Process      2 started on node002
+ MPI Process      3 started on node002
+...
+ Number of MPI Processes:  4
 \end{lstlisting}
-where \ct{compX} are the names of available nodes and \ct{slots} indicate the number of available cores on each node. The parameter \ct{slots} is optional. On a cluster shared by others, you should not run long jobs without a job scheduler. A job scheduler will avoid running multiple on the same nodes/cores. If you are using a single Linux or macOS workstation, there is no need to define a host file. You just need to invoke the previously described \ct{mpiexec} line with a number of processors suitable to your case and computer.
-
-
+Note that the pre-compiled packages for either macOS and Linux contain the program \ct{mpiexec}\footnote{There are two very similar programs used to launch MPI jobs---\ct{mpiexec} and \ct{mpirun}. The former is typically used at the command line and the latter is typically used within a job scheduling script.}, but they are not exactly the same on each operating system. The Linux installation of FDS makes use of the Intel MPI libraries, whereas macOS uses Open MPI. The command shown above works under Linux. There are many options for \ct{mpiexec} and it is best to experiment with them using a small, multi-mesh job. Check the screen printout, and also, if possible, login to the nodes that you have specified and run the \ct{top} command to see if your processes are running properly.
 
 
 \subsection{Using MPI and OpenMP Together}
 
-MPI is the better choice when using multiple meshes since it more efficiently divides the computational work than OpenMP. However, combining MPI and OpenMP in the same simulation is possible. If you have multiple computers at your disposal, and each computer has multiple cores, you can assign one MPI process to each computer, and use multiple cores on each computer to speed up the processing of a given mesh using OpenMP. Typically, the use of OpenMP speeds the calculation by at most factor of 2, regardless of how many OpenMP threads you assign to each MPI process. It is usually better to divide the computational domain into more meshes and set the number of OpenMP threads to 1. This all depends on your particular OS, hardware, network traffic, and so on. You should choose a good test case and try different meshing and parallel processing strategies to see what is best for you.
+MPI is the better choice when using multiple meshes because it more efficiently divides the computational work than OpenMP. However, combining MPI and OpenMP in the same simulation is possible. If you have multiple computers at your disposal, and each computer has multiple cores, you can assign one MPI process to each computer, and use multiple cores on each computer to speed up the processing of a given mesh using OpenMP. Typically, the use of OpenMP speeds the calculation by at most factor of 2, regardless of how many OpenMP threads you assign to each MPI process. It is usually better to divide the computational domain into more meshes and set the number of OpenMP threads to 1. This all depends on your particular OS, hardware, network traffic, and so on. You should choose a good test case and try different meshing and parallel processing strategies to see what is best for you. The following command runs a 4 mesh FDS job using 4 MPI processes split over two nodes with 4 OpenMP threads attached to each process (Linux):
+\begin{lstlisting}
+mpiexec -n 4 -host node001,node002 -genv OMP_NUM_THREADS 4 /home/username/.../fds_openmp job_name.fds
+\end{lstlisting}
+When the job starts, you should see print out to the screen that looks like this:
+\begin{lstlisting}
+ Starting FDS ...
+
+ MPI Process      0 started on node001
+ MPI Process      1 started on node001
+ MPI Process      2 started on node002
+ MPI Process      3 started on node002
+...
+ Number of MPI Processes:  4
+ Number of OpenMP Threads: 4
+\end{lstlisting}
+Note that the name of the FDS executable file is \ct{fds_openmp} rather than \ct{fds} because there is a separate FDS executable that recognizes OpenMP commands. The reason for this is that the compiler's optimization strategy changes with and without the presence of OpenMP directives. If OpenMP is not considered in the compilation, the optimization is faster. Thus, it can sometimes be of no advantage to add extra OpenMP threads to the MPI processes. Of course, results may be different on different computers with different hardware. It is best to experiment to see what is best for your situation.
+
 
 \subsection{Running Very Large Jobs}
 
