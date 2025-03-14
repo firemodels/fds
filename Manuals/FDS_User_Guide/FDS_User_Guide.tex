@@ -2299,7 +2299,7 @@ It may be useful to visualize which convective heat transfer correlation is bein
 
 \subsubsection{Specified Convective Heat Transfer Coefficient}
 
-To specify the convective heat transfer coefficient, set it to a constant using \ct{HEAT_TRANSFER_COEFFICIENT} on the \ct{SURF} line in units of \unit{W/(m^2.K)} with optional time dependent ramp using \ct{RAMP_HEAT_TRANSFER_COEFFICIENT}. If the back side of the solid obstruction faces the exterior of the computational domain and the solid conducts heat, the heat transfer coefficient of the back side may be specified using \ct{HEAT_TRANSFER_COEFFICIENT_BACK} with optional time dependent ramp ramp using \ct{RAMP_HEAT_TRANSFER_COEFFICIENT_BACK}. This back side condition is appropriate for a \ct{SURF} line with \ct{BACKING='VOID'} or \ct{BACKING='EXPOSED'}.
+To specify the convective heat transfer coefficient, set it to a constant using \ct{HEAT_TRANSFER_COEFFICIENT} on the \ct{SURF} line in units of \unit{W/(m^2.K)} with optional time dependent ramp using \ct{RAMP_HEAT_TRANSFER_COEFFICIENT}. If the back side of the solid obstruction faces the exterior of the computational domain and the solid conducts heat, the heat transfer coefficient of the back side may be specified using \ct{HEAT_TRANSFER_COEFFICIENT_BACK} with optional time dependent ramp ramp using \ct{RAMP_HEAT_TRANSFER_COEFFICIENT_BACK}. This back side condition is appropriate for a \ct{SURF} line with \ct{BACKING='VOID'} or if the solid obsttuction backs to the exterior of the computational domain.
 
 \subsubsection{Impinging Jet Heat Transfer Model}
 \label{info:impinging_jet}

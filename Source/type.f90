@@ -910,6 +910,7 @@ TYPE SURFACE_TYPE
    REAL(EB) :: CHI_R_EFF                               !< Effective radiative fraction for S_pyro
    REAL(EB) :: TIME_STEP_FACTOR=10._EB                 !< Maximum amount to reduce solid phase conduction time step
    REAL(EB) :: REMESH_RATIO=0.05                       !< Fraction change in wall node DX to trigger a remesh
+   REAL(EB) :: FILM_FACTOR=ONTH                        !< Weighting factor for evaluating surface file properties
 
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: DX,RDX,RDXN,X_S,DX_WGT,MF_FRAC,PARTICLE_INSERT_CLOCK
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: RHO_0

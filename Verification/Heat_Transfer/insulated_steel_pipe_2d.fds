@@ -26,7 +26,6 @@
       TMP_GAS_FRONT             = 480.
       TMP_GAS_BACK              = 20.
       HEAT_TRANSFER_COEFFICIENT = 10.
-      HEAT_TRANSFER_COEFFICIENT_BACK = 10.
       GEOMETRY                  = 'CYLINDRICAL'
       INNER_RADIUS              = 0.01
       THICKNESS                 = 0.02,0.01,0.02 /
@@ -36,7 +35,6 @@
       TMP_GAS_FRONT             = 20.
       TMP_GAS_BACK              = 480.
       HEAT_TRANSFER_COEFFICIENT = 10.
-      HEAT_TRANSFER_COEFFICIENT_BACK = 10.
       GEOMETRY                  = 'INNER CYLINDRICAL'
       INNER_RADIUS              = 0.01
       THICKNESS                 = 0.02,0.01,0.02 /
