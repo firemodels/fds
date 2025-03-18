@@ -3023,7 +3023,7 @@ This verification case tests the computation of three-dimensional configuration 
 \begin{figure}[ht]
 \centering
 \includegraphics[width=4.0in]{FIGURES/box}
-\caption{\label{fig_box_radiation} Radiation inside a box geometry.}
+\caption[Radiation inside a box geometry]{\label{fig_box_radiation} Radiation inside a box geometry.}
 \end{figure}
 The configuration factors are calculated at the diagonal of the cold wall opposite to the hot wall. The exact values of the configuration factor from plane element $\d A$ to parallel rectangle $H$ are calculated using the analytical solution~\cite{Siegel:1}
 \begin{center}
@@ -3044,7 +3044,7 @@ Different variations of the case include the mesh resolution (20$^3$ and 100$^3$
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/radiation_box_20} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/radiation_box_100}
 \end{tabular*}
-\caption{Incident heat flux.}\label{fig_incident_heat_flux}
+\caption[Incident heat flux]{Incident heat flux.}\label{fig_incident_heat_flux}
 \end{figure}
 
 The results provide an illustration of numerical errors due to both angular resolution and spatial resolution. With 20$^3$ cells (5-cm spatial resolution), the discrepancies between the FDS and analytical solutions decrease when increasing the number of radiation angles used in the Radiation Transfer Equation (RTE) solver: this decrease may be explained by the increasingly accurate description of the angular region occupied by the hot wall when viewed from the selected opposite wall locations. The results also show that at 5-cm spatial resolution (20$^3$ cells), the discrepancies between the FDS and analytical solutions do not totally vanish and feature a residual error of approximately 10$\%$ even when using a large number of radiation angles: this residual error may be explained by inaccuracies in the numerical description of the configuration factors (configuration factors are defined as spatial integrals over the hot wall surface of an expression that features two cosine angles and a separation distance; the implicit evaluation of configuration factors in the RTE solver is subject to spatial integration errors). Consistent with this explanation, the results show that at 1-cm spatial resolution (100$^3$ cells), the discrepancies between the FDS and analytical solutions decrease to very small levels and feature a residual error of less than 1$\%$.

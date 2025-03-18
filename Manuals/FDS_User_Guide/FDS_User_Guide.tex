@@ -791,7 +791,7 @@ Table~\ref{tbl:namelistgroups} provides a quick reference to all the namelist pa
 \vspace{\baselineskip}
 \begin{table}[ht]
 \begin{center}
-\caption{Namelist Group Reference Table}
+\caption[Namelist Group Reference Table]{Namelist Group Reference Table}
 \label{tbl:namelistgroups}
 \begin{tabular}{|c|l|c|c|}
 \hline
@@ -943,7 +943,7 @@ There may be situations where you would like to specify the time step sequence i
 \begin{figure}[ht!]
 \centering
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/ramp_time}
-\caption{An example of ramping the simulation time values.}
+\caption[Ramping simulation time values]{An example of ramping the simulation time values.}
 \label{fig:ramp_time}
 \end{figure}
 
@@ -1003,7 +1003,7 @@ The term ``multiple meshes'' means that the computational domain consists of mor
 
 \begin{figure}[ht!]
 \includegraphics[width=\textwidth]{FIGURES/hallways}
-\caption{An example of a multiple-mesh geometry.}
+\caption[Multiple-mesh geometry]{An example of a multiple-mesh geometry.}
 \label{fig:domain}
 \end{figure}
 
@@ -1312,7 +1312,7 @@ Figure \ref{fig:outlinehack} shows an example where blockages are drawn as speci
 outlines drawn at blockage edges and mesh interfaces&outlines drawn as specified in the input file
 \end{tabular}
 \end{center}
-\caption[Blockage outlines drawn at mesh interfaces and as specified in the input file.]{Blockage outlines drawn at mesh interfaces and as specified in the input file.}
+\caption[Blockage outlines at mesh interfaces and as specified in the input file]{Blockage outlines drawn at mesh interfaces and as specified in the input file.}
 \label{fig:outlinehack}%
 \end{figure}
 
@@ -2765,7 +2765,7 @@ then the fuel mass flux would be the same as before, but now it would be diluted
 \begin{figure}[ht]
 \centering
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/multiple_reac_hrrpua}
-\caption[Demonstration of specifying HRRPUA with multiple reactions.]{Demonstration of specifying HRRPUA with multiple reactions.}
+\caption[Specifying HRRPUA with multiple reactions]{Demonstration of specifying HRRPUA with multiple reactions.}
 \label{fig:mulitple_reac_hrrpua}
 \end{figure}
 
@@ -2864,7 +2864,7 @@ The example, \ct{spyro_cone_demo.fds}, demonstrating the scaling behavior is sho
 \begin{figure}[ht]
 \centering
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/spyro_cone_demo}
-\caption[Demonstration of extrapolating cone test data to other heat fluxes.]{Demonstration of extrapolating cone test data to other heat fluxes.}
+\caption[Extrapolating cone test data to other heat fluxes]{Demonstration of extrapolating cone test data to other heat fluxes.}
 \label{fig:spyro_cone_demo}
 \end{figure}
 
@@ -6231,7 +6231,7 @@ The drag force exerted by moving or stationary particles is detailed in the FDS 
 
 \begin{table}[ht]
 \begin{center}
-\caption{Drag laws available in FDS}
+\caption[Drag laws available in FDS]{Drag laws available in FDS}
 \label{tbl:draglaws}
 \begin{tabular}{|c|c|}
 \hline
@@ -8881,14 +8881,14 @@ Table~\ref{tbl:SIMULATION_MODE} indicates the value of various parameters for ea
 
 \begin{table}[ht]
 \centering
-\caption{Parameters effected by \ct{SIMULATION_MODE}.}
+\caption[Parameters effected by \ct{SIMULATION_MODE}]{Parameters effected by \ct{SIMULATION_MODE}.}
 \label{tbl:SIMULATION_MODE}
 \begin{tabular}{|l|c|c|c|c|c|}
 \hline
-Key Parameter                          & Section                        & \ct{'DNS'}   & \ct{'LES'}    & \ct{'VLES'}      & \ct{'SVLES'}    \\ \hline \hline
-\ct{CFL_VELOCITY_NORM}              & \ref{info:CFL}                 & 1             & 1              & 2                 & 3                \\ \hline
-\ct{CHECK_VN}                        & \ref{info:VN}                  & T             & T              & T                 & F                \\ \hline
-\ct{FLUX_LIMITER}                    & \ref{info:flux_limiters}       & \ct{'CHARM'} & \ct{'CHARM'}  & \ct{'SUPERBEE'}  & \ct{'SUPERBEE'} \\ \hline
+Key Parameter                      & Section                        & \ct{'DNS'}    & \ct{'LES'}     & \ct{'VLES'}       & \ct{'SVLES'}     \\ \hline \hline
+\ct{CFL_VELOCITY_NORM}             & \ref{info:CFL}                 & 1             & 1              & 2                 & 3                \\ \hline
+\ct{CHECK_VN}                      & \ref{info:VN}                  & T             & T              & T                 & F                \\ \hline
+\ct{FLUX_LIMITER}                  & \ref{info:flux_limiters}       & \ct{'CHARM'}  & \ct{'CHARM'}   & \ct{'SUPERBEE'}   & \ct{'SUPERBEE'}  \\ \hline
 \ct{CONSTANT_SPECIFIC_HEAT_RATIO}  & \ref{info:Enthalpy}            & F             & F              & F                 & T                \\ \hline
 \ct{EXTINCTION_MODEL}              & ~\ref{info:extinction}         & 2             & 2              & 1                 & 1                \\ \hline
 \end{tabular}
@@ -14458,7 +14458,7 @@ Table~\ref{tab:sourcefiles} lists the files that make up the FDS source code. Fi
 
 \begin{table}[ht]
 \begin{center}
-\caption{FDS source code files}
+\caption[FDS source code files]{FDS source code files}
 \label{tab:sourcefiles}
 \vspace{.1in}
 \begin{tabular}{|l|l|}
@@ -14869,7 +14869,6 @@ WRITE(LU_BINGEOM) VERTS(1:3*N_VERTS)
 WRITE(LU_BINGEOM) FACES(1:3*N_FACES)
 WRITE(LU_BINGEOM) SURFS(1:N_FACES)
 WRITE(LU_BINGEOM) VOLUS(1:4*N_VOLUS)
-
 \end{lstlisting}
 
 \noindent where:
@@ -14944,23 +14943,22 @@ This information allows for complete area and boundary condition information per
 \label{inout:binhvac}
 The HVAC outputs under the namelist group \ct{HVAC} are written out unformatted to the file \ct{CHID.hvac}. These files are written out from \ct{dump.f90} with the following lines:
 \begin{lstlisting}
-      WRITE(LU_HVAC) N_NODE_OUT, N_NODE_QUANTITY, N_DUCT_OUT, N_DUCT_QUANTITY
-      WRITE(LU_HVAC) DUCT_CELL(1:N_DUCT_OUT)
+WRITE(LU_HVAC) N_NODE_OUT, N_NODE_QUANTITY, N_DUCT_OUT, N_DUCT_QUANTITY
+WRITE(LU_HVAC) DUCT_CELL(1:N_DUCT_OUT)
 
-      WRITE(LU_HVAC) TIME
-    DO N=1,N_NODE_OUT
-       WRITE(LU_HVAC) OUTVAL_N(1:N_NODE_QUANTITY)
-    ENDDO
-      DO N=1,N_DUCT_OUT
-         IF (DUCT(N)%N_CELLS > 0) THEN
-        DO N=1,DUCT(N)%N_CELLS
-             WRITE(LU_HVAC) OUTVAL_D(1:N_DUCT_QUANTITY)
-          ENDDO
-       ELSE
-          WRITE(LU_HVAC) OUTVAL_D(1:N_DUCT_QUANTITY)
-       ENDIF
-    ENDDO
-
+WRITE(LU_HVAC) TIME
+DO N=1,N_NODE_OUT
+   WRITE(LU_HVAC) OUTVAL_N(1:N_NODE_QUANTITY)
+ENDDO
+   DO N=1,N_DUCT_OUT
+      IF (DUCT(N)%N_CELLS > 0) THEN
+      DO N=1,DUCT(N)%N_CELLS
+         WRITE(LU_HVAC) OUTVAL_D(1:N_DUCT_QUANTITY)
+      ENDDO
+   ELSE
+      WRITE(LU_HVAC) OUTVAL_D(1:N_DUCT_QUANTITY)
+   ENDIF
+ENDDO
 \end{lstlisting}
 where \ct{DUCT_CELL} is the number of mass transport cells for a duct (if a duct doesn't have mass transport, then the value 1 is written), and the second block of output is written for each \ct{DT_HVAC} output interval.
 
@@ -14973,7 +14971,7 @@ Table~\ref{tbl:fileextensions} provides a quick reference to file extensions use
 \vspace{\baselineskip}
 \begin{table}[ht]
 \begin{center}
-\caption{File Extension Reference Table}
+\caption[File Extension Reference Table]{File Extension Reference Table}
 \label{tbl:fileextensions}
 \begin{tabular}{|c|l|c|}
 \hline
