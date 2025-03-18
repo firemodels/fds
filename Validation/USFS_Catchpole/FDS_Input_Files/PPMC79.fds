@@ -1,7 +1,7 @@
 &HEAD CHID='PPMC79', TITLE='Catchpole simulation using Lagrangian particles' /
 
 &MISC TMPA=27 /
-&TIME T_END=363.6363636363636 /
+&TIME T_END=364.0 /
 
 &MESH IJK=40,20,30, XB=-1.0,1.0,-1.5,-0.5,0.0,1.50, MULT_ID='mesh' /
 &MULT ID='mesh', DX=2.0, DY=1.0, DZ=1.5, I_UPPER=4, J_UPPER=2, K_UPPER=1 /

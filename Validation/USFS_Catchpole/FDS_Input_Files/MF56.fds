@@ -1,7 +1,7 @@
 &HEAD CHID='MF56', TITLE='Catchpole simulation using Lagrangian particles' /
 
 &MISC TMPA=27 /
-&TIME T_END=342.85714285714283 /
+&TIME T_END=343.0 /
 
 &MESH IJK=40,20,30, XB=-1.0,1.0,-1.5,-0.5,0.0,1.50, MULT_ID='mesh' /
 &MULT ID='mesh', DX=2.0, DY=1.0, DZ=1.5, I_UPPER=4, J_UPPER=2, K_UPPER=1 /
@@ -76,7 +76,7 @@
       XB                   = 0.0,8.0,-0.5,0.5,0,0.152
       N_PARTICLES_PER_CELL = 1
       CELL_CENTERED        = .TRUE.
-      MASS_PER_VOLUME      = 7.9559999999999995
+      MASS_PER_VOLUME      = 7.96
       DRY                  = T /
 
 &SURF ID                   = 'NO BURN FUEL'
@@ -97,7 +97,7 @@
       XB                   = -0.4,0.0,-1.5,1.5,0,0.152
       N_PARTICLES_PER_CELL = 1
       CELL_CENTERED        = .TRUE.
-      MASS_PER_VOLUME      = 7.9559999999999995
+      MASS_PER_VOLUME      = 7.96
       DRY                  = T /
 
 &MATL ID                 = 'NO BURN FUEL'

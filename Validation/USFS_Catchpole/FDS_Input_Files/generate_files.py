@@ -13,7 +13,7 @@ for i, row in metadata.iterrows():
    textout = template
 
    textout = textout.replace('JOBID',row['Test'])
-   t_end = min(999.,12/row['R'])
+   t_end = round(min(999.,12/row['R']),0)
    textout = textout.replace('endtime',str(t_end))
    textout = textout.replace('windspeed',str(row['U']))
    textout = textout.replace('vegheight',str(row['delta']))
@@ -41,7 +41,8 @@ for i, row in metadata.iterrows():
       ignition_end = 10.
       ignition_p1 = ignition_end + 1
    
-   textout = textout.replace('masspervolume',str(row['beta']*density))
+   mpv=round(row['beta']*density,2)
+   textout = textout.replace('masspervolume',str(mpv))
    textout = textout.replace('vegdensity',str(density))
    textout = textout.replace('heatofreaction',str(heat_of_reaction))
    textout = textout.replace('ignitionend',str(ignition_end))

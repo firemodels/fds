@@ -76,7 +76,7 @@
       XB                   = 0.0,8.0,-0.5,0.5,0,0.076
       N_PARTICLES_PER_CELL = 1
       CELL_CENTERED        = .TRUE.
-      MASS_PER_VOLUME      = 7.9559999999999995
+      MASS_PER_VOLUME      = 7.96
       DRY                  = T /
 
 &SURF ID                   = 'NO BURN FUEL'
@@ -97,7 +97,7 @@
       XB                   = -0.4,0.0,-1.5,1.5,0,0.076
       N_PARTICLES_PER_CELL = 1
       CELL_CENTERED        = .TRUE.
-      MASS_PER_VOLUME      = 7.9559999999999995
+      MASS_PER_VOLUME      = 7.96
       DRY                  = T /
 
 &MATL ID                 = 'NO BURN FUEL'
