@@ -3752,6 +3752,7 @@ M => MESHES(NM)
 
 DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
    CALL FIND_WALL_BACK_INDEX(NM,IW)
+   IF (STOP_STATUS/=NO_STOP) RETURN
 ENDDO
 
 ! Search all neighboring meshes for 3-D WALL cells. Add index and surface information from these to M%OMESH(NOM)%WALL_RECV_BUFFER
@@ -4039,11 +4040,15 @@ FIND_BACK_WALL_CELL: DO  ! Look for the back wall cell; that is, the wall cell o
    ! Determine if the back face is found
 
    IF ((.NOT.OM%CELL(IC)%SOLID .AND. OM%CELL(IC)%WALL_INDEX(IOR)>0) .OR. NOM==0) THEN ! the back wall face is found
-   !  IF (NOM>0 .AND. SF%BACKING/=EXPOSED) RETURN  ! No need to assign back cell information for anything but exposed backing
       ONE_D%BACK_INDEX = OM%CELL(IC)%WALL_INDEX(IOR)
       ONE_D%BACK_MESH  = NOM
       ONE_D%BACK_SURF  = OM%CELL(IC)%SURF_INDEX(IOR)
       IF (NOM>0) THEN
+         IF (SURFACE(ONE_D%BACK_SURF)%THERMAL_BC_INDEX/=THERMALLY_THICK) THEN
+            WRITE(MESSAGE,'(3A)') 'ERROR(378): SURF ',TRIM(SURFACE(ONE_D%BACK_SURF)%ID),&
+                                  ' cannot be applied to a thermally-thick solid.'
+            CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
+         ENDIF
          OS => M%OMESH(NOM)%WALL_RECV_BUFFER
          IF (.NOT.ALLOCATED(OS%ITEM_INDEX)) THEN
             OS%N_ITEMS_DIM = 50
