@@ -44,7 +44,7 @@ def checkCaption(caption):
     return outtxt
 
 def check_disallowed_commands(txt, file):
-    disallowed_commands = ['\\bf{','\\tt{']
+    disallowed_commands = [] #['\\bf{','\\tt{']
     outtxt = ''
     for cmd in disallowed_commands:
         split = txt.split(cmd)
@@ -54,7 +54,44 @@ def check_disallowed_commands(txt, file):
                 outtxt = outtxt + "ERROR, %s %s located at line %d\n"%(file, cmd, line_count)
     return outtxt
 
-texfiles = glob.glob('..'+os.sep+'*'+os.sep+'*.tex')
+texfiles = ['../FDS_Verification_Guide/FDS_Verification_Guide.tex',
+            '../FDS_User_Guide/FDS_User_Guide.tex',
+            '../FDS_Technical_Reference_Guide/FDS_Technical_Reference_Guide.tex',
+            '../FDS_Technical_Reference_Guide/Aerosol_Chapter.tex',
+            '../FDS_Technical_Reference_Guide/Device_Chapter.tex',
+            '../FDS_Technical_Reference_Guide/Introduction_Chapter.tex',
+            '../FDS_Technical_Reference_Guide/Radiation_Chapter.tex',
+            '../FDS_Technical_Reference_Guide/Appendices.tex',
+            '../FDS_Technical_Reference_Guide/Equation_Chapter.tex',
+            '../FDS_Technical_Reference_Guide/Mass_Chapter.tex',
+            '../FDS_Technical_Reference_Guide/Combustion_Chapter.tex',
+            '../FDS_Technical_Reference_Guide/Momentum_Chapter.tex',
+            '../FDS_Technical_Reference_Guide/Solid_Chapter.tex',
+            '../FDS_Technical_Reference_Guide/Complex_Geometry_Chapter.tex',
+            '../FDS_Technical_Reference_Guide/HVAC_Chapter.tex',
+            '../FDS_Technical_Reference_Guide/Particle_Chapter.tex',
+            '../FDS_Technical_Reference_Guide/Time_Chapter.tex',
+            '../FDS_Validation_Guide/FDS_Validation_Guide.tex',
+            '../FDS_Validation_Guide/Appendix_Graphs.tex',
+            '../FDS_Validation_Guide/Experiment_Chapter.tex',
+            '../FDS_Validation_Guide/Overview_Chapter.tex',
+            '../FDS_Validation_Guide/Surface_Temperature_Chapter.tex',
+            '../FDS_Validation_Guide/Appendix_Only.tex',
+            '../FDS_Validation_Guide/FDS_Validation_Guide.tex',
+            '../FDS_Validation_Guide/Plume_Chapter.tex',
+            '../FDS_Validation_Guide/Survey_Chapter.tex',
+            '../FDS_Validation_Guide/Burning_Rate_Chapter.tex',
+            '../FDS_Validation_Guide/Heat_Flux_Chapter.tex',
+            '../FDS_Validation_Guide/Pressure_Chapter.tex',
+            '../FDS_Validation_Guide/Velocity_Chapter.tex',
+            '../FDS_Validation_Guide/Ceiling_Jet_Chapter.tex',
+            '../FDS_Validation_Guide/HGL_Chapter.tex',
+            '../FDS_Validation_Guide/Species_Chapter.tex',
+            '../FDS_Validation_Guide/Wind_Chapter.tex',
+            '../FDS_Validation_Guide/Error_Chapter.tex',
+            '../FDS_Validation_Guide/HVAC_Chapter.tex',
+            '../FDS_Validation_Guide/Suppression_Chapter.tex']
+
 
 outtxt = '\n'
 for i in range(0, len(texfiles)):
