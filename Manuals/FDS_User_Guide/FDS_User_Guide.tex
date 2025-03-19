@@ -11320,6 +11320,8 @@ In combustion, knowing if, when, or where chemical reactions have been extinguis
 \label{info:fire_spread_output}
 In some cases it can be useful to output timings related to the spread of fire over a surface. For example, when modeling wildland fires the shape and spread of the fire front can be very important. For this reason, two specialized output quantities are available as boundary files (Sec.~\ref{info:BNDF}) or as measurements from devices places on a solid boundary (Sec.~\ref{info:DEVC2}). These are \ct{FIRE ARRIVAL TIME} and \ct{FIRE RESIDENCE TIME}. The \ct{FIRE ARRIVAL TIME} quantity outputs the time at which the gas-phase cell adjacent to the solid exceeds a threshold for heat release rate per volume (\ct{HRRPUV}) and the \ct{FIRE RESIDENCE TIME} gives the cummulative time over which the threshold is exceeded during the simulation. The chosen threshold is the same as used by smokeview for rendering \ct{HRRPUV}, as described in Sec.~\ref{info:SMOKE3D}. In the case of a level set simulation (Sec.~\ref{info:level_set}), the \ct{FIRE ARRIVAL TIME} can be computed directly from the level set value and the \ct{FIRE RESIDENCE TIME} comes from the spread-rate adjusted burning duration of the fuel, as described in Sec.~\ref{level_set_fuel_model_1}. These two quantities are cummulatively populated over time such that a full picture of the fire spread can be obtained from relatively infrequent outputs - theoretically only one snapshot at the end of the simulation is required.
 
+For level set simulations another output is availble, called \ct{LS SPREAD RATE}. This output stores the magnitude of the local spread rate calculated as the fire reaches a given point along the surface. The dependence on slope and local wind is related to the mode of level set which is activated (Sec.~\ref{info:level_set}). 
+
 
 \newpage
 
@@ -11552,6 +11554,7 @@ Table~\ref{tab:solidoutputquantities} below lists solid phase output quantities.
 \ct{EMISSIVITY}                                & Surface emissivity (usually constant)         &                    & B,D          \\ \hline
 \ct{FIRE ARRIVAL TIME}                         & Section \ref{info:fire_spread_output}         & \si{s}             & B,D          \\ \hline
 \ct{FIRE RESIDENCE TIME}                       & Section \ref{info:fire_spread_output}         & \si{s}             & B,D          \\ \hline
+\ct{LS SPREAD RATE}                            & Section \ref{info:fire_spread_output}         & \si{m/s}           & B,D          \\ \hline
 \ct{GAS DENSITY}                               & Gas Density near wall                         & \si{kg/m^3}        & B,D          \\ \hline
 \ct{GAS TEMPERATURE}                           & Gas Temperature near wall                     & $^\circ$C          & B,D          \\ \hline
 \ct{HEAT TRANSFER COEFFICIENT}                 & Section \ref{info:convection}                 & \si{W/(m^2.K)}     & B,D          \\ \hline
