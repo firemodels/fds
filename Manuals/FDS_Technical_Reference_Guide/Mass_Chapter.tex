@@ -84,7 +84,7 @@ To illustrate how flux limiters are applied to the scalar transport equations, b
 \be  \frac{(\rho Z)_{i}^* - (\rho Z)_{i}^n}{\dt}
     + \frac{\overline{\rho Z}^{\rm FL}_{i+\frac{1}{2}} u_{i+\frac{1}{2}} - \overline{\rho Z}^{\rm FL}_{i-\frac{1}{2}} u_{i-\frac{1}{2}}}{\dx} = ...
 \ee
-Note that the $\pm\ha$ suffixes indicates a face value for a particular cell $i$. A flux-limited scalar value (density in this case) premultiplies the staggered, face-centered velocity to form the scalar advective flux.  Recall that these velocity values are primitive variables in the calculation---they are \emph{not} interpolated.
+Note that the $\pm\ha$ suffixes indicates a face value for a particular cell $i$. A flux-limited scalar value (density in this case) pre-multiplies the staggered, face-centered velocity to form the scalar advective flux.  Recall that these velocity values are primitive variables in the calculation---they are \emph{not} interpolated.
 Consider face $i+\frac{1}{2}$ between cells $i$ and $i+1$ and let $\phi$ denote a general scalar variable, like $\rho Z_\alpha$.  The local (loc) and upstream (up) data variations are
 \begin{align}
 \delta \phi_{\rm loc} &= \phi_{i+1}-\phi_i \\
@@ -313,7 +313,7 @@ This special treatment of the ghost cell density may be accessed in the source c
 \put(170,30){\line(-1,-1){8}}
 \end{picture}
 
-\caption[Verticel mesh coarening]{Vertical mesh coarsening.  Mesh 1 is the fine mesh.  Mesh 2 is the coarse mesh.  In this example, the coarsening ratio is 1:2.  Solid dots represent interior gas phase unknown values.  Open circles represent ghost cell values.}
+\caption[Vertical mesh coarsening]{Vertical mesh coarsening.  Mesh 1 is the fine mesh.  Mesh 2 is the coarse mesh.  In this example, the coarsening ratio is 1:2.  Solid dots represent interior gas phase unknown values.  Open circles represent ghost cell values.}
 \label{fig:vertmeshcoarsening}
 \end{figure}
 
@@ -398,7 +398,7 @@ compartment leads to an appropriate change in the divergence within the volume.
 \subsection{Combining Pressure Zones}
 
 In the event that a barrier separating two pressure zones should rupture (e.g., opening a door), Eq.~(\ref{concon2}) is modified so that the pressure in the
-newly connected zones is driven towards an equilibrium pressure:
+newly connected zones is driven toward an equilibrium pressure:
 \be
   \bp_{\rm eq} = \sum_m \left( \bp_m \int_{\Omega_m} P \, \d V  \right)  \Big/  \sum_m \int_{\Omega_m} P \, \d V \approx \frac{ \sum_m V_m }{ \sum_m (V_m/\bp_m) }
 \ee
@@ -407,8 +407,8 @@ Note that
   \int_{\Omega_m} P \, \d V \approx  \frac{ V_m}{\gamma \, \bp_m }
 \ee
 where $V_m$ is the volume of zone $m$ and $\gamma$ is the ratio of specific heats.
-To drive the pressure within the connected zones towards each other, a volume flow, $\dot{V}_m^*$, is applied to each zone. This flow is intended to move gas
-from zones with the higher pressures towards zones with lower pressures. Eq.~(\ref{concon2}) now becomes:
+To drive the pressure within the connected zones toward each other, a volume flow, $\dot{V}_m^*$, is applied to each zone. This flow is intended to move gas
+from zones with the higher pressures toward zones with lower pressures. Eq.~(\ref{concon2}) now becomes:
 \be
    \dod{\bp_{\rm eq}}{t} - \frac{ \bp_m - \bp_{\rm eq} }{\tau} =
    \left( \int_{\Omega_m} D \, \d V - \int_{\partial \Omega_m} \bu \cdot \d \bS - \dot{V}_m^* \right) \Big/ \int_{\Omega_m} P \, \d V
@@ -419,8 +419,8 @@ The first term on the left is the change in the equilibrium pressure with time:
    \dod{\bp_{\rm eq}}{t} = \left( \sum_m \int_{\Omega_m} D \, \d V - \sum_m \int_{\partial \Omega_m} \bu \cdot \d \bS \right) \Big/ \sum_m \int_{\Omega_m} P \, \d V
 \ee
 The summation is over all connected zones, and it is essentially the net change in pressure with time for the entire connected region. If there is any opening to the
-exterior of the computational domain, this term is set to zero and all connected zone pressures are driven towards ambient.
-The second term on the left forces the pressure in the $m$th pressure zone towards the equilibrium.
+exterior of the computational domain, this term is set to zero and all connected zone pressures are driven toward ambient.
+The second term on the left forces the pressure in the $m$th pressure zone toward the equilibrium.
 The constant, $\tau$, is a characteristic time for the pressure to come into equilibrium. Its default value is on the order of 1~s. In reality, room pressures typically
 come into equilibrium very rapidly, but air movements associated with rapid changes in pressure can cause numerical instabilities.
 
