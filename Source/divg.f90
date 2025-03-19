@@ -185,6 +185,7 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
          WC => WALL(IW)
          IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP
          BC => BOUNDARY_COORD(WC%BC_INDEX)
+         IF (WC%THIN .AND. BC%IOR<0) CYCLE WALL_LOOP  ! Avoid OpenMP race condition by processing on one side of thin OBST
          BOUNDARY_TYPE_SELECT: SELECT CASE(WC%BOUNDARY_TYPE)
             CASE DEFAULT
                SELECT CASE(BC%IOR)
@@ -321,6 +322,8 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
             RHO_D_DZDN = -(SUM(RHO_D_DZDN_GET(:))-RHO_D_DZDN)
          ENDIF
          B1%RHO_D_DZDN_F(N) = RHO_D_DZDN
+
+         IF (WC%THIN .AND. BC%IOR<0) CYCLE WALL_LOOP_2  ! Avoid OpenMP race condition by processing only one side of thin OBST
 
          IF (STORE_SPECIES_FLUX) THEN
             IF (CORRECTOR) THEN
@@ -529,6 +532,9 @@ CORRECTION_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    ELSE
       B1%K_G = KP(BC%IIG,BC%JJG,BC%KKG)
    ENDIF
+   ! Q_LEAK accounts for enthalpy moving through leakage paths
+   DP(BC%IIG,BC%JJG,BC%KKG) = DP(BC%IIG,BC%JJG,BC%KKG) - ( B1%AREA_ADJUST*B1%Q_CON_F*B1%RDN - B1%Q_LEAK )
+   IF (WC%THIN .AND. BC%IOR<0) CYCLE CORRECTION_LOOP  ! Avoid OpenMP race condition by processing on one side of thin OBST
    SELECT CASE(BC%IOR)
       CASE( 1) ; KDTDX(BC%II  ,BC%JJ  ,BC%KK  ) = 0._EB
       CASE(-1) ; KDTDX(BC%II-1,BC%JJ  ,BC%KK  ) = 0._EB
@@ -537,8 +543,6 @@ CORRECTION_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       CASE( 3) ; KDTDZ(BC%II  ,BC%JJ  ,BC%KK  ) = 0._EB
       CASE(-3) ; KDTDZ(BC%II  ,BC%JJ  ,BC%KK-1) = 0._EB
    END SELECT
-   ! Q_LEAK accounts for enthalpy moving through leakage paths
-   DP(BC%IIG,BC%JJG,BC%KKG) = DP(BC%IIG,BC%JJG,BC%KKG) - ( B1%AREA_ADJUST*B1%Q_CON_F*B1%RDN - B1%Q_LEAK )
 ENDDO CORRECTION_LOOP
 
 ! Compute (q + del dot k del T) and add to the divergence
