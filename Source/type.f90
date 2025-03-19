@@ -442,6 +442,8 @@ TYPE WALL_TYPE
    INTEGER :: N_INTEGERS=0            !< Number of integers to pack into restart or send/recv buffer
    INTEGER :: N_LOGICALS=0            !< Number of logicals to pack into restart or send/recv buffer
 
+   LOGICAL :: THIN=.FALSE.            !< Indicates if the underlying solid is zero cells thick
+
 END TYPE WALL_TYPE
 
 

@@ -333,9 +333,11 @@ END SUBROUTINE ASSIGN_GHOST_VALUE
 !> \param SF Pointer to SURFACE derived type
 !> \param BC Pointer to BOUNDARY_COORD derived type
 !> \param B1 Pointer to BOUNDARY_PROP1 derived type
-!> \param LP Pointer to LAGRANGIAN_PARTICLE derived type
-!> \param WALL_INDEX Index of wall cell
-!> \param PARTICLE_INDEX Index of particle
+!> \param LP (Optional) Pointer to LAGRANGIAN_PARTICLE derived type
+!> \param TW (Optional) Pointer to THIN_WALL
+!> \param WALL_INDEX (Optional) Index of wall cell
+!> \param PARTICLE_INDEX (Optional) Index of particle
+!> \param THIN_WALL_INDEX (Optional) Index of thin wall cell
 
 SUBROUTINE NEAR_SURFACE_GAS_VARIABLES(T,SF,BC,B1,LP,TW,WALL_INDEX,PARTICLE_INDEX,THIN_WALL_INDEX)
 
@@ -1384,6 +1386,7 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
             ENDIF
          ENDIF
          IF (OTHER_MESH_OBST_INDEX>0) THEN
+            !$OMP CRITICAL
             IF (OBST_INDEX>0) OBSTRUCTION(OBST_INDEX)%MASS = MESHES(EWC%NOM)%OBSTRUCTION(OTHER_MESH_OBST_INDEX)%MASS
             IF (MESHES(EWC%NOM)%OBSTRUCTION(OTHER_MESH_OBST_INDEX)%CONSUMABLE) THEN
                OMESH(EWC%NOM)%N_EXTERNAL_OBST = OMESH(EWC%NOM)%N_EXTERNAL_OBST + 1
@@ -1392,6 +1395,7 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
                OMESH(EWC%NOM)%REAL_SEND_PKG8(LL)   = &
                   (B1%M_DOT_PART_ACTUAL+SUM(B1%M_DOT_G_PP_ACTUAL(1:N_TRACKED_SPECIES)))*DT*B1%AREA
             ENDIF
+            !$OMP END CRITICAL
          ELSE
             !$OMP CRITICAL
             IF (OBST_INDEX>0) OBSTRUCTION(OBST_INDEX)%MASS = OBSTRUCTION(OBST_INDEX)%MASS - &
@@ -3482,7 +3486,7 @@ END SUBROUTINE PYROLYSIS
 !> \param WALL_INDEX_IN Optional wall cell index
 !> \param CFACE_INDEX_IN Optional cface index
 !> \param PARTICLE_INDEX_IN Optional particle index
-!> \param BACK_SIZE Optional flag indicating if the surface is on the back side of the obstruction
+!> \param BACK_SIDE Optional flag indicating if the surface is on the back side of the obstruction
 
 REAL(EB) FUNCTION HEAT_TRANSFER_COEFFICIENT(NM,T,DELTA_N_TMP,SF,WALL_INDEX_IN,CFACE_INDEX_IN,PARTICLE_INDEX_IN,BACK_SIDE)
 
@@ -3740,7 +3744,7 @@ WALL_LOOP: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
 ENDDO WALL_LOOP
 !$OMP END DO
 
-!$OMP DO SCHEDULE(GUIDED) PRIVATE(ITW,TW,SF,BC,ONE_D,NWP,THR_D,I,II,IWA,NM2,I_NODE,WC2,BC2,ONE_D2,TW2)
+!$OMP DO SCHEDULE(GUIDED) PRIVATE(ITW,TW,SF,BC,ONE_D,NWP,THR_D,I,II,IWA,NM2,I_NODE,WC2,BC2,ONE_D2,TW2,TMP_1,TMP_NWP)
 THIN_WALL_LOOP: DO ITW=1,M%N_THIN_WALL_CELLS
 
    TW => M%THIN_WALL(ITW)
