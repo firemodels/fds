@@ -5,7 +5,40 @@ Created on Wed Mar 12 11:20:18 2025
 @author: jhodges
 """
 
-import glob, os
+import os, subprocess, platform
+
+def sortWhitelist(firemodels):
+    whitelist = os.path.join(firemodels, 'fds','Manuals','Bibliography')+ os.sep + 'whitelist.txt'
+    whitelist = os.path.abspath(whitelist)
+    
+    with open(whitelist,'r') as f:
+        txt = f.readlines()
+    
+    words = list(set(txt[1:]))
+    words.sort()
+    
+    outtxt = txt[0] + '\n' + '\n'.join(words) + '\n'
+    while '\n\n' in outtxt:
+        outtxt = outtxt.replace('\n\n','\n')
+        
+    with open(whitelist.replace('.txt','_back.txt'), 'w') as f:
+        f.writelines(txt)
+        
+    with open(whitelist, 'w') as f:
+        f.write(outtxt)
+
+def checkSpelling(file, firemodels):
+    whitelist = os.path.join(firemodels, 'fds','Manuals','Bibliography')+ os.sep + 'whitelist.txt'
+    whitelist = os.path.abspath(whitelist)
+    if 'Windows' in platform.platform():
+        whitelist = whitelist.replace('\\','/')
+        whitelist = whitelist[0].upper() + whitelist[1:]
+    cmd = ['aspell','--lang=en','--mode=tex','--add-extra-dicts=%s'%(whitelist), 'list', '<', file]
+    
+    p = subprocess.run(cmd, capture_output=True, shell=True)
+    txt = p.stdout.decode('utf-8')
+    txt = txt.replace('\r\n','\n')
+    return txt
 
 def checkCaption(caption):
     
@@ -92,6 +125,10 @@ texfiles = ['../FDS_Verification_Guide/FDS_Verification_Guide.tex',
             '../FDS_Validation_Guide/HVAC_Chapter.tex',
             '../FDS_Validation_Guide/Suppression_Chapter.tex']
 
+firemodels = os.path.join(os.path.dirname(__file__),'..','..','..')
+
+# This can be called if the white list is being edited and you want sort it
+# sortWhitelist(firemodels)
 
 outtxt = '\n'
 for i in range(0, len(texfiles)):
@@ -120,6 +157,16 @@ for i in range(0, len(texfiles)):
     
     # Check disallowed commands
     outtxt = outtxt + check_disallowed_commands(txt, file)
+    
+    # Check spelling
+    txt = checkSpelling(file, firemodels)
+    
+    if len(txt) > 0:
+        txt_list = list(set(txt.split('\n')))
+        txt_list.sort()
+        #while '\n\n' in txt:
+        #    txt = txt.replace('\n\n','\n')
+        outtxt = outtxt + '\n\nMisspelt Words in %s:\n'%(file) + '\n'.join(txt_list) + '\n\n'
 
 if len(outtxt) > 1:
     print("Warnings identified in the manual check:")

@@ -491,7 +491,7 @@ The purpose of the second term on the right hand side of Eq.~(\ref{Hbc}) is seen
 \be
    u_{I,jk}^{*,m} = \bar{u}_{I,jk}^n - \frac{u_{I,jk}^{*,m-1}-u_{0,jk}^{*,m-1}}{2} - \dt \left( F_{x,I,jk}^{n} + \frac{ (\cH_{I,jk}^{m-1}+\cH_{1,jk}^{m-1})/2 - \cH_{I,jk}^{m} }{ \dx/2} \right) \label{uI}
 \ee
-The extra term on the right hand side drives $u_{I,jk}^{*,m}$ halfway towards $u_{0,jk}^{*,m}$, and vice versa. This iterative process continues until $\left| u_{I,jk}^{*,m} - u_{0,jk}^{*,m} \right|$ falls below a specified tolerance. By default, the tolerance is $\dx/2$.
+The extra term on the right hand side drives $u_{I,jk}^{*,m}$ halfway toward $u_{0,jk}^{*,m}$, and vice versa. This iterative process continues until $\left| u_{I,jk}^{*,m} - u_{0,jk}^{*,m} \right|$ falls below a specified tolerance. By default, the tolerance is $\dx/2$.
 
 For the corrector phase of the time step, the procedure is the same, except the boundary condition for the pressure term is:
 \be
@@ -577,10 +577,10 @@ This section describes how the tangential component of velocity is specified at 
 \subsection{Smooth Walls}
 \label{smooth_wall_model}
 
-In finite-volume LES, when the momentum equation is integrated over a cell adjacent to the wall it turns out that the most difficult term to handle is the viscous stress, $\tau_w$, because the wall-normal gradient of the streamwise velocity component cannot be resolved; the SGS stress at the wall is identically zero.  We have, therefore, an entirely different situation than exists in the bulk flow at high Reynolds number where the viscous terms are negligible and the SGS stress is of critical importance.  The fidelity of the SGS model still influences the wall stress, however, since other components of the SGS tensor affect the value of the near-wall velocity and hence the resulting viscous stress determined by the wall model. FDS models $\tau_w$ with a logarithmic velocity profile \cite{Pope:2000} described below.
+In finite-volume LES, when the momentum equation is integrated over a cell adjacent to the wall it turns out that the most difficult term to handle is the viscous stress, $\tau_w$, because the wall-normal gradient of the stream-wise velocity component cannot be resolved; the SGS stress at the wall is identically zero.  We have, therefore, an entirely different situation than exists in the bulk flow at high Reynolds number where the viscous terms are negligible and the SGS stress is of critical importance.  The fidelity of the SGS model still influences the wall stress, however, since other components of the SGS tensor affect the value of the near-wall velocity and hence the resulting viscous stress determined by the wall model. FDS models $\tau_w$ with a logarithmic velocity profile \cite{Pope:2000} described below.
 
 An important scaling quantity in the near-wall region is the friction velocity, defined as $u_\tau \equiv \sqrt{\tau_w/\rho}$.
-From the friction velocity we can define the nondimensional streamwise velocity $u^+ \equiv u/u_\tau$ and nondimensional wall-normal distance $y^+ \equiv y/\delta_\nu$, where $\delta_\nu = \nu/u_\tau = \mu/(\rho u_\tau)$ is the \emph{viscous length scale}. In FDS, the law of the wall is approximated by
+From the friction velocity we can define the non-dimensional stream-wise velocity $u^+ \equiv u/u_\tau$ and non-dimensional wall-normal distance $y^+ \equiv y/\delta_\nu$, where $\delta_\nu = \nu/u_\tau = \mu/(\rho u_\tau)$ is the \emph{viscous length scale}. In FDS, the law of the wall is approximated by
 \begin{align}
 \label{eqn_visclayer} u^+ &= y^+                           && \mbox{for} \quad y^+ < 11.81 \\
 \label{eqn_loglaw}    u^+ &= \frac{1}{\kappa} \ln y^+ + B  && \mbox{for} \quad y^+ \ge 11.81
@@ -594,7 +594,7 @@ where $\kappa = 0.41$ is the von K\'arm\'an constant and $B=5.2$.  The region $5
 %\end{align}
 %where $(1/\kappa)_{\mbox{\tiny\emph{buffer}}}=4.74$ and $B_{\mbox{\tiny\emph{buffer}}}=-2.63$.
 
-For the purposes of adapting the log law model to FDS we suppose that the first off-wall velocity component represents the profile sampled at a distance $\delta y/2$ in the wall-normal direction---streamwise components of velocity are stored at the face center on a staggered grid.  The density and molecular viscosity are taken as the average of the neighboring cell values and uniform on the cell face where the streamwise velocity component is stored.
+For the purposes of adapting the log law model to FDS we suppose that the first off-wall velocity component represents the profile sampled at a distance $\delta y/2$ in the wall-normal direction---stream-wise components of velocity are stored at the face center on a staggered grid.  The density and molecular viscosity are taken as the average of the neighboring cell values and uniform on the cell face where the stream-wise velocity component is stored.
 
 \subsection{Rough Walls}
 \label{rough_wall_model}

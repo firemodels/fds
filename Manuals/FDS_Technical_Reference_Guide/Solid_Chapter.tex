@@ -313,7 +313,7 @@ The local oxygen volume fraction at depth $x$ is calculated from the gas phase (
 \be
 X_{\rm O_2}(x) = X_{\rm O_2,f}\exp(-x/L_{\rm g,\alpha\beta})
 \ee
-where $L_{\rm g,\alpha\beta}$ is the characteristic depth of oxygen diffusion. Specifying $L_{\rm g,\alpha\beta}=0$ m means that the reaction takes place only at the surface of the material.  The defaul value is $L_{\rm g,\alpha\beta}=0.001$ m.
+where $L_{\rm g,\alpha\beta}$ is the characteristic depth of oxygen diffusion. Specifying $L_{\rm g,\alpha\beta}=0$ m means that the reaction takes place only at the surface of the material.  The default value is $L_{\rm g,\alpha\beta}=0.001$ m.
 
 The fourth factor is a power function for temperature.
 
@@ -345,7 +345,7 @@ If the material reaction involves oxygen, then we balance the rate of mass flux 
 \be
 \dm_{\rm O_2}'' = h_{\rm m}(Y_{\rm O_2,f} - Y_{\rm O_2,g}) \quad \longrightarrow \quad Y_{\rm O_2,f} = Y_{\rm O_2,g} + \frac{\dm_{\rm O_2}''}{h_{\rm m}}
 \ee
-where $h_m$ is the mass transfer coefficient computed from the heat transfer coefficient as $h/c_p(T_{\rm film})$.  The mass flux of oxygen will be a negative value, so this formula reduces the surface value of oxygen from the gas phase cell value and hence limits the oxygen available for the material reaction.  The Newtwon method uses the value of $Y_{\rm O_2,f}$ from the previous time step as an initial guess and usually converges in a few iterations.
+where $h_m$ is the mass transfer coefficient computed from the heat transfer coefficient as $h/c_p(T_{\rm film})$.  The mass flux of oxygen will be a negative value, so this formula reduces the surface value of oxygen from the gas phase cell value and hence limits the oxygen available for the material reaction.  The Newton method uses the value of $Y_{\rm O_2,f}$ from the previous time step as an initial guess and usually converges in a few iterations.
 
 The chemical source term in the heat conduction equation is
 \be
@@ -387,7 +387,7 @@ In practice, a liquid fuel may have multiple components, like gasoline or kerose
 \ee
 The assumption of an assumed lumped gas species is not mandatory---one can evaporate each liquid component to form a unique gas species.
 
-For simplicity, the liquid fuel itself is treated like a thermally-thick solid for the purpose of computing the heat conduction. There is no computation of the convection of the liquid within the pool. Obviously, this assumption has consequences. One of which is related to the fact that the evaporation rate expression ({\ref{mdot_alpha}) is applied only to the surface liquid layer. However, it is possible that an interior liquid layer may possess a temperature, $T_\ell$, in excess of the boiling temperature of an individual liquid component, $T_{\rm b,\alpha}$. If this is the case, an additional amount of component $\alpha$ is boiled off from the surface so as to drive the liquid temperature back towards the boiling point of component $\alpha$. This addition to the surface mass flux takes the form:
+For simplicity, the liquid fuel itself is treated like a thermally-thick solid for the purpose of computing the heat conduction. There is no computation of the convection of the liquid within the pool. Obviously, this assumption has consequences. One of which is related to the fact that the evaporation rate expression ({\ref{mdot_alpha}) is applied only to the surface liquid layer. However, it is possible that an interior liquid layer may possess a temperature, $T_\ell$, in excess of the boiling temperature of an individual liquid component, $T_{\rm b,\alpha}$. If this is the case, an additional amount of component $\alpha$ is boiled off from the surface so as to drive the liquid temperature back toward the boiling point of component $\alpha$. This addition to the surface mass flux takes the form:
 \be
    \dot{m}_\alpha'' = \frac{ \rho_{\ell,\alpha} \left( h(T_{\ell})-h(T_{\rm b,\alpha}) \right) \delta}{h_{\rm v,\alpha} \dt} \quad ; \quad  h(T) = \int_0^T  c_s(T') \d T'
 \ee
