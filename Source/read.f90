@@ -11777,7 +11777,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
 
    IF (I_MODE==2) THEN
       ALLOCATE(MESHES(NM)%VENTS(N_VENT),STAT=IZERO) ; CALL ChkMemErr('READ','VENTS',IZERO) ; VENTS=>MESHES(NM)%VENTS
-      IF (.NOT. ALLOCATED(VENT_TOTAL_AREA)) ALLOCATE(VENT_TOTAL_AREA(N_VENT_TOTAL,NMESHES),STAT=IZERO) ! Only once per MPI process
+      IF (.NOT. ALLOCATED(VENT_TOTAL_AREA)) ALLOCATE(VENT_TOTAL_AREA(N_VENT_TOTAL),STAT=IZERO) ! Only once per MPI process
       CALL ChkMemErr('READ','VENT_TOTAL_AREA',IZERO); VENT_TOTAL_AREA = 0._EB
       IF (MY_RANK==0 .AND. .NOT.ALLOCATED(ORIGINAL_VENTS)) ALLOCATE(ORIGINAL_VENTS(N_ORIGINAL_VENTS))
    ENDIF
@@ -11787,7 +11787,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
    N_VENT           = 0  ! Number of VENTs stored by each mesh
    N_TOTAL          = 0  ! Counter of all VENTs, both explicit and implicit
    N_EXPLICIT       = 0  ! Counter of explicitly declared VENTs
-   N_VENT_TOTAL     = 0  ! Purely for Smokeview drawing of VENTs
+   N_VENT_TOTAL     = 0  ! Total number of all vents throughout the whole domain
    N_ORIGINAL_VENTS = 0  ! Number of specified vents for use with Smokeview and HVAC drawing
 
    REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
@@ -12443,7 +12443,7 @@ MESH_LOOP_2: DO NM=1,NMESHES
                ENDDO
             ENDDO
       END SELECT
-      VENT_TOTAL_AREA(VT%TOTAL_INDEX,NM) = VT%FDS_AREA
+      VENT_TOTAL_AREA(VT%TOTAL_INDEX) = VENT_TOTAL_AREA(VT%TOTAL_INDEX) + VT%FDS_AREA
    ENDDO  VENT_LOOP_3
 
 ENDDO MESH_LOOP_2
