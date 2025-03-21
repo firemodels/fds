@@ -10253,8 +10253,14 @@ CFACE_LOOP_2 : DO ICF=INTERNAL_CFACE_CELLS_LB+1,INTERNAL_CFACE_CELLS_LB+N_INTERN
    ENDDO
 ENDDO CFACE_LOOP_2
 
-Q_DOT_SUM = Q_DOT_SUM + DT*Q_DOT
-M_DOT_SUM = M_DOT_SUM + DT*M_DOT
+! Muliply the energy and mass  rates (Q_DOT, M_DOT (W)) for this time step by the time step size, DT.
+! For all the meshes belonging to the current MPI process, keep a running tally of the rates (Q_DOT_SUM, M_DOT_SUM (J)).
+! When it is time for a dump to the CHID_hrr.csv file, sum up (i.e. MPI_ALLREDUCE) Q_DOT_SUM and M_DOT_SUM in main.f90.
+
+IF (NM==UPPER_MESH_INDEX) THEN
+   Q_DOT_SUM = Q_DOT_SUM + DT*Q_DOT
+   M_DOT_SUM = M_DOT_SUM + DT*M_DOT
+ENDIF
 
 END SUBROUTINE UPDATE_HRR
 
