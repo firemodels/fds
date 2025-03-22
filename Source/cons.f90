@@ -274,6 +274,7 @@ LOGICAL :: OUTPUT_WALL_QUANTITIES=.FALSE.           !< Flag to force call to WAL
 LOGICAL :: FLUX_LIMITER_MW_CORRECTION=.FALSE.       !< Flag for MW correction ensure consistent equation of state at face
 LOGICAL :: STORE_FIRE_ARRIVAL=.FALSE.               !< Flag for tracking arrival of spreading fire front over a surface
 LOGICAL :: STORE_FIRE_RESIDENCE=.FALSE.             !< Flag for tracking residence time of spreading fire front over a surface
+LOGICAL :: STORE_LS_SPREAD_RATE=.FALSE.             !< Flag for outputting local level set spread rate magnitude
 LOGICAL :: TEST_NEW_CHAR_MODEL=.FALSE.              !< Flag to envoke new char model
 
 INTEGER, ALLOCATABLE, DIMENSION(:) :: CHANGE_TIME_STEP_INDEX      !< Flag to indicate if a mesh needs to change time step
@@ -346,8 +347,8 @@ REAL(EB) :: GRAV=9.80665_EB                    !< Acceleration of gravity (m/s2)
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: H_V_H2O !< Heat of vaporization for water (J/kg)
 REAL(EB) :: CHI_R_MIN=0._EB                    !< Lower bound for radiative fraction
 REAL(EB) :: CHI_R_MAX=1._EB                    !< Upper bound for radiative fraction
-REAL(EB) :: SPHERE_FILM_FAC=ONTH               !< Factor used in droplet evaporation algorithm for droplets
-REAL(EB) :: PLATE_FILM_FAC=ONTH                !< Factor used in droplet evaporation algorithm for walls
+REAL(EB) :: SPHERE_FILM_FACTOR=ONTH            !< Weighting factor used in droplet evaporation algorithm for droplets
+REAL(EB) :: PLATE_FILM_FACTOR=ONTH             !< Weighting factor used in droplet evaporation algorithm for walls
 REAL(EB) :: ORIGIN_LAT=-1.E6_EB                !< Latitude of terrain map
 REAL(EB) :: ORIGIN_LON=-1.E6_EB                !< Longitude of terrain map
 REAL(EB) :: NORTH_BEARING=0._EB                !< North bearing for terrain map
@@ -758,7 +759,7 @@ REAL(EB), ALLOCATABLE, DIMENSION(:) :: EXTERNAL_RAMP
 LOGICAL, ALLOCATABLE, DIMENSION(:) :: EXTERNAL_CTRL
 
 ! VENT array
-REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: VENT_TOTAL_AREA
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: VENT_TOTAL_AREA  !< Array holding grid-snapped areas for all vents
 
 END MODULE GLOBAL_CONSTANTS
 

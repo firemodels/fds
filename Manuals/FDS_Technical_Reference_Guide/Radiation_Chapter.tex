@@ -321,7 +321,7 @@ This is the default mode of FDS. For optically thin flames, however, where the y
 
 The radiant heat flux vector $\dbq_{\rm r}''$ is defined
 \be \dbq_{\rm r}''(\bx) = \int_{4\pi} \;  I(\bx,\bs) \, \bs \; \d \Omega   \ee
-The interaction between the electromagneric radiation and the gas molecules and soot particles contributes to the gas phase energy equation through the source term which, under the gray gas assumption, can be written as
+The interaction between the electromagnetic radiation and the gas molecules and soot particles contributes to the gas phase energy equation through the source term which, under the gray gas assumption, can be written as
 \be -\nabla\!\cdot \dbq_{\rm r}''(\bx)(\mbox{gas}) =
     \kappa(\bx) \, \left[ U(\bx) - 4 \pi \, I_{\rm b}(\bx) \right]  \quad ; \quad
     U(\bx) = \int_{4\pi} \, I(\bx,\bs) \, \d \Omega  \label{net_emission}
@@ -469,7 +469,7 @@ exactly.The local incident radiation intensity is
  U_{ijk} = \sum_{l=1}^{N_{\Omega}} I_{ijk}^l \delta\Omega^l
 \ee
 
-In Cartesian coordinates\footnote{In the axisymmetric case equation~(\ref{RTEdiscrete2}) becomes
+In Cartesian coordinates\footnote{In the axi-symmetric case equation~(\ref{RTEdiscrete2}) becomes
 a little bit more complicated, as the cell face normal vectors $\bn_m$ are not always constant. However, the computational efficiency can still be
 retained.},
 the normal vectors $\bn_m$ are the base vectors of the coordinate system and the integrals over the solid
@@ -537,13 +537,13 @@ or scattering are important, or if the scenario is optically very thick. Current
 
 \subsection{Spatial Discretization in Cut Cells}
 
-In the case of complex gemoetry where irregular cut-cells may exist (see Sec.~\ref{sec:unstructured_geometry}) an unstructured version of the RTE in Eq.~\ref{RTEdiscrete3} is adopted
+In the case of complex geometry where irregular cut-cells may exist (see Sec.~\ref{sec:unstructured_geometry}) an unstructured version of the RTE in Eq.~\ref{RTEdiscrete3} is adopted
 \be  \sum_{f=1}^n A_f \; I_f^l \; D_f^l
    = \kappa_{ijk} \,
      \left[ I_{{\rm b},ijk} - I_{ijk}^l \right] \; V_{ijk} \,
      \delta \Omega^l, 
 \ee
-where $A_f$ are the $n$ cut-face areas. These include both gasphase cut-faces, which are cartesian grid aligned, and in-boundary cut-faces, which can have any orientation. The $D_f$-terms are calculated as
+where $A_f$ are the $n$ cut-face areas. These include both gasphase cut-faces, which are Cartesian grid aligned, and in-boundary cut-faces, which can have any orientation. The $D_f$-terms are calculated as
 \begin{align}
 D_f^l & = \int_{\Omega^l}(\bs \cdot \bn_f) \d \Omega \\
 & = \int_{\dph}\int_{\dth} [\cos\phi\sin\theta \, \hat{x}_f + \sin\phi\sin\theta \, \hat{y}_f + \cos\theta \, \hat{z}_f] \sin\theta \; \d \theta \d\phi \notag \\
@@ -554,7 +554,7 @@ with $D_x^l$, $D_y^l$, and $D_z^l$ defined as above and ($\hat{x}_f,\hat{y}_f,\h
    \sum_{fd} A_{fd} \; I_{ijk}^l \; D_{fd}^l = \kappa_{ijk}\,I_{{\rm b},ijk} V_{ijk} \,\delta \Omega^l
    - \kappa_{ijk}\,I_{ijk}^l\,V_{ijk} \,\delta \Omega^l.
 \ee
-In this case the upwind cut-face intensities, $I_{nu}^l$, come from the upwind value for gasphase cut-faces (as with the cartesian solution) and from the boundary conditions for in-boundary cut-faces.  The downwind cut-face intensities, $I_{nd}^l$, use the cell value, $I_{ijk}^l$.
+In this case the upwind cut-face intensities, $I_{nu}^l$, come from the upwind value for gasphase cut-faces (as with the Cartesian solution) and from the boundary conditions for in-boundary cut-faces.  The downwind cut-face intensities, $I_{nd}^l$, use the cell value, $I_{ijk}^l$.
 
 Adopting the previous notation, the equation for intensity becomes
 \be

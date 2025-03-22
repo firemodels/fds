@@ -442,6 +442,8 @@ TYPE WALL_TYPE
    INTEGER :: N_INTEGERS=0            !< Number of integers to pack into restart or send/recv buffer
    INTEGER :: N_LOGICALS=0            !< Number of logicals to pack into restart or send/recv buffer
 
+   LOGICAL :: THIN=.FALSE.            !< Indicates if the underlying solid is zero cells thick
+
 END TYPE WALL_TYPE
 
 
@@ -910,6 +912,7 @@ TYPE SURFACE_TYPE
    REAL(EB) :: CHI_R_EFF                               !< Effective radiative fraction for S_pyro
    REAL(EB) :: TIME_STEP_FACTOR=10._EB                 !< Maximum amount to reduce solid phase conduction time step
    REAL(EB) :: REMESH_RATIO=0.05                       !< Fraction change in wall node DX to trigger a remesh
+   REAL(EB) :: FILM_FACTOR=ONTH                        !< Weighting factor for evaluating surface file properties
 
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: DX,RDX,RDXN,X_S,DX_WGT,MF_FRAC,PARTICLE_INSERT_CLOCK
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: RHO_0
