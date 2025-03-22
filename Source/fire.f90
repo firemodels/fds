@@ -875,7 +875,10 @@ INTEGRATION_LOOP: DO TIME_ITER = 1,MAX_CHEMISTRY_SUBSTEPS
          DO NS =1,N_TRACKED_SPECIES
             ATOL(NS) = DBLE(SPECIES_MIXTURE(NS)%ODE_ABS_ERROR)
          ENDDO
+         IF (1==2) WRITE(LU_ERR,*) PRES_IN ! To avoid unused variable error.
+#ifdef WITH_SUNDIALS
          CALL CVODE(ZZ_MIXED,TMP_IN,PRES_IN,ZETA_0, ZETA,TAU_MIX,CELL_MASS,T,DT_SUB,GLOBAL_ODE_REL_ERROR, ATOL)
+#endif
          ZETA_0     = ZETA
          Q_REAC_SUB = 0._EB
    END SELECT INTEGRATOR_SELECT
@@ -982,8 +985,10 @@ END SUBROUTINE COMBUSTION_MODEL
 !> \param GLOBAL_ODE_REL_ERROR is the relative error for all the species (REAL_EB)
 !> \param ATOL is the absolute error tolerance array for the species (REAL_EB)
 
+#ifdef WITH_SUNDIALS
 SUBROUTINE CVODE(ZZ, TMP_IN, PRES_IN,  ZETA_IN, ZETA_OUT, TAU_MIX, CELL_MASS, T_CFD, DT, GLOBAL_ODE_REL_ERROR, ATOL)
 USE PHYSICAL_FUNCTIONS, ONLY :  GET_MOLECULAR_WEIGHT
+USE CHEMCONS, ONLY: WRITE_MIXING_SUBSTEPS
 
 REAL(EB), INTENT(INOUT) :: ZZ(N_TRACKED_SPECIES)
 REAL(EB), INTENT(IN) :: ATOL(N_TRACKED_SPECIES)
@@ -991,39 +996,51 @@ REAL(EB), INTENT(IN) :: TMP_IN,PRES_IN,ZETA_IN,TAU_MIX,CELL_MASS,T_CFD,DT,GLOBAL
 REAL(EB), INTENT(OUT) ::ZETA_OUT
 
 REAL(EB) :: CC(N_TRACKED_SPECIES)
-REAL(EB) :: MW, RHO_IN, RHO_OUT, XXX, T1, T2, TOTAL_MIXED_MASS_0, ZETA0
-INTEGER :: NS
+REAL(EB) :: MW, RHO_IN, RHO_OUT, T1, T2, ZETA0, CHEM_TIME
+INTEGER :: NS, CVODE_CALL_OPTION
+LOGICAL :: WRITE_SUBSTEPS
 
+CVODE_CALL_OPTION = 1 ! CV_NORMAL
+WRITE_SUBSTEPS = .FALSE.
 CC = 0._EB
 
 ! Get the initial mass and concentration of mixed zone
-ZETA0 = ZETA_IN
-IF(ZETA0 >= 1._EB) ZETA0 = 0.99 ! With ZETA0 =1 the CVODE ODE become too stiff to solve. Hence, artifical mixing. 
-TOTAL_MIXED_MASS_0  = (1._EB-ZETA0)*CELL_MASS
-IF (TOTAL_MIXED_MASS_0 > 0._EB) THEN
-   CALL GET_MOLECULAR_WEIGHT(ZZ,MW)
-   RHO_IN = PRES_IN*MW/R0/TMP_IN ! [PR]= Pa, [MW] = g/mol, [R0]= J/K/kmol, [TMP]=K, [RHO]= kg/m3
-   ! Convert to concentration
-   DO NS =1,N_TRACKED_SPECIES
-     CC(NS) = RHO_IN*ZZ(NS)/SPECIES_MIXTURE(NS)%MW  ! [RHO]= kg/m3, [MW] = g/mol = kg/kmol, [CC] = kmol/m3
-   ENDDO
-   WHERE(CC<0._EB) CC=0._EB
-ENDIF   
+CALL GET_MOLECULAR_WEIGHT(ZZ,MW)
+RHO_IN = PRES_IN*MW/R0/TMP_IN ! [PR]= Pa, [MW] = g/mol, [R0]= J/K/kmol, [TMP]=K, [RHO]= kg/m3
+DO NS =1,N_TRACKED_SPECIES
+  CC(NS) = RHO_IN*ZZ(NS)/SPECIES_MIXTURE(NS)%MW  ! [RHO]= kg/m3, [MW] = g/mol = kg/kmol, [CC] = kmol/m3
+ENDDO
+WHERE(CC<0._EB) CC=0._EB
 
-#ifdef WITH_SUNDIALS
+! Get the initial mass and concentration of mixed zone
+IF(ZETA_IN >= 1._EB) THEN
+   ! With ZETA_IN =1 the CVODE ODE become too stiff to solve. Hence, performing negligible
+   ! artifical mixing based on a chemical time scale.
+   T1 = 0._EB
+   T2 = DT
+   ZETA0 = 0._EB ! Assume completely mixed.
+   CVODE_CALL_OPTION = 2 ! CV_ONE_STEP
+   CUR_CFD_TIME = T_CFD ! Set current cfd time in cvode, for logging purpose.
+   CALL  CVODE_SERIAL(CC,ZZ, TMP_IN, PRES_IN, ZETA0, TAU_MIX, CELL_MASS, T1,T2, GLOBAL_ODE_REL_ERROR, ATOL, &
+                      CHEM_TIME, WRITE_SUBSTEPS, CVODE_CALL_OPTION)
+   CHEM_TIME = MAX(CHEM_TIME,1.E-8_EB)
+   ZETA0 = ZETA_IN*EXP(-CHEM_TIME/TAU_MIX)
+ELSE
+   ZETA0 = ZETA_IN
+ENDIF
+
+CVODE_CALL_OPTION = 1
+IF(WRITE_MIXING_SUBSTEPS) THEN
+   CVODE_CALL_OPTION = 2 ! CV_ONE_STEP
+   WRITE_SUBSTEPS = .TRUE.
+ENDIF
+
+! Call CVODE to solve chemistry + Mixing
 T1 = 0._EB
 T2 = DT
 CUR_CFD_TIME = T_CFD ! Set current cfd time in cvode, for logging purpose.
-CALL  CVODE_SERIAL(CC,ZZ, TMP_IN, PRES_IN, ZETA0, TAU_MIX, CELL_MASS, T1,T2, GLOBAL_ODE_REL_ERROR, ATOL)
-! Avoid unused build error
-XXX = 1._EB
-#else
-! Avoid unused build error
-XXX = MINVAL(ATOL)
-XXX = T_CFD
-XXX = DT
-XXX = GLOBAL_ODE_REL_ERROR
-#endif
+CALL  CVODE_SERIAL(CC,ZZ, TMP_IN, PRES_IN, ZETA0, TAU_MIX, CELL_MASS, T1,T2, GLOBAL_ODE_REL_ERROR, ATOL, &
+                   CHEM_TIME, WRITE_SUBSTEPS, CVODE_CALL_OPTION)
 
 ! Convert back to mass fraction (Check for negative concentration)
 WHERE(CC<0._EB) CC=0._EB
@@ -1032,10 +1049,9 @@ RHO_OUT = SUM(ZZ)
 ZZ = ZZ/RHO_OUT
 
 ZETA_OUT = ZETA_IN*EXP(-DT/TAU_MIX)
-!WRITE(LU_ERR,*) "T_CFD,DT,RHO_IN, RHO_OUT, v_in, v_out=",T_CFD,DT,RHO_IN, RHO_OUT, 1._EB/RHO_IN, 1._EB/RHO_OUT
 
 END SUBROUTINE CVODE
-
+#endif
 
 SUBROUTINE CHECK_AUTO_IGNITION(EXTINCT,TMP_IN,AIT,IIC,JJC,KKC,REAC_INDEX)
 
