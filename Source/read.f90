@@ -1800,7 +1800,7 @@ TURBULENCE_MODEL     = 'null'
 MAX_LEAK_PATHS       = 200
 FLUX_LIMITER         = 'null'
 LES_FILTER_TYPE      = 'null'
-UNFREEZE_TIME        = -1
+UNFREEZE_TIME        = -1._EB
 
 ! Initial read of the MISC line
 
