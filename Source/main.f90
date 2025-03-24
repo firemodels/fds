@@ -532,6 +532,11 @@ T_USED(1) = WALL_CLOCK_START_ITERATIONS
 
 INITIALIZATION_PHASE = .FALSE.
 
+IF (UNFREEZE_TIME > 0._EB) THEN 
+   FREEZE_VELOCITY=.TRUE. 
+   SOLID_PHASE_ONLY=.TRUE.
+ENDIF
+
 IF (MY_RANK==0 .AND. VERBOSE) CALL VERBOSE_PRINTOUT('Starting the time-stepping')
 
 !***********************************************************************************************************************************
@@ -568,6 +573,11 @@ MAIN_LOOP: DO
 
    LO10 = INT(LOG10(REAL(MAX(1,ABS(ICYC)),EB)))
    IF (MOD(ICYC,10**LO10)==0 .OR. MOD(ICYC,DIAGNOSTICS_INTERVAL)==0 .OR. (T+DT)>=T_END) DIAGNOSTICS = .TRUE.
+
+   IF ((UNFREEZE_TIME > 0._EB).AND.(T>UNFREEZE_TIME)) THEN 
+      FREEZE_VELOCITY=.FALSE.
+      SOLID_PHASE_ONLY=.FALSE.
+   ENDIF
 
    !================================================================================================================================
    !                                           Start of Predictor part of time step
