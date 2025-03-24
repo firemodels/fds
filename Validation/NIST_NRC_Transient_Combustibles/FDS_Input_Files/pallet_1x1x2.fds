@@ -14,6 +14,6 @@
 
 &INIT PART_ID='Crinkle Paper', XB=-1.0,0.0,-1.2,0.0,0.00,0.12, N_PARTICLES_PER_CELL=5, CELL_CENTERED=F, DRY=T, MASS_PER_VOLUME=6.3 /
 
-&CATF OTHER_FILES='props.fds' /
+&CATF OTHER_FILES='props.txt' /
 
 &TAIL /

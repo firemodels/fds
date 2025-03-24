@@ -11,12 +11,12 @@ set clean_sundials=
 call :getopts %*
 if %stopscript% == 1 exit /b
 
-::*** make sure cmake and gcc are installed
+::*** make sure cmake and make are installed
 
 set abort=0
 set buildstatus=
 call :is_file_installed cmake || set abort=1
-call :is_file_installed gcc   || set abort=1
+call :is_file_installed make  || set abort=1
 if %abort% == 1 exit /b
 
 set CURDIR=%CD%
@@ -56,7 +56,7 @@ if not exist %SUNDIALS_HOME%  goto else4
     set buildstatus=prebuilt
     goto endif4
 :else4
-  set build_status=norepo
+  set buildstatus=norepo
 :endif4
 goto eof
 
@@ -69,19 +69,10 @@ set buildstatus=build
 echo.
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
-echo building Sundials library version %LIB_TAG%
+echo building sundials library version %LIB_TAG%
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
-
-echo.
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
-echo setting up Intel compilers
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
-echo.
-call %FIREMODELS%\fds\Build\Scripts\setup_intel_compilers.bat
 
 git checkout %LIB_TAG%
 
@@ -115,14 +106,15 @@ cmake ..\  ^
 -DCMAKE_INSTALL_PREFIX="%INSTALLDIR%" ^
 -DEXAMPLES_INSTALL_PATH="%INSTALLDIR%\examples" ^
 -DBUILD_FORTRAN_MODULE_INTERFACE=ON ^
--DCMAKE_C_COMPILER=icx ^
--DCMAKE_Fortran_COMPILER=ifort ^
+-DCMAKE_C_COMPILER=%COMP_CC% ^
+-DCMAKE_Fortran_COMPILER=%COMP_FC% ^
 -DEXAMPLES_ENABLE_C=OFF ^
 -DEXAMPLES_ENABLE_CXX=OFF ^
 -DEXAMPLES_ENABLE_F2003=OFF ^
 -DENABLE_OPENMP=ON ^
 -DBUILD_SHARED_LIBS=OFF ^
 -DCMAKE_INSTALL_LIBDIR="lib" ^
+-DCMAKE_MAKE_PROGRAM="%CMAKE_MAKE_PROGRAM%" ^
 -DCMAKE_C_FLAGS_RELEASE="${CMAKE_C_FLAGS_RELEASE} /MT" ^
 -DCMAKE_C_FLAGS_DEBUG="${CMAKE_C_FLAGS_DEBUG} /MTd"
 
@@ -153,8 +145,19 @@ echo setting SUNDIALS_HOME environment variable to %INSTALLDIR%
 set SUNDIALS_HOME=%INSTALLDIR%
 echo.
 
-echo The Sundials library version %LIB_TAG% was built and installed in %INSTALLDIR%
+echo The sundials library version %LIB_TAG% was built and installed in %INSTALLDIR%
 echo.
+
+echo ----------------------------------------------------------
+echo ----------------------------------------------------------
+echo removing .obj and .mod files from Windows fds build directories
+echo ----------------------------------------------------------
+echo ----------------------------------------------------------
+echo.
+for /D %%f in (%FIREMODELS%\fds\Build\*win*) do (
+  cd %%f
+  erase *.obj *.mod > Nul 2> Nul
+)
 
 cd %CURDIR%
 
@@ -210,21 +213,6 @@ exit /b
   exit /b 0
 
 :: -------------------------------------------------------------
-:have_program
-:: -------------------------------------------------------------
-:: same as is_file_installed except does not abort script if program is not insstalled
-
-  set program=%1
-  where %program% 1> installed_error.txt 2>&1
-  type installed_error.txt | find /i /c "Could not find" > installed_error_count.txt
-  set /p nothave=<installed_error_count.txt
-  erase installed_error_count.txt installed_error.txt
-  if %nothave% == 1 (
-    exit /b 1
-  )
-  exit /b 0
-
-:: -------------------------------------------------------------
 :usage  
 :: -------------------------------------------------------------
 echo build sundials
@@ -235,7 +223,7 @@ exit /b
 
 :eof
 echo.
-if "%buildstatus%" == "norepo"   echo The Sundials git repo does not exist, The Sundials library was not built.  FDS will be built without it.
-if "%buildstatus%" == "prebuilt" echo The Sundials library was not built. FDS will be built using the
-if "%buildstatus%" == "prebuilt" echo Sundials library in %SUNDIALS_HOME%
+if "%buildstatus%" == "norepo"   echo The sundials git repo does not exist, The sundials library was not built.  FDS will be built without it.
+if "%buildstatus%" == "prebuilt" echo The sundials library exists. Skipping sundials build. FDS will be built using the
+if "%buildstatus%" == "prebuilt" echo sundials library in %SUNDIALS_HOME%
 echo.

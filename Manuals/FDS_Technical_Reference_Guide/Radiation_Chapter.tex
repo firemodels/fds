@@ -52,7 +52,7 @@ Even with a reasonably small number of bands, solving multiple RTEs is very time
 This is the default mode of FDS. For optically thin flames, however, where the yield of soot is small compared to the yields of $\rm CO_2$ and water vapor, the gray gas assumption can lead to an over-prediction of the emitted radiation. From a series of numerical experiments using methane as the fuel, it has been found that six bands ($N=6$) provide an accurate representation of the most important radiation bands of the fuel, $\rm CO_2$, and water vapor~\cite{Hostikka:3}. Table~\ref{banditos} through Table~\ref{band_MMA} list the band limits for various fuel species. The location of the bands have been adjusted to accommodate most of the features of the fuels spectra. If the absorption of the fuel is known to be important, separate bands can be reserved for fuel, increasing the total number of bands, $N$. The number of additional bands depends on the fuel, as discussed in Appendix~\ref{absorption_coefficients}.
 
 \begin{table}[p]
-\caption{Limits of the spectral bands for methane (CH$_4$).}
+\caption[Limits of the spectral bands for methane (CH$_4$)]{Limits of the spectral bands for methane (CH$_4$).}
 \label{banditos}
 \begin{center}
 \begin{tabular}{|*{7}{c|}}
@@ -79,7 +79,7 @@ This is the default mode of FDS. For optically thin flames, however, where the y
 \end{table}
 
 \begin{table}[p]
-\caption{Limits of the spectral bands for ethane (C$_2$H$_6$).}
+\caption[Limits of the spectral bands for ethane (C$_2$H$_6$)]{Limits of the spectral bands for ethane (C$_2$H$_6$).}
 \label{band_Ethane}
 \begin{center}
 \begin{tabular}{|*{7}{c|}}
@@ -109,7 +109,7 @@ This is the default mode of FDS. For optically thin flames, however, where the y
 %%% TABLE ETHYLENE: CHECKED ON 04/09/13
 
 \begin{table}[p]
-\caption{Limits of the spectral bands for ethylene (C$_2$H$_4$).}
+\caption[Limits of the spectral bands for ethylene (C$_2$H$_4$)]{Limits of the spectral bands for ethylene (C$_2$H$_4$).}
 \label{band_Ethylene}
 \begin{center}
 \begin{tabular}{|*{7}{c|}}
@@ -139,7 +139,7 @@ This is the default mode of FDS. For optically thin flames, however, where the y
 %%% TABLE PROPYLENE: CHECKED ON 04/09/13
 
 \begin{table}[p]
-\caption{Limits of the spectral bands for propylene (C$_3$H$_6$).}
+\caption[Limits of the spectral bands for propylene (C$_3$H$_6$)]{Limits of the spectral bands for propylene (C$_3$H$_6$).}
 \label{band_Propylene}
 \begin{center}
 \begin{tabular}{|*{7}{c|}}
@@ -169,7 +169,7 @@ This is the default mode of FDS. For optically thin flames, however, where the y
 %%% TABLE PROPANE: CHECKED ON 04/09/13
 
 \begin{table}[p]
-\caption{Limits of the spectral bands for propane (C$_3$H$_8$).}
+\caption[Limits of the spectral bands for propane (C$_3$H$_8$)]{Limits of the spectral bands for propane (C$_3$H$_8$).}
 \label{band_Propane}
 \begin{center}
 \begin{tabular}{|*{7}{c|}}
@@ -199,7 +199,7 @@ This is the default mode of FDS. For optically thin flames, however, where the y
 %%% TABLE HEPTANE: CHECKED ON 04/09/13
 
 \begin{table}[p]
-\caption{Limits of the spectral bands for heptane (C$_7$H$_{16}$).}
+\caption[Limits of the spectral bands for heptane (C$_7$H$_{16}$)]{Limits of the spectral bands for heptane (C$_7$H$_{16}$).}
 \label{band_Heptane}
 \begin{center}
 \begin{tabular}{|*{7}{c|}}
@@ -229,7 +229,7 @@ This is the default mode of FDS. For optically thin flames, however, where the y
 %%% TABLE TOLUENE: CHECKED ON 04/09/13
 
 \begin{table}[p]
-\caption{Limits of the spectral bands for toluene (C$_7$H$_8$).}
+\caption[Limits of the spectral bands for toluene (C$_7$H$_8$)]{Limits of the spectral bands for toluene (C$_7$H$_8$).}
 \label{band_Toluene}
 \begin{center}
 \begin{tabular}{|*{7}{c|}}
@@ -259,7 +259,7 @@ This is the default mode of FDS. For optically thin flames, however, where the y
 %%% TABLE METHANOL: CHECKED ON 04/09/13
 
 \begin{table}[p]
-\caption{Limits of the spectral bands for methanol (CH$_3$OH).}
+\caption[Limits of the spectral bands for methanol (CH$_3$OH)]{Limits of the spectral bands for methanol (CH$_3$OH).}
 \label{band_Methanol}
 \begin{center}
 \begin{tabular}{|*{7}{c|}}
@@ -289,7 +289,7 @@ This is the default mode of FDS. For optically thin flames, however, where the y
 %%% TABLE MMA: CHECKED ON 04/09/13
 
 \begin{table}[p]
-\caption{Limits of the spectral bands for methyl methacrylate (MMA).}
+\caption[Limits of the spectral bands for methyl methacrylate (MMA)]{Limits of the spectral bands for methyl methacrylate (MMA).}
 \label{band_MMA}
 \begin{center}
 \begin{tabular}{|*{7}{c|}}
@@ -321,7 +321,7 @@ This is the default mode of FDS. For optically thin flames, however, where the y
 
 The radiant heat flux vector $\dbq_{\rm r}''$ is defined
 \be \dbq_{\rm r}''(\bx) = \int_{4\pi} \;  I(\bx,\bs) \, \bs \; \d \Omega   \ee
-The interaction between the electromagneric radiation and the gas molecules and soot particles contributes to the gas phase energy equation through the source term which, under the gray gas assumption, can be written as
+The interaction between the electromagnetic radiation and the gas molecules and soot particles contributes to the gas phase energy equation through the source term which, under the gray gas assumption, can be written as
 \be -\nabla\!\cdot \dbq_{\rm r}''(\bx)(\mbox{gas}) =
     \kappa(\bx) \, \left[ U(\bx) - 4 \pi \, I_{\rm b}(\bx) \right]  \quad ; \quad
     U(\bx) = \int_{4\pi} \, I(\bx,\bs) \, \d \Omega  \label{net_emission}
@@ -335,11 +335,11 @@ In words, the net thermal energy gained by a grid cell from the radiation field 
 
 \subsection{Correction of the Emission Source Term}
 
-In calculations of limited spatial resolution, the source term, $I_{\rm b}$, defined in Eq.~(\ref{emission_source_term}) requires special treatment in the flaming region of the fire. Typical FDS calculations use grid cells that are tens of centimeters in size, and consequently the computed temperatures constitute a bulk average for a given grid cell and are considerably lower than the maximum temperature in a diffusion flame. Because of its fourth-power dependence on the temperature, the source term must be modeled in those grid cells where combustion occurs. Elsewhere, the computed temperature is used directly to compute the source term. It is assumed that this ``flaming region'' is where the local, nominal radiative loss is greater than a specified lower bound, $\chi_{\rm r} \dq'''>10$~kW/m$^3$. In this region, the global radiative fraction model is used. The emission source term is multiplied by a corrective factor, $C$:
+In calculations of limited spatial resolution, the source term, $I_{\rm b}$, defined in Eq.~(\ref{emission_source_term}) requires special treatment in the flaming region of the fire. Typical FDS calculations use grid cells that are tens of centimeters in size, and consequently the computed temperatures constitute a bulk average for a given grid cell and are considerably lower than the maximum temperature in a diffusion flame. Because of its fourth-power dependence on the temperature, the source term must be modeled in those grid cells where combustion occurs. Elsewhere, the computed temperature is used directly to compute the source term. It is assumed that this ``flaming region'' is where the local, nominal radiative loss is greater than a specified lower bound, $\chi_{\rm r} \dq'''>1$~kW/m$^3$. In this region, the global radiative fraction model is used. The emission source term is multiplied by a corrective factor, $C$:
 \be I_{\rm b,f}(\bx) = C \, \frac{\sigma \, T(\bx)^4}{\pi}   \quad ; \quad
-    C = \min \left( 100 \; , \; \max \left[ 1 \; , \; \frac{\sum_{\chi_{\rm r}\dq'''_{ijk}>10} \left( \chi_{\rm r} \, \dq'''_{ijk} + \kappa_{ijk} \, U_{ijk} \right) \, V_{ijk}}{\sum_{\chi_{\rm r} \dq'''_{ijk}>10} \left( 4 \, \kappa_{ijk} \, \sigma \, T^4_{ijk} \right) \, V_{ijk}} \right] \right) \label{corrected_emission_source_term}
+    C = \min \left( 100 \; , \; \max \left[0.1 \; , \; \frac{\sum_{\chi_{\rm r}\dq'''_{ijk}>1} \left( \chi_{\rm r} \, \dq'''_{ijk} + \kappa_{ijk} \, U_{ijk} \right) \, V_{ijk}}{\sum_{\chi_{\rm r} \dq'''_{ijk}>1} \left( 4 \, \kappa_{ijk} \, \sigma \, T^4_{ijk} \right) \, V_{ijk}} \right] \right) \label{corrected_emission_source_term}
 \ee
-When the source term defined in Eq.~(\ref{corrected_emission_source_term}) is substituted into Eq.~(\ref{net_emission}), the net radiative emission from the flaming region becomes the desired fraction of the total heat release rate. Note that this correction factor is bounded below by 1 and above by 100. The upper bound is arbitrary, meant to prevent spurious behavior at the start of a simulation.
+When the source term defined in Eq.~(\ref{corrected_emission_source_term}) is substituted into Eq.~(\ref{net_emission}), the net radiative emission from the flaming region becomes the desired fraction of the total heat release rate. Note that this correction factor is bounded below by 0.1 and above by 100. These bounds are somewhat arbitrary, meant to prevent spurious behavior at the start of a simulation.
 
 The radiative fraction, $\chi_{\rm r}$, is a useful quantity in fire science. It is the nominal fraction of the combustion energy that is emitted as thermal radiation. For most combustibles, $\chi_{\rm r}$ is between 0.3 and 0.4~\cite{Beyler2:SFPE}. However, in Eq.~(\ref{corrected_emission_source_term}), $\chi_{\rm r}$ is interpreted as the fraction of energy radiated from the flaming region.  For a small fire with a base diameter less than approximately 1~m, the local $\chi_{\rm r}$ is approximately equal to its global counterpart. However, as the fire increases in size, the global value will typically decrease due to a net re-absorption of the thermal radiation by the increasing smoke mantle~\cite{Takahashi:1}.
 
@@ -362,7 +362,7 @@ shown in Figure~\ref{Angular}.
 \begin{figure}[ht]
 \begin{center}
 \includegraphics[height=2in]{FIGURES/RadCoord}
-\caption{Coordinate system of the angular discretization.}
+\caption[Coordinate system of the angular discretization]{Coordinate system of the angular discretization.}
 \label{Angular}
 \end{center}
 \end{figure}
@@ -469,7 +469,7 @@ exactly.The local incident radiation intensity is
  U_{ijk} = \sum_{l=1}^{N_{\Omega}} I_{ijk}^l \delta\Omega^l
 \ee
 
-In Cartesian coordinates\footnote{In the axisymmetric case equation~(\ref{RTEdiscrete2}) becomes
+In Cartesian coordinates\footnote{In the axi-symmetric case equation~(\ref{RTEdiscrete2}) becomes
 a little bit more complicated, as the cell face normal vectors $\bn_m$ are not always constant. However, the computational efficiency can still be
 retained.},
 the normal vectors $\bn_m$ are the base vectors of the coordinate system and the integrals over the solid
@@ -537,13 +537,13 @@ or scattering are important, or if the scenario is optically very thick. Current
 
 \subsection{Spatial Discretization in Cut Cells}
 
-In the case of complex gemoetry where irregular cut-cells may exist (see Sec.~\ref{sec:unstructured_geometry}) an unstructured version of the RTE in Eq.~\ref{RTEdiscrete3} is adopted
+In the case of complex geometry where irregular cut-cells may exist (see Sec.~\ref{sec:unstructured_geometry}) an unstructured version of the RTE in Eq.~\ref{RTEdiscrete3} is adopted
 \be  \sum_{f=1}^n A_f \; I_f^l \; D_f^l
    = \kappa_{ijk} \,
      \left[ I_{{\rm b},ijk} - I_{ijk}^l \right] \; V_{ijk} \,
      \delta \Omega^l, 
 \ee
-where $A_f$ are the $n$ cut-face areas. These include both gasphase cut-faces, which are cartesian grid aligned, and in-boundary cut-faces, which can have any orientation. The $D_f$-terms are calculated as
+where $A_f$ are the $n$ cut-face areas. These include both gasphase cut-faces, which are Cartesian grid aligned, and in-boundary cut-faces, which can have any orientation. The $D_f$-terms are calculated as
 \begin{align}
 D_f^l & = \int_{\Omega^l}(\bs \cdot \bn_f) \d \Omega \\
 & = \int_{\dph}\int_{\dth} [\cos\phi\sin\theta \, \hat{x}_f + \sin\phi\sin\theta \, \hat{y}_f + \cos\theta \, \hat{z}_f] \sin\theta \; \d \theta \d\phi \notag \\
@@ -554,7 +554,7 @@ with $D_x^l$, $D_y^l$, and $D_z^l$ defined as above and ($\hat{x}_f,\hat{y}_f,\h
    \sum_{fd} A_{fd} \; I_{ijk}^l \; D_{fd}^l = \kappa_{ijk}\,I_{{\rm b},ijk} V_{ijk} \,\delta \Omega^l
    - \kappa_{ijk}\,I_{ijk}^l\,V_{ijk} \,\delta \Omega^l.
 \ee
-In this case the upwind cut-face intensities, $I_{nu}^l$, come from the upwind value for gasphase cut-faces (as with the cartesian solution) and from the boundary conditions for in-boundary cut-faces.  The downwind cut-face intensities, $I_{nd}^l$, use the cell value, $I_{ijk}^l$.
+In this case the upwind cut-face intensities, $I_{nu}^l$, come from the upwind value for gasphase cut-faces (as with the Cartesian solution) and from the boundary conditions for in-boundary cut-faces.  The downwind cut-face intensities, $I_{nd}^l$, use the cell value, $I_{ijk}^l$.
 
 Adopting the previous notation, the equation for intensity becomes
 \be

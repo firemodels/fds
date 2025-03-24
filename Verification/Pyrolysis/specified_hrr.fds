@@ -6,7 +6,7 @@ A test of the simple "heat up and burn" pyrolysis model.
 
 &TIME T_END=30. /
 
-&DUMP FLUSH_FILE_BUFFERS=T, DT_PL3D=10000000./
+&DUMP DT_PL3D=10000000./
 &REAC SOOT_YIELD=0.01,FUEL='PROPANE'/
 &SURF ID='TEST'
       COLOR = 'TOMATO 2'

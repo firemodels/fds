@@ -113,7 +113,7 @@ For free (natural) convection, the Nusselt number is a function of the Rayleigh 
 The following expressions are simplifications of those given in Ref.~\cite{Incropera:1} under the assumption that $\PR=0.7$.
 \be
    \NU_{\rm free} = \left\{ \begin{array}{ll}
-                                                \left( 0.825 +  0.324 \, \hbox{Ra}^{1/6}  \right)^2   &  \hbox{Vertical plate or cylinder} \\
+                                                \left( 0.825 +  0.324 \, \hbox{Ra}^{1/6}  \right)^2   &  \hbox{Vertical plate or cylinder\footnotemark} \\
                                                 0.54 \, \hbox{Ra}^{1/4}                               &  \hbox{Horizontal hot plate facing up or cold plate facing down, Ra}\le 10^7 \\
                                                 0.15 \, \hbox{Ra}^{1/3}                               &  \hbox{Horizontal hot plate facing up or cold plate facing down, Ra} >  10^7 \\
                                                 0.52 \, \hbox{Ra}^{1/5}                               &  \hbox{Horizontal hot plate facing down or cold plate facing up}  \\
@@ -121,6 +121,7 @@ The following expressions are simplifications of those given in Ref.~\cite{Incro
                                                 2 +  0.454 \, \hbox{Ra}^{1/4}                         &  \hbox{Sphere}
        \end{array} \right.
 \ee
+\footnotetext{The heat transfer coefficient for a vertical plate or cylinder is simplified to $h=1.31 \, (\Delta T)^{1/3}$~\cite{Holman:2} in cases where the back side of a solid obstruction is outside the computational domain and the gas temperature is assumed to be ambient. }
 For forced convection, the Nusselt number takes the form:
 \be
    \NU_{\rm forced} = C_0 + \left( C_1 \, \RE^n - C_2 \right) \, \PR^m  \quad ; \quad \RE = \frac{\rho |\bu| L}{\mu}  \quad ; \quad m=1/3
@@ -145,7 +146,7 @@ Sphere       & 2        & 0.6     & 0     & 0.5    &                \\ \hline
 \end{center}
 \end{table}
 
-The impinging jet heat transfer model uses the stagnation pressure to define the velocity scale, $U_{\rm imp} = \sqrt{2 H}$, in the Reynolds number, but otherwise uses the forced convection Nusselt correlation with slightly modified default constants, $C_1 = 0.55$ and $n=0.8$.  As with the forced convection model, custom coefficients may be used, as discussed in the FDS User Guide \cite{FDS_Users_Guide}.  If the impinging jet model is implemented by the user, $\NU_{\rm impinge}$ gets added to the list of max arguments in Eq.~(\ref{q_con}).
+To avoid the artificial dissipation caused by averaging velocity components in a diverging flow, the impinging jet heat transfer model uses the staggered cell's maximum velocity components to define the velocity scale in the Reynolds number, but otherwise uses the forced convection Nusselt correlation with slightly modified default constants, $C_1 = 0.55$ and $n=0.8$.  As with the forced convection model, custom coefficients may be used, as discussed in the FDS User Guide \cite{FDS_Users_Guide}.  If the impinging jet model is implemented by the user, $\NU_{\rm impinge}$ gets added to the list of max arguments in Eq.~(\ref{q_con}).
 
 \be
    \NU_{\rm impinge} = C_0 + \left( C_1 \, \RE_{\rm imp}^n - C_2 \right) \, \PR^m  \quad ; \quad \RE_{\rm imp} = \frac{\rho U_{\rm imp} L}{\mu}  \quad ; \quad m=1/3
@@ -304,17 +305,17 @@ r_{\alpha \beta} =
     \underbrace{T_{\rm s}^{n_{\rm t,\alpha\beta}}}_\textrm{Power function}
    \label{Arrhenius}
 \ee
-The first term describes the dependence of the reaction rate on the concentration of the reactant itself, with $n_{\rm s,\alpha\beta}$ being the partial reaction order. The second term is the Arrhenius function which is commonly used to describe the reaction kinetics, i.e. the dependence of the reaction rate on the material temperature. The chapter on pyrolysis in the FDS Verification Guide describes methods for determining the kinetic parameters $A_{\alpha \beta}$ and $E_{\alpha\beta}$ using bench-scale measurement techniques.  Note that the units of $A_{\alpha \beta}$ depend on the order of the reaction, that is, the value of $n_{\rm s,\alpha\beta}$, and must be consistent with the reaction rate having units of \si{kg/m^3 s}.  For first-order reactions ($n_{\rm s,\alpha\beta}=1$) the units of $A_{\alpha \beta}$ are simply 1/s.
+The first factor describes the dependence of the reaction rate on the concentration of the reactant itself, with $n_{\rm s,\alpha\beta}$ being the partial reaction order. The second factor is the Arrhenius function which is commonly used to describe the reaction kinetics, i.e. the dependence of the reaction rate on the material temperature. The chapter on pyrolysis in the FDS Verification Guide describes methods for determining the kinetic parameters $A_{\alpha \beta}$ and $E_{\alpha\beta}$ using bench-scale measurement techniques.  Note that the units of $A_{\alpha \beta}$ depend on the order of the reaction, that is, the value of $n_{\rm s,\alpha\beta}$, and must be consistent with the reaction rate having units of \si{kg/m^3 s}.  For first-order reactions ($n_{\rm s,\alpha\beta}=1$) the units of $A_{\alpha \beta}$ are simply 1/s.
 
-The third term can be used to describe the dependence on the local oxygen concentration $X_{\rm O_2}(x)$ and the heterogeneous reaction order, $n_{\rm O_2,\alpha\beta}$. The oxygen concentration profile within practical materials depends on the competition between diffusion and reactive consumption. As FDS does not solve for the transport of gaseous species within condensed phase materials, a simple exponential profile is assumed and the user is expected to specify the characteristic depth at which oxygen would be present.
+The third factor can be used to describe the dependence on the local oxygen concentration $X_{\rm O_2}(x)$ and the heterogeneous reaction order, $n_{\rm O_2,\alpha\beta}$. The oxygen concentration profile within practical materials depends on the competition between diffusion and reactive consumption. As FDS does not solve for the transport of gaseous species within condensed phase materials, a simple exponential profile is assumed and the user is expected to specify the characteristic depth at which oxygen would be present.
 
 The local oxygen volume fraction at depth $x$ is calculated from the gas phase (first grid cell) oxygen volume fraction $X_{\rm O_2,g}$ as follows.  First, the surface value of the oxygen mole fraction, $X_{\rm O_2,f}$, is determined such that the rate of oxygen mass transfer into the solid is balanced by the rate of consumption of the oxygen within the solid phase reactions.  The scheme to compute $X_{\rm O_2,f}$ is iterative and uses a Newton method, which we discuss below after a few more terms have been introduced.  Once $X_{\rm O_2,f}$ is known, the value of oxygen mole fraction in-depth is computed by
 \be
 X_{\rm O_2}(x) = X_{\rm O_2,f}\exp(-x/L_{\rm g,\alpha\beta})
 \ee
-where $L_{\rm g,\alpha\beta}$ is the characteristic depth of oxygen diffusion. Specifying $L_{\rm g,\alpha\beta}=0$ m means that the reaction takes place only at the surface of the material.  The defaul value is $L_{\rm g,\alpha\beta}=0.001$ m.
+where $L_{\rm g,\alpha\beta}$ is the characteristic depth of oxygen diffusion. Specifying $L_{\rm g,\alpha\beta}=0$ m means that the reaction takes place only at the surface of the material.  The default value is $L_{\rm g,\alpha\beta}=0.001$ m.
 
-The fourth term is a power function for temperature.
+The fourth factor is a power function for temperature.
 
 The production term $S_\alpha$ is the sum over all the reactions where the solid residue is material $\alpha$
 \be
@@ -344,7 +345,7 @@ If the material reaction involves oxygen, then we balance the rate of mass flux 
 \be
 \dm_{\rm O_2}'' = h_{\rm m}(Y_{\rm O_2,f} - Y_{\rm O_2,g}) \quad \longrightarrow \quad Y_{\rm O_2,f} = Y_{\rm O_2,g} + \frac{\dm_{\rm O_2}''}{h_{\rm m}}
 \ee
-where $h_m$ is the mass transfer coefficient computed from the heat transfer coefficient as $h/c_p(T_{\rm film})$.  The mass flux of oxygen will be a negative value, so this formula reduces the surface value of oxygen from the gas phase cell value and hence limits the oxygen available for the material reaction.  The Newtwon method uses the value of $Y_{\rm O_2,f}$ from the previous time step as an initial guess and usually converges in a few iterations.
+where $h_m$ is the mass transfer coefficient computed from the heat transfer coefficient as $h/c_p(T_{\rm film})$.  The mass flux of oxygen will be a negative value, so this formula reduces the surface value of oxygen from the gas phase cell value and hence limits the oxygen available for the material reaction.  The Newton method uses the value of $Y_{\rm O_2,f}$ from the previous time step as an initial guess and usually converges in a few iterations.
 
 The chemical source term in the heat conduction equation is
 \be
@@ -386,7 +387,7 @@ In practice, a liquid fuel may have multiple components, like gasoline or kerose
 \ee
 The assumption of an assumed lumped gas species is not mandatory---one can evaporate each liquid component to form a unique gas species.
 
-For simplicity, the liquid fuel itself is treated like a thermally-thick solid for the purpose of computing the heat conduction. There is no computation of the convection of the liquid within the pool. Obviously, this assumption has consequences. One of which is related to the fact that the evaporation rate expression ({\ref{mdot_alpha}) is applied only to the surface liquid layer. However, it is possible that an interior liquid layer may possess a temperature, $T_\ell$, in excess of the boiling temperature of an individual liquid component, $T_{\rm b,\alpha}$. If this is the case, an additional amount of component $\alpha$ is boiled off from the surface so as to drive the liquid temperature back towards the boiling point of component $\alpha$. This addition to the surface mass flux takes the form:
+For simplicity, the liquid fuel itself is treated like a thermally-thick solid for the purpose of computing the heat conduction. There is no computation of the convection of the liquid within the pool. Obviously, this assumption has consequences. One of which is related to the fact that the evaporation rate expression ({\ref{mdot_alpha}) is applied only to the surface liquid layer. However, it is possible that an interior liquid layer may possess a temperature, $T_\ell$, in excess of the boiling temperature of an individual liquid component, $T_{\rm b,\alpha}$. If this is the case, an additional amount of component $\alpha$ is boiled off from the surface so as to drive the liquid temperature back toward the boiling point of component $\alpha$. This addition to the surface mass flux takes the form:
 \be
    \dot{m}_\alpha'' = \frac{ \rho_{\ell,\alpha} \left( h(T_{\ell})-h(T_{\rm b,\alpha}) \right) \delta}{h_{\rm v,\alpha} \dt} \quad ; \quad  h(T) = \int_0^T  c_s(T') \d T'
 \ee

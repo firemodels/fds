@@ -4,128 +4,65 @@
 
 \chapter{Fire Detection Devices}
 
-FDS predicts the thermal environment resulting from a fire, but it relies on empirical models that describe the
-activation of various fire detection devices. These models are described in this section.
+FDS predicts the thermal environment resulting from a fire, but it relies on empirical models that describe the activation of various fire detection devices. These models are described in this section.
 
 
 \section{Sprinklers}
 
-The temperature of the sensing element (or ``link'') of an automatic fire sprinkler is estimated from
-the differential equation put forth by Heskestad and Bill~\cite{Heskestad:3},
-with the addition of a term to account for the cooling of the link
-by water droplets in the gas stream from previously activated
-sprinklers
+The temperature of the sensing element (or ``link'') of an automatic fire sprinkler is estimated from the differential equation put forth by Heskestad and Bill~\cite{Heskestad:3}, with the addition of a term to account for the cooling of the link by water droplets in the gas stream from previously activated sprinklers
 \be \frac{\d T_l}{\d t} = \frac{\sqrt{|\bu|}}{\hbox{RTI}} (T_g - T_l) -
    \frac{C}{\hbox{RTI}} (T_l - T_m) - \frac{C_2}{\hbox{RTI}} \beta |\bu|
-   \label{actode} \ee
-where $\bu$ is the gas velocity, RTI is the response time index, $T_l$ is the link temperature,
-$T_g$ is the gas temperature in the neighborhood of the link,
-$T_m$ is the temperature of the sprinkler mount (assumed ambient),
-and $\beta$ is the volume fraction of (liquid) water in the
-gas stream. The sensitivity of the sprinkler link is characterized by
-its RTI value. The amount of heat conducted away from the
-link by the mount is indicated by the ``C-Factor'', $C$. The RTI and
-C-Factor are determined experimentally. The constant
-$C_2$ has been empirically determined by DiMarzo and
-co-workers~\cite{Ruffino:1,Ruffino:2,Gavelli:1} to
-be \SI{6e6}{K/(m/s)^{1/2}}, and its value is relatively constant
-for different types of sprinklers.
+   \label{actode}
+\ee
+where $\bu$ is the gas velocity, RTI is the response time index, $T_l$ is the link temperature, $T_g$ is the gas temperature in the neighborhood of the link, $T_m$ is the temperature of the sprinkler mount (assumed ambient), and $\beta$ is the volume fraction of (liquid) water in the gas stream. The sensitivity of the sprinkler link is characterized by its RTI value. The amount of heat conducted away from the link by the mount is indicated by the ``C-Factor'', $C$. The RTI and C-Factor are determined experimentally. The constant $C_2$ has been empirically determined by DiMarzo and co-workers~\cite{Ruffino:1,Ruffino:2,Gavelli:1} to be \SI{6e6}{K/(m/s)^{1/2}}, and its value is relatively constant for different types of sprinklers.
 
-The algorithm for heat detector activation is exactly the same as for
-sprinkler activation, except there is no accounting for conductive losses or
-droplet cooling. Note that neither the sprinkler nor heat detector models account for
-thermal radiation.
+The algorithm for heat detector activation is exactly the same as for sprinkler activation, except there is no accounting for conductive losses or droplet cooling. Note that neither the sprinkler nor heat detector models account for thermal radiation.
 
 \section{Heat Detectors}
 
-As far as FDS is concerned, a heat detector is just a sprinkler with no water spray. In other words, the activation of a heat
-detector is governed by Eq.~(\ref{actode}), but with just the first term on the right hand side:
-\be \frac{\d T_l}{\d t} = \frac{\sqrt{|\bu|}}{\hbox{RTI}} (T_g - T_l)  \label{heatactode} \ee
+As far as FDS is concerned, a heat detector is just a sprinkler with no water spray. In other words, the activation of a heat detector is governed by Eq.~(\ref{actode}), but with just the first term on the right hand side:
+\be
+   \frac{\d T_l}{\d t} = \frac{\sqrt{|\bu|}}{\hbox{RTI}} (T_g - T_l)  \label{heatactode}
+\ee
 Both the RTI and activation temperature are determined empirically.
 
 
 \section{Smoke Detectors}
 
-An informative discussion of the issues associated with smoke detection can be found in the
-SFPE Handbook chapter ``Design of Detection Systems,'' by Schifiliti, Meacham, and Custer~\cite{SFPE}.
-The authors point out that the difficulty in modeling smoke detector activation stems from a number of issues:
-(1) the production and transport of smoke in the early stage of a fire are not well-understood, (2) detectors often use
-complex response algorithms rather than simple threshold or rate-of-change criteria, (3) detectors can be sensitive
-to smoke particle number density, size distribution, refractive index, composition, etc., and (4) most
-computer models, including FDS, do not provide detailed descriptions of the smoke besides its bulk transport. This
-last point is the most important. At best, in its present form, FDS can only calculate the
-velocity and smoke concentration of the ceiling jet flowing past the detector. Regardless of the
-detailed mechanism within
-the device, any activation model included within FDS can only account for the entry resistance of the smoke due to the
-geometry of the detector. Issues related to the effectiveness of ionization or photoelectric detectors cannot be
-addressed by FDS.
+An informative discussion of the issues associated with smoke detection can be found in the SFPE Handbook chapter ``Design of Detection Systems,'' by Schifiliti, Meacham, and Custer~\cite{SFPE}. The authors point out that the difficulty in modeling smoke detector activation stems from a number of issues: (1) the production and transport of smoke in the early stage of a fire are not well-understood, (2) detectors often use
+complex response algorithms rather than simple threshold or rate-of-change criteria, (3) detectors can be sensitive to smoke particle number density, size distribution, refractive index, composition, etc., and (4) most computer models, including FDS, do not provide detailed descriptions of the smoke besides its bulk transport. This last point is the most important. At best, in its present form, FDS can only calculate the
+velocity and smoke concentration of the ceiling jet flowing past the detector. Regardless of the detailed mechanism within the device, any activation model included within FDS can only account for the entry resistance of the smoke due to the geometry of the detector. Issues related to the effectiveness of ionization or photoelectric detectors cannot be addressed by FDS.
 
-Consider the simple idealization of a ``spot-type'' smoke detector. A disk-shaped cover lined with a fine mesh screen
-forms the external housing of the device, which is usually mounted on the ceiling.
-Somewhere within the device is a relatively small sensing chamber where the smoke is actually detected in some way.
-A simple model of this device has been proposed by Heskestad~\cite{SFPE}. He suggested that the mass fraction of smoke in the
-sensing chamber of the detector $Y_c$ lags behind the mass fraction in the
-external free stream $Y_e$ by a time period $\delta t = L/u$,
-where $u$ is the free stream velocity and $L$ is a length characteristic of the detector geometry.
-The change in the mass fraction of smoke in the sensing chamber can be found by solving the following equation:
-\be \frac{\d Y_c }{\d t} = \frac{ Y_e(t) - Y_c(t)}{L/\bu} \label{HYoeq} \ee
-The detector activates when $Y_c$ rises above a detector-specific threshold.
-
-A more detailed model of smoke detection involving two filling times rather than one has also been proposed.
-Smoke passing into the sensing chamber must first pass through the exterior housing, then it must pass through a series
-of baffles before arriving at the sensing chamber. There is a time lag
-associated with the passing of the smoke through the housing and also the entry of the smoke into the sensing chamber.
-Let $\delta t_e$ be the characteristic filling time of the entire volume enclosed by the external housing. Let
-$\delta t_c$ be the characteristic filling time of the sensing chamber.
-Cleary~{\em et al.}~\cite{Cleary:IAFSS6} suggested that each characteristic filling time is a function of the
-free-stream velocity $u$ outside the detector
+Consider the simple idealization of a ``spot-type'' smoke detector. A disk-shaped cover lined with a fine mesh screen forms the external housing of the device, which is usually mounted on the ceiling. Somewhere within the device is a relatively small sensing chamber where the smoke is actually detected in some way. A simple model of this device has been proposed by Heskestad~\cite{SFPE}. He suggested that the mass fraction of smoke in the sensing chamber of the detector $Y_\mathrm{c}$ lags behind the mass fraction in the external free stream $Y_\mathrm{e}$ by a time period $\delta t = L/u$, where $u$ is the free stream velocity and $L$ is a length characteristic of the detector geometry. The change in the mass fraction of smoke in the sensing chamber can be found by solving the following equation:
 \be
-\delta t_e = \alpha_e u^{\beta_e} \quad ; \quad \delta t_c = \alpha_c u^{\beta_c}
+   \frac{\d Y_\mathrm{c} }{\d t} = \frac{ Y_\mathrm{e}(t) - Y_\mathrm{c}(t)}{L/|\mathbf{u}|} \label{HYoeq}
 \ee
-The $\alpha$ and $\beta$ parameters are empirical constants related to the specific detector geometry.
-Suggested values for these parameters are listed in the FDS User's Guide~\cite{FDS_Users_Guide}.
-The change in the mass fraction of smoke in the sensing chamber $Y_c$ can be found by solving the following equation:
+The detector activates when $Y_\mathrm{c}$ rises above a detector-specific threshold.
+
+A more detailed model of smoke detection involving two filling times rather than one has also been proposed. Smoke passing into the sensing chamber must first pass through the exterior housing, then it must pass through a series of baffles before arriving at the sensing chamber. There is a time lag associated with the passing of the smoke through the housing and also the entry of the smoke into the sensing chamber.
+Let $\delta t_\mathrm{e}$ be the characteristic filling time of the entire volume enclosed by the external housing. Let $\delta t_\mathrm{c}$ be the characteristic filling time of the sensing chamber. Cleary~{\em et al.}~\cite{Cleary:IAFSS6} suggested that each characteristic filling time is a function of the free-stream velocity $u$ outside the detector
 \be
-\frac{\d Y_c}{\d t} = \frac{ Y_e(t-\delta t_e) - Y_c(t)}{\delta t_c} \label{Yoeq}
+\delta t_\mathrm{e} = \alpha_e u^{\beta_e} \quad ; \quad \delta t_\mathrm{c} = \alpha_\mathrm{c} u^{\beta_\mathrm{c}}
 \ee
-where $Y_e$ is the mass fraction of smoke outside of the detector in the free-stream.
-A simple interpretation of the equation is that the concentration of the smoke that enters the sensing chamber at time $t$
-is that of the free-stream at time $t-\delta t_e$.
-
-An analytical solution for Eq.~(\ref{Yoeq}) can be found, but it is more convenient to simply integrate it numerically
-as is done for sprinklers and heat detectors. Then, the predicted mass fraction of smoke in the sensing chamber
-$Y_c(t)$ can be converted into an expression for the percent obscuration per unit length by computing:
+The $\alpha$ and $\beta$ parameters are empirical constants related to the specific detector geometry. Suggested values for these parameters are listed in the FDS User's Guide~\cite{FDS_Users_Guide}. The change in the mass fraction of smoke in the sensing chamber $Y_\mathrm{c}$ can be found by solving the following equation:
 \be
-   \hbox{Obscuration}  = \left( 1 - \mathrm{e}^{-K_m \rho Y_c l} \right) \times 100 \; \; \hbox{\% per length} \; l
+\frac{\d Y_\mathrm{c}}{\d t} = \frac{ Y_\mathrm{e}(t-\delta t_\mathrm{e}) - Y_\mathrm{c}(t)}{\delta t_\mathrm{c}} \label{Yoeq}
 \ee
-where $K_m$ is the mass extinction coefficient, $\rho$ is the density of the external gases in the ceiling jet,
-and $l$ is the unit of length over which the light is attenuated\footnote{Typically, the activation criterion for a spot-type smoke detector is listed as a percent obscuration per foot or per meter. For the former, $l=0.3048$~m and for the latter, $l=1$~m.}.
-For most flaming fuels, a suggested value for $K_m$ is 8700~m$^2$/kg~$\pm$~1100~m$^2$/kg at a
-wavelength of 633~nm~\cite{Mulholland:F+M}.
+where $Y_\mathrm{e}$ is the mass fraction of smoke outside of the detector in the free-stream. A simple interpretation of the equation is that the concentration of the smoke that enters the sensing chamber at time $t$ is that of the free-stream at time $t-\delta t_\mathrm{e}$.
 
-The SFPE Handbook~\cite{SFPE} has references to various studies on smoke detection and suggested values for the
-characteristic length $L$. FDS includes the one-parameter Heskestad model as a special case of the four-parameter
-Cleary model. For the Cleary model, the user must specify
-$\alpha_e$, $\beta_e$, $\alpha_c$, and $\beta_c$, whereas for the Heskestad model, only $L=\alpha_c$ needs to be
-specified. Equation~(\ref{Yoeq})
-is still used, with $\alpha_e=0$ and $\beta_e=\beta_c=-1$.
-Proponents of the four-parameter model claim that the two filling times are needed to
-better capture the behavior of detectors in a very
-slow free-stream ($u<\SI{0.5}{m/s}$). Rather than declaring one model better than another,
-the algorithm included in FDS allows the
-user to pick these various parameters, and in doing so, pick whichever model the user feels is appropriate~\cite{CSE_GCR}.
+An analytical solution for Eq.~(\ref{Yoeq}) can be found, but it is more convenient to simply integrate it numerically as is done for sprinklers and heat detectors. Then, the predicted mass fraction of smoke in the sensing chamber $Y_c(t)$ can be converted into an expression for the percent obscuration per unit length by computing:
+\be
+   \hbox{Obscuration}  = \left( 1 - \mathrm{e}^{-K_m \rho Y_\mathrm{c} l} \right) \times 100 \; \; \hbox{\% per length} \; l
+\ee
+where $K_m$ is the mass extinction coefficient, $\rho$ is the density of the external gases in the ceiling jet, and $l$ is the unit of length over which the light is attenuated\footnote{Typically, the activation criterion for a spot-type smoke detector is listed as a percent obscuration per foot or per meter. For the former, $l=0.3048$~m and for the latter, $l=1$~m.}. For most flaming fuels, a suggested value for $K_m$ is 8700~m$^2$/kg~$\pm$~1100~m$^2$/kg at a wavelength of 633~nm~\cite{Mulholland:F+M}.
 
-Additionally, FDS can model the behavior of beam and aspiration smoke detectors.  For a beam detector, the user
-specifies the emitter and receiver positions and the total obscuration at which the detector will alarm.  FDS will then
-integrate the obscuration over the path length using the predicted soot concentration in each grid cell along
-the path:
+The SFPE Handbook~\cite{SFPE} has references to various studies on smoke detection and suggested values for the characteristic length $L$. FDS includes the one-parameter Heskestad model as a special case of the four-parameter Cleary model. For the Cleary model, the user must specify $\alpha_e$, $\beta_e$, $\alpha_c$, and $\beta_c$, whereas for the Heskestad model, only $L=\alpha_c$ needs to be specified. Equation~(\ref{Yoeq}) is still used, with $\alpha_e=0$ and $\beta_e=\beta_c=-1$. Proponents of the four-parameter model claim that the two filling times are needed to better capture the behavior of detectors in a very slow free-stream ($u<\SI{0.5}{m/s}$). Rather than declaring one model better than another, the algorithm included in FDS allows the user to pick these various parameters, and in doing so, pick whichever model the user feels is appropriate~\cite{CSE_GCR}.
+
+Additionally, FDS can model the behavior of beam and aspiration smoke detectors.  For a beam detector, the user specifies the emitter and receiver positions and the total obscuration at which the detector will alarm.  FDS will then integrate the obscuration over the path length using the predicted soot concentration in each grid cell along the path:
 \be
   \hbox{Obscuration}  = \left(1 - \mathrm{e}^{-K_m \int \rho Y_s \, \d l }  \right) \times 100  \; \; \hbox{\%}
 \ee
 where the integration is carried out over the path of the beam.
 
-For an aspiration detector, the user specifies the sampling locations, the flow rate at each location, the
-transport time from each sampling point to the detector, the flow rate of any bypass flow, and the total obscuration at which the
-detector alarms.  FDS computes the soot concentration at the detector by weighting the predicted soot concentrations
-at the sampling locations with their flow rates after applying the appropriate time delay. See the FDS User's Guide~\cite{FDS_Users_Guide} for details.
+For an aspiration detector, the user specifies the sampling locations, the flow rate at each location, the transport time from each sampling point to the detector, the flow rate of any bypass flow, and the total obscuration at which the detector alarms.  FDS computes the soot concentration at the detector by weighting the predicted soot concentrations at the sampling locations with their flow rates after applying the appropriate time delay. See the FDS User's Guide~\cite{FDS_Users_Guide} for details.
 

@@ -1,0 +1,105 @@
+------------------------------MATERIALS-------------------------------
+EN1992-1-2 values for normal weight concrete
+
+EUROCODE 1993-1-2:1995  &3.4.1.3 carbon steel
+&MATL ID = 'STEEL'
+      EMISSIVITY = 0.9
+      DENSITY = 7850.
+      CONDUCTIVITY_RAMP = 'c-steel'
+      SPECIFIC_HEAT_RAMP= 's-steel'/
+      
+&RAMP ID = 'c-steel', T = 0., F = 53.3/
+&RAMP ID = 'c-steel', T = 800., F = 27.3/
+&RAMP ID = 'c-steel', T = 1200., F = 27.3/
+
+&RAMP ID = 's-steel', T = 0., F = 0.439/
+&RAMP ID = 's-steel', T = 600., F = 0.759/
+&RAMP ID = 's-steel', T = 640., F = 0.798/
+&RAMP ID = 's-steel', T = 680., F = 0.890/
+&RAMP ID = 's-steel', T = 720., F = 1.388/
+&RAMP ID = 's-steel', T = 735., F = 5.0/
+&RAMP ID = 's-steel', T = 740., F = 2.525/
+&RAMP ID = 's-steel', T = 760., F = 1.159/
+&RAMP ID = 's-steel', T = 780., F = 0.909/
+&RAMP ID = 's-steel', T = 800., F = 0.803/
+&RAMP ID = 's-steel', T = 820., F = 0.745/
+&RAMP ID = 's-steel', T = 840., F = 0.708/
+&RAMP ID = 's-steel', T = 860., F = 0.683/
+&RAMP ID = 's-steel', T = 880., F = 0.664/
+&RAMP ID = 's-steel', T = 900., F = 0.65/
+&RAMP ID = 's-steel', T = 1200., F = 0.65/
+
+
+ISOWOOL 1260
+&MATL ID = 'CERAMIC_FIBRE_BLANKET'
+      EMISSIVITY = 0.9	
+      DENSITY = 100.		
+      CONDUCTIVITY_RAMP = 'c-ceramic'				
+      SPECIFIC_HEAT= 1.0/
+      
+&RAMP ID = 'c-ceramic', T = 0., F = 0.1/
+&RAMP ID = 'c-ceramic', T = 600., F = 0.15/
+&RAMP ID = 'c-ceramic', T = 800., F = 0.22/
+	
+ISOURU BOARD 1260
+http://isolite.co.jp/info/ceramicfiber/seihin2-6/index.html
+&MATL ID = 'CERAMIC_FIBRE_BOARD'
+      EMISSIVITY = 0.9
+      DENSITY = 250.
+      CONDUCTIVITY_RAMP = 'c-board'
+      SPECIFIC_HEAT= 1.0 /
+
+&RAMP ID = 'c-board', T = 0., F = 0.07/	  
+&RAMP ID = 'c-board', T = 400., F = 0.07/
+&RAMP ID = 'c-board', T = 600., F = 0.12/
+&RAMP ID = 'c-board', T = 800., F = 0.16/
+&RAMP ID = 'c-board', T = 1000., F = 0.23/
+
+According to EN 1094-4:1995
+&MATL ID = 'CALSIUM_SILICATE_BOARD'
+      EMISSIVITY = 0.9
+      DENSITY = 225.
+      CONDUCTIVITY= 0.21
+      SPECIFIC_HEAT= 0.84 /
+
+------------------------------------------SURFACE PROPERTIES-------------------------------------
+
+&SURF ID='PIPE',
+      COLOR = 'RED',
+      MATL_ID = 'STEEL',
+      STRETCH_FACTOR = 2,
+      THICKNESS = 0.006/
+
+&SURF ID='CEILING',
+      COLOR = 'SILVER',
+      MATL_ID = 'CERAMIC_FIBRE_BOARD','STEEL',
+      STRETCH_FACTOR = 1.5,2,
+      THICKNESS = 0.05,0.006,
+      BACKING = 'VOID'/
+
+&SURF ID='FLOOR',
+      COLOR = 'GRAY 30',
+      MATL_ID = 'CERAMIC_FIBRE_BLANKET','CERAMIC_FIBRE_BOARD','STEEL',
+      STRETCH_FACTOR = 2,2,2,
+      THICKNESS = 0.025,0.05,0.006,
+      BACKING = 'VOID' /
+
+&SURF ID='WALL',
+      COLOR = 'SILVER',
+      MATL_ID = 'CERAMIC_FIBRE_BOARD','STEEL',
+      STRETCH_FACTOR = 1.5,2,
+      THICKNESS = 0.05,0.006,
+      BACKING = 'VOID',
+      DEFAULT=.TRUE./
+
+&SURF ID='FRONTWALL',
+      COLOR = 'GRAY 70',
+      MATL_ID = 'CERAMIC_FIBRE_BOARD','STEEL',
+      STRETCH_FACTOR = 1.5,2,
+      THICKNESS = 0.05,0.006 /
+
+&SURF ID='FACADE',
+      COLOR = 'GRAY 60',
+      MATL_ID = 'CERAMIC_FIBRE_BOARD','CALSIUM_SILICATE_BOARD',
+      STRETCH_FACTOR   = 2,2,2,
+      THICKNESS = 0.025,0.025 /

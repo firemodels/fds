@@ -1,4 +1,6 @@
 #!/bin/bash
+HYPRE_LIB_TAG=v2.32.0
+
 CONFMAKE=$1
 CLEAN_HYPRE=$2
 
@@ -30,9 +32,17 @@ echo "Checking for hypre repository..."
 if [ -d "$FIREMODELS/hypre" ]; then
   echo "Hypre repository exists. Building hypre library."
   cd $FIREMODELS/hypre
-  if [[ "$(git tag -l "v2.32.0")" == "v2.32.0" ]]; then
-    echo "Checking out v2.32.0"
-    git checkout v2.32.0
+  # Handle possible corrupted state of repository
+  if git branch | grep -q "* master"; then
+    echo "On master branch"
+  else
+    git checkout master
+  fi
+  git checkout .
+  git clean -dxf
+  if [[ "$(git tag -l $HYPRE_LIB_TAG)" == $HYPRE_LIB_TAG ]]; then
+    echo "Checking out $HYPRE_LIB_TAG"
+    git checkout $HYPRE_LIB_TAG
   fi
   cd $FIREMODELS/hypre/src/cmbuild
   export HYPRE_VERSION=$(git describe)

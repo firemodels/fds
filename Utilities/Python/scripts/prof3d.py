@@ -15,6 +15,7 @@ $ python prof3d.py --with_slider
 """
 
 import sys
+import csv
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
@@ -39,42 +40,60 @@ args = parser.parse_args()
 # Close all previously opened figures
 plt.close('all')
 
-tmpa = 20.
-scalar_min = 20.
-scalar_max = 60.
+scalar_min = 0.
+scalar_max = 120.
 
-filenames = ['pine_21O2_40_1C_cat_prof_1.csv',
-             'pine_21O2_40_1C_cat_prof_5.csv',
-             'pine_21O2_40_1C_cat_prof_9.csv',
-             'pine_21O2_40_1C_cat_prof_13.csv']
+filenames = ['../Current_Results/pine_21O2_40_1C_cat_prof_4.csv']
 
 # create lists to store information about each profile
 IOR = []
 X = []
 Y = []
 Z = []
-df = []
+df = {}
 
-for i in range(len(filenames)):
+for i, filename in enumerate(filenames):
+
+    data = []
+    max_cols = 0
 
     # read header information
 
-    with open(filenames[i]) as f:
+    with open(filename,'r') as f:
         # Skip the first 1 lines
         for j in range(1):
             next(f)
         first_line = f.readline().strip('\n')
 
-    header=first_line.split(",")[1:5]
-    IOR.append(int(header[0])) #; print(IOR)
-    X.append(float(header[1])) #; print(X)
-    Y.append(float(header[2])) #; print(Y)
-    Z.append(float(header[3])) #; print(Z)
+        header=first_line.split(",")[1:5]
+        IOR.append(int(header[0])) ; print(IOR)
+        X.append(float(header[1])) ; print(X)
+        Y.append(float(header[2])) ; print(Y)
+        Z.append(float(header[3])) ; print(Z)
+        next(f)
 
-    # sys.exit()
+        # Read lines one at a time
+        while True:
+            line = f.readline()
+            if not line:  # End of file
+                break
+            row = line.strip().split(',')  # Adjust delimiter if needed
 
-    df.append(pd.read_csv(filenames[i],skiprows=3,header=None))
-    df[i].fillna(tmpa, inplace=True)
+            # Convert each element to float, handling errors gracefully
+            try:
+                row = [float(value) if value else None for value in row]
+            except ValueError:
+                # If a value cannot be converted, keep it as None
+                row = [float(value) if value.replace('.', '', 1).isdigit() else None for value in row]
+
+            data.append(row)
+            max_cols = max(max_cols, len(row))  # Track the maximum number of columns
+
+    # Normalize rows to have the same number of columns
+    data = [row + [None] * (max_cols - len(row)) for row in data]
+
+    # Convert to a Pandas DataFrame
+    df[i] = pd.DataFrame(data)
 
 # sys.exit()
 

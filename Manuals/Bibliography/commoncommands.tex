@@ -25,7 +25,7 @@
 \usepackage[pdftex]{graphicx} % use \usepackage[pdftex,demo]{graphicx} to suppress images
 \usepackage{tabularx}
 \usepackage{multirow}
-\usepackage{pdfsync}
+%\usepackage{pdfsync}
 \usepackage{tikz}
 \usepackage{bm}
 \usepackage{pgfplots}
@@ -63,16 +63,13 @@
 \usepackage{needspace}
 
 \newcommand{\nopart}{\expandafter\def\csname Parent-1\endcsname{}} % To fix table of contents in pdf.
-\newcommand{\ct}{\tt\small} % eventually will be deprecated due to http://www.tex.ac.uk/cgi-bin/texfaq2html?label=2letterfontcmd
-\newcommand{\textct}[1]{\texttt{\small #1}}
+\newcommand{\ct}[1]{\lstinline{#1}}
 
 \usepackage{siunitx}
 
 \usepackage{listings}
 \usepackage{textcomp}
-\definecolor{lbcolor}{rgb}{0.96,0.96,0.96}
 \lstset{
-    %backgroundcolor=\color{lbcolor},
     tabsize=4,
     rulecolor=,
     language=Fortran,
@@ -92,6 +89,8 @@
         keywordstyle=\color[rgb]{0,0,0},
         commentstyle=\color[rgb]{0,0,0},
         stringstyle=\color[rgb]{0,0,0},
+        literate={\_}{}{0\discretionary{\_}{}{\_}}
+                 {/}{}{0\discretionary{/}{}{/}}%
 }
 
 \usepackage{xr-hyper}
@@ -156,7 +155,7 @@ Chandan Paul
 
 \newcommand{\logosigs}{
 \begin{minipage}[b]{6.25in}
-\parbox[b]{.5\textwidth}{\flushleft{\includegraphics[height=1.05in]{../Bibliography/FSRI_ULRI_Logo}}}
+\parbox[b]{.5\textwidth}{\flushleft{\includegraphics[height=1.5in]{../Bibliography/FDS_Logo_lock}}}
 \hfill
 \parbox[b]{.5\textwidth}{\flushright{\includegraphics[height=1in]{../Bibliography/nistident_flright_vec}}}
 \end{minipage}
@@ -184,11 +183,10 @@ Chandan Paul \\
 \small
 \begin{flushright}
 U.S. Department of Commerce \\
-{\em Gina M. Raimondo, Secretary} \\
+{\em Howard Lutnick, Secretary} \\
 \hspace{1in} \\
 National Institute of Standards and Technology \\
-{\em Laurie E. Locascio, NIST Director and Undersecretary of Commerce for Standards and Technology}
-% {\em James K. Olthoff, Performing the Non-Exclusive Functions and Duties of the Under Secretary of Commerce for Standards and Technology \& Director, National Institute of Standards and Technology}
+{\em Craig Burkhardt, Acting NIST Director and Acting Under Secretary of Commerce for Standards and Technology}
 \end{flushright}
 }
 

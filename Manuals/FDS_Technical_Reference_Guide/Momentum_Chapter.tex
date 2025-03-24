@@ -394,11 +394,11 @@ An open boundary is where fluid is allowed to flow into or out of the computatio
           \displaystyle \frac{\tp_{\rm ext}}{\rho_\infty} + \ha \left( u_\infty^2 + v_\infty^2 + w_\infty^2 \right)  & {\rm incoming}
           \end{array} \right.  \label{open_general}
 \ee
-{\ct BXS} is the name of the array sent to the pressure solver. The bar over the velocity components indicates an average over the respective faces of the grid cell adjacent to the boundary. The subscript $\infty$ denotes user-specified far field velocity and density values. Typically, the far field velocity is zero, but for simulations involving an external wind, these values can be specified accordingly.
+\ct{BXS} is the name of the array sent to the pressure solver. The bar over the velocity components indicates an average over the respective faces of the grid cell adjacent to the boundary. The subscript $\infty$ denotes user-specified far field velocity and density values. Typically, the far field velocity is zero, but for simulations involving an external wind, these values can be specified accordingly.
 
 \subsubsection{Open Boundary Conditions (Wind)}
 
-If the user specifies a wind {\ct SPEED}, a slightly different {\ct OPEN} boundary condition is invoked. The outflow boundary condition is the same as that shown in Eq.~(\ref{open_general}). At the inflow boundary, the mean viscous and convective forces are assumed small, and a simplified momentum equation is used to develop a boundary value for $H$, namely, $\partial u_i/\partial t = -\partial H/\partial x_i$. For example, the value of $H$ at the lower $x$ boundary, $\cH_{\ha,jk}$, is set so as to approximate a Neumann boundary with a specified velocity component normal to the boundary:
+If the user specifies a wind \ct{SPEED}, a slightly different \ct{OPEN} boundary condition is invoked. The outflow boundary condition is the same as that shown in Eq.~(\ref{open_general}). At the inflow boundary, the mean viscous and convective forces are assumed small, and a simplified momentum equation is used to develop a boundary value for $H$, namely, $\partial u_i/\partial t = -\partial H/\partial x_i$. For example, the value of $H$ at the lower $x$ boundary, $\cH_{\ha,jk}$, is set so as to approximate a Neumann boundary with a specified velocity component normal to the boundary:
 \begin{equation}
 \label{eq:Hin}
 \mathtt{BXS(J,K)} \equiv \cH_{\ha,jk} =  \cH_{1,jk}^n + \frac{\dx}{2}\left[\frac{u_\infty(z,t) - u_{0,jk}^n}{\dt}\right] 
@@ -421,7 +421,7 @@ Boundary conditions at a solid surface fall into three distinct categories:
 {\mathtt{BXF(J,K)}} \equiv \frac{\hp_{I+1,jk}^n-\hp_{I,jk}^n}{\dx} = -F_{x,I,jk}^n - \frac{u_{I,jk}^*-u_{I,jk}^n}{\dt}
 \label{dbc}
 \ee
-where {\ct BXF} is the name of the boundary condition array sent to the pressure solver, $\cH_{I+1,jk}$ lives in the center of the ghost cell to the right of the boundary, $\cH_{I,jk}$ lives in the center of cell to the left of the boundary, $F_{x,I,jk}^n$ is the $x$-component of $\bF$ at the vent or solid wall at the start of the time step, and $u_{I,jk}^*$ is the user-specified value of the $x$-component of velocity at the next time step.
+where \ct{BXF} is the name of the boundary condition array sent to the pressure solver, $\cH_{I+1,jk}$ lives in the center of the ghost cell to the right of the boundary, $\cH_{I,jk}$ lives in the center of cell to the left of the boundary, $F_{x,I,jk}^n$ is the $x$-component of $\bF$ at the vent or solid wall at the start of the time step, and $u_{I,jk}^*$ is the user-specified value of the $x$-component of velocity at the next time step.
 
 Note that for Neumann pressure boundary, there are several options for computing the boundary force term (it could even be set to zero).  What matters is, whatever value is used for the force here, the same value must be used in the velocity predictor and corrector steps, Eqs. (\ref{eqn_RK1}) and (\ref{eqn_RK2}).  We choose to compute the boundary force term using the previous value of the normal pressure gradient, just as we would for an immersed boundary surface:
 \be
@@ -491,7 +491,7 @@ The purpose of the second term on the right hand side of Eq.~(\ref{Hbc}) is seen
 \be
    u_{I,jk}^{*,m} = \bar{u}_{I,jk}^n - \frac{u_{I,jk}^{*,m-1}-u_{0,jk}^{*,m-1}}{2} - \dt \left( F_{x,I,jk}^{n} + \frac{ (\cH_{I,jk}^{m-1}+\cH_{1,jk}^{m-1})/2 - \cH_{I,jk}^{m} }{ \dx/2} \right) \label{uI}
 \ee
-The extra term on the right hand side drives $u_{I,jk}^{*,m}$ halfway towards $u_{0,jk}^{*,m}$, and vice versa. This iterative process continues until $\left| u_{I,jk}^{*,m} - u_{0,jk}^{*,m} \right|$ falls below a specified tolerance. By default, the tolerance is $\dx/2$.
+The extra term on the right hand side drives $u_{I,jk}^{*,m}$ halfway toward $u_{0,jk}^{*,m}$, and vice versa. This iterative process continues until $\left| u_{I,jk}^{*,m} - u_{0,jk}^{*,m} \right|$ falls below a specified tolerance. By default, the tolerance is $\dx/2$.
 
 For the corrector phase of the time step, the procedure is the same, except the boundary condition for the pressure term is:
 \be
@@ -577,10 +577,10 @@ This section describes how the tangential component of velocity is specified at 
 \subsection{Smooth Walls}
 \label{smooth_wall_model}
 
-In finite-volume LES, when the momentum equation is integrated over a cell adjacent to the wall it turns out that the most difficult term to handle is the viscous stress, $\tau_w$, because the wall-normal gradient of the streamwise velocity component cannot be resolved; the SGS stress at the wall is identically zero.  We have, therefore, an entirely different situation than exists in the bulk flow at high Reynolds number where the viscous terms are negligible and the SGS stress is of critical importance.  The fidelity of the SGS model still influences the wall stress, however, since other components of the SGS tensor affect the value of the near-wall velocity and hence the resulting viscous stress determined by the wall model. FDS models $\tau_w$ with a logarithmic velocity profile \cite{Pope:2000} described below.
+In finite-volume LES, when the momentum equation is integrated over a cell adjacent to the wall it turns out that the most difficult term to handle is the viscous stress, $\tau_w$, because the wall-normal gradient of the stream-wise velocity component cannot be resolved; the SGS stress at the wall is identically zero.  We have, therefore, an entirely different situation than exists in the bulk flow at high Reynolds number where the viscous terms are negligible and the SGS stress is of critical importance.  The fidelity of the SGS model still influences the wall stress, however, since other components of the SGS tensor affect the value of the near-wall velocity and hence the resulting viscous stress determined by the wall model. FDS models $\tau_w$ with a logarithmic velocity profile \cite{Pope:2000} described below.
 
 An important scaling quantity in the near-wall region is the friction velocity, defined as $u_\tau \equiv \sqrt{\tau_w/\rho}$.
-From the friction velocity we can define the nondimensional streamwise velocity $u^+ \equiv u/u_\tau$ and nondimensional wall-normal distance $y^+ \equiv y/\delta_\nu$, where $\delta_\nu = \nu/u_\tau = \mu/(\rho u_\tau)$ is the \emph{viscous length scale}. In FDS, the law of the wall is approximated by
+From the friction velocity we can define the non-dimensional stream-wise velocity $u^+ \equiv u/u_\tau$ and non-dimensional wall-normal distance $y^+ \equiv y/\delta_\nu$, where $\delta_\nu = \nu/u_\tau = \mu/(\rho u_\tau)$ is the \emph{viscous length scale}. In FDS, the law of the wall is approximated by
 \begin{align}
 \label{eqn_visclayer} u^+ &= y^+                           && \mbox{for} \quad y^+ < 11.81 \\
 \label{eqn_loglaw}    u^+ &= \frac{1}{\kappa} \ln y^+ + B  && \mbox{for} \quad y^+ \ge 11.81
@@ -594,7 +594,7 @@ where $\kappa = 0.41$ is the von K\'arm\'an constant and $B=5.2$.  The region $5
 %\end{align}
 %where $(1/\kappa)_{\mbox{\tiny\emph{buffer}}}=4.74$ and $B_{\mbox{\tiny\emph{buffer}}}=-2.63$.
 
-For the purposes of adapting the log law model to FDS we suppose that the first off-wall velocity component represents the profile sampled at a distance $\delta y/2$ in the wall-normal direction---streamwise components of velocity are stored at the face center on a staggered grid.  The density and molecular viscosity are taken as the average of the neighboring cell values and uniform on the cell face where the streamwise velocity component is stored.
+For the purposes of adapting the log law model to FDS we suppose that the first off-wall velocity component represents the profile sampled at a distance $\delta y/2$ in the wall-normal direction---stream-wise components of velocity are stored at the face center on a staggered grid.  The density and molecular viscosity are taken as the average of the neighboring cell values and uniform on the cell face where the stream-wise velocity component is stored.
 
 \subsection{Rough Walls}
 \label{rough_wall_model}
@@ -660,27 +660,27 @@ The well-known CFL constraint given by
 \end{equation}
 places a restriction on the time step due to the advection velocity. Physically, the constraint says that a fluid element should not traverse more than one cell within a time step. For LES, this constraint has the added advantage of keeping the implicit temporal and spatial filters consistent with each other.  In other words, in order to resolve an eddy of size $\delta x$, the time step needs to be in concert with the CFL.  If one were to employ an implicit scheme for the purpose of taking time steps say 10 times larger than the CFL limit, the smallest resolvable turbulent motions would then be roughly 10 times the grid spacing, which would severely limit the benefit of LES.  In most cases, if one wishes the simulation to run faster, a better strategy is to coarsen the grid resolution while keeping the CFL $\approx 1$.
 
-The exact CFL needed to maintain stability depends on the order (as well as other properties) of the time integration scheme and the choice of velocity norm. Three choices for velocity norm are available in FDS (set on \textct{MISC}):
+The exact CFL needed to maintain stability depends on the order (as well as other properties) of the time integration scheme and the choice of velocity norm. Three choices for velocity norm are available in FDS (set on \ct{MISC}):
 \vskip\baselineskip
 \noindent
-\textct{CFL\_VELOCITY\_NORM=0} (corresponds to $L_\infty$ norm of velocity vector)
+\ct{CFL\_VELOCITY\_NORM=0} (corresponds to $L_\infty$ norm of velocity vector)
     \begin{equation}
     \frac{\|\mathbf{u}\|}{\delta x} = \max \left(\frac{|u|}{\delta x}, \frac{|v|}{\delta y}, \frac{|w|}{\delta z}\right) + |\nabla\cdot\mathbf{u}|
     \end{equation}
-\textct{CFL\_VELOCITY\_NORM=1} (DNS and LES default, most restrictive, corresponds to $L_1$ norm of velocity vector)
+\ct{CFL\_VELOCITY\_NORM=1} (DNS and LES default, most restrictive, corresponds to $L_1$ norm of velocity vector)
     \begin{equation}
     \frac{\|\mathbf{u}\|}{\delta x} = \frac{|u|}{\delta x}+\frac{|v|}{\delta y}+\frac{|w|}{\delta z} + |\nabla\cdot\mathbf{u}|
     \end{equation}
-\textct{CFL\_VELOCITY\_NORM=2} (VLES default, $L_2$ norm of velocity vector)
+\ct{CFL\_VELOCITY\_NORM=2} (VLES default, $L_2$ norm of velocity vector)
     \begin{equation}
     \frac{\|\mathbf{u}\|}{\delta x} = \sqrt{ (u/\delta x)^2+(v/\delta y)^2+(w/\delta z)^2 } + |\nabla\cdot\mathbf{u}|
     \end{equation}
-\textct{CFL\_VELOCITY\_NORM=3} (SVLES default, least restrictive, corresponds to $L_\infty$ norm of velocity vector)
+\ct{CFL\_VELOCITY\_NORM=3} (SVLES default, least restrictive, corresponds to $L_\infty$ norm of velocity vector)
     \begin{equation}
     \frac{\|\mathbf{u}\|}{\delta x} = \max \left(\frac{|u|}{\delta x}, \frac{|v|}{\delta y}, \frac{|w|}{\delta z}\right)
     \end{equation}
 
-The addition of the magnitude of the velocity divergence to the velocity norm is discussed below in Sec.~\ref{sec:mass_density_constraint}.  Notice that {\ct CFL\_VELOCITY\_NORM=3} omits this restriction and should therefore only be used for incompressible flows.
+The addition of the magnitude of the velocity divergence to the velocity norm is discussed below in Sec.~\ref{sec:mass_density_constraint}.  Notice that \ct{CFL_VELOCITY_NORM=3} omits this restriction and should therefore only be used for incompressible flows.
 
 \subsection{The Von Neumann Constraint}
 
@@ -709,7 +709,7 @@ We can argue that the case we are most concerned with is when $\rho^n$ is near z
 \label{eqn_divstability}
 \delta t < \frac{\rho}{\overline{u}_i \left(\frac{\rho-0}{\delta x_i}\right) + \rho \nabla\cdot\mathbf{u}} = \left[ \frac{\overline{u}_i}{\delta x_i} + \nabla\cdot\mathbf{u} \right]^{-1}
 \ee
-Equation (\ref{eqn_divstability}) basically adds the effect of thermal expansion to the CFL constraint and provides a reason to prefer \textct{CFL\_VELOCITY\_NORM=1} as the basis for the time step restriction.
+Equation (\ref{eqn_divstability}) basically adds the effect of thermal expansion to the CFL constraint and provides a reason to prefer \ct{CFL\_VELOCITY\_NORM=1} as the basis for the time step restriction.
 
 \subsection{Realizable Fluid Volume Constraint}
 

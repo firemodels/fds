@@ -17,7 +17,7 @@ Solve for $z_{\rm int}$:
 \be
    z_{\rm int} = \frac{ T_{\rm \ell}(I_1 \, I_2 - H^2)}{I_1+I_2 \, T_{\rm \ell}^2 - 2\, T_{\rm \ell} \, H}
 \ee
-Let $T_{\rm \ell}$ be the temperature in the lowest mesh cell and, using Simpson's Rule, perform the numerical integration of $I_1$ and $I_2$. $T_{\rm u}$ is defined as the average upper layer temperature via
+Let $T_{\rm \ell}$ be the temperature in the lowest mesh cell and perform the numerical integration of $I_1$ and $I_2$. $T_{\rm u}$ is defined as the average upper layer temperature via
 \be
    (H-z_{\rm int})\; T_{\rm u} = \int_{z_{\rm int}}^H \; T(z) \; dz
 \ee
@@ -824,7 +824,7 @@ Thermocouple arrays were suspended from the ceiling at two points along the cent
 
 The NIST/NRC series consisted of 15 heptane spray fire experiments with varying heat release rates, pan locations, and ventilation conditions. Gas temperatures were measured using seven floor-to-ceiling thermocouple arrays (or ``trees'') distributed throughout the compartment.  The average hot gas layer temperature and height are calculated using thermocouple Trees 1, 2, 3, 5, 6 and 7. Tree~4 was not used because one of its thermocouples (TC~4-9) malfunctioned during most of the experiments. A few observations about the simulations:
 \begin{itemize}
-\item During Tests~4, 5, 10 and 16 a fan blew air into the compartment through a vent in the south wall. The measured velocity profile of the fan was not uniform, with the bulk of the air blowing from the lower third of the duct towards the ceiling at a roughly 45$^\circ$ angle.  The exact flow pattern is difficult to replicate in the model, thus, the results for Tests~4, 5, 10 and 16 should be evaluated with this in mind. The effect of the fan on the hot gas layer is small, but it does have a some effect on target temperatures near the vent.
+\item During Tests~4, 5, 10 and 16 a fan blew air into the compartment through a vent in the south wall. The measured velocity profile of the fan was not uniform, with the bulk of the air blowing from the lower third of the duct toward the ceiling at a roughly 45$^\circ$ angle.  The exact flow pattern is difficult to replicate in the model, thus, the results for Tests~4, 5, 10 and 16 should be evaluated with this in mind. The effect of the fan on the hot gas layer is small, but it does have a some effect on target temperatures near the vent.
 \item For all of the tests involving a fan, the predicted HGL height increased after the fire was extinguished, while the measured HGL decreased.  This appears to be a curious artifact of the layer reduction algorithm. It is not included in the calculation of the relative difference.
 \item In the closed door tests, the hot gas layer descended all the way to the floor. However, the reduction method, used on both the measured and predicted temperatures, does not account for the formation of a single layer, and therefore does not indicate that the layer drops all the way to the floor. This is neither a flaw in the measurements nor in FDS, but rather in the layer reduction method.
 \item The HGL reduction method produces spurious results in the first few minutes of each test because no clear layer has yet formed. These early times are not included in the relative difference calculation.
@@ -1337,6 +1337,31 @@ Steckler et al.~\cite{Steckler:NBSIR_82-2520} mapped the doorway/window flows in
 \caption[Steckler experiments, HGL temperature, Tests 161, 162, 163, 164, 165, 166, 167]
 {Steckler experiments, HGL temperature, Tests 161, 162, 163, 164, 165, 166, 167.}
 \label{Steckler_Temp_7}
+\end{figure}
+
+
+\clearpage
+
+\section{TUS Facade Experiments}
+
+The TUS Facade experiments involved a 1.7~m tall burner compartment out of which spilled a fire plume through a rectangular opening. Shown in Fig.~\ref{TUS_Facade_HGL_Temp} are the HGL temperatures inside the compartment where the gas burners are located.
+
+\newpage
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/TUS_Facade/HGL_Temperature_I_1} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/TUS_Facade/HGL_Temperature_I_2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/TUS_Facade/HGL_Temperature_1_1} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/TUS_Facade/HGL_Temperature_1_2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/TUS_Facade/HGL_Temperature_1_3} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/TUS_Facade/HGL_Temperature_2_1} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/TUS_Facade/HGL_Temperature_2_2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/TUS_Facade/HGL_Temperature_2_3}
+\end{tabular*}
+\caption[TUS Facade Experiments, HGL Temperature]
+{TUS Facade Experiments, HGL Temperature.}
+\label{TUS_Facade_HGL_Temp}
 \end{figure}
 
 
