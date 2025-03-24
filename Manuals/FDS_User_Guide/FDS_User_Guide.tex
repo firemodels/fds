@@ -9259,6 +9259,11 @@ If multiple meshes are involved, enter the name of the first \ct{.csv} file only
 \end{lstlisting}
 and FDS will read, for example, \ct{CHID_uvw_t1_m1.csv} through \ct{CHID_uvw_t1_m16.csv} in the order of the \ct{MESH} lines (note that a \ct{MULT} line for the meshes may also be used).
 
+\section{Unfreezing the Initial Flow Field}
+\label{info:FREZ}
+
+It may be useful to allow the solid phase to respond to an established flow field at the start of a simulation.  This could be accomplished with the normal restart functionality; however, this limits the number of changes that can be made to the model before a restart is made.  The \ct{UNFREEZE_TIME} parameter on the \ct{MISC} line can be used for this purpose. When set, the initial flow field is frozen with the options \ct{FREEZE_VELOCITY} and \ct{SOLID_PHASE_ONLY} set until the simulation time exceeds \ct{UNFREEZE_TIME}.
+
 
 \section{Gravity}
 \label{info:GVEC}
@@ -12731,6 +12736,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{TMPA}                                          & Real         & Section~\ref{info:MISC_Basics}          & $^\circ$C  & 20.               \\ \hline
 \ct{TURBULENCE_MODEL}                             & Character    & Section~\ref{info:LES}                  &            & \ct{'DEARDORFF'} \\ \hline
 \ct{TURBULENT_DEPOSITION}                         & Logical      & Section~\ref{info:deposition}           &            & \ct{T}           \\ \hline
+\ct{UNFREEZE_TIME}                               & Real          & Section~\ref{info:FREZ}                 &            &                  \\ \hline
 \ct{VERBOSE}                                       & Logical      & Section~\ref{info:multimesh}            &            &                   \\ \hline
 \ct{VISIBILITY_FACTOR}                            & Real         & Section~\ref{info:visibility}           &            & 3                 \\ \hline
 \ct{VN_MAX}                                       & Real         & Section~\ref{info:VN}                   &            & 1.0               \\ \hline
