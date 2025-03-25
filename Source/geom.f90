@@ -288,6 +288,9 @@ INTEGER, SAVE ::      NQT2C = INT_P_IND+2   ! The +2 is because we pass RHO0, WC
 
 ! Max numbers of link attempts for small faces and cut-cells:
 INTEGER, PARAMETER :: N_LINK_ATTMP = 1, N_LINK_ATTMP_F=50
+! Number of digits in loose precision used in normals definition for linking.
+INTEGER, PARAMETER :: LINK_DIGITS = 8            
+REAL(EB),PARAMETER :: LINK_FCT    = REAL(10**LINK_DIGITS,EB)
 
 ! Areas per SURF and GEOM:
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: FDS_AREA_GEOM
@@ -8268,6 +8271,11 @@ LINK_LOOP : DO ! Cut-cell linking loop for small cells. -> Algo defined by CCVOL
 
          ! With the surface normal search for a Regular Gasphase face in that direction.
          AREA_IF_1 : IF (AREA > TWO_EPSILON_EB) THEN
+            NRML = NRML / AREA ! Normalize unit vector:
+            ! Normalize NRML vector to LINK_DIGITS:
+            DO DUM=IAXIS,KAXIS
+               NRML(DUM) = REAL(INT(LINK_FCT*NRML(DUM)),EB)/LINK_FCT
+            ENDDO
             MASK(IAXIS:KAXIS) = .TRUE.
             INRM(1) = MAXLOC(ABS(NRML(IAXIS:KAXIS)),MASK=MASK,DIM=1); MASK(INRM(1))=.FALSE.
             INRM(2) = MAXLOC(ABS(NRML(IAXIS:KAXIS)),MASK=MASK,DIM=1); MASK(INRM(2))=.FALSE.
@@ -8373,6 +8381,11 @@ LINK_LOOP : DO ! Cut-cell linking loop for small cells. -> Algo defined by CCVOL
          ENDDO
 
          AREA_IF_2 : IF (AREA > TWO_EPSILON_EB) THEN
+            NRML = NRML / AREA ! Normalize unit vector:
+            ! Normalize NRML vector to LINK_DIGITS:
+            DO DUM=IAXIS,KAXIS
+               NRML(DUM) = REAL(INT(LINK_FCT*NRML(DUM)),EB)/LINK_FCT
+            ENDDO
             MASK(IAXIS:KAXIS) = .TRUE.
             INRM(1) = MAXLOC(ABS(NRML(IAXIS:KAXIS)),MASK=MASK,DIM=1); MASK(INRM(1))=.FALSE.
             INRM(2) = MAXLOC(ABS(NRML(IAXIS:KAXIS)),MASK=MASK,DIM=1); MASK(INRM(2))=.FALSE.
