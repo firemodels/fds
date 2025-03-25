@@ -395,6 +395,7 @@ REAL(EB) :: MPI_TIMEOUT=600._EB                             !< Time to wait for 
 REAL(EB) :: DT_END_MINIMUM=TWO_EPSILON_EB                   !< Smallest possible final time step (s)
 REAL(EB) :: DT_END_FILL=1.E-6_EB
 INTEGER  :: DIAGNOSTICS_INTERVAL                            !< Number of time steps between diagnostic outputs
+REAL(EB) :: UNFREEZE_TIME                                   !< Time to unfreeze a simulation
 
 ! Combustion parameters
 
