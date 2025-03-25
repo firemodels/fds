@@ -1,0 +1,65 @@
+-----------------------------------------------MEASURING-------------------------------------------------
+&PROP ID        = 'TC'
+      QUANTITY  = 'THERMOCOUPLE'
+      DIAMETER  = 0.0032/
+
+&PROP ID        = 'TC2'
+      QUANTITY  = 'THERMOCOUPLE'
+      DIAMETER  = 0.0016/
+
+Gas temperatures at facade
+
+Line a
+&DEVC 	XYZ=1.1,-0.25,1.75,     PROP_ID = 'TC', ID='TC_23' / 
+&DEVC 	XYZ=1.1,-0.25,2.6,      PROP_ID = 'TC', ID='TC_20' / 
+&DEVC 	XYZ=1.1,-0.25,2.9,      PROP_ID = 'TC', ID='TC_17' /
+&DEVC 	XYZ=1.1,-0.25,3.2,      PROP_ID = 'TC', ID='TC_14' /
+&DEVC 	XYZ=1.1,-0.25,5.7,      PROP_ID = 'TC', ID='TC_3' / 
+
+Line b
+&DEVC 	XYZ=2.0,-0.25,1.75,     PROP_ID = 'TC', ID='TC_22' / This may be functioning wrong.
+&DEVC 	XYZ=2.0,-0.25,2.6,      PROP_ID = 'TC', ID='TC_19' / 
+&DEVC 	XYZ=2.0,-0.25,2.9,      PROP_ID = 'TC', ID='TC_16' / 
+&DEVC 	XYZ=2.0,-0.25,3.2,      PROP_ID = 'TC', ID='TC_13' / 
+&DEVC 	XYZ=2.0,-0.25,3.7,      PROP_ID = 'TC', ID='TC_11' / 
+&DEVC 	XYZ=2.0,-0.25,5.7,      PROP_ID = 'TC', ID='TC_2' / 
+
+Line c
+&DEVC 	XYZ=2.9,-0.25,1.75,     PROP_ID = 'TC', ID='TC_21' / 
+&DEVC 	XYZ=2.9,-0.25,2.6,      PROP_ID = 'TC', ID='TC_18' / 
+&DEVC 	XYZ=2.9,-0.25,2.9,      PROP_ID = 'TC', ID='TC_15' / 
+&DEVC 	XYZ=2.9,-0.25,3.2,      PROP_ID = 'TC', ID='TC_12' / 
+&DEVC 	XYZ=2.9,-0.25,3.7,      PROP_ID = 'TC', ID='TC_10' / 
+&DEVC 	XYZ=2.9,-0.25,5.7,      PROP_ID = 'TC', ID='TC_1' / 
+
+Gauge Heat fluxes
+Line a
+&DEVC XYZ=1.1,-0.2,2.6,         QUANTITY = 'GAUGE HEAT FLUX', ID='HF_10', IOR = -2 / 
+&DEVC XYZ=1.1,-0.2,3.2,         QUANTITY = 'GAUGE HEAT FLUX', ID='HF_5', IOR = -2 / 
+
+Line b
+&DEVC XYZ=2.0,-0.2,2.6,         QUANTITY = 'GAUGE HEAT FLUX', ID='HF_9', IOR = -2 / 
+&DEVC XYZ=2.0,-0.2,2.9,         QUANTITY = 'GAUGE HEAT FLUX', ID='HF_7', IOR = -2 / 
+&DEVC XYZ=2.0,-0.2,3.2,         QUANTITY = 'GAUGE HEAT FLUX', ID='HF_4', IOR = -2 / 
+&DEVC XYZ=2.0,-0.2,3.7,         QUANTITY = 'GAUGE HEAT FLUX', ID='HF_2', IOR = -2 / 
+
+Line c
+&DEVC XYZ=2.9,-0.2,2.6,         QUANTITY = 'GAUGE HEAT FLUX', ID='HF_8', IOR = -2 / 
+&DEVC XYZ=2.9,-0.2,2.9,         QUANTITY = 'GAUGE HEAT FLUX', ID='HF_6', IOR = -2 / 
+&DEVC XYZ=2.9,-0.2,3.2,         QUANTITY = 'GAUGE HEAT FLUX', ID='HF_3', IOR = -2 / 
+&DEVC XYZ=2.9,-0.2,3.7,         QUANTITY = 'GAUGE HEAT FLUX', ID='HF_1', IOR = -2 / 
+
+Temperature inside chamber
+POLE_A
+&DEVC XYZ=0.09,0.09,0.22,       PROP_ID = 'TC2' ID='TC_32'/
+&DEVC XYZ=0.09,0.09,0.43,       PROP_ID = 'TC2', ID='TC_31'/
+&DEVC XYZ=0.09,0.09,0.855,      PROP_ID = 'TC2', ID='TC_30'/
+&DEVC XYZ=0.09,0.09,1.28,       PROP_ID = 'TC2', ID='TC_29'/
+&DEVC XYZ=0.09,0.09,1.49,       PROP_ID = 'TC2', ID='TC_28'/
+
+POLE_B
+&DEVC XYZ=3.91,3.91,0.22,       PROP_ID = 'TC2', ID='TC_37'/
+&DEVC XYZ=3.91,3.91,0.43,       PROP_ID = 'TC2', ID='TC_36'/
+&DEVC XYZ=3.91,3.91,0.855,      PROP_ID = 'TC2', ID='TC_35'/
+&DEVC XYZ=3.91,3.91,1.28,       PROP_ID = 'TC2', ID='TC_34'/
+&DEVC XYZ=3.91,3.91,1.49,       PROP_ID = 'TC2', ID='TC_33'/

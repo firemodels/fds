@@ -45,7 +45,7 @@ else:
    spec_data_flag = True
    prop_flag = args.fds_prop
 
-mfo_file_flag = False
+mf0_file_flag = False
 if args.mf0_file!='noinput':
    try:
       mf0_data=pd.read_csv(args.mf0_file, keep_default_na=False, na_values=['_'])

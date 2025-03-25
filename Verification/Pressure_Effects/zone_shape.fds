@@ -8,7 +8,7 @@ Each time a ZONE is opened, the pressure of the two connected ZONEs quickly equi
 
 &TIME T_END=25., DT=0.05 / 
 
-&DUMP FLUSH_FILE_BUFFERS=T, DT_DEVC=0.1 /
+&DUMP DT_DEVC=0.1 /
 
 &MISC CONSTANT_SPECIFIC_HEAT_RATIO=.TRUE., STRATIFICATION=.FALSE. /
 

@@ -63,7 +63,7 @@
 \usepackage{needspace}
 
 \newcommand{\nopart}{\expandafter\def\csname Parent-1\endcsname{}} % To fix table of contents in pdf.
-\newcommand\ct[1]{\lstinline !#1!} 
+\newcommand{\ct}[1]{\lstinline{#1}}
 
 \usepackage{siunitx}
 
@@ -80,7 +80,7 @@
         columns=fixed,
         extendedchars=true,
         breaklines=true,
-        breakatwhitespace=false,
+        breakatwhitespace=true,
         frame=none,
         showtabs=false,
         showspaces=false,
@@ -89,6 +89,8 @@
         keywordstyle=\color[rgb]{0,0,0},
         commentstyle=\color[rgb]{0,0,0},
         stringstyle=\color[rgb]{0,0,0},
+        literate={\_}{}{0\discretionary{\_}{}{\_}}
+                 {/}{}{0\discretionary{/}{}{/}}%
 }
 
 \usepackage{xr-hyper}
@@ -153,7 +155,7 @@ Chandan Paul
 
 \newcommand{\logosigs}{
 \begin{minipage}[b]{6.25in}
-\parbox[b]{.5\textwidth}{\flushleft{\includegraphics[height=1.05in]{../Bibliography/FSRI_ULRI_Logo}}}
+\parbox[b]{.5\textwidth}{\flushleft{\includegraphics[height=1.5in]{../Bibliography/FDS_Logo_lock}}}
 \hfill
 \parbox[b]{.5\textwidth}{\flushright{\includegraphics[height=1in]{../Bibliography/nistident_flright_vec}}}
 \end{minipage}
@@ -181,11 +183,10 @@ Chandan Paul \\
 \small
 \begin{flushright}
 U.S. Department of Commerce \\
-{\em Gina M. Raimondo, Secretary} \\
+{\em Howard Lutnick, Secretary} \\
 \hspace{1in} \\
 National Institute of Standards and Technology \\
-{\em Laurie E. Locascio, NIST Director and Undersecretary of Commerce for Standards and Technology}
-% {\em James K. Olthoff, Performing the Non-Exclusive Functions and Duties of the Under Secretary of Commerce for Standards and Technology \& Director, National Institute of Standards and Technology}
+{\em Craig Burkhardt, Acting NIST Director and Acting Under Secretary of Commerce for Standards and Technology}
 \end{flushright}
 }
 

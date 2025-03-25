@@ -2955,9 +2955,6 @@ ELSE PARTICLE_NON_STATIC_IF ! Drag calculation for stationary, airborne particle
             ACCEL_X = -(K_TERM(1)+Y_TERM(1))*UBAR*DY(JJG_OLD)*DZ(KKG_OLD)*SFAC
             ACCEL_Y = -(K_TERM(2)+Y_TERM(2))*VBAR*DX(IIG_OLD)*DZ(KKG_OLD)*SFAC
             ACCEL_Z = -(K_TERM(3)+Y_TERM(3))*WBAR*DX(IIG_OLD)*DY(JJG_OLD)*SFAC
-            DRAG_MAX(1) = ACCEL_X/(-UBAR+TWO_EPSILON_EB)
-            DRAG_MAX(2) = ACCEL_Y/(-VBAR+TWO_EPSILON_EB)
-            DRAG_MAX(3) = ACCEL_Z/(-WBAR+TWO_EPSILON_EB)
          ELSE
             ACCEL_X = 0._EB
             ACCEL_Y = 0._EB
@@ -2973,10 +2970,10 @@ ELSE PARTICLE_NON_STATIC_IF ! Drag calculation for stationary, airborne particle
          ACCEL_X = -(MIN(DX(IIG_OLD),LP%DX)/DX(IIG_OLD))*(K_TERM(1)+Y_TERM(1))*UBAR*SFAC
          ACCEL_Y = -(MIN(DY(JJG_OLD),LP%DY)/DY(JJG_OLD))*(K_TERM(2)+Y_TERM(2))*VBAR*SFAC
          ACCEL_Z = -(MIN(DZ(KKG_OLD),LP%DZ)/DZ(KKG_OLD))*(K_TERM(3)+Y_TERM(3))*WBAR*SFAC
-         DRAG_MAX(1) = ACCEL_X/(-UBAR-SIGN(1._EB,UBAR)*TWO_EPSILON_EB)
-         DRAG_MAX(2) = ACCEL_Y/(-VBAR-SIGN(1._EB,VBAR)*TWO_EPSILON_EB)
-         DRAG_MAX(3) = ACCEL_Z/(-WBAR-SIGN(1._EB,WBAR)*TWO_EPSILON_EB)
    END SELECT
+   DRAG_MAX(1) = ACCEL_X/(-UBAR-SIGN(1._EB,UBAR)*TWO_EPSILON_EB)
+   DRAG_MAX(2) = ACCEL_Y/(-VBAR-SIGN(1._EB,VBAR)*TWO_EPSILON_EB)
+   DRAG_MAX(3) = ACCEL_Z/(-WBAR-SIGN(1._EB,WBAR)*TWO_EPSILON_EB)
    IF (TWO_D) THEN
       ACCEL_Y  = 0._EB
       DRAG_MAX(2) = 0._EB
@@ -3634,7 +3631,7 @@ IF (LIQUID_DROPLETS) THEN
    
    RHO_INTERIM => WORK1 ; RHO_INTERIM = RHO
    TMP_INTERIM => WORK2 ; TMP_INTERIM = TMP
-   ZZ_INTERIM  => SCALAR_WORK1 ; ZZ_INTERIM = ZZ
+   ZZ_INTERIM  => SWORK1 ; ZZ_INTERIM(:,:,:,1:) = ZZ(:,:,:,1:)
 
 ENDIF
 
@@ -3909,11 +3906,11 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
                ! Add energy losses and gains to overall energy budget array
 
-               Q_DOT(8,NM) = Q_DOT(8,NM) - Q_RAD*WGT/DT  ! Q_PART
-               Q_DOT(4,NM) = Q_DOT(4,NM) + M_VAP*H_S_B*WGT/DT                       ! Q_CONV
-               Q_DOT(3,NM) = Q_DOT(3,NM) + Q_RAD*WGT/DT                             ! Q_RADI
+               Q_DOT(8) = Q_DOT(8) - Q_RAD*WGT/DT  ! Q_PART
+               Q_DOT(4) = Q_DOT(4) + M_VAP*H_S_B*WGT/DT                       ! Q_CONV
+               Q_DOT(3) = Q_DOT(3) + Q_RAD*WGT/DT                             ! Q_RADI
 
-               IF (LPC%Z_INDEX>0) M_DOT(LPC%Z_INDEX,NM) = M_DOT(LPC%Z_INDEX,NM) + WGT*M_VAP/DT/LPC%ADJUST_EVAPORATION
+               IF (LPC%Z_INDEX>0) M_DOT(LPC%Z_INDEX) = M_DOT(LPC%Z_INDEX) + WGT*M_VAP/DT/LPC%ADJUST_EVAPORATION
 
                ! Keep track of total mass evaporated in cell
 
@@ -3949,7 +3946,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
                SOLID_OR_GAS_PHASE_2: IF (BC%IOR/=0 .AND. (LP%WALL_INDEX>0 .OR. LP%CFACE_INDEX>0) .AND. .NOT. SF_FIXED) THEN
 
-                  CALL GET_FILM_PROPERTIES(1,PLATE_FILM_FAC,Y_DROP_A,Y_GAS_A,Z_INDEX_A,TMP_DROP,TMP_G,ZZ_GET, &
+                  CALL GET_FILM_PROPERTIES(1,PLATE_FILM_FACTOR,Y_DROP_A,Y_GAS_A,Z_INDEX_A,TMP_DROP,TMP_G,ZZ_GET, &
                                            PBAR(KK,PRESSURE_ZONE(II,JJ,KK)),TMP_FILM,MU_FILM,&
                                            K_FILM,CP_FILM,D_FILM,RHO_FILM,PR_FILM,SC_FILM)
 
@@ -4021,7 +4018,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
                ELSE SOLID_OR_GAS_PHASE_2
 
-                  CALL GET_FILM_PROPERTIES(1,SPHERE_FILM_FAC,Y_DROP_A,Y_GAS_A,Z_INDEX_A,TMP_DROP,TMP_G,ZZ_GET,&
+                  CALL GET_FILM_PROPERTIES(1,SPHERE_FILM_FACTOR,Y_DROP_A,Y_GAS_A,Z_INDEX_A,TMP_DROP,TMP_G,ZZ_GET,&
                                            PBAR(KK,PRESSURE_ZONE(II,JJ,KK)),TMP_FILM,MU_FILM,&
                                            K_FILM,CP_FILM,D_FILM,RHO_FILM,PR_FILM,SC_FILM)
 
@@ -4284,12 +4281,12 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
                ! Add energy losses and gains to overall energy budget array
 
-               Q_DOT(8,NM) = Q_DOT(8,NM) - (Q_CON_GAS + Q_CON_WALL + Q_RAD)*WGT/DT  ! Q_PART
-               Q_DOT(4,NM) = Q_DOT(4,NM) + M_VAP*H_S_B*WGT/DT                       ! Q_CONV
-               Q_DOT(3,NM) = Q_DOT(3,NM) + Q_RAD*WGT/DT                             ! Q_RADI
-               Q_DOT(5,NM) = Q_DOT(5,NM) + Q_CON_WALL*WGT/DT                        ! Q_COND
+               Q_DOT(8) = Q_DOT(8) - (Q_CON_GAS + Q_CON_WALL + Q_RAD)*WGT/DT  ! Q_PART
+               Q_DOT(4) = Q_DOT(4) + M_VAP*H_S_B*WGT/DT                       ! Q_CONV
+               Q_DOT(3) = Q_DOT(3) + Q_RAD*WGT/DT                             ! Q_RADI
+               Q_DOT(5) = Q_DOT(5) + Q_CON_WALL*WGT/DT                        ! Q_COND
 
-               IF (LPC%Z_INDEX>0) M_DOT(LPC%Z_INDEX,NM) = M_DOT(LPC%Z_INDEX,NM) + WGT*M_VAP/DT/LPC%ADJUST_EVAPORATION
+               IF (LPC%Z_INDEX>0) M_DOT(LPC%Z_INDEX) = M_DOT(LPC%Z_INDEX) + WGT*M_VAP/DT/LPC%ADJUST_EVAPORATION
 
                ! Keep track of total mass evaporated in cell
 
@@ -4748,8 +4745,8 @@ IF (NOM/=0 .AND. NOM/=NM) THEN
    ENDIF
 
    OS%N_ITEMS = OS%N_ITEMS + 1
-
-   CALL PACK_PARTICLE(NM,OS,LP,LP%CLASS_INDEX,OS%N_REALS,OS%N_INTEGERS,OS%N_LOGICALS,UNPACK_IT=.FALSE.,COUNT_ONLY=.FALSE.)
+   CALL PACK_PARTICLE(NM,OS,LP,LP%CLASS_INDEX,OS%N_REALS,OS%N_INTEGERS,OS%N_LOGICALS,UNPACK_IT=.FALSE.,COUNT_ONLY=.FALSE.,&
+                      CHECK_BOUNDS=.FALSE.)
 
 ENDIF
 

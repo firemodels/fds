@@ -2,7 +2,7 @@
 
 \chapter{Surface Temperature}
 
-All solid surfaces in an FDS model are assigned thermal boundary conditions. Heat and mass transfer to and from surfaces is usually handled with empirical correlations, although it is possible to compute directly the heat and mass transfer when performing a Direct Numerical Simulation (DNS). Heat conduction into a solid surface is calculated via a one-dimensional solution of the heat equation in cartesian, cylindrical, or spherical coordinates. The latter two are useful for predicting the thermal response of so-called ``targets,'' which include structural steel, electrical cables, sensitive equipment, or any type of intervening combustible.
+All solid surfaces in an FDS model are assigned thermal boundary conditions. Heat and mass transfer to and from surfaces is usually handled with empirical correlations, although it is possible to compute directly the heat and mass transfer when performing a Direct Numerical Simulation (DNS). Heat conduction into a solid surface is calculated via a one-dimensional solution of the heat equation in Cartesian, cylindrical, or spherical coordinates. The latter two are useful for predicting the thermal response of so-called ``targets,'' which include structural steel, electrical cables, sensitive equipment, or any type of intervening combustible.
 
 This chapter divides solid surfaces into two major categories -- compartment linings (i.e., walls, ceiling, floor) and targets (i.e., anything that is not a wall, ceiling, or floor). The reason for this distinction is that some models treat the two categories differently. In general, FDS does not.
 
@@ -1897,7 +1897,7 @@ Results of the Frankman vegetation experiments are shown in Fig.~\ref{Frankman_F
 
 In most of the PRISME experiments, instrumented electrical cables were laid within trays at various heights in the test compartment. For the PRISME LEAK series of experiments (Figs.~\ref{PRISME_1} and \ref{PRISME_2}), the gas temperature in the vicinity of the cables was measured and served as the exposing heat source for calculations using the THIEF (Thermally-Induced Electrical Failure) model~\cite{Dreisbach:Interflam}.
 
-For the PRISME Door experiments, the temperatures of surrogate cables were predicted directly from the predicted thermal environment of the entire compartment. The measurement points in these experiments were labeled, for example, TCA\_L2\_HE\_SURF, meaning thermocouple of the ``analytical'' cable, compartment 2, {\it haut} (high), east, surface. BW means {\it bas} (low) west, for example. Thermocouples were positioned on the cable surface (SURF), halfway towards center (INTER), and center (CENTRE).
+For the PRISME Door experiments, the temperatures of surrogate cables were predicted directly from the predicted thermal environment of the entire compartment. The measurement points in these experiments were labeled, for example, TCA\_L2\_HE\_SURF, meaning thermocouple of the ``analytical'' cable, compartment 2, {\it haut} (high), east, surface. BW means {\it bas} (low) west, for example. Thermocouples were positioned on the cable surface (SURF), halfway toward center (INTER), and center (CENTRE).
 
 \newpage
 

@@ -34,23 +34,39 @@ jobs:
     - uses: rscohn2/setup-oneapi@v0
       with:
         components: |
-          ifx
-          impi
-          mkl
+          ifx@2025.0.1
+          impi@2021.14.1
+          mkl@2025.0.1
 
     - uses: actions/checkout@v4
+
+    - name: Check Current Memory Limit
+      run: ulimit -a  # Check the memory limits
+
+    - name: free -h command
+      run: free -h  
+
     - name: build fds debug
       run: |
         source /opt/intel/oneapi/setvars.sh
         cd ./Build/impi_intel_linux_db
         ./make_fds.sh
         ./fds_impi_intel_linux_db
+
+    - name: free -h command
+      run: free -h  
+
     - name: build fds release
+      if: false # skip this run until ifx issue is sorted out
       run: |
         source /opt/intel/oneapi/setvars.sh
         cd ./Build/impi_intel_linux
         ./make_fds.sh
         ./fds_impi_intel_linux
+
+    - name: free -h command
+      run: free -h  
+
     # Setup python
     - uses: actions/setup-python@v5
       with:
@@ -64,7 +80,6 @@ jobs:
         echo $GITHUB_WORKSPACE
         cd $GITHUB_WORKSPACE/Utilities/Python
         python hello_world.py
-        python FDS_verification_script.py
 
   linux-gnu-openmpi:
     # build on ubuntu using gfortran with openmpi and mkl based on

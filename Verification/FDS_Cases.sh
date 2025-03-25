@@ -417,6 +417,12 @@ $QFDS -p 4 -d Pressure_Solver obst_activation_default.fds
 $QFDS -p 4 -d Pressure_Solver obst_activation_ulmat.fds
 $QFDS -p 4 -d Pressure_Solver obst_activation_default_gases.fds
 
+$QFDS -d Pyrolysis anca-couce-fig1_10K.fds
+$QFDS -d Pyrolysis anca-couce-fig1_5K.fds
+$QFDS -d Pyrolysis anca-couce-fig1_2p5K.fds
+$QFDS -d Pyrolysis anca-couce-fig2_10K.fds
+$QFDS -d Pyrolysis anca-couce-fig2_5K.fds
+$QFDS -d Pyrolysis anca-couce-fig2_2p5K.fds
 $QFDS -d Pyrolysis cable_11_insulation_mcc.fds
 $QFDS -d Pyrolysis cable_23_insulation_mcc.fds
 $QFDS -d Pyrolysis cable_701_insulation_mcc.fds
@@ -424,6 +430,9 @@ $QFDS -d Pyrolysis cable_11_jacket_mcc.fds
 $QFDS -d Pyrolysis cable_23_jacket_mcc.fds
 $QFDS -d Pyrolysis cable_701_jacket_mcc.fds
 $QFDS -d Pyrolysis cell_burn_away.fds
+$QFDS -d Pyrolysis cellulose_TGA_1KPM_Air.fds
+$QFDS -d Pyrolysis cellulose_TGA_3KPM_Air.fds
+$QFDS -d Pyrolysis cellulose_TGA_5KPM_Air.fds
 $QFDS -d Pyrolysis birch_tga_1step_2.fds
 $QFDS -d Pyrolysis birch_tga_1step_20.fds
 $QFDS -d Pyrolysis enthalpy.fds
@@ -434,6 +443,7 @@ $QFDS -d Pyrolysis part_baking_soda_420K.fds
 $QFDS -d Pyrolysis part_baking_soda_450K.fds
 $QFDS -d Pyrolysis part_baking_soda_500K.fds
 $QFDS -d Pyrolysis pine_wood_TGA_exp03_1C.fds
+$QFDS -d Pyrolysis pine_wood_TGA_exp03_3C.fds
 $QFDS -d Pyrolysis pine_wood_TGA_exp13_1C.fds
 $QFDS -d Pyrolysis pine_wood_TGA_exp13_3C.fds
 $QFDS -d Pyrolysis pine_wood_TGA_exp14_1C.fds
@@ -441,7 +451,9 @@ $QFDS -d Pyrolysis pine_wood_TGA_exp14_3C.fds
 $QFDS -d Pyrolysis pine_wood_TGA_exp15_1C.fds
 $QFDS -d Pyrolysis pine_wood_TGA_exp15_3C.fds
 $QFDS -d Pyrolysis pine_wood_TGA_exp16_1C.fds
+$QFDS -d Pyrolysis pine_wood_TGA_exp16_3C.fds
 $QFDS -d Pyrolysis pine_wood_TGA_exp17_1C.fds
+$QFDS -d Pyrolysis pine_wood_TGA_exp17_3C.fds
 $QFDS -d Pyrolysis pyrolysis_1.fds
 $QFDS -d Pyrolysis pyrolysis_2.fds
 $QFDS -d Pyrolysis specified_hrr.fds
@@ -596,10 +608,17 @@ $QFDS -d Species propane_flame_2reac_simple.fds
 $QFDS -d Species multiple_reac_hrrpua.fds
 $QFDS -d Species multiple_reac_n_simple.fds
 $QFDS -d Species reactionrate_arrhenius_0order_1step.fds
+$QFDS -d Species reactionrate_arrhenius_0order_1step_cvode.fds
 $QFDS -d Species reactionrate_arrhenius_2order_1step.fds
+$QFDS -d Species reactionrate_arrhenius_2order_1step_cvode.fds
 $QFDS -d Species reactionrate_arrhenius_1p75order_2step.fds
+$QFDS -d Species reactionrate_arrhenius_1p75order_2step_cvode.fds
 $QFDS -d Species reactionrate_arrhenius_1p75order_2stepr.fds
+$QFDS -d Species reactionrate_arrhenius_1p75order_2stepr_cvode.fds
 $QFDS -d Species reactionrate_arrhenius_equilibrium.fds
+$QFDS -d Species reactionrate_arrhenius_equilibrium_cvode.fds
+$QFDS -d Species reactionrate_arrhenius_jones_lindstedt.fds
+$QFDS -d Species reactionrate_arrhenius_jones_lindstedt_cvode.fds
 $QFDS -d Species reactionrate_EDC_1step_CH4_nonmix.fds
 $QFDS -d Species reactionrate_EDC_flim_1step_C3H8.fds
 $QFDS -d Species reactionrate_EDC_flim_1step_CH4.fds

@@ -11,7 +11,7 @@
 
 VPATH = ../Source
 
-# 3rd part library versions 
+# 3rd part library versions
 HYPRE_VERSION=v2.32.0
 SUNDIALS_VERSION=v6.7.0
 
@@ -21,7 +21,7 @@ ifeq ($(shell echo "check_quotes"),"check_quotes")
   GIT_STAT := $(shell ..\Scripts\gitstat)
   GIT_DATE := $(shell ..\Scripts\gitlog)
   GIT_BRANCH := $(shell ..\Scripts\gitbranch)
-  BUILD_DATE := $(shell date /t) $(shell time /t)
+  BUILD_DATE := $(shell powershell -Command "(Get-Date).ToString('ddd-MM/dd/yyyy-hh:mm-tt')")
 else
 # linux/osx
   SHELL:=/bin/bash
@@ -343,7 +343,7 @@ ompi_intel_linux : setup $(obj_mpi)
 
 #*** GNU Compilers ***
 
-ompi_gnu_linux : FFLAGS = -m64 -O2 -std=f2018 -frecursive -ffpe-summary=none -fall-intrinsics $(GITINFOGNU) $(FFLAGSMKL_GNU_OPENMPI) $(GFORTRAN_OPTIONS) $(FFLAGS_HYPRE) $(FFLAGS_SUNDIALS)
+ompi_gnu_linux : FFLAGS = -m64 -O3 -std=f2018 -frecursive -ffpe-summary=none -fall-intrinsics $(GITINFOGNU) $(FFLAGSMKL_GNU_OPENMPI) $(GFORTRAN_OPTIONS) $(FFLAGS_HYPRE) $(FFLAGS_SUNDIALS)
 ompi_gnu_linux : LFLAGSMKL = $(LFLAGSMKL_GNU_OPENMPI) $(LFLAGS_HYPRE) $(LFLAGS_SUNDIALS)
 ompi_gnu_linux : FCOMPL = $(COMP_FC)
 ompi_gnu_linux : FOPENMPFLAGS = -fopenmp
@@ -405,7 +405,7 @@ type.o : prec.o cons.o imkl.o
 data.o : prec.o func.o cons.o prop.o
 rcal.o : func.o prec.o cons.o
 mesh.o : prec.o type.o
-func.o : prec.o cons.o type.o mesh.o devc.o
+func.o : prec.o prop.o cons.o type.o mesh.o devc.o
 gsmv.o : prec.o func.o cons.o mesh.o
 smvv.o : geom.o prec.o func.o cons.o data.o
 turb.o : prec.o func.o cons.o mesh.o
@@ -439,7 +439,7 @@ type.obj : prec.obj cons.obj imkl.obj
 data.obj : prec.obj func.obj cons.obj prop.obj
 rcal.obj : func.obj prec.obj cons.obj
 mesh.obj : prec.obj type.obj
-func.obj : prec.obj cons.obj type.obj mesh.obj devc.obj
+func.obj : prec.obj prop.obj cons.obj type.obj mesh.obj devc.obj
 gsmv.obj : prec.obj func.obj cons.obj mesh.obj
 smvv.obj : geom.obj prec.obj func.obj cons.obj data.obj
 turb.obj : prec.obj func.obj cons.obj mesh.obj

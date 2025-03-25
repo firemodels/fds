@@ -165,6 +165,7 @@ INTEGER :: NO_INDEX=0                      !< Index for NO
 INTEGER :: NO2_INDEX=0                     !< Index for NO2
 INTEGER :: ZETA_INDEX=0                    !< Index for unmixed fuel fraction, ZETA
 INTEGER :: MOISTURE_INDEX=0                !< Index for MATL MOISTURE
+INTEGER :: CHAR_INDEX=0                    !< Index for MATL CHAR
 
 INTEGER :: STOP_STATUS=NO_STOP             !< Indicator of whether and why to stop the job
 INTEGER :: INPUT_FILE_LINE_NUMBER=0        !< Indicator of what line in the input file is being read
@@ -195,6 +196,7 @@ LOGICAL :: TWO_D=.FALSE.                    !< Perform a 2-D simulation
 LOGICAL :: SETUP_ONLY=.FALSE.               !< Indicates that the calculation should be stopped before time-stepping
 LOGICAL :: CHECK_MESH_ALIGNMENT=.FALSE.     !< Indicates that the user wants to check the mesh alignment and then stop
 LOGICAL :: SMOKE3D=.TRUE.                   !< Indicates that the 3D smoke and fire output is desired
+LOGICAL :: SMV_PARALLEL_WRITE=.FALSE.       !< If true, the CHID.smv file is written in parallel using MPI-IO.
 LOGICAL :: STATUS_FILES=.FALSE.             !< Produce an output file CHID.notready which is deleted if the simulation completes
 LOGICAL :: LOCK_TIME_STEP=.FALSE.           !< Do not allow time step to change for diagnostic purposes
 LOGICAL :: RESTRICT_TIME_STEP=.TRUE.        !< Do not let the time step increase above its intial value
@@ -254,6 +256,7 @@ LOGICAL :: NEAR_WALL_PARTICLE_INTERPOLATION=.FALSE.
 LOGICAL :: POSITIVE_ERROR_TEST=.FALSE.
 LOGICAL :: OBST_SHAPE_AREA_ADJUST=.FALSE.
 LOGICAL :: STORE_SPECIES_FLUX=.FALSE.
+LOGICAL :: STORE_RADIATION_TERMS=.FALSE.
 LOGICAL :: STORE_PRESSURE_POISSON_RESIDUAL=.FALSE.
 LOGICAL :: OXIDATION_REACTION=.FALSE.
 LOGICAL :: PERIODIC_DOMAIN_X=.FALSE.                !< The domain is periodic \f$ x \f$
@@ -265,12 +268,14 @@ LOGICAL :: INIT_INVOKED_BY_SURF=.FALSE.             !< Flag indicating that a SU
 LOGICAL :: NO_PRESSURE_ZONES=.FALSE.                !< Flag to suppress pressure zones
 LOGICAL :: CTRL_DIRECT_FORCE=.FALSE.                !< Allow adjustable direct force via CTRL logic
 LOGICAL :: REACTING_THIN_OBSTRUCTIONS=.FALSE.       !< Thin obstructions that off-gas are present
-LOGICAL :: SMOKE3D_16=.FALSE.                       !< Output 3D smoke values using 16 bit integers
-LOGICAL :: CHECK_BOUNDARY_ONE_D_ARRAYS=.FALSE.      !< Flag that indicates that ONE_D array dimensions need to be checked
 LOGICAL :: TENSOR_DIFFUSIVITY=.FALSE.               !< If true, use experimental tensor diffusivity model for spec and tmp
 LOGICAL :: OXPYRO_MODEL=.FALSE.                     !< Flag to use oxidative pyrolysis mass transfer model
 LOGICAL :: OUTPUT_WALL_QUANTITIES=.FALSE.           !< Flag to force call to WALL_MODEL
-LOGICAL :: TEST_FLUX_LIMITER_FACE_CORRECTION=.FALSE.
+LOGICAL :: FLUX_LIMITER_MW_CORRECTION=.FALSE.       !< Flag for MW correction ensure consistent equation of state at face
+LOGICAL :: STORE_FIRE_ARRIVAL=.FALSE.               !< Flag for tracking arrival of spreading fire front over a surface
+LOGICAL :: STORE_FIRE_RESIDENCE=.FALSE.             !< Flag for tracking residence time of spreading fire front over a surface
+LOGICAL :: STORE_LS_SPREAD_RATE=.FALSE.             !< Flag for outputting local level set spread rate magnitude
+LOGICAL :: TEST_NEW_CHAR_MODEL=.FALSE.              !< Flag to envoke new char model
 
 INTEGER, ALLOCATABLE, DIMENSION(:) :: CHANGE_TIME_STEP_INDEX      !< Flag to indicate if a mesh needs to change time step
 INTEGER, ALLOCATABLE, DIMENSION(:) :: SETUP_PRESSURE_ZONES_INDEX  !< Flag to indicate if a mesh needs to keep searching for ZONEs
@@ -342,8 +347,8 @@ REAL(EB) :: GRAV=9.80665_EB                    !< Acceleration of gravity (m/s2)
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: H_V_H2O !< Heat of vaporization for water (J/kg)
 REAL(EB) :: CHI_R_MIN=0._EB                    !< Lower bound for radiative fraction
 REAL(EB) :: CHI_R_MAX=1._EB                    !< Upper bound for radiative fraction
-REAL(EB) :: SPHERE_FILM_FAC=ONTH               !< Factor used in droplet evaporation algorithm for droplets
-REAL(EB) :: PLATE_FILM_FAC=ONTH                !< Factor used in droplet evaporation algorithm for walls
+REAL(EB) :: SPHERE_FILM_FACTOR=ONTH            !< Weighting factor used in droplet evaporation algorithm for droplets
+REAL(EB) :: PLATE_FILM_FACTOR=ONTH             !< Weighting factor used in droplet evaporation algorithm for walls
 REAL(EB) :: ORIGIN_LAT=-1.E6_EB                !< Latitude of terrain map
 REAL(EB) :: ORIGIN_LON=-1.E6_EB                !< Longitude of terrain map
 REAL(EB) :: NORTH_BEARING=0._EB                !< North bearing for terrain map
@@ -376,8 +381,7 @@ TYPE (MPI_COMM), ALLOCATABLE, DIMENSION(:) :: MPI_COMM_NEIGHBORS       !< MPI co
 TYPE (MPI_COMM), ALLOCATABLE, DIMENSION(:) :: MPI_COMM_CLOSE_NEIGHBORS !< MPI communicator for the a given mesh and its neighbors
 INTEGER, ALLOCATABLE, DIMENSION(:) :: MPI_COMM_NEIGHBORS_ROOT          !< The rank of the given mesh within the MPI communicator
 INTEGER, ALLOCATABLE, DIMENSION(:) :: MPI_COMM_CLOSE_NEIGHBORS_ROOT    !< The rank of the given mesh within the MPI communicator
-INTEGER, ALLOCATABLE, DIMENSION(:) :: COUNTS,DISPLS,COUNTS_MASS,DISPLS_MASS,COUNTS_HVAC,DISPLS_HVAC,&
-                                      COUNTS_QM,DISPLS_QM,COUNTS_10,DISPLS_10,COUNTS_20,DISPLS_20
+INTEGER, ALLOCATABLE, DIMENSION(:) :: COUNTS,DISPLS,COUNTS_10,DISPLS_10,COUNTS_20,DISPLS_20,COUNTS_VENT,DISPLS_VENT
 
 ! Time parameters
 
@@ -390,6 +394,7 @@ REAL(EB) :: MPI_TIMEOUT=600._EB                             !< Time to wait for 
 REAL(EB) :: DT_END_MINIMUM=TWO_EPSILON_EB                   !< Smallest possible final time step (s)
 REAL(EB) :: DT_END_FILL=1.E-6_EB
 INTEGER  :: DIAGNOSTICS_INTERVAL                            !< Number of time steps between diagnostic outputs
+REAL(EB) :: UNFREEZE_TIME                                   !< Time to unfreeze a simulation
 
 ! Combustion parameters
 
@@ -467,7 +472,7 @@ INTEGER :: INITIAL_RADIATION_ITERATIONS                    !< Number of radiatio
 REAL(EB) :: RTE_SOURCE_CORRECTION_FACTOR=1._EB   !< Multiplicative factor used in correcting RTE source term
 REAL(EB) :: RAD_Q_SUM=0._EB   !< \f$ \sum_{ijk} \left( \chi_{\rm r} \dot{q}_{ijk}''' + \kappa_{ijk} U_{ijk} \right) V_{ijk} \f$
 REAL(EB) :: KFST4_SUM=0._EB   !< \f$ \sum_{ijk} 4 \kappa_{ijk} \sigma T_{ijk}^4 V_{ijk} \f$
-REAL(EB) :: QR_CLIP=10._EB    !< Lower bound of \f$ \chi_{\rm r} \dot{q}_{ijk}''' \f$ below which no source correction is made
+REAL(EB) :: QR_CLIP=1._EB     !< Lower bound of \f$ \chi_{\rm r} \dot{q}_{ijk}''' \f$ below which no source correction is made
 REAL(EB) :: C_MAX=100._EB     !< Maximum value of RAD_Q_SUM/KFST4_SUM
 REAL(EB) :: C_MIN=0.1_EB      !< Minimum value of RAD_Q_SUM/KFST4_SUM
 
@@ -530,9 +535,6 @@ REAL(EB), ALLOCATABLE, DIMENSION(:) :: TP_CC                     !< Right hand s
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: TP_DD                     !< Diagonal of tri-diagonal matrix for tunnel pressure solver
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: TP_RDXN                   !< Reciprocal of the distance between tunnel precon points
 REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:) :: H_BAR             !< Pressure solution of 1-D tunnel pressure solver, predictor step
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:) :: H_BAR_S           !< Pressure solution of 1-D tunnel pressure solver, corrector step
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:) :: DUDT_BAR          !< Average du/dt for 1-D tunnel pressure solver, predictor step
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:) :: DUDT_BAR_S        !< Average du/dt for 1-D tunnel pressure solver, corrector step
 INTEGER, ALLOCATABLE, DIMENSION(:) :: COUNTS_TP                  !< Counter for MPI calls used for 1-D tunnel pressure solver
 INTEGER, ALLOCATABLE, DIMENSION(:) :: DISPLS_TP                  !< Displacements for MPI calls used for 1-D tunnel pressure solver
 INTEGER, ALLOCATABLE, DIMENSION(:) :: I_OFFSET                   !< Spatial index of tunnel
@@ -735,12 +737,17 @@ REAL(EB), POINTER, DIMENSION(:) :: COS_HALF_VIEW_ANGLE     !< View angle of the 
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: VIEW_ANGLE_FACTOR        !< View angle area ORIENTATION_VECTOR
 INTEGER :: N_ORIENTATION_VECTOR                               !< Number of ORIENTATION_VECTORs
 
-INTEGER :: TGA_MESH_INDEX=HUGE(INTEGER_ONE)  !< Mesh for the special TGA calculation
-INTEGER :: TGA_SURF_INDEX=-100               !< Surface properties to use for special TGA calculation
-INTEGER :: TGA_WALL_INDEX=-100               !< Wall index to use for special TGA calculation
-INTEGER :: TGA_PARTICLE_INDEX=-100           !< Particle index to use for special TGA calculation
-REAL(EB) :: TGA_HEATING_RATE=5._EB           !< Heat rate (K/min) to use for special TGA calculation
-REAL(EB) :: TGA_FINAL_TEMPERATURE=800._EB    !< Final Temperature (C) to use for special TGA calculation
+INTEGER :: TGA_MESH_INDEX=HUGE(INTEGER_ONE) !< Mesh for the special TGA calculation
+INTEGER :: TGA_SURF_INDEX=-100              !< Surface properties to use for special TGA calculation
+INTEGER :: TGA_WALL_INDEX=-100              !< Wall index to use for special TGA calculation
+INTEGER :: TGA_PARTICLE_INDEX=-100          !< Particle index to use for special TGA calculation
+REAL(EB) :: TGA_DT=0.01_EB                  !< Time step (s) to use for special TGA calculation
+REAL(EB) :: TGA_DUMP=1._EB                  !< Temperature output interval (K), starting at TMPA, to use for special TGA calculation
+REAL(EB) :: TGA_HEATING_RATE=5._EB          !< Heat rate (K/min) to use for special TGA calculation
+REAL(EB) :: TGA_FINAL_TEMPERATURE=800._EB   !< Final Temperature (C) to use for special TGA calculation
+REAL(EB) :: TGA_CONVERSION_FACTOR=1._EB     !< Conversion factor for TGA output
+REAL(EB) :: MCC_CONVERSION_FACTOR=1._EB     !< Conversion factor for MCC output
+REAL(EB) :: DSC_CONVERSION_FACTOR=1._EB     !< Conversion factor for DSC output
 
 LOGICAL :: IBLANK_SMV=.TRUE.  !< Parameter passed to smokeview (in .smv file) to control generation of blockages
 
@@ -751,6 +758,9 @@ INTEGER :: LU_EXTERNAL,LU_EXTERNAL_HEARTBEAT,DT_EXTERNAL_HEARTBEAT=0
 REAL(EB) :: DT_EXTERNAL=0._EB, T_EXTERNAL
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: EXTERNAL_RAMP
 LOGICAL, ALLOCATABLE, DIMENSION(:) :: EXTERNAL_CTRL
+
+! VENT array
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: VENT_TOTAL_AREA  !< Array holding grid-snapped areas for all vents
 
 END MODULE GLOBAL_CONSTANTS
 

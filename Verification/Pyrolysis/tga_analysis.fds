@@ -8,18 +8,18 @@
 &REAC FUEL='CELLULOSE', C=6, H=10, O=5, SOOT_YIELD=0.015 /
 &SPEC ID='WATER VAPOR' /
 
-&VENT XB=-1,1,-0.5,0.5,0.0,0.0, SURF_ID='SAMPLE' /
+&VENT XB=-1,1,-0.5,0.5,0.0,0.0, SURF_ID='wet wood' /
 
-&SURF ID             = 'SAMPLE'
+&SURF ID             = 'wet wood'
       TGA_ANALYSIS   = .TRUE.
       COLOR          = 'RED'
       THICKNESS      = 0.01
-      MATL_ID(1,1) = 'component 1'
+      MATL_ID(1,1) = 'dry wood'
       MATL_ID(1,2) = 'water'
       MATL_MASS_FRACTION(1,1) = 0.90
       MATL_MASS_FRACTION(1,2) = 0.10 /
 
-&MATL ID                    = 'component 1'
+&MATL ID                    = 'dry wood'
       EMISSIVITY            = 1.0
       DENSITY 	            = 500.
       CONDUCTIVITY          = 0.20
@@ -30,10 +30,10 @@
       NU_SPEC 	            = 0.60
       SPEC_ID               = 'CELLULOSE'
       NU_MATL               = 0.40
-      MATL_ID               = 'component 2'
+      MATL_ID               = 'char'
       HEAT_OF_REACTION      = 1000. /  
 
-&MATL ID                    = 'component 2'
+&MATL ID                    = 'char'
       EMISSIVITY            = 1.0
       DENSITY 	            = 500.
       CONDUCTIVITY          = 0.20
@@ -44,7 +44,7 @@
       NU_SPEC 	            = 0.85
       SPEC_ID               = 'CELLULOSE'
       NU_MATL               = 0.15
-      MATL_ID               = 'residue'
+      MATL_ID               = 'ash'
       HEAT_OF_REACTION      = 1000. /
 
 &MATL ID = 'water'
@@ -58,7 +58,7 @@
       SPEC_ID = 'WATER VAPOR'
       HEAT_OF_REACTION= 2500. /
 
-&MATL ID                    = 'residue'
+&MATL ID                    = 'ash'
       DENSITY               = 200.
       CONDUCTIVITY          = 0.20
       SPECIFIC_HEAT         = 1.0 /

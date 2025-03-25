@@ -11,7 +11,7 @@ A gas species in FDS can be defined as an aerosol species. This enables a series
 
 By default, FDS assumes that soot is transported just like all other gaseous species. That is, the soot particles are small enough that their settling velocity is small compared to the fire-driven flows of the gas containing the soot. Near surfaces, however, other mechanisms can affect the soot, which results in its deposition onto surfaces. The removal of soot via deposition can impact the visibility for egress and the time for smoke detectors to activate. In forensic fire reconstructions, the amount of soot deposited on surfaces can be correlated to post-fire observations. The deposition of particulates is also important for computing the dispersion characteristics of aerosol toxicants like ash, radionuclides, or other particulate matter.
 
-However, there is an option to treat any gas phase species as an aerosol that can be deposited on surfaces. Aerosol deposition is determined by applying an empirical deposition velocity to aerosols near surfaces. There are a number of phenomena that cause deposition: thermophoresis (where temperature gradients push the aerosol towards or away from the surface), gravitational settling, diffusive deposition (where the aerosols move along the boundary layer concentration
+However, there is an option to treat any gas phase species as an aerosol that can be deposited on surfaces. Aerosol deposition is determined by applying an empirical deposition velocity to aerosols near surfaces. There are a number of phenomena that cause deposition: thermophoresis (where temperature gradients push the aerosol toward or away from the surface), gravitational settling, diffusive deposition (where the aerosols move along the boundary layer concentration
 gradient), and turbulent deposition (essentially impact deposition due to a turbulent boundary layer). Other phenomena, such as electrical fields, can also result in deposition but are not considered in FDS due to their relatively small contribution in compartment fire scenarios.
 
 The total aerosol deposition velocity to surfaces, $u_{\rm dep}$, is determined by assuming the deposition phenomena are independent, computing a deposition velocity for each mechanism, and then summing them~\cite{Bixler:1}
@@ -99,7 +99,7 @@ computed by the wall model, and $\tau^+$ is the dimensionless stopping distance 
 \newpage
 \section{Aerosol Agglomeration}
 
-Agglomeration is the process via which small aerosol particles become larger aerosol particles due to collisions that cause the smaller particles to stick together and become larger particles. The FDS implemenation of aerosol agglomeration is based on the agglomeration model in VICTORIA~\cite{NRC:VICTORIA}, a US NRC software package for modeling radioactive aerosol transport during severe accidents. The agglomeration mechanisms in FDS include Brownian, graviational, and turbulent (sheer and inertial). The agglomeration is governed by the equation below.
+Agglomeration is the process via which small aerosol particles become larger aerosol particles due to collisions that cause the smaller particles to stick together and become larger particles. The FDS implementation of aerosol agglomeration is based on the agglomeration model in VICTORIA~\cite{NRC:VICTORIA}, a US NRC software package for modeling radioactive aerosol transport during severe accidents. The agglomeration mechanisms in FDS include Brownian, gravitational, and turbulent (sheer and inertial). The agglomeration is governed by the equation below.
 \be
 \frac{\d N}{\d t} = \frac{1}{2} \int_{0}^{m} \Phi (\omega,m-\omega) N(\omega) N(m-\omega) \d \omega - N(m) \int_{0}^{\infty} \Phi (\omega,m) N(\omega) \d \omega - R(m) + S(m)
 \ee
@@ -111,18 +111,18 @@ Using this binning, the agglomeration equation becomes:
 \be
 \frac{\d N_i}{\d t} = \sum_{k=1}^{M} \sum_{j=k}^{M} \left( 1- \frac{1}{2} \delta_{j,k} \right) \eta \Phi(j,k) N_j N_k - N_i \sum_{k=1}^M \Phi(j,k) N_k - R_i + S_i
 \ee
-where $\eta$, shown below, is a function for apportioning mass between adjacent particle bins.
+where $\eta$, shown below, is a function for apportioning the new particle mass, $m_{j+k}=x_j+x_k$, between adjacent particle bins.
 \be
 \eta = \begin{cases}
-   \frac{x_{i+1}-m_i}{x_{i+1}-x_i} & x_i< m_i \leq x_{i+1} \\
-   \frac{m_i-x_{i-1}}{x_i-x_{i-1}} & x_{i-1}< m_i \leq x_i
+   \frac{x_{i+1}-m_{j+k}}{x_{i+1}-x_i} & x_i< m_{j+k} \leq x_{i+1} \\
+   \frac{m_{j+k}-x_{i-1}}{x_i-x_{i-1}} & x_{i-1}< m_{j+k} \leq x_i
 \end{cases}
 \ee
 The agglomeration kernel is given by the sum of the Brownian (Br), gravitational (Gr), shear (Sh), and inertial (In) agglomeration  terms.
 \be
 \Phi (m,\omega)= \Phi_{\rm Br}(m,\omega) + \Phi_{\rm Gr}(m,\omega) + \sqrt{\Phi_{\rm Sh}(m,\omega)^2 + \Phi_{\rm In}(m,\omega)^2}
 \ee
-Browian agglomeration occurs when the random walks of particles brings them into contact with one another. It is computed as~\cite{NRC:VICTORIA}:
+Brownian agglomeration occurs when the random walks of particles brings them into contact with one another. It is computed as~\cite{NRC:VICTORIA}:
 \be
 \Phi_{\rm Br}= 4 \pi k_{\rm b} T \left({\rm B} (m) + {\rm B} (\omega) \right) \left(r_m+r_{\omega} \right) {\rm Fu} (m,\omega)
 \ee
@@ -215,7 +215,7 @@ The condensation rate is computed assuming the same mass transfer coefficient as
 
 The total mass evaporated or condensed is added to the bulk mass source terms, $\dot{m}_{{\rm b},\alpha}^{\ppp}$, for the condensed and vapor phase species. The bulk energy source term, $\dot{q}_{\rm b}^{\ppp}$, is taken as the mass source term multiplied by the heat of vaporization, $h_v$ where condensation results in positive energy source term and evaporation results in a negative energy source term.
 
-The contribution to divergence is added to the {\ct D\_SOURCE} term following Eq~(\ref{eq:D_SOURCE_vap}). Since the condensed and vapor phases have the same molecular weight, the first term in the equation is zero.
+The contribution to divergence is added to the \ct{D_SOURCE} term following Eq~(\ref{eq:D_SOURCE_vap}). Since the condensed and vapor phases have the same molecular weight, the first term in the equation is zero.
 
 For the condensed phase, the radiation absorption is computed following Sec.~\ref{droplet-radiation}.
 
@@ -239,5 +239,5 @@ The total mass evaporated or condensed is added to the deposition wall mass sour
 \be
 \dot{q}_{{\rm dep},\alpha}^{\pp} = \dot{m}_{{\rm dep},\alpha}^{\pp} (h_v(T_w)+h_{s,\alpha}(T_g)-h_{s,\alpha}(T_w))
 \ee
-For the {\ct D\_SOURCE} term only the first term in Eq~(\ref{eq:D_SOURCE_vap}) applies since all the phase change energy comes from the wall cell.
+For the \ct{D\_SOURCE} term only the first term in Eq~(\ref{eq:D_SOURCE_vap}) applies since all the phase change energy comes from the wall cell.
 

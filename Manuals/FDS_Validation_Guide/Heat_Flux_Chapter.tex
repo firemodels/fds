@@ -53,7 +53,7 @@ Predicted and measured vertical heat flux profiles for three propane and three p
 
 Predicted and measured heat fluxes from 6 compartment fires are shown on the following pages.
 The heat fluxes measured in the quarter and half scale compartments are generally under-predicted by FDS; however, there is better agreement in heat flux predictions in the full-scale.
-However, the heat fluxes in the continuous flaming region near the burner were underpredicted by FDS at all scales.
+However, the heat fluxes in the continuous flaming region near the burner were under-predicted by FDS at all scales.
 Note that all the FDS simulations were performed with a grid resolution such that $D^*/\dx$ was 10-15 at the post-flashover HRR inside the compartment.
 
 \begin{figure}[p]
@@ -150,6 +150,60 @@ Figure~\ref{FM_Vertical_Flame_HF} displays the measured and predicted heat flux 
 \caption[FM Vertical Wall Flame experiments, centerline heat flux]
 {Vertical profiles of heat flux to the burner surface for fuel flow rates of 12.68, 17.05, and 22.37~g/m$^2$/s.}
 \label{FM_Vertical_Flame_HF}
+\end{figure}
+
+\clearpage
+
+\subsection{Lattimer Corridor Ceiling}
+
+
+Figure~\ref{Lattimer_Ceiling_Heat_Flux} displays the predicted lateral profile of heat flux to the ceiling above a propane fire in a corridor, compared to the measured value.
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Lattimer_Corridor_Ceiling/lattimer_test1_HF} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Lattimer_Corridor_Ceiling/lattimer_test2_HF} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Lattimer_Corridor_Ceiling/lattimer_test3_HF} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Lattimer_Corridor_Ceiling/lattimer_test4_HF} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Lattimer_Corridor_Ceiling/lattimer_test5_HF} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Lattimer_Corridor_Ceiling/lattimer_test6_HF} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Lattimer_Corridor_Ceiling/lattimer_test7_HF} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Lattimer_Corridor_Ceiling/lattimer_test8_HF} 
+\end{tabular*}
+\caption[Lattimer Corridor Ceiling, heat flux to the ceiling]{Lattimer Corridor Ceiling, predicted lateral heat flux profile (dashed lines) compared to the measured value (solid line).}
+\label{Lattimer_Ceiling_Heat_Flux}
+\end{figure}
+
+\clearpage
+
+\subsection{Lattimer Tilted Wall}
+
+Figure~\ref{Lattimer_Tilted_Wall_Heat_Flux1}-\ref{Lattimer_Tilted_Wall_Heat_Flux2} display the predicted vertical profile of heat flux to the tilted wall above a propane fire, compared to the measured values.
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Lattimer_Tilted_Wall/lattimer_tilt_50kW_00} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Lattimer_Tilted_Wall/lattimer_tilt_50kW_11} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Lattimer_Tilted_Wall/lattimer_tilt_50kW_23} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Lattimer_Tilted_Wall/lattimer_tilt_50kW_35} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Lattimer_Tilted_Wall/lattimer_tilt_50kW_49} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Lattimer_Tilted_Wall/lattimer_tilt_50kW_67}
+\end{tabular*}
+\caption[Lattimer Tilted Wall, heat flux to the wall]{Lattimer Tilted Wall, predicted vertical heat flux profile compared to the measured values.}
+\label{Lattimer_Tilted_Wall_Heat_Flux1}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Lattimer_Tilted_Wall/lattimer_tilt_35kW_00} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Lattimer_Tilted_Wall/lattimer_tilt_35kW_67} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Lattimer_Tilted_Wall/lattimer_tilt_50kW_00} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Lattimer_Tilted_Wall/lattimer_tilt_50kW_67} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Lattimer_Tilted_Wall/lattimer_tilt_75kW_00} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Lattimer_Tilted_Wall/lattimer_tilt_75kW_67}
+\end{tabular*}
+\caption[Lattimer Tilted Wall, heat flux to the wall]{Lattimer Tilted Wall, predicted vertical heat flux profile compared to the measured values.}
+\label{Lattimer_Tilted_Wall_Heat_Flux2}
 \end{figure}
 
 \clearpage
@@ -351,7 +405,7 @@ The bottom plot displays profiles for an experiment where the panels are lined w
 
 \begin{figure}[h!]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC_Parallel_Panels/Marinite_Heat_Flux} & 
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC_Parallel_Panels/Marinite_Heat_Flux} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC_Parallel_Panels/Marinite_Heat_Flux_Contours} \\
 \multicolumn{2}{c}{\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC_Parallel_Panels/PMMA_Heat_Flux}}
 \end{tabular*}
@@ -420,8 +474,7 @@ fire is 10.3~MW.}
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NRCC_Facade/NRCC_Facade_Win_1_05_MW} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NRCC_Facade/NRCC_Facade_Win_1_06_MW} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/NRCC_Facade/NRCC_Facade_Win_1_08_MW} &
-  \\
+\multicolumn{2}{c}{\includegraphics[height=2.15in]{SCRIPT_FIGURES/NRCC_Facade/NRCC_Facade_Win_1_08_MW}} \\
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NRCC_Facade/NRCC_Facade_Win_2_05_MW} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NRCC_Facade/NRCC_Facade_Win_2_06_MW} \\
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NRCC_Facade/NRCC_Facade_Win_2_08_MW} &
@@ -661,6 +714,101 @@ Total and radiative heat flux gauges were positioned at various points on the wa
 \clearpage
 
 
+\subsection{TUS Facade Experiments}
+\label{TUS_Facade_Heat_Flux}
+
+Figure~\ref{TUS_Facade_HF_Positions} indicates the location of the heat flux gauges on the outer wall of the TUS Facade experiments, described in Sec.~\ref{TUS_Facade_Description}. Figures~\ref{TUS Facade_Heat_Flux_1} through \ref{TUS Facade_Heat_Flux_4} display measured and predicted heat flux to the surface above a window out of which emanates a fire plume. The measurements have been made along three vertical lines, a, b, and c, where b is along the centerline, and a and c are along the outer edges of the window.
+
+\begin{figure}[!ht]
+\begin{minipage}{16cm}
+\setlength{\unitlength}{1.0in}
+\begin{picture}(4.0,6.0)(-1.2,0.0)
+
+\put(0.0,0.0){\framebox(3.0,5.7){ }}
+\put(0.95,0.5){\framebox(2.0,1.2){Window}}
+
+\put(1.05,2.6){\makebox(0.0,0.0){10}}
+\put(1.05,3.2){\makebox(0.0,0.0){5}}
+\put(1.05,5.8){\makebox(0.0,0.0){a}}
+
+
+\put(1.95,2.6){\makebox(0.0,0.0){9}}
+\put(1.95,2.9){\makebox(0.0,0.0){7}}
+\put(1.95,3.2){\makebox(0.0,0.0){4}}
+\put(1.95,3.7){\makebox(0.0,0.0){2}}
+\put(1.95,5.8){\makebox(0.0,0.0){b}}
+
+\put(2.85,2.6){\makebox(0.0,0.0){8}}
+\put(2.85,2.9){\makebox(0.0,0.0){6}}
+\put(2.85,3.2){\makebox(0.0,0.0){3}}
+\put(2.85,3.7){\makebox(0.0,0.0){1}}
+\put(2.85,5.8){\makebox(0.0,0.0){c}}
+
+
+\end{picture}
+\end{minipage}
+\caption[tUS Facade, position of heat flux gauges]{Positions of the heat flux gauges on the exterior wall of the TUS Facade experiments. The wall is 3~m wide and 5.7~m tall. The window is 2~m wide by 1.2~m tall and 0.5~m above the floor and 0.05~m to the left of an adjacent wall. The letters a, b, and c at top denote the vertical line.}
+\label{TUS_Facade_HF_Positions}
+\end{figure}
+
+
+\newpage
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/TUS_Facade/TUS_facade_1_1_HF_Line_a} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/TUS_Facade/TUS_facade_1_2_HF_Line_a} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/TUS_Facade/TUS_facade_1_1_HF_Line_b} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/TUS_Facade/TUS_facade_1_2_HF_Line_b} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/TUS_Facade/TUS_facade_1_1_HF_Line_c} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/TUS_Facade/TUS_facade_1_2_HF_Line_c}
+\end{tabular*}
+\caption[TUS Facade, heat flux, Cases 1-1 and 1-2]{TUS Facade, heat flux, Cases 1-1 and 1-2.}
+\label{TUS Facade_Heat_Flux_1}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/TUS_Facade/TUS_facade_1_3_HF_Line_a} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/TUS_Facade/TUS_facade_2_1_HF_Line_a} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/TUS_Facade/TUS_facade_1_3_HF_Line_b} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/TUS_Facade/TUS_facade_2_1_HF_Line_b} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/TUS_Facade/TUS_facade_1_3_HF_Line_c} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/TUS_Facade/TUS_facade_2_1_HF_Line_c}
+\end{tabular*}
+\caption[TUS Facade, heat flux, Cases 1-3 and 2-1]{TUS Facade, heat flux, Cases 1-3 and 2-1.}
+\label{TUS Facade_Heat_Flux_2}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/TUS_Facade/TUS_facade_2_2_HF_Line_a} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/TUS_Facade/TUS_facade_2_3_HF_Line_a} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/TUS_Facade/TUS_facade_2_2_HF_Line_b} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/TUS_Facade/TUS_facade_2_3_HF_Line_b} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/TUS_Facade/TUS_facade_2_2_HF_Line_c} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/TUS_Facade/TUS_facade_2_3_HF_Line_c}
+\end{tabular*}
+\caption[TUS Facade, heat flux, Cases 2-2 and 2-3]{TUS Facade, heat flux, Cases 2-2 and 2-3.}
+\label{TUS Facade_Heat_Flux_3}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/TUS_Facade/TUS_facade_I_1_HF_Line_a} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/TUS_Facade/TUS_facade_I_2_HF_Line_a} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/TUS_Facade/TUS_facade_I_1_HF_Line_b} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/TUS_Facade/TUS_facade_I_2_HF_Line_b} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/TUS_Facade/TUS_facade_I_1_HF_Line_c} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/TUS_Facade/TUS_facade_I_2_HF_Line_c}
+\end{tabular*}
+\caption[TUS Facade, heat flux, Cases I-1 and I-2]{TUS Facade, heat flux, Cases I-1 and I-2.}
+\label{TUS Facade_Heat_Flux_4}
+\end{figure}
+
+
+\clearpage
+
 \subsection{Ulster SBI Experiments}
 
 Predicted and measured vertical heat flux profiles for three propane fire sizes in the single burning item (SBI) enclosure at the University of Ulster are shown on the following page. Measurements were made on two vertical panels that form a corner, at the base of which was a triangular-shaped burner with sides of length 25~cm. Three vertical profiles were measured on each panel at distances of 3.25~cm, 16.5~cm, and 29~cm from the corner.
@@ -719,7 +867,7 @@ Figure~\ref{UMD_SBI_HF} displays the measured and predicted heat fluxes at 28 lo
 \includegraphics[height=1.00in]{SCRIPT_FIGURES/UMD_SBI/HF_x=5_z=10} &
 \includegraphics[height=1.00in]{SCRIPT_FIGURES/UMD_SBI/HF_x=10_z=10} &
 \includegraphics[height=1.00in]{SCRIPT_FIGURES/UMD_SBI/HF_x=15_z=10} &
-\includegraphics[height=1.00in]{SCRIPT_FIGURES/UMD_SBI/HF_x=22_z=10} 
+\includegraphics[height=1.00in]{SCRIPT_FIGURES/UMD_SBI/HF_x=22_z=10}
 \end{tabular*}
 \caption[UMD SBI heat flux to PMMA panel]{UMD SBI, heat flux to PMMA panel at seven vertical locations and four lateral locations.}
 \label{UMD_SBI_HF}
@@ -727,6 +875,29 @@ Figure~\ref{UMD_SBI_HF} displays the measured and predicted heat fluxes at 28 lo
 
 
 \clearpage
+
+
+\subsection{Wasson Impinging Plumes}
+
+Figure~\ref{Wasson_Heat_Flux} displays the predicted lateral profile of heat flux to the ceiling above a propane fire, compared to the measured peak value.
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Wasson_Impinging_Plumes/wasson_test1_HF} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Wasson_Impinging_Plumes/wasson_test2_HF} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Wasson_Impinging_Plumes/wasson_test3_HF} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Wasson_Impinging_Plumes/wasson_test4_HF} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Wasson_Impinging_Plumes/wasson_test5_HF} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Wasson_Impinging_Plumes/wasson_test6_HF}
+\end{tabular*}
+\caption[Wasson Impinging Plumes, heat flux to the ceiling]{Wasson Impinging Plumes, predicted lateral heat flux profile (dashed lines) compared to the measured peak value (solid line).}
+\label{Wasson_Heat_Flux}
+\end{figure}
+
+
+
+\clearpage
+
 
 \subsection{WTC Experiments}
 
@@ -1382,7 +1553,7 @@ No.      & (m)      & (m)        & (kW)        &  (kg/s)               &  (kW/m$
 \subsection{BGC/GRI LNG Fires}
 \label{BGC_GRI_LNG_Fires_Heat_Flux}
 
-A description of the 13 LNG trench fire experiments is given in Sec.~\ref{BGC_GRI_LNG_Fires_Description}. 
+A description of the 13 LNG trench fire experiments is given in Sec.~\ref{BGC_GRI_LNG_Fires_Description}.
 
 Figures~\ref{Croce_Heat_Flux_1} and \ref{Croce_Heat_Flux_2} compare predicted and measured heat fluxes to radiometers at various distances from the LNG trench fire. The general layout of the facility is shown in Fig.~\ref{BGC_Layout}. The radiometers were positioned approximately 1.2~m off the ground along the axis lines shown in the figure. The wind direction was typically perpendicular to the longer dimension of the trench.
 
@@ -1467,7 +1638,7 @@ Test & Length (m) & Width (m) \\ \hline
 
 A brief description of the experiments and modeling is found in Sec.~\ref{Loughborough_Jet_Fires_Description}.
 
-The plots on the following pages present near-field and far-field heat flux measurements of natural gas jet fires. Figures~\ref{Loughborough_1} through \ref{Loughborough_3} compare measured and predicted heat fluxes to a 0.9~m diameter, 16~m long pipe segment engulfed in the fire. The locations of the gauges are shown in Fig.~\ref{Loughborough_gauge}. 
+The plots on the following pages present near-field and far-field heat flux measurements of natural gas jet fires. Figures~\ref{Loughborough_1} through \ref{Loughborough_3} compare measured and predicted heat fluxes to a 0.9~m diameter, 16~m long pipe segment engulfed in the fire. The locations of the gauges are shown in Fig.~\ref{Loughborough_gauge}.
 
 Figure~\ref{Loughborough_Rad} presents the far-field radiometer predictions and measurements. Table~\ref{Loughborough_rads} lists the radiometer coordinates relative to the center of the target pipe.
 
@@ -1558,10 +1729,10 @@ Figure~\ref{Loughborough_Rad} presents the far-field radiometer predictions and 
 \centering
 \begin{tabular}{|c|ccccccccc|}
 \hline
-Test     & Rad 1  & Rad 2   & Rad 3   & Rad 4   & Rad 5   & Rad 6   & Rad 7   & Rad 8   & Rad 9    \\ 
+Test     & Rad 1  & Rad 2   & Rad 3   & Rad 4   & Rad 5   & Rad 6   & Rad 7   & Rad 8   & Rad 9    \\
 No.      & (N,W)  & (N,W)   & (N,W)   & (S,W)   & (S,W)   & (S,W)   & (S,W)   & (S,W)   & (S,W)    \\ \hline
-1        & (20,5) & (15,0)  & (15,5)  & (15,0)  & (15,5)  & (20,0)  & (20,5)  & (25,0)  & (30,0)   \\ 
-2        & (30,0) & (20,0)  & (20,5)  & (15,0)  & (20,0)  & (20,5)  & (30,0)  & (30,5)  & (40,0)   \\ 
+1        & (20,5) & (15,0)  & (15,5)  & (15,0)  & (15,5)  & (20,0)  & (20,5)  & (25,0)  & (30,0)   \\
+2        & (30,0) & (20,0)  & (20,5)  & (15,0)  & (20,0)  & (20,5)  & (30,0)  & (30,5)  & (40,0)   \\
 3        & (35,0) & (25,0)  & (25,5)  & (20,0)  & (25,0)  & (25,5)  & (35,0)  & (35,5)  & (52,0)   \\ \hline
 \end{tabular}
 \label{Loughborough_rads}
@@ -1579,7 +1750,7 @@ No.      & (N,W)  & (N,W)   & (N,W)   & (S,W)   & (S,W)   & (S,W)   & (S,W)   & 
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Loughborough_Jet_Fires/jet1_HF_bottom_N} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Loughborough_Jet_Fires/jet1_HF_bottom_S} \\
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Loughborough_Jet_Fires/jet1_HF_back_N} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Loughborough_Jet_Fires/jet1_HF_back_S} 
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Loughborough_Jet_Fires/jet1_HF_back_S}
 \end{tabular*}
 \caption[Loughborough Jet Fires, heat flux to pipe, Test 1]{Loughborough Jet Fires, heat flux to pipe, Test 1.}
 \label{Loughborough_1}
@@ -1608,7 +1779,7 @@ No.      & (N,W)  & (N,W)   & (N,W)   & (S,W)   & (S,W)   & (S,W)   & (S,W)   & 
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Loughborough_Jet_Fires/jet3_HF_bottom_N} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Loughborough_Jet_Fires/jet3_HF_bottom_S} \\
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Loughborough_Jet_Fires/jet3_HF_back_N} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Loughborough_Jet_Fires/jet3_HF_back_S} 
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Loughborough_Jet_Fires/jet3_HF_back_S}
 \end{tabular*}
 \caption[Loughborough Jet Fires, heat flux to pipe, Test 3]{Loughborough Jet Fires, heat flux to pipe, Test 3.}
 \label{Loughborough_3}
@@ -1616,12 +1787,12 @@ No.      & (N,W)  & (N,W)   & (N,W)   & (S,W)   & (S,W)   & (S,W)   & (S,W)   & 
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Loughborough_Jet_Fires/jet1_Rad_North} & 
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Loughborough_Jet_Fires/jet1_Rad_North} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Loughborough_Jet_Fires/jet1_Rad_South} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Loughborough_Jet_Fires/jet2_Rad_North} & 
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Loughborough_Jet_Fires/jet2_Rad_North} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Loughborough_Jet_Fires/jet2_Rad_South} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Loughborough_Jet_Fires/jet3_Rad_North} & 
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Loughborough_Jet_Fires/jet3_Rad_South} 
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Loughborough_Jet_Fires/jet3_Rad_North} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Loughborough_Jet_Fires/jet3_Rad_South}
 \end{tabular*}
 \caption[Loughborough Jet Fires, far-field radiometers]{Loughborough Jet Fires, far-field radiometers.}
 \label{Loughborough_Rad}
@@ -1633,7 +1804,7 @@ No.      & (N,W)  & (N,W)   & (N,W)   & (S,W)   & (S,W)   & (S,W)   & (S,W)   & 
 \subsection{Montoir LNG Fires}
 \label{Montoir_LNG_Fires_Heat_Flux}
 
-A brief description of these experiments can be found in Sec.~\ref{Montoir_LNG_Fires_Description}. Figure~\ref{Montoir_Layout} indicates the radial lines emanating outwards from the 35~m pool along which the radiometers were positioned. Figures~\ref{Montoir_HF_1} through \ref{Montoir_HF_3} display the results of measured and predicted heat fluxes along the radial lines.
+A brief description of these experiments can be found in Sec.~\ref{Montoir_LNG_Fires_Description}. Figure~\ref{Montoir_Layout} indicates the radial lines emanating outward from the 35~m pool along which the radiometers were positioned. Figures~\ref{Montoir_HF_1} through \ref{Montoir_HF_3} display the results of measured and predicted heat fluxes along the radial lines.
 
 \begin{figure}[!ht]
 \begin{minipage}{16cm}
@@ -1675,7 +1846,7 @@ A brief description of these experiments can be found in Sec.~\ref{Montoir_LNG_F
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Montoir_LNG_Fires/Montoir01_HF_120} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Montoir_LNG_Fires/Montoir01_HF_225} \\
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Montoir_LNG_Fires/Montoir01_HF_270} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Montoir_LNG_Fires/Montoir01_HF_315} 
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Montoir_LNG_Fires/Montoir01_HF_315}
 \end{tabular*}
 \caption[Montoir LNG Fires, far-field radiometers, Test~1]{Montoir LNG Fires, far-field radiometers, Test~1.}
 \label{Montoir_HF_1}
@@ -1871,8 +2042,8 @@ A description of the NIST Pool Fire experiments and modeling is given in Sec.~\r
 \begin{itemize}
 \item Figure~\ref{NIST_Pool_Fire_Heat_Flux} displays downward radiative and total heat flux near the liquid pool surface of a 30~cm methanol fire. The {\rm radiative} heat flux measurements were made by Hamins~et~al.~\cite{Hamins:CST1994} and the {\em total} heat flux measurements were made by Kim et al.~\cite{Kim:FSJ2019}.
 \item Figure~\ref{NIST_Pool_Fire_Heat_Flux2} displays radial and vertical profiles of {\em total} heat flux for a 30~cm methanol fire extending beyond the outer rim of the pan~\cite{Kim:FSJ2019}. The vertical profile was made at $r=60$~cm. Additional radial measurements were made by Klassen~et~al.~\cite{Klassen:GCR1994}.
-\item Figure~\ref{NIST_Pool_Fire_Heat_Flux3} displays a radial profile of the total heat flux in the downward direction for a 100~cm pan methanl fire. The radial distance ranges from the burner edge ($r=50$~cm) to $r=200$~cm. The positions of the heat flux gauges were located $z=1$~cm above the fuel surface and oriented in the upward direction~\cite{Sung:TN2019}.
-\item Figure~\ref{NIST_Pool_Fire_Heat_Flux4} displays radial profiles of the total heat flux emitted radially away from the fire at heights of $z=41$~cm, $z=61$~cm, and $z=81$~cm above the fuel surface. The heat flux guages were oriented in the horizontal direction towards the fire centerline~\cite{Sung:TN2019}.
+\item Figure~\ref{NIST_Pool_Fire_Heat_Flux3} displays a radial profile of the total heat flux in the downward direction for a 100~cm pan methanol fire. The radial distance ranges from the burner edge ($r=50$~cm) to $r=200$~cm. The positions of the heat flux gauges were located $z=1$~cm above the fuel surface and oriented in the upward direction~\cite{Sung:TN2019}.
+\item Figure~\ref{NIST_Pool_Fire_Heat_Flux4} displays radial profiles of the total heat flux emitted radially away from the fire at heights of $z=41$~cm, $z=61$~cm, and $z=81$~cm above the fuel surface. The heat flux gauges were oriented in the horizontal direction toward the fire centerline~\cite{Sung:TN2019}.
 \end{itemize}
 
 \begin{figure}[!ht]
@@ -1933,7 +2104,7 @@ The NIST Structure Separation Verification experiments are described in Sec.~\re
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Structure_Separation/SSE_Verification_4MW_HF6}
 \end{tabular*}
 \caption[NIST Structure Separation Verification heat flux (4 MW)]
-{NIST Structure Separation Verification heat flux (4 MW max heat release rate).  Gauges HF1, HF3, and HF5 are position at burner level (1 m off the floor) and, respectively, 2 m, 3 m, and 4 m away from the burner center.  Gauges HF2, HF4, and HF6 are positioned 2 m abover burner level (3 m off the floor) and likewise 2 m, 3 m, and 4 m away from the burner center.}
+{NIST Structure Separation Verification heat flux (4 MW max heat release rate).  Gauges HF1, HF3, and HF5 are position at burner level (1 m off the floor) and, respectively, 2 m, 3 m, and 4 m away from the burner center.  Gauges HF2, HF4, and HF6 are positioned 2 m above burner level (3 m off the floor) and likewise 2 m, 3 m, and 4 m away from the burner center.}
 \label{NIST_SSE_Verification_HF_4MW}
 \end{figure}
 
@@ -1947,7 +2118,7 @@ The NIST Structure Separation Verification experiments are described in Sec.~\re
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Structure_Separation/SSE_Verification_8MWb_HF6}
 \end{tabular*}
 \caption[NIST Structure Separation Verification heat flux (8 MW)]
-{NIST Structure Separation Verification heat flux (8 MW max heat release rate).  Gauges HF1, HF3, and HF5 are position at burner level (1 m off the floor) and, respectively, 2 m, 3 m, and 4 m away from the burner center.  Gauges HF2, HF4, and HF6 are positioned 2 m abover burner level (3 m off the floor) and likewise 2 m, 3 m, and 4 m away from the burner center.}
+{NIST Structure Separation Verification heat flux (8 MW max heat release rate).  Gauges HF1, HF3, and HF5 are position at burner level (1 m off the floor) and, respectively, 2 m, 3 m, and 4 m away from the burner center.  Gauges HF2, HF4, and HF6 are positioned 2 m above burner level (3 m off the floor) and likewise 2 m, 3 m, and 4 m away from the burner center.}
 \label{NIST_SSE_Verification_HF_8MW}
 \end{figure}
 
@@ -1960,7 +2131,7 @@ A description of the two LNG pool fire experiments is given in Sec.~\ref{Phoenix
 
 The general layout of the facility is shown in Fig.~\ref{Phoenix_Layout}. Wide-angle and narrow-angle radiometers were positioned at various heights off the ground and at various inclination angles along the axes shown in the figure.
 
-Figure~\ref{Phoenix_Heat_Flux} compares predicted and measured heat fluxes for the wide-angle radiometers as a function of distance from the LNG pool fires. These radiometers were positioned along all four directional axes. Figure~\ref{Phoenix_Narrow_Angle_Heat_Flux} compares predicted and measured heat flux for the narrow-angle radiometers along the north and south axes. There were three measurement towers along each axis. The nearest tower contained five narrow-angle radiometers at various inclination angles. The further two towers contained one narrow-angle radiometer each, along with one wide-angle radiometer. The vertical axes of the plots in Fig.~\ref{Phoenix_Heat_Flux} represent the ``spot height'' of the radiometers; that is, the height of the fire plume at which the radiometers were aimed. The ``spot diameter'' of the various radiometers ranged from 5~m to 15~m. 
+Figure~\ref{Phoenix_Heat_Flux} compares predicted and measured heat fluxes for the wide-angle radiometers as a function of distance from the LNG pool fires. These radiometers were positioned along all four directional axes. Figure~\ref{Phoenix_Narrow_Angle_Heat_Flux} compares predicted and measured heat flux for the narrow-angle radiometers along the north and south axes. There were three measurement towers along each axis. The nearest tower contained five narrow-angle radiometers at various inclination angles. The further two towers contained one narrow-angle radiometer each, along with one wide-angle radiometer. The vertical axes of the plots in Fig.~\ref{Phoenix_Heat_Flux} represent the ``spot height'' of the radiometers; that is, the height of the fire plume at which the radiometers were aimed. The ``spot diameter'' of the various radiometers ranged from 5~m to 15~m.
 
 
 \begin{figure}[!ht]
@@ -1996,7 +2167,7 @@ Figure~\ref{Phoenix_Heat_Flux} compares predicted and measured heat fluxes for t
 \begin{figure}[!ht]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Phoenix_LNG_Fires/Phoenix01_Heat_Flux_Profile} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Phoenix_LNG_Fires/Phoenix02_Heat_Flux_Profile} 
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Phoenix_LNG_Fires/Phoenix02_Heat_Flux_Profile}
 \end{tabular*}
 \caption[Phoenix LNG Fires, radial profiles of wide-angle heat flux]{Phoenix LNG Fires, radial profiles of wide-angle heat flux.}
 \label{Phoenix_Heat_Flux}
@@ -2016,7 +2187,7 @@ Figure~\ref{Phoenix_Heat_Flux} compares predicted and measured heat fluxes for t
 \subsection{Sandia Methane Burner Experiments}
 \label{Sandia_Methane_Burner_Heat_Flux}
 
-A brief summary of these experiments and the modeling strategy is found in Sec.~\ref{Sandia_Methane_Burner_Description}. 
+A brief summary of these experiments and the modeling strategy is found in Sec.~\ref{Sandia_Methane_Burner_Description}.
 
 On the following pages are comparisons of vertical profiles of the measured and predicted heat flux approximately 9~m from the centerline of a 3~m diameter methane burner of various heat release rates. There were two types of gauges used in the experiments---a conventional wide-angle heat flux gauge and a narrow-angle radiometer designed to measure the surface emissive power (SEP) of the fire. The narrow-angle radiometer had a view angle of 5$^\circ$ which was focused on a circular patch of flame of diameter approximately 0.8~m. This narrow-angle heat flux is modeled in FDS as the radiance (kW/m$^2$/sr) of a single ray multiplied by $\pi$~sr. The unit sphere is discretized into approximately 600~solid angles, and the angle closest to the radiometer direction vector is used.
 
@@ -2132,7 +2303,7 @@ On the following pages are comparisons of vertical profiles of the measured and 
 \subsection{Shell LNG Fireballs}
 \label{Shell_LNG_Fireballs_Heat_Flux}
 
-A brief description of the experiments and modeling assumptions is given in Sec.~\ref{Shell_LNG_Fireballs_Description}. 
+A brief description of the experiments and modeling assumptions is given in Sec.~\ref{Shell_LNG_Fireballs_Description}.
 
 Figure~\ref{Shell_HF} compares the measured and predicted heat flux from three large fireballs at a distance of 100~m from the test vessel. Experiment~4 also includes measurements at distances of 40~m and 70~m.
 
@@ -2140,7 +2311,7 @@ Figure~\ref{Shell_HF} compares the measured and predicted heat flux from three l
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Shell_LNG_Fireballs/Exp_2_HF} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Shell_LNG_Fireballs/Exp_3_HF} \\
-\multicolumn{2}{c}{\includegraphics[height=2.15in]{SCRIPT_FIGURES/Shell_LNG_Fireballs/Exp_4_HF}} 
+\multicolumn{2}{c}{\includegraphics[height=2.15in]{SCRIPT_FIGURES/Shell_LNG_Fireballs/Exp_4_HF}}
 \end{tabular*}
 \caption[Shell LNG Fireballs, heat flux] {Heat flux for the Shell LNG Fireball experiments.}
 \label{Shell_HF}
@@ -2179,7 +2350,7 @@ The radiative fraction and radiative heat flux as functions of oxygen volume fra
 \begin{figure}[h!]
 \centering
 \includegraphics[height=3in]{FIGURES/UMD_Line_Burner/integrated_intensity}
-\caption{UMD Line Burner contour of integrated radiation intensity.}
+\caption[UMD Line Burner contour of integrated radiation intensity]{UMD Line Burner contour of integrated radiation intensity.}
 \label{fig_umd_integrated_intensity}
 \end{figure}
 

@@ -5,7 +5,6 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
-$QFDS $DEBUG $QUEUE -p 64  -d $INDIR crib_1x1x1_2cm_obst.fds
 $QFDS $DEBUG $QUEUE -p 64  -d $INDIR crib_1x1x1_2cm.fds
 $QFDS $DEBUG $QUEUE -p  8  -d $INDIR crib_1x1x1_4cm.fds
 $QFDS $DEBUG $QUEUE -p  1  -d $INDIR crib_1x1x1_8cm.fds
