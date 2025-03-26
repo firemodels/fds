@@ -17,7 +17,6 @@
 &SURF ID='SPHERE'
       HT3D=T
       TMP_FRONT=20.
-      TMP_BACK=20.
       COLOR='ORANGE' /
 
 &MULT ID='cube array', DX=0.0025, DY=0.0025, DZ=0.0025, I_UPPER=81, J_UPPER=81, K_UPPER=81 /
