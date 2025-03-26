@@ -2010,7 +2010,7 @@ In this equation $h_{\alpha,{\rm ref}}$ is the enthalpy at the temperature $T_{\
 \begin{description}
    \item[Reactions = unknowns]{Solution can be found by a simple solution of the linear system: $\bar{x} = A^{-1} \bar{b}$}
    \item[Reactions < unknowns]{In this case there are an infinite number of solutions; however, any single solution will suffice. The solution that gives the minimum vector magnitude of $\bar{x}$ is $\bar{x}= A^T (A A^T)^{-1} \bar{b}$.}
-   \item[Reactions > unknowns]{In this case the system is overdetermined, and there may not be a solution vector $\bar{x}$ that will perfectly conserve energy. A least-squares solution is given by $\bar{x}=  (A^T A)^{-1} A^T \bar{b}$.}
+   \item[Reactions > unknowns]{In this case the system is over-determined, and there may not be a solution vector $\bar{x}$ that will perfectly conserve energy. A least-squares solution is given by $\bar{x}=  (A^T A)^{-1} A^T \bar{b}$.}
 \end{description}
 The first two cases are typically expected. The first case is where all materials decomposes into one or more gas species and there is no material residue. The second case is where one or more materials produce one or more residues including the possibility that the residue has a reaction. For example, wood pyrolyzing into a fuel gas plus char where the char reacts with oxygen to produce and ash remnant and CO$_2$. The third case would be where multiple solid materials are reactants in the same reaction. This case, while possible, is not typical for pyrolysis reactions.
 

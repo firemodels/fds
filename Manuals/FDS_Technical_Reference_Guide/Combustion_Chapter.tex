@@ -166,7 +166,7 @@ The mathematical details of the submodels are as follows:
 \label{eq:tau_sgs}  \tau_{\rm u} &= \frac{C_u \,\Delta}{\sqrt{(2/3)k_{\rm sgs}}} \\
 \label{eqn_tau_grav}\tau_{\rm g} &= \sqrt{ 2\Delta/g }
 \end{align}
-where $D_{\si{F}}$ is the diffusivity of the fuel species. Note that $k_{\rm sgs}$ is the unclosed subgrid kinetic energy per unit mass which by default is taken from the model for the turbulent viscosity (see Sec.~\ref{section:turbulent_viscosity}, Eq.~(\ref{Deardorff_LES})).  The advective time scale constant is calibrated to match the Heskestad flame height correlation \cite{FDS_Validation_Guide} and is set to $C_u = 0.4$. The acceleration time scale $\tau_{\rm g}$ is the time required to travel a distance $\Delta$ starting from rest under a constant acceleration, $g=\SI{9.81}{m/s^2}$.
+where $D_{\si{F}}$ is the diffusivity of the fuel species. Note that $k_{\rm sgs}$ is the un-closed subgrid kinetic energy per unit mass which by default is taken from the model for the turbulent viscosity (see Sec.~\ref{section:turbulent_viscosity}, Eq.~(\ref{Deardorff_LES})).  The advective time scale constant is calibrated to match the Heskestad flame height correlation \cite{FDS_Validation_Guide} and is set to $C_u = 0.4$. The acceleration time scale $\tau_{\rm g}$ is the time required to travel a distance $\Delta$ starting from rest under a constant acceleration, $g=\SI{9.81}{m/s^2}$.
 
 
 
@@ -227,7 +227,7 @@ In this section, we discuss the numerical solution of (\ref{eq:mixmass}). Let $\
 \label{eq:ystar}  \hat{Y}_\alpha^* &= \hat{m}_\alpha^*/M^* \\[0.1in]
 \label{eq:dmdt_2} \hat{Y}_\alpha(t^k + \Delta t^k) &= \hat{Y}_\alpha^* + \Delta \hat{Y}_\alpha^*
 \end{align}
-The superscript $^*$ indicates a post-mixing value.  The first step, (\ref{eq:dmdt_1}), is an analytical solution for the mixing step (first term in (\ref{eq:mixmass})), obtained using (\ref{eq:zeta_soln}).  The mixing time scale $\tau_{\rm mix}$, needed in (\ref{eq:zeta_soln}), is computed once per LES time step using (\ref{eqn_tau_mix}) and held constant during the reactor integration. The mixed mass, $M^* = M(t^k + \Delta t^k)$, is evaluated at the end of the subinterval using (\ref{eq:mixunmix_3}). For fast chemistry, we take only one sub-step ($\Delta t^{k=1} = \delta t$). At the end of the time integration, the mixed zone composition, $\hat{Y}_\alpha(\delta t)$, is combined with the unmixed mass to obtain the final cell composition.
+The superscript $^*$ indicates a post-mixing value.  The first step, (\ref{eq:dmdt_1}), is an analytical solution for the mixing step (first term in (\ref{eq:mixmass})), obtained using (\ref{eq:zeta_soln}).  The mixing time scale $\tau_{\rm mix}$, needed in (\ref{eq:zeta_soln}), is computed once per LES time step using (\ref{eqn_tau_mix}) and held constant during the reactor integration. The mixed mass, $M^* = M(t^k + \Delta t^k)$, is evaluated at the end of the sub-interval using (\ref{eq:mixunmix_3}). For fast chemistry, we take only one sub-step ($\Delta t^{k=1} = \delta t$). At the end of the time integration, the mixed zone composition, $\hat{Y}_\alpha(\delta t)$, is combined with the unmixed mass to obtain the final cell composition.
 
 The method to determine $\Delta \hat{Y}_\alpha^*$ (the change in mass fraction of $\alpha$ due to chemical reaction) in (\ref{eq:dmdt_2}) depends on the complexity of the reaction system. In the next section, we first discuss the simplest case of infinitely fast chemistry.  Then we discuss finite-rate chemistry.
 
@@ -335,7 +335,7 @@ Note that the Gibbs free energy as a function of temperature is defined for any 
 
 \subsubsection{Time Integration for Finite-Rate Chemistry}
 
-For reactions other than single step, mixing controlled chemistry, a fourth-order explicit integrator with error control is used. The time integration follows the procedure outlined in Eqs.~(\ref{eq:dmdt_1}) and (\ref{eq:dmdt_2}), but multiple subiterations are generally needed. The change in composition over the subinterval in the mixed reactor zone, $\Delta \hat{Y}_\alpha^*$, is usually obtained by integrating an Arrhenius rate law (we say ``usually'' because a combination of fast and finite-rate chemistry is permissible). More detail on the numerical methods of the integrator, including a method to combat stiff chemistry, can be found in Appendix~\ref{chemistry_integration}.
+For reactions other than single step, mixing controlled chemistry, a fourth-order explicit integrator with error control is used. The time integration follows the procedure outlined in Eqs.~(\ref{eq:dmdt_1}) and (\ref{eq:dmdt_2}), but multiple subiterations are generally needed. The change in composition over the sub-interval in the mixed reactor zone, $\Delta \hat{Y}_\alpha^*$, is usually obtained by integrating an Arrhenius rate law (we say ``usually'' because a combination of fast and finite-rate chemistry is permissible). More detail on the numerical methods of the integrator, including a method to combat stiff chemistry, can be found in Appendix~\ref{chemistry_integration}.
 
 
 \subsection{Finite-Rate Chemistry (Detailed Chemical Mechanism)}
