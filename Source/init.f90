@@ -4048,10 +4048,10 @@ FIND_BACK_WALL_CELL: DO  ! Look for the back wall cell; that is, the wall cell o
       ONE_D%BACK_INDEX = OM%CELL(IC)%WALL_INDEX(IOR)
       ONE_D%BACK_MESH  = NOM
       ONE_D%BACK_SURF  = OM%CELL(IC)%SURF_INDEX(IOR)
+      SF_BACK => SURFACE(ONE_D%BACK_SURF)
       IF (NOM>0) THEN
-         IF (SURFACE(ONE_D%BACK_SURF)%THERMAL_BC_INDEX/=THERMALLY_THICK) THEN
-            WRITE(MESSAGE,'(3A)') 'ERROR(378): SURF ',TRIM(SURFACE(ONE_D%BACK_SURF)%ID),&
-                                  ' cannot be applied to a thermally-thick solid.'
+         IF (SF%HT_DIM>1 .AND. SF_BACK%HT_DIM==1) THEN
+            WRITE(MESSAGE,'(3A)') 'ERROR(378): SURF ',TRIM(SF_BACK%ID),' cannot be applied to 3-D conducting solid.'
             CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
          ENDIF
          OS => M%OMESH(NOM)%WALL_RECV_BUFFER
