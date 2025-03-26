@@ -14064,6 +14064,8 @@ ORIENTATION_LOOP: DO IS=1,3
                   IF(FAXIS==JAXIS) THEN; U2_T = VV(IIGM,JJGM,KKGM)**2; ELSE; U2_T = WW(IIGM,JJGM,KKGM)**2; ENDIF
                CASE(JAXIS);              U1_T = VV(IIGM,JJGM,KKGM)**2
                   IF(FAXIS==IAXIS) THEN; U2_T = UU(IIGM,JJGM,KKGM)**2; ELSE; U2_T = WW(IIGM,JJGM,KKGM)**2; ENDIF
+               CASE(KAXIS);              U1_T = WW(IIGM,JJGM,KKGM)**2
+                  IF(FAXIS==IAXIS) THEN; U2_T = UU(IIGM,JJGM,KKGM)**2; ELSE; U2_T = VV(IIGM,JJGM,KKGM)**2; ENDIF
             END SELECT
             VEL_T = SQRT(U1_T+U2_T)
             DUIDXJ(ICD_SGN)    = 0._EB
