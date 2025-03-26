@@ -157,7 +157,7 @@ FDS is a Computational Fluid Dynamics (CFD) model of fire-driven fluid flow. The
 appropriate for low-speed, thermally-driven flow with an emphasis on smoke and heat transport from fires. The partial derivatives in the conservation
 equations for mass, momentum, and energy are approximated by finite differences, and the solution is updated in time on a three-dimensional,
 rectilinear grid. Thermal radiation is computed using a finite volume technique on the same grid as the flow solver. Lagrangian particles are used to
-simulate sprinkler droplets, fuel sprays, and unresolvable subgrid objects.
+simulate sprinkler droplets, fuel sprays, and un-resolvable sub-grid objects.
 
 Smokeview is a companion program to FDS that produces images and animations of the results. In recent years, its developer, Glenn Forney, has added
 to Smokeview the ability to visualize fire and smoke in a fairly realistic way. In a sense, Smokeview now is, via its three-dimensional renderings,
@@ -355,7 +355,7 @@ Official versions of the model released by NIST are identified with specific ver
  Revision Date    : Wed Aug 24 16:29:46 2016 -0400
  Compilation Date : Aug 24, 2016  22:28:55
 \end{lstlisting}
-New versions of FDS and Smokeview are identified using a specific numbering convention consisting of three integers separated by periods, where the first number is the {\em major} release, the second is the {\em minor} release, and the third is the {\em maintenance} release. For example, FDS 6.7.9 indicates that this is FDS 6, the sixth major release. The 7 indicates a significant upgrade (a minor release), but still within the framework of FDS 6.  The 9 indicates the nineth maintenance release of 6.7, mostly bug fixes and minor user requests. All volumes of the FDS/Smokeview documentation are also automatically tagged with this information on the title page of each document providing documentation and traceability of a given version of the documents to a specific version of FDS/Smokeview and a specific repository revision. Release notes indicate whether the changes affect a particular model feature. Maintenance releases are either just bug fixes or the addition of minor enhancements (such as a new output quantity), and should not affect code functionality.
+New versions of FDS and Smokeview are identified using a specific numbering convention consisting of three integers separated by periods, where the first number is the {\em major} release, the second is the {\em minor} release, and the third is the {\em maintenance} release. For example, FDS 6.7.9 indicates that this is FDS 6, the sixth major release. The 7 indicates a significant upgrade (a minor release), but still within the framework of FDS 6.  The 9 indicates the ninth maintenance release of 6.7, mostly bug fixes and minor user requests. All volumes of the FDS/Smokeview documentation are also automatically tagged with this information on the title page of each document providing documentation and traceability of a given version of the documents to a specific version of FDS/Smokeview and a specific repository revision. Release notes indicate whether the changes affect a particular model feature. Maintenance releases are either just bug fixes or the addition of minor enhancements (such as a new output quantity), and should not affect code functionality.
 
 
 
@@ -529,7 +529,7 @@ These computer systems are available only to specified personnel, including the 
 
 \section{Supplier Control}
 
-NIST currently uses the Intel oneAPI Base and HPC toolkits which include Fortran and C++ compilers along with various diagnostic tools\footnote{Certain commercial entities, equipment, or materials may be identified in this document in order to describe an experimental procedure or concept adequately. Such identification is not intended to imply recommendation or endorsement by the National Institute of Standards and Technology, nor is it intended to imply that the entities, materials, or equipment are necessarily the best available for the purpose.}. Some Intel redistributable libraries are part of the FDS installation packages.  Prior to any change in compilers, a full test suite of test cases are compared to verify consistent operation of the model and model results.
+NIST currently uses the Intel oneAPI Base and HPC toolkits which include Fortran and C++ compilers along with various diagnostic tools\footnote{Certain commercial entities, equipment, or materials may be identified in this document in order to describe an experimental procedure or concept adequately. Such identification is not intended to imply recommendation or endorsement by the National Institute of Standards and Technology, nor is it intended to imply that the entities, materials, or equipment are necessarily the best available for the purpose.}. Some Intel re-distributable libraries are part of the FDS installation packages.  Prior to any change in compilers, a full test suite of test cases are compared to verify consistent operation of the model and model results.
 
 \section{Records Collection, Maintenance, and Retention}
 
