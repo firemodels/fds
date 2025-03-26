@@ -70,13 +70,13 @@
 &INIT ID='part_init first-order', PART_ID='agent_part first-order', XB=-0.05,0.05,-0.05,0.05,0.95,1.05, N_PARTICLES = 1 /
 &INIT ID='part_init spherical'  , PART_ID='agent_part spherical',   XB=-0.05,0.05,-0.05,0.05,0.95,1.05, N_PARTICLES = 1 /
 
-&DEVC XYZ=0,0,1, QUANTITY='WALL THICKNESS',          INIT_ID='part_init first-order', CONVERSION_FACTOR=2.E6, UNITS='mu-m', ID='diam first-order'/
-&DEVC XYZ=0,0,1, QUANTITY='INSIDE WALL TEMPERATURE', INIT_ID='part_init first-order', DEPTH=1.E-9, ID='TMP first-order'/
-&DEVC XYZ=0,0,1, QUANTITY='SOLID DENSITY', MATL_ID='Sodium Bicarbonate first-order', INIT_ID='part_init first-order', DEPTH=1.E-9, ID='RHO_S first-order'/
+&DEVC QUANTITY='WALL THICKNESS',          INIT_ID='part_init first-order', CONVERSION_FACTOR=2.E6, UNITS='mu-m', ID='diam first-order'/
+&DEVC QUANTITY='INSIDE WALL TEMPERATURE', INIT_ID='part_init first-order', DEPTH=1.E-9, ID='TMP first-order'/
+&DEVC QUANTITY='SOLID DENSITY', MATL_ID='Sodium Bicarbonate first-order', INIT_ID='part_init first-order', DEPTH=1.E-9, ID='RHO_S first-order'/
 
-&DEVC XYZ=0,0,1, QUANTITY='WALL THICKNESS',          INIT_ID='part_init spherical', CONVERSION_FACTOR=2.E6, UNITS='mu-m', ID='diam spherical'/
-&DEVC XYZ=0,0,1, QUANTITY='INSIDE WALL TEMPERATURE', INIT_ID='part_init spherical', DEPTH=1.E-6, ID='TMP spherical'/
-&DEVC XYZ=0,0,1, QUANTITY='SOLID DENSITY', MATL_ID='Sodium Bicarbonate spherical', INIT_ID='part_init spherical', DEPTH=1.E-9, ID='RHO_S spherical'/
+&DEVC QUANTITY='WALL THICKNESS',          INIT_ID='part_init spherical', CONVERSION_FACTOR=2.E6, UNITS='mu-m', ID='diam spherical'/
+&DEVC QUANTITY='INSIDE WALL TEMPERATURE', INIT_ID='part_init spherical', DEPTH=1.E-6, ID='TMP spherical'/
+&DEVC QUANTITY='SOLID DENSITY', MATL_ID='Sodium Bicarbonate spherical', INIT_ID='part_init spherical', DEPTH=1.E-9, ID='RHO_S spherical'/
 
 &CTRL ID='MY POWER', FUNCTION_TYPE='POWER', INPUT_ID='RHO_S spherical','CONSTANT', CONSTANT=0.33333/
 &DEVC ID='SPHERE DIA', XYZ=0,0,1, QUANTITY='CONTROL VALUE', CTRL_ID='MY POWER', CONVERSION_FACTOR=0.38444/ CONVERSION_FACTOR=DIAMETER/(RHO_S(0)^(1/3))
