@@ -43,14 +43,14 @@ Note that the node pressures are not expressed as $P^n_i$, but rather as $\tilde
 rather than the actual pressure at the end of the time step.  The pressure in a compartment is a function of the mass and energy flowing in and out.
 If that compartment is connected to other compartments by doors or other openings, then the pressure is also dependent upon flows into and out those other compartments.
 Those mass and energy flows include both those being predicted by the HVAC model and those being predicted by the CFD model.
-For example, in Fig.~\ref{hvacpressure}, the un-shaded compartments have pressure solutions that are dependent upon the flows predicted by both the
+For example, in Fig.~\ref{hvacpressure}, the unshaded compartments have pressure solutions that are dependent upon the flows predicted by both the
 HVAC model and the CFD model and all of those compartments need to be included in the extrapolated pressure for those compartments.
 Since the two models are not fully coupled, the extrapolated pressure is an estimate of the pressure at the end of the time step based upon the pressure rise for the prior time step.
 
 \begin{figure}[ht!]
    \begin{center}
       \scalebox{0.8}{\includegraphics{FIGURES/hvacpressure}}
-      \caption[Illustration of interdependent pressure solutions]{\label{hvacpressure} Illustration of interdependent pressure solutions.  All un-shaded compartments have pressures that are dependent upon each other.}
+      \caption[Illustration of interdependent pressure solutions]{\label{hvacpressure} Illustration of interdependent pressure solutions.  All unshaded compartments have pressures that are dependent upon each other.}
    \end{center}
 \end{figure}
 
@@ -94,9 +94,9 @@ Nodes in the HVAC systems can include inlet and outlets, tees, and other duct fi
 
 \begin{enumerate}
 \item If there is no flow at the node, then each duct connected to the node is assigned the average of all the losses for flows to the duct from all other ducts.
-\item If there is flow into only one connected duct, then each out-flowing duct is assigned the flow loss for flow from the inlet duct to that specific out-flowing duct.
-\item If there is flow out of only one connected duct, then each in-flowing duct is assigned the flow loss for flow from that inlet duct to the outlet duct corrected for any change in duct area from inlet to outlet (node losses are input as a function of the downstream duct area).
-\item If there is flow into multiple ducts and out of multiple ducts, then each outgoing duct is given the average loss from the in-flowing ducts weighted by the volume flow through those ducts.
+\item If there is flow into only one connected duct, then each outflowing duct is assigned the flow loss for flow from the inlet duct to that specific outflowing duct.
+\item If there is flow out of only one connected duct, then each inflowing duct is assigned the flow loss for flow from that inlet duct to the outlet duct corrected for any change in duct area from inlet to outlet (node losses are input as a function of the downstream duct area).
+\item If there is flow into multiple ducts and out of multiple ducts, then each outgoing duct is given the average loss from the inflowing ducts weighted by the volume flow through those ducts.
 \end{enumerate}
 
 \subsection{Duct Losses}
