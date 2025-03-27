@@ -421,6 +421,7 @@ REAL(EB) :: FREE_BURN_TEMPERATURE=600._EB                           !< Temperatu
 REAL(EB) :: FINITE_RATE_MIN_TEMP=-273.15                            !< When FR is present, min temp. to compute combustion (C->K)
 REAL(FB) :: HRRPUV_MAX_SMV=1200._FB                                 !< Clipping value used by Smokeview (kW/m3)
 REAL(FB) :: TEMP_MAX_SMV=2000._FB                                   !< Clipping value used by Smokeview (C)
+REAL(FB) :: TEMP_MIN_SMV=20._FB                                     !< Clipping value used by Smokeview (C)
 
 INTEGER :: N_SPECIES=0                                              !< Number of total gas phase primitive species
 INTEGER :: N_REACTIONS                                              !< Number of gas phase reactions
