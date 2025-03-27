@@ -1017,6 +1017,7 @@ INTEGER :: J
 
 
 IF (DEBUG) THEN
+   WRITE(LU_ERR,'(A, E18.8)')" WARN: CVODE message at CFD time. CUR_CFD_TIME=", CUR_CFD_TIME
    WRITE(LU_ERR,*) '  CVODE CODE   : ', ERR_CODE
 
    ! Print Message
