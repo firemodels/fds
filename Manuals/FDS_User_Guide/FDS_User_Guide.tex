@@ -10144,6 +10144,8 @@ The \ct{MASS_EXTINCTION_COEFFICIENT} is passed to Smokeview to be used for visua
 
 FDS outputs 3D smoke quantities as 8 bit integers compressed using run length encoding.  Soot density, HRRPUV or temperatures are first scaled to 8 bit integers (soot density is converted to an opacity first). Repeated integers are replaced by $n$I where $n$ is the number of repeats and I is the value repeated.
 
+You can change the scale of \ct{HRRPUV} via the parameter \ct{HRRPUV_MAX_SMV} (default 1200~kW/m$^3$) on the \ct{DUMP} line. You can change the \ct{TEMPERATURE} bounds via \ct{TEMP_MIN_SMV} and \ct{TEMP_MAX_SMV} (default 20~$^\circ$C and 2000~$^\circ$C).
+
 \newpage
 
 \section{Particle Output Quantities}
@@ -12173,6 +12175,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{DT_TMP}                       & Real         & Section~\ref{info:CSVF}                &  s        &                                \\ \hline
 \ct{DT_UVW}                       & Real         & Section~\ref{info:CSVF}                &  s        &                                \\ \hline
 \ct{FLUSH_FILE_BUFFERS}          & Logical      & Section~\ref{info:DUMP}                &           & \ct{T}                        \\ \hline
+\ct{HRRPUV_MAX_SMV}              & Real         & Section~\ref{info:SMOKE3D}             & kW/m$^3$  & 1200                          \\ \hline
 \ct{MASS_FILE}                    & Logical      & Section~\ref{info:DUMP}                &           & \ct{F}                        \\ \hline
 \ct{MAXIMUM_PARTICLES}            & Integer      & Section~\ref{info:controlling_droplets}&           & 1000000                        \\ \hline
 \ct{NFRAMES}                       & Integer      & Section~\ref{info:DUMP}                &           & 1000                           \\ \hline
@@ -12207,6 +12210,8 @@ Keyword             & Type     & Description                      & Units       
 \ct{SMOKE3D}                       & Logical      & Section~\ref{info:SMOKE3D}             &           & \ct{T}                        \\ \hline
 \ct{STATUS_FILES}                 & Logical      & Section~\ref{info:DUMP}                &           & \ct{F}                        \\ \hline
 \ct{SUPPRESS_DIAGNOSTICS}         & Logical      & Section~\ref{info:monitoring_progress} &           & \ct{F}                        \\ \hline
+\ct{TEMP_MAX_SMV}                 & Real         & Section~\ref{info:SMOKE3D}             & $^\circ$C & 2000                          \\ \hline
+\ct{TEMP_MIN_SMV}                 & Real         & Section~\ref{info:SMOKE3D}             & $^\circ$C & 2000                          \\ \hline
 \ct{VELOCITY_ERROR_FILE}         & Logical      & Section~\ref{info:TIMING}              &           & \ct{F}                        \\ \hline
 \ct{WRITE_XYZ}                    & Logical      & Section~\ref{info:PL3D}                &           & \ct{F}                        \\ \hline
 \end{longtable}
