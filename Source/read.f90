@@ -10393,7 +10393,7 @@ REAL(EB) :: TRANSPARENCY,XB1,XB2,XB3,XB4,XB5,XB6,BULK_DENSITY,VOL_ADJUSTED,VOL_S
             UNDIVIDED_INPUT_LENGTH(3),HEIGHT,RADIUS,XYZ(3),ORIENTATION(3),AABB(6),ROTMAT(3,3),THETA,LENGTH,WIDTH,SHAPE_AREA(3),&
             XXI,YYJ,ZZK,DX_GHOST,DY_GHOST,DZ_GHOST,MATL_MASS_FRACTION(MAX_MATERIALS),INTERNAL_HEAT_SOURCE,STRETCH_FACTOR,&
             CELL_SIZE,CELL_SIZE_FACTOR
-LOGICAL :: EMBEDDED,THICKEN,THICKEN_LOC,PERMIT_HOLE,ALLOW_VENT,REMOVABLE,BNDF_FACE(-3:3),BNDF_OBST,OUTLINE,REJECT_OBST,FOUND
+LOGICAL :: EMBEDDED,THICKEN,THICKEN_DIR(3),PERMIT_HOLE,ALLOW_VENT,REMOVABLE,BNDF_FACE(-3:3),BNDF_OBST,OUTLINE,REJECT_OBST,FOUND
 NAMELIST /OBST/ ALLOW_VENT,BNDF_FACE,BNDF_OBST,BULK_DENSITY,CELL_SIZE,CELL_SIZE_FACTOR,COLOR,CTRL_ID,DEVC_ID,FYI,HEIGHT,ID,&
                 INTERNAL_HEAT_SOURCE,LENGTH,MATL_ID,MATL_MASS_FRACTION,MULT_ID,N_LAYER_CELLS_MAX,ORIENTATION,OUTLINE,OVERLAY,&
                 PERMIT_HOLE,RADIUS,RAMP_IHS,REMOVABLE,RGB,SHAPE,STRETCH_FACTOR,SURF_ID,SURF_ID_INTERIOR,SURF_ID6,SURF_IDS,&
@@ -10661,13 +10661,17 @@ MESH_LOOP: DO NM=1,NMESHES
                N = N + 1
 
                ! Look for obstructions that are within a half grid cell of the current mesh.
-               ! If the obstruction is thin and has the THICKEN attribute, look for it within an entire grid cell.
-               ! If there OBST is in another mesh with a gap in between, reject it.
+               ! If the obstruction is thin and has the THICKEN attribute, do not thicken it if it lies mostly outside the mesh.
+               ! If the OBST is in another mesh with a gap in between, reject it.
 
-               THICKEN_LOC = THICKEN
+               THICKEN_DIR = THICKEN
                REJECT_OBST = .FALSE.
 
-               IF ( (XB2>=XS-0.5_EB*DX(0)   .AND. XB2<XS) .OR. (THICKEN .AND. 0.5_EB*(XB1+XB2)>=XS-DX(0)    .AND. XB2<XS) ) THEN
+               IF (XB1+XB2<2._EB*XS .OR. XB1+XB2>2._EB*XF) THICKEN_DIR(1) = .FALSE.
+               IF (XB3+XB4<2._EB*YS .OR. XB3+XB4>2._EB*YF) THICKEN_DIR(2) = .FALSE.
+               IF (XB5+XB6<2._EB*ZS .OR. XB5+XB6>2._EB*ZF) THICKEN_DIR(3) = .FALSE.
+
+               IF (XB2>=XS-0.5_EB*DX(0) .AND. XB2<XS) THEN
                   DX_GHOST = DX(0)
                   CALL SEARCH_OTHER_MESHES(XS-0.01_EB*DX(0),0.5_EB*(MAX(YS,XB3)+MIN(YF,XB4)),0.5_EB*(MAX(ZS,XB5)+MIN(ZF,XB6)),&
                                            NOM,IIO,JJO,KKO,XXI,YYJ,ZZK)
@@ -10675,15 +10679,14 @@ MESH_LOOP: DO NM=1,NMESHES
                                            NOM2,IIO,JJO,KKO,XXI,YYJ,ZZK)
                   IF (NOM==0 .AND. NOM2>0) REJECT_OBST = .TRUE.
                   IF (NOM>0) THEN
-                     IF (ALLOCATED(MESHES(NOM)%DX))DX_GHOST = MESHES(NOM)%DX(IIO)
+                     IF (ALLOCATED(MESHES(NOM)%DX)) DX_GHOST = MESHES(NOM)%DX(IIO)
                   ENDIF
                   IF (XB2>=XS-0.5_EB*DX_GHOST) THEN
                      XB1 = XS
                      XB2 = XS
-                     THICKEN_LOC = .FALSE.
                   ENDIF
                ENDIF
-               IF ( (XB1<XF+0.5_EB*DX(IBP1) .AND. XB1>XF) .OR. (THICKEN .AND. 0.5_EB*(XB1+XB2)< XF+DX(IBP1) .AND. XB1>XF) ) THEN
+               IF (XB1<XF+0.5_EB*DX(IBP1) .AND. XB1>XF) THEN
                   DX_GHOST = DX(IBP1)
                   CALL SEARCH_OTHER_MESHES(XF+0.01_EB*DX(IBP1),0.5_EB*(MAX(YS,XB3)+MIN(YF,XB4)),0.5_EB*(MAX(ZS,XB5)+MIN(ZF,XB6)),&
                                            NOM,IIO,JJO,KKO,XXI,YYJ,ZZK)
@@ -10696,10 +10699,9 @@ MESH_LOOP: DO NM=1,NMESHES
                   IF (XB1<XF+0.5_EB*DX_GHOST) THEN
                      XB1 = XF
                      XB2 = XF
-                     THICKEN_LOC = .FALSE.
                   ENDIF
                ENDIF
-               IF ( (XB4>=YS-0.5_EB*DY(0)   .AND. XB4<YS) .OR. (THICKEN .AND. 0.5_EB*(XB3+XB4)>=YS-DY(0)    .AND. XB4<YS) ) THEN
+               IF (XB4>=YS-0.5_EB*DY(0) .AND. XB4<YS) THEN
                   DY_GHOST = DY(0)
                   CALL SEARCH_OTHER_MESHES(0.5_EB*(MAX(XS,XB1)+MIN(XF,XB2)),YS-0.01_EB*DY(0),0.5_EB*(MAX(ZS,XB5)+MIN(ZF,XB6)),&
                                            NOM,IIO,JJO,KKO,XXI,YYJ,ZZK)
@@ -10712,10 +10714,9 @@ MESH_LOOP: DO NM=1,NMESHES
                   IF (XB4>=YS-0.5_EB*DY_GHOST) THEN
                      XB3 = YS
                      XB4 = YS
-                     THICKEN_LOC = .FALSE.
                   ENDIF
                ENDIF
-               IF ( (XB3<YF+0.5_EB*DY(JBP1) .AND. XB3>YF) .OR. (THICKEN .AND. 0.5_EB*(XB3+XB4)< YF+DY(JBP1) .AND. XB3>YF) ) THEN
+               IF (XB3<YF+0.5_EB*DY(JBP1) .AND. XB3>YF) THEN
                   DY_GHOST = DY(JBP1)
                   CALL SEARCH_OTHER_MESHES(0.5_EB*(MAX(XS,XB1)+MIN(XF,XB2)),YF+0.01_EB*DY(JBP1),0.5_EB*(MAX(ZS,XB5)+MIN(ZF,XB6)),&
                                            NOM,IIO,JJO,KKO,XXI,YYJ,ZZK)
@@ -10728,10 +10729,9 @@ MESH_LOOP: DO NM=1,NMESHES
                   IF (XB3<YS+0.5_EB*DY_GHOST) THEN
                      XB3 = YF
                      XB4 = YF
-                     THICKEN_LOC = .FALSE.
                   ENDIF
                ENDIF
-               IF ( (XB6>=ZS-0.5_EB*DZ(0)   .AND. XB6<ZS) .OR. (THICKEN .AND. 0.5_EB*(XB5+XB6)>=ZS-DZ(0)    .AND. XB6<ZS) ) THEN
+               IF (XB6>=ZS-0.5_EB*DZ(0) .AND. XB6<ZS) THEN
                   DZ_GHOST = DZ(0)
                   CALL SEARCH_OTHER_MESHES(0.5_EB*(MAX(XS,XB1)+MIN(XF,XB2)),0.5_EB*(MAX(YS,XB3)+MIN(YF,XB4)),ZS-0.01_EB*DZ(0),&
                                            NOM,IIO,JJO,KKO,XXI,YYJ,ZZK)
@@ -10744,10 +10744,9 @@ MESH_LOOP: DO NM=1,NMESHES
                   IF (XB6>=ZS-0.5_EB*DZ_GHOST) THEN
                      XB5 = ZS
                      XB6 = ZS
-                     THICKEN_LOC = .FALSE.
                   ENDIF
                ENDIF
-               IF ( (XB5<ZF+0.5_EB*DZ(KBP1) .AND. XB5>ZF) .OR. (THICKEN .AND. 0.5_EB*(XB5+XB6)< ZF+DZ(KBP1) .AND. XB5>ZF) ) THEN
+               IF (XB5<ZF+0.5_EB*DZ(KBP1) .AND. XB5>ZF) THEN
                   DZ_GHOST = DZ(KBP1)
                   CALL SEARCH_OTHER_MESHES(0.5_EB*(MAX(XS,XB1)+MIN(XF,XB2)),0.5_EB*(MAX(YS,XB3)+MIN(YF,XB4)),ZF+0.01_EB*DZ(KBP1),&
                                            NOM,IIO,JJO,KKO,XXI,YYJ,ZZK)
@@ -10760,7 +10759,6 @@ MESH_LOOP: DO NM=1,NMESHES
                   IF (XB5<ZF+0.5_EB*DZ_GHOST) THEN
                      XB5 = ZF
                      XB6 = ZF
-                     THICKEN_LOC = .FALSE.
                   ENDIF
                ENDIF
 
@@ -10804,28 +10802,16 @@ MESH_LOOP: DO NM=1,NMESHES
                OB%K2 = NINT( GINV(XB6-ZS,3,NM)*RDZETA )
 
                ! If desired, thicken small obstructions
+                  !Don't allow thickening if an OBST straddles the midpoint and is small compared to grid cell
 
-               IF (THICKEN_LOC) THEN
+               IF (THICKEN_DIR(1)) THEN
                   IF (OB%I1==OB%I2) THEN
                      OB%I1 = INT(GINV(.5_EB*(XB1+XB2)-XS,1,NM)*RDXI)
                      OB%I2 = MIN(OB%I1+1,IBAR)
                      OB%X1 = X(OB%I1)
                      OB%X2 = X(OB%I2)
                   ENDIF
-                  IF (OB%J1==OB%J2) THEN
-                     OB%J1 = INT(GINV(.5_EB*(XB3+XB4)-YS,2,NM)*RDETA)
-                     OB%J2 = MIN(OB%J1+1,JBAR)
-                     OB%Y1 = Y(OB%J1)
-                     OB%Y2 = Y(OB%J2)
-                  ENDIF
-                  IF (OB%K1==OB%K2) THEN
-                     OB%K1 = INT(GINV(.5_EB*(XB5+XB6)-ZS,3,NM)*RDZETA)
-                     OB%K2 = MIN(OB%K1+1,KBAR)
-                     OB%Z1 = Z(OB%K1)
-                     OB%Z2 = Z(OB%K2)
-                  ENDIF
                ELSE
-                  !Don't allow thickening if an OBST straddles the midpoint and is small compared to grid cell
                   IF (GINV(XB2-XS,1,NM)-GINV(XB1-XS,1,NM)<0.25_EB/RDXI .AND. OB%I1 /= OB%I2) THEN
                      IF(GINV(XB1-XS,1,NM)-REAL(OB%I1,EB) < REAL(OB%I2,EB) - GINV(XB2-XS,1,NM)) THEN
                         OB%I2=OB%I1
@@ -10833,6 +10819,16 @@ MESH_LOOP: DO NM=1,NMESHES
                         OB%I1=OB%I2
                      ENDIF
                   ENDIF
+               ENDIF
+
+               IF (THICKEN_DIR(2)) THEN
+                  IF (OB%J1==OB%J2) THEN
+                     OB%J1 = INT(GINV(.5_EB*(XB3+XB4)-YS,2,NM)*RDETA)
+                     OB%J2 = MIN(OB%J1+1,JBAR)
+                     OB%Y1 = Y(OB%J1)
+                     OB%Y2 = Y(OB%J2)
+                  ENDIF
+               ELSE
                   IF (GINV(XB4-YS,2,NM)-GINV(XB3-YS,2,NM)<0.25_EB/RDETA .AND. OB%J1 /= OB%J2) THEN
                      IF(GINV(XB3-XS,2,NM)-REAL(OB%J1,EB) < REAL(OB%J2,EB) - GINV(XB4-YS,2,NM)) THEN
                         OB%J2=OB%J1
@@ -10840,6 +10836,16 @@ MESH_LOOP: DO NM=1,NMESHES
                         OB%J1=OB%J2
                      ENDIF
                   ENDIF
+               ENDIF
+
+               IF (THICKEN_DIR(3)) THEN
+                  IF (OB%K1==OB%K2) THEN
+                     OB%K1 = INT(GINV(.5_EB*(XB5+XB6)-ZS,3,NM)*RDZETA)
+                     OB%K2 = MIN(OB%K1+1,KBAR)
+                     OB%Z1 = Z(OB%K1)
+                     OB%Z2 = Z(OB%K2)
+                  ENDIF
+               ELSE
                   IF (GINV(XB6-ZS,3,NM)-GINV(XB5-ZS,3,NM)<0.25_EB/RDZETA .AND. OB%K1 /= OB%K2) THEN
                      IF(GINV(XB5-ZS,3,NM)-REAL(OB%I1,EB) < REAL(OB%I2,EB) - GINV(XB6-ZS,3,NM)) THEN
                         OB%K2=OB%K1
