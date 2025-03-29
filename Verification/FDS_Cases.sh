@@ -59,6 +59,17 @@ $QFDS -p 6  -d Chemistry load_bal_propane_2step_arrhenius_parallel.fds
 $QFDS -p 6  -d Chemistry load_bal_methane_2step_fast_serial.fds
 $QFDS -p 6  -d Chemistry load_bal_methane_2step_fast_parallel.fds
 
+$QFDS -d Chemistry EDC_OneCFDStep_Methane_grimech30_Zeta1p0.fds
+$QFDS -d Chemistry EDC_OneCFDStep_Methane_grimech30_Zeta0p75.fds
+$QFDS -d Chemistry EDC_OneCFDStep_Methane_grimech30_Zeta0p5.fds
+$QFDS -d Chemistry EDC_OneCFDStep_Methane_grimech30_Zeta0p25.fds
+$QFDS -d Chemistry EDC_OneCFDStep_Methane_grimech30_Zeta0p0.fds
+$QFDS -d Chemistry EDC_MultiCFDStep_Methane_grimech30_Zeta1p0.fds
+$QFDS -d Chemistry EDC_MultiCFDStep_Methane_grimech30_Zeta0p75.fds
+$QFDS -d Chemistry EDC_MultiCFDStep_Methane_grimech30_Zeta0p5.fds
+$QFDS -d Chemistry EDC_MultiCFDStep_Methane_grimech30_Zeta0p25.fds
+$QFDS -d Chemistry EDC_MultiCFDStep_Methane_grimech30_Zeta0p0.fds
+
 $QFDS -d Complex_Geometry geom_channel.fds
 $QFDS -d Complex_Geometry geom_channel2.fds
 $QFDS -d Complex_Geometry geom_channel_tmp.fds
