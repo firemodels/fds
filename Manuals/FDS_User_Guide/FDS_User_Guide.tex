@@ -7632,11 +7632,11 @@ In this next example, ground vegetation with the same properties as the previous
 \subsection{Vegetation Radiation Absorption}
 \label{ground_vegetation_radi}
 
-In this next example, ground vegetation lines the floors of two unit cubes with hot ceilings and cold floors. The walls are \ct{MIRROR} boundaries so that the ceiling and floor can be taken as infinitely wide parallel plates. The height of the vegetation is $\delta=0.05$~m, and the grid size in the simulation is 5~cm.  Particles model the vegetation in one cube; the Boundary Fuel Model is applied in the other. The surface area to volume ratio of the vegetation, $\sigma_{\rm v}=3092$~m$^{-1}$, the packing ratio, $\beta=0.02$, and the shape factor, $C_{\rm s}$=0.25. The ceiling temperature, $T_{\rm c}=993$~K; the floor temperature, $T_{\rm f}=293$~K. The emissivity of both surfaces is 1. The radiation absorption coefficient, $\kappa \equiv C_{\rm s} \sigma_{\rm v} \beta=15.46$~m$^{-1}$, and the expected heat flux to the floor is:
+In this next example, ground vegetation lines the floors of two unit cubes with hot ceilings and cold floors. The walls are \ct{MIRROR} boundaries so that the ceiling and floor can be taken as infinitely wide parallel plates. The height of the vegetation is $\delta=0.05$~m, and the grid size in the simulation is 5~cm.  Particles model the vegetation in one cube; the Boundary Fuel Model is applied in the other. The surface area to volume ratio of the vegetation, $\sigma_{\rm v}=3092$~m$^{-1}$, the packing ratio, $\beta=0.02$, and the shape factor, $C_{\rm s}$=0.25. The ceiling temperature, $T_{\rm c}=993$~K; the floor temperature, $T_{\rm f}=293$~K. The emissivity of both surfaces is 1. The radiation absorption coefficient is $\kappa \equiv C_{\rm s} \sigma_{\rm v} \beta=15.46$~m$^{-1}$. Using the third-order exponential integral function, $E_3$, the expected heat flux to the floor is~\cite{Siegel:1}:
 \be
-   \dq'' = \sigma (T_{\rm c}^4-T_{\rm f}^4) \, {\rm e}^{- 2 \kappa \delta} = 11.66 \; \hbox{kW/m}^2
+   \dq'' = 2 \, \sigma T_{\rm c}^4 \, E_3(\kappa\delta) - \sigma T_{\rm f}^4 \left(1-2 \, E_3(\kappa\delta) \right) = 15.52 \; \hbox{kW/m}^2
 \ee
-The results are shown in Fig.~\ref{ground_vegetation_radi_fig}. The Lagrangian particles that represent the vegetation only occupy a single layer of grid cells; thus, the radiation absorption calculation for particles is not expected to be accurate.
+The results are shown in Fig.~\ref{ground_vegetation_radi_fig}. The Lagrangian particles that represent the vegetation only occupy two layers of grid cells; thus, the radiation absorption calculation has some error. In the case of the Boundary Fuel Model the error originates from the use of the "two-flux" model for internal radiation in the fuel (see the FDS Technical Reference Guide~\cite{FDS_Math_Guide}).
 
 \begin{figure}[ht]
 \centering

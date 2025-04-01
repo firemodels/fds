@@ -23,13 +23,15 @@
       MATL_ID = 'Dry Grass'
       MASS_PER_VOLUME(1) = 8.
       COLOR = 'FOREST GREEN'
-      SURFACE_VOLUME_RATIO(1) = 3092. 
+      SURFACE_VOLUME_RATIO(1) = 3092.
+      EMISSIVITY = 1. 
       THICKNESS(1) = 0.05 /
 
 &SURF ID = 'Blade of Grass'
       MATL_ID = 'Dry Grass'
       SURFACE_VOLUME_RATIO = 3092.
       LENGTH = 0.02
+      EMISSIVITY = 1. 
       GEOMETRY = 'CYLINDRICAL' /
 
 &PART ID             = 'Blade of Grass'
