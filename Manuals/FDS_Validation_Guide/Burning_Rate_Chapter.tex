@@ -2,7 +2,7 @@
 
 \chapter{Burning Rate and Fire Spread}
 
-This chapter contains a series of validation exercises where the aim is to {\em predict} the burning and spread rate of the fire. Most of the simulations included in the previous chapters involved a {\em specified} burning or heat release rate. Here, the objective is to apply measured thermophysical properties of the material and predict its burning rate, either with a specified heat flux or as a free burn.
+This chapter contains a series of validation exercises where the aim is to {\em predict} the burning and spread rate of the fire. Most of the simulations included in the previous chapters involved a {\em specified} burning or heat release rate. Here, the objective is to apply measured thermo-physical properties of the material and predict its burning rate, either with a specified heat flux or as a free burn.
 
 \section{FAA Polymers}\label{sec_FAA_Polymers}
 
@@ -988,7 +988,7 @@ In Fig.~\ref{fig:Kashiwagi_Gasification_mass_flux}, mass loss rates for differen
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Kashiwagi_Gasification/Kashiwagi_MFLUX_25_1C} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Kashiwagi_Gasification/Kashiwagi_MFLUX_40_1C}
 \end{tabular*}
-\caption[Kashiwagi Gasification: weigth loss mass flux]{Kashiwagi gasification mass flux (left) 25 \si{kW/m^2} and (right) 40 \si{kW/m^2}.}
+\caption[Kashiwagi Gasification: weight loss mass flux]{Kashiwagi gasification mass flux (left) 25 \si{kW/m^2} and (right) 40 \si{kW/m^2}.}
 \label{fig:Kashiwagi_Gasification_mass_flux}
 \end{figure}
 
@@ -1025,7 +1025,7 @@ Figure~\ref{NIST_NRC_Transient_Combustibles_cribs} compares measured and predict
 
 \FloatBarrier
 
-Figure~\ref{NIST_NRC_Transient_Combustibles_boxes} compares measured and predicted heat release rates for a single cardbard box filled with shredded craft paper and arrays of multiple boxes. The simulations are all performed using Lagrangian particles as surrogates for the small paper strips. The grid resolution in all cases is 5~cm.
+Figure~\ref{NIST_NRC_Transient_Combustibles_boxes} compares measured and predicted heat release rates for a single cardboard box filled with shredded craft paper and arrays of multiple boxes. The simulations are all performed using Lagrangian particles as surrogates for the small paper strips. The grid resolution in all cases is 5~cm.
 
 \begin{figure}[!h]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -1392,11 +1392,11 @@ Figure~\ref{UMD_SBI_HRR} displays the measured and predicted HRR for upward spre
 
 \section{Scaling Pyrolysis (SPyro)}\label{sec_Scaling Pyrolysis}
 
-FDS has a scaling-based pyrolysis model (SPyro) which dynamically scales a reference heat release rate per unit area curve based on the energy absorbed on the surface. This section evaluates the performance of FDS in scaling the buring rate using this model. Each heat flux shown in the figures in this section is a validation heat transfer level (i.e., the reference heat flux is not shown). Validation statistics are calculated based on the peak HRRPUA.
+FDS has a scaling-based pyrolysis model (SPyro) which dynamically scales a reference heat release rate per unit area curve based on the energy absorbed on the surface. This section evaluates the performance of FDS in scaling the burning rate using this model. Each heat flux shown in the figures in this section is a validation heat transfer level (i.e., the reference heat flux is not shown). Validation statistics are calculated based on the peak HRRPUA.
 
 \subsection{Aalto Woods Experiments}\label{sec_Aalto_Woods_Materials}
 
-Table ~\ref{Properties_Aalto_Woods_All} lists the relevant parameters for modeling the cone calorimeter experiments for this study. Note that the published properties from the test report are simplified in this analysis. Each multi-phase properties is represented as single bulk value.In addition, the temperature-dependent thermal conductivity and specific capacity are fixed at an average value. The ignition temperatures were calculated based on times to ignition at the lower heat fluxes using the other properties. The results of the simulations are shown below.
+Table ~\ref{Properties_Aalto_Woods_All} lists the relevant parameters for modeling the cone calorimeter experiments for this study. Note that the published properties from the test report are simplified in this analysis. Each multiphase properties is represented as single bulk value.In addition, the temperature-dependent thermal conductivity and specific capacity are fixed at an average value. The ignition temperatures were calculated based on times to ignition at the lower heat fluxes using the other properties. The results of the simulations are shown below.
 
 \begin{table}[!h]
 \caption[Properties of Aalto Woods]{Properties of Aalto Woods~\cite{Rinta-Paavola:2023}.}
@@ -1430,7 +1430,7 @@ Spruce Flaming                                    & 20.0 & 408 & 0.06 & 0.91 & 0
 \subsection{FAA Polymers Experiments}\label{sec_FAA_Polymers_Materials}
 
 Table ~\ref{Properties_FAA_Polymers_All} lists the relevant parameters for modeling the cone calorimeter experiments for this study.
-Note that the published properties from the test report are simplified in this analysis. Each multi-phase properties is represented as single bulk value. In addition, the temperature-dependent thermal conductivity and specific capacity are fixed at an average value.
+Note that the published properties from the test report are simplified in this analysis. Each multiphase properties is represented as single bulk value. In addition, the temperature-dependent thermal conductivity and specific capacity are fixed at an average value.
 The ignition temperatures were calculated based on times to ignition at the lower heat fluxes using the other properties.
 The results of the simulations are shown on the following pages.
 
@@ -1551,7 +1551,7 @@ Waferboard                                        & 13.0 & 712 & 425 & 13.3 & 0.
 \subsection{FSRI/NIJ Experiments}\label{sec_FSRI_NIJ_Materials}
 
 Table ~\ref{Properties_FSRI_Materials_Others}, Table ~\ref{Properties_FSRI_Materials_Polymers}, and Table ~\ref{Properties_FSRI_Materials_Wood-Based} lists the relevant parameters for modeling the cone calorimeter experiments for this study.
-Note that the published properties from the test report are simplified in this analysis. Each multi-phase properties is represented as single bulk value.
+Note that the published properties from the test report are simplified in this analysis. Each multiphase properties is represented as single bulk value.
 In addition, the temperature-dependent thermal conductivity and specific capacity are fixed at an average value.
 The ignition temperatures were calculated based on times to ignition at the lower heat fluxes using the other properties.
 
@@ -1840,7 +1840,7 @@ Wood Stud                                         & 46.2 & 379  & 0.10 & 1.47 & 
 \subsection{JH Experiments}\label{sec_JH_Materials}
 
 Table ~\ref{Properties_JH_Materials_All} lists the relevant parameters for modeling the cone calorimeter experiments for this study.
-Note that the published properties from the test report are simplified in this analysis. Each multi-phase properties is represented as single bulk value.
+Note that the published properties from the test report are simplified in this analysis. Each multiphase properties is represented as single bulk value.
 In addition, the temperature-dependent thermal conductivity and specific capacity are fixed at an average value.
 The ignition temperatures were calculated based on times to ignition at the lower heat fluxes using the other properties.
 The results of the simulations are shown on the following pages.

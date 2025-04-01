@@ -291,6 +291,7 @@ LOGICAL :: WROTE_PART=.FALSE.                       !< Flag indicating if a PART
 LOGICAL :: FLUX_LIMITER_MW_CORRECTION=.FALSE.       !< Flag for MW correction ensure consistent equation of state at face
 LOGICAL :: STORE_FIRE_ARRIVAL=.FALSE.               !< Flag for tracking arrival of spreading fire front over a surface
 LOGICAL :: STORE_FIRE_RESIDENCE=.FALSE.             !< Flag for tracking residence time of spreading fire front over a surface
+LOGICAL :: STORE_LS_SPREAD_RATE=.FALSE.             !< Flag for outputting local level set spread rate magnitude
 LOGICAL :: TEST_NEW_CHAR_MODEL=.FALSE.              !< Flag to envoke new char model
 
 INTEGER, ALLOCATABLE, DIMENSION(:) :: CHANGE_TIME_STEP_INDEX      !< Flag to indicate if a mesh needs to change time step
@@ -365,8 +366,8 @@ REAL(EB) :: GRAV=9.80665_EB                    !< Acceleration of gravity (m/s2)
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: H_V_H2O !< Heat of vaporization for water (J/kg)
 REAL(EB) :: CHI_R_MIN=0._EB                    !< Lower bound for radiative fraction
 REAL(EB) :: CHI_R_MAX=1._EB                    !< Upper bound for radiative fraction
-REAL(EB) :: SPHERE_FILM_FAC=ONTH               !< Factor used in droplet evaporation algorithm for droplets
-REAL(EB) :: PLATE_FILM_FAC=ONTH                !< Factor used in droplet evaporation algorithm for walls
+REAL(EB) :: SPHERE_FILM_FACTOR=ONTH            !< Weighting factor used in droplet evaporation algorithm for droplets
+REAL(EB) :: PLATE_FILM_FACTOR=ONTH             !< Weighting factor used in droplet evaporation algorithm for walls
 REAL(EB) :: ORIGIN_LAT=-1.E6_EB                !< Latitude of terrain map
 REAL(EB) :: ORIGIN_LON=-1.E6_EB                !< Longitude of terrain map
 REAL(EB) :: NORTH_BEARING=0._EB                !< North bearing for terrain map
@@ -418,6 +419,7 @@ REAL(EB) :: MPI_TIMEOUT=600._EB                             !< Time to wait for 
 REAL(EB) :: DT_END_MINIMUM=TWO_EPSILON_EB                   !< Smallest possible final time step (s)
 REAL(EB) :: DT_END_FILL=1.E-6_EB
 INTEGER  :: DIAGNOSTICS_INTERVAL                            !< Number of time steps between diagnostic outputs
+REAL(EB) :: UNFREEZE_TIME                                   !< Time to unfreeze a simulation
 
 ! Combustion parameters
 
@@ -444,6 +446,7 @@ REAL(EB) :: FREE_BURN_TEMPERATURE=600._EB                           !< Temperatu
 REAL(EB) :: FINITE_RATE_MIN_TEMP=-273.15                            !< When FR is present, min temp. to compute combustion (C->K)
 REAL(FB) :: HRRPUV_MAX_SMV=1200._FB                                 !< Clipping value used by Smokeview (kW/m3)
 REAL(FB) :: TEMP_MAX_SMV=2000._FB                                   !< Clipping value used by Smokeview (C)
+REAL(FB) :: TEMP_MIN_SMV=20._FB                                     !< Clipping value used by Smokeview (C)
 
 INTEGER :: N_SPECIES=0                                              !< Number of total gas phase primitive species
 INTEGER :: N_REACTIONS                                              !< Number of gas phase reactions
@@ -806,7 +809,7 @@ REAL(EB), ALLOCATABLE, DIMENSION(:) :: EXTERNAL_RAMP
 LOGICAL, ALLOCATABLE, DIMENSION(:) :: EXTERNAL_CTRL
 
 ! VENT array
-REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: VENT_TOTAL_AREA
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: VENT_TOTAL_AREA  !< Array holding grid-snapped areas for all vents
 
 END MODULE GLOBAL_CONSTANTS
 

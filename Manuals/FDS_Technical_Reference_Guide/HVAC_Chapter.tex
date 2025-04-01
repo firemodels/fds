@@ -8,7 +8,7 @@ HVAC systems are found throughout the built environment.  During a fire, HVAC du
 
 While simple defined velocity, mass flux, or pressure boundary conditions can represent inflow and outflow due to HVAC system, they cannot fully model an HVAC system. There is no coupling of the mass, momentum, and energy solutions amongst the multiple inlets and outlets comprising the HVAC network. To address this limitation, an HVAC network solver has been added to FDS.
 
-The reader may find it useful to read a literature review on coupled hybrid modelling in fire applications~\cite{Ralph:1} and review similar work in coupling CFD to a 1-D nodal model for analysis of ventilation in tunnel fires \cite{Colella:2010, Colella:2011}.
+The reader may find it useful to read a literature review on coupled hybrid modeling in fire applications~\cite{Ralph:1} and review similar work in coupling CFD to a 1-D nodal model for analysis of ventilation in tunnel fires \cite{Colella:2010, Colella:2011}.
 
 \section{Governing Equations}
 
@@ -43,7 +43,7 @@ Note that the node pressures are not expressed as $P^n_i$, but rather as $\tilde
 rather than the actual pressure at the end of the time step.  The pressure in a compartment is a function of the mass and energy flowing in and out.
 If that compartment is connected to other compartments by doors or other openings, then the pressure is also dependent upon flows into and out those other compartments.
 Those mass and energy flows include both those being predicted by the HVAC model and those being predicted by the CFD model.
-For example, in Fig.~\ref{hvacpressure}, the un-shaded compartments have pressure solutions that are dependent upon the flows predicted by both the
+For example, in Fig.~\ref{hvacpressure}, the unshaded compartments have pressure solutions that are dependent upon the flows predicted by both the
 HVAC model and the CFD model and all of those compartments need to be included in the extrapolated pressure for those compartments.
 Since the two models are not fully coupled, the extrapolated pressure is an estimate of the pressure at the end of the time step based upon the pressure rise for the prior time step.
 
@@ -126,7 +126,7 @@ With rare exceptions, walls, floors, and ceilings are not air tight.  Gaps aroun
 
 In the first approach one or more surfaces in the domain are defined as being part of a leakage path between two pressure zones. An HVAC duct is created whose area is the leakage area and whose nodes are all wall cells belong to the surfaces that make up the leakage path. In this approach only the background pressure, $\bp_m$ , in each zone is used. of the duct is total leakage area and the terminal nodes of the duct can be considered the entire area of the surfaces defined as participating in that flow path. Since only the background pressure is used, this approach can only be used for leakage between pressure zones. 
 
-The second approach, a specific area is identified as the inlet and outlet for the leakage path. This approach is useful to represent small openings in known locations that are subgrid such as a the undercut beneath a typical interior door. Similar to the first approach an HVAC dut is created whose area is the leakage area and whose nodes are the wall cells belonging to the identified inlet and outlet regions. This approach uses the total pressure; therefore, it can be applied in cases where the inlet and outlet are in the same pressure zone. 
+The second approach, a specific area is identified as the inlet and outlet for the leakage path. This approach is useful to represent small openings in known locations that are subgrid such as a the undercut beneath a typical interior door. Similar to the first approach an HVAC duct is created whose area is the leakage area and whose nodes are the wall cells belonging to the identified inlet and outlet regions. This approach uses the total pressure; therefore, it can be applied in cases where the inlet and outlet are in the same pressure zone. 
 
 For more details see the FDS User's Guide~\cite{FDS_Users_Guide}.
 
@@ -205,4 +205,4 @@ In its default mode of operation, the HVAC solver does not account for mass stor
 \be (\rho \, Y_{\alpha})_c^{n+1}=  \rho_j \, u_j^n - \frac{\Delta t}{\Delta x} \, (\rho \, u)_j^n left(Y_{\alpha ,c}^n - Y_{\alpha ,c-1}^n ) \ee  
 \be (\rho \, h)_c^{n+1}=  \rho_j \, u_j^n - \frac{\Delta t}{\Delta x} \, (\rho \, u)_j^n left(h_c^n - h_{c-1}^n ) \ee  
 
-Updating duct conditions begins at the upwind duct node and marches over the duct length to the downwind duct node. Cell temperatures are extracted from the cell enthalpy $h_c$. This solution is done over groups of ducts that form a duct network basis. A duct network is a set of ducts and nodes that are interconnected via a flow path through HVAC components. The time step $\Delta t$ is taken as the minimum of the current simulation time step and the minimum value of $\frac{\Delta x_j}{2 u_j}$ over all ducts in the netwok. In the summation terms in Eq.~(\ref{HVACmass}) and Eq.~(\ref{HVACenergy}), the mass flow and enthalpy flow into a node from a discretized duct are obtained by integrating those flows using the values in the last cell over each time step taken.
+Updating duct conditions begins at the upwind duct node and marches over the duct length to the downwind duct node. Cell temperatures are extracted from the cell enthalpy $h_c$. This solution is done over groups of ducts that form a duct network basis. A duct network is a set of ducts and nodes that are interconnected via a flow path through HVAC components. The time step $\Delta t$ is taken as the minimum of the current simulation time step and the minimum value of $\frac{\Delta x_j}{2 u_j}$ over all ducts in the network. In the summation terms in Eq.~(\ref{HVACmass}) and Eq.~(\ref{HVACenergy}), the mass flow and enthalpy flow into a node from a discretized duct are obtained by integrating those flows using the values in the last cell over each time step taken.

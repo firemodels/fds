@@ -47,7 +47,7 @@ For thin disk shaped particles, the following correlation was derived from data 
 \be
     C_{\d} = \frac{20.37}{\RE_D}+\frac{1.17}{1+1/\RE_D},
 \ee
-where the particle diameter, $D$, for square cartesian particles is taken as the hydraulic diameter, $A_{\rm p,c}^{1/2}$.
+where the particle diameter, $D$, for square Cartesian particles is taken as the hydraulic diameter, $A_{\rm p,c}^{1/2}$.
 
 Additional corrections are made to account for drag reduction due to the wake effect~\cite{Ramirez:1} and deformation of the droplet~\cite{Loth:1}.
 
@@ -79,7 +79,7 @@ Here, $W$ is the relative area of ``white'' of the shadowgraph formed by sunligh
 \subsection{Drag Reduction}
 \label{sec:threeway}
 
-Typically, Lagrangian particle models assume that the particles are independent of each other. If the spray is dense enough, however, the individual particles influence each other through aerodynamic interactions. These effects cannot be captured by the current Eulerian-Lagrangian model for two reasons. First, the Lagrangian particles occupy no volume in the Eulerian space. Second, the separation lengths would be of sub-grid scale in most practical simulations. The aerodynamic interactions start to have an effect when the average particle spacing is less than 10~diameters~\cite{Prahl:1,Prahl:2}. This corresponds to a particle volume fraction, $\alpha$, of approximately 0.01. Volume fractions as high as this can sometimes be achieved inside water mist sprays. If the spray is even more dense, particle-particle collisions or four-way coupling would need to be considered.
+Typically, Lagrangian particle models assume that the particles are independent of each other. If the spray is dense enough, however, the individual particles influence each other through aerodynamic interactions. These effects cannot be captured by the current Eulerian-Lagrangian model for two reasons. First, the Lagrangian particles occupy no volume in the Eulerian space. Second, the separation lengths would be of subgrid scale in most practical simulations. The aerodynamic interactions start to have an effect when the average particle spacing is less than 10~diameters~\cite{Prahl:1,Prahl:2}. This corresponds to a particle volume fraction, $\alpha$, of approximately 0.01. Volume fractions as high as this can sometimes be achieved inside water mist sprays. If the spray is even more dense, particle-particle collisions or four-way coupling would need to be considered.
 
 In a configuration where two particles with the same diameter are directly in line, the reduction of the drag force on the second particle is assumed to be:~\cite{Ramirez:1}:
 \be
@@ -97,7 +97,7 @@ The average separation distance between particle centers, $L/D$, is calculated f
 \be
   L/D = \left(\pi/6\alpha \right)^{\frac{1}{3}}
 \ee
-This simple approximation assumes that particles are uniformly distributed in each computational cell~\cite{Bhattacharyya2008}. In reality, the spray is not monodisperse and the separation distance between the interacting particles varies. In the simulation, the drag reduction factor in Eq.~\ref{eq:dragred} is only used when the local droplet volume fraction exceeds \num{1e-5}.
+This simple approximation assumes that particles are uniformly distributed in each computational cell~\cite{Bhattacharyya2008}. In reality, the spray is not mono-disperse and the separation distance between the interacting particles varies. In the simulation, the drag reduction factor in Eq.~\ref{eq:dragred} is only used when the local droplet volume fraction exceeds \num{1e-5}.
 
 An alternative approach to drag reduction was provided by Prahl et al.~\cite{Prahl:1} who studied the interaction between two solid spheres in steady or pulsating flow by detailed numerical simulations. According to their study, the above equation underestimates the drag reduction significantly at small drop-to-drop distances. The inflow pulsations were found to reduce the effect of the drag reduction. At large distances, the two results are similar, the Ram\'{\i}rez-Mu\~{n}oz correlation showing more drag reduction. This is not surprising since the velocity profile of a fully developed axi-symmetric wake behind an axi-symmetric body is used in developing the drag reduction correction in Eqs.~\ref{eq:dragredfact} and \ref{eq:Wake-Vel}. At short distances, the wake is not fully developed and the assumption does not hold.
 
@@ -306,7 +306,7 @@ Note that $a$ is an empirical constant that is dependent on the material propert
 \section{Using Lagrangian Particles to Model Complex Objects}
 \label{rad_part_absorb}
 
-There are many real objects that participate in a fire that cannot be modeled easily as solid obstructions that conform to the rectilinear mesh. For example, electrical cables, dry brush, tree branches, and so on, are potential fuels that cannot be well-represented as solid cubes, not only because the geometry is wrong, but also because the solid restricts the movement of hot gases through the complex collection of objects.  Additionally objects such as window screens also impose flow restrictions but are typically not resolvable in an engineering calculation. As a potential remedy for the problem, these objects can be modeled as discrete particles that are either spheres, cylinders or small sheets. Each particle can be assigned a surface type in much the same way as is done for solid obstructions that conform to the numerical grid. The particle is assumed to be thermally-thick, but for simplicity the heat conduction within the particle is assumed to be one-dimensional in either a cylindrical, spherical or cartesian coordinate system.
+There are many real objects that participate in a fire that cannot be modeled easily as solid obstructions that conform to the rectilinear mesh. For example, electrical cables, dry brush, tree branches, and so on, are potential fuels that cannot be well-represented as solid cubes, not only because the geometry is wrong, but also because the solid restricts the movement of hot gases through the complex collection of objects.  Additionally objects such as window screens also impose flow restrictions but are typically not resolvable in an engineering calculation. As a potential remedy for the problem, these objects can be modeled as discrete particles that are either spheres, cylinders or small sheets. Each particle can be assigned a surface type in much the same way as is done for solid obstructions that conform to the numerical grid. The particle is assumed to be thermally-thick, but for simplicity the heat conduction within the particle is assumed to be one-dimensional in either a cylindrical, spherical or Cartesian coordinate system.
 
 Particles interact with the radiation field through an additional sink term in the radiative transfer equation. For a grid cell with indices $ijk$, the integrated radiant intensity is reduced at rate
 \be \label{eq:qr}
