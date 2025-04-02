@@ -988,20 +988,22 @@ END SUBROUTINE COMBUSTION_MODEL
 #ifdef WITH_SUNDIALS
 SUBROUTINE CVODE(ZZ, TMP_IN, PRES_IN,  ZETA_IN, ZETA_OUT, TAU_MIX, CELL_MASS, T_CFD, DT, GLOBAL_ODE_REL_ERROR, ATOL)
 USE PHYSICAL_FUNCTIONS, ONLY :  GET_MOLECULAR_WEIGHT
-USE CHEMCONS, ONLY: WRITE_CVODE_SUBSTEPS,MIN_CHEM_TIME
+USE CHEMCONS, ONLY: WRITE_CVODE_SUBSTEPS, MAX_CHEM_TIME
 
 REAL(EB), INTENT(INOUT) :: ZZ(N_TRACKED_SPECIES)
 REAL(EB), INTENT(IN) :: ATOL(N_TRACKED_SPECIES)
 REAL(EB), INTENT(IN) :: TMP_IN,PRES_IN,ZETA_IN,TAU_MIX,CELL_MASS,T_CFD,DT,GLOBAL_ODE_REL_ERROR
 REAL(EB), INTENT(OUT) ::ZETA_OUT
 
-REAL(EB) :: CC(N_TRACKED_SPECIES)
-REAL(EB) :: MW, RHO_IN, RHO_OUT, T1, T2, ZETA0, CHEM_TIME
+REAL(EB) :: CC(N_TRACKED_SPECIES), CC_CHEM_TIME(N_TRACKED_SPECIES)
+REAL(EB) :: MW, RHO_IN, RHO_OUT, T1, T2, ZETA0, TMP_IN_MOD, TMP_OUT, CHEM_TIME, DT_MOD
 INTEGER :: NS, CVODE_CALL_OPTION
 LOGICAL :: WRITE_SUBSTEPS
 
 CVODE_CALL_OPTION = 1 ! CV_NORMAL
 WRITE_SUBSTEPS = .FALSE.
+DT_MOD = DT
+TMP_IN_MOD = TMP_IN
 CC = 0._EB
 
 ! Get the initial mass and concentration of mixed zone
@@ -1014,17 +1016,35 @@ WHERE(CC<0._EB) CC=0._EB
 
 ! Get the initial mass and concentration of mixed zone
 IF(ZETA_IN > ONE_M_EPS) THEN
-   ! With ZETA_IN =1 the CVODE ODE become too stiff to solve. Hence, performing negligible
-   ! artifical mixing based on a chemical time scale.
+   !With ZETA_IN =1 the CVODE ODE become too stiff to solve. Hence, performing negligible
+   !artifical mixing based on a chemical time scale.
+   !1. First find a reasonable chemical time scale.
+   !2. Do cemistry on the chemical time scale
+   !3. Set the final zeta0 based on the chemical time
    T1 = 0._EB
    T2 = DT
    ZETA0 = 0._EB ! Assume completely mixed.
    CVODE_CALL_OPTION = 2 ! CV_ONE_STEP
    CUR_CFD_TIME = T_CFD ! Set current cfd time in cvode, for logging purpose.
-   CALL  CVODE_SERIAL(CC,ZZ, TMP_IN, PRES_IN, ZETA0, TAU_MIX, CELL_MASS, T1,T2, GLOBAL_ODE_REL_ERROR, ATOL, &
-                      CHEM_TIME, WRITE_SUBSTEPS, CVODE_CALL_OPTION)
-   CHEM_TIME = MAX(CHEM_TIME,MIN_CHEM_TIME)
+   CC_CHEM_TIME(1:N_TRACKED_SPECIES)=CC(1:N_TRACKED_SPECIES)
+   CALL CVODE_SERIAL(CC_CHEM_TIME,ZZ, TMP_IN, PRES_IN, ZETA0, TAU_MIX, CELL_MASS, T1,T2,  &
+                      GLOBAL_ODE_REL_ERROR, ATOL, TMP_OUT, CHEM_TIME, WRITE_SUBSTEPS, CVODE_CALL_OPTION) ! Find the chem time scale
+   IF (CHEM_TIME > MAX_CHEM_TIME) THEN ! Limit artifical mixing.
+      T1 = 0._EB
+      T2 = MAX_CHEM_TIME
+      ZETA0 = 0._EB ! Assume completely mixed.
+      CVODE_CALL_OPTION = 1 ! CV_NORMAL
+      CUR_CFD_TIME = T_CFD ! Set current cfd time in cvode, for logging purpose.
+      CALL CVODE_SERIAL(CC,ZZ, TMP_IN, PRES_IN, ZETA0, TAU_MIX, CELL_MASS, T1,T2,  &
+                         GLOBAL_ODE_REL_ERROR, ATOL, TMP_OUT, CHEM_TIME, WRITE_SUBSTEPS, CVODE_CALL_OPTION)
+      CHEM_TIME = MAX_CHEM_TIME
+   ELSE
+      CC(1:N_TRACKED_SPECIES)=CC_CHEM_TIME(1:N_TRACKED_SPECIES)
+   ENDIF
+   TMP_IN_MOD = TMP_OUT
    ZETA0 = ZETA_IN*EXP(-CHEM_TIME/TAU_MIX)
+   !WRITE(LU_ERR,*)"T_CFD,TMP_IN, TMP_OUT=",T_CFD,TMP_IN, TMP_OUT
+   DT_MOD = DT_MOD - CHEM_TIME
 ELSE
    ZETA0 = ZETA_IN
 ENDIF
@@ -1037,10 +1057,10 @@ ENDIF
 
 ! Call CVODE to solve chemistry + Mixing
 T1 = 0._EB
-T2 = DT
+T2 = DT_MOD
 CUR_CFD_TIME = T_CFD ! Set current cfd time in cvode, for logging purpose.
-CALL  CVODE_SERIAL(CC,ZZ, TMP_IN, PRES_IN, ZETA0, TAU_MIX, CELL_MASS, T1,T2, GLOBAL_ODE_REL_ERROR, ATOL, &
-                   CHEM_TIME, WRITE_SUBSTEPS, CVODE_CALL_OPTION)
+CALL  CVODE_SERIAL(CC,ZZ, TMP_IN_MOD, PRES_IN, ZETA0, TAU_MIX, CELL_MASS, T1,T2, GLOBAL_ODE_REL_ERROR, ATOL, &
+                   TMP_OUT, CHEM_TIME, WRITE_SUBSTEPS, CVODE_CALL_OPTION)
 
 ! Convert back to mass fraction (Check for negative concentration)
 WHERE(CC<0._EB) CC=0._EB

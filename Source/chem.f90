@@ -757,10 +757,14 @@ END FUNCTION DDTMP_TROE
 !> \param TEND is the end time in seconds
 !> \param RTOL is the relative error for all the species (REAL_EB)
 !> \param ATOL is the absolute error tolerance array for the species (REAL_EB)
+!> \param TMP_OUT reactor calculated temperature at the end
+!> \param CHEM_TIME Chemical time scale
+!> \param WRITE_SUBSTEPS Whether to write cvode substeps. Only write for first cfd step.
+!> \param CVODE_CALL_OPTION 1:CV_NORMAL, 2=CV_ONE_STEP
 !> \details This is the interface subroutine to the other modules.
 
 SUBROUTINE CVODE_SERIAL(CC,ZZ_0, TMP_IN, PR_IN, ZETA0, TAU_MIX, CELL_MASS, TCUR,TEND, RTOL, ATOL, &
-                        CHEM_TIME, WRITE_SUBSTEPS, CVODE_CALL_OPTION)
+                        TMP_OUT, CHEM_TIME, WRITE_SUBSTEPS, CVODE_CALL_OPTION)
 USE PHYSICAL_FUNCTIONS, ONLY : MOLAR_CONC_TO_MASS_FRAC, CALC_EQUIV_RATIO, GET_ENTHALPY, GET_MOLECULAR_WEIGHT
 USE COMP_FUNCTIONS, ONLY: GET_FILE_NUMBER
 USE GLOBAL_CONSTANTS
@@ -777,7 +781,7 @@ REAL(EB), INTENT(INOUT) :: CC(N_TRACKED_SPECIES)
 REAL(EB), INTENT(IN)    :: ZZ_0(N_TRACKED_SPECIES),TMP_IN,PR_IN,ZETA0,TAU_MIX,CELL_MASS,TCUR,TEND
 REAL(EB), INTENT(IN)    :: ATOL(N_TRACKED_SPECIES)
 REAL(EB), INTENT(IN)    :: RTOL
-REAL(EB), INTENT(OUT)   :: CHEM_TIME
+REAL(EB), INTENT(OUT)   :: TMP_OUT,CHEM_TIME
 INTEGER, INTENT(IN) :: CVODE_CALL_OPTION
 LOGICAL, INTENT(IN) :: WRITE_SUBSTEPS
 
@@ -916,7 +920,7 @@ ELSE IF(CVODE_TASK == CV_ONE_STEP) THEN
    ONLY_FIRST_STEP = .TRUE.
    IF (WRITE_SUBSTEPS) THEN ! This WRITE_SUBSTEPS is only true for few verification cases.
       ONLY_FIRST_STEP = .FALSE.
-      ALLOCATE(CVODE_SUBSTEP_DATA(MAX_CVODE_SUBSTEPS, N_TRACKED_SPECIES+4))
+      ALLOCATE(CVODE_SUBSTEP_DATA((CVODE_MAX_TRY+1)*MAX_CVODE_SUBSTEPS, N_TRACKED_SPECIES+4))
    ENDIF
    
    SUBSTEP_COUNT = 0
@@ -945,7 +949,7 @@ ELSE IF(CVODE_TASK == CV_ONE_STEP) THEN
 ENDIF
 
 IF (IERR_C /= 0) THEN
-   MAXTRY = 2
+   MAXTRY = CVODE_MAX_TRY
    ! If all internal substeps are taken try two more times. This will allow larger CFD timestep.
    IF (IERR_C == CV_TOO_MUCH_WORK) THEN !CV_TOO_MUCH_WORK == all internal substeps are taken
       NTRY = 0
@@ -982,6 +986,7 @@ IF (IERR_C /= 0) THEN
 ENDIF
 
 CC = CVEC_C(1:N_TRACKED_SPECIES) !DISCARD THE TEMPERATURE.
+TMP_OUT = CVEC_C(N_TRACKED_SPECIES+1)
 IERR_C = FCVODEGETLASTSTEP(CVODE_MEM, CHEM_TIME_C(1))
 CHEM_TIME=CHEM_TIME_C(1)
 
