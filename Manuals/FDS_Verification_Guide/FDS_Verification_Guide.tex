@@ -3973,6 +3973,49 @@ Six additional constant volume ignition delay cases are configured using the fol
 \end{figure}
 
 
+\section{Mixing with detailed chemistry (\ct{edc\_mixing\_cvode})}
+\label{edc_mixing_cvode}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_Zeta1p0_TMP} &
+\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_Zeta1p0_OH} \\
+\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_Zeta0p75_TMP} &
+\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_Zeta0p75_OH} \\
+\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_Zeta0p5_TMP} &
+\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_Zeta0p5_OH} \\
+\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_Zeta0p25_TMP} &
+\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_Zeta0p25_OH} \\
+\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_Zeta0p0_TMP} &
+\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_Zeta0p0_OH} 
+\end{tabular*}
+\caption[Results of the \ct{edc\_mixing\_cvode} test cases]{Comparison of CVODE substeps for a single CFD step of 0.1 s, showing the effect of varying the initial unmixed fraction between FDS and Cantera. The simulation uses the Methane GRI mechanism with an equivalence ratio of 0.6, a mixing time of 0.01 s, and an initial temperature of 1200 K.}
+\label{fig:edc_mixing_cvode_onecfdstep_vary_zeta0}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{lcr}
+\includegraphics[height=1.6in,width=0.32\textwidth]{SCRIPT_FIGURES/EDC_MultiCFDStep_Methane_grimech30_Zeta1p0_TMP} &
+\includegraphics[height=1.6in,width=0.32\textwidth]{SCRIPT_FIGURES/EDC_MultiCFDStep_Methane_grimech30_Zeta1p0_OH} &
+\includegraphics[height=1.6in,width=0.32\textwidth]{SCRIPT_FIGURES/EDC_MultiCFDStep_Methane_grimech30_Zeta1p0_elements} \\
+\includegraphics[height=1.6in,width=0.32\textwidth]{SCRIPT_FIGURES/EDC_MultiCFDStep_Methane_grimech30_Zeta0p75_TMP} &
+\includegraphics[height=1.6in,width=0.32\textwidth]{SCRIPT_FIGURES/EDC_MultiCFDStep_Methane_grimech30_Zeta0p75_OH} &
+\includegraphics[height=1.6in,width=0.32\textwidth]{SCRIPT_FIGURES/EDC_MultiCFDStep_Methane_grimech30_Zeta0p75_elements} \\
+\includegraphics[height=1.6in,width=0.32\textwidth]{SCRIPT_FIGURES/EDC_MultiCFDStep_Methane_grimech30_Zeta0p5_TMP} &
+\includegraphics[height=1.6in,width=0.32\textwidth]{SCRIPT_FIGURES/EDC_MultiCFDStep_Methane_grimech30_Zeta0p5_OH} &
+\includegraphics[height=1.6in,width=0.32\textwidth]{SCRIPT_FIGURES/EDC_MultiCFDStep_Methane_grimech30_Zeta0p5_elements} \\
+\includegraphics[height=1.6in,width=0.32\textwidth]{SCRIPT_FIGURES/EDC_MultiCFDStep_Methane_grimech30_Zeta0p25_TMP} &
+\includegraphics[height=1.6in,width=0.32\textwidth]{SCRIPT_FIGURES/EDC_MultiCFDStep_Methane_grimech30_Zeta0p25_OH} &
+\includegraphics[height=1.6in,width=0.32\textwidth]{SCRIPT_FIGURES/EDC_MultiCFDStep_Methane_grimech30_Zeta0p25_elements} \\
+\includegraphics[height=1.6in,width=0.32\textwidth]{SCRIPT_FIGURES/EDC_MultiCFDStep_Methane_grimech30_Zeta0p0_TMP} &
+\includegraphics[height=1.6in,width=0.32\textwidth]{SCRIPT_FIGURES/EDC_MultiCFDStep_Methane_grimech30_Zeta0p0_OH} &
+\includegraphics[height=1.6in,width=0.32\textwidth]{SCRIPT_FIGURES/EDC_MultiCFDStep_Methane_grimech30_Zeta0p0_elements} \\
+\end{tabular*}
+\caption[Results of the \ct{edc\_mixing\_cvode} test cases]{Comparison of mixing with detailed chemistry over several CFD steps, showing the effect of varying the initial unmixed fraction between FDS and Cantera. The simulation uses the Methane GRI mechanism with an equivalence ratio of 0.6, a mixing time of 0.01 s, and an initial temperature of 900 K.}
+\label{fig:edc_mixing_cvode_onecfdstep_vary_zeta0}
+\end{figure}
+
+
 \section{Combustion Load Balancing (\ct{comb\_load\_bal})}
 \label{comb_load_bal}
 
@@ -4000,6 +4043,17 @@ Overall, combustion load balancing provides significant speedup for detailed che
 \caption[Results of the \ct{comb\_load\_balance} test cases]{Combustion load balance case using Methane\_Smooke detailed chemical mechanism.}
 \label{fig:comb_load_bal_methane_smooke}
 \end{figure}
+
+% \begin{figure}[p]
+% \begin{tabular*}{\textwidth}{lr}
+% \includegraphics[height=2.15in]{SCRIPT_FIGURES/edc_load_bal_Methane_Smooke_CHEM} &
+% \includegraphics[height=2.15in]{SCRIPT_FIGURES/edc_load_bal_Methane_Smooke_COMM} \\
+% \includegraphics[height=2.15in]{SCRIPT_FIGURES/edc_load_bal_Methane_Smooke_TOT} &
+% \includegraphics[height=2.15in]{SCRIPT_FIGURES/edc_load_bal_Methane_Smooke_DEVC}
+% \end{tabular*}
+% \caption[Results of the \ct{comb\_load\_balance} test cases]{Combustion load balance case for mixing with detailed chemistry using Methane\_Smooke detailed chemical mechanism.}
+% \label{fig:comb_load_bal_EDC_methane_smooke}
+% \end{figure}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{lr}
