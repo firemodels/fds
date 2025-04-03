@@ -72,13 +72,13 @@ elif len(sys.argv) >= 6:
     print("Exiting the program...")
     sys.exit(0)
 
-if check_file(wdir+'\\fds_wake.txt') == True: os.remove(wdir+'\\fds_wake.txt')
-file_path1=wdir+'\\'+inp+'.csv'
+if check_file(wdir+'/fds_wake.txt') == True: os.remove(wdir+'/fds_wake.txt')
+file_path1=wdir+'/'+inp+'.csv'
 input_values= read_files(file_path1, None)
-file_path=wdir+"\\"+chid+"_DEVC.csv"
+file_path=wdir+"/"+chid+"_devc.csv"
    
 # Run FDS in the background
-subprocess.Popen(['mpiexec', '-n', '1', '..\\..\\Build\\impi_intel_linux_openmp\\fds_impi_intel_linux_openmp.exe', chid+'.fds'])
+subprocess.Popen(['mpiexec', '-n', '1', '../../Build/impi_intel_linux_openmp/fds_impi_intel_linux_openmp', chid+'.fds'])
 
 start=0
 dt_devc=2
@@ -92,7 +92,7 @@ devc=pd.DataFrame({"Firesize": ['FTC_1','FTC_2','FTC_3','FTC_4'],
 curves=read_files('ext_heartbeat_std_curve.csv', 0)
 
 if restart == 'true':
-    stored_values=read_files(wdir+"\\stored_values_"+chid+".csv", 0)
+    stored_values=read_files(wdir+"/stored_values_"+chid+".csv", 0)
     last_time=stored_values['Time'][len(stored_values['Time'])-1]
     nexttime=last_time+dt_devc
     time_interpolated = np.arange(0, t_end+dt_devc, dt_devc)  # Generate time values at dt_devc-second intervals
@@ -172,12 +172,12 @@ while nexttime <= t_end+dt_devc:
                     print("Updated "+input_values.at[j,1]+" values to "+str(input_values.at[j,2])+" !")
                     j=j+1
                 input_values.to_csv(file_path1, index=False,header=None)
-                f = open(wdir+"\\fds_wake.txt", "w")
+                f = open(wdir+"/fds_wake.txt", "w")
                 f.close()
                 stored_values.at[i,'Time']=nexttime
                 stored_values.at[i,'std_Curve']=interpolated_temperature
-                if check_file(wdir+"\\stored_values_"+chid+".csv"):os.remove(wdir+"\\stored_values_"+chid+".csv")
-                stored_values.to_csv(wdir+"\\stored_values_"+chid+".csv",index=None)
+                if check_file(wdir+"/stored_values_"+chid+".csv"):os.remove(wdir+"/stored_values_"+chid+".csv")
+                stored_values.to_csv(wdir+"/stored_values_"+chid+".csv",index=None)
                 i=i+1
                 nexttime=nexttime+dt_devc
                 if nexttime >= t_end:
