@@ -3853,7 +3853,7 @@ ENDIF
 ! delta the thickness, and h the heat transfer coefficient, all evaluated at ambient conditions. A coefficient of 0.1 is applied
 ! to ensure adequate temporal resolution during the initial phase of the integration.
 
-ITMP = TMPA
+ITMP = INT(TMPA)
 ONE_D%RHO_C_S(1) = 0._EB
 MATERIAL_LOOP: DO N=1,ONE_D%N_MATL
    IF (ONE_D%MATL_COMP(N)%RHO(1)<=TWO_EPSILON_EB) CYCLE MATERIAL_LOOP
