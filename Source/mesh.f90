@@ -486,7 +486,7 @@ SUBROUTINE POINT_TO_MESH(NM)
 ! Local names for MESH variables point to Global names
 
 INTEGER, INTENT(IN) ::  NM
-TYPE (MESH_TYPE), POINTER :: M=>NULL()
+TYPE (MESH_TYPE), POINTER :: M
 
 M=>MESHES(NM)
 U=>M%U
