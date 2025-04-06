@@ -333,7 +333,7 @@ REAL(EB), INTENT(IN) :: T,DT
 INTEGER :: IIG,IW,JJG,IC,OUTPUT_INDEX
 INTEGER :: KDUM,KWIND,ICF,IKT
 REAL(EB) :: UMF_TMP,PHX,PHY,MAG_PHI,PHI_W_X,PHI_W_Y,UMF_X,UMF_Y,UMAG,ROS_MAG,UMF_MAG,ROTH_FACTOR,&
-            SIN_THETA,COS_THETA,THETA
+            SIN_THETA,COS_THETA,THETA,ZWIND(2),U_Z(2),V_Z(2)
 
 T_NOW = CURRENT_TIME()
 
@@ -395,16 +395,34 @@ DO JJG=1,JBAR
 
          IF (LEVEL_SET_COUPLED_WIND) THEN
 
-            KWIND = 0
-            DO KDUM = K_LS(IIG,JJG),KBAR
-               IF (ZC(KDUM)-ZC(K_LS(IIG,JJG))>=6.1_EB) THEN
-                  KWIND = KDUM
-                  EXIT
-               ENDIF
-            ENDDO
+            ! Check if sample height is in the mesh
+            IF (ZC(KBAR)<6.1_EB) THEN
+               U_LS(IIG,JJG) = 0.5_EB*(U(IIG-1,JJG,KBAR)+U(IIG,JJG,KBAR))
+               V_LS(IIG,JJG) = 0.5_EB*(V(IIG,JJG-1,KBAR)+V(IIG,JJG,KBAR))
+            ELSE
 
-            U_LS(IIG,JJG) = 0.5_EB*(U(IIG-1,JJG,KWIND)+U(IIG,JJG,KWIND))
-            V_LS(IIG,JJG) = 0.5_EB*(V(IIG,JJG-1,KWIND)+V(IIG,JJG,KWIND))
+               KWIND = 0
+               DO KDUM = K_LS(IIG,JJG),KBAR
+                  IF ((ZC(KDUM)-Z_LS(IIG,JJG))>=6.1_EB) THEN
+                     KWIND = KDUM
+                     ZWIND(1) = ZC(KWIND-1)-Z_LS(IIG,JJG)
+                     ZWIND(2) = ZC(KWIND)-Z_LS(IIG,JJG)
+                     EXIT
+                  ENDIF
+               ENDDO
+
+               U_Z(1) = 0.5_EB*(U(IIG-1,JJG,KWIND-1)+U(IIG,JJG,KWIND-1))
+               U_Z(2) = 0.5_EB*(U(IIG-1,JJG,KWIND)+U(IIG,JJG,KWIND))
+               V_Z(1) = 0.5_EB*(V(IIG,JJG-1,KWIND-1)+V(IIG,JJG,KWIND-1))
+               V_Z(2) = 0.5_EB*(V(IIG,JJG-1,KWIND)+V(IIG,JJG,KWIND))
+               ! If wind comes from first grid cell assume zero wind at ground level
+               IF (KWIND==1) THEN
+                  U_Z(1) = 0._EB; V_Z(1) = 0._EB; ZWIND(1) = 0._EB
+               ENDIF
+               U_LS(IIG,JJG) = U_Z(1) + (6.1_EB-ZWIND(1))/(ZWIND(2)-ZWIND(1))*(U_Z(2)-U_Z(1))
+               V_LS(IIG,JJG) = V_Z(1) + (6.1_EB-ZWIND(1))/(ZWIND(2)-ZWIND(1))*(V_Z(2)-V_Z(1))
+
+            ENDIF
 
          ENDIF
 

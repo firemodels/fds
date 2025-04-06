@@ -394,6 +394,7 @@ REAL(EB) :: MPI_TIMEOUT=600._EB                             !< Time to wait for 
 REAL(EB) :: DT_END_MINIMUM=TWO_EPSILON_EB                   !< Smallest possible final time step (s)
 REAL(EB) :: DT_END_FILL=1.E-6_EB
 INTEGER  :: DIAGNOSTICS_INTERVAL                            !< Number of time steps between diagnostic outputs
+REAL(EB) :: UNFREEZE_TIME                                   !< Time to unfreeze a simulation
 
 ! Combustion parameters
 
@@ -420,6 +421,7 @@ REAL(EB) :: FREE_BURN_TEMPERATURE=600._EB                           !< Temperatu
 REAL(EB) :: FINITE_RATE_MIN_TEMP=-273.15                            !< When FR is present, min temp. to compute combustion (C->K)
 REAL(FB) :: HRRPUV_MAX_SMV=1200._FB                                 !< Clipping value used by Smokeview (kW/m3)
 REAL(FB) :: TEMP_MAX_SMV=2000._FB                                   !< Clipping value used by Smokeview (C)
+REAL(FB) :: TEMP_MIN_SMV=20._FB                                     !< Clipping value used by Smokeview (C)
 
 INTEGER :: N_SPECIES=0                                              !< Number of total gas phase primitive species
 INTEGER :: N_REACTIONS                                              !< Number of gas phase reactions

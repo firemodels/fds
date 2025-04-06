@@ -1,27 +1,31 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import os
+import os, sys
 import pandas as pd
+from matplotlib.ticker import ScalarFormatter
 
 # include FDS plot styles, etc.
+filedir = os.path.dirname(__file__)
+firemodels = os.path.join(filedir,'..','..','..','..')
+sys.path.append(filedir+os.sep+'..'+os.sep)
 import fdsplotlib
 
+
 # Get plot style parameters
+plt.rcParams["pdf.use14corefonts"] = True # forces matplotlib to write native pdf fonts rather then embed
 plot_style = fdsplotlib.get_plot_style("fds")
-plt.rcParams['text.usetex'] = True # supports latex math (set per plot below)
-plt.rcParams["pdf.use14corefonts"] = True # forces matplotlib to write native pdf fonts rather than embed
-plt.rcParams["font.family"] = plot_style["Font_Name"]
-plt.rcParams["font.size"] = plot_style["Label_Font_Size"]
 
 # Define paths
-base_path = "../../../out/USFS_Catchpole/"
-fig_path = "../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/USFS_Catchpole/"
+base_path = os.path.join(firemodels,'out','USFS_Catchpole')
+fig_path = os.path.join(firemodels,'fds','Manuals','FDS_Validation_Guide','SCRIPT_FIGURES','USFS_Catchpole')
+validation_path = os.path.join(firemodels,'fds','Validation','USFS_Catchpole','FDS_Input_Files')
 
 # Experiment parameters
-tests = pd.read_csv("../../Validation/USFS_Catchpole/FDS_Input_Files/Test_Matrix.csv")
+tests = pd.read_csv(os.path.join(validation_path,"Test_Matrix.csv"))
 
 for ti,test in tests.iterrows():
-    chid = test['Test']
+    R = tests['R'].iloc[ti]
+    chid = tests['Test'].iloc[ti]
     fds_file = os.path.join(base_path, f"{chid}_devc.csv")
     git_file = os.path.join(base_path, f"{chid}_git.txt")
     fig_file = os.path.join(fig_path, f"{chid}.pdf")
@@ -44,41 +48,37 @@ for ti,test in tests.iterrows():
     if R_FDS<0:
         R_FDS=0        
     
-    fig, ax = plt.subplots(figsize=(plot_style["Paper_Width"], plot_style["Paper_Height"]))
-    
     # Exp results
     x_exp = np.array([0., 8.])
-    t_exp = np.array([0., 8./test['R']])
-    ax.plot(t_exp,x_exp,'k-',label='Exp')
+    t_exp = np.array([0., 8./R])
+    version_string = fdsplotlib.get_version_string(git_file)
+    fig = fdsplotlib.plot_to_fig(x_data=t_exp, y_data=x_exp,
+                                 data_label='EXP',
+                                 marker_style='k-')
     
-    # FDS results
-    ax.plot(fds_data['Time'],fds_data['x'],'k--',label='FDS')
+    fig = fdsplotlib.plot_to_fig(x_data=fds_data['Time'].values, y_data=fds_data['x'].values,
+                                 revision_label=version_string,
+                                 figure_handle=fig,
+                                 data_label='FDS',
+                                 x_label='Time (s)',
+                                 y_label='Distance (m)',
+                                 marker_style='k--',
+                                 y_min=0.,y_max=8.,
+                                 x_min=0.,x_max=8./R,
+                                 legend_location="lower right",
+                                 show_legend='show',
+                                 )
     
-    # plot attributes
-    ax.set_xlabel("Time (s)",
-                  fontdict={"fontname": plot_style["Font_Name"], 
-                            "fontsize": plot_style["Label_Font_Size"]})
-    ax.set_ylabel("Distance (m)",
-                  fontdict={"fontname": plot_style["Font_Name"], 
-                            "fontsize": plot_style["Label_Font_Size"]})
-    t_end = max(fds_data['Time'].max(),8./test['R'])
-    ax.set_xlim([0, t_end])
-    ax.set_ylim([0, 8.])
-    plt.legend(loc="lower right", fontsize=plot_style["Key_Font_Size"], 
-               framealpha=1,frameon=True)
-    ax.set_title(chid,fontsize=plot_style["Title_Font_Size"],
-                 loc="left",x=0.05,y=0.9)
-
-    # add version sting
-    version_str = fdsplotlib.get_version_string(git_file)
-    fdsplotlib.add_version_string(ax, version_str, plot_type='linear')        
-
-    fig.tight_layout()
-    plt.savefig(fig_file)
+    ax = fig.axes[0]
+    fdsplotlib.add_version_string(ax, chid, plot_type='linear', scale_x=0.05, scale_y=0.9, font_size=plot_style['Label_Font_Size'])
+    
+    #fig.supertitle(chid)
+    fig.savefig(fig_file, backend='pdf')
     plt.close()
         
     # write table for dataplot
-    test['R_FDS'] = R_FDS
+    tests.loc[tests['Test'].index[ti],'R_FDS'] = R_FDS
+    test = tests.iloc[ti]
     test = test.drop('Test')
     out_file = os.path.join(base_path,f"{chid}_FDS.csv")
     pd.DataFrame([test]).to_csv(out_file,index=False)
@@ -86,7 +86,6 @@ for ti,test in tests.iterrows():
     # add fds data to full table for summary plotting      
     tests.loc[ti,'R_FDS'] = R_FDS
     
-        
 ##### Create summary plots
 
 # variables of interest
@@ -97,36 +96,32 @@ dep_variables={"s":"Surface-to-Volume Ratio (1/m)",
 
 # fuel labels for filtering data
 fuel_labels=["MF","EXSC","PPMC","EX"]
-
 for dvar in dep_variables:
-    
+    plt.rcParams['mathtext.fontset'] = 'stix' #'dejavuserif'
+    plt.rcParams['mathtext.default'] = 'rm'
+    plt.rcParams['axes.formatter.use_mathtext'] = False
     fig_file = os.path.join(fig_path, f"Catchpole_R_v_{dvar}.pdf")    
-    fig, ax = plt.subplots(figsize=(plot_style["Paper_Width"], plot_style["Paper_Height"]))
     
     # show +/- 20% relative error
     [xmin,xmax] = [tests[dvar].min(),tests[dvar].max()]
-    ax.semilogy([xmin,xmax],[0.8,0.8],'k--')
-    ax.semilogy([xmin,xmax],[1.2,1.2],'k--')
-    
-    for fuel in fuel_labels:
+    colors = ['b','g','r','c','m','y','k'] # matlab defauls
+    fig = fdsplotlib.plot_to_fig(x_data=[xmin, xmax], y_data=[0.8,0.8],
+                             plot_type='semilogy', marker_style='k--',)
+    for i in range(0, len(fuel_labels)):
+        fuel = fuel_labels[i]
         filtered_data = tests[tests['Test'].str.startswith(fuel)]
+        color = colors[i]
         if fuel=='EX':
             filtered_data = tests[
                 (tests['Test'].str.startswith(fuel))&(~tests['Test'].str.startswith('EXSC'))]
-    
-        ax.semilogy(filtered_data[dvar],filtered_data['R_FDS']/filtered_data['R'],
-                    '.',label=fuel)
-    
-    # plot attributes
-    ax.set_xlabel(dep_variables[dvar],
-                  fontdict={"fontname": plot_style["Font_Name"], 
-                            "fontsize": plot_style["Label_Font_Size"]})
-    ax.set_ylabel("$R_{FDS}/R_{Exp}$ (-)",
-                  fontdict={"fontname": plot_style["Font_Name"], 
-                            "fontsize": plot_style["Label_Font_Size"]})
-    plt.legend(fontsize=plot_style["Key_Font_Size"], 
-               framealpha=1,frameon=True)
-    ax.set_xlim([xmin,xmax])
+        fig = fdsplotlib.plot_to_fig(x_data=filtered_data[dvar], y_data=filtered_data['R_FDS']/filtered_data['R'],
+                                 data_label=fuel, plot_type='semilogy', marker_style=colors[i]+'o', figure_handle=fig)
+    fig = fdsplotlib.plot_to_fig(x_data=[xmin, xmax], y_data=[1.2,1.2],
+                             plot_type='semilogy', marker_style='k--', figure_handle=fig,
+                             x_min=xmin, x_max=xmax, y_min=3e-3, y_max=1.1e1,
+                             x_label=dep_variables[dvar],y_label=r"$\mathrm{R_{FDS}/R_{Exp}}$ $\mathrm{(-)}$",
+                             show_legend='show', legend_framealpha=1.0, legend_location=2)
+    plt.gca().yaxis.set_major_formatter(ScalarFormatter()) 
     
     # add version sting
     version_str = fdsplotlib.get_version_string(git_file)
@@ -135,6 +130,9 @@ for dvar in dep_variables:
     plt.tight_layout()
     plt.savefig(fig_file)
     plt.close()
+
+
+
 
 
 # plot no-spread conditions

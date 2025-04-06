@@ -640,7 +640,7 @@ Get in the habit of checking the version number of your executable, periodically
 
 An FDS calculation may end before the specified time limit. Following is a list of common error statements and how to diagnose the problems:
 \begin{description}
-\item[Input File Errors:] The most common errors in FDS are due to mis-typed input statements. These errors result in the immediate halting of the program and a statement like, ``ERROR: Problem with the HEAD line.'' For these errors, check the line in the input file named in the error statement. Make sure the parameter names are spelled correctly. Make sure that a / (forward slash) is put at the end of each namelist entry. Make sure that the correct type of input data is provided for each input parameter, such as one real number, several integers, or something else. Make sure there are no non-ASCII characters being used, as can sometimes happen when text is cut and pasted from other applications or word-processing software. Make sure that the number zero (0) is not typed as the capital letter O and {\em vice versa}. Make sure that the number one (1) is not an exclamation point (!) or lower case letter l. Make sure apostrophes are used to designate character strings. Make sure the text file on a Unix/Linux machine was not created on a Windows machine, and {\em vice versa}. Make sure that all the parameters listed are still being used -- new versions of FDS often drop or change parameters forcing you to re-examine old input files.
+\item[Input File Errors:] The most common errors in FDS are due to mistyped input statements. These errors result in the immediate halting of the program and a statement like, ``ERROR: Problem with the HEAD line.'' For these errors, check the line in the input file named in the error statement. Make sure the parameter names are spelled correctly. Make sure that a / (forward slash) is put at the end of each namelist entry. Make sure that the correct type of input data is provided for each input parameter, such as one real number, several integers, or something else. Make sure there are no non-ASCII characters being used, as can sometimes happen when text is cut and pasted from other applications or word-processing software. Make sure that the number zero (0) is not typed as the capital letter O and {\em vice versa}. Make sure that the number one (1) is not an exclamation point (!) or lower case letter l. Make sure apostrophes are used to designate character strings. Make sure the text file on a Unix/Linux machine was not created on a Windows machine, and {\em vice versa}. Make sure that all the parameters listed are still being used -- new versions of FDS often drop or change parameters forcing you to re-examine old input files.
 \item [Numerical Instability Errors:] Input errors are numerical errors during a simulation may result in high velocities in the domain that cause the time step size to decrease to a point\footnote{By default, the calculation is stopped when the time step drops below 0.0001 of the initial time step. This factor can be changed via the \ct{TIME} line by specifying the \ct{LIMITING_DT_RATIO}.} where logic in the code decides that the results are unphysical and stops the calculation with an error message in the file \ct{CHID.out}. In these cases, FDS ends by dumping out one final Plot3D file giving you a hint as to where the error is occurring within the computational domain. Usually, a numerical instability can be identified by fictitiously large velocity vectors emanating from a small region within the domain. Common causes of such instabilities are:
     \begin{itemize}
     \item mesh cells that have an aspect ratio larger than 2 to 1
@@ -652,10 +652,10 @@ An FDS calculation may end before the specified time limit. Following is a list 
     \item the removal or creation of an obstruction, like the opening or closing of a door
     \item a high (>100 g/mol) molecular weight fuel molecule that is not in the FDS database, Appendix~\ref{info:predefined_species}. In such cases, reduce the molecular weight but maintain the atom ratios or define the fuel specific heat on \ct{SPEC}. See Sec.~\ref{user_defined_gas_species_props} for details.
     \item long, sealed tunnels, in which pressure fluctuations can cause spurious numerical artifacts. See Sec.~\ref{info:PRES} for details.
-    \item large number of automatically generated pressure zones. This can happen when a pre-processor simply converts CAD geometry stored as faces to thin obstructions. For example, on a 10 cm grid, a typical interior gypsum board wall will appear in an FDS input file as two thin obstructions representing the gypsum board enclosing a single grid cell wide volume of air. FDS will automatically identify these regions as pressure zones; however, they can sometimes result in instabilities developing. The pressure zones identified by FDS can be determined by reviewing the \ct{casename.out} file. Telling FDS to automatically fill these zones (see Section~\ref{info:filling_zones}) or manually fixing the geometry to fill the regions can reduce these issues.
+    \item large number of automatically generated pressure zones. This can happen when a preprocessor simply converts CAD geometry stored as faces to thin obstructions. For example, on a 10 cm grid, a typical interior gypsum board wall will appear in an FDS input file as two thin obstructions representing the gypsum board enclosing a single grid cell wide volume of air. FDS will automatically identify these regions as pressure zones; however, they can sometimes result in instabilities developing. The pressure zones identified by FDS can be determined by reviewing the \ct{casename.out} file. Telling FDS to automatically fill these zones (see Section~\ref{info:filling_zones}) or manually fixing the geometry to fill the regions can reduce these issues.
     \end{itemize}
     There are various ways to solve the problem, depending on the situation. Try to diagnose and fix the problem before reporting it. The originator of the input file is by far the best person to diagnose the problem.
-\item[Inadequate Computer Resources:] The calculation might be using more RAM than the machine has (you will see an error message like ``ERROR: Memory allocation failed for ZZ in the routine INIT'') , or the output files could have used up all the available disk space. In these situations, the computer may or may not produce an intelligible error message. Sometimes the computer is just unresponsive. It is your responsibility to ensure that the computer has adequate resources to do the calculation. Remember, there is no limit to how big or how long FDS calculations can be -- it depends on the resources of the computer. For any new simulation, try running the case with a modest-sized mesh, and gradually make refinements until the computer can no longer handle it. Then back off somewhat on the size of the calculation so that the computer can comfortably run the case. Trying to run with 90~\% to 100~\% of computer resources is risky; using MPI and mulitple machines would be better. If you are using a Linux/Unix machine, make sure that the stacksize is unlimited, which will allow FDS to access as much of the RAM as possible. Changing the stacksize limit differs with each shell type, so it is best to do an on-line search to find out how to ensure that the stacksize is unlimited.
+\item[Inadequate Computer Resources:] The calculation might be using more RAM than the machine has (you will see an error message like ``ERROR: Memory allocation failed for ZZ in the routine INIT'') , or the output files could have used up all the available disk space. In these situations, the computer may or may not produce an intelligible error message. Sometimes the computer is just unresponsive. It is your responsibility to ensure that the computer has adequate resources to do the calculation. Remember, there is no limit to how big or how long FDS calculations can be -- it depends on the resources of the computer. For any new simulation, try running the case with a modest-sized mesh, and gradually make refinements until the computer can no longer handle it. Then back off somewhat on the size of the calculation so that the computer can comfortably run the case. Trying to run with 90~\% to 100~\% of computer resources is risky; using MPI and multiple machines would be better. If you are using a Linux/Unix machine, make sure that the stacksize is unlimited, which will allow FDS to access as much of the RAM as possible. Changing the stacksize limit differs with each shell type, so it is best to do an on-line search to find out how to ensure that the stacksize is unlimited.
 \item[{\bf Run-Time Errors}:] An error occurs either within the computer operating system or the FDS program. An error message is printed out by the operating system of the computer onto the screen or into the diagnostic output file. This message is most often unintelligible to most people, including the programmers, although occasionally one might get a small clue if there is mention of a specific problem, like ``stack overflow,'' ``divide by zero,'' or ``file write error, unit=...'' Sometimes the error message simply refers to a ``Segmentation Fault.'' These errors may be caused by a bug in FDS, for example if a number is divided by zero, or an array is used before it is allocated, or any number of other problems. Before reporting the error to the Issue Tracker, try to systematically simplify the input file until the error goes away. This process usually brings to light some feature of the calculation responsible for the problem and helps in the debugging.
 \item[MPI Timeout Errors:] If there is an error or delay in communication from one MPI (Message Passing Interface) process to another, you might see an error statement like ``ERROR: MPI exchange ... timed out for MPI process ...'' This indicates that, for whatever reason, an MPI message never reached its destination and the program shut down. The input parameter \ct{MPI_TIMEOUT}, specified on the \ct{MISC} line, sets the time that FDS waits for the communication to complete. By default, it is 600~s. This is an extremely long period of time to wait for an MPI communication to complete and it typically means that something has gone very wrong. If you believe that there is a reason for the delay, for example one mesh is much bigger in size or has much more work to do than other meshes, then set \ct{MPI_TIMEOUT} to a larger value and hope for the best. However, the timeout might indicate that there is something wrong with the way the calculation has been set up, or something wrong with your network and the particular {\em communication fabric} that it uses. If you cannot determine the problem, submit a simple version of the case that fails to the \href{https://github.com/firemodels/fds/issues}{Issue Tracker}.
 \item[Mesh Connection Error:] If the arrangement of meshes is complicated, FDS may not be able to sort out which mesh is connected to which, and typically the error message ``Mesh connection test timed out for MPI process ...'' appears early in the simulation, before any time-stepping occurs. One possible remedy to this problem, besides simplifying the mesh arrangement, is to ensure that the fine meshes or any embedded meshes are listed first in the input file. That way, FDS has a better chance of registering the proper connections between meshes.
@@ -1692,7 +1692,7 @@ One current limitation of the unstructured geometry algorithm is that a Cartesia
 
 \paragraph{Big picture} The long-term goal for complex geometry in FDS is to allow for relatively seamless work-flow with Building Information Management (BIM) models and complex CAD geometries.  However, the past several years have been spent developing a formulation that is conservative and stable.  In so doing, for the time being we have had to abandon the immersed boundary method and move to a cut cell scheme that requires an unstructured pressure solver (ULMAT; see Sec.~\ref{pressure_solver}).
 
-\paragraph{Run time} When using complex geometry you may notice slower run-times for two reasons.  First, the setup time will be noticeably slower, especially if you are not importing geometry from binary (see Sec.~\ref{subsec:readbin}).  This is inevitable, because identifying and processing cutcells is time-consuming.  Second, the use of ULMAT, while more accurate at solid boundaries, is slower than the FFT pressure solver (per iteration).  Further, ULMAT gets progressively slower as the size of the mesh increases.  Therefore, for larger cases using ULMAT it is important to break the domain up into meshes with less than 150,000 cells (roughly $53^3$).
+\paragraph{Run time} When using complex geometry you may notice slower runtimes for two reasons.  First, the setup time will be noticeably slower, especially if you are not importing geometry from binary (see Sec.~\ref{subsec:readbin}).  This is inevitable, because identifying and processing cutcells is time-consuming.  Second, the use of ULMAT, while more accurate at solid boundaries, is slower than the FFT pressure solver (per iteration).  Further, ULMAT gets progressively slower as the size of the mesh increases.  Therefore, for larger cases using ULMAT it is important to break the domain up into meshes with less than 150,000 cells (roughly $53^3$).
 
 \paragraph{Accuracy} The rationale for using curvilinear geometry should be that the accuracy of the Cartesian geometry is not sufficient.  For example, you may have a sloped ceiling or some detail of a room that requires higher fidelity.  When higher accuracy is required, this usually also means that better grid resolution is required.  Keep the fidelity of the geometry and the Cartesian grid consistent with each other.  Do not expect a highly detailed geometry to give improved results if the Cartesian grid is disproportionately coarse.
 
@@ -2428,9 +2428,9 @@ The solid material can be given an \ct{ABSORPTION_COEFFICIENT} (1/m) that allows
 \subsection{Back Side Boundary Conditions}
 \label{info:BACKING}
 
-There are several options for defining the back surface boundary condition of a thermally-thick obstruction. The default, \ct{BACKING='EXPOSED'} on the \ct{SURF} line, assumes that the back side is exposed to the thermal environment behind the solid. FDS calculates the heat transfer through the solid into the space behind the wall and vis versa. This heat conduction calculation in the solid is based on the \ct{THICKNESS} of the material layers specified on the \ct{SURF} line, not the dimension of the \ct{OBST} or other solid that the \ct{SURF} is applied to. For example, when modeling a steel plate that is 5~mm thick, if the \ct{OBST} is approximated as a zero-cell thick sheet because 5~mm is less than half the grid dimension of 5~cm, then FDS will still compute the heat transfer through a 5~mm thick plate of steel. If a \ct{SURF} with \ct{BACKING='EXPOSED'} is applied to the surface of a solid whose dimension in the normal direction is at least one gas phase grid cell length greater than \ct{THICKNESS}, FDS will then ignore \ct{BACKING='EXPOSED'} and apply \ct{BACKING='VOID'} instead. This latter boundary condition is described below.
+There are several options for defining the back surface boundary condition of a thermally-thick obstruction. The default, \ct{BACKING='EXPOSED'} on the \ct{SURF} line, assumes that the back side is exposed to the thermal environment behind the solid. FDS calculates the heat transfer through the solid into the space behind the wall and vis versa. This heat conduction calculation in the solid is based on the \ct{THICKNESS} of the material layers specified on the \ct{SURF} line, not the dimension of the \ct{OBST} or other solid to which the \ct{SURF} is applied. For example, when modeling a steel plate that is 5~mm thick, if the \ct{OBST} is approximated as a zero-cell thick sheet because 5~mm is less than half the grid dimension of 5~cm, then FDS will still compute the heat transfer through a 5~mm thick plate of steel. If a \ct{SURF} with \ct{BACKING='EXPOSED'} is applied to the surface of a solid whose dimension in the normal direction is at least one gas phase grid cell length greater than \ct{THICKNESS}, FDS will then ignore \ct{BACKING='EXPOSED'} and apply \ct{BACKING='VOID'} instead. This latter boundary condition is described below.
 
-If a \ct{VENT} is applied to a thermally-thick obstruction, the \ct{SURF_ID} associated with this \ct{VENT} must describe a thermally-thick solid as well; that is, the \ct{SURF} line must have a \ct{MATL_ID}.
+If a \ct{VENT} is applied to a thermally-thick obstruction with 3-D heat conduction, the \ct{SURF_ID} associated with this \ct{VENT} must describe a thermally-thick, 3-D solid as well; that is, the \ct{SURF} line must have a \ct{MATL_ID} and \ct{HT3D=T}.
 
 An alternative back side boundary condition, \ct{BACKING='INSULATED'}, assumes that the solid backs up to a perfectly insulated material, in which case no heat is lost to the back side. Use of this condition means specifying properties of the inner insulating material is not necessary because it is assumed to be perfectly insulated.
 
@@ -3420,7 +3420,7 @@ The two \ct{TGA} entries will force FDS to perform a numerical version of the TG
 Note: If applying \ct{TGA_ANALYSIS} to a case where the \ct{SURF} is associated with a \ct{PART} class yet to be inserted into the calculation, FDS may not find the \ct{SURF} and hence throw an error. In this case, create a simple case with a single particle that is inserted at the start.
 \end{warning}
 
-The result of the \ct{TGA_ANALYSIS} is a single comma-delimited file called \ct{CHID_tga.csv}. The first and second columns of the file consist of the time and sample temperature. The third column is the normalized sample mass; that is, the sample mass divided by its initial mass. The following columns list the mass fractions of the individual material components. The next column is the total mass loss rate, in units of s$^{-1}$, followed by the mass loss rates of the individual material components. The next column is the heat release rate per unit mass of the sample in units of W/g, typical of an MCC measurement. The final two columns are the rate of heat absorbed by the sample normalized by its {\it original} mass and by its {\it instantaneous} mass, respectively. The former is labelled \ct{DSC} and the latter \ct{STA}, both in units of W/g. \ct{STA} means Simultaneous Thermal Analysis, where a TGA and DSC measurement are made simultaneously, in which case the instantaneous mass of the sample is available.
+The result of the \ct{TGA_ANALYSIS} is a single comma-delimited file called \ct{CHID_tga.csv}. The first and second columns of the file consist of the time and sample temperature. The third column is the normalized sample mass; that is, the sample mass divided by its initial mass. The following columns list the mass fractions of the individual material components. The next column is the total mass loss rate, in units of s$^{-1}$, followed by the mass loss rates of the individual material components. The next column is the heat release rate per unit mass of the sample in units of W/g, typical of an MCC measurement. The final two columns are the rate of heat absorbed by the sample normalized by its {\it original} mass and by its {\it instantaneous} mass, respectively. The former is labeled \ct{DSC} and the latter \ct{STA}, both in units of W/g. \ct{STA} means Simultaneous Thermal Analysis, where a TGA and DSC measurement are made simultaneously, in which case the instantaneous mass of the sample is available.
 
 The timestep used in the TGA analysis can be controlled with \ct{TGA_DT} on the \ct{SURF} line. The output spacing for temperature can be set with \ct{TGA_DUMP} on the \ct{SURF} line.
 
@@ -3474,7 +3474,7 @@ H_{x} \left(T_{\rm ref} \right) + H_{x,\rm adj} + H_{x,\rm r} \left(T_{\rm ref} 
 \ee
 where $H(T)$ is the enthalpy of a material or gas, $H_{\rm r}$ is the \ct{HEAT_OF_REACTION}, $T_{\rm ref}$ is the temperature at which the \ct{HEAT_OF_REACTION} was specified for, $\nu$ is a yield, and $H_{\rm adj}$ is a constant that forces the correct enthalpy to balance the reactions. During initialization, $H(T)$ for a material is initialized using the defined \ct{SPECIFIC_HEAT} or ramp. $H(T)$ for a gas is defined per the discussion in Sec.~\ref{gas_species_props}. No adjustment parameter is included for gases since typically pyrolysis is either producing a predefined species such as carbon dioxide or water vapor or it is producing a fuel species use on \ct{REAC}. For a predefined species, the enthalpy is known. When a non-predefined species is used on \ct{REAC}, FDS adjusts the species enthalpy so that the correct \ct{HEAT_OF_COMBUSTION} is obtained. This means it cannot be adjusted again to balance a material reaction.
 
-The result is a system of linear equations where the $H_{\rm adj}$ values are the unknowns. This results in a matrix whose row count is the total number of reactions over all materials, and whose column count is the total number of materials that are either a reactant or a residue. The number of rows and columns may not be equal to one another. If they are equal, provided the matrix is not singular, then a standard matrix solution can be done. If there are more equations than materials, then the system is over-determined, and there may not be a solution that conserves energy. In this case, a least-squares solution of the system is performed to find the best possible values for the $H_{\rm adj}$ values. A warning message will be written in this case. If there are more materials than reactions, then the system is under-determined, and there will be an infinite number of solutions. In this case, the matrix is solved to yield a minimal solution for $H_{\rm adj}$ values. That is it attempts to find values for $H_{\rm adj}$ where the vector of values has the smallest magnitude.
+The result is a system of linear equations where the $H_{\rm adj}$ values are the unknowns. This results in a matrix whose row count is the total number of reactions over all materials, and whose column count is the total number of materials that are either a reactant or a residue. The number of rows and columns may not be equal to one another. If they are equal, provided the matrix is not singular, then a standard matrix solution can be done. If there are more equations than materials, then the system is overdetermined, and there may not be a solution that conserves energy. In this case, a least-squares solution of the system is performed to find the best possible values for the $H_{\rm adj}$ values. A warning message will be written in this case. If there are more materials than reactions, then the system is under-determined, and there will be an infinite number of solutions. In this case, the matrix is solved to yield a minimal solution for $H_{\rm adj}$ values. That is it attempts to find values for $H_{\rm adj}$ where the vector of values has the smallest magnitude.
 
 In the case of a singular matrix, a warning is written that no adjustment is done. A singular matrix happens when a row in the matrix is a linear combination of one or more other rows. If this happens, there is likely an error in one of the \ct{MATL} definitions.
 
@@ -3695,7 +3695,7 @@ Using the boundary file output quantity \ct{'MASS FLUX'} might help to visualize
 \label{info:HVAC}
 
 There are occasions where simply defining fixed flow and fixed species boundary conditions is not sufficient to model the behavior of an HVAC (Heating, Ventilation, and Air Conditioning) system.
-If the ability to transport heat and combustion products through a duct network or the ability to fully account for the pressurization of a compartment due to a fire on the flows in a duct network is important, you can make use of a coupled HVAC network solver. The solver computes the flows through a duct network described as a mapping of duct segments and nodes where a node is either the joining of two or more ducts (a tee for example) or where a duct segment connects to the FDS computational domain. For more information on coupled hybrid modelling in fire safety engineering, interested readers may want to refer to Ralph et al.'s literature review of the topic~\cite{Ralph:1}.
+If the ability to transport heat and combustion products through a duct network or the ability to fully account for the pressurization of a compartment due to a fire on the flows in a duct network is important, you can make use of a coupled HVAC network solver. The solver computes the flows through a duct network described as a mapping of duct segments and nodes where a node is either the joining of two or more ducts (a tee for example) or where a duct segment connects to the FDS computational domain. For more information on coupled hybrid modeling in fire safety engineering, interested readers may want to refer to Ralph et al.'s literature review of the topic~\cite{Ralph:1}.
 
 By default the HVAC solver does not allow for mass storage in the duct network (i.e., what goes in during a time step, goes out during a time step). However, if you set \ct{N_CELLS} for and HVAC duct, then the HVAC solver will account for mass storage and will compute transient species and energy transport through the ducts.
 
@@ -4092,7 +4092,7 @@ This example is similar to the ones in the previous section, except in this case
 
 With a few notable exceptions, like containment buildings for nuclear power plants, real world construction is not air tight.  Small gaps occur along windows and doors and where walls abut each other and the floors and ceilings.  As a compartment is pressurized by a fire, air will escape through these small gaps.  This is referred to as leakage.
 
-Leakage is inherently a sub-grid scale phenomenon because the leakage area is usually very small. In other words, it is not possible to define a leak directly on the
+Leakage is inherently a subgrid scale phenomenon because the leakage area is usually very small. In other words, it is not possible to define a leak directly on the
 numerical mesh. It is sometimes possible to ``lump'' the leaks into a single mesh-resolvable hole, but this is problematic
 for two reasons. First, the leakage area rarely corresponds neatly to the area of a single mesh cell-sized hole. Second, the
 flow speeds through the hole can be large and cause numerical instabilities.
@@ -5529,7 +5529,7 @@ This type of reaction is specified by adding \ct{THIRD_BODY=T} to the \ct{REAC} 
 
 \subsection{Fall-off Reactions}
 \label{info:falloff_reactions}
-Fall-off reactions are a type of reaction where rates depend on both pressure and temperature, as described in the FDS Tech Guide \cite{FDS_Math_Guide}. These reactions are prevalent in detailed chemical mechanisms (see Section \ref{info:detailedChemMech}). Following are the example of Lindermann-fall-off and Troe-fall-off reaction entires from GRI-3 mechanism \cite{gri3:1999} in FDS format. SRI-fall-off reactions are not supported yet, and will be incorporated in future.
+Fall-off reactions are a type of reaction where rates depend on both pressure and temperature, as described in the FDS Tech Guide \cite{FDS_Math_Guide}. These reactions are prevalent in detailed chemical mechanisms (see Section \ref{info:detailedChemMech}). Following are the example of Lindermann-fall-off and Troe-fall-off reaction entries from GRI-3 mechanism \cite{gri3:1999} in FDS format. SRI-fall-off reactions are not supported yet, and will be incorporated in future.
 
 \begin{lstlisting}
 &REAC ID='R12',
@@ -5900,7 +5900,7 @@ The absorption and scattering of thermal radiation by Lagrangian particles is in
 
 The radiative properties of the water and fuel particles (droplets) are determined automatically. For fuel, the properties of heptane are assumed. The heptane values can be overridden by specifying them on the \ct{PART} line.
 
-Other parameters affecting the computations of particle-radiation interaction are listed here. \ct{RADTMP} is the assumed radiative source temperature. It is used in the spectral weighting during the computation of the mean scattering and absorption cross sections. The default is 900~$^\circ$C. \ct{NMIEANG} is the number of angles in the numerical integration of the Mie-phase function. Increasing \ct{NMIEANG} improves the accuracy of the radiative properties of water droplets. The cost of the better accuracy is seen in the initialization phase, not during the actual simulation. The default value for \ct{NMIEANG} is 15. For each class of particles, the Mie coefficients are calculated for a wide range of droplet diameters to ensure that the all possible run-time situations can be covered. To speed up the initialization phase, the range of diameters can be limited by parameters \ct{MIE_MINIMUM_DIAMETER} and \ct{MIE_MAXIMUM_DIAMETER}. Also, the size of the Mie coefficient tables can be specified using \ct{MIE_NDG} parameter.
+Other parameters affecting the computations of particle-radiation interaction are listed here. \ct{RADTMP} is the assumed radiative source temperature. It is used in the spectral weighting during the computation of the mean scattering and absorption cross sections. The default is 900~$^\circ$C. \ct{NMIEANG} is the number of angles in the numerical integration of the Mie-phase function. Increasing \ct{NMIEANG} improves the accuracy of the radiative properties of water droplets. The cost of the better accuracy is seen in the initialization phase, not during the actual simulation. The default value for \ct{NMIEANG} is 15. For each class of particles, the Mie coefficients are calculated for a wide range of droplet diameters to ensure that the all possible runtime situations can be covered. To speed up the initialization phase, the range of diameters can be limited by parameters \ct{MIE_MINIMUM_DIAMETER} and \ct{MIE_MAXIMUM_DIAMETER}. Also, the size of the Mie coefficient tables can be specified using \ct{MIE_NDG} parameter.
 
 
 
@@ -6015,13 +6015,13 @@ By default liquid droplet evaporation uses the Ranz-Marshall correlation~\cite{R
 \subsection{Thermal Properties}
 \label{thermal_part_props}
 
-The properties you need to supply for a liquid droplet depend on whether or not the \ct{SPEC_ID} is listed in Appendix~\ref{info:predefined_species}, and if the column labelled ``Liquid'' is checked with a ``Y'', meaning that its liquid properties are known. The following sub-sections provide instructions on what to do in various instances. Note that the \ct{INITIAL_TEMPERATURE} ($^\circ$C) of the liquid droplets is specified on the \ct{PART} line. Its default value is the overall ambient temperature of the simulation, \ct{TMPA}, from the \ct{MISC} line.
+The properties you need to supply for a liquid droplet depend on whether or not the \ct{SPEC_ID} is listed in Appendix~\ref{info:predefined_species}, and if the column labeled ``Liquid'' is checked with a ``Y'', meaning that its liquid properties are known. The following sub-sections provide instructions on what to do in various instances. Note that the \ct{INITIAL_TEMPERATURE} ($^\circ$C) of the liquid droplets is specified on the \ct{PART} line. Its default value is the overall ambient temperature of the simulation, \ct{TMPA}, from the \ct{MISC} line.
 
 Heat transfer and evaporation from liquid droplets to the gas uses correlations for the heat and mass transfer coefficients. These can instead be respectively specified using \ct{HEAT_TRANSFER_COEFFICIENT_GAS} and \ct{MASS_TRANSFER_COEFFICIENT} on the \ct{PART} line.
 
 \subsubsection{Known Liquid/Gas Species}
 
-If the \ct{SPEC_ID} is listed in Appendix~\ref{info:predefined_species}, and if the column labelled ``Liquid'' is checked with a ``Y'', you need only list the following:
+If the \ct{SPEC_ID} is listed in Appendix~\ref{info:predefined_species}, and if the column labeled ``Liquid'' is checked with a ``Y'', you need only list the following:
 \begin{lstlisting}
 &SPEC ID='WATER VAPOR' /
 &PART ID='water droplets', SPEC_ID='WATER VAPOR', ... /
@@ -6060,7 +6060,7 @@ Note that only one gas species can be used in the droplet evaporation model beca
 
 If the liquid droplets burn, the \ct{SPEC_ID} on the \ct{PART} line should designate the \ct{FUEL} on the \ct{REAC} line. Depending on the combustion model, you may not need to create a separate \ct{SPEC} line. Fuel droplets will be colored yellow by default in Smokeview and any resulting fuel vapor will burn according to the combustion model specified on the \ct{REAC} line. The droplets evaporate into an equivalent amount of fuel vapor such that the resulting heat release rate (assuming complete combustion) is equal to the evaporation rate multiplied by the \ct{HEAT_OF_COMBUSTION}. The \ct{HEAT_OF_COMBUSTION} can be specified on the \ct{PART} line, or the \ct{REAC} line, or it will be calculated automatically by FDS. If it is specified on the \ct{PART} line, the burning rate will be adjusted to account for the difference between the heats of combustion of this particular droplet and the other fuels in the model. If you let FDS calculate the heat of combustion automatically, run the model for a few time steps and look for the ``Heat of Combustion'' listed in the \ct{CHID.out} file. Use this value to specify the flow rate from the nozzle to achieve your desired heat release rate.
 
-If a spray nozzle is used to generate the fuel droplets, its characteristics are specified in the same way as those for a sprinkler.  If the fuel species is listed in Appendix~\ref{info:predefined_species} and the column labelled ``RadCal Surrogate'' is not blank, then the droplets will be assigned fuel radiation absorption properties corresponding to the listed species.
+If a spray nozzle is used to generate the fuel droplets, its characteristics are specified in the same way as those for a sprinkler.  If the fuel species is listed in Appendix~\ref{info:predefined_species} and the column labeled ``RadCal Surrogate'' is not blank, then the droplets will be assigned fuel radiation absorption properties corresponding to the listed species.
 
 Note that to limit the computational cost of sprinkler simulations, liquid droplets disappear when they hit the ``floor'' of the computational domain, regardless of whether it is solid or not. However, this may not be desired when using liquid fuels. To stop FDS from removing liquid droplets from the floor of the domain, add the phrase \ct{POROUS_FLOOR=F} to the \ct{MISC} line. An alternate solution is make sure the \ct{OBST} the fuel is landing on is at least one cell thick.
 
@@ -7364,7 +7364,7 @@ At the start of the simulation the particle enthalpy is:
 H_{part} = 0.1~{\rm m} \times \pi \times (0.0005~{\rm m})^2 \times 500~{\rm kg/m}^3 \times (6145-5)~{\rm kJ/kg} = 0.2411~{\rm kJ}
 \ee
 
-At the end of the simulation only ash is left which is 2~\% of the char mass which was 25~\% of the inital particle mass. The ash will end up at the gas temperature.
+At the end of the simulation only ash is left which is 2~\% of the char mass which was 25~\% of the initial particle mass. The ash will end up at the gas temperature.
 
 \be
 H_{part} = 0.1~{\rm m} \times \pi \times (0.0005~{\rm m})^2 \times 500~{\rm kg/m}^3 \times 0.02 \times 0.25 \times (775-231)~{\rm kJ/kg} = 0.0001~{\rm kJ}
@@ -7483,7 +7483,7 @@ A handy way to introduce many trees into a simulation is by way of a \ct{SURF} l
 \begin{lstlisting}
 &SURF ID='forest',..., INIT_IDS(1:2)='needles','branches', INIT_PER_AREA=0.1 /
 \end{lstlisting}
-This line indicates that solid boundaries with the surface properties given by \ct{'forest'} shall have 1 tree per 10~m$^2$, as indicated by the parameter \ct{INIT_PER_AREA}. The trees may consist of more than one type of particle, as indicated by the array \ct{INIT_IDS}. Note that this construct is designed for trees and is only invoked on upward-facing horizontal boundaries. Also note that the coordinates \ct{XYZ} on the \ct{INIT} line should be \ct{0,0,0} so that it can be re-positioned accordingly.
+This line indicates that solid boundaries with the surface properties given by \ct{'forest'} shall have 1 tree per 10~m$^2$, as indicated by the parameter \ct{INIT_PER_AREA}. The trees may consist of more than one type of particle, as indicated by the array \ct{INIT_IDS}. Note that this construct is designed for trees and is only invoked on upward-facing horizontal boundaries. Also note that the coordinates \ct{XYZ} on the \ct{INIT} line should be \ct{0,0,0} so that it can be repositioned accordingly.
 
 
 \subsection{Bulk Density Input Files}
@@ -7590,7 +7590,7 @@ For scenarios where the fire's rate of spread (ROS) is relatively slow and the n
 \be
    W = {\rm ROS} \times \Delta t_{\rm b}
 \ee
-The more grid cells spanning the front width, the better resolved the simulation. In badly resolved simulations, the time required for the fire to spread the width of a grid cell may be comparable or longer than the burnout time, $\Delta t_{\rm b}$. In such cases, it is necessary to specify an effective ``burnout time'' that accounts for the unresolved burning occurring at sub-grid scales. This parameter, \ct{MINIMUM_BURNOUT_TIME} (s), is specified on the \ct{SURF} line that provides parameters for the vegetation. By default, it has a very large value, meaning that it is ignored unless specified.
+The more grid cells spanning the front width, the better resolved the simulation. In badly resolved simulations, the time required for the fire to spread the width of a grid cell may be comparable or longer than the burnout time, $\Delta t_{\rm b}$. In such cases, it is necessary to specify an effective ``burnout time'' that accounts for the unresolved burning occurring at subgrid scales. This parameter, \ct{MINIMUM_BURNOUT_TIME} (s), is specified on the \ct{SURF} line that provides parameters for the vegetation. By default, it has a very large value, meaning that it is ignored unless specified.
 
 
 \newpage
@@ -7632,11 +7632,11 @@ In this next example, ground vegetation with the same properties as the previous
 \subsection{Vegetation Radiation Absorption}
 \label{ground_vegetation_radi}
 
-In this next example, ground vegetation lines the floors of two unit cubes with hot ceilings and cold floors. The walls are \ct{MIRROR} boundaries so that the ceiling and floor can be taken as infinitely wide parallel plates. The height of the vegetation is $\delta=0.05$~m, and the grid size in the simulation is 5~cm.  Particles model the vegetation in one cube; the Boundary Fuel Model is applied in the other. The surface area to volume ratio of the vegetation, $\sigma_{\rm v}=3092$~m$^{-1}$, the packing ratio, $\beta=0.02$, and the shape factor, $C_{\rm s}$=0.25. The ceiling temperature, $T_{\rm c}=993$~K; the floor temperature, $T_{\rm f}=293$~K. The emissivity of both surfaces is 1. The radiation absorption coefficient, $\kappa \equiv C_{\rm s} \sigma_{\rm v} \beta=15.46$~m$^{-1}$, and the expected heat flux to the floor is:
+In this next example, ground vegetation lines the floors of two unit cubes with hot ceilings and cold floors. The walls are \ct{MIRROR} boundaries so that the ceiling and floor can be taken as infinitely wide parallel plates. The height of the vegetation is $\delta=0.05$~m, and the grid size in the simulation is 5~cm.  Particles model the vegetation in one cube; the Boundary Fuel Model is applied in the other. The surface area to volume ratio of the vegetation, $\sigma_{\rm v}=3092$~m$^{-1}$, the packing ratio, $\beta=0.02$, and the shape factor, $C_{\rm s}$=0.25. The ceiling temperature, $T_{\rm c}=993$~K; the floor temperature, $T_{\rm f}=293$~K. The emissivity of both surfaces is 1. The radiation absorption coefficient is $\kappa \equiv C_{\rm s} \sigma_{\rm v} \beta=15.46$~m$^{-1}$. Using the third-order exponential integral function, $E_3$, the expected heat flux to the floor is~\cite{Siegel:1}:
 \be
-   \dq'' = \sigma (T_{\rm c}^4-T_{\rm f}^4) \, {\rm e}^{- 2 \kappa \delta} = 11.66 \; \hbox{kW/m}^2
+   \dq'' = 2 \, \sigma T_{\rm c}^4 \, E_3(\kappa\delta) - \sigma T_{\rm f}^4 \left(1-2 \, E_3(\kappa\delta) \right) = 15.52 \; \hbox{kW/m}^2
 \ee
-The results are shown in Fig.~\ref{ground_vegetation_radi_fig}. The Lagrangian particles that represent the vegetation only occupy a single layer of grid cells; thus, the radiation absorption calculation for particles is not expected to be accurate.
+The results are shown in Fig.~\ref{ground_vegetation_radi_fig}. The Lagrangian particles that represent the vegetation only occupy two layers of grid cells; thus, the radiation absorption calculation has some error. In the case of the Boundary Fuel Model the error originates from the use of the "two-flux" model for internal radiation in the fuel (see the FDS Technical Reference Guide~\cite{FDS_Math_Guide}).
 
 \begin{figure}[ht]
 \centering
@@ -7960,7 +7960,7 @@ For full-cone sprays, the parameter \ct{SPRAY_PATTERN_MU} is set to zero by defa
 &PROP ... SPRAY_ANGLE=0.,30., SPRAY_PATTERN_MU=15. /
 \end{lstlisting}
 
-Figure \ref{fig:spray_pattern_parameters} gives a sense of how the parameters \ct{SPRAY_PATTERN_MU} and \ct{SPRAY_PATTERN_BETA} affect the distribution.  In each row of the figure, the maximinum angle, \ct{SPRAY_ANGLE(2,1)}, is varied from 22.5 to 45 degrees.  Each plot varies the spread parameter, \ct{SPRAY_PATTERN_BETA}, from 0 (uniform) to 1000 (narrow distribution).  The peak angle of the distribution, \ct{SPRAY_PATTERN_MU}, is varied from 0 to 10 to 20 as you go from the top to the bottom row.
+Figure \ref{fig:spray_pattern_parameters} gives a sense of how the parameters \ct{SPRAY_PATTERN_MU} and \ct{SPRAY_PATTERN_BETA} affect the distribution.  In each row of the figure, the maximum angle, \ct{SPRAY_ANGLE(2,1)}, is varied from 22.5 to 45 degrees.  Each plot varies the spread parameter, \ct{SPRAY_PATTERN_BETA}, from 0 (uniform) to 1000 (narrow distribution).  The peak angle of the distribution, \ct{SPRAY_PATTERN_MU}, is varied from 0 to 10 to 20 as you go from the top to the bottom row.
 
 \begin{figure}[h!]
 \begin{center}
@@ -9259,6 +9259,11 @@ If multiple meshes are involved, enter the name of the first \ct{.csv} file only
 \end{lstlisting}
 and FDS will read, for example, \ct{CHID_uvw_t1_m1.csv} through \ct{CHID_uvw_t1_m16.csv} in the order of the \ct{MESH} lines (note that a \ct{MULT} line for the meshes may also be used).
 
+\section{Unfreezing the Initial Flow Field}
+\label{info:FREZ}
+
+It may be useful to allow the solid phase to respond to an established flow field at the start of a simulation.  This could be accomplished with the normal restart functionality; however, this limits the number of changes that can be made to the model before a restart is made.  The \ct{UNFREEZE_TIME} parameter on the \ct{MISC} line can be used for this purpose. When set, the initial flow field is frozen with the options \ct{FREEZE_VELOCITY} and \ct{SOLID_PHASE_ONLY} set until the simulation time exceeds \ct{UNFREEZE_TIME}.
+
 
 \section{Gravity}
 \label{info:GVEC}
@@ -10032,7 +10037,7 @@ For a particle, there are two options. The first is to reference the \ct{INIT} l
 &INIT ID='my particle', XYZ=..., N_PARTICLES=1, PART_ID='...' /
 &PROF ID='T-2', INIT_ID='my particle', QUANTITY='INSIDE WALL TEMPERATURE' /
 \end{lstlisting}
-The second option is to specify the particle using its unique identifying tag\footnote{Each droplet or particle has a unique integer identifier. To find it, open the case in Smokeview, load the particles, right click, ``Files/Data/Coloring,'' ``Particles,'' ``Settings,'' and click the box labelled ``Show selected particle tag.'' Then click on the desired particle.}. Once you have determined the tag, add the following line to the input file:
+The second option is to specify the particle using its unique identifying tag\footnote{Each droplet or particle has a unique integer identifier. To find it, open the case in Smokeview, load the particles, right click, ``Files/Data/Coloring,'' ``Particles,'' ``Settings,'' and click the box labeled ``Show selected particle tag.'' Then click on the desired particle.}. Once you have determined the tag, add the following line to the input file:
 \begin{lstlisting}
 &PROF LP_TAG=..., PART_ID='...', QUANTITY='INSIDE WALL TEMPERATURE' /
 \end{lstlisting}
@@ -10138,6 +10143,8 @@ You have the option of rendering the \ct{DENSITY} of any other species besides \
 The \ct{MASS_EXTINCTION_COEFFICIENT} is passed to Smokeview to be used for visualization.
 
 FDS outputs 3D smoke quantities as 8 bit integers compressed using run length encoding.  Soot density, HRRPUV or temperatures are first scaled to 8 bit integers (soot density is converted to an opacity first). Repeated integers are replaced by $n$I where $n$ is the number of repeats and I is the value repeated.
+
+You can change the scale of \ct{HRRPUV} via the parameter \ct{HRRPUV_MAX_SMV} (default 1200~kW/m$^3$) on the \ct{DUMP} line. You can change the \ct{TEMPERATURE} bounds via \ct{TEMP_MIN_SMV} and \ct{TEMP_MAX_SMV} (default 20~$^\circ$C and 2000~$^\circ$C).
 
 \newpage
 
@@ -10249,7 +10256,7 @@ If the \ct{INIT} line has a \ct{MULT_ID}; that is, an array of particles is intr
 \end{lstlisting}
 specify an array of 10 by 10 by 4 particles. We want to record the surface temperature of the 307-th particle. See Sec.~\ref{info:MULT} for details of how the \ct{MULT} line is interpreted.
 
-If you know the unique identifying tag\footnote{Each droplet or particle has a unique integer identifier. To find it, open the case in Smokeview, load the particles, right click, ``Files/Data/Coloring,'' ``Particles,'' ``Settings,'' and click the box labelled ``Show selected particle tag.'' Then click on the desired particle.} of a particular particle, you can output a solid phase quantity via the following line:
+If you know the unique identifying tag\footnote{Each droplet or particle has a unique integer identifier. To find it, open the case in Smokeview, load the particles, right click, ``Files/Data/Coloring,'' ``Particles,'' ``Settings,'' and click the box labeled ``Show selected particle tag.'' Then click on the desired particle.} of a particular particle, you can output a solid phase quantity via the following line:
 \begin{lstlisting}
 &DEVC ID='...', LP_TAG=..., QUANTITY='WALL TEMPERATURE' /
 \end{lstlisting}
@@ -11683,8 +11690,8 @@ Table~\ref{tab:particleoutputquantities} below lists some less often used output
 \ct{ADT}$^2$                                   & Avg.~Droplet Temperature                          & $^\circ$C         & D,I,P,S      \\ \hline
 \ct{ADT_Z}$^1$                                & Avg.~Droplet Temperature                          & $^\circ$C         & D,I,P,S      \\ \hline
 \ct{DROPLET VOLUME FRACTION}$^2$               & Section~\ref{bucket_test_4}                       &                   & D,P,S        \\ \hline
-\ct{MPUV}$^2$                                  & Section~\ref{bucket_test_4}                       & kg/m$^3$          & D,P,S        \\ \hline
-\ct{MPUV_Z}$^1$                               & Section~\ref{bucket_test_4}                       & kg/m$^3$          & D,P,S        \\ \hline
+\ct{MPUV}$^3$                                  & Section~\ref{bucket_test_4}                       & kg/m$^3$          & D,P,S        \\ \hline
+\ct{MPUV_Z}$^3$                               & Section~\ref{bucket_test_4}                       & kg/m$^3$          & D,P,S        \\ \hline
 \ct{PARTICLE ACCEL X}$^2$                      & Section~\ref{particle_colors}                     & m/s$^2$           & PA          \\ \hline
 \ct{PARTICLE ACCEL Y}$^2$                      & Section~\ref{particle_colors}                     & m/s$^2$           & PA          \\ \hline
 \ct{PARTICLE ACCEL Z}$^2$                      & Section~\ref{particle_colors}                     & m/s$^2$           & PA          \\ \hline
@@ -11721,7 +11728,8 @@ Table~\ref{tab:particleoutputquantities} below lists some less often used output
 \noindent
 \begin{tabbing}
 $^1$ \hspace{0.05in} \= Requires the specification of a gas species using \ct{SPEC_ID}. \\
-$^2$                 \> Requires the specification of a particle name using \ct{PART_ID}. \\
+$^2$                 \> Requires the specification of a particle class using \ct{PART_ID}. \\
+$^3$                 \> Requires the specification of a non-zero mass particle class using \ct{PART_ID}. \\
 \end{tabbing}
 
 
@@ -12168,6 +12176,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{DT_TMP}                       & Real         & Section~\ref{info:CSVF}                &  s        &                                \\ \hline
 \ct{DT_UVW}                       & Real         & Section~\ref{info:CSVF}                &  s        &                                \\ \hline
 \ct{FLUSH_FILE_BUFFERS}          & Logical      & Section~\ref{info:DUMP}                &           & \ct{T}                        \\ \hline
+\ct{HRRPUV_MAX_SMV}              & Real         & Section~\ref{info:SMOKE3D}             & kW/m$^3$  & 1200                          \\ \hline
 \ct{MASS_FILE}                    & Logical      & Section~\ref{info:DUMP}                &           & \ct{F}                        \\ \hline
 \ct{MAXIMUM_PARTICLES}            & Integer      & Section~\ref{info:controlling_droplets}&           & 1000000                        \\ \hline
 \ct{NFRAMES}                       & Integer      & Section~\ref{info:DUMP}                &           & 1000                           \\ \hline
@@ -12202,6 +12211,8 @@ Keyword             & Type     & Description                      & Units       
 \ct{SMOKE3D}                       & Logical      & Section~\ref{info:SMOKE3D}             &           & \ct{T}                        \\ \hline
 \ct{STATUS_FILES}                 & Logical      & Section~\ref{info:DUMP}                &           & \ct{F}                        \\ \hline
 \ct{SUPPRESS_DIAGNOSTICS}         & Logical      & Section~\ref{info:monitoring_progress} &           & \ct{F}                        \\ \hline
+\ct{TEMP_MAX_SMV}                 & Real         & Section~\ref{info:SMOKE3D}             & $^\circ$C & 2000                          \\ \hline
+\ct{TEMP_MIN_SMV}                 & Real         & Section~\ref{info:SMOKE3D}             & $^\circ$C & 2000                          \\ \hline
 \ct{VELOCITY_ERROR_FILE}         & Logical      & Section~\ref{info:TIMING}              &           & \ct{F}                        \\ \hline
 \ct{WRITE_XYZ}                    & Logical      & Section~\ref{info:PL3D}                &           & \ct{F}                        \\ \hline
 \end{longtable}
@@ -12731,6 +12742,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{TMPA}                                          & Real         & Section~\ref{info:MISC_Basics}          & $^\circ$C  & 20.               \\ \hline
 \ct{TURBULENCE_MODEL}                             & Character    & Section~\ref{info:LES}                  &            & \ct{'DEARDORFF'} \\ \hline
 \ct{TURBULENT_DEPOSITION}                         & Logical      & Section~\ref{info:deposition}           &            & \ct{T}           \\ \hline
+\ct{UNFREEZE_TIME}                               & Real          & Section~\ref{info:FREZ}                 &            &                  \\ \hline
 \ct{VERBOSE}                                       & Logical      & Section~\ref{info:multimesh}            &            &                   \\ \hline
 \ct{VISIBILITY_FACTOR}                            & Real         & Section~\ref{info:visibility}           &            & 3                 \\ \hline
 \ct{VN_MAX}                                       & Real         & Section~\ref{info:VN}                   &            & 1.0               \\ \hline
@@ -14084,7 +14096,7 @@ Keyword             & Type     & Description                      & Units       
 375  \> \ct{OBST ... is VARIABLE_THICKNESS or HT3D and needs a MATL_ID.} \> Section~\ref{info:HT3D_Limitations}  \\
 376  \> \ct{Meshes must have the same y/z bounds for TUNNEL_PRECONDITIONER.} \> Section~\ref{tunnel_solver}  \\
 377  \> \ct{SURF ... IMPINGING JET model requires ...} \> Section~\ref{info:impinging_jet}  \\
-378  \> \ct{SURF ... cannot be applied to a thermally-thick solid.} \> Section~\ref{info:BACKING}  \\
+378  \> \ct{SURF ... cannot be applied to a 3-D conducting solid.} \> Section~\ref{info:BACKING}  \\
      \>                                                                               \>                                     \\
 381  \> \ct{Need more spectral band limits.} \> Section~\ref{info:RADI_Wide_Band}  \\
 382  \> \ct{Spectral band limits should be given in ascending order.} \> Section~\ref{info:RADI_Wide_Band}  \\
@@ -14411,6 +14423,7 @@ Keyword             & Type     & Description                      & Units       
 1042 \> \ct{QUANTITY ... not found.} \> Section~\ref{info:gasoutputquantities} \\
 1043 \> \ct{PROP_ID ... not found.} \> Section~\ref{info:gasoutputquantities} \\
 1044 \> \ct{Cannot set EXTERNAL_FILE=T for a RAMP used for an output clock ...} \> Section~\ref{info:external_control} \\
+1045 \> \ct{QUANTITY ... requires a PART_ID for particles with mass.} \> Section~\ref{tab:particleoutputquantities} \\
      \>                                                                               \>                                     \\
 1051 \> \ct{RESTART initial time equals T_END.} \> Section~\ref{info:restart} \\
 
