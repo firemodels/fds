@@ -20,7 +20,6 @@ import numpy as np
 import pandas as pd
 
 
-
 def dataplot(config_filename,**kwargs):
 
     import os
@@ -28,9 +27,9 @@ def dataplot(config_filename,**kwargs):
     import pandas as pd
     from matplotlib import rc
 
-    # plt.rcParams["font.family"] = 'Times'
-    plt.rcParams['text.usetex'] = True # supports latex math (set per plot below)
-    plt.rcParams["pdf.use14corefonts"] = True # forces matplotlib to write native pdf fonts rather than embed
+    import logging
+    # Suppress just the 'findfont' warnings from matplotlib's font manager
+    logging.getLogger('matplotlib.font_manager').setLevel(logging.ERROR)
 
     # defaults
     revision  = ''
@@ -202,6 +201,12 @@ def plot_to_fig(x_data,y_data,**kwargs):
     plt.rcParams["font.family"] = plot_style["Font_Name"]
     plt.rcParams["font.size"] = plot_style["Label_Font_Size"]
     # print(plot_style)
+
+    plt.rcParams['text.usetex'] = True # supports latex math (set per plot below)
+    plt.rcParams["pdf.use14corefonts"] = True # forces matplotlib to write native pdf fonts rather than embed
+    import logging
+    # Suppress just the 'findfont' warnings from matplotlib's font manager
+    logging.getLogger('matplotlib.font_manager').setLevel(logging.ERROR)
 
     ##### default parameters ######
     default_figure_size = (plot_style["Paper_Width"],plot_style["Paper_Height"])
@@ -466,20 +471,28 @@ def add_version_string(ax, version_str, plot_type='linear', scale_x=0.60, scale_
     font_interpreter (str): Interpreter type (not applicable in matplotlib, kept for compatibility).
     font_size (int): Font size for the text.
     """
+    import logging
+    # Suppress just the 'findfont' warnings from matplotlib's font manager
+    logging.getLogger('matplotlib.font_manager').setLevel(logging.ERROR)
 
     if (version_str):
 
         x_lim = ax.get_xlim()
         y_lim = ax.get_ylim()
 
+        eps = 1.e-10
         if plot_type == 'loglog':
+            x_lim = np.maximum(eps,x_lim)
+            y_lim = np.maximum(eps,y_lim)
             x_pos = 10**(np.log10(x_lim[0]) + scale_x * (np.log10(x_lim[1]) - np.log10(x_lim[0])))
             y_pos = 10**(np.log10(y_lim[0]) + scale_y * (np.log10(y_lim[1]) - np.log10(y_lim[0])))
         elif plot_type == 'semilogx':
+            x_lim = np.maximum(eps,x_lim)
             x_pos = 10**(np.log10(x_lim[0]) + scale_x * (np.log10(x_lim[1]) - np.log10(x_lim[0])))
             y_pos = y_lim[0] + scale_y * (y_lim[1] - y_lim[0])
         elif plot_type == 'semilogy':
             x_pos = x_lim[0] + scale_x * (x_lim[1] - x_lim[0])
+            y_lim = np.maximum(eps,y_lim)
             y_pos = 10**(np.log10(y_lim[0]) + scale_y * (np.log10(y_lim[1]) - np.log10(y_lim[0])))
         else:
             x_pos = x_lim[0] + scale_x * (x_lim[1] - x_lim[0])
@@ -499,6 +512,10 @@ def get_plot_style(style="fds"):
     Returns:
     - dict: A dictionary containing plot style parameters.
     """
+    import logging
+    # Suppress just the 'findfont' warnings from matplotlib's font manager
+    logging.getLogger('matplotlib.font_manager').setLevel(logging.ERROR)
+
     if style == "fds":
         return {
             # Font properties
