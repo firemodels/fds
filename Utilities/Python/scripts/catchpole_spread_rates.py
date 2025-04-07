@@ -4,15 +4,17 @@ import os, sys
 import pandas as pd
 from matplotlib.ticker import ScalarFormatter
 
+# Suppress RankWarning specifically
+import warnings
+warnings.simplefilter('ignore', np.RankWarning)
+
 # include FDS plot styles, etc.
 filedir = os.path.dirname(__file__)
 firemodels = os.path.join(filedir,'..','..','..','..')
 sys.path.append(filedir+os.sep+'..'+os.sep)
 import fdsplotlib
 
-
 # Get plot style parameters
-plt.rcParams["pdf.use14corefonts"] = True # forces matplotlib to write native pdf fonts rather then embed
 plot_style = fdsplotlib.get_plot_style("fds")
 
 # Define paths
@@ -29,6 +31,8 @@ for ti,test in tests.iterrows():
     fds_file = os.path.join(base_path, f"{chid}_devc.csv")
     git_file = os.path.join(base_path, f"{chid}_git.txt")
     fig_file = os.path.join(fig_path, f"{chid}.pdf")
+
+    print("  plotting {}...".format(chid))
     
     if os.path.exists(fds_file) is False:
         print(f'Error: File {fds_file} does not exist. Skipping case.')
@@ -46,7 +50,7 @@ for ti,test in tests.iterrows():
         R_FDS=0.
         
     if R_FDS<0:
-        R_FDS=0        
+        R_FDS=0
     
     # Exp results
     x_exp = np.array([0., 8.])
