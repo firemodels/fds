@@ -141,14 +141,13 @@ def EDC_batch_reactor(mechanismFile, T0, P0, fuel, equiv_ratio, zeta_0, tau_mix,
     ]).T
     
     # Reduce the number of rows of statesForCSV
-    # statesForCSVReduced = []
-    # for j in range(len(statesForCSV)):
-    #     t= statesForCSV[j][0]
-    #     # Use np.isclose to avoid floating-point precision issues
-    #     if np.isclose(t % writeInterval, 0, atol=1e-4):
-    #        statesForCSVReduced.append(statesForCSV[j])
-        
-    csvdata = pd.DataFrame(statesForCSV, columns=columnNames)
+    statesForCSVReduced = []
+    tCount = 0
+    for j in range(len(statesForCSV)):
+        if (tCount%writeInterval ==0):
+            statesForCSVReduced.append(statesForCSV[j])
+        tCount = tCount+1
+    csvdata = pd.DataFrame(statesForCSVReduced, columns=columnNames)
     outfilename = caseName+'_soln.csv'
     save_csv_file(Chemistry_DIR+outfilename,csvdata)
 
@@ -168,7 +167,7 @@ def get_OneCFDStep_vary_zeta0_default_parameters():
     t_end = 1e-1
     dt_cfd = 1e-1
     dt_sub_chem = 1e-4
-    writeInterval=0.001
+    writeInterval=10
     return equiv_ratio, T0, P0, tau_mix, t_end, dt_cfd, dt_sub_chem,writeInterval
 
 # Define mechanism and fuel
@@ -216,7 +215,7 @@ def get_MultiCFDStep_vary_zeta0_default_parameters():
     t_end = 20
     dt_cfd = 1e-2
     dt_sub_chem = 1e-4
-    writeInterval=0.001
+    writeInterval=10
     return equiv_ratio, T0, P0, tau_mix, t_end, dt_cfd, dt_sub_chem,writeInterval
 
 mechFile='Methane_grimech30.yaml'
@@ -227,25 +226,25 @@ equiv_ratio, T0, P0, tau_mix, t_end, dt_cfd, dt_sub_chem,writeInterval = get_Mul
 zeta_0 = 1.0
 EDC_batch_reactor(mechFile, T0, P0, fuel, equiv_ratio, zeta_0, tau_mix, t_end, dt_cfd, dt_sub_chem, caseName,2,writeInterval)
 
-# caseName='EDC_MultiCFDStep_Methane_grimech30_Zeta0p75'
-# equiv_ratio, T0, P0, tau_mix, t_end, dt_cfd, dt_sub_chem,writeInterval = get_MultiCFDStep_vary_zeta0_default_parameters()
-# zeta_0 = 0.75
-# EDC_batch_reactor(mechFile, T0, P0, fuel, equiv_ratio, zeta_0, tau_mix, t_end, dt_cfd, dt_sub_chem, caseName,2,writeInterval)
+caseName='EDC_MultiCFDStep_Methane_grimech30_Zeta0p75'
+equiv_ratio, T0, P0, tau_mix, t_end, dt_cfd, dt_sub_chem,writeInterval = get_MultiCFDStep_vary_zeta0_default_parameters()
+zeta_0 = 0.75
+EDC_batch_reactor(mechFile, T0, P0, fuel, equiv_ratio, zeta_0, tau_mix, t_end, dt_cfd, dt_sub_chem, caseName,2,writeInterval)
 
-# caseName='EDC_MultiCFDStep_Methane_grimech30_Zeta0p5'
-# equiv_ratio, T0, P0, tau_mix, t_end, dt_cfd, dt_sub_chem,writeInterval = get_MultiCFDStep_vary_zeta0_default_parameters()
-# zeta_0 = 0.5
-# EDC_batch_reactor(mechFile, T0, P0, fuel, equiv_ratio, zeta_0, tau_mix, t_end, dt_cfd, dt_sub_chem, caseName,2,writeInterval)
+caseName='EDC_MultiCFDStep_Methane_grimech30_Zeta0p5'
+equiv_ratio, T0, P0, tau_mix, t_end, dt_cfd, dt_sub_chem,writeInterval = get_MultiCFDStep_vary_zeta0_default_parameters()
+zeta_0 = 0.5
+EDC_batch_reactor(mechFile, T0, P0, fuel, equiv_ratio, zeta_0, tau_mix, t_end, dt_cfd, dt_sub_chem, caseName,2,writeInterval)
 
-# caseName='EDC_MultiCFDStep_Methane_grimech30_Zeta0p25'
-# equiv_ratio, T0, P0, tau_mix, t_end, dt_cfd, dt_sub_chem,writeInterval = get_MultiCFDStep_vary_zeta0_default_parameters()
-# zeta_0 = 0.25
-# EDC_batch_reactor(mechFile, T0, P0, fuel, equiv_ratio, zeta_0, tau_mix, t_end, dt_cfd, dt_sub_chem, caseName,2,writeInterval)
+caseName='EDC_MultiCFDStep_Methane_grimech30_Zeta0p25'
+equiv_ratio, T0, P0, tau_mix, t_end, dt_cfd, dt_sub_chem,writeInterval = get_MultiCFDStep_vary_zeta0_default_parameters()
+zeta_0 = 0.25
+EDC_batch_reactor(mechFile, T0, P0, fuel, equiv_ratio, zeta_0, tau_mix, t_end, dt_cfd, dt_sub_chem, caseName,2,writeInterval)
 
-# caseName='EDC_MultiCFDStep_Methane_grimech30_Zeta0p0'
-# equiv_ratio, T0, P0, tau_mix, t_end, dt_cfd, dt_sub_chem,writeInterval = get_MultiCFDStep_vary_zeta0_default_parameters()
-# zeta_0 = 0.0
-# EDC_batch_reactor(mechFile, T0, P0, fuel, equiv_ratio, zeta_0, tau_mix, t_end, dt_cfd, dt_sub_chem, caseName,2,writeInterval)
+caseName='EDC_MultiCFDStep_Methane_grimech30_Zeta0p0'
+equiv_ratio, T0, P0, tau_mix, t_end, dt_cfd, dt_sub_chem,writeInterval = get_MultiCFDStep_vary_zeta0_default_parameters()
+zeta_0 = 0.0
+EDC_batch_reactor(mechFile, T0, P0, fuel, equiv_ratio, zeta_0, tau_mix, t_end, dt_cfd, dt_sub_chem, caseName,2,writeInterval)
 
 
 #------------------------------------------------------------------
@@ -255,81 +254,45 @@ EDC_batch_reactor(mechFile, T0, P0, fuel, equiv_ratio, zeta_0, tau_mix, t_end, d
 #------------------------------------------------------------------
 
 
-# # Helper function to get default CFD step parameters
-# def get_OneCFDStep_vary_taumix_default_parameters():
-#     equiv_ratio = 0.6
-#     T0 = 1200  # Initial temperature [K]
-#     P0 = ct.one_atm  # Initial pressure [Pa]
-#     zeta_0 = 1.0
-#     t_end = 1e-1
-#     dt_cfd = 1e-1
-#     dt_sub_chem = 1e-4
-#     writeInterval=0.001
-#     return equiv_ratio, T0, P0, zeta_0, t_end, dt_cfd, dt_sub_chem,writeInterval
+# Helper function to get default CFD step parameters
+def get_OneCFDStep_vary_taumix_default_parameters():
+    equiv_ratio = 0.6
+    T0 = 1200  # Initial temperature [K]
+    P0 = ct.one_atm  # Initial pressure [Pa]
+    zeta_0 = 1.0
+    t_end = 1e-1
+    dt_cfd = 1e-1
+    dt_sub_chem = 1e-4
+    writeInterval=10
+    return equiv_ratio, T0, P0, zeta_0, t_end, dt_cfd, dt_sub_chem,writeInterval
 
-# # Define mechanism and fuel
-# mechFile = 'Methane_grimech30.yaml'
-# fuel = 'CH4'
+# Define mechanism and fuel
+mechFile = 'Methane_grimech30.yaml'
+fuel = 'CH4'
 
-# caseName='EDC_OneCFDStep_Methane_grimech30_taumix0p1'
-# equiv_ratio, T0, P0, zeta_0, t_end, dt_cfd, dt_sub_chem,writeInterval = get_OneCFDStep_vary_taumix_default_parameters()
-# tau_mix = 0.1
-# EDC_batch_reactor(mechFile, T0, P0, fuel, equiv_ratio, zeta_0, tau_mix, t_end, dt_cfd, dt_sub_chem, caseName,1,writeInterval)
+caseName='EDC_OneCFDStep_Methane_grimech30_taumix0p1'
+equiv_ratio, T0, P0, zeta_0, t_end, dt_cfd, dt_sub_chem,writeInterval = get_OneCFDStep_vary_taumix_default_parameters()
+tau_mix = 0.1
+EDC_batch_reactor(mechFile, T0, P0, fuel, equiv_ratio, zeta_0, tau_mix, t_end, dt_cfd, dt_sub_chem, caseName,1,writeInterval)
 
-# caseName='EDC_OneCFDStep_Methane_grimech30_taumix0p01'
-# equiv_ratio, T0, P0, zeta_0, t_end, dt_cfd, dt_sub_chem,writeInterval = get_OneCFDStep_vary_taumix_default_parameters()
-# tau_mix = 0.01
-# EDC_batch_reactor(mechFile, T0, P0, fuel, equiv_ratio, zeta_0, tau_mix, t_end, dt_cfd, dt_sub_chem, caseName,1,writeInterval)
+caseName='EDC_OneCFDStep_Methane_grimech30_taumix0p01'
+equiv_ratio, T0, P0, zeta_0, t_end, dt_cfd, dt_sub_chem,writeInterval = get_OneCFDStep_vary_taumix_default_parameters()
+tau_mix = 0.01
+EDC_batch_reactor(mechFile, T0, P0, fuel, equiv_ratio, zeta_0, tau_mix, t_end, dt_cfd, dt_sub_chem, caseName,1,writeInterval)
 
-# caseName='EDC_OneCFDStep_Methane_grimech30_taumix0p001'
-# equiv_ratio, T0, P0, zeta_0, t_end, dt_cfd, dt_sub_chem,writeInterval = get_OneCFDStep_vary_taumix_default_parameters()
-# tau_mix = 0.001
-# EDC_batch_reactor(mechFile, T0, P0, fuel, equiv_ratio, zeta_0, tau_mix, t_end, dt_cfd, dt_sub_chem, caseName,1,writeInterval)
+caseName='EDC_OneCFDStep_Methane_grimech30_taumix0p001'
+equiv_ratio, T0, P0, zeta_0, t_end, dt_cfd, dt_sub_chem,writeInterval = get_OneCFDStep_vary_taumix_default_parameters()
+tau_mix = 0.001
+EDC_batch_reactor(mechFile, T0, P0, fuel, equiv_ratio, zeta_0, tau_mix, t_end, dt_cfd, dt_sub_chem, caseName,1,writeInterval)
 
-# caseName='EDC_OneCFDStep_Methane_grimech30_taumix0p0001'
-# equiv_ratio, T0, P0, zeta_0, t_end, dt_cfd, dt_sub_chem,writeInterval = get_OneCFDStep_vary_taumix_default_parameters()
-# tau_mix = 0.001
-# EDC_batch_reactor(mechFile, T0, P0, fuel, equiv_ratio, zeta_0, tau_mix, t_end, dt_cfd, dt_sub_chem, caseName,1,writeInterval)
+caseName='EDC_OneCFDStep_Methane_grimech30_taumix0p0001'
+equiv_ratio, T0, P0, zeta_0, t_end, dt_cfd, dt_sub_chem,writeInterval = get_OneCFDStep_vary_taumix_default_parameters()
+tau_mix = 0.0001
+EDC_batch_reactor(mechFile, T0, P0, fuel, equiv_ratio, zeta_0, tau_mix, t_end, dt_cfd, dt_sub_chem, caseName,1,writeInterval)
 
-# caseName='EDC_OneCFDStep_Methane_grimech30_taumix0p000001'
-# equiv_ratio, T0, P0, zeta_0, t_end, dt_cfd, dt_sub_chem,writeInterval = get_OneCFDStep_vary_taumix_default_parameters()
-# tau_mix = 0.000001
-# EDC_batch_reactor(mechFile, T0, P0, fuel, equiv_ratio, zeta_0, tau_mix, t_end, dt_cfd, dt_sub_chem, caseName,1,writeInterval)
-
-
-
-#---------------
-
-# # Helper function to get default CFD step parameters
-# def get_MultiCFDStep_vary_zeta0_default_parameters():
-#     equiv_ratio = 0.6
-#     T0 = 900  # Initial temperature [K]
-#     P0 = ct.one_atm  # Initial pressure [Pa]
-#     tau_mix = 0.01
-#     t_end = 20
-#     dt_cfd = 1e-2
-#     dt_sub_chem = 1e-4
-#     writeInterval=0.001
-#     return equiv_ratio, T0, P0, tau_mix, t_end, dt_cfd, dt_sub_chem,writeInterval
-
-# mechFile='Methane_grimech30.yaml'
-# fuel = 'CH4'
+caseName='EDC_OneCFDStep_Methane_grimech30_taumix0p00001'
+equiv_ratio, T0, P0, zeta_0, t_end, dt_cfd, dt_sub_chem,writeInterval = get_OneCFDStep_vary_taumix_default_parameters()
+tau_mix = 0.00001
+EDC_batch_reactor(mechFile, T0, P0, fuel, equiv_ratio, zeta_0, tau_mix, t_end, dt_cfd, dt_sub_chem, caseName,1,writeInterval)
 
 
-# caseName='EDC_MultiCFDStep_Methane_grimech30_Zeta0p99_chem0p001'
-# equiv_ratio, T0, P0, tau_mix, t_end, dt_cfd, dt_sub_chem,writeInterval = get_MultiCFDStep_vary_zeta0_default_parameters()
-# zeta_0 = 0.99
-# dt_sub_chem = 0.001
-# EDC_batch_reactor(mechFile, T0, P0, fuel, equiv_ratio, zeta_0, tau_mix, t_end, dt_cfd, dt_sub_chem, caseName,2,writeInterval)
-
-# caseName='EDC_MultiCFDStep_Methane_grimech30_Zeta0p99_chem0p0001'
-# equiv_ratio, T0, P0, tau_mix, t_end, dt_cfd, dt_sub_chem,writeInterval = get_MultiCFDStep_vary_zeta0_default_parameters()
-# zeta_0 = 0.99
-# dt_sub_chem = 1e-4
-# EDC_batch_reactor(mechFile, T0, P0, fuel, equiv_ratio, zeta_0, tau_mix, t_end, dt_cfd, dt_sub_chem, caseName,2,writeInterval)
-
-# caseName='EDC_MultiCFDStep_Methane_grimech30_Zeta0p99_chem0p00001'
-# equiv_ratio, T0, P0, tau_mix, t_end, dt_cfd, dt_sub_chem,writeInterval = get_MultiCFDStep_vary_zeta0_default_parameters()
-# zeta_0 = 0.99
-# dt_sub_chem = 1e-5
-# EDC_batch_reactor(mechFile, T0, P0, fuel, equiv_ratio, zeta_0, tau_mix, t_end, dt_cfd, dt_sub_chem, caseName,2,writeInterval)

@@ -69,6 +69,14 @@ $QFDS -d Chemistry EDC_MultiCFDStep_Methane_grimech30_Zeta0p75.fds
 $QFDS -d Chemistry EDC_MultiCFDStep_Methane_grimech30_Zeta0p5.fds
 $QFDS -d Chemistry EDC_MultiCFDStep_Methane_grimech30_Zeta0p25.fds
 $QFDS -d Chemistry EDC_MultiCFDStep_Methane_grimech30_Zeta0p0.fds
+$QFDS -d Chemistry EDC_OneCFDStep_Methane_grimech30_taumix0p1.fds
+$QFDS -d Chemistry EDC_OneCFDStep_Methane_grimech30_taumix0p01.fds
+$QFDS -d Chemistry EDC_OneCFDStep_Methane_grimech30_taumix0p001.fds
+$QFDS -d Chemistry EDC_OneCFDStep_Methane_grimech30_taumix0p0001.fds
+$QFDS -d Chemistry EDC_OneCFDStep_Methane_grimech30_taumix0p00001.fds
+
+$QFDS -p 24 -d Chemistry EDC_load_bal_methane_smooke_serial.fds
+$QFDS -p 24 -d Chemistry EDC_load_bal_methane_smooke_parallel.fds
 
 $QFDS -d Complex_Geometry geom_channel.fds
 $QFDS -d Complex_Geometry geom_channel2.fds

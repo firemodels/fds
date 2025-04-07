@@ -3976,6 +3976,16 @@ Six additional constant volume ignition delay cases are configured using the fol
 \section{Mixing with detailed chemistry (\ct{edc\_mixing\_cvode})}
 \label{edc_mixing_cvode}
 
+Mixing with detailed chemistry is implemented using the Eddy Dissipation Concept (EDC) model, in which a system of ordinary differential equations (ODEs) describing species concentrations and temperature is solved using the CVODE solver. For detailed information on the formulation of the ODE system, please refer to the Technical Guide~\cite{FDS_Math_Guide}.
+
+This implementation has been validated against results obtained using Cantera~\cite{cantera:2023}. Note that Cantera does not provide a direct method to solve the coupled mixing-chemistry ODE system as done here in FDS; therefore, in Cantera an operator splitting approach was employed, where mixing and chemistry are handled sequentially. Specifically, within each CFD timestep (0.1 s), substeps for chemistry calculations in Cantera are kept sufficiently small (0.0001 s) to resolve the fast dynamics. All comparisons are carried out using the GRI-Mech 3.0 chemical mechanism~\cite{gri3:1999}.
+
+Figure~\ref{fig:edc_mixing_cvode_onecfdstep_vary_zeta0} presents comparisons of temperature and OH mass fraction between FDS and Cantera within a single CFD timestep for five constant-volume ignition delay cases, with varying initial unmixed fractions \(\zeta_0 = 1.0, 0.75, 0.5, 0.25, 0.0\).
+
+Figure~\ref{fig:edc_mixing_cvode_multicfdstep_vary_zeta0} shows similar comparisons over multiple CFD timesteps for the same ignition delay cases and initial unmixed fractions. These results also verify that elemental mass is conserved throughout the entire process.
+
+Finally, Figure~\ref{fig:edc_mixing_cvode_onecfdstep_vary_taumix} compares temperature and OH mass fraction for a single CFD timestep across five cases with varying mixing times \(\tau_{\text{mix}} = 0.1, 0.01, 0.001, 0.0001, 0.00001\) s. As the mixing time decreases, the solution becomes independent of \(\tau_{\text{mix}}\), approaching the well-stirred reactor limit corresponding to (\(\zeta_0 = 0.0\)).
+
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_Zeta1p0_TMP} &
@@ -4011,10 +4021,26 @@ Six additional constant volume ignition delay cases are configured using the fol
 \includegraphics[height=1.6in,width=0.32\textwidth]{SCRIPT_FIGURES/EDC_MultiCFDStep_Methane_grimech30_Zeta0p0_OH} &
 \includegraphics[height=1.6in,width=0.32\textwidth]{SCRIPT_FIGURES/EDC_MultiCFDStep_Methane_grimech30_Zeta0p0_elements} \\
 \end{tabular*}
-\caption[Results of the \ct{edc\_mixing\_cvode} test cases]{Comparison of mixing with detailed chemistry over several CFD steps, showing the effect of varying the initial unmixed fraction between FDS and Cantera. The simulation uses the Methane GRI mechanism with an equivalence ratio of 0.6, a mixing time of 0.01 s, and an initial temperature of 900 K.}
-\label{fig:edc_mixing_cvode_onecfdstep_vary_zeta0}
+\caption[Results of the \ct{edc\_mixing\_cvode} test cases]{Comparison of mixing with detailed chemistry over several CFD steps of 0.1 s, showing the effect of varying the initial unmixed fraction between FDS and Cantera. The simulation uses the Methane GRI mechanism with an equivalence ratio of 0.6, a mixing time of 0.01 s, and an initial temperature of 900 K.}
+\label{fig:edc_mixing_cvode_multicfdstep_vary_zeta0}
 \end{figure}
 
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_taumix0p1_TMP} &
+\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_taumix0p1_OH} \\
+\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_taumix0p01_TMP} &
+\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_taumix0p01_OH} \\
+\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_taumix0p001_TMP} &
+\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_taumix0p001_OH} \\
+\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_taumix0p0001_TMP} &
+\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_taumix0p0001_OH} \\
+\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_taumix0p00001_TMP} &
+\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_taumix0p00001_OH}
+\end{tabular*}
+\caption[Results of the \ct{edc\_mixing\_cvode} test cases]{Comparison of CVODE substeps for a single CFD step of 0.1 s, showing the effect of varying the mixing time between FDS and Cantera. The simulation uses the Methane GRI mechanism with an equivalence ratio of 0.6, an initial unmixed fraction of 1.0 s, and an initial temperature of 1200 K.}
+\label{fig:edc_mixing_cvode_onecfdstep_vary_taumix}
+\end{figure}
 
 \section{Combustion Load Balancing (\ct{comb\_load\_bal})}
 \label{comb_load_bal}

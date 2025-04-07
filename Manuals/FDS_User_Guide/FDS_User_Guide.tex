@@ -11690,8 +11690,8 @@ Table~\ref{tab:particleoutputquantities} below lists some less often used output
 \ct{ADT}$^2$                                   & Avg.~Droplet Temperature                          & $^\circ$C         & D,I,P,S      \\ \hline
 \ct{ADT_Z}$^1$                                & Avg.~Droplet Temperature                          & $^\circ$C         & D,I,P,S      \\ \hline
 \ct{DROPLET VOLUME FRACTION}$^2$               & Section~\ref{bucket_test_4}                       &                   & D,P,S        \\ \hline
-\ct{MPUV}$^2$                                  & Section~\ref{bucket_test_4}                       & kg/m$^3$          & D,P,S        \\ \hline
-\ct{MPUV_Z}$^1$                               & Section~\ref{bucket_test_4}                       & kg/m$^3$          & D,P,S        \\ \hline
+\ct{MPUV}$^3$                                  & Section~\ref{bucket_test_4}                       & kg/m$^3$          & D,P,S        \\ \hline
+\ct{MPUV_Z}$^3$                               & Section~\ref{bucket_test_4}                       & kg/m$^3$          & D,P,S        \\ \hline
 \ct{PARTICLE ACCEL X}$^2$                      & Section~\ref{particle_colors}                     & m/s$^2$           & PA          \\ \hline
 \ct{PARTICLE ACCEL Y}$^2$                      & Section~\ref{particle_colors}                     & m/s$^2$           & PA          \\ \hline
 \ct{PARTICLE ACCEL Z}$^2$                      & Section~\ref{particle_colors}                     & m/s$^2$           & PA          \\ \hline
@@ -11728,7 +11728,8 @@ Table~\ref{tab:particleoutputquantities} below lists some less often used output
 \noindent
 \begin{tabbing}
 $^1$ \hspace{0.05in} \= Requires the specification of a gas species using \ct{SPEC_ID}. \\
-$^2$                 \> Requires the specification of a particle name using \ct{PART_ID}. \\
+$^2$                 \> Requires the specification of a particle class using \ct{PART_ID}. \\
+$^3$                 \> Requires the specification of a non-zero mass particle class using \ct{PART_ID}. \\
 \end{tabbing}
 
 
@@ -14422,6 +14423,7 @@ Keyword             & Type     & Description                      & Units       
 1042 \> \ct{QUANTITY ... not found.} \> Section~\ref{info:gasoutputquantities} \\
 1043 \> \ct{PROP_ID ... not found.} \> Section~\ref{info:gasoutputquantities} \\
 1044 \> \ct{Cannot set EXTERNAL_FILE=T for a RAMP used for an output clock ...} \> Section~\ref{info:external_control} \\
+1045 \> \ct{QUANTITY ... requires a PART_ID for particles with mass.} \> Section~\ref{tab:particleoutputquantities} \\
      \>                                                                               \>                                     \\
 1051 \> \ct{RESTART initial time equals T_END.} \> Section~\ref{info:restart} \\
 
