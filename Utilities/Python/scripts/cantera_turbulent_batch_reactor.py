@@ -26,8 +26,8 @@ def save_csv_file(fullFilePath, csvdata):
 def EDC_batch_reactor(mechanismFile, T0, P0, fuel, equiv_ratio, zeta_0, tau_mix, t_end, dt_cfd, dt_sub_chem, caseName, saveStateOpt, writeInterval):
     print("Running case:"+caseName)
     current_working_directory = os.getcwd()
-    Cantera_DIR = os.path.join(current_working_directory, "../../Input_Libraries/Chemical_Mechanisms/Cantera/")
-    Chemistry_DIR = os.path.join(current_working_directory, "../../../Verification/Chemistry/")
+    Cantera_DIR = os.path.join(current_working_directory, "../Input_Libraries/Chemical_Mechanisms/Cantera/")
+    Chemistry_DIR = os.path.join(current_working_directory, "../../Verification/Chemistry/")
     
     gas = ct.Solution(Cantera_DIR+mechanismFile)
     mixingstates = ct.SolutionArray(gas, extra=['t', 'internal_energy', 'enthalpy','C_MF', 'H_MF', 'N_MF', 'O_MF'])
