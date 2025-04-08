@@ -1,4 +1,4 @@
-&HEAD CHID='load_bal_methane_smooke_parallel', TITLE='Complex Geometry: Test methane burning around sphere using detailed chemistry.' /
+&HEAD CHID='EDC_load_bal_methane_smooke_parallel', TITLE='Complex Geometry: Test methane burning around sphere using detailed chemistry.' /
 
 # 1 MESH:
 #& MESH IJK=64,64,96, XB=-2.0,2.0,-2.0,2.0,0.0,6.0 /
@@ -29,7 +29,7 @@
 &VENT MB='ZMAX', SURF_ID='OPEN' /
 
 # Species:
-&COMB ODE_SOLVER='CVODE',ODE_MIN_ATOL=1E-15,ODE_REL_ERROR=1E-9,ZZ_MIN_GLOBAL=1E-15,INITIAL_UNMIXED_FRACTION=0.0/
+&COMB ODE_SOLVER='CVODE',ODE_MIN_ATOL=1E-15,ODE_REL_ERROR=1E-9,ZZ_MIN_GLOBAL=1E-15,INITIAL_UNMIXED_FRACTION=1.0,FIXED_MIX_TIME=0.01/
 &CATF OTHER_FILES='../../Utilities/Input_Libraries/Chemical_Mechanisms/FDS/Methane_Smooke.fds' /
 &BACK SPEC_ID='N2','O2','H2O','CO2' ,MASS_FRACTION=0.762470,0.230997,0.005941,0.000591 /
 
