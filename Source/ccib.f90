@@ -14663,7 +14663,7 @@ END SUBROUTINE GET_LINKED_FV
 ! INTEGER, PARAMETER :: N_SEG=20
 ! WRITE(LU_ERR,'(A,I6,A,I2,A)') 'Process ID=',MY_RANK,'; execution halted for ',N_SEG,' seconds : '
 ! DO I=1,N_SEG
-!    CALL FDS_SLEEP(1)
+!    CALL FDS_SLEEP(1._EB)
 !    IF (I<N_SEG) THEN
 !       WRITE(LU_ERR,'(I2,A)',ADVANCE="no") I,', '
 !    ELSE
