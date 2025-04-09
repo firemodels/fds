@@ -348,14 +348,18 @@ END SUBROUTINE CHECK_REACTION
 
 SUBROUTINE CHECK_CHEMICALLY_ACTIVE_STATE (ZZ_GET, TMP, I, J , K, IS_CUT_CELL, CHEM_ACTIVE)
 
-USE PHYSICAL_FUNCTIONS, ONLY: IS_REALIZABLE
+USE PHYSICAL_FUNCTIONS, ONLY: IS_REALIZABLE, CALC_EQUIV_RATIO
 USE COMPLEX_GEOMETRY, ONLY : CC_CGSC, CC_GASPHASE
+USE CHEMCONS, ONLY: EQUIV_RATIO_CHECK, MIN_EQUIV_RATIO, MAX_EQUIV_RATIO
+
 REAL(EB), INTENT(IN) :: ZZ_GET(1:N_TRACKED_SPECIES)
 REAL(EB), INTENT(IN) :: TMP
 INTEGER, INTENT(IN), OPTIONAL :: I, J, K
 LOGICAL, INTENT(IN) :: IS_CUT_CELL
 LOGICAL, INTENT(INOUT) :: CHEM_ACTIVE
 LOGICAL :: DO_REACTION, REALIZABLE
+REAL(EB) :: EQUIV
+
 CHEM_ACTIVE = .TRUE.
 
 IF (CELL(CELL_INDEX(I,J,K))%SOLID) THEN
@@ -393,7 +397,14 @@ IF (.NOT.DO_REACTION) THEN
    RETURN
 ENDIF
 
-! Will add equivalence ratio check for CVODE later. ! CPaul
+! Check equivalence ratio of the mixture. Avoid chemistry calculation for very lean and rich cases.
+IF (COMBUSTION_ODE_SOLVER==CVODE_SOLVER .AND. EQUIV_RATIO_CHECK) THEN
+   CALL CALC_EQUIV_RATIO(ZZ_GET(1:N_TRACKED_SPECIES), EQUIV)
+   IF(EQUIV <  MIN_EQUIV_RATIO .OR. EQUIV > MAX_EQUIV_RATIO) THEN 
+      CHEM_ACTIVE = .FALSE.
+      RETURN
+   ENDIF   
+ENDIF
 
 END SUBROUTINE CHECK_CHEMICALLY_ACTIVE_STATE
 
@@ -723,7 +734,6 @@ REAL(EB) :: A1(1:N_TRACKED_SPECIES),A2(1:N_TRACKED_SPECIES),A4(1:N_TRACKED_SPECI
 INTEGER :: NR,NS,ITER,TVI,RICH_ITER,TIME_ITER,RICH_ITER_MAX
 INTEGER, PARAMETER :: TV_ITER_MIN=5
 LOGICAL :: TV_FLUCT(1:N_TRACKED_SPECIES),EXTINCT,NO_REACTIONS,NO_REAC_2,NO_REAC_4
-DOUBLE PRECISION :: T1,T2
 TYPE(REACTION_TYPE), POINTER :: RN !,R1
 
 ZZ_0 = ZZ_GET
@@ -731,7 +741,6 @@ EXTINCT = .FALSE.
 NO_REACTIONS = .FALSE.
 
 ! Determine the mixing time for this cell
-
 IF (FIXED_MIX_TIME>0._EB) THEN
    MIX_TIME_OUT=FIXED_MIX_TIME
 ELSE
@@ -863,15 +872,14 @@ INTEGRATION_LOOP: DO TIME_ITER = 1,MAX_CHEMISTRY_SUBSTEPS
          ENDIF
          ZETA_0     = ZETA
       CASE (CVODE_SOLVER)
-         T1 = 0._EB
-         T2 = DT
          DO NS =1,N_TRACKED_SPECIES
             ATOL(NS) = DBLE(SPECIES_MIXTURE(NS)%ODE_ABS_ERROR)
          ENDDO
+         IF (1==2) WRITE(LU_ERR,*) PRES_IN ! To avoid unused variable error.
 #ifdef WITH_SUNDIALS
-         CUR_CFD_TIME = T ! Set current cfd time in cvode, for logging purpose.
+         CALL CVODE(ZZ_MIXED,TMP_IN,PRES_IN,ZETA_0, ZETA,TAU_MIX,CELL_MASS,T,DT_SUB,GLOBAL_ODE_REL_ERROR, ATOL)
 #endif
-         CALL  CVODE(ZZ_MIXED,TMP_IN,PRES_IN, T1,T2, GLOBAL_ODE_REL_ERROR, ATOL)
+         ZETA_0     = ZETA
          Q_REAC_SUB = 0._EB
    END SELECT INTEGRATOR_SELECT
 
@@ -968,50 +976,91 @@ END SUBROUTINE COMBUSTION_MODEL
 !> \param ZZ species mass fraction array
 !> \param TMP_IN is the temperature
 !> \param PRES_IN is the pressure
-!> \param TCUR is the start time in seconds
-!> \param TEND is the end time in seconds
+!> \param ZETA_IN is the initial unmixed fraction
+!> \param ZETA_OUT is the final unmixed fraction
+!> \param TAU_MIX is Mixing timescale
+!> \param CELL_MASS total mass of the cell (mixed + unmixed)
+!> \param T_CFD is the current CFD time
+!> \param DT is the current CFD timestep
 !> \param GLOBAL_ODE_REL_ERROR is the relative error for all the species (REAL_EB)
 !> \param ATOL is the absolute error tolerance array for the species (REAL_EB)
 
-SUBROUTINE CVODE(ZZ, TMP_IN, PRES_IN,  TCUR,TEND, GLOBAL_ODE_REL_ERROR, ATOL)
-USE PHYSICAL_FUNCTIONS, ONLY :  GET_MOLECULAR_WEIGHT, CALC_EQUIV_RATIO
-USE CHEMCONS, ONLY: EQUIV_RATIO_CHECK, MIN_EQUIV_RATIO, MAX_EQUIV_RATIO
+#ifdef WITH_SUNDIALS
+SUBROUTINE CVODE(ZZ, TMP_IN, PRES_IN,  ZETA_IN, ZETA_OUT, TAU_MIX, CELL_MASS, T_CFD, DT, GLOBAL_ODE_REL_ERROR, ATOL)
+USE PHYSICAL_FUNCTIONS, ONLY :  GET_MOLECULAR_WEIGHT
+USE CHEMCONS, ONLY: WRITE_CVODE_SUBSTEPS, MAX_CHEM_TIME
 
 REAL(EB), INTENT(INOUT) :: ZZ(N_TRACKED_SPECIES)
 REAL(EB), INTENT(IN) :: ATOL(N_TRACKED_SPECIES)
-REAL(EB), INTENT(IN) :: TMP_IN, PRES_IN, TCUR, TEND, GLOBAL_ODE_REL_ERROR
+REAL(EB), INTENT(IN) :: TMP_IN,PRES_IN,ZETA_IN,TAU_MIX,CELL_MASS,T_CFD,DT,GLOBAL_ODE_REL_ERROR
+REAL(EB), INTENT(OUT) ::ZETA_OUT
 
-REAL(EB) :: CC(N_TRACKED_SPECIES)
-REAL(EB) :: MW, RHO_IN, RHO_OUT, XXX, EQUIV
-INTEGER :: NS
+REAL(EB) :: CC(N_TRACKED_SPECIES), CC_CHEM_TIME(N_TRACKED_SPECIES)
+REAL(EB) :: MW, RHO_IN, RHO_OUT, T1, T2, ZETA0, TMP_IN_MOD, TMP_OUT, CHEM_TIME, DT_MOD
+INTEGER :: NS, CVODE_CALL_OPTION
+LOGICAL :: WRITE_SUBSTEPS
 
-! Check equivalence ratio of the mixture. Avoid chemistry calculation for very lean and rich cases.
-IF (EQUIV_RATIO_CHECK) THEN
-   CALL CALC_EQUIV_RATIO(ZZ(1:N_TRACKED_SPECIES), EQUIV)
-   IF(EQUIV <  MIN_EQUIV_RATIO .OR. EQUIV > MAX_EQUIV_RATIO) RETURN
-ENDIF
+CVODE_CALL_OPTION = 1 ! CV_NORMAL
+WRITE_SUBSTEPS = .FALSE.
+DT_MOD = DT
+TMP_IN_MOD = TMP_IN
+CC = 0._EB
 
+! Get the initial mass and concentration of mixed zone
 CALL GET_MOLECULAR_WEIGHT(ZZ,MW)
 RHO_IN = PRES_IN*MW/R0/TMP_IN ! [PR]= Pa, [MW] = g/mol, [R0]= J/K/kmol, [TMP]=K, [RHO]= kg/m3
-
-! Convert to concentration
-CC = 0._EB
 DO NS =1,N_TRACKED_SPECIES
   CC(NS) = RHO_IN*ZZ(NS)/SPECIES_MIXTURE(NS)%MW  ! [RHO]= kg/m3, [MW] = g/mol = kg/kmol, [CC] = kmol/m3
 ENDDO
 WHERE(CC<0._EB) CC=0._EB
 
-#ifdef WITH_SUNDIALS
-CALL  CVODE_SERIAL(CC,TMP_IN,PRES_IN, TCUR,TEND, GLOBAL_ODE_REL_ERROR, ATOL)
-! Avoid unused build error
-XXX = 1._EB
-#else
-! Avoid unused build error
-XXX = MINVAL(ATOL)
-XXX = TCUR
-XXX = TEND
-XXX = GLOBAL_ODE_REL_ERROR
-#endif
+! Get the initial mass and concentration of mixed zone
+IF(ZETA_IN > ONE_M_EPS) THEN
+   !With ZETA_IN =1 the CVODE ODE become too stiff to solve. Hence, performing negligible
+   !artifical mixing based on a chemical time scale.
+   !1. First find a reasonable chemical time scale.
+   !2. Do cemistry on the chemical time scale
+   !3. Set the final zeta0 based on the chemical time
+   T1 = 0._EB
+   T2 = DT
+   ZETA0 = 0._EB ! Assume completely mixed.
+   CVODE_CALL_OPTION = 2 ! CV_ONE_STEP
+   CUR_CFD_TIME = T_CFD ! Set current cfd time in cvode, for logging purpose.
+   CC_CHEM_TIME(1:N_TRACKED_SPECIES)=CC(1:N_TRACKED_SPECIES)
+   CALL CVODE_SERIAL(CC_CHEM_TIME,ZZ, TMP_IN, PRES_IN, ZETA0, TAU_MIX, CELL_MASS, T1,T2,  &
+                      GLOBAL_ODE_REL_ERROR, ATOL, TMP_OUT, CHEM_TIME, WRITE_SUBSTEPS, CVODE_CALL_OPTION) ! Find the chem time scale
+   IF (CHEM_TIME > MAX_CHEM_TIME) THEN ! Limit artifical mixing.
+      T1 = 0._EB
+      T2 = MAX_CHEM_TIME
+      ZETA0 = 0._EB ! Assume completely mixed.
+      CVODE_CALL_OPTION = 1 ! CV_NORMAL
+      CUR_CFD_TIME = T_CFD ! Set current cfd time in cvode, for logging purpose.
+      CALL CVODE_SERIAL(CC,ZZ, TMP_IN, PRES_IN, ZETA0, TAU_MIX, CELL_MASS, T1,T2,  &
+                         GLOBAL_ODE_REL_ERROR, ATOL, TMP_OUT, CHEM_TIME, WRITE_SUBSTEPS, CVODE_CALL_OPTION)
+      CHEM_TIME = MAX_CHEM_TIME
+   ELSE
+      CC(1:N_TRACKED_SPECIES)=CC_CHEM_TIME(1:N_TRACKED_SPECIES)
+   ENDIF
+   TMP_IN_MOD = TMP_OUT
+   ZETA0 = ZETA_IN*EXP(-CHEM_TIME/TAU_MIX)
+   !WRITE(LU_ERR,*)"T_CFD,TMP_IN, TMP_OUT=",T_CFD,TMP_IN, TMP_OUT
+   DT_MOD = DT_MOD - CHEM_TIME
+ELSE
+   ZETA0 = ZETA_IN
+ENDIF
+
+CVODE_CALL_OPTION = 1
+IF(WRITE_CVODE_SUBSTEPS) THEN
+   CVODE_CALL_OPTION = 2 ! CV_ONE_STEP
+   WRITE_SUBSTEPS = .TRUE.
+ENDIF
+
+! Call CVODE to solve chemistry + Mixing
+T1 = 0._EB
+T2 = DT_MOD
+CUR_CFD_TIME = T_CFD ! Set current cfd time in cvode, for logging purpose.
+CALL  CVODE_SERIAL(CC,ZZ, TMP_IN_MOD, PRES_IN, ZETA0, TAU_MIX, CELL_MASS, T1,T2, GLOBAL_ODE_REL_ERROR, ATOL, &
+                   TMP_OUT, CHEM_TIME, WRITE_SUBSTEPS, CVODE_CALL_OPTION)
 
 ! Convert back to mass fraction (Check for negative concentration)
 WHERE(CC<0._EB) CC=0._EB
@@ -1019,8 +1068,10 @@ ZZ(1:N_TRACKED_SPECIES) = CC(1:N_TRACKED_SPECIES)*SPECIES_MIXTURE(1:N_TRACKED_SP
 RHO_OUT = SUM(ZZ)
 ZZ = ZZ/RHO_OUT
 
-END SUBROUTINE CVODE
+ZETA_OUT = ZETA_IN*EXP(-DT/TAU_MIX)
 
+END SUBROUTINE CVODE
+#endif
 
 SUBROUTINE CHECK_AUTO_IGNITION(EXTINCT,TMP_IN,AIT,IIC,JJC,KKC,REAC_INDEX)
 

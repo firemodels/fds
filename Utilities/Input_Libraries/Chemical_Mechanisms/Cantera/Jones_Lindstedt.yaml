@@ -12,7 +12,6 @@ phases:
     T: 300.0
     P: 101325.0
 
-units: {length: cm, time: s, quantity: mol, activation-energy: cal/mol}
 
 species:
 - name: O2
@@ -28,6 +27,13 @@ species:
     - [4.9752943e+08, -2.866106874e+05, 66.9035225, -6.16995902e-03, 3.016396027e-07,
       -7.4214166e-12, 7.27817577e-17, 2.293554027e+06, -553.062161]
     note: Ref-Elm. Gurvich,1989 pt1 p94 pt2 p9. [tpis89]
+  transport:
+    model: gas
+    geometry: linear
+    well-depth: 107.4
+    diameter: 3.458
+    polarizability: 1.6
+    rotational-relaxation: 3.8  
 - name: N2
   composition: {N: 2}
   thermo:
@@ -41,6 +47,13 @@ species:
     - [8.31013916e+08, -6.42073354e+05, 202.0264635, -0.03065092046, 2.486903333e-06,
       -9.70595411e-11, 1.437538881e-15, 4.93870704e+06, -1672.09974]
     note: Ref-Elm. Gurvich,1978 pt1 p280 pt2 p207. [tpis78]
+  transport:
+    model: gas
+    geometry: linear
+    well-depth: 97.53
+    diameter: 3.621
+    polarizability: 1.76
+    rotational-relaxation: 4.0  
 - name: CO
   composition: {C: 1, O: 1}
   thermo:
@@ -54,6 +67,13 @@ species:
     - [8.86866296e+08, -7.50037784e+05, 249.5474979, -0.039563511, 3.29777208e-06,
       -1.318409933e-10, 1.998937948e-15, 5.70142113e+06, -2060.704786]
     note: Gurvich,1979 pt1 p25 pt2 p29. [tpis79]
+  transport:
+    model: gas
+    geometry: linear
+    well-depth: 98.1
+    diameter: 3.65
+    polarizability: 1.95
+    rotational-relaxation: 1.8  
 - name: CO2
   composition: {C: 1, O: 2}
   thermo:
@@ -67,6 +87,13 @@ species:
     - [-1.544423287e+09, 1.016847056e+06, -256.140523, 0.0336940108, -2.181184337e-06,
       6.99142084e-11, -8.8423515e-16, -8.04321451e+06, 2254.177493]
     note: Gurvich,1991 pt1 p27 pt2 p24. [g 9/99]
+  transport:
+    model: gas
+    geometry: linear
+    well-depth: 244.0
+    diameter: 3.763
+    polarizability: 2.65
+    rotational-relaxation: 2.1  
 - name: C3H8
   composition: {C: 3, H: 8}
   thermo:
@@ -78,6 +105,12 @@ species:
     - [6.42073168e+06, -2.659791134e+04, 45.3435684, -5.02066392e-03, 9.47121694e-07,
       -9.57540523e-11, 4.00967288e-15, 1.455582459e+05, -281.8374734]
     note: Hf:TRC(10/85) w1350. Chao,1973. [g 2/00]
+  transport:
+    model: gas
+    geometry: nonlinear
+    well-depth: 266.8
+    diameter: 4.982
+    rotational-relaxation: 1.0  
 - name: H2
   composition: {H: 2}
   thermo:
@@ -91,6 +124,13 @@ species:
     - [4.96688412e+08, -3.147547149e+05, 79.8412188, -8.41478921e-03, 4.75324835e-07,
       -1.371873492e-11, 1.605461756e-16, 2.488433516e+06, -669.572811]
     note: Ref-Elm. Gurvich,1978 pt1 p103 pt2 p31. [tpis78]
+  transport:
+    model: gas
+    geometry: linear
+    well-depth: 38.0
+    diameter: 2.92
+    polarizability: 0.79
+    rotational-relaxation: 280.0 
 - name: H2O
   composition: {H: 2, O: 1}
   thermo:
@@ -102,6 +142,13 @@ species:
     - [1.034972096e+06, -2412.698562, 4.64611078, 2.291998307e-03, -6.83683048e-07,
       9.42646893e-11, -4.82238053e-15, -1.384286509e+04, -7.97814851]
     note: Hf:Cox,1989. Woolley,1987. TRC(10/88) tuv25. [g 8/89]
+  transport:
+    model: gas
+    geometry: nonlinear
+    well-depth: 572.4
+    diameter: 2.605
+    dipole: 1.844
+    rotational-relaxation: 4.0  
 
 reactions:
 - equation: C3H8 + 1.5 O2 => 3 CO + 4 H2
