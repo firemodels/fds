@@ -1728,7 +1728,7 @@ IF (MY_RANK==0) THEN
       CASE(HEARTBEAT_STOP)
          WRITE(MESSAGE,'(A)') 'ERROR: External program failure - FDS stopped'
       CASE(CVODE_SUBSTEP_STOP)
-         WRITE(MESSAGE,'(A)') 'STOP: CVODE substeps for 1st timestep are written - FDS stopped'
+         WRITE(MESSAGE,'(A)') 'STOP: CVODE substeps for 1st timestep are completed successfully - FDS stopped'
       CASE DEFAULT
          WRITE(MESSAGE,'(A)') 'null'
    END SELECT
