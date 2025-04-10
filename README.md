@@ -36,7 +36,7 @@ Depending on your GPU type, set the following environment variables:
   ```
 - **Intel (SYCL):**
   ```sh
-  # Nothing needs to be done other than enabling OneAPI module.
+  export SYCL_DIR=<Path to oneapi installation (contains lib)>
   ```
 
 ### **Step 2: Clone the Required Repositories**
@@ -105,6 +105,17 @@ To compile FireX using INTEL compilers, add the following to your ~/.bash_profil
 module load intel/24.0
 export MPICH_DIR=$MPI_ROOT
 export HYPRE_ENABLE_GPU_AWARE_MPI=ON
+export SYCL_DIR=/opt/intel/oneapi/compiler/2024.0
+```
+### [Aurora-ALCF](https://www.anl.gov/aurora) (Intel Data Center GPU Max Series)
+To compile FireX using INTEL compilers, add the following to your ~/.bash_profile:
+```sh
+module load cmake
+export FIREMODELS_CC=icx
+export FIREMODELS_CXX=dpcpp
+export FIREMODELS_FC=mpifort
+export HYPRE_ENABLE_GPU_AWARE_MPI=ON
+export SYCL_DIR=/opt/aurora/24.180.3/updates/oneapi/compiler/eng-20240629
 ```
 
 ### **[Polaris-ALCF](https://www.alcf.anl.gov/polaris)** (NVIDIA - A100)

@@ -156,7 +156,7 @@ ifeq ($(BUILD_WITH_GPU), ON)
       LFLAGS_GPU = -ldl -L/usr/lib64 -lstdc++ -L${CUDA_DIR}/lib64 -lcudart -lcusparse -lcublas -lcurand -L${CUDA_MATH_DIR}/lib64 -lcusolver
       LFLAGS_GPU_WIN = "$(GPU_HOME)\lib\x64\cudart.lib" "$(GPU_HOME)\lib\x64\cusparse.lib" "$(GPU_HOME)\lib\x64\cublas.lib" "$(GPU_HOME)\lib\x64\curand.lib" "$(GPU_HOME)\lib\x64\cusolver.lib"
    else ifeq ($(GPU_ARCH), sycl)
-      LFLAGS_GPU = -L/usr/lib64 -lstdc++ -L${MKLROOT}/lib -lmkl_sycl -lsycl
+      LFLAGS_GPU = -L/usr/lib64 -lstdc++ -L${MKLROOT}/lib -lmkl_sycl -L${SYCL_DIR}/lib -lsycl
    endif
 endif
 
@@ -286,7 +286,7 @@ impi_intel_win_openmp_db : setup_win $(objwin_mpi)
 # Linux Intel Fortran Compiler and Intel MPI
 
 impi_intel_linux : FFLAGS = $(M64_FLAG) -O2 -ipo -no-wrap-margin $(GITINFO) $(FFLAGSMKL_INTEL) $(FFLAGS_HYPRE) $(FFLAGS_SUNDIALS) $(FFLAGS_HDF5) -DUSE_IFPORT  -diag-disable=10448
-impi_intel_linux : LFLAGSMKL = $(LFLAGSMKL_INTEL) $(LFLAGS_HYPRE) $(LFLAGS_SUNDIALS) $(LFLAGS_HDF5)
+impi_intel_linux : LFLAGSMKL = $(LFLAGSMKL_INTEL) $(LFLAGS_HYPRE) $(LFLAGS_SUNDIALS) $(LFLAGS_HDF5) $(LFLAGS_GPU)
 impi_intel_linux : FCOMPL = $(COMP_FC)
 impi_intel_linux : obj = fds_impi_intel_linux
 impi_intel_linux : setup $(obj_mpi)
