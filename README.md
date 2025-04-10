@@ -105,6 +105,7 @@ To compile FireX using INTEL compilers, add the following to your ~/.bash_profil
 module load intel/24.0
 export MPICH_DIR=$MPI_ROOT
 export HYPRE_ENABLE_GPU_AWARE_MPI=ON
+export SYCL_DIR=/opt/intel/oneapi/compiler/2024.0
 ```
 ### [Aurora-ALCF](https://www.anl.gov/aurora) (Intel Data Center GPU Max Series)
 To compile FireX using INTEL compilers, add the following to your ~/.bash_profile:
