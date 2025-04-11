@@ -13,5 +13,6 @@ export OMP_NUM_THREADS=1
 source $FIREMODELS/fds/.github/fds_python_env/bin/activate
 
 echo "Running ext_heartbeat_std_curve_slurm.sh script..."
+cd $FIREMODELS/fds/Verification/Controls
 python ext_heartbeat_std_curve.py
 echo "Done."
