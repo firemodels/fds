@@ -1,10 +1,11 @@
-! Test of Polaris and Summit FDS Builds on a simple fire case:
+! Test of FDS Builds on a simple fire case:
 ! If you comment the &PRES line code will run with FFT Pressure solver in
-! CPU only. If you run with UGLMAT code will run CG+HYPRE PETSc solve in GPU.
-! For Polaris, see pbs_script.sh submission script.
+! CPU only. If you run with UGLMAT code will run HYPRE solve in GPU.
+! For different supercomputing clusters, job submission scripts are provided in the same folder.
  
 &HEAD CHID='test_gpu', TITLE='Simple GPU test: Test PETSc Poisson solvers in simple fire case.' /
 &TIME T_END=1./
+#&DUMP WRITE_FORMAT='VTK', RESULTS_DIR='VTK_OUTPUT' /
 
 # 4 mesh:
 #&MESH ID='mesh', IJK=50,100,50, XB=-2.4,-2.,1.6,2.4,1.2,1.7/
