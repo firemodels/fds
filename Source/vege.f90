@@ -332,7 +332,7 @@ INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T,DT
 INTEGER :: IIG,IW,JJG,IC,OUTPUT_INDEX
 INTEGER :: KDUM,KWIND,ICF,IKT
-REAL(EB) :: UMF_TMP,PHX,PHY,MAG_PHI,PHI_W_X,PHI_W_Y,UMF_X,UMF_Y,UMAG,ROS_MAG,UMF_MAG,ROTH_FACTOR,&
+REAL(EB) :: UMF_TMP,PHX,PHY,MAG_PHI,PHI_W_X,PHI_W_Y,UMF_X,UMF_Y,UMAG,ROS_MAG,UMF_MAG,WIND_FACTOR,&
             SIN_THETA,COS_THETA,THETA,ZWIND(2),U_Z(2),V_Z(2)
 
 T_NOW = CURRENT_TIME()
@@ -436,13 +436,18 @@ DO JJG=1,JBAR
          UMF_Y = UMF_TMP * V_LS(IIG,JJG) * 60.0_EB
          UMF_MAG = SQRT(UMF_X**2 + UMF_Y**2)
 
-         ! Components of Rothermel wind factor - affects spread rate
+         ! Compute wind factor affecting spread rate R(U) = R_0*(1+WIND_FACTOR)
 
-         ROTH_FACTOR = C_ROTH * ((3.281_EB * UMF_MAG)**B_ROTH) * (SF%VEG_LSET_BETA / BETA_OP_ROTH)**(-E_ROTH) ! Bova et al., Eq. A1
+         IF (SF%I_RAMP_LS_WIND>0) THEN            
+            WIND_FACTOR = EVALUATE_RAMP(UMF_MAG/60._EB,SF%I_RAMP_LS_WIND)
+         ELSE
+            WIND_FACTOR = C_ROTH * ((3.281_EB * UMF_MAG)**B_ROTH) * (SF%VEG_LSET_BETA/BETA_OP_ROTH)**(-E_ROTH) ! Bova et al., Eq. A1
+         ENDIF
+
 
          IF (UMF_MAG>TWO_EPSILON_EB) THEN
-            PHI_W_X = ROTH_FACTOR*UMF_X/UMF_MAG
-            PHI_W_Y = ROTH_FACTOR*UMF_Y/UMF_MAG
+            PHI_W_X = WIND_FACTOR*UMF_X/UMF_MAG
+            PHI_W_Y = WIND_FACTOR*UMF_Y/UMF_MAG
          ELSE
             PHI_W_X = 0.0_EB
             PHI_W_Y = 0.0_EB
