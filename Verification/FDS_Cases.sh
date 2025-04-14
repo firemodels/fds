@@ -186,7 +186,10 @@ $QFDS -d Controls rms_cov_corr.fds
 $QFDS -d Controls rms_example.fds
 $QFDS -d Controls special_time_ramps.fds
 $QFDS -p 4 -d Controls spreading_fire.fds
-# sbatch $FIREMODELS/fds/Verification/Controls/ext_heartbeat_std_curve_slurm.sh
+# if [ "$QUEUE" == "" ]; then
+#     QUEUE='batch'
+# fi
+# sbatch --partition=$QUEUE $FIREMODELS/fds/Verification/Controls/ext_heartbeat_std_curve_slurm.sh
 # $QFDS -d Controls ext_heartbeat_std_curve.fds
 
 $QFDS -d Detectors aspiration_detector.fds
