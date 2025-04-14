@@ -6,8 +6,8 @@
 # Run it with "sbatch -N 4 -n 32 VISTA_TACC_runjob.sh"
 #SBATCH -J HYPRE_gpu_job          # Job name
 #SBATCH -o HYPRE_gpu_job.%j.out   # Output file (%j = job ID)
-#SBATCH -t 00:30:00               # Wall time
-#SBATCH -p gh-dev                 # GPU partition (modify as needed)
+#SBATCH -t 02:00:00               # Wall time
+#SBATCH -p gh                     # GPU partition (modify as needed)
 #SBATCH -A CDA24014               # Project allocation
 
 #export RANKS_PER_GPU=8
