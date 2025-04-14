@@ -1,8 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=ext_heartbeat_std_curve_python
-#SBATCH --output=ext_heartbeat_std_curve_python.log
-#SBATCH --error=ext_heartbeat_std_curve_python.err
-#SBATCH --partition=batch
+#SBATCH --output=Controls/%x.log
+#SBATCH --error=Controls/%x.err
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
 #SBATCH --nodes=1
@@ -12,7 +11,8 @@ export OMP_NUM_THREADS=1
 # Load Python environment 
 source $FIREMODELS/fds/.github/fds_python_env/bin/activate
 
-echo "Running ext_heartbeat_std_curve_slurm.sh script..."
+# Set the working directory
 cd $FIREMODELS/fds/Verification/Controls
+echo "Running external heartbeat case..."
 python ext_heartbeat_std_curve.py
 echo "Done."
