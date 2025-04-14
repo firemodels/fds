@@ -29,7 +29,7 @@ sleep 5                          # Wait for daemons to initialize
 # 2. Run your CUDA application
 export UCX_RCACHE_ENABLE=n
 #export UCX_LOG_LEVEL=info
-export OMP_NUM_THREADS=1
+export OMP_NUM_THREADS=8
 export FDS_RANKS_PER_GPU=8
 
 echo "Launching application..."
