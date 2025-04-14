@@ -31,6 +31,7 @@ export UCX_RCACHE_ENABLE=n
 #export UCX_LOG_LEVEL=info
 export OMP_NUM_THREADS=8
 export FDS_RANKS_PER_GPU=8
+FDSEXEC=~/firemodels/firex/fds/Build/ompi_gnu_linux/fds_ompi_gnu_linux
 
 echo "Launching application..."
 echo "       Input file: test_gpu.fds"
@@ -39,7 +40,6 @@ echo "FDS_RANKS_PER_GPU: ${FDS_RANKS_PER_GPU}"
 echo "        Directory: `pwd`"
 echo "             Host: `hostname`"
 echo "started running at `date`" >> test_gpu.qlog
-FDSEXEC=~/firemodels/firex/fds/Build/ompi_gnu_linux/fds_ompi_gnu_linux
 ibrun ${FDSEXEC} test_gpu.fds   
 echo "finished running at `date`" >> test_gpu.qlog
 
