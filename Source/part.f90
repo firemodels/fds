@@ -1822,6 +1822,10 @@ LOGICAL :: TEST_POS, BOUNCE_CF, IN_CFACE, SLIDE_CF, EXT_CFACE
 INTEGER :: DIND, MADD(3,3)
 INTEGER, PARAMETER :: EYE3(1:3,1:3)=RESHAPE( (/1,0,0, 0,1,0, 0,0,1 /), (/3,3/) )
 
+! Zero out max particle velocity if CFL number is to be bound by particle speed.
+
+PART_UVWMAX = 0._EB
+
 IF (MESHES(NM)%NLP==0) RETURN
 
 ! Set the CPU timer and point to the current mesh variables
@@ -1836,10 +1840,6 @@ IF (PARTICLE_DRAG) THEN
 ENDIF
 
 IF (CC_IBM) CALL CUTFACE_VELOCITIES(NM,U,V,W,CUTFACES=.TRUE.)
-
-! Zero out max particle velocity if CFL number is to be bound by particle speed.
-
-PART_UVWMAX = 0._EB
 
 ! Loop through all Lagrangian particles and move them one time step
 
