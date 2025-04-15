@@ -1550,6 +1550,7 @@ TYPE SLICE_TYPE
    LOGICAL :: TERRAIN_SLICE=.FALSE.,CELL_CENTERED=.FALSE.,RLE=.FALSE.,DEBUG=.FALSE.,THREE_D=.FALSE.
    CHARACTER(LABEL_LENGTH) :: SLICETYPE='STRUCTURED',SMOKEVIEW_LABEL
    CHARACTER(LABEL_LENGTH) :: SMOKEVIEW_BAR_LABEL,ID='null',MATL_ID='null'
+   CHARACTER(200) :: SLCF_NAME='null'
 END TYPE SLICE_TYPE
 
 TYPE RAD_FILE_TYPE
@@ -1758,6 +1759,9 @@ TYPE ZONE_SOLVE_TYPE
    INTEGER ,ALLOCATABLE, DIMENSION(:)   :: IA_H,JA_H  !< Matrix indexes for pressure zone, up triang part, CSR format.
    REAL(EB),ALLOCATABLE, DIMENSION(:)   :: F_H,X_H    !< RHS and Solution containers for pressure zone.
    REAL(FB),ALLOCATABLE, DIMENSION(:)   :: A_H_FB,F_H_FB,X_H_FB!< Arrays in case of single precision solve.
+   INTEGER :: NUNKH_LOCAL_RS = 0                      ! Total number of unknowns for the resource set.
+   INTEGER :: TOT_NNZ_H_RS=0                          ! Total number of non-zeros for the resource set.
+   INTEGER, ALLOCATABLE, DIMENSION(:)   :: NUNKH_LOC_RS, UNKH_IND_RS ! Arrays for Matrix gathering per resource set (GPUs).
 END TYPE ZONE_SOLVE_TYPE
 
 TYPE (ZONE_SOLVE_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: ZONE_SOLVE

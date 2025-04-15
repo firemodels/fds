@@ -788,7 +788,11 @@ END SUBROUTINE READ_HVAC
 SUBROUTINE PROC_HVAC
 
 USE PHYSICAL_FUNCTIONS, ONLY: GET_ENTHALPY
+#ifdef WITHOUT_MPIF08
+USE MPI
+#else
 USE MPI_F08
+#endif
 INTEGER :: N,ND,ND2,NM,NN,NF,NV,IERR
 REAL(EB) :: TNOW !< Current CPU time (s) used in computing length of time spent in HVAC routines.
 REAL(EB) :: ZZ_GET(1:N_TRACKED_SPECIES) !< Species mass fraction array

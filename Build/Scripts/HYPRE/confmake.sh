@@ -11,6 +11,7 @@ fi
 cmake_args=(
   -DCMAKE_INSTALL_PREFIX="$HYPRE_INSTALL_PREFIX"
   -DCMAKE_C_COMPILER="$COMP_CC"
+  -DCMAKE_CXX_COMPILER="$COMP_CXX"
   -DCMAKE_C_FLAGS="$C_FLAGS"
   -DCMAKE_INSTALL_LIBDIR="lib"
 )
@@ -24,7 +25,24 @@ if [[ "$FDS_BUILD_TARGET" == *"osx"* ]]; then
    fi
 fi
 
+if [[ "$BUILD_WITH_GPU" == "ON" && -n "$GPU_ARCH" ]]; then
+    if [[ "$GPU_ARCH" == "cuda" ]]; then
+        cmake_args+=(-DHYPRE_ENABLE_CUDA="ON")
+    elif [[ "$GPU_ARCH" == "hip" ]]; then
+        cmake_args+=(-DHYPRE_ENABLE_HIP="ON")
+    elif [[ "$GPU_ARCH" == "sycl" ]]; then
+        cmake_args+=(-DHYPRE_ENABLE_SYCL="ON")
+    else
+        echo "Error: Unsupported GPU_ARCH value: $GPU_ARCH" >&2
+        exit 1
+    fi
+
+    if [[ "$HYPRE_ENABLE_GPU_AWARE_MPI" == "ON" ]]; then
+        cmake_args+=(-DHYPRE_ENABLE_GPU_AWARE_MPI="ON")
+    fi
+fi
+
 # Run cmake with the arguments
-cmake ../ "${cmake_args[@]}"
+cmake ../src "${cmake_args[@]}"
 
 make install
