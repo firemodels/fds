@@ -1,5 +1,5 @@
 @echo off
-set LIB_TAG=v2.32.0
+set LIB_TAG=v2.33.0
 
 ::*** library and tag name are the same
 
@@ -87,16 +87,6 @@ cd %LIB_REPO%
 git checkout %LIB_REPO%\src\config\HYPRE_config.h.cmake.in
 git checkout %LIB_TAG%
 
-echo.
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
-echo changing HYPRE_FMANGLE 0 to HYPRE_FMANGLE 4
-echo in the file HYPRE_config.h.cmake.in
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
-echo.
-powershell -Command "(Get-Content %LIB_REPO%\src\config\HYPRE_config.h.cmake.in) -replace 'HYPRE_FMANGLE 0', 'HYPRE_FMANGLE 4' | Set-Content %LIB_REPO%\src\config\HYPRE_config.h.cmake.in"
-
 cd %CURDIR%
 
 echo.
@@ -118,16 +108,24 @@ echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
 
-set BUILDDIR=%LIB_REPO%\src\cmbuild
+set cmake_args=
+if "%BUILD_WITH_GPU%" EQU "ON" (
+  if "%GPU_ARCH%" EQU "cuda" (
+    set cmake_args=-DHYPRE_ENABLE_CUDA="ON"
+  )
+)
+set BUILDDIR=%LIB_REPO%\build
 cd %BUILDDIR%
-cmake ..\  ^
+cmake ..\src  ^
 -G "MinGW Makefiles" ^
 -DCMAKE_INSTALL_PREFIX="%INSTALLDIR%" ^
 -DCMAKE_C_COMPILER=%COMP_CC% ^
 -DCMAKE_C_FLAGS="/DWIN32 -O3 /fp:precise" ^
 -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded" ^
 -DCMAKE_MAKE_PROGRAM="%CMAKE_MAKE_PROGRAM%" ^
--DCMAKE_INSTALL_LIBDIR="lib"
+-DHYPRE_FMANGLE=4 ^
+-DCMAKE_INSTALL_LIBDIR="lib" ^
+%cmake_args%
 
 echo.
 echo ----------------------------------------------------------

@@ -11,6 +11,7 @@ fi
 cmake_args=(
   -DCMAKE_INSTALL_PREFIX="$HYPRE_INSTALL_PREFIX"
   -DCMAKE_C_COMPILER="$COMP_CC"
+  -DCMAKE_CXX_COMPILER="$COMP_CXX"
   -DCMAKE_C_FLAGS="$C_FLAGS"
   -DCMAKE_INSTALL_LIBDIR="lib"
 )
@@ -25,6 +26,6 @@ if [[ "$FDS_BUILD_TARGET" == *"osx"* ]]; then
 fi
 
 # Run cmake with the arguments
-cmake ../ "${cmake_args[@]}"
+cmake ../src "${cmake_args[@]}"
 
 make install
