@@ -108,12 +108,6 @@ echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
 
-set cmake_args=
-if "%BUILD_WITH_GPU%" EQU "ON" (
-  if "%GPU_ARCH%" EQU "cuda" (
-    set cmake_args=-DHYPRE_ENABLE_CUDA="ON"
-  )
-)
 set BUILDDIR=%LIB_REPO%\build
 cd %BUILDDIR%
 cmake ..\src  ^
@@ -124,8 +118,8 @@ cmake ..\src  ^
 -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded" ^
 -DCMAKE_MAKE_PROGRAM="%CMAKE_MAKE_PROGRAM%" ^
 -DHYPRE_FMANGLE=4 ^
--DCMAKE_INSTALL_LIBDIR="lib" ^
-%cmake_args%
+-DCMAKE_INSTALL_LIBDIR="lib"
+
 
 echo.
 echo ----------------------------------------------------------
