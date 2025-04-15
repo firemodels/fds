@@ -1,5 +1,5 @@
 #!/bin/bash
-HYPRE_LIB_TAG=v2.32.0
+HYPRE_LIB_TAG=v2.33.0
 
 CONFMAKE=$1
 CLEAN_HYPRE=$2
@@ -44,10 +44,10 @@ if [ -d "$FIREMODELS/hypre" ]; then
     echo "Checking out $HYPRE_LIB_TAG"
     git checkout $HYPRE_LIB_TAG
   fi
-  cd $FIREMODELS/hypre/src/cmbuild
+  cd $FIREMODELS/hypre/build
   export HYPRE_VERSION=$(git describe)
   echo "Cleaning hypre repository..."
-  rm -r $FIREMODELS/hypre/src/cmbuild/*
+  rm -r $FIREMODELS/hypre/build/*
   cp $FIREMODELS/fds/Build/Scripts/HYPRE/$CONFMAKE .
   ./$CONFMAKE
   # get back from detached HEAD state
