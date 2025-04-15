@@ -12,7 +12,7 @@
 VPATH = ../Source
 
 # 3rd part library versions
-HYPRE_VERSION=master
+HYPRE_VERSION=v2.33.0
 SUNDIALS_VERSION=v6.7.0
 HDF5_VERSION=v1.14.5
 
