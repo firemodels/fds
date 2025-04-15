@@ -1,5 +1,5 @@
 #!/bin/bash
-HYPRE_LIB_TAG=master
+HYPRE_LIB_TAG=v2.33.0
 
 CONFMAKE=$1
 CLEAN_HYPRE=$2
