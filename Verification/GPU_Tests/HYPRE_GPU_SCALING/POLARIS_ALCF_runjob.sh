@@ -1,38 +1,43 @@
 #!/bin/bash -l
-#PBS -N test_gpu
+#PBS -N HYPRE_gpu_job
 #PBS -l select=1
 #PBS -l place=scatter
 #PBS -l walltime=0:30:00
 #PBS -l filesystems=home:eagle
 #PBS -j oe
-#PBS -q debug-scaling
+#PBS -q debug
 #PBS -A CampSwift
 
 # Modules:
-module load cudatoolkit-standalone/12.5.0 PrgEnv-gnu cray-libsci
-# Enable GPU-MPI (if supported by application)
+module load PrgEnv-gnu
+module load nvhpc-mixed
+module load craype-accel-nvidia80
 export MPICH_GPU_SUPPORT_ENABLED=1
 
 # MPI and OpenMP settings
 NNODES=1
-NRANKS_PER_NODE=32 # Meshes
+NRANKS_PER_NODE=${NUM_OF_MESHES} # Meshes
 NDEPTH=1
 NTHREADS=1
-export AFFINITY_RANKS_PER_GPU=8
-export FDS_RANKS_PER_GPU=${AFFINITY_RANKS_PER_GPU}
+AFFINITY_RANKS_PER_GPU=$(( RANKS_PER_GPU > 4 ? RANKS_PER_GPU : 4 ))
+export AFFINITY_RANKS_PER_GPU
+export FDS_RANKS_PER_GPU=${RiANKS_PER_GPU}
+echo "AFFINITY_RANKS_PER_GPU= ${AFFINITY_RANKS_PER_GPU}"
 
 NTOTRANKS=$(( NNODES * NRANKS_PER_NODE ))
 echo "NUM_OF_NODES= ${NNODES} TOTAL_NUM_RANKS= ${NTOTRANKS} RANKS_PER_NODE= ${NRANKS_PER_NODE} THREADS_PER_RANK= ${NTHREADS}"
 
 FDSEXEC=~/firemodels/firex/fds/Build/ompi_gnu_linux/fds_ompi_gnu_linux
 echo "Launching application..."
-echo "       Input file: test_gpu.fds"
+echo "       Input file: ${FDS_CASE_FILE}"
+echo "    NUM_OF_MESHES: ${NUM_OF_MESHES}"
+echo "          RS_CASE: ${RS_CASE}"
 echo "        Exec file: ${FDSEXEC}"
 echo "FDS_RANKS_PER_GPU: ${FDS_RANKS_PER_GPU}"
 echo "        Directory: `pwd`"
 echo "             Host: `hostname`"
-echo "started running at `date`" >> test_gpu.qlog
+echo "started running at `date`" >> ${FDS_BASENAME}.qlog
 # For applications that internally handle binding MPI/OpenMP processes to GPUs
 cd /home/isapchp/firemodels/firex/fds/Verification/GPU_Tests/HYPRE_GPU_SCALING
-mpiexec -n ${NTOTRANKS} --ppn ${NRANKS_PER_NODE} --depth=${NDEPTH} --cpu-bind depth --env OMP_NUM_THREADS=${NTHREADS} -env OMP_PLACES=threads ./set_affinity_gpu_polaris.sh ${FDSEXEC} test_32mesh_RS8.fds
+mpiexec -n ${NTOTRANKS} --ppn ${NRANKS_PER_NODE} --depth=${NDEPTH} --cpu-bind depth --env OMP_NUM_THREADS=${NTHREADS} -env OMP_PLACES=threads ./set_affinity_gpu_polaris.sh ${FDSEXEC}  ${FDS_CASE_FILE}
 
