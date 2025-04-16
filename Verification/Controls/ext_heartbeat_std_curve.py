@@ -181,7 +181,7 @@ while check_file(file_pathsmv) == False:
     time.sleep(5)
     i=i+1
     #wait for FDS start for how many seconds? i*5 
-    if i > 60: # 5 minutes
+    if i > 1440: # 120 minutes
         print("FDS did not started in "+int(i*5/60)+" minutes")
         print("Exiting the program...")
         sys.exit(0)
@@ -200,7 +200,7 @@ while nexttime <= t_end+dt_devc:
             if counter == 0: print("Next time step still not achieved. Waiting...")
             time.sleep(1)
             counter=counter+1
-            if counter == 600: # 600 seconds
+            if counter == 7200: # 7200 seconds or 2 hours
                 print("Waited "+str(counter/60)+" minutes for the Next time step and nothing happened, maybe FDS crashed")
                 print("Exiting the program...")
                 sys.exit(0)
