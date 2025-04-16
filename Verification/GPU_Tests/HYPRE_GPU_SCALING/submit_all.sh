@@ -36,13 +36,16 @@ if [ "$HPCSYS" == "VISTA" ]; then
     sbatch -N 4 -n 32 VISTA_TACC_runjob.sh
 
 elif [ "$HPCSYS" == "POLARIS" ]; then
-    qsub pbs_script_4msh.sh
-    qsub pbs_script_8msh_RS2.sh
-    qsub pbs_script_8msh_NOFRPG.sh
-    qsub pbs_script_16msh_RS4.sh
-    qsub pbs_script_16msh_NOFRPG.sh
-    qsub pbs_script_32msh_RS8.sh
-    qsub pbs_script_32msh_NOiFRPG.sh
+    # All following job assume one node
+    qsub -v RS_CASE=true,NUM_OF_MESHES=4,RANKS_PER_GPU=4,FDS_CASE_FILE=test_4mesh_RS4.fds POLARIS_ALCF_runjob.sh
+    qsub -v RS_CASE=true,NUM_OF_MESHES=8,RANKS_PER_GPU=2,FDS_CASE_FILE=test_8mesh_RS2.fds POLARIS_ALCF_runjob.sh
+    qsub -v RS_CASE=true,NUM_OF_MESHES=16,RANKS_PER_GPU=4,FDS_CASE_FILE=test_16mesh_RS4.fds POLARIS_ALCF_runjob.sh
+    qsub -v RS_CASE=true,NUM_OF_MESHES=32,RANKS_PER_GPU=8,FDS_CASE_FILE=test_32mesh_RS8.fds POLARIS_ALCF_runjob.sh
+
+    qsub -v NUM_OF_MESHES=4,RANKS_PER_GPU=1,FDS_CASE_FILE=test_4mesh.fds POLARIS_ALCF_runjob.sh
+    qsub -v NUM_OF_MESHES=8,RANKS_PER_GPU=1,FDS_CASE_FILE=test_8mesh_NOFRPG.fds POLARIS_ALCF_runjob.sh
+    qsub -v NUM_OF_MESHES=16,RANKS_PER_GPU=1,FDS_CASE_FILE=test_16mesh_NOFRPG.fds POLARIS_ALCF_runjob.sh
+    qsub -v NUM_OF_MESHES=32,RANKS_PER_GPU=1,FDS_CASE_FILE=test_32mesh_NOFRPG.fds POLARIS_ALCF_runjob.sh
 fi
 
 
