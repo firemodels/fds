@@ -16,10 +16,12 @@ The compilation process for FireX is similar to FDS, as described in the [FDS Wi
 ### **Step 1: Setup Your Environment**
 
 Follow the instructions to set up your system environment:
-
+  
   - [Setting up Windows environment](https://github.com/firemodels/fds/wiki/Setting-up-Windows-Environment)
   - [Setting up macOS environment](https://github.com/firemodels/fds/wiki/Setting-up-macOS-Environment)
   - [Setting up Linux environment](https://github.com/firemodels/fds/wiki/Setting-up-Linux-environment)
+
+Note: CMake version 3.21 or higher is required for FireX.
 
 #### **Additional Environment Variables for GPU Compilation**
 
