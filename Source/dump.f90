@@ -229,40 +229,7 @@ CHARACTER(LABEL_LENGTH) :: CFORM
 ! Set up file number counter
 
 ALLOCATE(FILE_COUNTER(0:N_MPI_PROCESSES))
-FILE_COUNTER = 10
-
-! Check for custom directory for output
-IF (RESULTS_DIR/='') THEN
-   DO I=1,FILE_LENGTH
-      IF (RESULTS_DIR(FILE_LENGTH-I:FILE_LENGTH-I)/='') THEN
-         IF (RESULTS_DIR(FILE_LENGTH-I:FILE_LENGTH-I)=='/') THEN
-            EXIT
-         ELSE
-            RESULTS_DIR(FILE_LENGTH-I+1:FILE_LENGTH-I+1)='/'
-            EXIT
-         ENDIF
-      ENDIF
-   ENDDO
-! Try to make results directory on all ranks in case one that is not 0
-! This prevents subsequent failure of the software in writing to a non-existent
-! directory later on if rank 0 is running too slow.
-! As an alternative we could add an mpi wait here on other processes.
-#ifdef _WIN32
-      CALL EXECUTE_COMMAND_LINE('mkdir '//'"'//TRIM(RESULTS_DIR)//'"')
-#else
-      CALL EXECUTE_COMMAND_LINE('mkdir -p '//TRIM(RESULTS_DIR))
-#endif
-   IF (MY_RANK==0) THEN
-      LU_RDIR=GET_FILE_NUMBER()
-      OPEN(LU_RDIR,FILE=TRIM(RESULTS_DIR)//'/.ignore',FORM='FORMATTED',STATUS='REPLACE')
-      WRITE(LU_RDIR, '(A)') TRIM(RESULTS_DIR)
-      CLOSE(LU_RDIR)
-      INQUIRE(FILE=TRIM(RESULTS_DIR)//'/.ignore',EXIST=EX)
-      IF (.NOT.EX) THEN
-         CALL SHUTDOWN('FAILED TO CREATE DIRECTORY: '//TRIM(RESULTS_DIR))
-      ENDIF
-   ENDIF
-ENDIF
+FILE_COUNTER = 100 ! check cons.f90 Logical units and output file names for preassigned logical units
 
 ! GIT ID file
 

@@ -292,6 +292,7 @@ CHARACTER(FORMULA_LENGTH), DIMENSION(MAX_TERRAIN_IMAGES) :: TERRAIN_IMAGE !< Nam
 CHARACTER(CHID_LENGTH) :: CHID                                            !< Job ID
 CHARACTER(CHID_LENGTH) :: RESTART_CHID                                    !< Job ID for a restarted case
 CHARACTER(FILE_LENGTH) :: RESULTS_DIR                                     !< Custom directory for output
+CHARACTER(FILE_LENGTH) :: BINGEOM_DIR                                     !< Custom directory for writing binary geometry files
 
 ! Dates, version numbers, revision numbers
 
@@ -559,11 +560,11 @@ REAL(EB) :: ALIGNMENT_TOLERANCE=0.001_EB      !< Maximum ratio of sizes of abutt
 ! Logical units and output file names
 
 INTEGER                              :: LU_ERR=ERROR_UNIT,LU_END=2,LU_GIT=3,LU_SMV=4,LU_INPUT=5,LU_OUTPUT=6,LU_STOP=7,LU_CPU=8,&
-                                        LU_CATF=9
+                                        LU_CATF=9,LU_RDIR=10,LU_GDIR=11,LU_SETCC=12,LU_BINGEOM=13
 INTEGER                              :: LU_MASS,LU_HRR,LU_STEPS,LU_NOTREADY,LU_VELOCITY_ERROR,LU_CFL,LU_LINE=-1,LU_CUTCELL, &
                                         LU_CVODE_SUBSTEPS
 INTEGER                              :: LU_HISTOGRAM,LU_HVAC
-INTEGER                              :: LU_GEOC=-1,LU_TGA,LU_INFO,LU_DEVC_CTRL=-1,LU_RDIR
+INTEGER                              :: LU_GEOC=-1,LU_TGA,LU_INFO,LU_DEVC_CTRL=-1
 INTEGER, ALLOCATABLE, DIMENSION(:)   :: LU_PART,LU_PROF,LU_XYZ,LU_TERRAIN,LU_PL3D,LU_DEVC,LU_STATE,LU_CTRL,LU_CORE,LU_RESTART
 INTEGER, ALLOCATABLE, DIMENSION(:)   :: LU_VEG_OUT,LU_GEOM,LU_CFACE_GEOM
 INTEGER                              :: LU_GEOM_TRAN
