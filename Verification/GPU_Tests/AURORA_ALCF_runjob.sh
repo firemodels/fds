@@ -33,7 +33,7 @@ echo "started running at `date`" >> test_gpu.qlog
 
 cd /home/isapchp/firemodels/firex/fds/Verification/GPU_Tests
 #mpiexec -n ${NTOTRANKS} --ppn ${NRANKS_PER_NODE} --depth=${NDEPTH} --cpu-bind depth --env OMP_NUM_THREADS=${NTHREADS} -env OMP_PLACES=cores gpu_dev_compact.sh ${FDSEXEC} test_gpu.fds
-mpiexec -n ${NTOTRANKS} --ppn ${NRANKS_PER_NODE} --depth=${NDEPTH} --cpu-bind depth  ./gpu_tile_compact.sh ${FDSEXEC} test_gpu.fds
+mpiexec -n ${NTOTRANKS} --ppn ${NRANKS_PER_NODE} --depth=${NDEPTH} --cpu-bind depth  gpu_tile_compact.sh ${FDSEXEC} test_gpu.fds
 echo "finished running at `date`" >> test_gpu.qlog
 
 
