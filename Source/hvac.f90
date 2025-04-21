@@ -2320,37 +2320,37 @@ ZONE_LEAK_IF: IF (ALL(SF%LEAK_PATH < 0)) THEN
          CASE (-3)
             P_AVE = 0.5_EB*(PBARP(KK,B1%PRESSURE_ZONE)+PBARP(KK+1,B1%PRESSURE_ZONE))
       END SELECT
-      NODE_P(NODE_INDEX) = NODE_P(NODE_INDEX) + (P_AVE-PINF+RHO(II,JJ,KK)*(HP(II,JJ,KK)-KRES(II,JJ,KK)))*AREA
+      NODE_P(NODE_INDEX) = NODE_P(NODE_INDEX) + (P_AVE-P_INF+RHO(II,JJ,KK)*(HP(II,JJ,KK)-KRES(II,JJ,KK)))*AREA
    ELSE
       SELECT CASE (IOR)
          CASE (1)
             NODE_P(NODE_INDEX) = NODE_P(NODE_INDEX) + &
-                                       (PBARP(KK,B1%PRESSURE_ZONE)-PINF-RHO(II,JJ,KK) * &
+                                       (PBARP(KK,B1%PRESSURE_ZONE)-P_INF-RHO(II,JJ,KK) * &
                                        0.5_EB*(UP(II-1,JJ,KK)+B1%U_NORMAL)**2 * &
                                        SIGN(1._EB,UP(II-1,JJ,KK)+B1%U_NORMAL))* AREA
          CASE(-1)
             NODE_P(NODE_INDEX) = NODE_P(NODE_INDEX) + &
-                                       (PBARP(KK,B1%PRESSURE_ZONE)-PINF+RHO(II,JJ,KK) * &
+                                       (PBARP(KK,B1%PRESSURE_ZONE)-P_INF+RHO(II,JJ,KK) * &
                                        0.5_EB*(UP(II,JJ,KK)-B1%U_NORMAL)**2  * &
                                        SIGN(1._EB,UP(II,JJ,KK)-B1%U_NORMAL))*AREA
          CASE (2)
             NODE_P(NODE_INDEX) = NODE_P(NODE_INDEX) + &
-                                       (PBARP(KK,B1%PRESSURE_ZONE)-PINF-RHO(II,JJ,KK) * &
+                                       (PBARP(KK,B1%PRESSURE_ZONE)-P_INF-RHO(II,JJ,KK) * &
                                        0.5_EB*(VP(II,JJ-1,KK)+B1%U_NORMAL)**2 * &
                                        SIGN(1._EB,VP(II,JJ-1,KK)+B1%U_NORMAL))*AREA
          CASE(-2)
             NODE_P(NODE_INDEX) = NODE_P(NODE_INDEX) + &
-                                       (PBARP(KK,B1%PRESSURE_ZONE)-PINF+RHO(II,JJ,KK) * &
+                                       (PBARP(KK,B1%PRESSURE_ZONE)-P_INF+RHO(II,JJ,KK) * &
                                        0.5_EB*(VP(II,JJ,KK)-B1%U_NORMAL)**2 * &
                                        SIGN(1._EB,VP(II,JJ,KK)-B1%U_NORMAL))*AREA
          CASE (3)
             NODE_P(NODE_INDEX) = NODE_P(NODE_INDEX) + &
-                                       (PBARP(KK,B1%PRESSURE_ZONE)-PINF-RHO(II,JJ,KK) * &
+                                       (PBARP(KK,B1%PRESSURE_ZONE)-P_INF-RHO(II,JJ,KK) * &
                                        0.5_EB*(WP(II,JJ,KK-1)+B1%U_NORMAL)**2 * &
                                        SIGN(1._EB,WP(II,JJ,KK-1)+B1%U_NORMAL))*AREA
          CASE (-3)
             NODE_P(NODE_INDEX) = NODE_P(NODE_INDEX) + &
-                                       (PBARP(KK,B1%PRESSURE_ZONE)-PINF+RHO(II,JJ,KK) * &
+                                       (PBARP(KK,B1%PRESSURE_ZONE)-P_INF+RHO(II,JJ,KK) * &
                                        0.5_EB*(WP(II,JJ,KK)-B1%U_NORMAL)**2 * &
                                        SIGN(1._EB,WP(II,JJ,KK)-B1%U_NORMAL))*AREA
       END SELECT
@@ -2386,13 +2386,13 @@ ELSE ZONE_LEAK_IF
 
    SELECT CASE (IOR)
       CASE (3)
-         P_AVE = 0.5_EB*(PBARP(KK-1,B1%PRESSURE_ZONE)+PBARP(KK,B1%PRESSURE_ZONE))-PINF
+         P_AVE = 0.5_EB*(PBARP(KK-1,B1%PRESSURE_ZONE)+PBARP(KK,B1%PRESSURE_ZONE))-P_INF
          NODE_Z(NODE_INDEX) = NODE_Z(NODE_INDEX) + Z(KK-1)*AREA
       CASE (-3)
-         P_AVE = 0.5_EB*(PBARP(KK,B1%PRESSURE_ZONE)+PBARP(KK+1,B1%PRESSURE_ZONE))-PINF
+         P_AVE = 0.5_EB*(PBARP(KK,B1%PRESSURE_ZONE)+PBARP(KK+1,B1%PRESSURE_ZONE))-P_INF
          NODE_Z(NODE_INDEX) = NODE_Z(NODE_INDEX) + Z(KK)*AREA
       CASE DEFAULT
-         P_AVE = PBARP(KK,B1%PRESSURE_ZONE)-PINF
+         P_AVE = PBARP(KK,B1%PRESSURE_ZONE)-P_INF
          NODE_Z(NODE_INDEX) = NODE_Z(NODE_INDEX) + ZC(KK)*AREA
    END SELECT
    NODE_P(NODE_INDEX) = NODE_P(NODE_INDEX) + P_AVE*AREA
@@ -3071,10 +3071,10 @@ VENT_CUSTOM_AMBIENT: DO NN=1,N_DUCTNODES
       ENDIF
 
       IF (DN%LEAKAGE) THEN
-         IF(ABS(T-T_BEGIN) < TWO_EPSILON_EB) DN%P_OLD = NODE_P(NN)/AREA+PINF
+         IF(ABS(T-T_BEGIN) < TWO_EPSILON_EB) DN%P_OLD = NODE_P(NN)/AREA+P_INF
       ENDIF
 
-      DN%P = HVAC_PRES_RELAX*(NODE_P(NN)/AREA+PINF)+(1._EB-HVAC_PRES_RELAX)*DN%P_OLD
+      DN%P = HVAC_PRES_RELAX*(NODE_P(NN)/AREA+P_INF)+(1._EB-HVAC_PRES_RELAX)*DN%P_OLD
       DN%TMP_V = NODE_TMP(NN)/AREA
       HGAS = NODE_H(NN)/AREA
       CALL GET_TEMPERATURE(DN%TMP_V,HGAS,ZZ_GET)
@@ -4241,7 +4241,7 @@ DO NR = 1, N_DUCTRUNS
          ENDDO
       ENDDO
       DO NN = 1,DUCTRUN(NR)%N_M_DUCTNODES
-         DUCTRUN(NR)%P(NN,:,:) = DUCTNODE(DUCTRUN(NR)%NODE_M_INDEX(NN))%P - PINF
+         DUCTRUN(NR)%P(NN,:,:) = DUCTNODE(DUCTRUN(NR)%NODE_M_INDEX(NN))%P - P_INF
       ENDDO
 
       DO NN = 1,DUCTRUN(NR)%N_M_DUCTNODES
