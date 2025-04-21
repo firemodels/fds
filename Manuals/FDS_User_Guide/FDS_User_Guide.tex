@@ -12725,10 +12725,10 @@ Keyword             & Type     & Description                      & Units       
 \ct{RAMP_WX}                                      & Character    & Section~\ref{info:ramp_velocity_1d}     &            &                   \\ \hline
 \ct{RAMP_WY}                                      & Character    & Section~\ref{info:ramp_velocity_1d}     &            &                   \\ \hline
 \ct{RAMP_WZ}                                      & Character    & Section~\ref{info:ramp_velocity_1d}     &            &                   \\ \hline
-\ct{RESTART}                                       & Logical      & Section~\ref{info:restart}              &            & \ct{F}           \\ \hline
+\ct{RESTART}                                      & Logical      & Section~\ref{info:restart}              &            & \ct{F}           \\ \hline
 \ct{RESTART_CHID}                                 & Character    & Section~\ref{info:restart}              &            & \ct{CHID}        \\ \hline
-\ct{RND_SEED}                                     & Integer      & Section~\ref{info:restart}              &            &                   \\ \hline
-\ct{SC}                                            & Real         & Section~\ref{info:NOISE}                &            & 0.5               \\ \hline
+\ct{RND_SEED}                                     & Integer      & Section~\ref{info:NOISE}                &            &                   \\ \hline
+\ct{SC}                                           & Real         & Section~\ref{info:LES}                  &            & 0.5               \\ \hline
 \ct{SIMULATION_MODE}                              & Character    & Section~\ref{Sim_Mode}                  &            & \ct{'VLES'}      \\ \hline
 \ct{SMOKE_ALBEDO}                                 & Real         & Reference~\cite{Smokeview_Users_Guide}  &            & 0.3               \\ \hline
 \ct{SOLID_PHASE_ONLY}                            & Logical      & Section~\ref{solid_phase_verification}  &            & \ct{F}           \\ \hline
@@ -14591,7 +14591,7 @@ where for the \ct{I}th state change \ct{T(I)} is the time of the state change, \
 \section{CPU Usage Data}
 \label{out:CPU}
 
-The file called \ct{CHID_cpu.csv} records the amount of CPU time for each of the MPI processes.
+The file called \ct{CHID_cpu.csv} records the CPU time spent by each MPI process in the various major subroutines.
 \begin{lstlisting}
 Rank,MAIN,DIVG, ... , Total T_USED (s)
     0, 2.052E+00, 1.058E+01, ... , 5.143+01
@@ -14599,7 +14599,123 @@ Rank,MAIN,DIVG, ... , Total T_USED (s)
             .
             .
 \end{lstlisting}
-where \ct{Rank} is the number of the MPI process (starting at 0), \ct{MAIN}, \ct{DIVG}, and so on, are major routines, and \ct{'Total T_USED (s)'} is the total CPU time consumed by that particular MPI process. Typically, the total time is similar. The time spent in \ct{MAIN} is essentially overhead -- time spent {\em not} working on the calculation. If you want to know if your work load is balanced, take a look at the time spent in \ct{MAIN}. It should be similar for all MPI processes. If one of the MPI processes has a noticeably smaller value for \ct{MAIN}, then that process is working on the core routines while the other processes sit idle in \ct{MAIN}.
+where \ct{Rank} is the number of the MPI process (starting at 0), \ct{MAIN}, \ct{DIVG}, and so on, are major routines, and \ct{'Total T_USED (s)'} is the total CPU time consumed by that particular MPI process. A brief description of each column is given in Table~\ref{tab:CPU_usage}. The time spent in \ct{MAIN} is essentially overhead -- time spent {\em not} working on the calculation. If you want to know if your work load is balanced, take a look at the time spent in \ct{MAIN}. It should be similar for all MPI processes. If one of the MPI processes has a noticeably smaller value for \ct{MAIN}, then that process is working on the core routines while the other processes sit idle in \ct{MAIN}.
+
+\begin{table}[ht]
+\centering
+\caption[Major FDS routines in the CPU usage file]{Major FDS routines listed in the CPU usage output file.}
+\label{tab:CPU_usage}
+\begin{tabular}{|l|l|}
+\hline
+Routine     & Description  \\ \hline \hline
+\ct{MAIN}   & Time not spent in the subroutines listed below \\ \hline
+\ct{DIVG}   & Computation of divergence \\ \hline
+\ct{MASS}   & Mass transport \\ \hline
+\ct{VELO}   & Momentum transport \\ \hline
+\ct{PRES}   & Pressure solver \\ \hline
+\ct{WALL}   & Solid phase  \\ \hline
+\ct{DUMP}   & Input and output \\ \hline
+\ct{PART}   & Lagrangian particles \\ \hline
+\ct{RADI}   & Radiation transport \\ \hline
+\ct{FIRE}   & Combustion \\ \hline
+\ct{COMM}   & MPI communication \\ \hline
+\ct{BLNK}   & Blank, not used \\ \hline
+\ct{HVAC}   & Heating, Ventilation, Air Conditioning \\ \hline
+\ct{GEOM}   & Complex geometry \\ \hline
+\ct{VEGE}   & Wildland fire spread \\ \hline
+\ct{CHEM}   & Complex chemistry \\ \hline
+\end{tabular}
+\end{table}
+
+The \ct{CHID_cpu.csv} file is printed out at the end of the simulation. To force it to be printed out periodically during the simulation, set \ct{DT_CPU} or \ct{RAMP_CPU} on the \ct{DUMP} line. The latter parameter allows you to write out the files at specified times.
+
+\section{Time Step Data}
+\label{out:timestep}
+
+The file called \ct{CHID_steps.csv} records data on the size of time steps and the amount of elapsed CPU time.
+\begin{lstlisting}
+Time Step,Wall Time,Step Size,Simulation Time,CPU Time
+\end{table}
+
+The \ct{CHID_cpu.csv} file is printed out at the end of the simulation. To force it to be printed out periodically during the simulation, set \ct{DT_CPU} or \ct{RAMP_CPU} on the \ct{DUMP} line. The latter parameter allows you to write out the files at specified times.
+
+\section{Time Step Data}
+\label{out:timestep}
+
+The file called \ct{CHID_steps.csv} records data on the size of time steps and the amount of elapsed CPU time.
+\begin{lstlisting}
+Time Step,Wall Time,Step Size,Simulation Time,CPU Time
+\end{table}
+
+The \ct{CHID_cpu.csv} file is printed out at the end of the simulation. To force it to be printed out periodically during the simulation, set \ct{DT_CPU} or \ct{RAMP_CPU} on the \ct{DUMP} line. The latter parameter allows you to write out the files at specified times.
+
+\section{Time Step Data}
+\label{out:timestep}
+
+The file called \ct{CHID_steps.csv} records data on the size of time steps and the amount of elapsed CPU time.
+\begin{lstlisting}
+Time Step,Wall Time,Step Size,Simulation Time,CPU Time
+\end{table}
+
+The \ct{CHID_cpu.csv} file is printed out at the end of the simulation. To force it to be printed out periodically during the simulation, set \ct{DT_CPU} or \ct{RAMP_CPU} on the \ct{DUMP} line. The latter parameter allows you to write out the files at specified times.
+
+\section{Time Step Data}
+\label{out:timestep}
+
+The file called \ct{CHID_steps.csv} records data on the size of time steps and the amount of elapsed CPU time.
+\begin{lstlisting}
+Time Step,Wall Time,Step Size,Simulation Time,CPU Time
+\end{table}
+
+The \ct{CHID_cpu.csv} file is printed out at the end of the simulation. To force it to be printed out periodically during the simulation, set \ct{DT_CPU} or \ct{RAMP_CPU} on the \ct{DUMP} line. The latter parameter allows you to write out the files at specified times.
+
+\section{Time Step Data}
+\label{out:timestep}
+
+The file called \ct{CHID_steps.csv} records data on the size of time steps and the amount of elapsed CPU time.
+\begin{lstlisting}
+Time Step,Wall Time,Step Size,Simulation Time,CPU Time
+\end{table}
+
+The \ct{CHID_cpu.csv} file is printed out at the end of the simulation. To force it to be printed out periodically during the simulation, set \ct{DT_CPU} or \ct{RAMP_CPU} on the \ct{DUMP} line. The latter parameter allows you to write out the files at specified times.
+
+\section{Time Step Data}
+\label{out:timestep}
+
+The file called \ct{CHID_steps.csv} records data on the size of time steps and the amount of elapsed CPU time.
+\begin{lstlisting}
+Time Step,Wall Time,Step Size,Simulation Time,CPU Time
+\end{table}
+
+The \ct{CHID_cpu.csv} file is printed out at the end of the simulation. To force it to be printed out periodically during the simulation, set \ct{DT_CPU} or \ct{RAMP_CPU} on the \ct{DUMP} line. The latter parameter allows you to write out the files at specified times.
+
+\section{Time Step Data}
+\label{out:timestep}
+
+The file called \ct{CHID_steps.csv} records data on the size of time steps and the amount of elapsed CPU time.
+\begin{lstlisting}
+Time Step,Wall Time,Step Size,Simulation Time,CPU Time
+\end{table}
+
+The \ct{CHID_cpu.csv} file is printed out at the end of the simulation. To force it to be printed out periodically during the simulation, set \ct{DT_CPU} or \ct{RAMP_CPU} on the \ct{DUMP} line. The latter parameter allows you to write out the files at specified times.
+
+\section{Time Step Data}
+\label{out:timestep}
+
+The file called \ct{CHID_steps.csv} records data on the size of time steps and the amount of elapsed CPU time.
+\begin{lstlisting}
+Time Step,Wall Time,Step Size,Simulation Time,CPU Time
+\end{table}
+
+The \ct{CHID_cpu.csv} file is printed out at the end of the simulation. To force it to be printed out periodically during the simulation, set \ct{DT_CPU} or \ct{RAMP_CPU} on the \ct{DUMP} line. The latter parameter allows you to write out the files at specified times.
+
+\section{Time Step Data}
+\label{out:timestep}
+
+The file called \ct{CHID_steps.csv} records data on the size of time steps and the amount of elapsed CPU time.
+\begin{lstlisting}
+Time Step,Wall Time,Step Size,Simulation Time,CPU Time
+\end{table}
 
 The \ct{CHID_cpu.csv} file is printed out at the end of the simulation. To force it to be printed out periodically during the simulation, set \ct{DT_CPU} or \ct{RAMP_CPU} on the \ct{DUMP} line. The latter parameter allows you to write out the files at specified times.
 
