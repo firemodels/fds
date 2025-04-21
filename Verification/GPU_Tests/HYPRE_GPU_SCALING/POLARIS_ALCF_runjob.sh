@@ -2,7 +2,7 @@
 #PBS -N HYPRE_gpu_job
 #PBS -l select=1
 #PBS -l place=scatter
-#PBS -l walltime=0:30:00
+#PBS -l walltime=2:00:00
 #PBS -l filesystems=home:eagle
 #PBS -j oe
 #PBS -q preemptable
