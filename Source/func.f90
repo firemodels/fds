@@ -5817,6 +5817,52 @@ END SELECT
 
 END SUBROUTINE TRANSFORM_COORDINATES
 
+!> \brief Find the determinant of a matrix A of order N
+!> \param A is a square matrix N x N
+!> \param N is the order of the matrix
+!> \param DET is the result
+
+RECURSIVE FUNCTION DETERMINANT(A, N) RESULT(DET)
+INTEGER, INTENT(IN) :: N
+REAL(EB), INTENT(IN) :: A(N,N)
+REAL(EB) :: DET
+INTEGER :: I, J, K, SUBI, SUBJ
+REAL(8), ALLOCATABLE :: SUBMAT(:,:)
+
+SELECT CASE (N)
+   CASE (1)
+      DET = A(1,1)
+
+   CASE (2)
+      DET = A(1,1)*A(2,2) - A(1,2)*A(2,1)
+
+   CASE (3)
+      DET = A(1,1)*(A(2,2)*A(3,3) - A(2,3)*A(3,2)) &
+          - A(1,2)*(A(2,1)*A(3,3) - A(2,3)*A(3,1)) &
+          + A(1,3)*(A(2,1)*A(3,2) - A(2,2)*A(3,1))
+
+   CASE DEFAULT
+      DET = 0._EB
+      ALLOCATE(SUBMAT(N-1,N-1))
+      DO K = 1, N
+         SUBI = 0
+            DO I = 2, N
+               SUBI = SUBI + 1
+               SUBJ = 0
+               DO J = 1, N
+                  IF (J == K) CYCLE
+                  SUBJ = SUBJ + 1
+                  SUBMAT(SUBI,SUBJ) = A(I,J)
+               ENDDO
+            ENDDO
+            DET = DET + (-1._EB)**(1+K) * A(1,K) * DETERMINANT(SUBMAT, N-1)
+      ENDDO
+      DEALLOCATE(SUBMAT)
+END SELECT
+
+END FUNCTION DETERMINANT
+
+
 END MODULE GEOMETRY_FUNCTIONS
 
 

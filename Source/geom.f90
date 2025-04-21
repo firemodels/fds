@@ -24881,9 +24881,10 @@ USE GEOMETRY_FUNCTIONS, ONLY: TRANSFORM_COORDINATES
    REAL(EB), INTENT(IN) :: TIME
    INTEGER, INTENT(OUT) :: N_VERTS, N_FACES, N_VOLUS
 
-   INTEGER :: I, IVERT, IMOVE, MOVE_INDEX
+   INTEGER :: I, IVERT, IMOVE, MOVE_INDEX, IFACE
    TYPE(GEOMETRY_TYPE), POINTER :: G
    REAL(EB) :: DELTA_T, VEC(1:3) ! M(3,3)
+   TYPE(MOVEMENT_TYPE), POINTER :: MV
 
    IF (IS_DYNAMIC) THEN
       DELTA_T = TIME - T_BEGIN
@@ -24921,6 +24922,15 @@ USE GEOMETRY_FUNCTIONS, ONLY: TRANSFORM_COORDINATES
             CALL TRANSFORM_COORDINATES(VEC(1),VEC(2),VEC(3),MOVE_INDEX,1) ! Eventually, time varying motion dealt with here.
             G%VERTS(3*IVERT-2:3*IVERT) = VEC(1:3)
          ENDDO
+         ! Swap face connectivities if we have reflections:
+         MV => MOVEMENT(MOVE_INDEX)
+         IF (MV%DET < -TWO_EPSILON_EB) THEN ! Swap vertices 2 and 3:
+            DO IFACE=1,G%N_FACES
+               IVERT = G%FACES(3*(IFACE-1)+2)
+               G%FACES(3*(IFACE-1)+2) = G%FACES(3*(IFACE-1)+3)
+               G%FACES(3*(IFACE-1)+3) = IVERT
+            ENDDO
+         ENDIF
       ELSE
          DO IVERT=1,G%N_VERTS
             G%VERTS(3*IVERT-2:3*IVERT) = G%VERTS_BASE(3*IVERT-2:3*IVERT)
