@@ -449,7 +449,6 @@ DO JJG=1,JBAR
 
          IF (SF%I_RAMP_LS_WIND>0) THEN            
             WIND_FACTOR = EVALUATE_RAMP(UMF_MAG/60._EB,SF%I_RAMP_LS_WIND)
-            WRITE(LU_ERR,*) UMF_MAG/60._EB,WIND_FACTOR
          ELSE
             WIND_FACTOR = C_ROTH * ((3.281_EB * UMF_MAG)**B_ROTH) * (SF%VEG_LSET_BETA/BETA_OP_ROTH)**(-E_ROTH) ! Bova et al., Eq. A1
          ENDIF
