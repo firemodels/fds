@@ -1,0 +1,13 @@
+
+Suppose you have a script that sets environment variables.
+If you want to make a module from this script perform the
+following steps
+
+1.  env | sort > file1
+2.  run the script that sets environtment variables
+3.  env | sort > file2
+4.  ./env2mod -f file1 file2 
+5.  clean up module file named modulefile created by env2mod
+
+The program env2mod is located in the smv repo and may be built
+using scripts at smv/Build/env2mod.  
