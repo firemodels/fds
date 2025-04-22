@@ -44,6 +44,10 @@ if [ -d "$FIREMODELS/hdf5" ]; then
   if [[ "$(git tag -l $HDF5_LIB_TAG)" == $HDF5_LIB_TAG ]]; then
     echo "Checking out $HDF5_LIB_TAG"
     git checkout $HDF5_LIB_TAG
+  else
+    echo "Your HDF5 repository is not up to date with the required tag: $HDF5_LIB_TAG."
+    echo "The FDS build requires HDF5 version $HDF5_LIB_TAG. Please update your HDF5 repository."
+    exit 1
   fi 
 
   mkdir $FIREMODELS/hdf5/BUILDDIR
