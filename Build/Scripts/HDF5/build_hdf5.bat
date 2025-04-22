@@ -80,6 +80,7 @@ if "%FOUND_TAG%" == "%LIB_TAG%" (
 ) else (
     echo Your HDF5 repository is not up to date with the required tag: %LIB_TAG%.
     echo The FDS build requires HDF5 version %LIB_TAG%. Please update your HDF5 repository.
+    pause
     exit /b 1
 )
 
