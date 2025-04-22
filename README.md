@@ -129,6 +129,7 @@ module use /soft/modulefiles
 module load spack-pe-base cmake
 module load PrgEnv-gnu
 module load nvhpc-mixed
+module load craype-accel-nvidia80
 export FIREMODELS_CC=cc
 export FIREMODELS_CXX=CC
 export FIREMODELS_FC=ftn
