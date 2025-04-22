@@ -92,6 +92,7 @@ if "%FOUND_TAG%" == "%LIB_TAG%" (
 ) else (
     echo Your HYPRE repository is not up to date with the required tag: %LIB_TAG%.
     echo The FDS build requires HYPRE version %LIB_TAG%. Please update your HYPRE repository.
+    pause
     exit /b 1
 )
 
