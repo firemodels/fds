@@ -1,0 +1,5 @@
+The Fire Dynamics Simulator (FDS), is a computational
+fluid dynamics (CFD) model of fire-driven fluid flow. 
+
+Smokeview is a separate visualization program that is used to display the
+results of an FDS simulation.
