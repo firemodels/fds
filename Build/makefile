@@ -55,6 +55,7 @@ FFLAGSMKL =
 LFLAGSMKL_INTEL =
 LFLAGSMKL_INTEL_OPENMP =
 LFLAGSMKL_GNU_OPENMP =
+LFLAGSMKL_OMPI_INTEL_LINUX =
 LFLAGSMKL_CUSTOM =
 LFLAGSMKL_CUSTOM_OPENMP =
 
@@ -80,18 +81,16 @@ $(info MKLLIBDIR = $(MKLLIBDIR))
 
 ifeq ($(shell echo "check_quotes"),"check_quotes")
   # windows
-  #MKLLIBDIR = $(MKLROOT)\lib
   FFLAGSMKL = -DWITH_MKL /I"$(MKLROOT)\include"
   COMMON_MKL_LIBS = "$(MKLLIBDIR)\mkl_intel_lp64.lib" "$(MKLLIBDIR)\mkl_core.lib" "$(MKLLIBDIR)\mkl_blacs_intelmpi_lp64.lib"
   LFLAGSMKL_INTEL = $(COMMON_MKL_LIBS) "$(MKLLIBDIR)\mkl_sequential.lib"
   LFLAGSMKL_INTEL_OPENMP = $(COMMON_MKL_LIBS) "$(MKLLIBDIR)\mkl_intel_thread.lib"
 else
 # linux
-  #MKLLIBDIR = $(MKLROOT)/lib
   FFLAGSMKL = -DWITH_MKL -I$(MKLROOT)/include
+  COMMON_MKL_LIBS = ${MKLLIBDIR}/libmkl_intel_lp64.a ${MKLLIBDIR}/libmkl_core.a -lpthread -lm -ldl
 
   # impi_intel_linux targets
-  COMMON_MKL_LIBS = ${MKLLIBDIR}/libmkl_intel_lp64.a ${MKLLIBDIR}/libmkl_core.a -lpthread -lm -ldl
   COMMON_MKL_INTEL_LIBS = ${COMMON_MKL_LIBS} ${MKLLIBDIR}/libmkl_blacs_intelmpi_lp64.a
   LFLAGSMKL_INTEL = -Wl,--start-group ${COMMON_MKL_INTEL_LIBS} ${MKLLIBDIR}/libmkl_sequential.a -Wl,--end-group
   LFLAGSMKL_INTEL_OPENMP = -Wl,--start-group ${COMMON_MKL_INTEL_LIBS} ${MKLLIBDIR}/libmkl_intel_thread.a -liomp5 -Wl,--end-group
