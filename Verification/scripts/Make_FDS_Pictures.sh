@@ -74,7 +74,7 @@ if [ "$SMV_PATH" == "" ]; then
 fi
 export SMV=$SMV_PATH/smokeview_$PLATFORM$TEST$SIZE$DEBUG
 export RUNSMV=$SVNROOT/fds/Utilities/Scripts/runsmv.sh
-export SMVBINDIR="-bindir $SVNROOT//smv/Build/for_bundle/"
+export SMVBINDIR="-bindir $SVNROOT/smv/Build/for_bundle/"
 export BASEDIR=`pwd`/..
 
 echo "erasing SCRIPT_FIGURES png files"
