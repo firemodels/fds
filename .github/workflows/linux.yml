@@ -37,7 +37,8 @@ jobs:
           ifx@2025.0.1
           impi@2021.14.1
           mkl@2025.0.1
-
+        prune: false       
+         
     - uses: actions/checkout@v4
 
     - name: Check Current Memory Limit
@@ -97,6 +98,7 @@ jobs:
       with:
         components: |
           mkl
+        prune: false  
 
     - uses: actions/checkout@v4
     - name: build fds debug
