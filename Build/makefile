@@ -104,7 +104,7 @@ else
   LFLAGSMKL_OMPI_INTEL_LINUX = -Wl,--start-group ${COMMON_MKL_LIBS} ${MKLLIBDIR}/libmkl_sequential.a ${MKLLIBDIR}/libmkl_blacs_openmpi_lp64.a  -Wl,--end-group
   
   # ompi_gnu_osx and ompi_intel_osx targets
-  COMMON_MKL_CUSTOM_LIBS = ${MKLLIBDIR}/libmkl_intel_lp64.a ${MKLLIBDIR}/libmkl_core.a ${MKLLIBDIR}/libmkl_blacs_custom_lp64.a  -lpthread -lm -ldl
+  COMMON_MKL_CUSTOM_LIBS = ${COMMON_MKL_LIBS} ${MKLLIBDIR}/libmkl_blacs_custom_lp64.a
   LFLAGSMKL_CUSTOM = ${COMMON_MKL_CUSTOM_LIBS} ${MKLLIBDIR}/libmkl_sequential.a
   LFLAGSMKL_CUSTOM_OPENMP = ${COMMON_MKL_CUSTOM_LIBS} ${MKLLIBDIR}/libmkl_intel_thread.a
  endif # OS test
