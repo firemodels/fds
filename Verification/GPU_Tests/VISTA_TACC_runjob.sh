@@ -29,7 +29,7 @@ sleep 5                          # Wait for daemons to initialize
 # 2. Run your CUDA application
 export UCX_RCACHE_ENABLE=n
 #export UCX_LOG_LEVEL=info
-export OMP_NUM_THREADS=8
+export OMP_NUM_THREADS=1
 export FDS_RANKS_PER_GPU=8
 FDSEXEC=~/firemodels/firex/fds/Build/ompi_gnu_linux/fds_ompi_gnu_linux
 
