@@ -1783,6 +1783,7 @@ TYPE MOVEMENT_TYPE
    REAL(EB) :: ROTATION_ANGLE     !< Angle of rotation around AXIS (deg)
    REAL(EB) :: AXIS(3)            !< Vector originating at (X0,Y0,Z0) that defines axis of rotation
    REAL(EB) :: T34(3,4)           !< Transformation matrix
+   REAL(EB) :: DET=0._EB          !< DET(T34(1:3,1:3)), if <0, need to reorder faces to preserve outward normals
    INTEGER :: INDEX               !< Integer identifier
    CHARACTER(LABEL_LENGTH) :: ID  !< Character identifier
 END TYPE MOVEMENT_TYPE

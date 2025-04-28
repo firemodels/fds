@@ -199,13 +199,14 @@ IF (READ_EXTERNAL) THEN
    IF (DT_EXTERNAL_HEARTBEAT > 0._EB) LU_EXTERNAL_HEARTBEAT = GET_FILE_NUMBER()
 ENDIF
 
-! Allocate and initialize mesh-specific variables, and check to see if the code should stop
+! Set up the background atmosphere and initialize the WALL cells
 
 DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-   CALL INITIALIZE_MESH_VARIABLES_1(DT,NM)
+   CALL INITIALIZE_ATMOSPHERE(NM)
+   CALL INITIALIZE_WALL_ARRAY(NM)
 ENDDO
 
-IF (MY_RANK==0 .AND. VERBOSE) CALL VERBOSE_PRINTOUT('Completed INITIALIZE_MESH_VARIABLES_1')
+IF (MY_RANK==0 .AND. VERBOSE) CALL VERBOSE_PRINTOUT('Completed INITIALIZE_WALL_ARRAY')
 
 ! Write the Smokeview (.smv) file using parallel MPI writes
 
@@ -237,6 +238,14 @@ IF (SETUP_ONLY .OR. CHECK_MESH_ALIGNMENT) THEN
    IF (MY_RANK==0) WRITE(LU_ERR,'(A)') ' Checking mesh alignment. This could take a few tens of seconds...'
    CALL STOP_CHECK(1)
 ENDIF
+
+! Allocate and initialize MESH-specific variables
+
+DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   CALL INITIALIZE_MESH_VARIABLES_1(DT,NM)
+ENDDO
+
+IF (MY_RANK==0 .AND. VERBOSE) CALL VERBOSE_PRINTOUT('Completed INITIALIZE_MESH_VARIABLES_1')
 
 ! MPI process 0 reopens the Smokeview file for additional output
 

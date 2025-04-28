@@ -1,0 +1,46 @@
+#%Module@VER@#####################################################################
+
+proc ModulesHelp { } {
+    global helpmsg
+    puts stderr "\t$helpmsg\n"
+}
+
+#module add library/gmp6.0.0a library/mpfr3.1.2  library/mpc1.0.3 compilers/gcc4.9.2
+
+#
+# 1. change 'mpihome' to base directory: /usr/local/XXX/XXX/XXX,
+#    and all variables below will be set correctly
+#
+set mpihome /shared/openmpi_64ib
+
+conflict openmpi
+conflict FDS6
+
+if [ file isdirectory $mpihome/bin ] {
+    module-whatis "Sets up your openmpi environment to use $mpihome"
+    set helpmsg "Sets up your openmpi environment to use $mpihome"
+
+    setenv OPAL_PREFIX $mpihome
+
+    setenv CC $mpihome/bin/mpicc
+    setenv FC $mpihome/bin/mpif77
+    setenv F90 $mpihome/bin/mpif90
+    setenv F77 $mpihome/bin/mpif77
+
+    prepend-path PATH $mpihome/bin
+    prepend-path MANPATH $mpihome/man
+    prepend-path C_INCLUDE_PATH $mpihome/include 
+    prepend-path CPLUS_INCLUDE_PATH $mpihome/include 
+    if [ file isdirectory $mpihome/lib64 ] {
+	prepend-path LD_LIBRARY_PATH $mpihome/lib64:$mpihome/lib
+    } else {
+	prepend-path LD_LIBRARY_PATH $mpihome/lib
+    }
+    if [ file isdirectory /usr/lib64 ] {
+       prepend-path LD_LIBRARY_PATH /usr/lib64
+    }
+} else {
+    module-whatis "MPI $mpihome is NOT installed"
+    set helpmsg "MPI $mpihome is NOT installed"
+}
+

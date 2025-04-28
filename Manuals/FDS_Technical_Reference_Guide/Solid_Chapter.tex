@@ -48,7 +48,7 @@ The numerical solution of the solid phase heat equation is presented in detail i
 \subsection{Radiation Heat Transfer to Solids}
 \label{inradsection}
 
-If it is assumed that the thermal radiation from the surrounding gases is absorbed within an infinitely thin layer at the surface of the solid obstruction, then the net radiative heat flux is the sum of incoming and outgoing components, $\dq_{\rm r}'' = \dq_{\rm r,in}'' - \dq_{\rm r,out}''$:
+By default, it is assumed that the thermal radiation from the surrounding gases is absorbed within an infinitely thin layer at the surface of the solid obstruction, in which case the net radiative heat flux is the sum of incoming and outgoing components, $\dq_{\rm r}'' = \dq_{\rm r,in}'' - \dq_{\rm r,out}''$:
 \begin{align}
  \dq_{\rm r,in}'' &= \epsilon\,
  \int_{\bs'\cdot \bn_{\rm w} < 0} I_{\rm w}(\bs')\; |\bs'\cdot \bn_{\rm w} | \; \d\bO
@@ -56,7 +56,7 @@ If it is assumed that the thermal radiation from the surrounding gases is absorb
  \dq_{\rm r,out}'' &= \epsilon\,\sigma\,T_{\rm w}^4
  \label{RFluxOut1}
 \end{align}
-However, many common materials are not opaque; thus, the radiation penetrates the material to some finite depth. The radiative transport within the solid (or liquid) can be described as a source term in Eq.~(\ref{1dheat}). A ``two-flux'' model based on the Schuster-Schwarzschild approximation~\cite{Siegel:1} assumes the radiative intensity is constant inside the ``forward'' and ``backward'' hemispheres. The transport equation for the intensity in the ``forward'' direction is
+However, many common materials are not opaque to thermal radiation; i.e., the radiation penetrates the material to some finite depth. The radiative transport within the solid (or liquid) can be described as a source term in Eq.~(\ref{1dheat}). A ``two-flux'' model based on the Schuster-Schwarzschild approximation~\cite{Siegel:1} assumes the radiative intensity is constant inside the ``forward'' and ``backward'' hemispheres. The transport equation for the intensity in the ``forward'' direction is
 \be
  \frac{1}{2}\frac{\d I^+(x)}{\d x}=\kappa_{\rm s}\,\left(I_{\rm b}-I^+(x)\right)
  \label{RInForward}
@@ -65,7 +65,7 @@ where $x$ is the distance from the material surface and $\kappa_{\rm s}$ is the 
 \be
    \kappa_{\rm s} = \sum_{\alpha=1}^{N_{\rm m}} X_\alpha \; \kappa_{{\rm s},\alpha}
 \ee
-A corresponding formula can be given for the ``backward'' direction. Multiplying Eq.~\ref{RInForward} by $\pi$ gives us the ``forward'' radiative heat flux into the solid
+The ``two-flux'' model is invoked by specifying the absorption coefficients for the solid material components. A corresponding formula can be given for the ``backward'' direction. Multiplying Eq.~\ref{RInForward} by $\pi$ gives us the ``forward'' radiative heat flux into the solid
 \be
  \frac{1}{2}\frac{{\d\dq^+_{\rm r}(x)} }{\d x}=\kappa_{\rm s}\,
        \left(\sigma\,T_{\rm s}^4-\dq_{\rm r}^+(x)\right)
@@ -329,8 +329,7 @@ where $\nu_{\alpha,\alpha' \beta}$ is the yield of component $\alpha$ from react
 \label{eq:pyrolyzate}
 \dot{m}_{\gamma}''' =  \sum_{\alpha=1}^{N_{\rm m}} \sum_{\beta=1}^{N_{\rm r,\alpha}} \nu_{\rm \gamma,\alpha \beta} \; r_{\alpha \beta}
 \ee
-It is assumed that the gases are transported instantaneously to the surface, where the
-mass fluxes are given by\footnote{In cylindrical and spherical coordinates, the mass fluxes are
+It is assumed that the gases are transported instantaneously to the surface, where the mass fluxes are given by\footnote{In cylindrical and spherical coordinates, the mass fluxes are
 \be
    \dm_\gamma'' =\frac{1}{R_{\rm out}}   \int_{R_{\rm in}}^{R_{\rm out}} \dm_\gamma'''(x) \,r \d r \;\; ; \;\;
    \dm_\gamma'' =\frac{1}{R_{\rm out}^2} \int_{R_{\rm in}}^{R_{\rm out}} \dm_\gamma'''(x) \,r^2 \d r \;\;
@@ -339,7 +338,7 @@ mass fluxes are given by\footnote{In cylindrical and spherical coordinates, the 
 \label{eq:1dmassflux_solid}
 \dm_\gamma'' = \int_0^L \dm_\gamma'''(x) \,\d x
 \ee
-where $L$ is the thickness of the solid.
+where $L$ is the depth to which pyrolyzed gases are assumed to originate. This is typically half the thickness of the solid, meaning that the pyrolyzed gases exit the solid from the nearest surface cell.
 
 If the material reaction involves oxygen, then we balance the rate of mass flux from reaction $\dm_{\rm O_2}'''$ with the rate of mass transfer of oxygen into the solid,
 \be

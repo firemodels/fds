@@ -1,6 +1,6 @@
 &HEAD CHID='tga_sample', TITLE='TGA tutorial' / 
 
-&MESH IJK=3,1,4, XB=-2,2,-0.5,0.5,0,1 / 
+&MESH IJK=4,1,4, XB=-2,2,-0.5,0.5,0,1 / 
 
 &TIME T_END=9600., WALL_INCREMENT=1, DT=0.2 /
 
