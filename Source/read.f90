@@ -2637,11 +2637,11 @@ IF (MY_RANK==0) THEN
    IF (.NOT.EX) THEN
       CALL SHUTDOWN('FAILED TO IDENTIFY WORKING DIRECTORY.')
    ENDIF
-   #ifdef _WIN32
+#ifdef _WIN32
    CALL EXECUTE_COMMAND_LINE('del workingdir.txt')
-   #else
+#else
    CALL EXECUTE_COMMAND_LINE('rm workingdir.txt')
-   #endif
+#endif
 ENDIF
 
 

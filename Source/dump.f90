@@ -5030,11 +5030,10 @@ SUBROUTINE DUMP_SMOKE3D(T,DT,NM)
 USE ISOSMOKE, ONLY: SMOKE3D_TO_FILE
 REAL(EB), INTENT(IN) :: T,DT
 INTEGER,  INTENT(IN) :: NM
-INTEGER  :: I,J,K,N
+INTEGER  :: N
 REAL(FB) :: DXX,STIME
 REAL(EB), POINTER, DIMENSION(:,:,:) :: FF
 REAL(FB), ALLOCATABLE, DIMENSION(:) :: QQ_PACK
-REAL(EB) :: FR_C
 TYPE(SMOKE3D_TYPE), POINTER :: S3
 
 ! Miscellaneous settings
@@ -5048,45 +5047,7 @@ DATA_FILE_LOOP: DO N=1,N_SMOKE3D
 
    S3 => SMOKE3D_FILE(N)
    IF (S3%QUANTITY_INDEX==0) CYCLE
-
-   ! Obtain Smoke3D output at cell centers
-
-   DO K=0,KBP1
-      DO J=0,JBP1
-         DO I=0,IBP1
-            FF(I,J,K)=GAS_PHASE_OUTPUT(T,DT,NM,I,J,K,S3%QUANTITY_INDEX,0,S3%Y_INDEX,S3%Z_INDEX,0,0,0,0,0,0,0)
-         ENDDO
-      ENDDO
-   ENDDO
-
-   ! Adjust the temperature as it is used in the expression for the radiation source term
-
-   IF (S3%DISPLAY_TYPE=='TEMPERATURE' .AND. RTE_SOURCE_CORRECTION) THEN
-      FR_C = RTE_SOURCE_CORRECTION_FACTOR**0.25_EB
-      WHERE (CHI_R*Q>QR_CLIP) FF = (FF+TMPM)*FR_C - TMPM
-   ENDIF
-
-   ! Interpolate data to cell nodes
-
-   DO K=0,KBAR
-      DO J=0,JBAR
-         DO I=0,IBAR
-            QQ(I,J,K,1) = REAL((FF(I,J,K)  +FF(I+1,J,K)  +FF(I,J,K+1)  +FF(I+1,J,K+1)+ &
-                                FF(I,J+1,K)+FF(I+1,J+1,K)+FF(I,J+1,K+1)+FF(I+1,J+1,K+1))*0.125_FB,FB)
-         ENDDO
-      ENDDO
-   ENDDO
-
-   IF (CC_IBM) THEN
-      DO K=0,KBAR
-         DO J=0,JBAR
-            DO I=0,IBAR
-               IF(MESHES(NM)%VERTVAR(I,J,K,CC_VGSC) /= CC_SOLID) CYCLE
-               QQ(I,J,K,1) = 0._FB
-            ENDDO
-         ENDDO
-      ENDDO
-   ENDIF
+   CALL GET_SMOKE3D_QQ(S3,T,DT,NM,FF,QQ)
 
    ! Pack the data into a 1-D array and send to the routine that writes the file for Smokeview
 
