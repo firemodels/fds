@@ -2625,18 +2625,25 @@ ENDIF
 
 
 #ifdef _WIN32
-CALL EXECUTE_COMMAND_LINE('cd > workingdir.txt')
+      CALL EXECUTE_COMMAND_LINE('cd > workingdir.txt')
 #else
-CALL EXECUTE_COMMAND_LINE('pwd > workingdir.txt')
+      CALL EXECUTE_COMMAND_LINE('pwd > workingdir.txt')
 #endif
-OPEN(LU_WDIR, FILE="workingdir.txt", STATUS="OLD", ACTION="READ")
-READ(LU_WDIR, '(A)') WORKING_DIR
-CLOSE(LU_WDIR)
-#ifdef _WIN32
-CALL EXECUTE_COMMAND_LINE('del workingdir.txt')
-#else
-CALL EXECUTE_COMMAND_LINE('rm workingdir.txt')
-#endif
+IF (MY_RANK==0) THEN
+   OPEN(LU_WDIR, FILE="workingdir.txt", STATUS="OLD", ACTION="READ")
+   READ(LU_WDIR, '(A)') WORKING_DIR
+   CLOSE(LU_WDIR)
+   INQUIRE(FILE='workingdir.txt',EXIST=EX)
+   IF (.NOT.EX) THEN
+      CALL SHUTDOWN('FAILED TO IDENTIFY WORKING DIRECTORY.')
+   ENDIF
+   #ifdef _WIN32
+   CALL EXECUTE_COMMAND_LINE('del workingdir.txt')
+   #else
+   CALL EXECUTE_COMMAND_LINE('rm workingdir.txt')
+   #endif
+ENDIF
+
 
 END SUBROUTINE READ_DUMP
 
