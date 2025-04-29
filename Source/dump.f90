@@ -314,79 +314,13 @@ END SUBROUTINE DUMP_MESH_OUTPUTS
 SUBROUTINE ASSIGN_FILE_NAMES
 
 USE COMP_FUNCTIONS, ONLY: GET_FILE_NUMBER
-INTEGER :: NM,I,N,IO
+INTEGER :: NM,I,N
 CHARACTER(LABEL_LENGTH) :: CFORM
 
 ! Set up file number counter
 
 ALLOCATE(FILE_COUNTER(0:N_MPI_PROCESSES))
 FILE_COUNTER = 100
-
-! Check for custom directory for output
-IF (RESULTS_DIR/='') THEN
-   DO I=1,FILE_LENGTH
-      IF (RESULTS_DIR(FILE_LENGTH-I:FILE_LENGTH-I)/='') THEN
-         IF (RESULTS_DIR(FILE_LENGTH-I:FILE_LENGTH-I)=='/') THEN
-            EXIT
-         ELSE
-            RESULTS_DIR(FILE_LENGTH-I+1:FILE_LENGTH-I+1)='/'
-            EXIT
-         ENDIF
-      ENDIF
-   ENDDO
-! Check for custom directory for vtk output
-IF (VTK_DIR/='') THEN
-   DO I=1,FILE_LENGTH
-      IF (VTK_DIR(FILE_LENGTH-I:FILE_LENGTH-I)/='') THEN
-         IF (VTK_DIR(FILE_LENGTH-I:FILE_LENGTH-I)=='/') THEN
-            EXIT
-         ELSE
-            VTK_DIR(FILE_LENGTH-I+1:FILE_LENGTH-I+1)='/'
-            EXIT
-         ENDIF
-      ENDIF
-   ENDDO
-ELSE
-   VTK_DIR=RESULTS_DIR
-ENDIF
-
-! Try to make results directory on all ranks in case one that is not 0
-! This prevents subsequent failure of the software in writing to a non-existent
-! directory later on if rank 0 is running too slow.
-! As an alternative we could add an mpi wait here on other processes.
-#ifdef _WIN32
-      CALL EXECUTE_COMMAND_LINE('mkdir '//'"'//TRIM(RESULTS_DIR)//'"')
-      CALL EXECUTE_COMMAND_LINE('mkdir '//'"'//TRIM(VTK_DIR)//'"')
-#else
-      CALL EXECUTE_COMMAND_LINE('mkdir -p '//TRIM(RESULTS_DIR))
-      CALL EXECUTE_COMMAND_LINE('mkdir -p '//TRIM(VTK_DIR))
-#endif
-   IF (MY_RANK==0) THEN
-      LU_RDIR=GET_FILE_NUMBER()
-      OPEN(LU_RDIR,FILE=TRIM(RESULTS_DIR)//'/.ignore',FORM='FORMATTED',STATUS='REPLACE')
-      WRITE(LU_RDIR, '(A)') TRIM(RESULTS_DIR)
-      CLOSE(LU_RDIR)
-      INQUIRE(FILE=TRIM(RESULTS_DIR)//'/.ignore',EXIST=EX)
-      IF (.NOT.EX) THEN
-         CALL SHUTDOWN('FAILED TO CREATE DIRECTORY: '//TRIM(RESULTS_DIR))
-      ENDIF
-#ifdef _WIN32
-      CALL EXECUTE_COMMAND_LINE('cd > workingdir.txt')
-#else
-      CALL EXECUTE_COMMAND_LINE('pwd > workingdir.txt')
-#endif
-      OPEN(NEWUNIT=IO, FILE="workingdir.txt", STATUS="OLD", ACTION="READ")
-      READ(IO, '(A)') WORKING_DIR
-      CLOSE(IO)
-#ifdef _WIN32
-      CALL EXECUTE_COMMAND_LINE('del workingdir.txt')
-#else
-      CALL EXECUTE_COMMAND_LINE('rm workingdir.txt')
-#endif
-   ENDIF
-ELSE
-   WORKING_DIR = ''
-ENDIF
 
 ! GIT ID file
 

@@ -2586,6 +2586,62 @@ IF (BINGEOM_DIR/='') THEN
       ENDIF
    ENDIF
 ENDIF
+! Check for custom directory for vtk output
+IF (VTK_DIR/='') THEN
+   DO I=1,FILE_LENGTH
+      IF (VTK_DIR(FILE_LENGTH-I:FILE_LENGTH-I)/='') THEN
+         IF (VTK_DIR(FILE_LENGTH-I:FILE_LENGTH-I)=='/') THEN
+            EXIT
+         ELSE
+            VTK_DIR(FILE_LENGTH-I+1:FILE_LENGTH-I+1)='/'
+            EXIT
+         ENDIF
+      ENDIF
+   ENDDO
+ELSE
+   VTK_DIR=RESULTS_DIR
+ENDIF
+! Try to make vtk results directory on all ranks in case one that is not 0
+! This prevents subsequent failure of the software in writing to a non-existent
+! directory later on if rank 0 is running too slow.
+! As an alternative we could add an mpi wait here on other processes.
+IF (VTK_DIR/=RESULTS_DIR) THEN
+#ifdef _WIN32
+      CALL EXECUTE_COMMAND_LINE('mkdir '//'"'//TRIM(VTK_DIR)//'"')
+#else
+      CALL EXECUTE_COMMAND_LINE('mkdir -p '//TRIM(VTK_DIR))
+#endif
+   IF (MY_RANK==0) THEN
+      OPEN(LU_VRDIR,FILE=TRIM(VTK_DIR)//'/.ignore',FORM='FORMATTED',STATUS='REPLACE')
+      WRITE(LU_VRDIR, '(A)') TRIM(VTK_DIR)
+      CLOSE(LU_VRDIR)
+      INQUIRE(FILE=TRIM(VTK_DIR)//'/.ignore',EXIST=EX)
+      IF (.NOT.EX) THEN
+         CALL SHUTDOWN('FAILED TO CREATE DIRECTORY: '//TRIM(VTK_DIR))
+      ENDIF
+   ENDIF
+ENDIF
+
+
+#ifdef _WIN32
+      CALL EXECUTE_COMMAND_LINE('cd > workingdir.txt')
+#else
+      CALL EXECUTE_COMMAND_LINE('pwd > workingdir.txt')
+#endif
+IF (MY_RANK==0) THEN
+   OPEN(LU_WDIR, FILE="workingdir.txt", STATUS="OLD", ACTION="READ")
+   READ(LU_WDIR, '(A)') WORKING_DIR
+   CLOSE(LU_WDIR)
+   INQUIRE(FILE='workingdir.txt',EXIST=EX)
+   IF (.NOT.EX) THEN
+      CALL SHUTDOWN('FAILED TO IDENTIFY WORKING DIRECTORY.')
+   ENDIF
+#ifdef _WIN32
+   CALL EXECUTE_COMMAND_LINE('del workingdir.txt')
+#else
+   CALL EXECUTE_COMMAND_LINE('rm workingdir.txt')
+#endif
+ENDIF
 
 END SUBROUTINE READ_DUMP
 
