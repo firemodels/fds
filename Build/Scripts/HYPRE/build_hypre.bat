@@ -117,12 +117,15 @@ echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
 
-set cmake_args=
-if "%BUILD_WITH_GPU%" EQU "ON" (
-  if "%GPU_ARCH%" EQU "cuda" (
-    set cmake_args=-DHYPRE_ENABLE_CUDA="ON"
+
+if "%BUILD_WITH_GPU%" == "ON" (
+  if "%GPU_ARCH%" == "cuda" (
+    set HYPRE_ENABLE_CUDA=ON
+  ) else (
+    set HYPRE_ENABLE_CUDA=OFF
   )
 )
+
 set BUILDDIR=%LIB_REPO%\build
 cd %BUILDDIR%
 cmake ..\src  ^
@@ -134,7 +137,7 @@ cmake ..\src  ^
 -DCMAKE_MAKE_PROGRAM="%CMAKE_MAKE_PROGRAM%" ^
 -DHYPRE_FMANGLE=4 ^
 -DCMAKE_INSTALL_LIBDIR="lib" ^
-%cmake_args%
+-DHYPRE_ENABLE_CUDA="%HYPRE_ENABLE_CUDA%"
 
 
 echo.
