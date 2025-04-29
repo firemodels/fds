@@ -1630,11 +1630,11 @@ A geometry may be translated, rotated and scaled. For example, in the following 
 \noindent the \ct{chair} object is translated and rotated using a reference to the \ct{MOVE} namelist, defined and explained in Sec.~\ref{info:MOVE}.
 
 
-\subsection{Reading Geometry Node Locations And Connectivity Data From Binary}
+\subsection{Binary Geometry Files}
 \label{subsec:readbin}
 
 In cases where geometries have very large numbers of nodes and surface triangles, greater setup time efficiency can be achieved by reading this data from an FDS produced binary file. This binary file can be obtained running the case in setup only mode (\ct{T_END=0.0}).
-Consider the chair geometry defined in the previous section. When a geometry is read by FDS, the \ct{XYZ} and face connectivity data \ct{FACES} is automatically written into a binary file with name \ct{CHID_GEOM_ID.bingeom} on the run directory (here, \ct{GEOM_ID='chair'}). If an \ct{ID} is not provided, the name of the binary file will be  \ct{CHID_N_GEOM.bingeom}, where \ct{N_GEOM} is the number defining the order of appearance of the geometry line on the FDS input file.
+Consider the chair geometry defined in the previous section. When a geometry is read by FDS, the \ct{XYZ} and face connectivity data \ct{FACES} is automatically written into a binary file with name \ct{CHID_GEOM_ID.bingeom} on the run directory (here, \ct{GEOM_ID='chair'}). If an \ct{ID} is not provided, the name of the binary file will be  \ct{CHID_N_GEOM.bingeom}, where \ct{N_GEOM} is the number defining the order of appearance of the geometry line on the FDS input file.  To help keep geometry files organized, you may specify a \ct{BINGEOM_DIR} on the \ct{DUMP} line, in which case the binary files will be written to \ct{BINGEOM_DIR/CHID_GEOM_ID.bingeom}.
 
 Then, supposing the case ID is \ct{CHID='DiningRoom'}, the next time the case is run, the geometry line can be modified to:
 \begin{lstlisting}
@@ -1643,11 +1643,10 @@ Then, supposing the case ID is \ct{CHID='DiningRoom'}, the next time the case is
       BINARY_FILE='DiningRoom_chair.bingeom',
       MOVE_ID='ChairMove' /
 \end{lstlisting}
-where the presence of \ct{BINARY_FILE} instructs FDS to read nodes and faces from the binary geometry file.
-Note we have deleted the \ct{VERTS, FACES} arrays from the input line.
-This manner of loading large geometries avoids the testing and reading of all lines related to these arrays on the FDS input file.
-This approach is particularly efficient in large parallel calculations, where parallel file systems are used. See Sec.~\ref{inout:bingeom} for more information on geometry I/O binary format.
+where the presence of \ct{BINARY_FILE} instructs FDS to read nodes and faces from the binary geometry file. Note we have deleted the \ct{VERTS, FACES} arrays from the input line. This manner of loading large geometries avoids the testing and reading of all lines related to these arrays on the FDS input file. This approach is particularly efficient in large parallel calculations, where parallel file systems are used. See Sec.~\ref{inout:bingeom} for more information on geometry I/O binary format.
+
 If a different name than the default is used, it can be specified in the field \ct{BINARY_FILE}. The location directory can also be added in the \ct{BINARY_FILE} string.
+
 Terrains can also be read and written in binary format, and in this case only their top surface triangulation is recorded. The binary contains their geometry information and terrain type, but the  \ct{SURF_ID} array has to be provided in the geometry line as shown above.
 The same requirement is needed for \ct{EXTEND_TERRAIN} if terrain extension is desired. The number of surface IDs defined in the binary file connectivities must match the number of surfaces defined in \ct{SURF_ID}.
 
@@ -4449,9 +4448,6 @@ where the primes refer to the new location of point $p$. In that case the previo
 \end{lstlisting}
 where $(i_1,i_2,i_3)$, $(j_1,j_2,j_3)$ and $(k_1,k_2,k_3)$ are the orthogonal basis vectors for the rotation and scaling operations, and $(a_1,a_2,a_3)$ is the translation vector. Note that if \ct{T34} is defined, it takes precedence over all other transformation parameters.
 
-Currently, the move feature only applies to point and line devices, and in future shall be applied to non-rectangular immersed objects.
-
-
 
 \chapter{Chemical Species}
 \label{info:SPEC}
@@ -6116,7 +6112,7 @@ The radiative properties of water and fuel droplets are determined automatically
 &TABL ID='radtab', TABLE_DATA= 5.0,1.33,0.002  /
 &TABL ID='radtab', TABLE_DATA=10.0,1.33,0.001  /
 \end{lstlisting}
-For calculating the absorption of thermal radiation by particles, FDS uses a running average of particle temperature and density. The \ct{RUNNING_AVERAGE_FACTOR} is set on the \ct{PART} line, and its default value is 0.5 for liquid droplets and 0 for solid particles. The value of 0 indicates that no running average is used. Similarly, the parameter \ct{RUNNING_AVERAGE_FACTOR_WALL}, also set on the \ct{PART} line, controls the running average of droplet or particle mass on solid surfaces. Its defaults are the same as for \ct{RUNNING_AVERAGE_FACTOR}.
+For calculating the absorption of thermal radiation by particles, FDS uses a running average of particle temperature and density. The \ct{RUNNING_AVERAGE_FACTOR} is set on the \ct{PART} line, and its default value is 0.95 for liquid droplets and 0 for solid particles. The value of 0 indicates that no running average is used. Similarly, the parameter \ct{RUNNING_AVERAGE_FACTOR_WALL}, also set on the \ct{PART} line, controls the running average of droplet or particle mass on solid surfaces. Its defaults are the same as for \ct{RUNNING_AVERAGE_FACTOR}.
 
 
 \subsection{Size Distribution}
@@ -12156,14 +12152,15 @@ Keyword             & Type     & Description                      & Units       
 \hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
+\ct{BINGEOM_DIR}                  & Character    & Section~\ref{subsec:readbin}           &           &                               \\ \hline
 \ct{CFL_FILE}                     & Logical      & Section~\ref{info:TIME_Control}        &           & \ct{F}                        \\ \hline
-\ct{CLIP_RESTART_FILES}          & Logical      & Section~\ref{info:restart}             &           & \ct{T}                        \\ \hline
-\ct{COLUMN_DUMP_LIMIT}           & Logical      & Section~\ref{info:out:DEVC}            &           & \ct{F}                        \\ \hline
-\ct{CTRL_COLUMN_LIMIT}           & Integer      & Section~\ref{info:out:DEVC}            &           & 254                            \\ \hline
-\ct{DEVC_COLUMN_LIMIT}           & Integer      & Section~\ref{info:out:DEVC}            &           & 254                            \\ \hline
-\ct{DIAGNOSTICS_INTERVAL}         & Integer      & Section~\ref{info:monitoring_progress} &           & 100                            \\ \hline
+\ct{CLIP_RESTART_FILES}           & Logical      & Section~\ref{info:restart}             &           & \ct{T}                        \\ \hline
+\ct{COLUMN_DUMP_LIMIT}            & Logical      & Section~\ref{info:out:DEVC}            &           & \ct{F}                        \\ \hline
+\ct{CTRL_COLUMN_LIMIT}            & Integer      & Section~\ref{info:out:DEVC}            &           & 254                           \\ \hline
+\ct{DEVC_COLUMN_LIMIT}            & Integer      & Section~\ref{info:out:DEVC}            &           & 254                           \\ \hline
+\ct{DIAGNOSTICS_INTERVAL}         & Integer      & Section~\ref{info:monitoring_progress} &           & 100                           \\ \hline
 \ct{DT_BNDF}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t$\ct{/NFRAMES}       \\ \hline
-\ct{DT_CPU}                       & Real         & Section~\ref{out:CPU}                  &  s        & $2 \Delta t$                   \\ \hline
+\ct{DT_CPU}                       & Real         & Section~\ref{out:CPU}                  &  s        & $2 \Delta t$                  \\ \hline
 \ct{DT_CTRL}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t$\ct{/NFRAMES}       \\ \hline
 \ct{DT_DEVC}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t$\ct{/NFRAMES}       \\ \hline
 \ct{DT_FLUSH}                     & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t$\ct{/NFRAMES}       \\ \hline
@@ -12172,51 +12169,51 @@ Keyword             & Type     & Description                      & Units       
 \ct{DT_ISOF}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t$\ct{/NFRAMES}       \\ \hline
 \ct{DT_MASS}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t$\ct{/NFRAMES}       \\ \hline
 \ct{DT_PART}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t$\ct{/NFRAMES}       \\ \hline
-\ct{DT_PL3D}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $2 \Delta t$                   \\ \hline
+\ct{DT_PL3D}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $2 \Delta t$                  \\ \hline
 \ct{DT_PROF}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t$\ct{/NFRAMES}       \\ \hline
-\ct{DT_RADF}                      & Real         & Section~\ref{info:RADF}                &  s        & $2 \Delta t$                   \\ \hline
-\ct{DT_RESTART}                   & Real         & Section~\ref{info:DT_DUMP}             &  s        & $2 \Delta t$                   \\ \hline
-\ct{DT_SL3D}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $2 \Delta t$                   \\ \hline
+\ct{DT_RADF}                      & Real         & Section~\ref{info:RADF}                &  s        & $2 \Delta t$                  \\ \hline
+\ct{DT_RESTART}                   & Real         & Section~\ref{info:DT_DUMP}             &  s        & $2 \Delta t$                  \\ \hline
+\ct{DT_SL3D}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $2 \Delta t$                  \\ \hline
 \ct{DT_SLCF}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t$\ct{/NFRAMES}       \\ \hline
 \ct{DT_SMOKE3D}                   & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t$\ct{/NFRAMES}       \\ \hline
 \ct{SMV_PARALLEL_WRITE}           & Logical      & Section~\ref{info:DUMP}                &           & \ct{T}                        \\ \hline
-\ct{DT_SPEC}                      & Real         & Section~\ref{info:CSVF}                &  s        &                                \\ \hline
-\ct{DT_TMP}                       & Real         & Section~\ref{info:CSVF}                &  s        &                                \\ \hline
-\ct{DT_UVW}                       & Real         & Section~\ref{info:CSVF}                &  s        &                                \\ \hline
-\ct{FLUSH_FILE_BUFFERS}          & Logical      & Section~\ref{info:DUMP}                &           & \ct{T}                        \\ \hline
-\ct{HRRPUV_MAX_SMV}              & Real         & Section~\ref{info:SMOKE3D}             & kW/m$^3$  & 1200                          \\ \hline
+\ct{DT_SPEC}                      & Real         & Section~\ref{info:CSVF}                &  s        &                               \\ \hline
+\ct{DT_TMP}                       & Real         & Section~\ref{info:CSVF}                &  s        &                               \\ \hline
+\ct{DT_UVW}                       & Real         & Section~\ref{info:CSVF}                &  s        &                               \\ \hline
+\ct{FLUSH_FILE_BUFFERS}           & Logical      & Section~\ref{info:DUMP}                &           & \ct{T}                        \\ \hline
+\ct{HRRPUV_MAX_SMV}               & Real         & Section~\ref{info:SMOKE3D}             & kW/m$^3$  & 1200                          \\ \hline
 \ct{MASS_FILE}                    & Logical      & Section~\ref{info:DUMP}                &           & \ct{F}                        \\ \hline
-\ct{MAXIMUM_PARTICLES}            & Integer      & Section~\ref{info:controlling_droplets}&           & 1000000                        \\ \hline
-\ct{NFRAMES}                       & Integer      & Section~\ref{info:DUMP}                &           & 1000                           \\ \hline
-\ct{PLOT3D_PART_ID(5)}           & Char.~Quint  & Section~\ref{info:PL3D}                &           &                                \\ \hline
-\ct{PLOT3D_QUANTITY(5)}           & Char.~Quint  & Section~\ref{info:PL3D}                &           &                                \\ \hline
-\ct{PLOT3D_SPEC_ID(5)}           & Char.~Quint  & Section~\ref{info:PL3D}                &           &                                \\ \hline
-\ct{PLOT3D_VELO_INDEX}           & Int.~Quint   & Section~\ref{info:velocity}            &           &  0                             \\ \hline
-\ct{RAMP_BNDF}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
-\ct{RAMP_CPU}                     & Character    & Section~\ref{out:CPU}                  &           &                                \\ \hline
-\ct{RAMP_CTRL}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
-\ct{RAMP_DEVC}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
-\ct{RAMP_FLUSH}                   & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
-\ct{RAMP_HRR}                     & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
-\ct{RAMP_HVAC}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
-\ct{RAMP_ISOF}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
-\ct{RAMP_MASS}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
-\ct{RAMP_PART}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
-\ct{RAMP_PL3D}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
-\ct{RAMP_PROF}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
-\ct{RAMP_RADF}                    & Character    & Section~\ref{info:RADF}                &           &                                \\ \hline
-\ct{RAMP_RESTART}                 & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
-\ct{RAMP_SL3D}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
-\ct{RAMP_SLCF}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
-\ct{RAMP_SMOKE3D}                 & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
-\ct{RAMP_SPEC}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
-\ct{RAMP_TMP}                     & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
-\ct{RAMP_UVW}                     & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
-\ct{RENDER_FILE}                  & Character    & Reference~\cite{Smokeview_Users_Guide} &           &                                \\ \hline
-\ct{RESULTS_DIR}                  & Character    & Section~\ref{info:DUMP}                &           &                                \\ \hline
-\ct{SIG_FIGS}                     & Integer      & Section~\ref{info:SIG_FIGS}            &           & 8                              \\ \hline
-\ct{SIG_FIGS_EXP}                & Integer      & Section~\ref{info:SIG_FIGS}            &           & 3                              \\ \hline
-\ct{SMOKE3D}                       & Logical      & Section~\ref{info:SMOKE3D}             &           & \ct{T}                        \\ \hline
+\ct{MAXIMUM_PARTICLES}            & Integer      & Section~\ref{info:controlling_droplets}&           & 1000000                       \\ \hline
+\ct{NFRAMES}                      & Integer      & Section~\ref{info:DUMP}                &           & 1000                          \\ \hline
+\ct{PLOT3D_PART_ID(5)}            & Char.~Quint  & Section~\ref{info:PL3D}                &           &                               \\ \hline
+\ct{PLOT3D_QUANTITY(5)}           & Char.~Quint  & Section~\ref{info:PL3D}                &           &                               \\ \hline
+\ct{PLOT3D_SPEC_ID(5)}            & Char.~Quint  & Section~\ref{info:PL3D}                &           &                               \\ \hline
+\ct{PLOT3D_VELO_INDEX}            & Int.~Quint   & Section~\ref{info:velocity}            &           &  0                            \\ \hline
+\ct{RAMP_BNDF}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                               \\ \hline
+\ct{RAMP_CPU}                     & Character    & Section~\ref{out:CPU}                  &           &                               \\ \hline
+\ct{RAMP_CTRL}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                               \\ \hline
+\ct{RAMP_DEVC}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                               \\ \hline
+\ct{RAMP_FLUSH}                   & Character    & Section~\ref{info:DT_DUMP}             &           &                               \\ \hline
+\ct{RAMP_HRR}                     & Character    & Section~\ref{info:DT_DUMP}             &           &                               \\ \hline
+\ct{RAMP_HVAC}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                               \\ \hline
+\ct{RAMP_ISOF}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                               \\ \hline
+\ct{RAMP_MASS}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                               \\ \hline
+\ct{RAMP_PART}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                               \\ \hline
+\ct{RAMP_PL3D}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                               \\ \hline
+\ct{RAMP_PROF}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                               \\ \hline
+\ct{RAMP_RADF}                    & Character    & Section~\ref{info:RADF}                &           &                               \\ \hline
+\ct{RAMP_RESTART}                 & Character    & Section~\ref{info:DT_DUMP}             &           &                               \\ \hline
+\ct{RAMP_SL3D}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                               \\ \hline
+\ct{RAMP_SLCF}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                               \\ \hline
+\ct{RAMP_SMOKE3D}                 & Character    & Section~\ref{info:DT_DUMP}             &           &                               \\ \hline
+\ct{RAMP_SPEC}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                               \\ \hline
+\ct{RAMP_TMP}                     & Character    & Section~\ref{info:DT_DUMP}             &           &                               \\ \hline
+\ct{RAMP_UVW}                     & Character    & Section~\ref{info:DT_DUMP}             &           &                               \\ \hline
+\ct{RENDER_FILE}                  & Character    & Reference~\cite{Smokeview_Users_Guide} &           &                               \\ \hline
+\ct{RESULTS_DIR}                  & Character    & Section~\ref{info:DUMP}                &           &                               \\ \hline
+\ct{SIG_FIGS}                     & Integer      & Section~\ref{info:SIG_FIGS}            &           & 8                             \\ \hline
+\ct{SIG_FIGS_EXP}                 & Integer      & Section~\ref{info:SIG_FIGS}            &           & 3                             \\ \hline
+\ct{SMOKE3D}                      & Logical      & Section~\ref{info:SMOKE3D}             &           & \ct{T}                        \\ \hline
 \ct{STATUS_FILES}                 & Logical      & Section~\ref{info:DUMP}                &           & \ct{F}                        \\ \hline
 \ct{SUPPRESS_DIAGNOSTICS}         & Logical      & Section~\ref{info:monitoring_progress} &           & \ct{F}                        \\ \hline
 \ct{TEMP_MAX_SMV}                 & Real         & Section~\ref{info:SMOKE3D}             & $^\circ$C & 2000                          \\ \hline
@@ -12733,10 +12730,10 @@ Keyword             & Type     & Description                      & Units       
 \ct{RAMP_WX}                                      & Character    & Section~\ref{info:ramp_velocity_1d}     &            &                   \\ \hline
 \ct{RAMP_WY}                                      & Character    & Section~\ref{info:ramp_velocity_1d}     &            &                   \\ \hline
 \ct{RAMP_WZ}                                      & Character    & Section~\ref{info:ramp_velocity_1d}     &            &                   \\ \hline
-\ct{RESTART}                                       & Logical      & Section~\ref{info:restart}              &            & \ct{F}           \\ \hline
+\ct{RESTART}                                      & Logical      & Section~\ref{info:restart}              &            & \ct{F}           \\ \hline
 \ct{RESTART_CHID}                                 & Character    & Section~\ref{info:restart}              &            & \ct{CHID}        \\ \hline
-\ct{RND_SEED}                                     & Integer      & Section~\ref{info:restart}              &            &                   \\ \hline
-\ct{SC}                                            & Real         & Section~\ref{info:NOISE}                &            & 0.5               \\ \hline
+\ct{RND_SEED}                                     & Integer      & Section~\ref{info:NOISE}                &            &                   \\ \hline
+\ct{SC}                                           & Real         & Section~\ref{info:LES}                  &            & 0.5               \\ \hline
 \ct{SIMULATION_MODE}                              & Character    & Section~\ref{Sim_Mode}                  &            & \ct{'VLES'}      \\ \hline
 \ct{SMOKE_ALBEDO}                                 & Real         & Reference~\cite{Smokeview_Users_Guide}  &            & 0.3               \\ \hline
 \ct{SOLID_PHASE_ONLY}                            & Logical      & Section~\ref{solid_phase_verification}  &            & \ct{F}           \\ \hline
@@ -12974,8 +12971,8 @@ Keyword             & Type     & Description                      & Units       
 \ct{RADIATIVE_PROPERTY_TABLE}         & Real        & Section~\ref{radiative_part_props}                                    &                   &                       \\ \hline
 \ct{REAL_REFRACTIVE_INDEX}            & Real        & Section~\ref{radiative_part_props}                                    &                   & 1.33                  \\ \hline
 \ct{RGB(3)}                             & Integers    & Section~\ref{info:part_output}                                        &                   &                       \\ \hline
-\ct{RUNNING_AVERAGE_FACTOR}           & Real        & Section~\ref{radiative_part_props}                                    &                   & 0.5                   \\ \hline
-\ct{RUNNING_AVERAGE_FACTOR_WALL}     & Real        & Section~\ref{radiative_part_props}                                    &                   & 0.5                   \\ \hline
+\ct{RUNNING_AVERAGE_FACTOR}           & Real        & Section~\ref{radiative_part_props}                                    &                   & 0.95                  \\ \hline
+\ct{RUNNING_AVERAGE_FACTOR_WALL}     & Real        & Section~\ref{radiative_part_props}                                    &                   & 0.95                  \\ \hline
 \ct{SAMPLING_FACTOR}                   & Integer     & Section~\ref{info:part_output}                                        &                   & 1                     \\ \hline
 \ct{SHAPE_FACTOR}                      & Real        & Section~\ref{pine_needles}                                            &                   & 0.25                  \\ \hline
 \ct{SIGMA_D}                           & Real        & Section~\ref{info:particle_size}                                      &                   &                       \\ \hline
@@ -14599,7 +14596,7 @@ where for the \ct{I}th state change \ct{T(I)} is the time of the state change, \
 \section{CPU Usage Data}
 \label{out:CPU}
 
-The file called \ct{CHID_cpu.csv} records the amount of CPU time for each of the MPI processes.
+The file called \ct{CHID_cpu.csv} records the CPU time spent by each MPI process in the various major subroutines.
 \begin{lstlisting}
 Rank,MAIN,DIVG, ... , Total T_USED (s)
     0, 2.052E+00, 1.058E+01, ... , 5.143+01
@@ -14607,7 +14604,123 @@ Rank,MAIN,DIVG, ... , Total T_USED (s)
             .
             .
 \end{lstlisting}
-where \ct{Rank} is the number of the MPI process (starting at 0), \ct{MAIN}, \ct{DIVG}, and so on, are major routines, and \ct{'Total T_USED (s)'} is the total CPU time consumed by that particular MPI process. Typically, the total time is similar. The time spent in \ct{MAIN} is essentially overhead -- time spent {\em not} working on the calculation. If you want to know if your work load is balanced, take a look at the time spent in \ct{MAIN}. It should be similar for all MPI processes. If one of the MPI processes has a noticeably smaller value for \ct{MAIN}, then that process is working on the core routines while the other processes sit idle in \ct{MAIN}.
+where \ct{Rank} is the number of the MPI process (starting at 0), \ct{MAIN}, \ct{DIVG}, and so on, are major routines, and \ct{'Total T_USED (s)'} is the total CPU time consumed by that particular MPI process. A brief description of each column is given in Table~\ref{tab:CPU_usage}. The time spent in \ct{MAIN} is essentially overhead -- time spent {\em not} working on the calculation. If you want to know if your work load is balanced, take a look at the time spent in \ct{MAIN}. It should be similar for all MPI processes. If one of the MPI processes has a noticeably smaller value for \ct{MAIN}, then that process is working on the core routines while the other processes sit idle in \ct{MAIN}.
+
+\begin{table}[ht]
+\centering
+\caption[Major FDS routines in the CPU usage file]{Major FDS routines listed in the CPU usage output file.}
+\label{tab:CPU_usage}
+\begin{tabular}{|l|l|}
+\hline
+Routine     & Description  \\ \hline \hline
+\ct{MAIN}   & Time not spent in the subroutines listed below \\ \hline
+\ct{DIVG}   & Computation of divergence \\ \hline
+\ct{MASS}   & Mass transport \\ \hline
+\ct{VELO}   & Momentum transport \\ \hline
+\ct{PRES}   & Pressure solver \\ \hline
+\ct{WALL}   & Solid phase  \\ \hline
+\ct{DUMP}   & Input and output \\ \hline
+\ct{PART}   & Lagrangian particles \\ \hline
+\ct{RADI}   & Radiation transport \\ \hline
+\ct{FIRE}   & Combustion \\ \hline
+\ct{COMM}   & MPI communication \\ \hline
+\ct{BLNK}   & Blank, not used \\ \hline
+\ct{HVAC}   & Heating, Ventilation, Air Conditioning \\ \hline
+\ct{GEOM}   & Complex geometry \\ \hline
+\ct{VEGE}   & Wildland fire spread \\ \hline
+\ct{CHEM}   & Complex chemistry \\ \hline
+\end{tabular}
+\end{table}
+
+The \ct{CHID_cpu.csv} file is printed out at the end of the simulation. To force it to be printed out periodically during the simulation, set \ct{DT_CPU} or \ct{RAMP_CPU} on the \ct{DUMP} line. The latter parameter allows you to write out the files at specified times.
+
+\section{Time Step Data}
+\label{out:timestep}
+
+The file called \ct{CHID_steps.csv} records data on the size of time steps and the amount of elapsed CPU time.
+\begin{lstlisting}
+Time Step,Wall Time,Step Size,Simulation Time,CPU Time
+\end{table}
+
+The \ct{CHID_cpu.csv} file is printed out at the end of the simulation. To force it to be printed out periodically during the simulation, set \ct{DT_CPU} or \ct{RAMP_CPU} on the \ct{DUMP} line. The latter parameter allows you to write out the files at specified times.
+
+\section{Time Step Data}
+\label{out:timestep}
+
+The file called \ct{CHID_steps.csv} records data on the size of time steps and the amount of elapsed CPU time.
+\begin{lstlisting}
+Time Step,Wall Time,Step Size,Simulation Time,CPU Time
+\end{table}
+
+The \ct{CHID_cpu.csv} file is printed out at the end of the simulation. To force it to be printed out periodically during the simulation, set \ct{DT_CPU} or \ct{RAMP_CPU} on the \ct{DUMP} line. The latter parameter allows you to write out the files at specified times.
+
+\section{Time Step Data}
+\label{out:timestep}
+
+The file called \ct{CHID_steps.csv} records data on the size of time steps and the amount of elapsed CPU time.
+\begin{lstlisting}
+Time Step,Wall Time,Step Size,Simulation Time,CPU Time
+\end{table}
+
+The \ct{CHID_cpu.csv} file is printed out at the end of the simulation. To force it to be printed out periodically during the simulation, set \ct{DT_CPU} or \ct{RAMP_CPU} on the \ct{DUMP} line. The latter parameter allows you to write out the files at specified times.
+
+\section{Time Step Data}
+\label{out:timestep}
+
+The file called \ct{CHID_steps.csv} records data on the size of time steps and the amount of elapsed CPU time.
+\begin{lstlisting}
+Time Step,Wall Time,Step Size,Simulation Time,CPU Time
+\end{table}
+
+The \ct{CHID_cpu.csv} file is printed out at the end of the simulation. To force it to be printed out periodically during the simulation, set \ct{DT_CPU} or \ct{RAMP_CPU} on the \ct{DUMP} line. The latter parameter allows you to write out the files at specified times.
+
+\section{Time Step Data}
+\label{out:timestep}
+
+The file called \ct{CHID_steps.csv} records data on the size of time steps and the amount of elapsed CPU time.
+\begin{lstlisting}
+Time Step,Wall Time,Step Size,Simulation Time,CPU Time
+\end{table}
+
+The \ct{CHID_cpu.csv} file is printed out at the end of the simulation. To force it to be printed out periodically during the simulation, set \ct{DT_CPU} or \ct{RAMP_CPU} on the \ct{DUMP} line. The latter parameter allows you to write out the files at specified times.
+
+\section{Time Step Data}
+\label{out:timestep}
+
+The file called \ct{CHID_steps.csv} records data on the size of time steps and the amount of elapsed CPU time.
+\begin{lstlisting}
+Time Step,Wall Time,Step Size,Simulation Time,CPU Time
+\end{table}
+
+The \ct{CHID_cpu.csv} file is printed out at the end of the simulation. To force it to be printed out periodically during the simulation, set \ct{DT_CPU} or \ct{RAMP_CPU} on the \ct{DUMP} line. The latter parameter allows you to write out the files at specified times.
+
+\section{Time Step Data}
+\label{out:timestep}
+
+The file called \ct{CHID_steps.csv} records data on the size of time steps and the amount of elapsed CPU time.
+\begin{lstlisting}
+Time Step,Wall Time,Step Size,Simulation Time,CPU Time
+\end{table}
+
+The \ct{CHID_cpu.csv} file is printed out at the end of the simulation. To force it to be printed out periodically during the simulation, set \ct{DT_CPU} or \ct{RAMP_CPU} on the \ct{DUMP} line. The latter parameter allows you to write out the files at specified times.
+
+\section{Time Step Data}
+\label{out:timestep}
+
+The file called \ct{CHID_steps.csv} records data on the size of time steps and the amount of elapsed CPU time.
+\begin{lstlisting}
+Time Step,Wall Time,Step Size,Simulation Time,CPU Time
+\end{table}
+
+The \ct{CHID_cpu.csv} file is printed out at the end of the simulation. To force it to be printed out periodically during the simulation, set \ct{DT_CPU} or \ct{RAMP_CPU} on the \ct{DUMP} line. The latter parameter allows you to write out the files at specified times.
+
+\section{Time Step Data}
+\label{out:timestep}
+
+The file called \ct{CHID_steps.csv} records data on the size of time steps and the amount of elapsed CPU time.
+\begin{lstlisting}
+Time Step,Wall Time,Step Size,Simulation Time,CPU Time
+\end{table}
 
 The \ct{CHID_cpu.csv} file is printed out at the end of the simulation. To force it to be printed out periodically during the simulation, set \ct{DT_CPU} or \ct{RAMP_CPU} on the \ct{DUMP} line. The latter parameter allows you to write out the files at specified times.
 

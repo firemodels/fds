@@ -84,8 +84,17 @@ echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
 cd %LIB_REPO%
-git checkout %LIB_REPO%\src\config\HYPRE_config.h.cmake.in
-git checkout %LIB_TAG%
+
+for /f %%i in ('git tag -l %LIB_TAG%') do set FOUND_TAG=%%i
+if "%FOUND_TAG%" == "%LIB_TAG%" (
+    git checkout %LIB_REPO%\src\config\HYPRE_config.h.cmake.in
+    git checkout %LIB_TAG%
+) else (
+    echo Your HYPRE repository is not up to date with the required tag: %LIB_TAG%.
+    echo The FDS build requires HYPRE version %LIB_TAG%. Please update your HYPRE repository.
+    pause
+    exit /b 1
+)
 
 cd %CURDIR%
 
@@ -108,12 +117,15 @@ echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
 
+<<<<<<< HEAD
 set cmake_args=
 if "%BUILD_WITH_GPU%" EQU "ON" (
   if "%GPU_ARCH%" EQU "cuda" (
     set cmake_args=-DHYPRE_ENABLE_CUDA="ON"
   )
 )
+=======
+>>>>>>> firemodels/master
 set BUILDDIR=%LIB_REPO%\build
 cd %BUILDDIR%
 cmake ..\src  ^
@@ -124,8 +136,13 @@ cmake ..\src  ^
 -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded" ^
 -DCMAKE_MAKE_PROGRAM="%CMAKE_MAKE_PROGRAM%" ^
 -DHYPRE_FMANGLE=4 ^
+<<<<<<< HEAD
 -DCMAKE_INSTALL_LIBDIR="lib" ^
 %cmake_args%
+=======
+-DCMAKE_INSTALL_LIBDIR="lib"
+>>>>>>> firemodels/master
+
 
 echo.
 echo ----------------------------------------------------------
