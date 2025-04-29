@@ -43,6 +43,10 @@ if [ -d "$FIREMODELS/hypre" ]; then
   if [[ "$(git tag -l $HYPRE_LIB_TAG)" == $HYPRE_LIB_TAG ]]; then
     echo "Checking out $HYPRE_LIB_TAG"
     git checkout $HYPRE_LIB_TAG
+  else
+    echo "Your HYPRE repository is not up to date with the required tag: $HYPRE_LIB_TAG."
+    echo "The FDS build requires HYPRE version $HYPRE_LIB_TAG. Please update your HYPRE repository."
+    exit 1
   fi
   cd $FIREMODELS/hypre/build
   export HYPRE_VERSION=$(git describe)

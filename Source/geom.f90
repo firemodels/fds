@@ -297,7 +297,7 @@ INTEGER, SAVE ::      NQT2C = INT_P_IND+2   ! The +2 is because we pass RHO0, WC
 ! Max numbers of link attempts for small faces and cut-cells:
 INTEGER, PARAMETER :: N_LINK_ATTMP = 1, N_LINK_ATTMP_F=50
 ! Number of digits in loose precision used in normals definition for linking.
-INTEGER, PARAMETER :: LINK_DIGITS = 8            
+INTEGER, PARAMETER :: LINK_DIGITS = 8
 REAL(EB),PARAMETER :: LINK_FCT    = REAL(10**LINK_DIGITS,EB)
 
 ! Areas per SURF and GEOM:
@@ -313,10 +313,7 @@ INTEGER, PARAMETER :: BLOCKED_UNLINK_CELL= 5
 
 
 ! End Variable declaration for CC_IBM.
-!! ---------------------------------------------------------------------------------
-
-! GET_CUTCELLS_VERBOSE variables:
-INTEGER :: LU_SETCC=99
+! ---------------------------------------------------------------------------------
 
 PRIVATE
 PUBLIC :: BLOCK_CC_SOLID_EXTWALLCELLS,GEOFCT,CALL_FOR_GLMAT,CALL_FROM_GLMAT_SETUP,CCGUARD,CC_MATVEC_DEFINED,GEOMEPS,&
@@ -938,7 +935,7 @@ IF (GET_CUTCELLS_VERBOSE) THEN
    ! MY_RANK = 0 writes first:
    IF (MY_RANK==0) THEN
       ! Open file to write SET_CUTCELLS_3D progress:
-      WRITE(VERBOSE_FILE,'(A,A,I0,A)') TRIM(CHID),'_cutcell_',MY_RANK,'.log'
+      WRITE(VERBOSE_FILE,'(A,A,I0,A)') TRIM(RESULTS_DIR)//TRIM(CHID),'_cutcell_',MY_RANK,'.log'
       OPEN(UNIT=LU_SETCC,FILE=TRIM(VERBOSE_FILE),STATUS='UNKNOWN')
       WRITE(LU_ERR,*) ' '
       WRITE(LU_ERR,*) '2. Generate Cut-cells in Meshes :'
@@ -972,7 +969,7 @@ IF (GET_CUTCELLS_VERBOSE) THEN
             TAG=IPROC
             CALL MPI_SEND(CC_COMPUTE_MESH(1),NMESHES,MPI_LOGICAL,0,TAG,MPI_COMM_WORLD,IERR)
             ! Open file to write SET_CUTCELLS_3D progress:
-            WRITE(VERBOSE_FILE,'(A,A,I0,A)') TRIM(CHID),'_cutcell_',MY_RANK,'.log'
+            WRITE(VERBOSE_FILE,'(A,A,I0,A)') TRIM(RESULTS_DIR)//TRIM(CHID),'_cutcell_',MY_RANK,'.log'
             OPEN(UNIT=LU_SETCC,FILE=TRIM(VERBOSE_FILE),STATUS='UNKNOWN')
             WRITE(LU_SETCC,*) ' '
             WRITE(LU_SETCC,*) '2. Generate Cut-cells in Meshes :'
@@ -997,7 +994,7 @@ IF (GET_CUTCELLS_VERBOSE) THEN
             DO NOM=1,NMESHES
                IF(CC_COMPUTE_MESH_AUX(NOM)) NMESH_CC = NMESH_CC + 1
             ENDDO
-            WRITE(VERBOSE_FILE_AUX,'(A,A,I0,A)') TRIM(CHID),'_cutcell_',IPROC,'.log'
+            WRITE(VERBOSE_FILE_AUX,'(A,A,I0,A)') TRIM(RESULTS_DIR)//TRIM(CHID),'_cutcell_',IPROC,'.log'
             WRITE(LU_ERR,'(A,I4,A,I4,A,A,A)',advance="no") ' Process MY_RANK=',IPROC,', will process M=',NMESH_CC, &
                                                            ' meshes in file ',TRIM(VERBOSE_FILE_AUX),'.'
             WRITE(LU_ERR,'(A)',advance="no") ' Meshes to Process : '
@@ -8604,7 +8601,7 @@ LINK_LOOP : DO ! Cut-cell linking loop for small cells. -> Algo defined by CCVOL
        IF (GET_CUTCELLS_VERBOSE) THEN
           ! Write out unlinked cells properties:
           ! Open file to write unlinked cells:
-          WRITE(UNLINKED_FILE,'(A,A,I0,A)') TRIM(CHID),'_unlinked_',MY_RANK,'.log'
+          WRITE(UNLINKED_FILE,'(A,A,I0,A)') TRIM(RESULTS_DIR)//TRIM(CHID),'_unlinked_',MY_RANK,'.log'
           ! Create file:
           IF (UNLINKED_1ST_CALL) THEN
              LU_UNLNK = GET_FILE_NUMBER()
@@ -14119,13 +14116,13 @@ SEGS_LOOP : DO ISEG=1,BODINT_PLANE%NSEGS
          IF (ADD2FACES) THEN
              NPFACE   = 2
              KK2VEC(LOW_IND) = KK + 1
-             KK2VEC(HIGH_IND)= KK 
+             KK2VEC(HIGH_IND)= KK
          ELSE
              NPFACE = 1
              if ( SNORI(JAXIS) > 0._EB ) THEN ! add 1 to index kk (i.e. lower face index)
                  KK2VEC(LOW_IND) = KK + 1
              ELSE
-                 KK2VEC(LOW_IND)= KK 
+                 KK2VEC(LOW_IND)= KK
              ENDIF
          ENDIF
 
@@ -14275,13 +14272,13 @@ SEGS_LOOP : DO ISEG=1,BODINT_PLANE%NSEGS
          IF (ADD2FACES) THEN
             NPFACE = 2
             JJ2VEC(LOW_IND)  = JJ + 1
-            JJ2VEC(HIGH_IND) = JJ 
+            JJ2VEC(HIGH_IND) = JJ
          ELSE
             NPFACE = 1
             IF ( SNORI(IAXIS) > 0._EB ) THEN ! add 1 to index jj (i.e. lower face index)
                JJ2VEC(LOW_IND) = JJ + 1
             ELSE
-               JJ2VEC(LOW_IND) = JJ 
+               JJ2VEC(LOW_IND) = JJ
             ENDIF
          ENDIF
 
@@ -20885,6 +20882,7 @@ DO K=KLO,KHI
                    MESHES(NM)%CCVAR(I,J,K,CC_IDCF)  = CC_UNDEFINED
                 ELSE
                    MESHES(NM)%CUT_FACE(IDCF)%NFACE  = NIBFACE
+                   MESHES(NM)%CUT_FACE(IDCF)%NVERT  = NVERT_CELL
                    MESHES(NM)%CUT_FACE(IDCF)%XYZVERT(IAXIS:KAXIS,1:NVERT_CELL) = XYZVERT(IAXIS:KAXIS,1:NVERT_CELL)
                 ENDIF
             ENDIF IDCF_COND
@@ -21987,11 +21985,11 @@ USE OUTPUT_DATA, ONLY: COLOR2RGB
 
 CHARACTER(LABEL_LENGTH) :: ID,MATL_ID,TEXTURE_MAPPING, &
                            DEVC_ID,CTRL_ID,SURF_IDS(3),SURF_ID6(6),MOVE_ID
-CHARACTER(MESSAGE_LENGTH) :: BUFFER, BIN_GEOM_FILENAME,BINARY_FILE
+CHARACTER(MESSAGE_LENGTH) :: BUFFER,FN_BINGEOM,BINARY_FILE
 CHARACTER(LABEL_LENGTH),  ALLOCATABLE, DIMENSION(:) :: SURF_ID
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZVALS,TFACES
-REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:) :: VERTS, VERTS_AUX
-INTEGER, ALLOCATABLE, DIMENSION(:) :: SURF_ID_IND, POLY
+REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:) :: VERTS,VERTS_AUX
+INTEGER, ALLOCATABLE, DIMENSION(:) :: SURF_ID_IND,POLY
 INTEGER, ALLOCATABLE, TARGET, DIMENSION(:) :: FACES,FACES_AUX,VOLUS,OFACES,SURFS,SURFS2
 LOGICAL, ALLOCATABLE, DIMENSION(:) :: IS_EXTERNAL
 
@@ -23519,23 +23517,23 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
 
    ! Case of false READ_BINARY, Process 0 writes a binary file with the geom:
    IF(MY_RANK == 0 .AND. .NOT.READ_BINARY) THEN
-      WRITE(BIN_GEOM_FILENAME,'(A,A,A,A,A)') './',TRIM(CHID),'_',TRIM(ID),'.bingeom'
-      OPEN(UNIT=731,FILE=TRIM(BIN_GEOM_FILENAME),STATUS='UNKNOWN',ACTION='WRITE',FORM='UNFORMATTED')
-      WRITE(731) GEOM_TYPE
+      WRITE(FN_BINGEOM,'(A,A,A,A,A)') './',TRIM(BINGEOM_DIR)//TRIM(CHID),'_',TRIM(ID),'.bingeom'
+      OPEN(UNIT=LU_BINGEOM,FILE=TRIM(FN_BINGEOM),STATUS='UNKNOWN',ACTION='WRITE',FORM='UNFORMATTED')
+      WRITE(LU_BINGEOM) GEOM_TYPE
       IF (GEOM_TYPE==TERRAIN_GEOM_TYPE) THEN
-         WRITE(731) N_VERTS_ORIG,N_FACES_ORIG,N_SURF_ID,N_VOLUS_ORIG
-         WRITE(731) VERTS(1:3*N_VERTS_ORIG)
-         WRITE(731) FACES(1:3*N_FACES_ORIG)
-         WRITE(731) SURFS(1:N_FACES_ORIG)
-         WRITE(731) VOLUS(1:4*N_VOLUS_ORIG)
+         WRITE(LU_BINGEOM) N_VERTS_ORIG,N_FACES_ORIG,N_SURF_ID,N_VOLUS_ORIG
+         WRITE(LU_BINGEOM) VERTS(1:3*N_VERTS_ORIG)
+         WRITE(LU_BINGEOM) FACES(1:3*N_FACES_ORIG)
+         WRITE(LU_BINGEOM) SURFS(1:N_FACES_ORIG)
+         WRITE(LU_BINGEOM) VOLUS(1:4*N_VOLUS_ORIG)
       ELSE
-         WRITE(731) N_VERTS,N_FACES,N_SURF_ID,N_VOLUS
-         WRITE(731) VERTS(1:3*N_VERTS)
-         WRITE(731) FACES(1:3*N_FACES)
-         WRITE(731) SURFS(1:N_FACES)
-         WRITE(731) VOLUS(1:4*N_VOLUS)
+         WRITE(LU_BINGEOM) N_VERTS,N_FACES,N_SURF_ID,N_VOLUS
+         WRITE(LU_BINGEOM) VERTS(1:3*N_VERTS)
+         WRITE(LU_BINGEOM) FACES(1:3*N_FACES)
+         WRITE(LU_BINGEOM) SURFS(1:N_FACES)
+         WRITE(LU_BINGEOM) VOLUS(1:4*N_VOLUS)
       ENDIF
-      CLOSE(731)
+      CLOSE(LU_BINGEOM)
    ENDIF
 
 ENDDO READ_GEOM_LOOP
@@ -24904,9 +24902,10 @@ USE GEOMETRY_FUNCTIONS, ONLY: TRANSFORM_COORDINATES
    REAL(EB), INTENT(IN) :: TIME
    INTEGER, INTENT(OUT) :: N_VERTS, N_FACES, N_VOLUS
 
-   INTEGER :: I, IVERT, IMOVE, MOVE_INDEX
+   INTEGER :: I, IVERT, IMOVE, MOVE_INDEX, IFACE
    TYPE(GEOMETRY_TYPE), POINTER :: G
    REAL(EB) :: DELTA_T, VEC(1:3) ! M(3,3)
+   TYPE(MOVEMENT_TYPE), POINTER :: MV
 
    IF (IS_DYNAMIC) THEN
       DELTA_T = TIME - T_BEGIN
@@ -24944,6 +24943,15 @@ USE GEOMETRY_FUNCTIONS, ONLY: TRANSFORM_COORDINATES
             CALL TRANSFORM_COORDINATES(VEC(1),VEC(2),VEC(3),MOVE_INDEX,1) ! Eventually, time varying motion dealt with here.
             G%VERTS(3*IVERT-2:3*IVERT) = VEC(1:3)
          ENDDO
+         ! Swap face connectivities if we have reflections:
+         MV => MOVEMENT(MOVE_INDEX)
+         IF (MV%DET < -TWO_EPSILON_EB) THEN ! Swap vertices 2 and 3:
+            DO IFACE=1,G%N_FACES
+               IVERT = G%FACES(3*(IFACE-1)+2)
+               G%FACES(3*(IFACE-1)+2) = G%FACES(3*(IFACE-1)+3)
+               G%FACES(3*(IFACE-1)+3) = IVERT
+            ENDDO
+         ENDIF
       ELSE
          DO IVERT=1,G%N_VERTS
             G%VERTS(3*IVERT-2:3*IVERT) = G%VERTS_BASE(3*IVERT-2:3*IVERT)
