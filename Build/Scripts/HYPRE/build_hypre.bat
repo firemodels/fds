@@ -118,11 +118,10 @@ echo ----------------------------------------------------------
 echo.
 
 
+set HYPRE_ENABLE_CUDA=OFF
 if "%BUILD_WITH_GPU%" == "ON" (
   if "%GPU_ARCH%" == "cuda" (
     set HYPRE_ENABLE_CUDA=ON
-  ) else (
-    set HYPRE_ENABLE_CUDA=OFF
   )
 )
 
