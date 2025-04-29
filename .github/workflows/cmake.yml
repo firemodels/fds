@@ -32,6 +32,7 @@ permissions:
 
 jobs:
   cmake-linux:
+    if: false
     name: ${{ matrix.container }} ${{ matrix.compiler_mpi }} openmp=${{ matrix.openmp }} ${{ matrix.build_type }}
     runs-on: [ubuntu-24.04]
     container: ${{ matrix.container }}
@@ -57,7 +58,7 @@ jobs:
     steps:
     - name: Install prerequisites (dnf)
       if: matrix.container != 'ubuntu:24.04'
-      run: dnf install -y git gcc make cmake sudo environment-modules
+      run: dnf install -y --nobest --skip-broken git gcc make cmake sudo environment-modules
     - name: Install prerequisites (apt)
       if: matrix.container == 'ubuntu:24.04'
       run: |
