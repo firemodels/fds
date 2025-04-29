@@ -10,4 +10,4 @@ seaborn
 pygments
 ipython
 cantera
-
+pyfdstools
