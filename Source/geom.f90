@@ -302,6 +302,7 @@ INTEGER, PARAMETER :: BLOCKED_SPLIT_CELL = 2
 INTEGER, PARAMETER :: BLOCKED_REFI_INTER = 3
 INTEGER, PARAMETER :: BLOCKED_CAVITY_CELL= 4
 INTEGER, PARAMETER :: BLOCKED_UNLINK_CELL= 5
+INTEGER, PARAMETER :: BLOCKED_SPECIAL_CELL=6
 
 
 ! End Variable declaration for CC_IBM.
@@ -1377,6 +1378,18 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
       ENDDO
       DEALLOCATE(GEOM_ZMAX_AUX)
    ENDIF
+
+
+   ! Block SPCELLS, cells in cut-cell region where cut-cells could not be built:
+   DO ICC=1,MESHES(NM)%N_SPCELL
+      I=MESHES(NM)%SPCELL_LIST(IAXIS,ICC); J=MESHES(NM)%SPCELL_LIST(JAXIS,ICC); K=MESHES(NM)%SPCELL_LIST(KAXIS,ICC)
+      ICC1=MESHES(NM)%CCVAR(I,J,K,CC_IDCC)
+      IF(ICC1 > 0) THEN
+         CC=>MESHES(NM)%CUT_CELL(ICC1)
+         CC%NOADVANCE(1:CC%NCELL) = BLOCKED_SPECIAL_CELL
+      ENDIF
+   ENDDO
+
 
    IF (ONE_CC_PER_CARTESIAN_CELL) THEN
       ! Here Block all cells that have volume less (or equal) than the first largest cell found.
@@ -19540,10 +19553,51 @@ DO K=KLO,KHI
 
          IF (NSEG < 3 ) CYCLE
 
+         ! IF(NM==1 .AND. I==37 .AND. J==6 .AND. K==32) THEN
+         !    LU_DB_SETCC = GET_FILE_NUMBER()
+         !    WRITE(LU_ERR,*) 'Writing Cartcell_SEGCELL.dat...'
+         !    OPEN(UNIT=LU_DB_SETCC,FILE="./Cartcell_SEGCELL.dat", STATUS='REPLACE')
+         !    ! Info pertaining to the Cartesian Cell:
+         !    WRITE(LU_DB_SETCC,*) 'I,J,K:',CF%NFACE
+         !    WRITE(LU_DB_SETCC,*) I,J,K,GEOMEPS
+         !    WRITE(LU_DB_SETCC,*) 'XC(I),DX(I),YC(J),DY(J),ZC(K),DZ(K):'
+         !    WRITE(LU_DB_SETCC,*) XCELL(I),DXCELL(I)
+         !    WRITE(LU_DB_SETCC,*) YCELL(J),DYCELL(J)
+         !    WRITE(LU_DB_SETCC,*) ZCELL(K),DZCELL(K)
+         !    WRITE(LU_DB_SETCC,*) 'NVERT,NSEG,SIZE_CEELEM_SEG_CELL,CC_MAX_WSTRIANG_SEG:'
+         !    WRITE(LU_DB_SETCC,*) NVERT,NSEG,SIZE_CEELEM_SEG_CELL,CC_MAX_WSTRIANG_SEG
+         !    WRITE(LU_DB_SETCC,*) 'XYZVERT(IAXIS:KAXIS,1:NVERT):'
+         !    DO IDUM=1,NVERT
+         !       WRITE(LU_DB_SETCC,*) IDUM,XYZVERT(IAXIS:KAXIS,IDUM)
+         !    ENDDO
+         !    WRITE(LU_DB_SETCC,*) 'SEG_CELL(NOD1:NOD2,1:NSEG),SEG_CELL(3:6,1:NSEG):'
+         !    DO IDUM=1,NSEG
+         !       WRITE(LU_DB_SETCC,*) IDUM,SEG_CELL(1:NOD2+CC_MAX_WSTRIANG_SEG+5,IDUM),SEG_POS(IDUM)
+         !    ENDDO
+         !    CLOSE(LU_DB_SETCC)
+         ! ENDIF
+
+
          ! Ear clipping algorithm by TRIANGLE and BODY:
          ! 1. Define closed 3D polyline:
          CALL GET_CLOSED_POLYLINES(SIZE_CEELEM_SEG_CELL,NSEG,SEG_CELL,SEG_POS,IFLG,NPOLY,ILO_POLY,NSG_POLY)
-         IF (IFLG .AND. GET_CUTCELLS_VERBOSE) WRITE(LU_ERR,*) 'IFLG ~=0, could not close polyline, ',BNDINT_FLAG,': ',NM,I,J,K
+
+         IF (IFLG) THEN
+            IF(DEBUG_SET_CUTCELLS .AND. PROCESS(NM)) WRITE(LU_ERR,*) 'IFLG ~=0, could not close polyline, ',BNDINT_FLAG,': ',&
+            NM,I,J,K,' NPOLY=',NPOLY,IFLG,'NSEG=',NSEG
+            MESHES(NM)%N_SPCELL = MESHES(NM)%N_SPCELL + 1
+            NSPCELL_LIST        = SIZE(MESHES(NM)%SPCELL_LIST,DIM=2)
+            IF (NSPCELL_LIST < MESHES(NM)%N_SPCELL) THEN
+               ALLOCATE(SPCELL_LIST(IAXIS:KAXIS,NSPCELL_LIST)); SPCELL_LIST(:,:)=MESHES(NM)%SPCELL_LIST(:,:)
+               DEALLOCATE(MESHES(NM)%SPCELL_LIST)
+               ALLOCATE(MESHES(NM)%SPCELL_LIST(IAXIS:KAXIS,NSPCELL_LIST+DELTA_CELL));
+               MESHES(NM)%SPCELL_LIST(IAXIS:KAXIS,1:NSPCELL_LIST)=SPCELL_LIST(IAXIS:KAXIS,1:NSPCELL_LIST)
+               MESHES(NM)%SPCELL_LIST(IAXIS:KAXIS,NSPCELL_LIST+1:NSPCELL_LIST+DELTA_CELL) = CC_UNDEFINED
+               DEALLOCATE(SPCELL_LIST)
+            ENDIF
+            MESHES(NM)%SPCELL_LIST(IAXIS:KAXIS,MESHES(NM)%N_SPCELL) = (/ I, J, K /)
+            CYCLE
+         ENDIF
 
          ! 2. Define triangles by Body and triangle, all triangles generated
          !    point outside of solid region:
@@ -19666,7 +19720,7 @@ DO K=KLO,KHI
          DEALLOCATE(CFELEM,SEG_CELL_AUX,CEDGES)
          CF%NFACE = NCF
 
-         ! IF((NM==3 .AND. I==4 .AND. J==6 .AND. K==36)) THEN
+         ! IF((NM==1 .AND. I==37 .AND. J==6 .AND. K==32)) THEN
          !    LU_DB_SETCC = GET_FILE_NUMBER()
          !    WRITE(LU_ERR,*) 'Writing Cartcell_cutfaces.dat...'
          !    OPEN(UNIT=LU_DB_SETCC,FILE="./Cartcell_cutfaces.dat", STATUS='REPLACE')
@@ -19683,9 +19737,9 @@ DO K=KLO,KHI
          !    DO IDUM=1,NVERT
          !       WRITE(LU_DB_SETCC,*) IDUM,XYZVERT(IAXIS:KAXIS,IDUM)
          !    ENDDO
-         !    WRITE(LU_DB_SETCC,*) 'SEG_CELL(NOD1:NOD2,1:NSEG),SEG_CELL(3:6,1:NSEG):'
+         !    WRITE(LU_DB_SETCC,*) 'SEG_CELL(NOD1:NOD2,1:NSEG),SEG_CELL(3:6,1:NSEG),SEG_POS(NSEG):'
          !    DO IDUM=1,NSEG
-         !       WRITE(LU_DB_SETCC,*) IDUM,SEG_CELL(NOD1:NOD2,IDUM),SEG_CELL(3:6,IDUM)
+         !       WRITE(LU_DB_SETCC,*) IDUM,SEG_CELL(NOD1:NOD2,IDUM),SEG_CELL(3:6,IDUM),SEG_POS(IDUM)
          !    ENDDO
          !    WRITE(LU_DB_SETCC,*) 'ICF,BOD_TRI:'
          !    WRITE(LU_DB_SETCC,*) ICF,NBODTRI

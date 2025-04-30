@@ -6897,6 +6897,10 @@ ENDDO
 MAX_DIST= MAX(1._EB,MAX_DIST)
 GEOMEPS = GEOMEPS*MAX_DIST
 
+IF(MY_RANK==0 .AND. GET_CUTCELLS_VERBOSE) THEN
+   WRITE(LU_ERR,*) 'GEOMETRY intersection computation THRESHOLD GEOMEPS=',GEOMEPS
+ENDIF
+
 ! Set CCVOL_LINK an epsilon higher than defined value to have all cells/faces around defined value linked.
 CCVOL_LINK = CCVOL_LINK + GEOMEPS
 
@@ -16111,11 +16115,11 @@ MESHES_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
          ENDDO JCC_LOOP
 
-         IF (.NOT.FOUND_POINT .AND. GET_CUTCELLS_VERBOSE) THEN
+         IF (.NOT.FOUND_POINT .AND. DEBUG_CC_INTERPOLATION) THEN
             IF(ICELL==0) THEN
-               WRITE(LU_ERR,*) 'CF: Havent found closest point CART CELL. ICC=',ICC
+               WRITE(LU_ERR,*) 'CF: Havent found closest point CART CELL. NM,ICC=',NM,ICC
             ELSE
-               WRITE(LU_ERR,*) 'CF: Havent found closest point CUT CELL. ICC,JCC=',ICC,JCC
+               WRITE(LU_ERR,*) 'CF: Havent found closest point CUT CELL. NM,ICC,JCC=',NM,ICC,JCC
             ENDIF
          ENDIF
 
