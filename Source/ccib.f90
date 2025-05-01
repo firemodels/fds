@@ -429,10 +429,13 @@ CUTFACES_IF : IF (CUTFACES) THEN ! USE CUT_FACE(ICF)%VEL_CF
                              (PREDFCT*B1%U_NORMAL+(1._EB-PREDFCT)*B1%U_NORMAL_S)*CFA%AREA*BC%NVEC(IAXIS:KAXIS)
       ENDDO
       VELN(IAXIS:KAXIS) = VELN(IAXIS:KAXIS)/(AREA+TWO_EPSILON_EB)
-      ! Distribute into Solid cartesian faces:
-      WHERE(FCVAR(I-1:I,J,K,CC_FGSC,IAXIS)==CC_SOLID) UU(I-1:I,J,K) = VELN(IAXIS)
-      WHERE(FCVAR(I,J-1:J,K,CC_FGSC,JAXIS)==CC_SOLID) VV(I,J-1:J,K) = VELN(JAXIS)
-      WHERE(FCVAR(I,J,K-1:K,CC_FGSC,KAXIS)==CC_SOLID) WW(I,J,K-1:K) = VELN(KAXIS)
+      ! Distribute into Solid cartesian faces when SOLID cell is present behind:
+      IF(FCVAR(I-1,J,K,CC_FGSC,IAXIS)==CC_SOLID .AND. CCVAR(I-1,J,K,CC_CGSC)==CC_SOLID) UU(I-1,J,K) = VELN(IAXIS)
+      IF(FCVAR(I  ,J,K,CC_FGSC,IAXIS)==CC_SOLID .AND. CCVAR(I+1,J,K,CC_CGSC)==CC_SOLID) UU(I  ,J,K) = VELN(IAXIS)
+      IF(FCVAR(I,J-1,K,CC_FGSC,JAXIS)==CC_SOLID .AND. CCVAR(I,J-1,K,CC_CGSC)==CC_SOLID) VV(I,J-1,K) = VELN(JAXIS)
+      IF(FCVAR(I,J  ,K,CC_FGSC,JAXIS)==CC_SOLID .AND. CCVAR(I,J+1,K,CC_CGSC)==CC_SOLID) VV(I,J  ,K) = VELN(JAXIS)
+      IF(FCVAR(I,J,K-1,CC_FGSC,KAXIS)==CC_SOLID .AND. CCVAR(I,J,K-1,CC_CGSC)==CC_SOLID) WW(I,J,K-1) = VELN(KAXIS)
+      IF(FCVAR(I,J,K  ,CC_FGSC,KAXIS)==CC_SOLID .AND. CCVAR(I,J,K+1,CC_CGSC)==CC_SOLID) WW(I,J,K  ) = VELN(KAXIS)
    ENDDO
 
 ELSE CUTFACES_IF ! USE CUT_FACE(ICF)%VEL_CRT
@@ -6905,6 +6908,10 @@ ENDDO
 ! Set relative epsilon for cut-cell definition:
 MAX_DIST= MAX(1._EB,MAX_DIST)
 GEOMEPS = GEOMEPS*MAX_DIST
+
+IF(MY_RANK==0 .AND. GET_CUTCELLS_VERBOSE) THEN
+   WRITE(LU_ERR,*) 'GEOMETRY intersection computation THRESHOLD GEOMEPS=',GEOMEPS
+ENDIF
 
 ! Set CCVOL_LINK an epsilon higher than defined value to have all cells/faces around defined value linked.
 CCVOL_LINK = CCVOL_LINK + GEOMEPS
@@ -16132,11 +16139,11 @@ MESHES_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
          ENDDO JCC_LOOP
 
-         IF (.NOT.FOUND_POINT .AND. GET_CUTCELLS_VERBOSE) THEN
+         IF (.NOT.FOUND_POINT .AND. DEBUG_CC_INTERPOLATION) THEN
             IF(ICELL==0) THEN
-               WRITE(LU_ERR,*) 'CF: Havent found closest point CART CELL. ICC=',ICC
+               WRITE(LU_ERR,*) 'CF: Havent found closest point CART CELL. NM,ICC=',NM,ICC
             ELSE
-               WRITE(LU_ERR,*) 'CF: Havent found closest point CUT CELL. ICC,JCC=',ICC,JCC
+               WRITE(LU_ERR,*) 'CF: Havent found closest point CUT CELL. NM,ICC,JCC=',NM,ICC,JCC
             ENDIF
          ENDIF
 
