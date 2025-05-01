@@ -28,6 +28,7 @@ $RUNSMV -d Complex_Geometry geom_texture4b.fds
 $RUNSMV -d Complex_Geometry sphere_radiate.fds
 $RUNSMV -p 3 -d Complex_Geometry sphere_helium_conserve_3meshes.fds
 $RUNSMV -d Complex_Geometry cone_1mesh.fds
+$RUNSMV -d Complex_Geometry t34_scaling.fds
 $RUNSMV -d Controls activate_vents.fds
 $RUNSMV -p 8 -d Detectors beam_detector.fds
 $RUNSMV -d Detectors objects_static.fds
