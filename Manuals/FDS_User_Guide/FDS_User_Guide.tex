@@ -1805,24 +1805,9 @@ See Sec.~\ref{info:activate_deactivate} for details.
 \subsection{Trouble-Shooting Vents}
 \label{info:VENT_Trouble}
 
-Unlike most of the entries in the input file, the order that you specify \ct{VENT}s can be important. There might be
-situations where it is convenient to position one \ct{VENT} atop another. For example, suppose you want to designate the
-ceiling of a compartment to have a particular set of surface properties, and you designate the entire ceiling to have the
-appropriate \ct{SURF_ID}. Then, you want to designate a smaller patch on the ceiling to have another set of surface
-properties, like an air supply. In this case, you must designate the supply \ct{VENT} {\em first} because for that area
-of the ceiling, FDS will ignore the ceiling properties and apply the supply properties. FDS processes the first \ct{VENT}, not
-the second as it did in versions prior to FDS 5. Now, the rule for \ct{VENT}s is ``first come, first served.''
-Keep in mind, however, that the
-second \ct{VENT} is not rejected entirely -- only where there is overlap. FDS will also print out a warning to the screen (or to
-standard error) saying which \ct{VENT} has priority.  Also, be careful if any of the \ct{VENT}s are applying \ct{OPEN} boundary conditions -- \ct{OPEN} boundaries disable pressure \ct{ZONE}s, which will change the solution of the problem.
+Unlike most of the entries in the input file, the order that you specify \ct{VENT}s can be important. There might be situations where it is convenient to position one \ct{VENT} atop another. For example, suppose you want to designate the ceiling of a compartment to have a particular set of surface properties, and you designate the entire ceiling to have the appropriate \ct{SURF_ID}. Then, you want to designate a smaller patch on the ceiling to have another set of surface properties, like an air supply. In this case, you must designate the supply \ct{VENT} {\em first} because for that area of the ceiling, FDS will ignore the ceiling properties and apply the supply properties. FDS processes the first \ct{VENT}, not the second as it did in versions prior to FDS 5. Now, the rule for \ct{VENT}s is ``first come, first served.'' Keep in mind, however, that the second \ct{VENT} is not rejected entirely -- only where there is overlap. FDS will also print out a warning to the screen (or to standard error) saying which \ct{VENT} has priority.  Also, be careful if any of the \ct{VENT}s are applying \ct{OPEN} boundary conditions -- \ct{OPEN} boundaries disable pressure \ct{ZONE}s, which will change the solution of the problem.
 
-Smokeview can help identify where two \ct{VENT}s overlap, assuming each has a unique \ct{COLOR}. Because Smokeview draws \ct{VENT}s
-on top of each other, areas of overlap will have a grainy, awkward appearance that changes pattern as you move the scene. In situations
-where you desire the overlap for the sake of convenience, you might want to slightly adjust the coordinates of the preferred \ct{VENT}
-so that it is slightly offset from the solid surface. Make the offset less than about a tenth of a cell dimension so that FDS snaps it
-to its desired location. Then, by toggling the ``q'' key in Smokeview, you can eliminate the grainy color overlap by showing the
-\ct{VENT} exactly where you specified it, as opposed to where FDS repositioned it. This trick also works where the faces of two
-obstructions overlap.
+Smokeview can help identify where two \ct{VENT}s overlap, assuming each has a unique \ct{COLOR}. Because Smokeview draws \ct{VENT}s on top of each other, areas of overlap will have a grainy, awkward appearance that changes pattern as you move the scene. In situations where you desire the overlap for the sake of convenience, you might want to slightly adjust the coordinates of the preferred \ct{VENT} so that it is slightly offset from the solid surface. Make the offset less than about a tenth of a cell dimension so that FDS snaps it to its desired location. Then, by toggling the ``q'' key in Smokeview, you can eliminate the grainy color overlap by showing the \ct{VENT} exactly where you specified it, as opposed to where FDS repositioned it. This trick also works where the faces of two obstructions overlap.
 
 If an error message appears requesting that
 the orientation of a vent be specified, first check to make sure that the vent is a plane.
@@ -4024,6 +4009,8 @@ All buildings have spaces that are relatively sealed off from the larger interio
 These spaces are important because FDS assumes pressure to be composed of a ``background'' component, $\bp(z,t)$, plus a perturbation pressure, $\tp(\bx,t)$. Most often, $\bp$ is just the hydrostatic pressure, and $\tp$ is the flow-induced spatially-resolved perturbation. If the computational domain has no sealed void spaces and there is at least one \ct{OPEN} boundary, FDS can assume that the background pressure is simply atmospheric pressure and that it is the same throughout the entire domain. However, if void spaces exist, their background pressures will be different. For example, if a fire starts in a sealed compartment, the background pressure must rise above atmospheric.
 
 FDS has an algorithm that identifies regions within the computational domain that are sealed; that is, are not connected to an \ct{OPEN} boundary. Thus, it is not necessary for you to explicitly declare these regions, or ``pressure zones.'' However, if you desire that a pressure zone be connected to another via a leak path, you need to explicitly declare it. The next section discusses how to do that.
+
+Depending on how the geometry is created, there might be an excessive amount of pressure zones in the model, some of which might only be a few grid cells sealed off from the rest of the domain. If these void spaces are not necessary, try to eliminate them. Otherwise, an excessive amount of CPU time or random access memory (RAM) will be necessary to include them. See Section~\ref{info:filling_zones} for hints on how to reduce the number of unwanted cavity spaces.
 
 \subsection{Specifying Pressure Zones}
 \label{info:ZONE_Basics}
