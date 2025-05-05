@@ -27,8 +27,6 @@ https://montgomerycomd.alerteagle.com/history2021-jpg.aspx
 
 &REAC FUEL='natural gas', RADIATIVE_FRACTION=0.25/
 
-&CLIP MINIMUM_DENSITY=0.01/
-
 &RADI NUMBER_RADIATION_ANGLES=400, PATH_LENGTH=2.0/
 
 &VENT DB='XMIN', SURF_ID='OPEN'/

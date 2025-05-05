@@ -1898,7 +1898,6 @@ TMPA4 = TMPA**4
 
 TMPMIN = MAX(1._EB , MIN(TMPA,TMPM)-10._EB)
 TMPMAX = 3000._EB
-RHOMAX = 0._EB
 
 ! Miscellaneous
 
@@ -2364,26 +2363,26 @@ ELSE
 ENDIF
 
 DT_BNDF      = -1._EB                  ; RAMP_BNDF    = 'null' ; DT_BNDF_SPECIFIED    = DT_BNDF
-DT_CPU       =  HUGE(EB)               ; RAMP_CPU     = 'null' ; DT_CPU_SPECIFIED     = DT_CPU
+DT_CPU       =  HUGE_EB                ; RAMP_CPU     = 'null' ; DT_CPU_SPECIFIED     = DT_CPU
 DT_CTRL      = -1._EB                  ; RAMP_CTRL    = 'null' ; DT_CTRL_SPECIFIED    = DT_CTRL
 DT_DEVC      = -1._EB                  ; RAMP_DEVC    = 'null' ; DT_DEVC_SPECIFIED    = DT_DEVC
 DT_FLUSH     = -1._EB                  ; RAMP_FLUSH   = 'null' ; DT_FLUSH_SPECIFIED   = DT_FLUSH
-DT_GEOM      =  HUGE(EB)               ; RAMP_GEOM    = 'null' ; DT_GEOM_SPECIFIED    = DT_GEOM
+DT_GEOM      =  HUGE_EB                ; RAMP_GEOM    = 'null' ; DT_GEOM_SPECIFIED    = DT_GEOM
 DT_HRR       = -1._EB                  ; RAMP_HRR     = 'null' ; DT_HRR_SPECIFIED     = DT_HRR
 DT_HVAC      = -1._EB                  ; RAMP_HVAC    = 'null' ; DT_HVAC_SPECIFIED    = DT_HVAC
 DT_ISOF      = -1._EB                  ; RAMP_ISOF    = 'null' ; DT_ISOF_SPECIFIED    = DT_ISOF
 DT_MASS      = -1._EB                  ; RAMP_MASS    = 'null' ; DT_MASS_SPECIFIED    = DT_MASS
 DT_PART      = -1._EB                  ; RAMP_PART    = 'null' ; DT_PART_SPECIFIED    = DT_PART
-DT_PL3D      =  HUGE(EB)               ; RAMP_PL3D    = 'null' ; DT_PL3D_SPECIFIED    = DT_PL3D
+DT_PL3D      =  HUGE_EB                ; RAMP_PL3D    = 'null' ; DT_PL3D_SPECIFIED    = DT_PL3D
 DT_PROF      = -1._EB                  ; RAMP_PROF    = 'null' ; DT_PROF_SPECIFIED    = DT_PROF
-DT_RADF      =  HUGE(EB)               ; RAMP_RADF    = 'null' ; DT_RADF_SPECIFIED    = DT_RADF
-DT_RESTART   =  HUGE(EB)               ; RAMP_RESTART = 'null' ; DT_RESTART_SPECIFIED = DT_RESTART
+DT_RADF      =  HUGE_EB                ; RAMP_RADF    = 'null' ; DT_RADF_SPECIFIED    = DT_RADF
+DT_RESTART   =  HUGE_EB                ; RAMP_RESTART = 'null' ; DT_RESTART_SPECIFIED = DT_RESTART
 DT_SLCF      = -1._EB                  ; RAMP_SLCF    = 'null' ; DT_SLCF_SPECIFIED    = DT_SLCF
 DT_SL3D      =  (T_END-T_BEGIN)/5._EB  ; RAMP_SL3D    = 'null' ; DT_SL3D_SPECIFIED    = DT_SL3D
 DT_SMOKE3D   = -1._EB                  ; RAMP_SMOKE3D = 'null' ; DT_SMOKE3D_SPECIFIED = DT_SMOKE3D
-DT_UVW       =  HUGE(EB)               ; RAMP_UVW     = 'null' ; DT_UVW_SPECIFIED     = DT_UVW
-DT_TMP       =  HUGE(EB)               ; RAMP_TMP     = 'null' ; DT_TMP_SPECIFIED     = DT_TMP
-DT_SPEC      =  HUGE(EB)               ; RAMP_SPEC    = 'null' ; DT_SPEC_SPECIFIED    = DT_SPEC
+DT_UVW       =  HUGE_EB                ; RAMP_UVW     = 'null' ; DT_UVW_SPECIFIED     = DT_UVW
+DT_TMP       =  HUGE_EB                ; RAMP_TMP     = 'null' ; DT_TMP_SPECIFIED     = DT_TMP
+DT_SPEC      =  HUGE_EB                ; RAMP_SPEC    = 'null' ; DT_SPEC_SPECIFIED    = DT_SPEC
 DIAGNOSTICS_INTERVAL = 100
 
 ! Read the DUMP line
@@ -7380,7 +7379,7 @@ GAS_DIFFUSION_DEPTH    = 0.001_EB    ! m
 HEAT_OF_COMBUSTION     = -1._EB      ! kJ/kg
 HEAT_OF_REACTION       = -1.E15_EB   ! kJ/kg
 ID                     = 'null'
-MAX_REACTION_RATE      = HUGE(1._EB)
+MAX_REACTION_RATE      = HUGE_EB
 MW                     = -1._EB
 N_REACTIONS            = 0
 N_O2                   = 0._EB
@@ -10089,8 +10088,8 @@ SUBROUTINE READ_CLIP
 REAL(EB) :: MAXIMUM_DENSITY,MINIMUM_DENSITY,MINIMUM_TEMPERATURE,MAXIMUM_TEMPERATURE
 NAMELIST /CLIP/ CLIP_DT_RESTRICTIONS_MAX,FYI,MAXIMUM_DENSITY,MAXIMUM_TEMPERATURE,MINIMUM_DENSITY,MINIMUM_TEMPERATURE
 
-MINIMUM_DENSITY       = -999._EB
-MAXIMUM_DENSITY       = -999._EB
+MINIMUM_DENSITY       = 0.01_EB
+MAXIMUM_DENSITY       = HUGE_EB
 MINIMUM_TEMPERATURE   = -999._EB
 MAXIMUM_TEMPERATURE   = -999._EB
 
@@ -10111,17 +10110,8 @@ IF (TMPMAX > 5000._EB) THEN
    IF (MY_RANK==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
 ENDIF
 
-IF (MINIMUM_DENSITY>0._EB) THEN
-   RHOMIN = MINIMUM_DENSITY
-ELSE
-   RHOMIN = MIN(0.1_EB*RHOA,2._EB*P_INF*MW_MIN/(R0*TMPMAX))
-ENDIF
-
-IF (MAXIMUM_DENSITY>0._EB) THEN
-   RHOMAX = MAXIMUM_DENSITY
-ELSE
-   RHOMAX = 2._EB*P_INF*MW_MAX/(R0*MAX(TMPMIN,1._EB))
-ENDIF
+RHOMIN = MINIMUM_DENSITY
+RHOMAX = MAXIMUM_DENSITY
 
 END SUBROUTINE READ_CLIP
 

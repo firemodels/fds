@@ -12,8 +12,6 @@ The gas species here is mixture fraction fuel, burning rate specified.
 
 &TIME T_END=30. DT = 0.05/
 
-&CLIP MAXIMUM_DENSITY=10 /
-
 &MATL ID                   = 'FOAM'
       HEAT_OF_COMBUSTION   = 30000.
       CONDUCTIVITY         = 0.2
