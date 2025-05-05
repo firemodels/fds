@@ -2640,6 +2640,12 @@ FILL_ZONES: IF (MINIMUM_ZONE_VOLUME>TWO_EPSILON_EB) THEN
 
 ENDIF FILL_ZONES
 
+! Warn if the number of pressure zones is too high
+
+IF (N_ZONE>100 .AND. MY_RANK==0) THEN
+   WRITE(LU_ERR,'(A,I0,A)') 'WARNING: Number of pressure ZONEs ',N_ZONE,' is large. Consider reducing the number.'
+ENDIF
+
 END SUBROUTINE INITIALIZE_PRESSURE_ZONES
 
 
