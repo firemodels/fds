@@ -9,14 +9,6 @@
 &MESH IJK=36,32,28, XB=0.0,10.2,-4.4,4.4,0.0,7.9, MULT_ID='mesh' /
 &MULT ID='mesh', DX=10.2, I_UPPER=83 /
 
-&REAC FUEL='N-HEPTANE', SOOT_YIELD=0.037, CO_YIELD=0.010, RADIATIVE_FRACTION=0.33 /
-
-&SURF ID='FIRE', HRRPUA=2016.1, RAMP_Q='RAMP_FIRE', COLOR='RED' /
-
-&OBST XB=608.0,614.4,-2.0,2.0,0.4,0.8, SURF_IDS='FIRE','COVER','COVER' /
-&OBST XB=614.8,617.2,-2.0,2.0,0.4,0.8, SURF_IDS='FIRE','COVER','COVER' /
-&OBST XB=619.6,623.2,-2.0,2.0,0.4,0.8, SURF_IDS='FIRE','COVER','COVER' /
-
 &RAMP ID='RAMP_FIRE', T=   0., F= 0.000 /
 &RAMP ID='RAMP_FIRE', T=   1., F= 0.033 /
 &RAMP ID='RAMP_FIRE', T=  16., F= 0.103 /
@@ -168,6 +160,6 @@
 &RAMP ID='VENTR_JF24',T=-180.0,F=0.0 /
 &RAMP ID='VENTR_JF24',T=-170.0,F=1.0 /
 
-&CATF OTHER_FILES='materials.txt', 'loop_obstructions.txt','vault_obstructions.txt', 'output.txt', 'fans.txt', 'extra_fans.txt' /
+&CATF OTHER_FILES='materials.txt', 'loop_obstructions.txt','vault_obstructions.txt', 'output.txt', 'fans.txt', 'extra_fans.txt', 'fire_100_MW_fans.txt' /
 
 &TAIL / 
