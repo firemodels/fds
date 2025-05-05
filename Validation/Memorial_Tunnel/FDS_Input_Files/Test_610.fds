@@ -9,12 +9,6 @@
 &MESH IJK=36,32,28, XB=0.0,10.2,-4.4,4.4,0.0,7.9, MULT_ID='mesh' /
 &MULT ID='mesh', DX=10.2, I_UPPER=83 /
 
-&REAC FUEL='N-HEPTANE', SOOT_YIELD=0.037, CO_YIELD=0.010, RADIATIVE_FRACTION=0.33 /
-
-&SURF ID='FIRE', HRRPUA=1953.125, RAMP_Q='RAMP_FIRE', COLOR='RED' /
-
-&OBST XB=608.0,614.4,-2.0,2.0,0.4,0.8, SURF_IDS='FIRE','COVER','COVER' /
-
 &RAMP ID='RAMP_FIRE', T=   0., F= 0.020 /
 &RAMP ID='RAMP_FIRE', T=  14., F= 0.150 /
 &RAMP ID='RAMP_FIRE', T=  40., F= 0.391 /
@@ -152,6 +146,6 @@
 &RAMP ID='VENTR_JF15',T=924.0,F=0.0 /
 &RAMP ID='VENTR_JF15',T=934.0,F=1.0 /
                 
-&CATF OTHER_FILES='materials.txt', 'loop_obstructions.txt','vault_obstructions.txt', 'output.txt', 'fans.txt' /
+&CATF OTHER_FILES='materials.txt', 'loop_obstructions.txt','vault_obstructions.txt', 'output.txt', 'fans.txt', 'fire_50_MW_fans.txt' /
 
 &TAIL / 
