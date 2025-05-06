@@ -135,6 +135,7 @@ benchmark=no
 showinput=0
 exe=
 walltime=99-99:99:99
+ACCOUNT=
 
 if [ $# -lt 1 ]; then
   usage
@@ -145,9 +146,12 @@ commandline=`echo $* | sed 's/-V//' | sed 's/-v//'`
 
 #*** read in parameters from command line
 
-while getopts 'b:d:e:GhHIj:Ln:o:Pp:q:stT:U:vw:y:Y' OPTION
+while getopts 'A:b:d:e:GhHIj:Ln:o:Pp:q:stT:U:vw:y:Y' OPTION
 do
 case $OPTION  in
+  A)
+   ACCOUNT="$OPTARG"
+   ;;
   b)
    EMAIL="$OPTARG"
    ;;
@@ -387,6 +391,11 @@ cat << EOF >> $scriptfile
 #SBATCH --nodes=$nodes
 #SBATCH --time=$walltime
 EOF
+if [ "$ACCOUNT" != "" ]; then
+cat << EOF >> $scriptfile
+#SBATCH -A=$ACCOUNT
+EOF
+fi
 
 if [[ $n_openmp_threads -gt 1 ]] || [[ $max_mpi_processes_per_node -lt 1000 ]] ; then
 cat << EOF >> $scriptfile
