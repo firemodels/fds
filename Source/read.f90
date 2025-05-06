@@ -2363,26 +2363,26 @@ ELSE
 ENDIF
 
 DT_BNDF      = -1._EB                  ; RAMP_BNDF    = 'null' ; DT_BNDF_SPECIFIED    = DT_BNDF
-DT_CPU       =  HUGE_EB                ; RAMP_CPU     = 'null' ; DT_CPU_SPECIFIED     = DT_CPU
+DT_CPU       =  HUGE_FB                ; RAMP_CPU     = 'null' ; DT_CPU_SPECIFIED     = DT_CPU
 DT_CTRL      = -1._EB                  ; RAMP_CTRL    = 'null' ; DT_CTRL_SPECIFIED    = DT_CTRL
 DT_DEVC      = -1._EB                  ; RAMP_DEVC    = 'null' ; DT_DEVC_SPECIFIED    = DT_DEVC
 DT_FLUSH     = -1._EB                  ; RAMP_FLUSH   = 'null' ; DT_FLUSH_SPECIFIED   = DT_FLUSH
-DT_GEOM      =  HUGE_EB                ; RAMP_GEOM    = 'null' ; DT_GEOM_SPECIFIED    = DT_GEOM
+DT_GEOM      =  HUGE_FB                ; RAMP_GEOM    = 'null' ; DT_GEOM_SPECIFIED    = DT_GEOM
 DT_HRR       = -1._EB                  ; RAMP_HRR     = 'null' ; DT_HRR_SPECIFIED     = DT_HRR
 DT_HVAC      = -1._EB                  ; RAMP_HVAC    = 'null' ; DT_HVAC_SPECIFIED    = DT_HVAC
 DT_ISOF      = -1._EB                  ; RAMP_ISOF    = 'null' ; DT_ISOF_SPECIFIED    = DT_ISOF
 DT_MASS      = -1._EB                  ; RAMP_MASS    = 'null' ; DT_MASS_SPECIFIED    = DT_MASS
 DT_PART      = -1._EB                  ; RAMP_PART    = 'null' ; DT_PART_SPECIFIED    = DT_PART
-DT_PL3D      =  HUGE_EB                ; RAMP_PL3D    = 'null' ; DT_PL3D_SPECIFIED    = DT_PL3D
+DT_PL3D      =  HUGE_FB                ; RAMP_PL3D    = 'null' ; DT_PL3D_SPECIFIED    = DT_PL3D
 DT_PROF      = -1._EB                  ; RAMP_PROF    = 'null' ; DT_PROF_SPECIFIED    = DT_PROF
-DT_RADF      =  HUGE_EB                ; RAMP_RADF    = 'null' ; DT_RADF_SPECIFIED    = DT_RADF
-DT_RESTART   =  HUGE_EB                ; RAMP_RESTART = 'null' ; DT_RESTART_SPECIFIED = DT_RESTART
+DT_RADF      =  HUGE_FB                ; RAMP_RADF    = 'null' ; DT_RADF_SPECIFIED    = DT_RADF
+DT_RESTART   =  HUGE_FB                ; RAMP_RESTART = 'null' ; DT_RESTART_SPECIFIED = DT_RESTART
 DT_SLCF      = -1._EB                  ; RAMP_SLCF    = 'null' ; DT_SLCF_SPECIFIED    = DT_SLCF
 DT_SL3D      =  (T_END-T_BEGIN)/5._EB  ; RAMP_SL3D    = 'null' ; DT_SL3D_SPECIFIED    = DT_SL3D
 DT_SMOKE3D   = -1._EB                  ; RAMP_SMOKE3D = 'null' ; DT_SMOKE3D_SPECIFIED = DT_SMOKE3D
-DT_UVW       =  HUGE_EB                ; RAMP_UVW     = 'null' ; DT_UVW_SPECIFIED     = DT_UVW
-DT_TMP       =  HUGE_EB                ; RAMP_TMP     = 'null' ; DT_TMP_SPECIFIED     = DT_TMP
-DT_SPEC      =  HUGE_EB                ; RAMP_SPEC    = 'null' ; DT_SPEC_SPECIFIED    = DT_SPEC
+DT_UVW       =  HUGE_FB                ; RAMP_UVW     = 'null' ; DT_UVW_SPECIFIED     = DT_UVW
+DT_TMP       =  HUGE_FB                ; RAMP_TMP     = 'null' ; DT_TMP_SPECIFIED     = DT_TMP
+DT_SPEC      =  HUGE_FB                ; RAMP_SPEC    = 'null' ; DT_SPEC_SPECIFIED    = DT_SPEC
 DIAGNOSTICS_INTERVAL = 100
 
 ! Read the DUMP line
@@ -10089,7 +10089,7 @@ REAL(EB) :: MAXIMUM_DENSITY,MINIMUM_DENSITY,MINIMUM_TEMPERATURE,MAXIMUM_TEMPERAT
 NAMELIST /CLIP/ CLIP_DT_RESTRICTIONS_MAX,FYI,MAXIMUM_DENSITY,MAXIMUM_TEMPERATURE,MINIMUM_DENSITY,MINIMUM_TEMPERATURE
 
 MINIMUM_DENSITY       = 0.01_EB
-MAXIMUM_DENSITY       = HUGE_EB
+MAXIMUM_DENSITY       = HUGE_FB
 MINIMUM_TEMPERATURE   = -999._EB
 MAXIMUM_TEMPERATURE   = -999._EB
 
