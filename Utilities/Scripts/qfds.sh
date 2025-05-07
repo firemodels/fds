@@ -38,6 +38,7 @@ function usage {
   echo ""
   echo "qfds.sh runs FDS using an executable from the repository or one specified with the -e option."
   echo ""
+  echo " -A AccountName - Allocation account name to charge "
   echo " -e exe - full path of FDS used to run case "
   echo "    [default: $FDSROOT/fds/Build/${MPI}_intel_linux$DB/fds_${MPI}_intel_linux$DB]"
   echo " -h   - show commonly used options"
@@ -393,7 +394,7 @@ cat << EOF >> $scriptfile
 EOF
 if [ "$ACCOUNT" != "" ]; then
 cat << EOF >> $scriptfile
-#SBATCH -A=$ACCOUNT
+#SBATCH --account=$ACCOUNT
 EOF
 fi
 
