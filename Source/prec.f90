@@ -43,6 +43,7 @@ REAL(EB), PARAMETER :: TWO_EPSILON_EB=2._EB*EPSILON(1._EB)    !< A very small nu
 REAL(FB), PARAMETER :: TWO_EPSILON_FB=2._EB*EPSILON(1._FB)    !< A very small number 4 byte accuracy
 REAL(EB), PARAMETER :: TINY_EB=TINY(1._EB)                    !< The smallest resolvable 8 byte real number
 REAL(EB), PARAMETER :: HUGE_EB=HUGE(1._EB)                    !< The largest resolvable 8 btye real number
+REAL(EB), PARAMETER :: HUGE_FB=HUGE(1._FB)                    !< A large number but not too large for various operations
 
 ! Often used numbers
 
