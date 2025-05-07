@@ -182,6 +182,7 @@ INTEGER :: RND_SEED=0                      !< User RANDOM_SEED
 
 LOGICAL :: HVAC_DEBUG=.FALSE.               !< Output known hvac values to smokeview
 LOGICAL :: RADIATION=.TRUE.                 !< Perform radiation transport
+LOGICAL :: UPDATE_ALL_ANGLES=.FALSE.        !< Update all radiation angles the next time the solver is called
 LOGICAL :: INCLUDE_PYROLYSIS=.FALSE.        !< Solid phase pyrolysis is included in the simulation
 LOGICAL :: EXCHANGE_RADIATION=.FALSE.       !< Do an MPI radiation exchange at this time step
 LOGICAL :: EXCHANGE_OBST_MASS=.FALSE.       !< Exchange mass loss information for obstructions bordering interpolated meshes
@@ -572,7 +573,7 @@ INTEGER, ALLOCATABLE, DIMENSION(:) :: I_OFFSET                   !< Spatial inde
 
 INTEGER :: ICYC,NFRAMES,PERIODIC_TEST=0,SIM_MODE=3,TURB_MODEL=0,FISHPAK_BC(3)=-1,&
            STOP_AT_ITER=0,WALL_INCREMENT=2,WALL_COUNTER=0,&
-           CLIP_DT_RESTRICTIONS_MAX=5,BNDF_TIME_INTEGRALS=0
+           CLIP_DT_RESTRICTIONS_MAX=0,BNDF_TIME_INTEGRALS=0
 
 LOGICAL  :: UPDATE_DEVICES_AGAIN=.FALSE.
 
