@@ -20,6 +20,14 @@ call :is_file_installed cmake || set abort=1
 call :is_file_installed make  || set abort=1
 if %abort% == 1 exit /b
 
+echo Running CMake version check...
+call ../check_cmake_version.bat
+if errorlevel 1 (
+    echo Exiting due to CMake version error.
+    exit /b 1
+)
+echo Proceeding with build...
+
 set CURDIR=%CD%
 
 ::*** define root directory where fds repo and libs directories are located
