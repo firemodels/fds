@@ -76,6 +76,15 @@ echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
 
+echo Running CMake version check...
+call %CURDIR%/../check_cmake_version.bat
+if errorlevel 1 (
+    echo Exiting due to CMake version error.
+    pause
+    exit /b 1
+)
+echo Proceeding with build...
+
 echo.
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
