@@ -31,6 +31,10 @@ echo "Checking for hypre repository..."
 
 if [ -d "$FIREMODELS/hypre" ]; then
   echo "Hypre repository exists. Building hypre library."
+
+  # Check CMake version.
+  source ../Scripts/check_cmake_version.sh
+
   cd $FIREMODELS/hypre
   # Handle possible corrupted state of repository
   if git branch | grep -q "* master"; then
