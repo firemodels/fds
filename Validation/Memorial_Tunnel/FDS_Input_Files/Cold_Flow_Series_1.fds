@@ -9,8 +9,6 @@
 &MESH IJK=36,32,28, XB=0.0,10.2,-4.4,4.4,0.0,7.9, MULT_ID='mesh' /
 &MULT ID='mesh', DX=10.2, I_UPPER=83 /
 
-&OBST XB=622.4,623.6,-2.0,2.0,0.4,0.8, SURF_ID='COVER' / 
-
 &VENT XB=0.0,0.0,-4.4,4.4,0.0,4.4,SURF_ID='OPEN' /
 &VENT XB=856.8,856.8,-4.4,4.4,0.0,4.4,SURF_ID='OPEN' /
 
@@ -73,7 +71,7 @@
 &RAMP ID='VENTR_JF15',T=4200.0,F=0.0 /
 &RAMP ID='VENTR_JF15',T=4205.0,F=1.0 /
 
-&CATF OTHER_FILES='materials.txt', 'loop_obstructions.txt','vault_obstructions.txt', 'fans.txt' /
+&CATF OTHER_FILES='materials.txt', 'loop_obstructions.txt','vault_obstructions.txt', 'fans.txt', 'pans_only.txt' /
 
 &DUMP DT_DEVC=30., DT_HRR=30. /
                 
