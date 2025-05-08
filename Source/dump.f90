@@ -3924,10 +3924,10 @@ SUBROUTINE WRITE_DIAGNOSTICS(T,DT)
 
 USE COMP_FUNCTIONS, ONLY : CURRENT_TIME,GET_DATE,GET_DATE_ISO_8601
 REAL(EB), INTENT(IN) :: T,DT
-INTEGER :: NM,II,JJ,KK,OUT_DIGITS,SOUT_DIGITS
+INTEGER :: NM,II,JJ,KK,OUT_DIGITS,SOUT_DIGITS,MAX_VN_IJK(3),MAX_CFL_IJK(3),MAX_CFL_MESH,MAX_VN_MESH
 CHARACTER(120) :: SIMPLE_OUTPUT,SIMPLE_OUTPUT_ERR,OUT_FORMAT
 CHARACTER(LABEL_LENGTH) :: DATE
-REAL(EB) :: TNOW,CPUTIME,STIME,DTS
+REAL(EB) :: TNOW,CPUTIME,STIME,DTS,MAX_CFL,MAX_VN
 
 TNOW = CURRENT_TIME()
 
@@ -3985,6 +3985,24 @@ ENDIF
 
 WRITE(LU_ERR,'(A)') TRIM(SIMPLE_OUTPUT_ERR)
 
+! Determine the mesh where the maximum CFL, VN, etc, occur
+
+MAX_CFL = -1._EB
+MAX_VN  = -1._EB
+DO NM=1,NMESHES
+   M => MESHES(NM)
+   IF (M%CFL>MAX_CFL) THEN
+      MAX_CFL = MAX(M%CFL,MAX_CFL)
+      MAX_CFL_MESH = NM
+      MAX_CFL_IJK = (/M%ICFL,M%JCFL,M%KCFL/)
+   ENDIF
+   IF (CHECK_VN .AND. M%VN>MAX_VN) THEN
+      MAX_VN  = MAX(M%VN,MAX_VN)
+      MAX_VN_MESH = NM
+      MAX_VN_IJK = (/M%I_VN,M%J_VN,M%K_VN/)
+   ENDIF
+ENDDO
+
 ! Header for .out file
 
 IF (ICYC==1) WRITE(LU_OUTPUT,100)
@@ -4037,6 +4055,13 @@ IF (ITERATE_PRESSURE) THEN
                                             ' on Mesh ',NM,' at (',II,',',JJ,',',KK,')'
 ENDIF
 
+WRITE(LU_OUTPUT,'(7X,A,E9.2,A,4(I0,A))') 'Maximum CFL Number    : ',MAX_CFL,' on Mesh ',MAX_CFL_MESH,&
+                                         ' at (',MAX_CFL_IJK(1),',',MAX_CFL_IJK(2),',',MAX_CFL_IJK(3),')'
+IF (CHECK_VN) THEN
+   WRITE(LU_OUTPUT,'(7X,A,E9.2,A,4(I0,A))') 'Maximum VN Number     : ',MAX_VN,' on Mesh ',MAX_VN_MESH,&
+                                            ' at (',MAX_VN_IJK(1),',',MAX_VN_IJK(2),',',MAX_VN_IJK(3),')'
+ENDIF
+
 WRITE(LU_OUTPUT,'(7X,A)') '---------------------------------------------------------------'
 
 DO NM=1,NMESHES
@@ -4052,7 +4077,6 @@ DO NM=1,NMESHES
       WRITE(LU_OUTPUT,121) M%DT_RESTRICT_STORE
       M%DT_RESTRICT_STORE=0
    ENDIF
-
 ENDDO
 
 WRITE(LU_OUTPUT,*)
