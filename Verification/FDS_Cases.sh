@@ -326,6 +326,9 @@ $QFDS -p 4 -d Heat_Transfer back_wall_test.fds
 $QFDS -p 3 -d Heat_Transfer back_wall_test_2.fds
 $QFDS -d Heat_Transfer SFPE_Case_6.fds
 $QFDS -d Heat_Transfer SFPE_Case_7.fds
+$QFDS -d Heat_Transfer SFPE_Case_8.fds
+$QFDS -d Heat_Transfer SFPE_Case_9.fds
+$QFDS -d Heat_Transfer SFPE_Case_13.fds
 $QFDS -d Heat_Transfer thermocouple_time_constant.fds
 
 $QFDS -d HVAC ashrae7_fixed_flow.fds

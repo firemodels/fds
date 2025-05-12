@@ -1,0 +1,240 @@
+&HEAD CHID='SFPE_Case_13', TITLE='Verification Case 8, SFPE Guide to Thermal Performance of Resistive Assemblies'/
+
+&MESH IJK=24,24,3, XB=-0.12,0.12,-0.12,0.12,-0.01,0.02 /
+
+&TIME T_END=10800, DT=1., WALL_INCREMENT=1 /
+
+&MISC SOLID_PHASE_ONLY=T, TMPA=20. /
+
+&RADI RADIATION=T /
+
+&OBST XB=-0.10, 0.10,-0.10, 0.10,0.0,0.01, SURF_IDS='ADIABATIC','STUFF','ADIABATIC', MATL_ID='STUFF','WATER', MATL_MASS_FRACTION=0.9792,0.0208 /
+
+&SURF ID='STUFF', COLOR='GRAY', HEAT_TRANSFER_COEFFICIENT=10.0, EMISSIVITY=0.8, HT3D=T, CELL_SIZE=0.01, TMP_GAS_FRONT=1000., RAMP_TMP_GAS_FRONT='fire_ramp' /
+&SURF ID='ADIABATIC', HEAT_TRANSFER_COEFFICIENT=0.0, EMISSIVITY=0.0, HT3D=T, CELL_SIZE=0.01 /
+
+&RAMP ID='fire_ramp', T=0, F=0 /
+&RAMP ID='fire_ramp', T=60, F=0.335932312 /
+&RAMP ID='fire_ramp', T=120, F=0.433168243 /
+&RAMP ID='fire_ramp', T=180, F=0.492131942 /
+&RAMP ID='fire_ramp', T=240, F=0.534578887 /
+&RAMP ID='fire_ramp', T=300, F=0.567765745 /
+&RAMP ID='fire_ramp', T=360, F=0.595018008 /
+&RAMP ID='fire_ramp', T=420, F=0.618139618 /
+&RAMP ID='fire_ramp', T=480, F=0.638219498 /
+&RAMP ID='fire_ramp', T=540, F=0.655965701 /
+&RAMP ID='fire_ramp', T=600, F=0.671864624 /
+&RAMP ID='fire_ramp', T=660, F=0.686264849 /
+&RAMP ID='fire_ramp', T=720, F=0.699424743 /
+&RAMP ID='fire_ramp', T=780, F=0.711541131 /
+&RAMP ID='fire_ramp', T=840, F=0.722767411 /
+&RAMP ID='fire_ramp', T=900, F=0.733225462 /
+&RAMP ID='fire_ramp', T=960, F=0.743013725 /
+&RAMP ID='fire_ramp', T=1020, F=0.752212853 /
+&RAMP ID='fire_ramp', T=1080, F=0.760889756 /
+&RAMP ID='fire_ramp', T=1140, F=0.769100555 /
+&RAMP ID='fire_ramp', T=1200, F=0.776892783 /
+&RAMP ID='fire_ramp', T=1260, F=0.784307054 /
+&RAMP ID='fire_ramp', T=1320, F=0.791378344 /
+&RAMP ID='fire_ramp', T=1380, F=0.798136986 /
+&RAMP ID='fire_ramp', T=1440, F=0.804609461 /
+&RAMP ID='fire_ramp', T=1500, F=0.81081902 /
+&RAMP ID='fire_ramp', T=1560, F=0.816786193 /
+&RAMP ID='fire_ramp', T=1620, F=0.822529192 /
+&RAMP ID='fire_ramp', T=1680, F=0.828064254 /
+&RAMP ID='fire_ramp', T=1740, F=0.833405911 /
+&RAMP ID='fire_ramp', T=1800, F=0.838567224 /
+&RAMP ID='fire_ramp', T=1860, F=0.843559974 /
+&RAMP ID='fire_ramp', T=1920, F=0.848394824 /
+&RAMP ID='fire_ramp', T=1980, F=0.853081456 /
+&RAMP ID='fire_ramp', T=2040, F=0.857628687 /
+&RAMP ID='fire_ramp', T=2100, F=0.862044572 /
+&RAMP ID='fire_ramp', T=2160, F=0.866336485 /
+&RAMP ID='fire_ramp', T=2220, F=0.870511199 /
+&RAMP ID='fire_ramp', T=2280, F=0.874574943 /
+&RAMP ID='fire_ramp', T=2340, F=0.878533466 /
+&RAMP ID='fire_ramp', T=2400, F=0.882392078 /
+&RAMP ID='fire_ramp', T=2460, F=0.886155699 /
+&RAMP ID='fire_ramp', T=2520, F=0.889828894 /
+&RAMP ID='fire_ramp', T=2580, F=0.893415906 /
+&RAMP ID='fire_ramp', T=2640, F=0.896920687 /
+&RAMP ID='fire_ramp', T=2700, F=0.900346923 /
+&RAMP ID='fire_ramp', T=2760, F=0.903698057 /
+&RAMP ID='fire_ramp', T=2820, F=0.906977312 /
+&RAMP ID='fire_ramp', T=2880, F=0.910187706 /
+&RAMP ID='fire_ramp', T=2940, F=0.913332071 /
+&RAMP ID='fire_ramp', T=3000, F=0.91641307 /
+&RAMP ID='fire_ramp', T=3060, F=0.919433205 /
+&RAMP ID='fire_ramp', T=3120, F=0.922394836 /
+&RAMP ID='fire_ramp', T=3180, F=0.925300185 /
+&RAMP ID='fire_ramp', T=3240, F=0.928151351 /
+&RAMP ID='fire_ramp', T=3300, F=0.93095032 /
+&RAMP ID='fire_ramp', T=3360, F=0.933698967 /
+&RAMP ID='fire_ramp', T=3420, F=0.93639907 /
+&RAMP ID='fire_ramp', T=3480, F=0.939052315 /
+&RAMP ID='fire_ramp', T=3540, F=0.9416603 /
+&RAMP ID='fire_ramp', T=3600, F=0.944224542 /
+&RAMP ID='fire_ramp', T=3660, F=0.946746486 /
+&RAMP ID='fire_ramp', T=3720, F=0.949227504 /
+&RAMP ID='fire_ramp', T=3780, F=0.951668904 /
+&RAMP ID='fire_ramp', T=3840, F=0.95407193 /
+&RAMP ID='fire_ramp', T=3900, F=0.95643777 /
+&RAMP ID='fire_ramp', T=3960, F=0.958767558 /
+&RAMP ID='fire_ramp', T=4020, F=0.961062376 /
+&RAMP ID='fire_ramp', T=4080, F=0.963323258 /
+&RAMP ID='fire_ramp', T=4140, F=0.965551194 /
+&RAMP ID='fire_ramp', T=4200, F=0.96774713 /
+&RAMP ID='fire_ramp', T=4260, F=0.969911971 /
+&RAMP ID='fire_ramp', T=4320, F=0.972046587 /
+&RAMP ID='fire_ramp', T=4380, F=0.97415181 /
+&RAMP ID='fire_ramp', T=4440, F=0.976228438 /
+&RAMP ID='fire_ramp', T=4500, F=0.978277238 /
+&RAMP ID='fire_ramp', T=4560, F=0.980298945 /
+&RAMP ID='fire_ramp', T=4620, F=0.982294267 /
+&RAMP ID='fire_ramp', T=4680, F=0.984263884 /
+&RAMP ID='fire_ramp', T=4740, F=0.986208449 /
+&RAMP ID='fire_ramp', T=4800, F=0.988128592 /
+&RAMP ID='fire_ramp', T=4860, F=0.990024919 /
+&RAMP ID='fire_ramp', T=4920, F=0.991898013 /
+&RAMP ID='fire_ramp', T=4980, F=0.993748436 /
+&RAMP ID='fire_ramp', T=5040, F=0.995576732 /
+&RAMP ID='fire_ramp', T=5100, F=0.997383422 /
+&RAMP ID='fire_ramp', T=5160, F=0.999169012 /
+&RAMP ID='fire_ramp', T=5220, F=1.000933988 /
+&RAMP ID='fire_ramp', T=5280, F=1.002678822 /
+&RAMP ID='fire_ramp', T=5340, F=1.004403967 /
+&RAMP ID='fire_ramp', T=5400, F=1.006109864 /
+&RAMP ID='fire_ramp', T=5460, F=1.007796936 /
+&RAMP ID='fire_ramp', T=5520, F=1.009465595 /
+&RAMP ID='fire_ramp', T=5580, F=1.011116239 /
+&RAMP ID='fire_ramp', T=5640, F=1.012749252 /
+&RAMP ID='fire_ramp', T=5700, F=1.014365007 /
+&RAMP ID='fire_ramp', T=5760, F=1.015963865 /
+&RAMP ID='fire_ramp', T=5820, F=1.017546175 /
+&RAMP ID='fire_ramp', T=5880, F=1.019112277 /
+&RAMP ID='fire_ramp', T=5940, F=1.0206625 /
+&RAMP ID='fire_ramp', T=6000, F=1.022197161 /
+&RAMP ID='fire_ramp', T=6060, F=1.023716571 /
+&RAMP ID='fire_ramp', T=6120, F=1.02522103 /
+&RAMP ID='fire_ramp', T=6180, F=1.026710829 /
+&RAMP ID='fire_ramp', T=6240, F=1.02818625 /
+&RAMP ID='fire_ramp', T=6300, F=1.02964757 /
+&RAMP ID='fire_ramp', T=6360, F=1.031095054 /
+&RAMP ID='fire_ramp', T=6420, F=1.032528963 /
+&RAMP ID='fire_ramp', T=6480, F=1.033949548 /
+&RAMP ID='fire_ramp', T=6540, F=1.035357055 /
+&RAMP ID='fire_ramp', T=6600, F=1.036751723 /
+&RAMP ID='fire_ramp', T=6660, F=1.038133783 /
+&RAMP ID='fire_ramp', T=6720, F=1.039503462 /
+&RAMP ID='fire_ramp', T=6780, F=1.040860979 /
+&RAMP ID='fire_ramp', T=6840, F=1.042206549 /
+&RAMP ID='fire_ramp', T=6900, F=1.04354038 /
+&RAMP ID='fire_ramp', T=6960, F=1.044862675 /
+&RAMP ID='fire_ramp', T=7020, F=1.046173631 /
+&RAMP ID='fire_ramp', T=7080, F=1.047473443 /
+&RAMP ID='fire_ramp', T=7140, F=1.048762297 /
+&RAMP ID='fire_ramp', T=7200, F=1.050040376 /
+&RAMP ID='fire_ramp', T=7260, F=1.05130786 /
+&RAMP ID='fire_ramp', T=7320, F=1.052564923 /
+&RAMP ID='fire_ramp', T=7380, F=1.053811734 /
+&RAMP ID='fire_ramp', T=7440, F=1.05504846 /
+&RAMP ID='fire_ramp', T=7500, F=1.056275262 /
+&RAMP ID='fire_ramp', T=7560, F=1.057492298 /
+&RAMP ID='fire_ramp', T=7620, F=1.058699723 /
+&RAMP ID='fire_ramp', T=7680, F=1.059897687 /
+&RAMP ID='fire_ramp', T=7740, F=1.061086338 /
+&RAMP ID='fire_ramp', T=7800, F=1.062265818 /
+&RAMP ID='fire_ramp', T=7860, F=1.063436269 /
+&RAMP ID='fire_ramp', T=7920, F=1.064597827 /
+&RAMP ID='fire_ramp', T=7980, F=1.065750627 /
+&RAMP ID='fire_ramp', T=8040, F=1.0668948 /
+&RAMP ID='fire_ramp', T=8100, F=1.068030474 /
+&RAMP ID='fire_ramp', T=8160, F=1.069157774 /
+&RAMP ID='fire_ramp', T=8220, F=1.070276823 /
+&RAMP ID='fire_ramp', T=8280, F=1.071387741 /
+&RAMP ID='fire_ramp', T=8340, F=1.072490645 /
+&RAMP ID='fire_ramp', T=8400, F=1.073585649 /
+&RAMP ID='fire_ramp', T=8460, F=1.074672867 /
+&RAMP ID='fire_ramp', T=8520, F=1.075752408 /
+&RAMP ID='fire_ramp', T=8580, F=1.076824381 /
+&RAMP ID='fire_ramp', T=8640, F=1.077888889 /
+&RAMP ID='fire_ramp', T=8700, F=1.078946037 /
+&RAMP ID='fire_ramp', T=8760, F=1.079995925 /
+&RAMP ID='fire_ramp', T=8820, F=1.081038653 /
+&RAMP ID='fire_ramp', T=8880, F=1.082074317 /
+&RAMP ID='fire_ramp', T=8940, F=1.083103013 /
+&RAMP ID='fire_ramp', T=9000, F=1.084124834 /
+&RAMP ID='fire_ramp', T=9060, F=1.085139871 /
+&RAMP ID='fire_ramp', T=9120, F=1.086148214 /
+&RAMP ID='fire_ramp', T=9180, F=1.08714995 /
+&RAMP ID='fire_ramp', T=9240, F=1.088145165 /
+&RAMP ID='fire_ramp', T=9300, F=1.089133943 /
+&RAMP ID='fire_ramp', T=9360, F=1.090116369 /
+&RAMP ID='fire_ramp', T=9420, F=1.091092521 /
+&RAMP ID='fire_ramp', T=9480, F=1.092062481 /
+&RAMP ID='fire_ramp', T=9540, F=1.093026326 /
+&RAMP ID='fire_ramp', T=9600, F=1.093984132 /
+&RAMP ID='fire_ramp', T=9660, F=1.094935976 /
+&RAMP ID='fire_ramp', T=9720, F=1.09588193 /
+&RAMP ID='fire_ramp', T=9780, F=1.096822068 /
+&RAMP ID='fire_ramp', T=9840, F=1.09775646 /
+&RAMP ID='fire_ramp', T=9900, F=1.098685176 /
+&RAMP ID='fire_ramp', T=9960, F=1.099608284 /
+&RAMP ID='fire_ramp', T=10020, F=1.100525853 /
+&RAMP ID='fire_ramp', T=10080, F=1.101437947 /
+&RAMP ID='fire_ramp', T=10140, F=1.102344632 /
+&RAMP ID='fire_ramp', T=10200, F=1.103245973 /
+&RAMP ID='fire_ramp', T=10260, F=1.10414203 /
+&RAMP ID='fire_ramp', T=10320, F=1.105032867 /
+&RAMP ID='fire_ramp', T=10380, F=1.105918543 /
+&RAMP ID='fire_ramp', T=10440, F=1.106799118 /
+&RAMP ID='fire_ramp', T=10500, F=1.10767465 /
+&RAMP ID='fire_ramp', T=10560, F=1.108545197 /
+&RAMP ID='fire_ramp', T=10620, F=1.109410815 /
+&RAMP ID='fire_ramp', T=10680, F=1.110271559 /
+&RAMP ID='fire_ramp', T=10740, F=1.111127485 /
+&RAMP ID='fire_ramp', T=10800, F=1.111978646 /
+
+&SPEC ID='WATER VAPOR' /
+
+&MATL ID            = 'WATER'
+      SPECIFIC_HEAT = 4.187
+      CONDUCTIVITY_RAMP = 'k_ramp'
+      DENSITY       = 1000.0
+      NU_SPEC       = 1.
+      SPEC_ID       = 'WATER VAPOR'
+      HEAT_OF_REACTION = 2260.
+      PYROLYSIS_RANGE  = 15.
+      REFERENCE_TEMPERATURE = 115. /
+
+&MATL ID            = 'STUFF'
+      SPECIFIC_HEAT = 1.
+      CONDUCTIVITY_RAMP = 'k_ramp'
+      DENSITY       = 2400.0 /
+
+&RAMP ID='k_ramp', T=   0, F=1.5 /
+&RAMP ID='k_ramp', T= 200, F=0.7 /
+&RAMP ID='k_ramp', T=1000, F=0.5 /
+
+&BNDF QUANTITY='WALL TEMPERATURE', CELL_CENTERED=T/
+&BNDF QUANTITY='NET HEAT FLUX', CELL_CENTERED=T/
+
+&VENT DB='XMIN', SURF_ID='OPEN' /
+&VENT DB='XMAX', SURF_ID='OPEN' /
+&VENT DB='YMIN', SURF_ID='OPEN' /
+&VENT DB='YMAX', SURF_ID='OPEN' /
+&VENT DB='ZMIN', SURF_ID='OPEN' /
+&VENT DB='ZMAX', SURF_ID='OPEN' /
+
+&DUMP DT_DEVC=1.0 /
+
+&SLCF PBZ=0.005, QUANTITY='TEMPERATURE', CELL_CENTERED=T /
+
+&DEVC ID='Center', XYZ=0.0,0.000,0.005, QUANTITY='TEMPERATURE' /
+&DEVC ID='Side',   XYZ=0.1,0.000,0.005, QUANTITY='WALL TEMPERATURE', IOR=1 /
+&DEVC ID='Corner', XYZ=0.1,0.099,0.005, QUANTITY='WALL TEMPERATURE', IOR=1 /
+
+&DEVC ID='T'  , XYZ=0.1,0.000,0.005, IOR=1, QUANTITY='INSIDE WALL TEMPERATURE', DEPTH=0.1 /
+&DEVC ID='Y_w', XYZ=0.1,0.000,0.005, IOR=1, QUANTITY='SOLID MASS FRACTION', DEPTH=0.1, MATL_ID='WATER' /
+
+&TAIL /
