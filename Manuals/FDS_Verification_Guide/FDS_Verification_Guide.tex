@@ -5087,14 +5087,37 @@ A hollow square metal tube ($\rho=7850$~kg/m$^3$, $c=0.6$~kJ/(kg~K), $\epsilon=0
 \subsection{Case 13: 2-D Heat Transfer with Moisture Evaporation}
 \label{SFPE_Case_13}
 
-A 0.2~m by 0.2~m square column (dry properties: $\rho=2400$~kg/m$^3$, $c=1$~kJ/(kg~K), $\epsilon=0.8$) is heated according to the ISO~834 time-temperature curve, Eq.~(\ref{ISO_834}). The thermal conductivity of the column material varies linearly with temperature such that its value is 1.5~W/(m~K) at 0~°C, 0.7~W/(m~K) at 200~°C, and 0.5~W/(m~K) at 1000~°C. The column contains 2.08~\% water by mass that evaporates at temperatures between 100~°C and 120~°C. The density of water and specific heat capacity of water can be taken as 1000~kg/m$^3$ and 4.187~kJ/(kg~K), respectively. The latent heat of evaporation of water (2260~kJ/kg) is assumed to be in addition to the specific heat of the material. During evaporation, the amount of water is assumed to decrease linearly to zero. Assuming that $h=10$~W/(m$^2$~K) and that the initial temperature is 20~°C, calculate the temperature at the column center, corner and middle side surface as a function of time (Fig.~\ref{fig:SFPE_Case_13}).
+A 0.2~m by 0.2~m square column (dry properties: $\rho_{\rm d}=2400$~kg/m$^3$, $c_{\rm d}=1$~kJ/(kg~K), $\epsilon=0.8$) is heated according to the ISO~834 time-temperature curve, Eq.~(\ref{ISO_834}). The thermal conductivity of the column material varies linearly with temperature such that its value is 1.5~W/(m~K) at 0~°C, 0.7~W/(m~K) at 200~°C, and 0.5~W/(m~K) at 1000~°C. The mass fraction of water within the column is $Y_{\rm w}=0.0208$, and it is assumed that the water evaporates at temperatures between 100~°C and 120~°C. The density of water and specific heat capacity of water can be taken as $\rho_{\rm w}=1000$~kg/m$^3$ and $c_{\rm w}=4.187$~kJ/(kg~K), respectively. The latent heat of evaporation of water ($h_{\rm v}=2260$~kJ/kg) is assumed to be added to the specific heat of the material. During evaporation, the amount of water is assumed to decrease linearly to zero. Assuming that $h=10$~W/(m$^2$~K) and that the initial temperature is 20~°C, calculate the temperature at the column center, corner and middle side surface as a function of time (Fig.~\ref{fig:SFPE_Case_13}).
+
+Normally, this scenario would be modeled in FDS by assuming that the water boils in the neighborhood of 100~$^\circ$C following an Arhennius reaction. However, this method would not allow for a linear decrease in the amount of water during its evaporation from 100~$^\circ$C to 120~$^\circ$C. Instead, the latent heat of vaporization of water has been incorporated into an effective specific heat of the column material, shown in the left plot of Fig.~\ref{fig:SFPE_Case_13}. The area of the triangular region is the product of the latent heat of evaporation and the mass fraction of water, $h_{\rm v} Y_{\rm w}$. The effective specific heat of the wet column is given by
+\be
+   c_{\rm eff} = \frac{ m_{\rm d}''' c_{\rm d} + m_{\rm w}''' c_{\rm w} }{ \rho_{\rm d} } \approx 1.089 \; \hbox{kJ/(kg K)} \quad ; \quad m_{\rm d}''' = 2400 \; \hbox{kg/m}^3 \quad ; \quad m_{\rm w}''' = \frac{ Y_{\rm w}}{1-Y_{\rm w}} \,  m_{\rm d}''' \approx 50.1  \hbox{kg/m}^3
+\ee
+where $m_{\rm d}'''$ is the mass per unit volume of the dry column material and $m_{\rm w}'''$ is the mass per unit volume of the water that fills the pores of the column material. Note that it is assumed that the volume of the wet column is the same as that of the dry. Also note that FDS does not allow for a change in material density without a reaction. Thus, in this case, the density of the column is taken as its dry density, which is seen in the denominator of the formula for the effective specific heat of the wet column.
 
 \begin{figure}[ht]
 \centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/SFPE_Case_13b}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/SFPE_Case_13}
-\caption[The SFPE heat transfer verification Case 13]{Temperature at the center, corner and side of a 20~cm by 20~cm column heated by a fire that follows a specified time-temperature curve. The thermal conductivity of the material varies with temperature and there is a small amount of moisture that evaporates.}
+\caption[The SFPE heat transfer verification Case 13]{(Left) The effective specific heat of the column material that incorporates the latent heat of evaporation of water. (Right) The temperature at the center, corner and side of a 20~cm by 20~cm column heated by a fire that follows a specified time-temperature curve.}
 \label{fig:SFPE_Case_13}
 \end{figure}
+
+
+\FloatBarrier
+
+\subsection{Case 16: 3-D Heat Transfer with Non-Uniform Heat Flux}
+\label{SFPE_Case_16}
+
+A 1~m by 2~m rectangular metal plate ($k=50$~W/(m~K), $\rho=7850$~kg/m$^3$, $c=0.5$~kJ/(kg~K), $\epsilon=0.8$) that is 10~cm thick is heated over a quarter of its upper surface with an incident radiant heat flux of 30~kW/m$^2$ with convection to ambient. In Cartesian coordinates $(x,y)$, the corners of the plate are $(0,0)$, $(1,0)$, $(1,2)$, and $(0,2)$. All lengths are in meters. The heating occurs at the top of the plate within the rectangular area whose corners are $(0,0)$, $(0.5,0)$, $(0.5,1)$, $(0,1)$. The bottom surface and the remainder of the top surface are cooled by convection and radiation to ambient. The sides of the plate are insulated. Assuming that the surrounding air temperature is 20~°C, and that the heat transfer coefficient is 10~W/(m$^2$~K), calculate the temperature along the lines $x=0.25$~m and $y=0.5$~m at the mid-depth of the plate at 60~min (Fig.~\ref{fig:SFPE_Case_16}).
+
+\begin{figure}[ht]
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/SFPE_Case_16a}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/SFPE_Case_16b}
+\caption[The SFPE heat transfer verification Case 16]{Temperature along the length (left) and width (right) of a metal plate heated over a quarter of its surface by a radiant heater of 30~kW/m$^2$ for 60~min.}
+\label{fig:SFPE_Case_16}
+\end{figure}
+
 
 
 
