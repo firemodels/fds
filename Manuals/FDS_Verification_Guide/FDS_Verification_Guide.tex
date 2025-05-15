@@ -5075,6 +5075,8 @@ A 0.2~m by 0.2~m square column ($\rho=2400$~kg/m$^3$, $c=1$~kJ/(kg~K), $\epsilon
 
 A hollow square metal tube ($\rho=7850$~kg/m$^3$, $c=0.6$~kJ/(kg~K), $\epsilon=0.8$) is filled with an insulation material ($k=0.05$~W/(m~K), $\rho=50$~kg/m$^3$, $c=1$~kJ/(kg~K)). The thermal conductivity of the metal tube varies linearly with temperature such that its value is 54.7~W/(m~K) at 0~°C, 27.3~W/(m~K) at 800~°C, and 27.3~W/(m~K) at 1200~°C. The tube walls are 0.5~mm thick, and the exterior width of the assembly is 0.201~m. The surrounding air temperature is 1000~°C, and the initial temperature of the assembly is 0~°C. Assuming that the heating is by convection and radiation, and that the heat transfer coefficient is 10~W/(m$^2$~K), calculate the temperature at the center of the tube as a function of time (Fig.~\ref{fig:SFPE_Case_9}).
 
+Normally, a 3-D conducting solid with a thin ``skin'' would be modeled by assigning a thin layer to the \ct{SURF} line that describes the surface properties of the obstruction. However, in this case, the difference in the enthalpy, $c_{\rm s} \rho_{\rm s}$, between the metal and the insulation material leads to inaccuracies in the alternating direction implicit (ADI) solver. In short, the energy absorbed by the thin metal skin is transferred from the $x$ or $y$ direction to the $z$ direction, which has no metal skin. Thus, the temperature in the $z$ direction becomes fictitiously high because its thermal mass is relatively low. As a work-around, the metal skin is thickened from 0.5~mm to 10~mm, the width of a gas phase cell, while its density is decreased by a factor of 20.
+
 \begin{figure}[ht]
 \centering
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/SFPE_Case_9}
