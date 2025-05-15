@@ -2973,6 +2973,8 @@ UVWMAX = 0._EB
 VN     = 0._EB
 MUTRM  = 1.E-9_EB
 R_DX2  = 1.E-9_EB
+ICFL   = 0; JCFL   = 0; KCFL   = 0
+I_VN   = 0; J_VN   = 0; K_VN   = 0
 
 ! Determine max CFL number from all grid cells
 

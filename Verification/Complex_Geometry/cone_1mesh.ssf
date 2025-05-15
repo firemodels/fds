@@ -6,7 +6,6 @@ LABEL
 RENDERDIR
  ..\..\Manuals\FDS_Verification_Guide\SCRIPT_FIGURES
 
-
 // render figure a 
 
 LABEL
@@ -25,7 +24,7 @@ LABEL
   Some cut-cells on cone
 
 LOADINIFILE
- cone_1mesh_a.ini
+ cone_1mesh_b.ini
 UNLOADALL
 LOADSLICEM
  Cut Cells
@@ -35,10 +34,6 @@ SETTIMEVAL
  1.000000
 SETVIEWPOINT
  viewb
-KEYBOARD
- o
-KEYBOARD
- o
 KEYBOARD
  g
 KEYBOARD
