@@ -2896,17 +2896,23 @@ CASE(HYPRE_FLAG) LIBRARY_SELECT
    CALL HYPRE_IJMATRIXSETOBJECTTYPE(ZM%HYPRE_ZM%A_H, HYPRE_PARCSR, HYPRE_IERR)
    CALL HYPRE_IJMATRIXINITIALIZE_V2(ZM%HYPRE_ZM%A_H, HYPRE_MEMORY_HOST, HYPRE_IERR)
    IF (ZM%MTYPE==SYMM_INDEFINITE) THEN
-      ! Rows 1 to ZM%NUNKH-1, last column, set all to zero:
-      DO IROW=1,ZM%NUNKH-1
-         DO JCOL=1,NNZ_H_MAT(IROW)
-            IF ( JD_H_MAT(JCOL,IROW) /= ZM%NUNKH ) CYCLE ! Make zero matrix entries in last column.
-            D_H_MAT(JCOL,IROW) = 0._EB
+      IF(ZM%NUNKH==1) THEN ! Single unknown, zero coefficient matrix (1,1). Set coefficient to 1.
+         NNZ_H_MAT(1) = 1
+         DEALLOCATE(JD_H_MAT); ALLOCATE(JD_H_MAT(1,1)); JD_H_MAT(1,1) = 1
+         DEALLOCATE( D_H_MAT); ALLOCATE( D_H_MAT(1,1));  D_H_MAT(1,1) = 1._EB
+      ELSE ! More than one unknown
+         ! Rows 1 to ZM%NUNKH-1, last column, set all to zero:
+         DO IROW=1,ZM%NUNKH-1
+            DO JCOL=1,NNZ_H_MAT(IROW)
+               IF ( JD_H_MAT(JCOL,IROW) /= ZM%NUNKH ) CYCLE ! Make zero matrix entries in last column.
+               D_H_MAT(JCOL,IROW) = 0._EB
+            ENDDO
          ENDDO
-      ENDDO
-      ! Last row, all zeros except the diagonal that keeps diagonal number: Note after previous loop IROW==ZM%NUNKH
-      DO JCOL=1,NNZ_H_MAT(IROW)
-         IF ( JD_H_MAT(JCOL,IROW) /= ZM%NUNKH ) D_H_MAT(JCOL,IROW) = 0._EB
-      ENDDO
+         ! Last row, all zeros except the diagonal that keeps diagonal number: Note after previous loop IROW==ZM%NUNKH
+         DO JCOL=1,NNZ_H_MAT(IROW)
+            IF ( JD_H_MAT(JCOL,IROW) /= ZM%NUNKH ) D_H_MAT(JCOL,IROW) = 0._EB
+         ENDDO
+      ENDIF
    ENDIF
    JD_H_MAT = JD_H_MAT - 1
    DO IROW=1,ZM%NUNKH
