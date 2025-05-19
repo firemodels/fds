@@ -2854,6 +2854,7 @@ VENT_INDEX_FOUND = 0
 VENT_SEARCH_LOOP: DO N=1,M%N_VENT
 
    VT => M%VENTS(N)
+   IF (VT%GEOM) CYCLE VENT_SEARCH_LOOP
    IF (OBST_INDEX>0) THEN
       IF (VT%BOUNDARY_TYPE==OPEN_BOUNDARY)           CYCLE VENT_SEARCH_LOOP
       IF (.NOT.M%OBSTRUCTION(OBST_INDEX)%ALLOW_VENT) CYCLE VENT_SEARCH_LOOP
@@ -2886,9 +2887,9 @@ VENT_SEARCH_LOOP: DO N=1,M%N_VENT
    ! Check if there are over-lapping VENTs
 
    IF (VENT_INDEX_FOUND>0) THEN
-      WRITE(LU_ERR,'(7A,2(I0,1X),I0,A,I0,3A)') 'WARNING: VENT ',TRIM(M%VENTS(N)%ID),' overlaps VENT ', &
+      WRITE(LU_ERR,'(7A,2(I0,1X),I0,A,I0,3A)') 'WARNING: VENT ',TRIM(VT%ID),' overlaps VENT ', &
                                                TRIM(M%VENTS(VENT_INDEX_FOUND)%ID),' in MESH ',TRIM(MESH_NAME(NM)), &
-                                               ', Cell (',I,J,K,'), IOR ',IOR,'. VENT ',TRIM(M%VENTS(N)%ID),' rejected.'
+                                               ', Cell (',I,J,K,'), IOR ',IOR,'. VENT ',TRIM(VT%ID),' rejected.'
       EXIT VENT_SEARCH_LOOP
    ENDIF
 
