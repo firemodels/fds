@@ -1099,7 +1099,7 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
    ! Allocate array for special cells containing geometry intersections:
    ALLOCATE(CELLRT(ISTR:IEND,JSTR:JEND,KSTR:KEND)); CELLRT(:,:,:)=.FALSE.
 
-   ! List of special cells to block (either from GET_CARTCELL_CUTCELLS or 
+   ! List of special cells to block (either from GET_CARTCELL_CUTCELLS or
    ! cells flagged as polyline could not be built in GET_CARTCELL_CUTFACES):
    ALLOCATE(SPCELLS_TO_BLOCK(1:GLOBAL_DELTA_CELL))
    N_SPCELLS_TO_BLOCK = 0
@@ -4314,38 +4314,40 @@ ENDDO MESH_LOOP_1
 MESH_LOOP_2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    CALL POINT_TO_MESH(NM)
 
-   ! Currently : Modify CFACE SURF_INDEX with VENT information: This needs more development.
-   VENT_LOOP : DO IVENT=1,MESHES(NM)%N_VENT
-      VT => VENTS(IVENT)
-      IF(.NOT.VT%GEOM) CYCLE VENT_LOOP ! Do not apply vent to Geometries.
+   ! ! Currently : Modify CFACE SURF_INDEX with VENT information: This needs more development.
+   IF(TERRAIN_CASE) THEN
+      VENT_LOOP : DO IVENT=1,MESHES(NM)%N_VENT
+         VT => VENTS(IVENT)
+         IF(.NOT.VT%GEOM) CYCLE VENT_LOOP ! Do not apply vent to Geometries.
 
-      ! This test is a simplified test for VENTS changing the CFACE SURF_ID to VENT SURF_ID for all CFACEs whose
-      ! centroid locations lay within the frame of the IOR grid aligned VENT:
-      ADDMAT = 0._EB;
-      SELECT CASE(ABS(VT%IOR))
-      CASE(IAXIS)
-         ADDMAT(IAXIS,LOW_IND)  = -(XF_MAX-XS_MIN) ! -DX(VT%I1) Set normal size to 2 times domain size.
-         ADDMAT(IAXIS,HIGH_IND) =  (XF_MAX-XS_MIN) !  DX(VT%I2) XF_MAX, etc. defined in cons.f90.
-      CASE(JAXIS)
-         ADDMAT(JAXIS,LOW_IND)  = -(YF_MAX-YS_MIN) ! -DY(VT%J1)
-         ADDMAT(JAXIS,HIGH_IND) =  (YF_MAX-YS_MIN) !  DY(VT%J2)
-      CASE(KAXIS)
-         ADDMAT(KAXIS,LOW_IND)  = -(ZF_MAX-ZS_MIN) ! -DZ(VT%K1)
-         ADDMAT(KAXIS,HIGH_IND) =  (ZF_MAX-ZS_MIN) !  DZ(VT%K2)
-      END SELECT
-      ! CFACE Loop to modify SURF_INDEX in INTERNAL_CFACE_CELLS:
-      CFACE_LOOP_2 : DO CFACE_INDEX_LOCAL=INTERNAL_CFACE_CELLS_LB+1,INTERNAL_CFACE_CELLS_LB+N_INTERNAL_CFACE_CELLS
-         CFA => CFACE(CFACE_INDEX_LOCAL)
-         BC => BOUNDARY_COORD(CFA%BC_INDEX)
-         IF (BC%X < X(VT%I1)+ADDMAT(IAXIS,LOW_IND )) CYCLE CFACE_LOOP_2
-         IF (BC%X > X(VT%I2)+ADDMAT(IAXIS,HIGH_IND)) CYCLE CFACE_LOOP_2
-         IF (BC%Y < Y(VT%J1)+ADDMAT(JAXIS,LOW_IND )) CYCLE CFACE_LOOP_2
-         IF (BC%Y > Y(VT%J2)+ADDMAT(JAXIS,HIGH_IND)) CYCLE CFACE_LOOP_2
-         IF (BC%Z < Z(VT%K1)+ADDMAT(KAXIS,LOW_IND )) CYCLE CFACE_LOOP_2
-         IF (BC%Z > Z(VT%K2)+ADDMAT(KAXIS,HIGH_IND)) CYCLE CFACE_LOOP_2
-         CFA%SURF_INDEX = VT%SURF_INDEX
-      ENDDO CFACE_LOOP_2
-   ENDDO VENT_LOOP
+         ! This test is a simplified test for VENTS changing the CFACE SURF_ID to VENT SURF_ID for all CFACEs whose
+         ! centroid locations lay within the frame of the IOR grid aligned VENT:
+         ADDMAT = 0._EB;
+         SELECT CASE(ABS(VT%IOR))
+         CASE(IAXIS)
+            ADDMAT(IAXIS,LOW_IND)  = -(XF_MAX-XS_MIN) ! -DX(VT%I1) Set normal size to 2 times domain size.
+            ADDMAT(IAXIS,HIGH_IND) =  (XF_MAX-XS_MIN) !  DX(VT%I2) XF_MAX, etc. defined in cons.f90.
+         CASE(JAXIS)
+            ADDMAT(JAXIS,LOW_IND)  = -(YF_MAX-YS_MIN) ! -DY(VT%J1)
+            ADDMAT(JAXIS,HIGH_IND) =  (YF_MAX-YS_MIN) !  DY(VT%J2)
+         CASE(KAXIS)
+            ADDMAT(KAXIS,LOW_IND)  = -(ZF_MAX-ZS_MIN) ! -DZ(VT%K1)
+            ADDMAT(KAXIS,HIGH_IND) =  (ZF_MAX-ZS_MIN) !  DZ(VT%K2)
+         END SELECT
+         ! CFACE Loop to modify SURF_INDEX in INTERNAL_CFACE_CELLS:
+         CFACE_LOOP_2 : DO CFACE_INDEX_LOCAL=INTERNAL_CFACE_CELLS_LB+1,INTERNAL_CFACE_CELLS_LB+N_INTERNAL_CFACE_CELLS
+            CFA => CFACE(CFACE_INDEX_LOCAL)
+            BC => BOUNDARY_COORD(CFA%BC_INDEX)
+            IF (BC%X < X(VT%I1)+ADDMAT(IAXIS,LOW_IND )) CYCLE CFACE_LOOP_2
+            IF (BC%X > X(VT%I2)+ADDMAT(IAXIS,HIGH_IND)) CYCLE CFACE_LOOP_2
+            IF (BC%Y < Y(VT%J1)+ADDMAT(JAXIS,LOW_IND )) CYCLE CFACE_LOOP_2
+            IF (BC%Y > Y(VT%J2)+ADDMAT(JAXIS,HIGH_IND)) CYCLE CFACE_LOOP_2
+            IF (BC%Z < Z(VT%K1)+ADDMAT(KAXIS,LOW_IND )) CYCLE CFACE_LOOP_2
+            IF (BC%Z > Z(VT%K2)+ADDMAT(KAXIS,HIGH_IND)) CYCLE CFACE_LOOP_2
+            CFA%SURF_INDEX = VT%SURF_INDEX
+         ENDDO CFACE_LOOP_2
+      ENDDO VENT_LOOP
+   ENDIF
 ENDDO MESH_LOOP_2
 ! - At this pont all final values of SURF_INDEX have been given to CFACEs.
 
@@ -8234,7 +8236,7 @@ DO ICC=1,M%N_CUTCELL_MESH+M%N_GCCUTCELL_MESH
    MINMAX_XYZ_CC(IAXIS:KAXIS,HIGH_IND)= -HUGE(EB)
    DO JCC=1,CC%NCELL
       ! Get cut-cell bounding box:
-      CALL CUT_CELL_BOUNDING_BOX(NM,ICC,JCC,XYZCELL,MINMAX_XYZ_CC)            
+      CALL CUT_CELL_BOUNDING_BOX(NM,ICC,JCC,XYZCELL,MINMAX_XYZ_CC)
       ! Perform Tests:
       DO DUM=IAXIS,KAXIS
          CELL_DELTA(DUM) = ABS(MINMAX_XYZ_CC(DUM,HIGH_IND)-MINMAX_XYZ_CC(DUM,LOW_IND))
@@ -8245,10 +8247,10 @@ DO ICC=1,M%N_CUTCELL_MESH+M%N_GCCUTCELL_MESH
       CASE(IAXIS); AX_OTHERS(1:2) = (/ JAXIS, KAXIS /); SOLID_FACES = ALL(M%FCVAR(I-1:I,J,K,CC_FGSC,IAXIS)==CC_SOLID)
       CASE(JAXIS); AX_OTHERS(1:2) = (/ IAXIS, KAXIS /); SOLID_FACES = ALL(M%FCVAR(I,J-1:J,K,CC_FGSC,JAXIS)==CC_SOLID)
       CASE(KAXIS); AX_OTHERS(1:2) = (/ IAXIS, JAXIS /); SOLID_FACES = ALL(M%FCVAR(I,J,K-1:K,CC_FGSC,KAXIS)==CC_SOLID)
-      END SELECT   
+      END SELECT
       ! Perform Test:
       BLOCK_SLIM_IF = (CELL_DELTA(AX_MIN)<10._EB*MIN_LENGTH_FACTOR*CELL_DELTA(AX_OTHERS(1))) .AND. &
-                      (CELL_DELTA(AX_MIN)<10._EB*MIN_LENGTH_FACTOR*CELL_DELTA(AX_OTHERS(2))) 
+                      (CELL_DELTA(AX_MIN)<10._EB*MIN_LENGTH_FACTOR*CELL_DELTA(AX_OTHERS(2)))
       IF(BLOCK_SLIM_IF .AND. SOLID_FACES) CC%NOADVANCE(JCC) = BLOCKED_SMALL_CELL
    ENDDO
    CC%UNKZ(:) = CC_UNDEFINED
@@ -8790,24 +8792,24 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       X1AXIS = ABS(IOR)
       ! Define underlying Cartesian faces indexes:
       SELECT CASE(IOR)
-      CASE( IAXIS) ! Lower X boundary for Mesh NM.
-         IIF = II    ; JJF = JJ    ; KKF = KK
-      CASE(-IAXIS) ! Higher X boundary for Mesh NM.
-         IIF = II - 1; JJF = JJ    ; KKF = KK
-      CASE( JAXIS) ! Lower Y boundary for Mesh NM.
-         IIF = II    ; JJF = JJ    ; KKF = KK
-      CASE(-JAXIS) ! Higher Y boundary for Mesh NM.
-         IIF = II    ; JJF = JJ - 1; KKF = KK
-      CASE( KAXIS) ! Lower Z boundary for Mesh NM.
-         IIF = II    ; JJF = JJ    ; KKF = KK
-      CASE(-KAXIS) ! Higher Z boundary for Mesh NM.
-         IIF = II    ; JJF = JJ    ; KKF = KK - 1
+         CASE( IAXIS) ! Lower X boundary for Mesh NM.
+            IIF = II    ; JJF = JJ    ; KKF = KK
+         CASE(-IAXIS) ! Higher X boundary for Mesh NM.
+            IIF = II - 1; JJF = JJ    ; KKF = KK
+         CASE( JAXIS) ! Lower Y boundary for Mesh NM.
+            IIF = II    ; JJF = JJ    ; KKF = KK
+         CASE(-JAXIS) ! Higher Y boundary for Mesh NM.
+            IIF = II    ; JJF = JJ - 1; KKF = KK
+         CASE( KAXIS) ! Lower Z boundary for Mesh NM.
+            IIF = II    ; JJF = JJ    ; KKF = KK
+         CASE(-KAXIS) ! Higher Z boundary for Mesh NM.
+            IIF = II    ; JJF = JJ    ; KKF = KK - 1
       END SELECT
       ! Change BOUNDARY_TYPE to null:
       IF (FIRST_CALL) THEN
-      IF(FCVAR(IIF,JJF,KKF,CC_FGSC,X1AXIS) == CC_SOLID) WC%BOUNDARY_TYPE = SOLID_BOUNDARY
+         IF(FCVAR(IIF,JJF,KKF,CC_FGSC,X1AXIS) == CC_SOLID) WC%BOUNDARY_TYPE = SOLID_BOUNDARY
       ELSE
-      IF(FCVAR(IIF,JJF,KKF,CC_FGSC,X1AXIS) == CC_SOLID) WC%BOUNDARY_TYPE = NULL_BOUNDARY
+         IF(FCVAR(IIF,JJF,KKF,CC_FGSC,X1AXIS) == CC_SOLID) WC%BOUNDARY_TYPE = NULL_BOUNDARY
       ENDIF
    ENDDO EXTERNAL_WALL_LOOP
 ENDDO MESH_LOOP
@@ -8845,7 +8847,6 @@ TYPE (MESH_TYPE), POINTER :: M
 TYPE (CFACE_TYPE), POINTER :: CFA
 TYPE (CC_CUTFACE_TYPE), POINTER :: CF
 
-
 M => MESHES(NM)
 SF=> SURFACE(SURF_INDEX)
 CF=> CUT_FACE(ICF)
@@ -8872,7 +8873,11 @@ CASE(INTEGER_ONE) ! Geometry information for CFACE.
    CFA%CUT_FACE_IND2 = IFACE
 
    INS_INB_COND_1 : IF (IS_INB) THEN
-      B1%VEL_ERR_NEW=CF%VEL(IFACE) - 0._EB ! Assumes zero veloc of solid.
+      B1%VEL_ERR_NEW=CF%VEL(IFACE) - 0._EB ! Assumes zero velocity of solid.
+
+      IBOD           = CF%BODTRI(1,IFACE)
+      IWSEL          = CF%BODTRI(2,IFACE)
+      CFA%VENT_INDEX = GEOMETRY(IBOD)%VENTS(IWSEL)
 
       ! Normal to cut-face:
       V2(IAXIS:KAXIS) = CF%XYZVERT(IAXIS:KAXIS,CF%CFELEM(2,IFACE))-CF%XYZCEN(IAXIS:KAXIS,IFACE)
@@ -8881,8 +8886,6 @@ CASE(INTEGER_ONE) ! Geometry information for CFACE.
       IF(NORM2(BC%NVEC)>TWO_EPSILON_EB .AND. CF%CFACE_ORIGIN(IFACE)==BLOCKED_SPLIT_CELL) THEN
          BC%NVEC(IAXIS:KAXIS) = BC%NVEC(IAXIS:KAXIS)/NORM2(BC%NVEC)
       ELSE
-         IBOD =CF%BODTRI(1,IFACE)
-         IWSEL=CF%BODTRI(2,IFACE)
          BC%NVEC(IAXIS:KAXIS) = GEOMETRY(IBOD)%FACES_NORMAL(IAXIS:KAXIS,IWSEL)
       ENDIF
       X1AXIS = MAXLOC(ABS(BC%NVEC(IAXIS:KAXIS)),DIM=1)
@@ -8915,6 +8918,7 @@ CASE(INTEGER_ONE) ! Geometry information for CFACE.
 
          ! External mesh boundary CFACES inherit the underlaying WALL type.
          CFA%BOUNDARY_TYPE = WC%BOUNDARY_TYPE
+         CFA%VENT_INDEX    = WC%VENT_INDEX
 
          BC%II = WC_BC%II
          BC%JJ = WC_BC%JJ
@@ -20370,7 +20374,7 @@ INTEGER, ALLOCATABLE, DIMENSION(:)   :: NOADVANCE
 
 REAL(EB) :: XYZCELL(IAXIS:KAXIS,LOW_IND:HIGH_IND),MINMAX_XYZ_CC(IAXIS:KAXIS,LOW_IND:HIGH_IND),CELL_DELTA(IAXIS:KAXIS)
 
-INTEGER :: IFACE, IEDGE, ISEG, SEG(NOD1:NOD2), ICELL, NFACEI, JCC, AX_MIN, AX_OTHERS(2) 
+INTEGER :: IFACE, IEDGE, ISEG, SEG(NOD1:NOD2), ICELL, NFACEI, JCC, AX_MIN, AX_OTHERS(2)
 LOGICAL :: INLIST, TEST1, TEST2, NEWFACE
 INTEGER :: NIEDGE, NEF, LOCSEG, JFACE, KFACE, NFACEK, NUM_FACE, NCUTCELL, NCFACE_CUTCELL
 INTEGER :: DFCT, CFELEM(5), CTVAL, CTVAL2, IBOD, ITRI, IDCF, MAXSEG, N_GAS_CFACES, NIBFACE, THRES, NSPCELL_LIST
@@ -21102,7 +21106,7 @@ DO K=KLO,KHI
          MINMAX_XYZ_CC(IAXIS:KAXIS,HIGH_IND)= -HUGE(EB)
          DO JCC=1,NCELL
             ! Get cut-cell bounding box:
-            CALL CUT_CELL_BOUNDING_BOX(NM,NCUTCELL,JCC,XYZCELL,MINMAX_XYZ_CC)            
+            CALL CUT_CELL_BOUNDING_BOX(NM,NCUTCELL,JCC,XYZCELL,MINMAX_XYZ_CC)
             ! Perform Tests:
             DO MYAXIS=IAXIS,KAXIS
                CELL_DELTA(MYAXIS) = ABS(MINMAX_XYZ_CC(MYAXIS,HIGH_IND)-MINMAX_XYZ_CC(MYAXIS,LOW_IND))
@@ -21113,10 +21117,10 @@ DO K=KLO,KHI
             CASE(IAXIS); AX_OTHERS(1:2) = (/ JAXIS, KAXIS /);
             CASE(JAXIS); AX_OTHERS(1:2) = (/ IAXIS, KAXIS /);
             CASE(KAXIS); AX_OTHERS(1:2) = (/ IAXIS, JAXIS /);
-            END SELECT   
+            END SELECT
             ! Perform Test:
             BLOCK_SLIM_IF = (CELL_DELTA(AX_MIN)<MIN_LENGTH_FACTOR*CELL_DELTA(AX_OTHERS(1))) .AND. &
-                            (CELL_DELTA(AX_MIN)<MIN_LENGTH_FACTOR*CELL_DELTA(AX_OTHERS(2))) 
+                            (CELL_DELTA(AX_MIN)<MIN_LENGTH_FACTOR*CELL_DELTA(AX_OTHERS(2)))
             IF(BLOCK_SLIM_IF) MESHES(NM)%CUT_CELL(NCUTCELL)%NOADVANCE(JCC) = BLOCKED_SMALL_CELL
          ENDDO
 
@@ -21246,7 +21250,7 @@ CC => MESHES(NM)%CUT_CELL(ICC)
 ! Get cut-cell bounding box:
 MINMAX_XYZ_JCC(IAXIS:KAXIS,LOW_IND) =  HUGE(EB)
 MINMAX_XYZ_JCC(IAXIS:KAXIS,HIGH_IND)= -HUGE(EB)
-DO IFC=1,CC%CCELEM(1,JCC) ! Loop over cut-faces boundary of this cell. 
+DO IFC=1,CC%CCELEM(1,JCC) ! Loop over cut-faces boundary of this cell.
    IFACE=CC%CCELEM(IFC+1,JCC)
    LOHI    =   CC%FACE_LIST(2,IFACE)
    HILO    =   3-LOHI   !  2 for LOW_IND, 1 for HIGH_IND
@@ -22167,10 +22171,10 @@ USE OUTPUT_DATA, ONLY: COLOR2RGB
 CHARACTER(LABEL_LENGTH) :: ID,MATL_ID,TEXTURE_MAPPING, &
                            DEVC_ID,CTRL_ID,SURF_IDS(3),SURF_ID6(6),MOVE_ID
 CHARACTER(MESSAGE_LENGTH) :: BUFFER,FN_BINGEOM,BINARY_FILE
-CHARACTER(LABEL_LENGTH),  ALLOCATABLE, DIMENSION(:) :: SURF_ID
+CHARACTER(LABEL_LENGTH),  ALLOCATABLE, DIMENSION(:) :: SURF_ID,VENT_ID
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZVALS,TFACES
 REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:) :: VERTS,VERTS_AUX
-INTEGER, ALLOCATABLE, DIMENSION(:) :: SURF_ID_IND,POLY
+INTEGER, ALLOCATABLE, DIMENSION(:) :: SURF_ID_IND,VENT_ID_IND,POLY
 INTEGER, ALLOCATABLE, TARGET, DIMENSION(:) :: FACES,FACES_AUX,VOLUS,OFACES,SURFS,SURFS2
 LOGICAL, ALLOCATABLE, DIMENSION(:) :: IS_EXTERNAL
 
@@ -22185,7 +22189,7 @@ INTEGER :: MAX_IDS=0,MAX_SURF_IDS=0,MAX_ZVALS=0,MAX_VERTS=0,MAX_FACES=0,MAX_VOLU
            GEOM_TYPE,NXB,IJK(3),N_LEVELS,N_LAT,N_LONG,SPHERE_TYPE,BOXVERTLIST(8),NI,NIJ,IVOL,SORT_FACES,II,II1,II2,II3,&
            X1AXIS,NNN,CYLINDER_NSEG_THETA,CYLINDER_NSEG_AXIS,CYL_FIND(LOW_IND:HIGH_IND,1:3),CELL_BLOCK_IOR
 
-LOGICAL :: HAVE_SURF,HAVE_MATL,IN_LIST,SURF_INDEX_PER_FACE,BNDF_GEOM,LOGTEST
+LOGICAL :: HAVE_SURF,HAVE_VENT,HAVE_MATL,IN_LIST,SURF_INDEX_PER_FACE,BNDF_GEOM,LOGTEST
 REAL(EB), POINTER, DIMENSION(:) :: V1,V2,V3,V4
 INTEGER, POINTER, DIMENSION(:) :: FACEI,FACEJ,FACE_FROM,FACE_TO,VOL
 TYPE(MESH_TYPE), POINTER :: M
@@ -22228,7 +22232,7 @@ NAMELIST /GEOM/ BNDF_GEOM,BINARY_FILE,CELL_BLOCK_IOR,CELL_BLOCK_ORIENTATION,COLO
                 CYLINDER_RADIUS,CYLINDER_LENGTH,CYLINDER_NSEG_THETA,CYLINDER_NSEG_AXIS,&
                 EXTRUDE,EXTEND_TERRAIN,FACES,ID,IJK,IS_TERRAIN,MOVE_ID,N_LAT,N_LEVELS,N_LONG,POLY,&
                 RGB,SPHERE_ORIGIN,SPHERE_RADIUS,SPHERE_TYPE,SURF_ID,SURF_IDS,SURF_ID6,&
-                TEXTURE_MAPPING,TEXTURE_ORIGIN,TEXTURE_SCALE,TRANSPARENCY,&
+                TEXTURE_MAPPING,TEXTURE_ORIGIN,TEXTURE_SCALE,TRANSPARENCY,VENT_ID,&
                 VERTS,XB,ZMIN,ZVALS,ZVAL_HORIZON
 
 ! first pass - count number of &GEOM lines.
@@ -22275,7 +22279,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       CALL ALLOCATE_BUFFERS
    ENDIF
 
-   GEO_RESIZE_DO : DO
+   GEOM_RESIZE_DO : DO
       DONE=.TRUE.
       CALL SET_GEOM_DEFAULTS
       READ(LU_INPUT,GEOM,END=35,ERR=22,IOSTAT=IOS)
@@ -22294,8 +22298,8 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
          ENDIF
          REWIND(LU_INPUT); DO ILINE=1,GEOM_LINE(N)-1; READ(LU_INPUT,'(A)') BUFFER; ENDDO
       ENDIF
-      IF (DONE) EXIT GEO_RESIZE_DO
-   ENDDO GEO_RESIZE_DO
+      IF (DONE) EXIT GEOM_RESIZE_DO
+   ENDDO GEOM_RESIZE_DO
 
    IF (COLOR/='null') THEN
       CALL COLOR2RGB(RGB,COLOR)
@@ -22388,8 +22392,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
          N_SURF_ID    = 3
          DO I=2,3
            IF (TRIM(SURF_ID(I))=='null') THEN
-              WRITE(MESSAGE,'(A,A,A)') 'ERROR(702): problem with GEOM ',TRIM(ID),&
-                                       ', SURF_IDS not defined properly.'
+              WRITE(MESSAGE,'(A,A,A)') 'ERROR(702): problem with GEOM ',TRIM(ID),', SURF_IDS not defined properly.'
               CALL SHUTDOWN(MESSAGE); RETURN
            ENDIF
          ENDDO
@@ -23320,6 +23323,8 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       ENDDO
       ALLOCATE(G%SURF_ID(1:N_SURF_ID))
       G%SURF_ID(1:N_SURF_ID) = SURF_ID(1:N_SURF_ID)
+      ALLOCATE(G%VENT_ID(1:N_SURF_ID))
+      G%VENT_ID(1:N_SURF_ID) = VENT_ID(1:N_SURF_ID)
 
       ! Now find correspondence with SURFACE(N)%ID:
       IF (ALLOCATED(SURF_ID_IND)) DEALLOCATE(SURF_ID_IND)
@@ -23341,6 +23346,35 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       ENDDO
    ENDIF
    G%HAVE_SURF = HAVE_SURF
+
+   ! Look for non-'null' VENTS:
+   HAVE_VENT=.FALSE.
+   DO I = 1, MAX_SURF_IDS
+      IF (TRIM(VENT_ID(I))=='null') CYCLE
+      HAVE_VENT=.TRUE.
+   ENDDO
+   G%HAVE_VENT = HAVE_VENT
+
+   IF(HAVE_VENT) THEN
+      ! Build single VENT_ID index list:
+      IF (ALLOCATED(VENT_ID_IND)) DEALLOCATE(VENT_ID_IND); ALLOCATE(VENT_ID_IND(0:MAX_SURF_IDS)); VENT_ID_IND = 0
+      DO I = 1, MAX_SURF_IDS ! Here we run over the GEOM local vent array max range.
+          IF (TRIM(VENT_ID(I))=='null') CYCLE ! Cycle if undefined vent, its VENT_ID_IND(I)=0.
+          ! Get VENT Index:
+          IN_LIST = .FALSE.
+          DO J = 1, N_VENT
+             IF (TRIM(VENT_ID(I))/=TRIM(VENTS(J)%ID)) CYCLE
+             VENT_ID_IND(I)=J
+             IN_LIST = .TRUE.
+             EXIT
+          ENDDO
+          IF(.NOT.IN_LIST) THEN
+             WRITE(MESSAGE,'(A,I4,3A)') 'ERROR(735): problem with GEOM, the vent ID(',I,') =',&
+                                         TRIM(VENT_ID(I)),' is not defined.'
+             CALL SHUTDOWN(MESSAGE)
+          ENDIF
+      ENDDO
+   ENDIF
 
    IF (MATL_ID=='null') THEN
       HAVE_MATL = .FALSE.
@@ -23634,6 +23668,10 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       ALLOCATE(G%SURFS(N_FACES),STAT=IZERO)
       CALL ChkMemErr('READ_GEOM','G%SURFS',IZERO)
 
+      ALLOCATE(G%VENTS(N_FACES),STAT=IZERO)
+      CALL ChkMemErr('READ_GEOM','G%VENTS',IZERO)
+      G%VENTS = 0
+
       PER_FACE_IF: IF (SURF_INDEX_PER_FACE) THEN
          DO I=1,N_FACES
             IF ( SURFS(I) <= 0 ) THEN
@@ -23641,13 +23679,10 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
             ELSE
                G%SURFS(I) = SURF_ID_IND(SURFS(I))
             ENDIF
-            ! HERE do tests on surfaces, is not supperted by GEOMs throw error:
-            UNSUPPERTED_SURF_FIELD : IF(SURFACE(G%SURFS(I))%BURN_AWAY) THEN
-               WRITE(MESSAGE,'(5A)') 'ERROR(720): GEOM: ',TRIM(ID),&
-               ', has currently unsupported BURN_AWAY feature in surface : ',TRIM(SURFACE(G%SURFS(I))%ID),'.'
-               CALL SHUTDOWN(MESSAGE)
-               RETURN
-            ENDIF UNSUPPERTED_SURF_FIELD
+            IF (HAVE_VENT) THEN
+               G%VENTS(I) = VENT_ID_IND(SURFS(I)) ! Uses SURF index in local numeration from FACES input.
+               IF(G%VENTS(I)>0) G%SURFS(I) = VENTS(G%VENTS(I))%SURF_INDEX ! Change SURF to apply to the vent surface.
+            ENDIF
          ENDDO
          DEALLOCATE(SURF_ID_IND)
       ELSE
@@ -23674,10 +23709,39 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
                   IF (SURF_ID6(4)==SURFACE(NNN)%ID .AND. NVECI(2)> TWO_EPSILON_EB) G%SURFS(I) = NNN ! Y2
                   IF (SURF_ID6(5)==SURFACE(NNN)%ID .AND. NVECI(3)<-TWO_EPSILON_EB) G%SURFS(I) = NNN ! Z1
                   IF (SURF_ID6(6)==SURFACE(NNN)%ID .AND. NVECI(3)> TWO_EPSILON_EB) G%SURFS(I) = NNN ! Z2
+                  IF (HAVE_VENT) THEN
+                     IF (SURF_ID(1)==SURFACE(NNN)%ID  .AND. ANY(ABS(NVECI(:))>TWO_EPSILON_EB)) G%VENTS(I)=VENT_ID_IND(1) !all sides
+                     IF (SURF_IDS(2)==SURFACE(NNN)%ID .AND. (ABS(NVECI(1))>TWO_EPSILON_EB .OR. ABS(NVECI(2))>TWO_EPSILON_EB) ) &
+                     G%VENTS(I) = VENT_ID_IND(2) ! sides
+                     IF (SURF_IDS(1)==SURFACE(NNN)%ID .AND. NVECI(3)> TWO_EPSILON_EB) G%VENTS(I) = VENT_ID_IND(1) ! top
+                     IF (SURF_IDS(3)==SURFACE(NNN)%ID .AND. NVECI(3)<-TWO_EPSILON_EB) G%VENTS(I) = VENT_ID_IND(3) ! bottom
+                     IF (SURF_ID6(1)==SURFACE(NNN)%ID .AND. NVECI(1)<-TWO_EPSILON_EB) G%VENTS(I) = VENT_ID_IND(1) ! X1
+                     IF (SURF_ID6(2)==SURFACE(NNN)%ID .AND. NVECI(1)> TWO_EPSILON_EB) G%VENTS(I) = VENT_ID_IND(2) ! X2
+                     IF (SURF_ID6(3)==SURFACE(NNN)%ID .AND. NVECI(2)<-TWO_EPSILON_EB) G%VENTS(I) = VENT_ID_IND(3) ! Y1
+                     IF (SURF_ID6(4)==SURFACE(NNN)%ID .AND. NVECI(2)> TWO_EPSILON_EB) G%VENTS(I) = VENT_ID_IND(4) ! Y2
+                     IF (SURF_ID6(5)==SURFACE(NNN)%ID .AND. NVECI(3)<-TWO_EPSILON_EB) G%VENTS(I) = VENT_ID_IND(5) ! Z1
+                     IF (SURF_ID6(6)==SURFACE(NNN)%ID .AND. NVECI(3)> TWO_EPSILON_EB) G%VENTS(I) = VENT_ID_IND(6) ! Z2
+
+                     IF(G%VENTS(I)>0) G%SURFS(I) = VENTS(G%VENTS(I))%SURF_INDEX ! Change SURF to apply to the vent surface.
+                  ENDIF
                ENDDO SURF_LOOP
             ENDDO FACE_LOOP
          ENDIF BOX_TYPE_IF
       ENDIF PER_FACE_IF
+      IF(HAVE_VENT) DEALLOCATE(VENT_ID_IND)
+
+      ! Test for Unsupported surfaces:
+      DO I=1,N_FACES
+         ! HERE do tests on surfaces, is not supported by GEOMs throw error:
+         UNSUPPORTED_SURF_FIELD : IF(SURFACE(G%SURFS(I))%BURN_AWAY) THEN
+            WRITE(MESSAGE,'(5A)') 'ERROR(720): GEOM: ',TRIM(ID),&
+            ', has currently unsupported BURN_AWAY feature in surface : ',TRIM(SURFACE(G%SURFS(I))%ID),'.'
+            CALL SHUTDOWN(MESSAGE)
+            RETURN
+         ENDIF UNSUPPORTED_SURF_FIELD
+         ! Others..
+      ENDDO
+
    ENDIF N_FACES_IF
 
    IF (N_VERTS>0) THEN
@@ -23747,11 +23811,6 @@ IF(ALLOCATED(TFACES))DEALLOCATE(TFACES)
 DEALLOCATE(GEOM_LINE)
 
 IF( (T_END-T_BEGIN) < TWO_EPSILON_EB) RETURN
-
-! IF (ANY_GEOM_TO_OBST) THEN
-!    CALL GEOM_2_OBST()
-!    RETURN
-! ENDIF
 
 CC_IBM = .TRUE.
 ! If unstructured projection defined set Pressure solver on unstructured grid.
@@ -24249,7 +24308,11 @@ SUBROUTINE ALLOCATE_BUFFERS
 
 IF(ALLOCATED(SURF_ID)) DEALLOCATE(SURF_ID)
 ALLOCATE(SURF_ID(MAX_SURF_IDS+1),STAT=IZERO)
-CALL ChkMemErr('ALLOCATE_BUFFERS','SURF_IDV',IZERO)
+CALL ChkMemErr('ALLOCATE_BUFFERS','SURF_ID',IZERO)
+
+IF(ALLOCATED(VENT_ID)) DEALLOCATE(VENT_ID)
+ALLOCATE(VENT_ID(MAX_SURF_IDS+1),STAT=IZERO)
+CALL ChkMemErr('ALLOCATE_BUFFERS','VENT_ID',IZERO)
 
 IF(ALLOCATED(ZVALS)) DEALLOCATE(ZVALS)
 ALLOCATE(ZVALS(MAX_ZVALS+1),STAT=IZERO)
@@ -24284,7 +24347,8 @@ SUBROUTINE SET_GEOM_DEFAULTS
 
    ZMIN=ZS_MIN
    WRITE(ID,'(A,I0)') 'geom_',N
-   SURF_ID(:)= 'null'
+   SURF_ID(:)='null'
+   VENT_ID(:)='null'
    SURF_IDS = 'null'
    SURF_ID6 = 'null'
    MATL_ID = 'null'
