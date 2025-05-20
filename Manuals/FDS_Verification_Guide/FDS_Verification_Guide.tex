@@ -5022,6 +5022,39 @@ An 18~cm long solid consisting of three 6~cm long abutting rectangular obstructi
 
 The Society of Fire Protection Engineers (SFPE) has developed a standard entitled {\em S.02 -- Calculation Methods to Predict the Thermal Performance of Structures \& Fire Resistive Assemblies}~\cite{SFPE_S.02} that contains an appendix with verification cases to benchmark basic heat transfer calculations. This section contains several of these cases.
 
+\subsection{Case 1: Lumped Mass Subjected to Standard Fire}
+\label{SFPE_Case_1}
+
+A plate ($\rho=7850$~kg/m$^3$, $c=0.52$~kJ/(kg~K), $\epsilon=0.7$) that has a thickness of 4~cm and an initial temperature of 20~°C is heated on the top and bottom surfaces according to the standard ISO~834 fire curve
+\be
+   T(t) = T_\infty + 345 \, \ln \left( 8t/60 + 1 \right) \label{ISO_834}
+\ee
+where the time, $t$, is in seconds. If the thermal conductivity of the material is relatively large, the temperature in the section can be taken as uniform. For the convection heat transfer coefficient, $h=25$~W/(m$^2$~K), calculate the temperature of the plate as a function of time (Fig.~\ref{fig:SFPE_Case_1}).
+
+\begin{figure}[ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/SFPE_Case_1}
+\caption[The SFPE heat transfer verification Case 1]{Temperature of a 4~cm thick plate that is heated top and bottom by the standard fire curve.}
+\label{fig:SFPE_Case_1}
+\end{figure}
+
+\FloatBarrier
+
+\subsection{Case 2: Lumped Mass Subjected to Incident Flux}
+\label{SFPE_Case_2}
+
+A 1~cm thick horizontal flat plate ($\rho=7850$~kg/m$^3$, $c=0.56$~kJ/(kg~K), $\epsilon=0.9$) with an initial temperature of 20~°C is exposed from above with a radiant heater set to an incident flux of 50~kW/m$^2$. The gas temperature is 20~°C and $h=12$~W/(m$^2$~K). Assuming that the bottom and sides of the plate are perfectly insulated, and that the thermal conductivity of the material is sufficiently large to assume a uniform temperature with depth, calculate the temperature of the plate as a function of time (Fig.~\ref{fig:SFPE_Case_2}).
+
+\begin{figure}[ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/SFPE_Case_2}
+\caption[The SFPE heat transfer verification Case 2]{Temperature of a 1~cm thick plate that is heated on top via an incident flux and insulated below.}
+\label{fig:SFPE_Case_2}
+\end{figure}
+
+\FloatBarrier
+
+
 \subsection{Case 6: 2-D Heat Transfer with Cooling by Convection}
 \label{SFPE_Case_6}
 
@@ -5039,11 +5072,7 @@ A 2~m by 2~m square column ($k=1$~W/(m~K), $\rho=1$~kg/m$^3$, $c=0.001$~kJ/(kg~K
 \subsection{Case 7: 2-D Heat Transfer by Convection and Radiation}
 \label{SFPE_Case_7}
 
-A 0.2 m by 0.2 m square column ($k=1$~W/(m~K), $\rho=2400$~kg/m$^3$, $c=1$~kJ/(kg~K), $\epsilon=0.8$) is heated according to the ISO~834 time-temperature curve
-\be
-   T(t) = T_\infty + 345 \, \ln \left( 8t/60 + 1 \right) \label{ISO_834}
-\ee
-where the time, $t$, is in seconds. Assuming that $h=10$~W/(m$^2$~K) and that the initial temperature is $T_\infty=273$~K, calculate the temperature at the column center, corner and middle side surface as a function of time (Fig.~\ref{fig:SFPE_Case_7}).
+A 0.2 m by 0.2 m square column ($k=1$~W/(m~K), $\rho=2400$~kg/m$^3$, $c=1$~kJ/(kg~K), $\epsilon=0.8$) is heated according to the ISO~834 time-temperature curve, Eq.~(\ref{ISO_834}). Assuming that $h=10$~W/(m$^2$~K) and that the initial temperature is $T_\infty=273$~K, calculate the temperature at the column center, corner and middle side surface as a function of time (Fig.~\ref{fig:SFPE_Case_7}).
 
 \begin{figure}[ht]
 \centering
@@ -7086,6 +7115,35 @@ The shapes of the fire fronts are shown in Figure~\ref{fig:level_set_ellipse}. T
  \caption[Level set fire front ellipse error]{Relative error between FDS and empirical model. FDS spread rates are obtained from arrival times at devices placed \SI{4}{\meter} from the ignition point at compass angle increments of \SI{45}{\degree}.}
 \label{fig:level_set_ellipse_error}
 \end{figure}
+
+\subsection{Custom Wind Fuction (\texorpdfstring{\ct{LS\_wind\_ramp}}{LS\_wind\_ramp})}
+\label{LS_wind_ramp}
+
+The level set model determines a wind-aided head fire spread rate based on the function  
+\be
+   R = R_{\rm 0} \, (1+\phi_{\rm W})
+\ee
+where the no-wind, no-slope spread rate, $R_{\rm 0}$, is increased by a factor $\phi_W$, which is a function of the wind speed. Note that there may be an additional term accounting for slope, $\phi_{\rm S}$, but this is excluded for simplicity in this example. The ability to customize the form of $\phi_W$ as a function of the reference wind speed, using \ct{VEG_LSET_WIND_RAMP}, is tested here. A line fire is ignited on a level set surface with a no-wind, no-slope spread rate, \ct{VEG_LSET_ROS_00}, of 0.03~m/s. The wind speed, using a flat wind profile, is progressively increased from 0~m/s to 5~m/s. In the first case,\ct{LS_wind_ramp_lin.fds}, the wind ramp is set to reproduce a linear function
+\be
+   R = R_{\rm 0} \, (1+0.4 \, U)
+\ee
+and in the second case, \ct{LS_wind_ramp_quad.fds}, it is set to match a quadratic function 
+\be
+   R = R_{\rm 0} \, (1+ 0.1 \, U^2)
+\ee
+The maximum spread rate as a function of wind speed is plotted in Figure~\ref{fig:LS_wind_ramp} to confirm that the functions are properly applied.
+
+
+\begin{figure}[h]
+\begin{center}
+\begin{tabular}{cc}
+ \includegraphics[height=2.2in]{SCRIPT_FIGURES/LS_wind_ramp.pdf}
+\end{tabular}
+\end{center}
+ \caption[Level set wind ramp]{Expected versus predicted spread rate as a function of linear and quadratic wind speed functions.}
+\label{fig:LS_wind_ramp}
+\end{figure}
+
 
 \subsection{Ember Generation (\texorpdfstring{\ct{LS4\_ember\_yield}}{LS4\_ember\_yield})}
 \label{LS4_ember_yield}

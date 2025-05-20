@@ -332,8 +332,8 @@ INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T,DT
 INTEGER :: IIG,IW,JJG,IC,OUTPUT_INDEX
 INTEGER :: KDUM,KWIND,ICF,IKT
-REAL(EB) :: UMF_TMP,PHX,PHY,MAG_PHI,PHI_W_X,PHI_W_Y,UMF_X,UMF_Y,UMAG,ROS_MAG,UMF_MAG,ROTH_FACTOR,&
-            SIN_THETA,COS_THETA,THETA,ZWIND(2),U_Z(2),V_Z(2)
+REAL(EB) :: UMF_TMP,PHX,PHY,MAG_PHI,PHI_W_X,PHI_W_Y,UMF_X,UMF_Y,UMAG,ROS_MAG,UMF_MAG,WIND_FACTOR,&
+            SIN_THETA,COS_THETA,THETA,ZWIND(2),U_Z(2),V_Z(2),REF_WIND_HEIGHT
 
 T_NOW = CURRENT_TIME()
 
@@ -362,6 +362,10 @@ DO JJG=1,JBAR
 
       ! Establish the wind field
 
+      REF_WIND_HEIGHT = SF%VEG_LSET_WIND_HEIGHT
+      ! If not set, use Behave/Andrews approach
+      IF (SF%VEG_LSET_WIND_HEIGHT<0._EB) REF_WIND_HEIGHT = 6.1_EB
+
       IF_CFD_COUPLED: IF (LEVEL_SET_COUPLED_WIND .AND. .NOT. LEVEL_SET_MODE==5) THEN  ! The wind speed is derived from the CFD
 
          U_LS(IIG,JJG) = 0.5_EB*(U(IIG-1,JJG,K_LS(IIG,JJG))+U(IIG,JJG,K_LS(IIG,JJG)))
@@ -372,11 +376,12 @@ DO JJG=1,JBAR
          ! Evaluate time and height varying profiles, using 6.1 m reference height
          IF (I_RAMP_DIRECTION_T/=0 .OR. I_RAMP_DIRECTION_Z/=0) THEN
             IF (I_RAMP_DIRECTION_T==0) THEN
-               THETA=EVALUATE_RAMP(6.1_EB,I_RAMP_DIRECTION_Z)*DEG2RAD
+               THETA=EVALUATE_RAMP(REF_WIND_HEIGHT,I_RAMP_DIRECTION_Z)*DEG2RAD
             ELSEIF (I_RAMP_DIRECTION_Z==0) THEN
                THETA=EVALUATE_RAMP(T,I_RAMP_DIRECTION_T)*DEG2RAD
              ELSE
-               THETA=(EVALUATE_RAMP(6.1_EB,I_RAMP_DIRECTION_Z)+EVALUATE_RAMP(T,I_RAMP_DIRECTION_T))*DEG2RAD
+               THETA=(EVALUATE_RAMP(REF_WIND_HEIGHT,I_RAMP_DIRECTION_Z)+&
+                  EVALUATE_RAMP(T,I_RAMP_DIRECTION_T))*DEG2RAD
              ENDIF
             SIN_THETA = -SIN(THETA)
             COS_THETA = -COS(THETA)
@@ -384,8 +389,10 @@ DO JJG=1,JBAR
             SIN_THETA = 1._EB
             COS_THETA = 1._EB
          ENDIF
-         U_LS(IIG,JJG) = U0*EVALUATE_RAMP(6.1_EB,I_RAMP_SPEED_Z)*EVALUATE_RAMP(T,I_RAMP_SPEED_T)*SIN_THETA
-         V_LS(IIG,JJG) = V0*EVALUATE_RAMP(6.1_EB,I_RAMP_SPEED_Z)*EVALUATE_RAMP(T,I_RAMP_SPEED_T)*COS_THETA
+         U_LS(IIG,JJG) = U0*EVALUATE_RAMP(REF_WIND_HEIGHT,I_RAMP_SPEED_Z)*&
+            EVALUATE_RAMP(T,I_RAMP_SPEED_T)*SIN_THETA
+         V_LS(IIG,JJG) = V0*EVALUATE_RAMP(REF_WIND_HEIGHT,I_RAMP_SPEED_Z)*&
+            EVALUATE_RAMP(T,I_RAMP_SPEED_T)*COS_THETA
 
       ENDIF IF_CFD_COUPLED
 
@@ -396,14 +403,14 @@ DO JJG=1,JBAR
          IF (LEVEL_SET_COUPLED_WIND) THEN
 
             ! Check if sample height is in the mesh
-            IF (ZC(KBAR)<6.1_EB) THEN
+            IF (ZC(KBAR)<REF_WIND_HEIGHT) THEN
                U_LS(IIG,JJG) = 0.5_EB*(U(IIG-1,JJG,KBAR)+U(IIG,JJG,KBAR))
                V_LS(IIG,JJG) = 0.5_EB*(V(IIG,JJG-1,KBAR)+V(IIG,JJG,KBAR))
             ELSE
 
                KWIND = 0
                DO KDUM = K_LS(IIG,JJG),KBAR
-                  IF ((ZC(KDUM)-Z_LS(IIG,JJG))>=6.1_EB) THEN
+                  IF ((ZC(KDUM)-Z_LS(IIG,JJG))>=REF_WIND_HEIGHT) THEN
                      KWIND = KDUM
                      ZWIND(1) = ZC(KWIND-1)-Z_LS(IIG,JJG)
                      ZWIND(2) = ZC(KWIND)-Z_LS(IIG,JJG)
@@ -419,16 +426,18 @@ DO JJG=1,JBAR
                IF (KWIND==1) THEN
                   U_Z(1) = 0._EB; V_Z(1) = 0._EB; ZWIND(1) = 0._EB
                ENDIF
-               U_LS(IIG,JJG) = U_Z(1) + (6.1_EB-ZWIND(1))/(ZWIND(2)-ZWIND(1))*(U_Z(2)-U_Z(1))
-               V_LS(IIG,JJG) = V_Z(1) + (6.1_EB-ZWIND(1))/(ZWIND(2)-ZWIND(1))*(V_Z(2)-V_Z(1))
+               U_LS(IIG,JJG) = U_Z(1) + (REF_WIND_HEIGHT-ZWIND(1))/(ZWIND(2)-ZWIND(1))*(U_Z(2)-U_Z(1))
+               V_LS(IIG,JJG) = V_Z(1) + (REF_WIND_HEIGHT-ZWIND(1))/(ZWIND(2)-ZWIND(1))*(V_Z(2)-V_Z(1))
 
             ENDIF
 
          ENDIF
 
-         ! Wind at midflame height (UMF). From Andrews 2012, USDA FS Gen Tech Rep. RMRS-GTR-266 (with added SI conversion)
+         UMF_TMP = 1._EB
 
-         UMF_TMP = 1.83_EB / LOG((20.0_EB + 1.18_EB * SF%VEG_LSET_HT) /(0.43_EB * SF%VEG_LSET_HT))  ! Bova et al., Eq. A2
+         ! Wind at midflame height (UMF). From Andrews 2012, USDA FS Gen Tech Rep. RMRS-GTR-266 (with added SI conversion)
+         IF (SF%VEG_LSET_WIND_HEIGHT<0._EB) &
+            UMF_TMP = 1.83_EB / LOG((20.0_EB + 1.18_EB * SF%VEG_LSET_HT) /(0.43_EB * SF%VEG_LSET_HT))  ! Bova et al., Eq. A2
 
          ! Factor 60 converts U from m/s to m/min which is used in elliptical model.
 
@@ -436,13 +445,18 @@ DO JJG=1,JBAR
          UMF_Y = UMF_TMP * V_LS(IIG,JJG) * 60.0_EB
          UMF_MAG = SQRT(UMF_X**2 + UMF_Y**2)
 
-         ! Components of Rothermel wind factor - affects spread rate
+         ! Compute wind factor affecting spread rate R(U) = R_0*(1+WIND_FACTOR)
 
-         ROTH_FACTOR = C_ROTH * ((3.281_EB * UMF_MAG)**B_ROTH) * (SF%VEG_LSET_BETA / BETA_OP_ROTH)**(-E_ROTH) ! Bova et al., Eq. A1
+         IF (SF%I_RAMP_LS_WIND>0) THEN            
+            WIND_FACTOR = EVALUATE_RAMP(UMF_MAG/60._EB,SF%I_RAMP_LS_WIND)
+         ELSE
+            WIND_FACTOR = C_ROTH * ((3.281_EB * UMF_MAG)**B_ROTH) * (SF%VEG_LSET_BETA/BETA_OP_ROTH)**(-E_ROTH) ! Bova et al., Eq. A1
+         ENDIF
+
 
          IF (UMF_MAG>TWO_EPSILON_EB) THEN
-            PHI_W_X = ROTH_FACTOR*UMF_X/UMF_MAG
-            PHI_W_Y = ROTH_FACTOR*UMF_Y/UMF_MAG
+            PHI_W_X = WIND_FACTOR*UMF_X/UMF_MAG
+            PHI_W_Y = WIND_FACTOR*UMF_Y/UMF_MAG
          ELSE
             PHI_W_X = 0.0_EB
             PHI_W_Y = 0.0_EB
