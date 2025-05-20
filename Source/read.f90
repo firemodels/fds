@@ -12470,6 +12470,12 @@ MESH_LOOP_2: DO NM=1,NMESHES
          CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
       ENDIF
 
+      ! Special treatment for coloring GEOM surface with HVAC_BOUNDARY
+
+      IF (VT%GEOM .AND. VT%BOUNDARY_TYPE==HVAC_BOUNDARY) THEN
+         SURFACE(VT%SURF_INDEX)%RGB = (/0,128,0/) ! green
+      ENDIF
+
    ENDDO VENT_LOOP_2
 
    ! Compute vent areas and check for passive openings
