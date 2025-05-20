@@ -7116,6 +7116,35 @@ The shapes of the fire fronts are shown in Figure~\ref{fig:level_set_ellipse}. T
 \label{fig:level_set_ellipse_error}
 \end{figure}
 
+\subsection{Custom Wind Fuction (\texorpdfstring{\ct{LS\_wind\_ramp}}{LS\_wind\_ramp})}
+\label{LS_wind_ramp}
+
+The level set model determines a wind-aided head fire spread rate based on the function  
+\be
+   R = R_{\rm 0} \, (1+\phi_{\rm W})
+\ee
+where the no-wind, no-slope spread rate, $R_{\rm 0}$, is increased by a factor $\phi_W$, which is a function of the wind speed. Note that there may be an additional term accounting for slope, $\phi_{\rm S}$, but this is excluded for simplicity in this example. The ability to customize the form of $\phi_W$ as a function of the reference wind speed, using \ct{VEG_LSET_WIND_RAMP}, is tested here. A line fire is ignited on a level set surface with a no-wind, no-slope spread rate, \ct{VEG_LSET_ROS_00}, of 0.03~m/s. The wind speed, using a flat wind profile, is progressively increased from 0~m/s to 5~m/s. In the first case,\ct{LS_wind_ramp_lin.fds}, the wind ramp is set to reproduce a linear function
+\be
+   R = R_{\rm 0} \, (1+0.4 \, U)
+\ee
+and in the second case, \ct{LS_wind_ramp_quad.fds}, it is set to match a quadratic function 
+\be
+   R = R_{\rm 0} \, (1+ 0.1 \, U^2)
+\ee
+The maximum spread rate as a function of wind speed is plotted in Figure~\ref{fig:LS_wind_ramp} to confirm that the functions are properly applied.
+
+
+\begin{figure}[h]
+\begin{center}
+\begin{tabular}{cc}
+ \includegraphics[height=2.2in]{SCRIPT_FIGURES/LS_wind_ramp.pdf}
+\end{tabular}
+\end{center}
+ \caption[Level set wind ramp]{Expected versus predicted spread rate as a function of linear and quadratic wind speed functions.}
+\label{fig:LS_wind_ramp}
+\end{figure}
+
+
 \subsection{Ember Generation (\texorpdfstring{\ct{LS4\_ember\_yield}}{LS4\_ember\_yield})}
 \label{LS4_ember_yield}
 

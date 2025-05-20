@@ -7741,6 +7741,26 @@ It is possible to set a custom fuel for which the spread rate does not vary with
 For all models, the total mineral content $S_{\rm t}=0.056$, the effective mineral content $S_{\rm e}=0.01$, the heat of combustion $\Delta H=18600$~kW/kg, density $\rho_{\rm p}=510$~kg/m$^3$, moisture content of fine, medium, and large dead vegetation, $M_{\rm d,1}=0.03$, $M_{\rm d,2}=0.04$, $M_{\rm d,3}=0.05$, moisture content of live woody and herbaceous vegetation $M_{\rm l,w}=M_{\rm l,h}= 0.70$.
 \end{sidewaystable}
 
+\subsection{Custom Wind Speed Function}
+The default Rothermel-Albini formulation~\cite{Rothermel:1972,Albini:1976} represents the influence of wind on the head fire spread rate as  
+\be
+   R = R_{\rm 0} \, (1+\phi_{\rm W})
+\ee
+where the no-wind, no-slope spread rate, $R_{\rm 0}$, is increased by a factor $\phi_W$, which is a function of the wind speed. In the default model the wind speed is taken as the value at mid-flame height, $U_{\rm mf}$.  
+
+This introduces two complications. The first is determining the functional form of $\phi_W$. The default formulation is an empirical function which depends on fuel bed properties. However, this has not been rigorously validated for all possible fuel configurations - the original fit was determined with just three fuel bed types~\cite{Rothermel:1972}. In addition, the relationship assumes a reference wind which is unaffected by the fire, which can be contradictory to the approach of \ct{LEVEL_SET_MODE=4}. Therefore, it may be preferable to specify a custom function $\phi_W$ to better match observational data for a given fuel type. This can be done by specifying a \ct{RAMP} using \ct{VEG_LSET_WIND_RAMP}:
+\begin{lstlisting}
+&SURF ..., VEG_LSET_WIND_RAMP='WR' /
+
+&RAMP ID='WR', Z =  0, F=0 /
+&RAMP ID='WR', Z = 10, F=4 /
+\end{lstlisting}
+Here, the variable \ct{Z} represents the reference wind speed in m/s and \ct{F} is the value of $\phi_W$. In this example the spread rate increases linearly with wind speed between 0~m/s and 10~m/s, but any functional form can be represented in a piecwise manner using the \ct{RAMP}.
+
+The second complication is determining the appropriate mid-flame wind speed. In the default formulation the wind is taken from a reference height of 6.1~m (based on a standard weather station measurement height of 20~ft). This is then re-scaled to an assumed mid-flame height (one fuel-bed height above the fuel) using an assumed logarithmic profile of the wind. This is the so-called wind adjustment factor~\cite{Andrews:2012,Bova:IJWF2015}. However, these assumptions may begin to break down, for example, when the wind profile is not logarithmic. Therefore, it is possible to specify a reference wind height via \ct{VEG_LSET_WIND_HEIGHT} on the \ct{SURF} line. The wind sampled at this height will be directly used in the $\phi_{\rm W}$ function, without any adjustment, whether using the default model or a custom \ct{RAMP}. Note that it is possible to include an adjustment factor when using \ct{VEG_LSET_WIND_HEIGHT} by implicitly including this factor when specifying a \ct{VEG_LSET_WIND_RAMP}.
+
+
+
 \subsection{Level Set Vegetation Drag}
 When a surface is defined using level set fuel parameters, a drag force is applied in the gas phase grid cell adjacent to the boundary following the same approach described for the Boundary Fuel Model in Section~\ref{info:boundary_fuel_model}. In this case, the fuel surface-area to volume ratio (\ct{VEG_LSET_SIGMA}), packing ratio (\ct{VEG_LSET_BETA}), and depth (\ct{VEG_LSET_HT}) are either obtained from the default fuel models or specified by the user for a custom fuel. The shape factor (\ct{SHAPE_FACTOR}) and drag coefficient (\ct{DRAG_COEFFICIENT}) can also be modified from their default values of 0.25 and 2.8, respectively. A comparison of the consistency of the level set drag with the particle and boundary models is included in Figure~\ref{ground_vegetation_drag_fig}.
 
@@ -11480,6 +11500,7 @@ The \ct{ID} is just a label in the output file. When an output quantity is relat
 \ct{TOTAL MASS FLUX X}$^1$                     & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
 \ct{TOTAL MASS FLUX Y}$^1$                     & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
 \ct{TOTAL MASS FLUX Z}$^1$                     & Section~\ref{info:mass_flow}                      & kg/s/m$^2$        & D,I,P,S      \\ \hline
+\ct{U_LS, V_LS}                                & Velocity for level set spread~\ref{info:level_set}& m/s               & D,I,P,S      \\ \hline
 \ct{U-VELOCITY}                                & Gas velocity component, $u$                       & m/s               & D,I,P,S      \\ \hline
 \ct{V-VELOCITY}                                & Gas velocity component, $v$                       & m/s               & D,I,P,S      \\ \hline
 \ct{W-VELOCITY}                                & Gas velocity component, $w$                       & m/s               & D,I,P,S      \\ \hline
@@ -13603,6 +13624,8 @@ Keyword             & Type     & Description                      & Units       
 \ct{VEG_LSET_SURF_LOAD}                               & Real            & Section~\ref{info:level_set}              & kg/m$^2$            & 1.0                     \\ \hline
 \ct{VEG_LSET_TAN2}                                     & Real            & Section~\ref{info:level_set}              &                     &                         \\ \hline
 \ct{VEG_LSET_WIND_EXP}                                & Real            & Section~\ref{info:level_set}              &                     & 1.                      \\ \hline
+\ct{VEG_LSET_WIND_HEIGHT}                             & Real            & Section~\ref{info:level_set}              & m                   & 6.1                      \\ \hline
+\ct{VEG_LSET_WIND_RAMP}                               & Character       & Section~\ref{info:level_set}              &                     &                         \\ \hline
 \ct{VEL}                                                 & Real            & Section~\ref{info:Velocity_BC}            & m/s                 &                         \\ \hline
 \ct{VEL_BULK}                                           & Real            & Section~\ref{info:profiles}               & m/s                 &                         \\ \hline
 \ct{VEL_GRAD}                                           & Real            & Section~\ref{info:vel_grad}               & 1/s                 &                         \\ \hline
