@@ -12465,9 +12465,11 @@ MESH_LOOP_2: DO NM=1,NMESHES
 
       ! Check UVW
 
-      IF (ABS(VT%UVW(ABS(VT%IOR))) < TWO_EPSILON_EB .AND. .NOT.VT%GEOM) THEN
-         WRITE(MESSAGE,'(3A)')  'ERROR(821): VENT ',TRIM(VT%ID),' cannot have normal component of UVW equal to 0.'
-         CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
+      IF (.NOT.VT%GEOM) THEN
+         IF (ABS(VT%UVW(ABS(VT%IOR))) < TWO_EPSILON_EB) THEN
+            WRITE(MESSAGE,'(3A)')  'ERROR(821): VENT ',TRIM(VT%ID),' cannot have normal component of UVW equal to 0.'
+            CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
+         ENDIF
       ENDIF
 
       ! Special treatment for coloring GEOM surface with HVAC_BOUNDARY
