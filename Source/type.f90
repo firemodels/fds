@@ -351,6 +351,7 @@ TYPE BOUNDARY_PROP2_TYPE
    REAL(EB) :: Y_PLUS=1._EB          !< Dimensionless boundary layer thickness unit
    REAL(EB) :: Z_STAR=1._EB          !< Dimensionless boundary layer unit
    REAL(EB) :: PHI_LS=-1._EB         !< Level Set value for output only
+   REAL(EB) :: TAU_LS=-1._EB         !< Level Set HRR ramp characteristic time
    REAL(EB) :: WORK1=0._EB           !< Work array
    REAL(EB) :: WORK2=0._EB           !< Work array
    REAL(EB) :: WORK3=0._EB           !< Work array
