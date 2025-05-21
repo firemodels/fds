@@ -4191,10 +4191,10 @@ interior of a tunnel, and a wind is blowing at one of the portals that affects t
             .
 \end{lstlisting}
 The use of a {\em dynamic pressure} boundary affects the FDS algorithm as follows.  At \ct{OPEN} boundaries, the hydrodynamic pressure (head) $\cH$ is specified as
-\begin{eqnarray}
-\cH &=& \mbox{\ct{DYNAMIC_PRESSURE}}/\rho_\infty + {|\mathbf{u}|^2}/2 \quad  \mbox{(outgoing)}  \nonumber \\
-\cH &=& \mbox{\ct{DYNAMIC_PRESSURE}}/\rho_\infty \quad                       \mbox{(incoming)}
-\end{eqnarray}
+\begin{align}
+\cH &= \text{\tt{DYNAMIC\_PRESSURE}}/\rho_\infty + {|\mathbf{u}|^2}/2 && \text{(outgoing)} & \nonumber \\
+\cH &= \text{\tt{DYNAMIC\_PRESSURE}}/\rho_\infty                      && \text{(incoming)} &
+\end{align}
 where $\rho_\infty$ is the ambient density and $\mathbf{u}$ is the most recent value of the velocity on the boundary.
 The \ct{PRESSURE_RAMP} allows for alteration of the pressure as a function of time. Note that you do not
 need to ramp the pressure up or down starting at zero, like you do for various other ramps.
@@ -7742,11 +7742,11 @@ For all models, the total mineral content $S_{\rm t}=0.056$, the effective miner
 \end{sidewaystable}
 
 \subsection{Custom Wind Speed Function}
-The default Rothermel-Albini formulation~\cite{Rothermel:1972,Albini:1976} represents the influence of wind on the head fire spread rate as  
+The default Rothermel-Albini formulation~\cite{Rothermel:1972,Albini:1976} represents the influence of wind on the head fire spread rate as
 \be
    R = R_{\rm 0} \, (1+\phi_{\rm W})
 \ee
-where the no-wind, no-slope spread rate, $R_{\rm 0}$, is increased by a factor $\phi_W$, which is a function of the wind speed. In the default model the wind speed is taken as the value at mid-flame height, $U_{\rm mf}$.  
+where the no-wind, no-slope spread rate, $R_{\rm 0}$, is increased by a factor $\phi_W$, which is a function of the wind speed. In the default model the wind speed is taken as the value at mid-flame height, $U_{\rm mf}$.
 
 This introduces two complications. The first is determining the functional form of $\phi_W$. The default formulation is an empirical function which depends on fuel bed properties. However, this has not been rigorously validated for all possible fuel configurations - the original fit was determined with just three fuel bed types~\cite{Rothermel:1972}. In addition, the relationship assumes a reference wind which is unaffected by the fire, which can be contradictory to the approach of \ct{LEVEL_SET_MODE=4}. Therefore, it may be preferable to specify a custom function $\phi_W$ to better match observational data for a given fuel type. This can be done by specifying a \ct{RAMP} using \ct{VEG_LSET_WIND_RAMP}:
 \begin{lstlisting}
