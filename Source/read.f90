@@ -12228,7 +12228,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
 
                ! If the VENT is on a GEOM do not reject (further setup in READ_GEOM)
 
-               IF (GEOM) REJECT_VENT = .FALSE.
+               IF (GEOM .AND. .NOT.(TERRAIN_CASE .AND. ALL(XB(1:6)>-1.01E6_EB))) REJECT_VENT = .FALSE.
 
                ! If the VENT is rejected, cycle
 
@@ -12584,6 +12584,12 @@ MESH_LOOP_2: DO NM=1,NMESHES
          CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
       ENDIF
 
+      ! Special treatment for coloring GEOM surface with HVAC_BOUNDARY
+
+      IF (VT%GEOM .AND. VT%BOUNDARY_TYPE==HVAC_BOUNDARY) THEN
+         SURFACE(VT%SURF_INDEX)%RGB = (/0,128,0/) ! green
+      ENDIF
+
    ENDDO VENT_LOOP_2
 
    ! Compute vent areas and check for passive openings
@@ -12680,6 +12686,7 @@ TRANSPARENCY      = 1._EB
 UVW               = -1.E12_EB
 VEL_RMS           = 0._EB
 XYZ               = -1.E6_EB
+XB                = -1.E6_EB
 
 END SUBROUTINE SET_VENT_DEFAULTS
 
