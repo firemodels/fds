@@ -4897,7 +4897,7 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
       ALLOCATE(RN%SPEC_ID_NU_READ(RN%N_SMIX))
       RN%SPEC_ID_NU_READ = 'null'
       RN%SPEC_ID_NU_READ(1:RN%N_SMIX)=SPEC_ID_NU(1:RN%N_SMIX)
-      
+
    ELSE SIMPLE_IF
       RN%N_SMIX = 3
       RN%N_SPEC_READ = 0
@@ -6384,7 +6384,7 @@ PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
    ! Allocate necessary boundary information if BLOWING heat transfer correction is applied
 
    IF (SF%BLOWING) LPC%INCLUDE_BOUNDARY_PROP2_TYPE = .TRUE.
-   
+
    ! If COLOR is not assigned to the PART class, use the SURF color if it has been specified
 
    IF (ALL(LPC%RGB==0) .AND. .NOT.ALL(SF%RGB==SURFACE(INERT_SURF_INDEX)%RGB)) LPC%RGB=SF%RGB
@@ -12114,7 +12114,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
 
                ! If the VENT is on a GEOM do not reject (further setup in READ_GEOM)
 
-               IF (GEOM) REJECT_VENT = .FALSE.
+               IF (GEOM .AND. .NOT.(TERRAIN_CASE .AND. ALL(XB(1:6)>-1.01E6_EB))) REJECT_VENT = .FALSE.
 
                ! If the VENT is rejected, cycle
 
@@ -12163,7 +12163,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
                   VT%UNDIVIDED_INPUT_AREA = (XB_USER(2)-XB_USER(1))*(XB_USER(4)-XB_USER(3))
 
                ! For circular vent account for VENT XB may only partially overlap circle
-               IF (RADIUS>0._EB) THEN                  
+               IF (RADIUS>0._EB) THEN
                   IF (ABS(XB_USER(1)-XB_USER(2))<=SPACING(XB_USER(2))) VT%UNDIVIDED_INPUT_AREA = &
                      CIRCLE_CELL_INTERSECTION_AREA(XYZ(2),XYZ(3),RADIUS,XB_USER(3),XB_USER(4),XB_USER(5),XB_USER(6))
                   IF (ABS(XB_USER(3)-XB_USER(4))<=SPACING(XB_USER(4))) VT%UNDIVIDED_INPUT_AREA = &
@@ -12572,6 +12572,7 @@ TRANSPARENCY      = 1._EB
 UVW               = -1.E12_EB
 VEL_RMS           = 0._EB
 XYZ               = -1.E6_EB
+XB                = -1.E6_EB
 
 END SUBROUTINE SET_VENT_DEFAULTS
 
@@ -12891,7 +12892,7 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
                DO NS=1,MAX_SPECIES
                   IF (SPEC_ID(NS)=='null') EXIT
                   DO NS2=1,N_TRACKED_SPECIES
-                     
+
                      IF (TRIM(SPEC_ID(NS))==TRIM(SPECIES_MIXTURE(NS2)%ID) .OR. &
                          TRIM(SPEC_ID(NS))==TRIM(SPECIES_MIXTURE(NS2)%ALT_ID)) THEN
                         IF (NS2==1) THEN
