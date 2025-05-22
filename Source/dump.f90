@@ -4428,7 +4428,6 @@ INTEGER  :: I,J,K,N
 REAL(FB) :: DXX,STIME
 REAL(EB), POINTER, DIMENSION(:,:,:) :: FF
 REAL(FB), ALLOCATABLE, DIMENSION(:) :: QQ_PACK
-REAL(EB) :: FR_C
 TYPE(SMOKE3D_TYPE), POINTER :: S3
 
 ! Miscellaneous settings
@@ -4452,13 +4451,6 @@ DATA_FILE_LOOP: DO N=1,N_SMOKE3D
          ENDDO
       ENDDO
    ENDDO
-
-   ! Adjust the temperature as it is used in the expression for the radiation source term
-
-   IF (S3%DISPLAY_TYPE=='TEMPERATURE' .AND. RTE_SOURCE_CORRECTION) THEN
-      FR_C = RTE_SOURCE_CORRECTION_FACTOR**0.25_EB
-      WHERE (CHI_R*Q>QR_CLIP) FF = (FF+TMPM)*FR_C - TMPM
-   ENDIF
 
    ! Interpolate data to cell nodes
 
