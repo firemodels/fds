@@ -197,9 +197,9 @@ WIND_EXP  = 1.0_EB
 LSET_TAN2    = .FALSE. ! Flag for ROS proportional to Tan(slope)^2
 
 ! Flux limiters
-! LIMITER_LS=1 MINMOD
+! LIMITER_LS=1 First order upwinding
 ! LIMITER_LS=2 SUPERBEE
-! LIMITER_LS=3 First order upwinding
+! LIMITER_LS=3 MINMOD
 
 LIMITER_LS = I_FLUX_LIMITER
 IF (LIMITER_LS > 3) LIMITER_LS = 1
@@ -1042,7 +1042,7 @@ END SUBROUTINE LEVEL_SET_ADVECT_FLUX
 !>
 !> \param SR_XY If positive, indicates that flow is from left to right
 !> \param Z Scalar quantity
-!> \param LIMITER Flux limiter (1) MINMOD, (2) SUPERBEE, (3) first-order upwinding (monotone)
+!> \param LIMITER Flux limiter (1) first-order upwinding (monotone), (2) SUPERBEE, (3) MINMOD
 !> \details
 !                           face
 !    |     o     |     o     |     o     |     o     |
@@ -1081,11 +1081,11 @@ ELSE  ! flow is right to left
 ENDIF
 
 IF (LIMITER==1) THEN
-   B = MAX(0._EB,MIN(1._EB,R))
+   B = 0._EB
 ELSEIF (LIMITER==2) THEN
    B = MAX(0._EB,MIN(2._EB*R,1._EB),MIN(R,2._EB))
 ELSEIF (LIMITER==3) THEN
-   B = 0._EB
+   B = MAX(0._EB,MIN(1._EB,R))
 ENDIF
 
 SCALAR_FACE_VALUE_LS = ZUP + 0.5_EB * B * ( ZDWN - ZUP )
