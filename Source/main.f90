@@ -199,13 +199,12 @@ IF (READ_EXTERNAL) THEN
    IF (DT_EXTERNAL_HEARTBEAT > 0._EB) LU_EXTERNAL_HEARTBEAT = GET_FILE_NUMBER()
 ENDIF
 
-! Set up the background atmosphere and initialize the WALL cells
+! Set up the background atmosphere and initialize the boundary (WALL) arrays
 
 DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    CALL INITIALIZE_ATMOSPHERE(NM)
-   CALL INITIALIZE_WALL_ARRAY(NM)
+   IF (.NOT.SETUP_ONLY) CALL INITIALIZE_WALL_ARRAY(NM)
 ENDDO
-
 IF (MY_RANK==0 .AND. VERBOSE) CALL VERBOSE_PRINTOUT('Completed INITIALIZE_WALL_ARRAY')
 
 ! Write the Smokeview (.smv) file using parallel MPI writes

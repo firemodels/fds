@@ -2461,28 +2461,34 @@ MESH_LOOP: DO NM=1,NMESHES
    WRITE(MYSTR,'(A)')     'OFFSET'; CALL ADDSTR
    WRITE(MYSTR,'(3F13.5)') 0.,0.,0.; CALL ADDSTR
 
-   ! Mesh grid dimensions and neighbor information.
-   ! Determine if the six mesh faces abut a single mesh (MESH_NEIGHBOR>0), nothing (MESH_NEIGHBOR=0),
-   ! or a combination of nothing and/or multiple meshes (MESH_NEIGHBOR=-1). Write six values to GRID line.
+   MESH_NEIGHBOR = 0
 
-   DO I=1,6
-      SELECT CASE(I)
-         CASE(1) ; IW1=1                                                 ; IW2=IW1+M%JBAR*M%KBAR-1
-         CASE(2) ; IW1=  M%JBAR*M%KBAR+1                                 ; IW2=IW1+M%JBAR*M%KBAR-1
-         CASE(3) ; IW1=2*M%JBAR*M%KBAR+1                                 ; IW2=IW1+M%IBAR*M%KBAR-1
-         CASE(4) ; IW1=2*M%JBAR*M%KBAR+  M%IBAR*M%KBAR+1                 ; IW2=IW1+M%IBAR*M%KBAR-1
-         CASE(5) ; IW1=2*M%JBAR*M%KBAR+2*M%IBAR*M%KBAR+1                 ; IW2=IW1+M%IBAR*M%JBAR-1
-         CASE(6) ; IW1=2*M%JBAR*M%KBAR+2*M%IBAR*M%KBAR+  M%IBAR*M%JBAR+1 ; IW2=IW1+M%IBAR*M%JBAR-1
-      END SELECT
-      MESH_NEIGHBOR(I) = M%EXTERNAL_WALL(IW1)%NOM
-      DO IW=IW1,IW2
-         IF (M%EXTERNAL_WALL(IW)%NOM/=MESH_NEIGHBOR(I)) THEN
-            MESH_NEIGHBOR(I) = -1
-            EXIT
-         ENDIF
+   IF (.NOT.SETUP_ONLY) THEN
+
+      ! Mesh grid dimensions and neighbor information.
+      ! Determine if the six mesh faces abut a single mesh (MESH_NEIGHBOR>0), nothing (MESH_NEIGHBOR=0), 
+      ! or a combination of nothing and/or multiple meshes (MESH_NEIGHBOR=-1). Write six values to GRID line.
+   
+      DO I=1,6
+         SELECT CASE(I)
+            CASE(1) ; IW1=1                                                 ; IW2=IW1+M%JBAR*M%KBAR-1
+            CASE(2) ; IW1=  M%JBAR*M%KBAR+1                                 ; IW2=IW1+M%JBAR*M%KBAR-1
+            CASE(3) ; IW1=2*M%JBAR*M%KBAR+1                                 ; IW2=IW1+M%IBAR*M%KBAR-1
+            CASE(4) ; IW1=2*M%JBAR*M%KBAR+  M%IBAR*M%KBAR+1                 ; IW2=IW1+M%IBAR*M%KBAR-1
+            CASE(5) ; IW1=2*M%JBAR*M%KBAR+2*M%IBAR*M%KBAR+1                 ; IW2=IW1+M%IBAR*M%JBAR-1
+            CASE(6) ; IW1=2*M%JBAR*M%KBAR+2*M%IBAR*M%KBAR+  M%IBAR*M%JBAR+1 ; IW2=IW1+M%IBAR*M%JBAR-1
+         END SELECT
+         MESH_NEIGHBOR(I) = M%EXTERNAL_WALL(IW1)%NOM
+         DO IW=IW1,IW2
+            IF (M%EXTERNAL_WALL(IW)%NOM/=MESH_NEIGHBOR(I)) THEN
+               MESH_NEIGHBOR(I) = -1
+               EXIT
+            ENDIF
+         ENDDO
       ENDDO
-   ENDDO
 
+   ENDIF
+   
    CALL EOL
    WRITE(MYSTR,'(A,3X,A)') 'GRID',TRIM(MESH_NAME(NM)); CALL ADDSTR
    WRITE(MYSTR,'(9I6)')     M%IBAR,M%JBAR,M%KBAR,MESH_NEIGHBOR(1:6) ; CALL ADDSTR
@@ -2566,7 +2572,6 @@ MESH_LOOP: DO NM=1,NMESHES
       IF (VT%RADIUS>0._EB) N_CVENT=N_CVENT+1
    ENDDO
 
-   
    ! Write out information about vents to Smokeview file
 
    CALL EOL
@@ -3014,7 +3019,7 @@ IF (.NOT.SUPPRESS_DIAGNOSTICS) THEN
       WRITE(LU_OUTPUT,'(A,I8)')     '   Cells in the X Direction      ',M%IBAR
       WRITE(LU_OUTPUT,'(A,I8)')     '   Cells in the Y Direction      ',M%JBAR
       WRITE(LU_OUTPUT,'(A,I8)')     '   Cells in the Z Direction      ',M%KBAR
-      WRITE(LU_OUTPUT,'(A,I8)')     '   Number of Grid Cells          ',M%IBAR*M%JBAR*M%KBAR
+      WRITE(LU_OUTPUT,'(A,I12)')    '   Number of Grid Cells      ',M%IBAR*M%JBAR*M%KBAR
       WRITE(LU_OUTPUT,'(//A,I5/)')' Physical Dimensions, Mesh ',NM
       WRITE(LU_OUTPUT,'(A,F10.3)')  '   Length (m)                  ',M%XF-M%XS
       WRITE(LU_OUTPUT,'(A,F10.3)')  '   Width  (m)                  ',M%YF-M%YS
@@ -3029,7 +3034,7 @@ IF (ORIGIN_LAT>-1.E6_EB) THEN
 ENDIF
 
 WRITE(LU_OUTPUT,'(/A/)')      ' Miscellaneous Parameters'
-WRITE(LU_OUTPUT,'(A,I9)'  )   '   Total Number of Grid Cells   ',CELL_COUNT
+WRITE(LU_OUTPUT,'(A,I12)')    '   Total Number of Grid Cells'   ,CELL_COUNT
 WRITE(LU_OUTPUT,'(A,F9.3)')   '   Maximum Cell Aspect Ratio    ',MAXVAL(MAX_CELL_ASPECT_RATIO)
 WRITE(LU_OUTPUT,'(A,F9.3)')   '   Initial Time Step (s)        ',DT
 WRITE(LU_OUTPUT,'(A,I9)')     '   CFL Velocity Norm            ',CFL_VELOCITY_NORM
@@ -4952,7 +4957,6 @@ INTEGER  :: I,J,K,N
 REAL(FB) :: DXX,STIME
 REAL(EB), POINTER, DIMENSION(:,:,:) :: FF
 REAL(FB), ALLOCATABLE, DIMENSION(:) :: QQ_PACK
-REAL(EB) :: FR_C
 TYPE(SMOKE3D_TYPE), POINTER :: S3
 
 ! Miscellaneous settings
@@ -4976,13 +4980,6 @@ DATA_FILE_LOOP: DO N=1,N_SMOKE3D
          ENDDO
       ENDDO
    ENDDO
-
-   ! Adjust the temperature as it is used in the expression for the radiation source term
-
-   IF (S3%DISPLAY_TYPE=='TEMPERATURE' .AND. RTE_SOURCE_CORRECTION) THEN
-      FR_C = RTE_SOURCE_CORRECTION_FACTOR**0.25_EB
-      WHERE (CHI_R*Q>QR_CLIP) FF = (FF+TMPM)*FR_C - TMPM
-   ENDIF
 
    ! Interpolate data to cell nodes
 
