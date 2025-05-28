@@ -9266,11 +9266,18 @@ If multiple meshes are involved, enter the name of the first \ct{.csv} file only
 \end{lstlisting}
 and FDS will read, for example, \ct{CHID_uvw_t1_m1.csv} through \ct{CHID_uvw_t1_m16.csv} in the order of the \ct{MESH} lines (note that a \ct{MULT} line for the meshes may also be used).
 
-\section{Unfreezing the Initial Flow Field}
+\subsection{Unfreezing the Initial Flow Field}
 \label{info:FREZ}
 
-It may be useful to allow the solid phase to respond to an established flow field at the start of a simulation.  This could be accomplished with the normal restart functionality; however, this limits the number of changes that can be made to the model before a restart is made.  The \ct{UNFREEZE_TIME} parameter on the \ct{MISC} line can be used for this purpose. When set, the initial flow field is frozen with the options \ct{FREEZE_VELOCITY} and \ct{SOLID_PHASE_ONLY} set until the simulation time exceeds \ct{UNFREEZE_TIME}.
-
+It may be useful to allow the solid phase to respond to an established flow field at the start of a simulation.  This could be accomplished with the normal restart functionality; however, this limits the number of changes that can be made to the model before a restart is made.  The \ct{UNFREEZE_TIME} parameter on the \ct{MISC} line can be used for this purpose. When set, the initial flow field is frozen with the options \ct{FREEZE_VELOCITY}, \ct{SOLID_PHASE_ONLY}, and \ct{LOCK_TIME_STEP} set until the simulation time exceeds \ct{UNFREEZE_TIME}. It may also be useful to set the initial time step \ct{DT} to a larger value. It may be necessary to set \ct{LIMITING_DT_RATIO} to a lower value than the default if the fixed \ct{DT} while the flow field is frozen is much larger than that calculated by the stability conditions. An example configuration with a frozen flow field is shown below.
+\begin{lstlisting}
+&TIME DT=1.0, T_END=120.0, LIMITING_DT_RATIO=1e-6 /
+&MISC UNFREEZE_TIME=90, /
+&CSVF UVWFILE ='CHID_uvw_t1_m1.csv',
+      TMPFILE ='CHID_tmp_t1_m1.csv',
+      SPECFILE='CHID_spec_t1_m1.csv' /
+\end{lstlisting}
+The example will read in an initial flow field using the \ct{CSVF} files, then allow the solids to heat for 90 seconds at a time step of 1 seconds (90 time steps total). The flow field will then be unfrozen for the remaining 30 seconds of simulation time.
 
 \section{Gravity}
 \label{info:GVEC}
