@@ -123,6 +123,7 @@ TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
    INTEGER :: DRAG_LAW=1                  !< Code indicating type of drag law
    INTEGER :: DEVC_INDEX=0                !< Index of device that governs this class of particles
    INTEGER :: CTRL_INDEX=0                !< Index of controller that governs this class of particles
+   INTEGER :: NODE_INDEX=0                !< Index of ductnode for surface
    INTEGER :: ORIENTATION_INDEX=0         !< Starting position of the particle class orientation vector within the master array
    INTEGER :: N_ORIENTATION               !< Number of orientations (directions) corresponding to this class of particles
    INTEGER :: Z_INDEX=-1                  !< Species mixture index for this class
@@ -934,6 +935,7 @@ TYPE SURFACE_TYPE
    INTEGER :: N_LPC=0         !< Number of particle classes emitted by the surface
    INTEGER :: N_CONE_CURVES=0 !< Total number of time vs. heat release rate curves specified for the S-pyro model
    INTEGER :: N_MATL          !< Total number of unique materials over all layers
+   INTEGER :: NODE_INDEX=0    !< Ductnode index
    INTEGER, DIMENSION(30) :: ONE_D_REALS_ARRAY_SIZE=0,ONE_D_INTEGERS_ARRAY_SIZE=0,ONE_D_LOGICALS_ARRAY_SIZE=0
    INTEGER, ALLOCATABLE, DIMENSION(:) :: N_LAYER_CELLS      !< Number of wall cells per material layer
    INTEGER, ALLOCATABLE, DIMENSION(:) :: LAYER_INDEX        !< The layer each wall cell belongs to
@@ -954,16 +956,17 @@ TYPE SURFACE_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: MIN_DIFFUSIVITY
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: HEAT_SOURCE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: LAYER_THICKNESS
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: MIN_LAYER_THICKNESS  ! Smallest layer size before layer is removed (m)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: MIN_LAYER_THICKNESS !< Smallest layer size before layer is removed (m)
    LOGICAL, ALLOCATABLE, DIMENSION(:) :: HT3D_LAYER
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: CELL_SIZE_FACTOR
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: CELL_SIZE                               !< Specified constant cell size (m)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: CELL_SIZE           !< Specified constant cell size (m)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: STRETCH_FACTOR
    REAL(EB), DIMENSION(MAX_LAYERS) :: LAYER_DENSITY,&
                                       MOISTURE_FRACTION,SURFACE_VOLUME_RATIO,PACKING_RATIO,KAPPA_S=-1._EB,RENODE_DELTA_T
    REAL(EB), DIMENSION(MAX_LAYERS,MAX_MATERIALS) :: DENSITY_ADJUST_FACTOR=1._EB,RHO_S
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: MATL_NAME
    CHARACTER(LABEL_LENGTH), DIMENSION(MAX_LAYERS,MAX_MATERIALS) :: MATL_ID
+   CHARACTER(LABEL_LENGTH) :: NODE_ID='null'           !< ID of a duct node
    REAL(EB), DIMENSION(MAX_LAYERS,MAX_MATERIALS) :: MATL_MASS_FRACTION
    LOGICAL :: BURN_AWAY,ADIABATIC,USER_DEFINED=.TRUE., &
               FREE_SLIP=.FALSE.,NO_SLIP=.FALSE.,SPECIFIED_NORMAL_VELOCITY=.FALSE.,SPECIFIED_TANGENTIAL_VELOCITY=.FALSE., &
@@ -1142,7 +1145,7 @@ TYPE GEOMETRY_TYPE
    CHARACTER(LABEL_LENGTH) :: ID,MATL_ID,DEVC_ID,MOVE_ID
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: SURF_ID,VENT_ID
    CHARACTER(LABEL_LENGTH) :: GEOC_FILENAME='null',TEXTURE_MAPPING
-   LOGICAL :: COMPONENT_ONLY,IS_DYNAMIC=.TRUE.,HAVE_SURF,HAVE_VENT,HAVE_MATL,HIDDEN,REMOVEABLE,SHOW_BNDF=.TRUE., &
+   LOGICAL :: COMPONENT_ONLY,IS_DYNAMIC=.TRUE.,HAVE_SURF,HAVE_MATL,HIDDEN,REMOVEABLE,SHOW_BNDF=.TRUE., &
               READ_BINARY=.FALSE.,IS_TERRAIN=.FALSE.
    INTEGER :: N_VERTS_BASE,N_FACES_BASE,N_VOLUS_BASE,N_VERTS,N_EDGES,N_FACES,N_VOLUS,NSUB_GEOMS,GEOM_TYPE,IJK(3),N_LEVELS,&
               DEVC_INDEX=-1,CTRL_INDEX=-1,PROP_INDEX=-1,DEVC_INDEX_O=-1,CTRL_INDEX_O=-1,MATL_INDEX=-1,&
@@ -1335,7 +1338,7 @@ TYPE CFACE_TYPE
    INTEGER :: B2_INDEX=0                 !< Derived type carrying most of the surface boundary conditions
    INTEGER :: BR_INDEX=0                 !< Derived type carrying angular-specific radiation intensities
    INTEGER :: SURF_INDEX=0
-   INTEGER :: VENT_INDEX=0
+   INTEGER :: NODE_INDEX=0
    INTEGER :: BOUNDARY_TYPE=0
    INTEGER :: CUT_FACE_IND1=-11          !< First index pointing to CUT_FACE array for this CFACE.
    INTEGER :: CUT_FACE_IND2=-11          !< Second index pointing to CUT_FACE array for this CFACE.
@@ -1493,7 +1496,7 @@ TYPE VENTS_TYPE
                X1_ORIG=0._EB,X2_ORIG=0._EB,Y1_ORIG=0._EB,Y2_ORIG=0._EB,Z1_ORIG=0._EB,Z2_ORIG=0._EB, &
                X0=-9.E6_EB,Y0=-9.E6_EB,Z0=-9.E6_EB,FIRE_SPREAD_RATE,UNDIVIDED_INPUT_AREA=0._EB,INPUT_AREA=0._EB,&
                TMP_EXTERIOR=-1000._EB,DYNAMIC_PRESSURE=0._EB,UVW(3)=-1.E12_EB,RADIUS=-1._EB
-   LOGICAL :: ACTIVATED=.TRUE.,GEOM=.FALSE.,AREA_ADJUST=.TRUE.,DRAW=.TRUE.
+   LOGICAL :: ACTIVATED=.TRUE.,AREA_ADJUST=.TRUE.,DRAW=.TRUE.
    CHARACTER(LABEL_LENGTH) :: DEVC_ID='null',CTRL_ID='null',ID='null'
    ! turbulent inflow (experimental)
    INTEGER :: N_EDDY=0
@@ -1873,10 +1876,10 @@ TYPE DUCTNODE_TYPE
    LOGICAL :: AMBIENT = .FALSE.                            !< Node is connected to the ambient
    LOGICAL :: LEAKAGE=.FALSE.                              !< Node is being used for leakage
    LOGICAL :: VENT=.FALSE.                                 !< Node has an attached vent
+   LOGICAL :: GEOM=.FALSE.                                 !< Node has an attached GEOM
    LOGICAL :: HMT_FILTER=.FALSE.                           !< Filter is in mass transport ductrun
    LOGICAL :: TRANSPORT_PARTICLES=.FALSE.                  !< Particles will be transported through the vent attached to the node
    LOGICAL :: SPECIFIED_XYZ=.FALSE.                        !< Node has explicit XYZ.
-   LOGICAL, ALLOCATABLE, DIMENSION(:) :: IN_MESH           !< (i) Flag indicating node is present in mesh i
 END TYPE DUCTNODE_TYPE
 
 TYPE (DUCTNODE_TYPE), DIMENSION(:), ALLOCATABLE,  TARGET :: DUCTNODE
