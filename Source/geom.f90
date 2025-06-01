@@ -8877,7 +8877,7 @@ CASE(INTEGER_ONE) ! Geometry information for CFACE.
 
          ! External mesh boundary CFACES inherit the underlaying WALL type.
          CFA%BOUNDARY_TYPE = WC%BOUNDARY_TYPE
-         CFA%NODE_INDEX    = BOUNDARY_PROP1(WC%B1_INDEX)%NODE_INDEX
+         CFA%NODE_INDEX    = SURFACE(WC%SURF_INDEX)%NODE_INDEX
 
          BC%II = WC_BC%II
          BC%JJ = WC_BC%JJ
