@@ -60,7 +60,7 @@
 
 &SURF ID                   = 'Regular Excelsior'
       MATL_ID              = 'Dry Regular Excelsior'
-      MOISTURE_FRACTION    = 0.06
+      MOISTURE_CONTENT    = 0.06
       SURFACE_VOLUME_RATIO = 7596
       LENGTH               = 0.02
       GEOMETRY             = 'CYLINDRICAL' /
