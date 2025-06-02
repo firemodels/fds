@@ -1,0 +1,13 @@
+
+&REAC ID='PROPANE', FUEL='PROPANE', SOOT_YIELD=0.024, RADIATIVE_FRACTION=0.29 /
+
+&SURF ID='BURNER', SPEC_ID='PROPANE', HRRPUA=333.3, COLOR='RED', RAMP_Q='fire', MATL_ID='MINERAL WOOL', THICKNESS=0.05, ROUGHNESS=0.005 /
+&RAMP ID='fire', T=  0., F=0.00 /
+&RAMP ID='fire', T= 20., F=0.37 /
+&RAMP ID='fire', T= 40., F=0.83 /
+&RAMP ID='fire', T= 60., F=0.98 /
+&RAMP ID='fire', T= 80., F=1.05 /
+&RAMP ID='fire', T=120., F=1.05 /
+&RAMP ID='fire', T=130., F=1.05 /
+
+
