@@ -33,7 +33,7 @@
 &SURF ID                        = 'foliage'
       MATL_ID(1,1) = 'GENERIC VEGETATION'
       MATL_MASS_FRACTION(1,1) = 1.0
-      MOISTURE_FRACTION         = 0.26
+      MOISTURE_CONTENT         = 0.26
       SURFACE_VOLUME_RATIO      = 3940.
       LENGTH                    = 0.05
       GEOMETRY                  = 'CYLINDRICAL' /
@@ -41,7 +41,7 @@
 &SURF ID                        = 'small roundwood'
       MATL_ID(1,1) = 'GENERIC VEGETATION'
       MATL_MASS_FRACTION(1,1) = 1.0
-      MOISTURE_FRACTION         = 0.26
+      MOISTURE_CONTENT         = 0.26
       SURFACE_VOLUME_RATIO      = 2667.
       LENGTH                    = 0.10
       GEOMETRY                  = 'CYLINDRICAL' /
@@ -49,7 +49,7 @@
 &SURF ID                        = 'medium roundwood'
       MATL_ID(1,1) = 'GENERIC VEGETATION'
       MATL_MASS_FRACTION(1,1) = 1.0
-      MOISTURE_FRACTION         = 0.26
+      MOISTURE_CONTENT         = 0.26
       SURFACE_VOLUME_RATIO      = 888.
       LENGTH                    = 0.10
       GEOMETRY                  = 'CYLINDRICAL' /
@@ -57,7 +57,7 @@
 &SURF ID                        = 'large roundwood'
       MATL_ID(1,1) = 'GENERIC VEGETATION'
       MATL_MASS_FRACTION(1,1) = 1.0
-      MOISTURE_FRACTION         = 0.26
+      MOISTURE_CONTENT         = 0.26
       SURFACE_VOLUME_RATIO      = 500.
       LENGTH                    = 0.10
       GEOMETRY                  = 'CYLINDRICAL' /
