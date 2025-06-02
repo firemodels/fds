@@ -218,7 +218,6 @@ ALLOCATE(M%MAG_ZT(IBAR,JBAR)); CALL ChkMemErr('VEGE:LEVEL SET','MAG_ZT',IZERO) ;
 ! Rothermel 'Phi' factors for effects of Wind and Slope on ROS
 
 ALLOCATE(M%PHI_WS(IBAR,JBAR))   ; CALL ChkMemErr('VEGE:LEVEL SET','PHI_W',IZERO)   ; PHI_WS => M%PHI_WS    ; PHI_WS = 0.0_EB
-ALLOCATE(M%PHI_S(IBAR,JBAR))    ; CALL ChkMemErr('VEGE:LEVEL SET','PHI_S',IZERO)   ; PHI_S => M%PHI_S
 ALLOCATE(M%PHI_S_X(IBAR,JBAR))  ; CALL ChkMemErr('VEGE:LEVEL SET','PHI_S_X',IZERO) ; PHI_S_X => M%PHI_S_X
 ALLOCATE(M%PHI_S_Y(IBAR,JBAR))  ; CALL ChkMemErr('VEGE:LEVEL SET','PHI_S_Y',IZERO) ; PHI_S_Y => M%PHI_S_Y
 
@@ -310,8 +309,6 @@ DO JJG=1,JBAR
          PHI_S_X(IIG,JJG) = 5.275_EB * ((SF%VEG_LSET_BETA)**(-0.3_EB)) * DZTDX_DUM * DZT_DUM
          PHI_S_Y(IIG,JJG) = 5.275_EB * ((SF%VEG_LSET_BETA)**(-0.3_EB)) * DZTDY_DUM * DZT_DUM
 
-         PHI_S(IIG,JJG) = SQRT(PHI_S_X(IIG,JJG)**2 + PHI_S_Y(IIG,JJG)**2)
-
       ENDIF IF_ELLIPSE
 
    ENDDO
@@ -337,8 +334,8 @@ INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T,DT
 INTEGER :: IIG,IW,JJG,IC,OUTPUT_INDEX
 INTEGER :: KDUM,KWIND,ICF,IKT
-REAL(EB) :: UMF_TMP,PHX,PHY,MAG_PHI,PHI_W_X,PHI_W_Y,UMF_X,UMF_Y,UMAG,ROS_MAG,UMF_MAG,WIND_FACTOR,&
-            SIN_THETA,COS_THETA,THETA,ZWIND(2),U_Z(2),V_Z(2),REF_WIND_HEIGHT
+REAL(EB) :: UMF_TMP,PHX,PHY,MAG_PHI,PHI_S,PHI_W_X,PHI_W_Y,UMF_X,UMF_Y,UMAG,ROS_MAG,UMF_MAG,&
+            WIND_FACTOR,SIN_THETA,COS_THETA,THETA,ZWIND(2),U_Z(2),V_Z(2),REF_WIND_HEIGHT
 
 T_NOW = CURRENT_TIME()
 
@@ -469,7 +466,9 @@ DO JJG=1,JBAR
 
          ! Include Rothermel slope factor
 
-         IF (PHI_S(IIG,JJG) > 0.0_EB) THEN
+         PHI_S = SQRT(PHI_S_X(IIG,JJG)+PHI_S_Y(IIG,JJG))
+
+         IF (PHI_S > 0.0_EB) THEN
 
             PHX = PHI_W_X + PHI_S_X(IIG,JJG)
             PHY = PHI_W_Y + PHI_S_Y(IIG,JJG)
@@ -492,13 +491,11 @@ DO JJG=1,JBAR
             ! 0.3048 ~= 1/3.281
             ! if phi_s < 0 then a complex value (NaN) results. Using abs(phi_s) and sign function to correct.
 
-            UMF_TMP = (((ABS(PHI_S_X(IIG,JJG)) * (SF%VEG_LSET_BETA / BETA_OP_ROTH)**E_ROTH)/C_ROTH)**(1/B_ROTH))*0.3048
-            UMF_TMP = SIGN(UMF_TMP,PHI_S_X(IIG,JJG))
-            UMF_X = UMF_X + UMF_TMP
+            UMF_TMP = &
+            0.3048_EB/PHI_S*(((SF%VEG_LSET_BETA / BETA_OP_ROTH)**E_ROTH)*PHI_S/C_ROTH)**(1._EB/B_ROTH)
 
-            UMF_TMP = (((ABS(PHI_S_Y(IIG,JJG)) * (SF%VEG_LSET_BETA / BETA_OP_ROTH)**E_ROTH)/C_ROTH)**(1/B_ROTH))*0.3048
-            UMF_TMP = SIGN(UMF_TMP,PHI_S_Y(IIG,JJG))
-            UMF_Y = UMF_Y + UMF_TMP
+            UMF_X = UMF_X + UMF_TMP*PHI_S_X(IIG,JJG)
+            UMF_Y = UMF_Y + UMF_TMP*PHI_S_Y(IIG,JJG)
 
          ELSE
 
