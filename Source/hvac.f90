@@ -118,7 +118,8 @@ LOGICAL :: SQUARE !< Flag indicating DUCT has a square cross-section
 LOGICAL :: DAMPER !< Flag indicating that a damper is present in a DUCT.
 LOGICAL :: REVERSE !< Flag indicating that a specfied flow or FAN in a DUCT is from the second to the first node.
 LOGICAL :: AMBIENT !< Flag indicating a DUCTNODE is connected to the ambient.
-LOGICAL :: GEOM !< Flag indicating a DUCTNODE is connected to GEOM.
+LOGICAL :: GEOM !< Flag indicating a DUCTNODE or LEAKAGE VENT_ID is connected to GEOM.
+LOGICAL :: GEOM2 !< Flag indicating LEAKAGE VENT2_ID is connected to GEOM.
 LOGICAL :: LEAK_ENTHALPY !< Flag indicating that the boundary condition for a LEAKAGE duct should preserve enthalpy.
 LOGICAL :: INITIALIZED_HVAC_MASS_TRANSPORT !< Flag indicating DUCTs with N_CELLS>1 have been initiazed.
 LOGICAL :: DUCT_QUANTITY_DEFINED=.FALSE. !< Flag indicating a DUCT_QUANTITY list has alreayd been defined
@@ -145,7 +146,7 @@ TYPE(DUCT_TYPE), POINTER :: DU !< Pointer to a DUCT
 TYPE(HVAC_QUANTITY_TYPE), POINTER :: HQT !< Pointer to a DUCT_ or NODE_QUANTITY_ARRAY
 NAMELIST /HVAC/ AIRCOIL_ID,AMBIENT,AREA,CLEAN_LOSS,COOLANT_SPECIFIC_HEAT,COOLANT_MASS_FLOW,COOLANT_TEMPERATURE,CTRL_ID,&
                 DAMPER,DEBUG,DEVC_ID,DIAMETER,DISCHARGE_COEFFICIENT,DUCT_ID,&
-                EFFICIENCY,FAN_ID,FILTER_ID,FIXED_Q,GEOM,ID,LEAK_ENTHALPY,LEAK_PRESSURE_EXPONENT,LEAK_REFERENCE_PRESSURE,&
+                EFFICIENCY,FAN_ID,FILTER_ID,FIXED_Q,GEOM,GEOM2,ID,LEAK_ENTHALPY,LEAK_PRESSURE_EXPONENT,LEAK_REFERENCE_PRESSURE,&
                 LENGTH,LOADING,LOADING_MULTIPLIER,LOSS,&
                 MASS_FLOW,MAX_FLOW,MAX_PRESSURE,N_CELLS,NETWORK_ID,NODE_ID,PERIMETER,QUANTITY,QUANTITY_SPEC_ID,&
                 RAMP_ID,RAMP_LOSS,REVERSE,ROUGHNESS,ROUND,SPEC_ID,SQUARE,TAU_AC,TAU_FAN,TAU_VF,TRANSPORT_PARTICLES,&
@@ -590,12 +591,21 @@ DO NN=1,N_HVAC_READ
             WRITE(MESSAGE,'(A,I5)') 'ERROR(527): Localized leakage has no ID, HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
-         DN%VENT_ID = VENT_ID
-         DN%VENT=.TRUE.
+         IF (GEOM) THEN
+            DN%GEOM = .TRUE.
+            IF (TRIM(DN%VENT_ID)=='AMBIENT') THEN
+               WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR(yyy): VENT_ID for leakage cannot be AMBIENT if GEOM is set. Leak ID:',TRIM(ID),&
+                  ', HVAC line number:',NN
+               CALL SHUTDOWN(MESSAGE); RETURN
+            ENDIF
+         ELSE
+            DN%VENT_ID = VENT_ID
+            DN%VENT=.TRUE.
+         ENDIF
          DN%NETWORK_ID='LEAK'
          DN%READ_IN = .FALSE.
          DN%TRANSPORT_PARTICLES = TRANSPORT_PARTICLES
-         IF (TRIM(DN%VENT_ID)=='null') THEN
+         IF (TRIM(DN%VENT_ID)=='null' .AND. .NOT. GEOM) THEN
             WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR(528): Leakage path must have VENT_ID defined. Leak ID:',TRIM(ID),&
                ', HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
@@ -614,12 +624,22 @@ DO NN=1,N_HVAC_READ
          NODE_FILTER_A(I_DUCTNODE) = 'null'
          DN => DUCTNODE(I_DUCTNODE)
          DN%ID = VENT2_ID
-         DN%VENT_ID = VENT2_ID
+         IF (GEOM2) THEN
+            DN%GEOM = .TRUE.
+            IF (TRIM(DN%VENT_ID)=='AMBIENT') THEN
+               WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR(yyy): VENT2_ID for leakage cannot be AMBIENT if GEOM2 is set. Leak ID:',&
+                  TRIM(ID),', HVAC line number:',NN
+               CALL SHUTDOWN(MESSAGE); RETURN
+            ENDIF
+         ELSE
+            DN%VENT_ID = VENT2_ID
+            DN%VENT=.TRUE.
+         ENDIF
          DN%VENT=.TRUE.
          DN%NETWORK_ID='LEAK'
          DN%READ_IN = .FALSE.
          DN%TRANSPORT_PARTICLES = TRANSPORT_PARTICLES
-         IF (TRIM(VENT2_ID)=='null') THEN
+         IF (TRIM(VENT2_ID)=='null' .AND. .NOT. GEOM2) THEN
             WRITE(MESSAGE,'(A,A,A,I2)') 'ERROR(530): Leakage path must have VENT2_ID defined. Leak ID:',TRIM(ID),&
                                         ', HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
@@ -749,6 +769,7 @@ FAN_ID       = 'null'
 FIXED_Q      = -1.E10_EB
 FILTER_ID    = 'null'
 GEOM         = .FALSE.
+GEOM2        = .FALSE.
 LEAK_ENTHALPY = .FALSE.
 LEAK_PRESSURE_EXPONENT = 0.5_EB
 LEAK_REFERENCE_PRESSURE = 4._EB
@@ -1045,6 +1066,7 @@ GEOM_IF: IF (N_GEOMETRY > 0 .AND. ANY(SURFACE%NODE_INDEX>0)) THEN
    CF_Z = 0._EB
    NODE_GEOM_LOOP: DO NG=1,N_GEOMETRY
       G=>GEOMETRY(NG)
+      IF (.NOT. G%HAVE_NODE) CYCLE
       FACES_LOOP: DO NF=1,G%N_FACES
          SF=>SURFACE(G%SURFS(NF))
          IF (SF%NODE_INDEX==0) CYCLE FACES_LOOP
