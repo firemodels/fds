@@ -4121,11 +4121,13 @@ SUBROUTINE GET_EXT_INB_CUTFACES_TO_CFACE
 
 ! Local Variables:
 INTEGER :: ICF, CFACE_INDEX_LOCAL, SURF_INDEX
+INTEGER :: IVENT
 REAL(EB):: ADDMAT(IAXIS:KAXIS,LOW_IND:HIGH_IND)
 
 ! GET_CUTCELLS_VERBOSE variables:
 INTEGER, ALLOCATABLE, DIMENSION(:) :: NCFACE_BY_MESH
 
+TYPE(VENTS_TYPE), POINTER :: VT
 TYPE(CFACE_TYPE), POINTER :: CFA
 
 IF(GET_CUTCELLS_VERBOSE) CALL CPU_TIME(CPUTIME_START)
@@ -4308,10 +4310,50 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    MESHES(NM)%N_INTERNAL_CFACE_CELLS   = CFACE_INDEX_LOCAL - MESHES(NM)%INTERNAL_CFACE_CELLS_LB
 ENDDO MESH_LOOP_1
 
+! Second loop, apply VENTS to change SURF_ID associated with CFACEs:
+MESH_LOOP_2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   CALL POINT_TO_MESH(NM)
+
+   ! ! Currently : Modify CFACE SURF_INDEX with VENT information: This needs more development.
+
+   VENT_LOOP : DO IVENT=1,MESHES(NM)%N_VENT
+      VT => VENTS(IVENT)
+      IF(.NOT.VT%GEOM) CYCLE VENT_LOOP ! Do not apply vent to Geometries.
+
+      ! This test is a simplified test for VENTS changing the CFACE SURF_ID to VENT SURF_ID for all CFACEs whose
+      ! centroid locations lay within the frame of the IOR grid aligned VENT:
+      ADDMAT = 0._EB;
+      SELECT CASE(ABS(VT%IOR))
+      CASE(IAXIS)
+         ADDMAT(IAXIS,LOW_IND)  = -(XF_MAX-XS_MIN) ! -DX(VT%I1) Set normal size to 2 times domain size.
+         ADDMAT(IAXIS,HIGH_IND) =  (XF_MAX-XS_MIN) !  DX(VT%I2) XF_MAX, etc. defined in cons.f90.
+      CASE(JAXIS)
+         ADDMAT(JAXIS,LOW_IND)  = -(YF_MAX-YS_MIN) ! -DY(VT%J1)
+         ADDMAT(JAXIS,HIGH_IND) =  (YF_MAX-YS_MIN) !  DY(VT%J2)
+      CASE(KAXIS)
+         ADDMAT(KAXIS,LOW_IND)  = -(ZF_MAX-ZS_MIN) ! -DZ(VT%K1)
+         ADDMAT(KAXIS,HIGH_IND) =  (ZF_MAX-ZS_MIN) !  DZ(VT%K2)
+      END SELECT
+      ! CFACE Loop to modify SURF_INDEX in INTERNAL_CFACE_CELLS:
+      CFACE_LOOP_2 : DO CFACE_INDEX_LOCAL=INTERNAL_CFACE_CELLS_LB+1,INTERNAL_CFACE_CELLS_LB+N_INTERNAL_CFACE_CELLS
+         CFA => CFACE(CFACE_INDEX_LOCAL)
+         BC => BOUNDARY_COORD(CFA%BC_INDEX)
+         IF (BC%X < X(VT%I1)+ADDMAT(IAXIS,LOW_IND )) CYCLE CFACE_LOOP_2
+         IF (BC%X > X(VT%I2)+ADDMAT(IAXIS,HIGH_IND)) CYCLE CFACE_LOOP_2
+         IF (BC%Y < Y(VT%J1)+ADDMAT(JAXIS,LOW_IND )) CYCLE CFACE_LOOP_2
+         IF (BC%Y > Y(VT%J2)+ADDMAT(JAXIS,HIGH_IND)) CYCLE CFACE_LOOP_2
+         IF (BC%Z < Z(VT%K1)+ADDMAT(KAXIS,LOW_IND )) CYCLE CFACE_LOOP_2
+         IF (BC%Z > Z(VT%K2)+ADDMAT(KAXIS,HIGH_IND)) CYCLE CFACE_LOOP_2
+         CFA%VENT_INDEX = IVENT
+         CFA%SURF_INDEX = VT%SURF_INDEX
+      ENDDO CFACE_LOOP_2
+   ENDDO VENT_LOOP
+ENDDO MESH_LOOP_2
 ! - At this pont all final values of SURF_INDEX have been given to CFACEs.
 
 ! Third loop, 1. Compute final FDS area integrals by SURF_ID and GEOM.
-!             2. Compute input areas by SURF_ID and GEOM. First sum over GEOM FACES SURF_IDs.
+!             2. Compute input areas by SURF_ID and GEOM. First sum over GEOM FACES SURF_IDs,
+!                then VENTS input surfaces are assigned to corresponding GEOMs and SURF_IDs if present (VENTs take precedence).
 IF(N_GEOMETRY>0) THEN
    ALLOCATE(FDS_AREA_GEOM(0:N_SURF,N_GEOMETRY)); FDS_AREA_GEOM = 0._EB
 ENDIF
@@ -8835,9 +8877,6 @@ CASE(INTEGER_ONE) ! Geometry information for CFACE.
    INS_INB_COND_1 : IF (IS_INB) THEN
       B1%VEL_ERR_NEW=CF%VEL(IFACE) - 0._EB ! Assumes zero velocity of solid.
 
-      IBOD           = CF%BODTRI(1,IFACE)
-      IWSEL          = CF%BODTRI(2,IFACE)
-
       ! Normal to cut-face:
       V2(IAXIS:KAXIS) = CF%XYZVERT(IAXIS:KAXIS,CF%CFELEM(2,IFACE))-CF%XYZCEN(IAXIS:KAXIS,IFACE)
       V3(IAXIS:KAXIS) = CF%XYZVERT(IAXIS:KAXIS,CF%CFELEM(3,IFACE))-CF%XYZCEN(IAXIS:KAXIS,IFACE)
@@ -8845,6 +8884,8 @@ CASE(INTEGER_ONE) ! Geometry information for CFACE.
       IF(NORM2(BC%NVEC)>TWO_EPSILON_EB .AND. CF%CFACE_ORIGIN(IFACE)==BLOCKED_SPLIT_CELL) THEN
          BC%NVEC(IAXIS:KAXIS) = BC%NVEC(IAXIS:KAXIS)/NORM2(BC%NVEC)
       ELSE
+         IBOD =CF%BODTRI(1,IFACE)
+         IWSEL=CF%BODTRI(2,IFACE)
          BC%NVEC(IAXIS:KAXIS) = GEOMETRY(IBOD)%FACES_NORMAL(IAXIS:KAXIS,IWSEL)
       ENDIF
       X1AXIS = MAXLOC(ABS(BC%NVEC(IAXIS:KAXIS)),DIM=1)
@@ -8878,6 +8919,7 @@ CASE(INTEGER_ONE) ! Geometry information for CFACE.
          ! External mesh boundary CFACES inherit the underlaying WALL type.
          CFA%BOUNDARY_TYPE = WC%BOUNDARY_TYPE
          CFA%NODE_INDEX    = SURFACE(WC%SURF_INDEX)%NODE_INDEX
+         CFA%VENT_INDEX    = WC%VENT_INDEX
 
          BC%II = WC_BC%II
          BC%JJ = WC_BC%JJ
@@ -23714,9 +23756,9 @@ IF(ALLOCATED(TFACES))DEALLOCATE(TFACES)
 
 DEALLOCATE(GEOM_LINE)
 
-CC_IBM = .TRUE.
-
 IF( (T_END-T_BEGIN) < TWO_EPSILON_EB) RETURN
+
+CC_IBM = .TRUE.
 
 ! If unstructured projection defined set Pressure solver on unstructured grid.
 IF (PRES_FLAG/=UGLMAT_FLAG) THEN
