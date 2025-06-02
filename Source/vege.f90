@@ -156,7 +156,7 @@ SUBROUTINE INITIALIZE_LEVEL_SET_FIRESPREAD_2(NM,MODE)
 
 INTEGER, INTENT(IN) :: NM,MODE
 INTEGER :: I,IM1,IM2,IIG,IP1,IP2,J,JJG,JM1,JP1
-REAL(EB) :: DZT_DUM,G_EAST,G_WEST,G_SOUTH,G_NORTH
+REAL(EB) :: DZT_DUM,DZTDX_DUM,DZTDY_DUM,G_EAST,G_WEST,G_SOUTH,G_NORTH
 
 T_NOW = CURRENT_TIME()
 
@@ -296,14 +296,19 @@ DO JJG=1,JBAR
          E_ROTH = 0.715_EB * EXP(-0.01094_EB * SF%VEG_LSET_SIGMA)
          BETA_OP_ROTH = 0.20395_EB * (SF%VEG_LSET_SIGMA**(-0.8189_EB))! Optimum packing ratio
 
-         ! Limit effect to slope lte 80 degrees. Phi_s_x,y are slope factors (Rothermel model)
+         ! Slope vector
+         DZTDX_DUM = DZTDX(IIG,JJG)
+         DZTDY_DUM = DZTDY(IIG,JJG)
+         DZT_DUM = SQRT(DZTDX_DUM**2._EB+DZTDY_DUM**2._EB)
+         ! Limit effect to slope lte 80 degrees
+         IF (DZT_DUM>5.67_EB) THEN
+            DZTDX_DUM = DZTDX_DUM * 5.67_EB/DZT_DUM
+            DZTDY_DUM = DZTDY_DUM * 5.67_EB/DZT_DUM
+            DZT_DUM = 5.67_EB
+         ENDIF
 
-         DZT_DUM = MIN(5.67_EB,ABS(DZTDX(IIG,JJG))) ! 5.67 ~ tan 80 deg
-         PHI_S_X(IIG,JJG) = 5.275_EB * ((SF%VEG_LSET_BETA)**(-0.3_EB)) * DZT_DUM**2
-         PHI_S_X(IIG,JJG) = SIGN(PHI_S_X(IIG,JJG),DZTDX(IIG,JJG))
-         DZT_DUM = MIN(1.73_EB,ABS(DZTDY(IIG,JJG))) ! 1.73 ~ tan 60 deg
-         PHI_S_Y(IIG,JJG) = 5.275_EB * ((SF%VEG_LSET_BETA)**(-0.3_EB)) * DZT_DUM**2
-         PHI_S_Y(IIG,JJG) = SIGN(PHI_S_Y(IIG,JJG),DZTDY(IIG,JJG))
+         PHI_S_X(IIG,JJG) = 5.275_EB * ((SF%VEG_LSET_BETA)**(-0.3_EB)) * DZTDX_DUM * DZT_DUM
+         PHI_S_Y(IIG,JJG) = 5.275_EB * ((SF%VEG_LSET_BETA)**(-0.3_EB)) * DZTDY_DUM * DZT_DUM
 
          PHI_S(IIG,JJG) = SQRT(PHI_S_X(IIG,JJG)**2 + PHI_S_Y(IIG,JJG)**2)
 
