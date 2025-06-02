@@ -1339,6 +1339,7 @@ TYPE CFACE_TYPE
    INTEGER :: BR_INDEX=0                 !< Derived type carrying angular-specific radiation intensities
    INTEGER :: SURF_INDEX=0
    INTEGER :: NODE_INDEX=0
+   INTEGER :: VENT_INDEX=0
    INTEGER :: BOUNDARY_TYPE=0
    INTEGER :: CUT_FACE_IND1=-11          !< First index pointing to CUT_FACE array for this CFACE.
    INTEGER :: CUT_FACE_IND2=-11          !< Second index pointing to CUT_FACE array for this CFACE.
@@ -1496,7 +1497,7 @@ TYPE VENTS_TYPE
                X1_ORIG=0._EB,X2_ORIG=0._EB,Y1_ORIG=0._EB,Y2_ORIG=0._EB,Z1_ORIG=0._EB,Z2_ORIG=0._EB, &
                X0=-9.E6_EB,Y0=-9.E6_EB,Z0=-9.E6_EB,FIRE_SPREAD_RATE,UNDIVIDED_INPUT_AREA=0._EB,INPUT_AREA=0._EB,&
                TMP_EXTERIOR=-1000._EB,DYNAMIC_PRESSURE=0._EB,UVW(3)=-1.E12_EB,RADIUS=-1._EB
-   LOGICAL :: ACTIVATED=.TRUE.,AREA_ADJUST=.TRUE.,DRAW=.TRUE.
+   LOGICAL :: ACTIVATED=.TRUE.,GEOM=.FALSE.,AREA_ADJUST=.TRUE.,DRAW=.TRUE.
    CHARACTER(LABEL_LENGTH) :: DEVC_ID='null',CTRL_ID='null',ID='null'
    ! turbulent inflow (experimental)
    INTEGER :: N_EDDY=0
