@@ -3998,6 +3998,46 @@ In the first approach, one can specify enough \ct{VOLUME_FLOW} and \ct{MASS_FLOW
 
 In the second approach, one or more ducts have flows that are not specified, in this case FDS must solve for the pressures at either end of the duct to determine the flow through the duct. As one example, if a tee has three ducts and only one of the ducts has a specified flow, then FDS will use the relative pressure drops along the two other ducts to determine the flow. If no \ct{LOSS} inputs are given, then FDS may not correctly solve for the flow. As another example, losses in the HVAC network limit how quickly flow in the ducts can change over time. If there is a single duct connecting two rooms with no \ct{LOSS} inputs given, then small pressure changes can lead to large changes in duct velocity and increase the risk of a numerical instability. If you specify an HVAC network where flow is being solved for by FDS, then you must provided \ct{LOSS} inputs for each possible flow path. FDS will perform a check at startup and return an error message if it finds insufficient losses have been specified; however, this check may not discover all cases.
 
+\subsection{HVAC and Unstructured Geometry}
+\label{info:hvac_geom}
+
+Assigning either a normal HVAC node or a localized leakage HVAC to a GEOM is done using \ct{SURF}. Using the simple example from Section~\ref{info:GEOM_Basics}, an HVAC node named \ct{'MY NODE'} is assigned to the first face by defining a \ct{SURF} with \ct{NODE_ID='MY NODE'}. No other boundary conditions should be set on the \ct{SURF} other than a color or texture. On the node \ct{HVAC} input set \ct{GEOM=T} to indicate FDS needs to look for a \ct{GEOM} and not a \ct{VENT} for the node:
+
+\begin{lstlisting}
+	&SURF ID='NODE SURF',NODE_ID='MY NODE'/
+	&GEOM ID='My Solid'
+	SURF_ID='NODE SURF','INERT'
+	VERTS= -1.0, -1.0,  0.0,
+	1.0, -1.0,  0.0,
+	0.0,  1.0,  0.0,
+	0.0,  0.0,  1.0,
+	FACES= 1,3,2, 2,
+	1,4,3, 1,
+	3,4,2, 1,
+	2,4,1, 0 /
+	&HVAC ID='MY NODE',TYPE_ID='NODE',GEOM=T,..../
+\end{lstlisting}
+
+The \ct{SURF} input \ct{NODE_ID} can only be applied to complex geometry. It cannot be used for \ct{OBST} or \ct{VENT}. While more than one \ct{GEOM} and more than one face of a \ct{GEOM} can use the same node, the same node cannot be shared by both a \ct{VENT} and a \ct{GEOM}. 
+
+To apply localized leakage to \ct{GEOM}, the process is similar. \ct{NODE_ID} on \ct{SURF} is still used to link faces of \ct{GEOM} to the localized leakage. The input for the localized leakage changes slightly. The inputs \ct{VENT_ID} and \ct{VENT2_ID} use \ct{GEOM} and \ct{GEOM2} to determine if the respective \ct{ID} is attached to a \ct{VENT} or a \ct{GEOM}.  For example, to attach the second vent for a localized leakage path:
+
+\begin{lstlisting}
+	&SURF ID='LEAK SURF',NODE_ID='LEAK OUT'/
+	&GEOM ID='My Solid'
+	SURF_ID='LEAK SURF','INERT'
+	VERTS= -1.0, -1.0,  0.0,
+	1.0, -1.0,  0.0,
+	0.0,  1.0,  0.0,
+	0.0,  0.0,  1.0,
+	FACES= 1,3,2, 2,
+	1,4,3, 1,
+	3,4,2, 1,
+	2,4,1, 0 /
+	&HVAC ID='MY LEAK',TYPE_ID='LEAK',VENT_ID='LEAK IN',VENT2_ID='LEAK OUT',GEOM2=T,AREA=0.01/
+\end{lstlisting}
+
+Here the use of \ct{GEOM2=T} indicates that \ct{VENT2_ID} is a \ct{NODE_ID} on \ct{SURF}.
 
 \newpage
 
@@ -12413,6 +12453,8 @@ Keyword             & Type     & Description                      & Units       
 \ct{FAN_ID}                 & Character     & Section~\ref{info:HVACduct}                                              &               &                \\ \hline
 \ct{FILTER_ID}              & Character     & Section~\ref{info:HVACnode}                                              &               &                \\ \hline
 \ct{FIXED_Q}                & Real          & Section~\ref{info:HVACaircoil}                                           & kW            &                \\ \hline
+\ct{GEOM}                   & Logical       & Section~\ref{info:hvac_geom}                                             &               & \ct{F}        \\ \hline
+\ct{GEOM2}                  & Logical       & Section~\ref{info:hvac_geom}                                             &               & \ct{F}        \\ \hline
 \ct{ID}                      & Character     & Section~\ref{info:HVAC}                                                  &               &                \\ \hline
 \ct{LEAK_ENTHALPY}          & Logical       & Section~\ref{info:local_leakage}                                         &               & \ct{F}        \\ \hline
 \ct{LEAK_PRESSURE_EXPONENT}& Real          & Section~\ref{info:Leaks}                                                 &               & 0.5            \\ \hline
@@ -13546,6 +13588,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{NEAR_WALL_TURBULENCE_MODEL}                       & Character       & Section~\ref{info:LES}                    &                     &                         \\ \hline
 \ct{NET_HEAT_FLUX}                                     & Real            & Section~\ref{info:convection}             & \unit{kW/m^2}            &                         \\ \hline
 \ct{NO_SLIP}                                            & Logical         & Section~\ref{info:WALL_MODEL}             &                     & \ct{F}                 \\ \hline
+\ct{NODE_ID}                                          & Character          & Section~\ref{info:hvac_geom}              &                     &                       \\ \hline
 \ct{NPPC}                                                & Integer         & Section~\ref{info:particle_flux}          &                     & 1                       \\ \hline
 \ct{NUSSELT_C0}                                         & Real            & Section~\ref{info:convection}             &                     &                         \\ \hline
 \ct{NUSSELT_C1}                                         & Real            & Section~\ref{info:convection}             &                     &                         \\ \hline
