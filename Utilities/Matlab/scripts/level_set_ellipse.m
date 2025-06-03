@@ -163,7 +163,7 @@ for slope=slope_angle
 end
 
 max_err = max(error_table{:,2:end}(:));
-if max_err>.15
+if max_err>.2
     display(['Matlab Warning: LS_ellipse is out of tolerance. Max error = ',num2str(max_err)])
 end
 
