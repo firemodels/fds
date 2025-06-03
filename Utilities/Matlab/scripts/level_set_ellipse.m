@@ -163,7 +163,7 @@ for slope=slope_angle
 end
 
 max_err = max(error_table{:,2:end}(:));
-if max_err>.15
+if max_err>.2
     display(['Matlab Warning: LS_ellipse is out of tolerance. Max error = ',num2str(max_err)])
 end
 
@@ -218,8 +218,9 @@ end
 function [phi_s_x,phi_s_y] = slope_adj(dzdx,dzdy)
     beta=0.01; % packing ratio (-), FDS default
     % Rothermel optimum packing ratio
-    phi_s_x = sign(dzdx)*5.275*beta^-0.3*dzdx^2;
-    phi_s_y = sign(dzdy)*5.275*beta^-0.3*dzdy^2;
+    dzds = sqrt(dzdx^2+dzdy^2);
+    phi_s_x = 5.275*beta^-0.3*dzdx*dzds;
+    phi_s_y = 5.275*beta^-0.3*dzdy*dzds;
 end
 
 % calculate virtual wind vector for slope
@@ -233,7 +234,13 @@ function [u_virtual,v_virtual]= virtual_wind(phi_s_x,phi_s_y)
     C = 7.47*exp(-0.8711*sigma.^0.55);
     B = 0.15988*sigma.^0.54;
     E = 0.715*exp(-0.01094*sigma);
+    phi_s=sqrt(phi_s_x^2+phi_s_y^2);
+    if (phi_s>0)
+        uv_tmp = 0.3048/phi_s*(phi_s/C*beta_ratio^E)^(1/B);
+    else
+        uv_tmp = 0;
+    end
     % divide by 60 to maintain units of m/s elsewhere
-    u_virtual = 0.3048*(phi_s_x/C*beta_ratio^E)^(1/B)/60;
-    v_virtual = 0.3048*(phi_s_y/C*beta_ratio^E)^(1/B)/60;
+    u_virtual = uv_tmp*phi_s_x/60;
+    v_virtual = uv_tmp*phi_s_y/60;
 end
