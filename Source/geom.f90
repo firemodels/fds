@@ -8852,7 +8852,7 @@ SF=> SURFACE(SURF_INDEX)
 CF=> CUT_FACE(ICF)
 
 STAGE_FLG_BRANCH : SELECT CASE(STAGE_FLG)
-   
+
 CASE(INTEGER_ONE) ! Geometry information for CFACE.
 
    CALL ALLOCATE_STORAGE(NM,SURF_INDEX=SURF_INDEX,CFACE_INDEX=CFACE_INDEX)
@@ -23324,7 +23324,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       ENDDO
       ALLOCATE(G%SURF_ID(1:N_SURF_ID))
       G%SURF_ID(1:N_SURF_ID) = SURF_ID(1:N_SURF_ID)
-      
+
       ! Now find correspondence with SURFACE(N)%ID:
       IF (ALLOCATED(SURF_ID_IND)) DEALLOCATE(SURF_ID_IND)
       ALLOCATE(SURF_ID_IND(N_SURF_ID))
@@ -23340,7 +23340,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
           IF(.NOT.IN_LIST) THEN
              WRITE(MESSAGE,'(A,I4,3A)') 'ERROR(716): problem with GEOM, the surface ID(',I,') =',&
                                          TRIM(SURF_ID(I)),' is not defined.'
-             CALL SHUTDOWN(MESSAGE)
+             CALL SHUTDOWN(MESSAGE); RETURN
           ENDIF
       ENDDO
    ENDIF
@@ -23747,7 +23747,7 @@ DO IG = 1, N_GEOMETRY
    ENDDO
 
    ! Check for duct nodes
-   
+
    DO J = 1,G%N_FACES
       IF (SURFACE(G%SURFS(J))%NODE_ID/='null') THEN
          G%HAVE_NODE = .TRUE.
