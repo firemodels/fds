@@ -21,7 +21,7 @@
       MATL_ID = 'vegetation'
       SURFACE_VOLUME_RATIO = 4000
       LENGTH = 0.05
-      MOISTURE_FRACTION = 0.5
+      MOISTURE_CONTENT = 0.5
       GEOMETRY = 'CYLINDRICAL'/
 &PART ID = 'foliage part', SURF_ID = 'foliage surf', DRAG_LAW='CYLINDER', 
 STATIC=T, QUANTITIES='PARTICLE BULK DENSITY'/

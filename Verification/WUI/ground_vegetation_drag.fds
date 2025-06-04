@@ -52,7 +52,7 @@
 
 &SURF ID = 'GRASS'
       MATL_ID = 'Dry Grass','SOIL'
-      MOISTURE_FRACTION(1) = 0.1
+      MOISTURE_CONTENT(1) = 0.1
       MASS_PER_VOLUME(1) = 4.
       COLOR = 'FOREST GREEN'
       DRAG_COEFFICIENT = 2.8
@@ -70,7 +70,7 @@
 
 &SURF ID = 'Blade of Grass'
       MATL_ID = 'Dry Grass'
-      MOISTURE_FRACTION = 0.1
+      MOISTURE_CONTENT = 0.1
       SURFACE_VOLUME_RATIO = 3092.
       LENGTH = 0.02
       GEOMETRY = 'CYLINDRICAL' /

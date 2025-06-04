@@ -1,0 +1,7 @@
+&HEAD CHID='WRC_1_cm', TITLE='Parallel Panel Test, WRC, Propane, 60 kW' /
+
+&CATF OTHER_FILES='Mesh_1_cm.txt','WRC_Reactions.txt','Common_Materials.txt','Burner.txt','Panels.txt','Output.txt' /
+
+&TIME T_END=600.0 /
+
+&TAIL /

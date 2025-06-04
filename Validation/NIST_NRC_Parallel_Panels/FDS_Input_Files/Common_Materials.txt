@@ -1,0 +1,23 @@
+
+&MATL ID = 'MINERAL WOOL'
+      CONDUCTIVITY = 0.035
+      SPECIFIC_HEAT = 0.8
+      DENSITY = 70. /
+
+&MATL ID            = 'MARINITE'
+      EMISSIVITY    = 0.9
+      DENSITY       = 737.
+      SPECIFIC_HEAT = 1.2
+      CONDUCTIVITY  = 0.12 /
+
+&MATL ID            = 'STEEL'
+      EMISSIVITY    = 0.9
+      DENSITY       = 7800.
+      SPECIFIC_HEAT = 0.465        
+      CONDUCTIVITY  = 43. /
+
+&SURF ID            = 'STEEL'
+      MATL_ID       = 'STEEL'
+      THICKNESS     = 0.003
+      COLOR         = 'BLACK' /
+
