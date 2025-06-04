@@ -11942,6 +11942,10 @@ MESH_LOOP_1: DO NM=1,NMESHES
          WRITE(MESSAGE,'(3A)') 'ERROR(802): VENT ',TRIM(ID), ' needs an explicit ID because it involves HVAC.'
          CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
       ENDIF
+      IF (SURF_ID=='HVAC' .AND. GEOM) THEN
+         WRITE(MESSAGE,'(3A)') 'ERROR(xxx): VENT ',TRIM(ID), ' cannot have SURF_ID=HVAC and GEOM=T.'
+         CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
+      ENDIF
 
       ! Special cases where VENT is specified with PBX, PBY, PBZ, MB, or DB
 
