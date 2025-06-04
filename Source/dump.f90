@@ -2349,10 +2349,6 @@ MESH_LOOP: DO NM=1,NMESHES
          ENDIF
       ENDIF
 
-      ! Render GEOM vents using SURF properties (that is, do not draw GEOM vents in Smokeview)
-
-      IF (VT%GEOM) VT%TYPE_INDICATOR = -2
-
    ENDDO VENT_LOOP
 
    ! Look for interpolated mesh boundaries and ensure that Smokeview leaves these blank (VENT_INDICES=-1).
