@@ -13,7 +13,7 @@
 
 &SURF ID                   = 'foliage'
       MATL_ID              = 'dry foliage'
-      MOISTURE_FRACTION    = 0.00
+      MOISTURE_CONTENT    = 0.00
       SURFACE_VOLUME_RATIO = 3940.
       LENGTH               = 0.20
       GEOMETRY             = 'CYLINDRICAL' /

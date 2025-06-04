@@ -49,7 +49,7 @@
 
 &SURF ID                        = 'wet vegetation'
       MATL_ID(1,1:1)            = 'GENERIC VEGETATION'
-      MOISTURE_FRACTION         = 0.058
+      MOISTURE_CONTENT         = 0.058
       SURFACE_VOLUME_RATIO      = 12240.
       LENGTH                    = 0.20
       GEOMETRY                  = 'CYLINDRICAL' /

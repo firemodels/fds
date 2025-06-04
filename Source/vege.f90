@@ -156,7 +156,7 @@ SUBROUTINE INITIALIZE_LEVEL_SET_FIRESPREAD_2(NM,MODE)
 
 INTEGER, INTENT(IN) :: NM,MODE
 INTEGER :: I,IM1,IM2,IIG,IP1,IP2,J,JJG,JM1,JP1
-REAL(EB) :: DZT_DUM,G_EAST,G_WEST,G_SOUTH,G_NORTH
+REAL(EB) :: DZT_DUM,DZTDX_DUM,DZTDY_DUM,G_EAST,G_WEST,G_SOUTH,G_NORTH
 
 T_NOW = CURRENT_TIME()
 
@@ -218,7 +218,6 @@ ALLOCATE(M%MAG_ZT(IBAR,JBAR)); CALL ChkMemErr('VEGE:LEVEL SET','MAG_ZT',IZERO) ;
 ! Rothermel 'Phi' factors for effects of Wind and Slope on ROS
 
 ALLOCATE(M%PHI_WS(IBAR,JBAR))   ; CALL ChkMemErr('VEGE:LEVEL SET','PHI_W',IZERO)   ; PHI_WS => M%PHI_WS    ; PHI_WS = 0.0_EB
-ALLOCATE(M%PHI_S(IBAR,JBAR))    ; CALL ChkMemErr('VEGE:LEVEL SET','PHI_S',IZERO)   ; PHI_S => M%PHI_S
 ALLOCATE(M%PHI_S_X(IBAR,JBAR))  ; CALL ChkMemErr('VEGE:LEVEL SET','PHI_S_X',IZERO) ; PHI_S_X => M%PHI_S_X
 ALLOCATE(M%PHI_S_Y(IBAR,JBAR))  ; CALL ChkMemErr('VEGE:LEVEL SET','PHI_S_Y',IZERO) ; PHI_S_Y => M%PHI_S_Y
 
@@ -296,16 +295,19 @@ DO JJG=1,JBAR
          E_ROTH = 0.715_EB * EXP(-0.01094_EB * SF%VEG_LSET_SIGMA)
          BETA_OP_ROTH = 0.20395_EB * (SF%VEG_LSET_SIGMA**(-0.8189_EB))! Optimum packing ratio
 
-         ! Limit effect to slope lte 80 degrees. Phi_s_x,y are slope factors (Rothermel model)
+         ! Slope vector
+         DZTDX_DUM = DZTDX(IIG,JJG)
+         DZTDY_DUM = DZTDY(IIG,JJG)
+         DZT_DUM = SQRT(DZTDX_DUM**2._EB+DZTDY_DUM**2._EB)
+         ! Limit effect to slope lte 80 degrees
+         IF (DZT_DUM>5.67_EB) THEN
+            DZTDX_DUM = DZTDX_DUM * 5.67_EB/DZT_DUM
+            DZTDY_DUM = DZTDY_DUM * 5.67_EB/DZT_DUM
+            DZT_DUM = 5.67_EB
+         ENDIF
 
-         DZT_DUM = MIN(5.67_EB,ABS(DZTDX(IIG,JJG))) ! 5.67 ~ tan 80 deg
-         PHI_S_X(IIG,JJG) = 5.275_EB * ((SF%VEG_LSET_BETA)**(-0.3_EB)) * DZT_DUM**2
-         PHI_S_X(IIG,JJG) = SIGN(PHI_S_X(IIG,JJG),DZTDX(IIG,JJG))
-         DZT_DUM = MIN(1.73_EB,ABS(DZTDY(IIG,JJG))) ! 1.73 ~ tan 60 deg
-         PHI_S_Y(IIG,JJG) = 5.275_EB * ((SF%VEG_LSET_BETA)**(-0.3_EB)) * DZT_DUM**2
-         PHI_S_Y(IIG,JJG) = SIGN(PHI_S_Y(IIG,JJG),DZTDY(IIG,JJG))
-
-         PHI_S(IIG,JJG) = SQRT(PHI_S_X(IIG,JJG)**2 + PHI_S_Y(IIG,JJG)**2)
+         PHI_S_X(IIG,JJG) = 5.275_EB * ((SF%VEG_LSET_BETA)**(-0.3_EB)) * DZTDX_DUM * DZT_DUM
+         PHI_S_Y(IIG,JJG) = 5.275_EB * ((SF%VEG_LSET_BETA)**(-0.3_EB)) * DZTDY_DUM * DZT_DUM
 
       ENDIF IF_ELLIPSE
 
@@ -332,8 +334,8 @@ INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T,DT
 INTEGER :: IIG,IW,JJG,IC,OUTPUT_INDEX
 INTEGER :: KDUM,KWIND,ICF,IKT
-REAL(EB) :: UMF_TMP,PHX,PHY,MAG_PHI,PHI_W_X,PHI_W_Y,UMF_X,UMF_Y,UMAG,ROS_MAG,UMF_MAG,WIND_FACTOR,&
-            SIN_THETA,COS_THETA,THETA,ZWIND(2),U_Z(2),V_Z(2),REF_WIND_HEIGHT
+REAL(EB) :: UMF_TMP,PHX,PHY,MAG_PHI,PHI_S,PHI_W_X,PHI_W_Y,UMF_X,UMF_Y,UMAG,ROS_MAG,UMF_MAG,&
+            WIND_FACTOR,SIN_THETA,COS_THETA,THETA,ZWIND(2),U_Z(2),V_Z(2),REF_WIND_HEIGHT
 
 T_NOW = CURRENT_TIME()
 
@@ -464,7 +466,9 @@ DO JJG=1,JBAR
 
          ! Include Rothermel slope factor
 
-         IF (PHI_S(IIG,JJG) > 0.0_EB) THEN
+         PHI_S = SQRT(PHI_S_X(IIG,JJG)+PHI_S_Y(IIG,JJG))
+
+         IF (PHI_S > 0.0_EB) THEN
 
             PHX = PHI_W_X + PHI_S_X(IIG,JJG)
             PHY = PHI_W_Y + PHI_S_Y(IIG,JJG)
@@ -487,13 +491,11 @@ DO JJG=1,JBAR
             ! 0.3048 ~= 1/3.281
             ! if phi_s < 0 then a complex value (NaN) results. Using abs(phi_s) and sign function to correct.
 
-            UMF_TMP = (((ABS(PHI_S_X(IIG,JJG)) * (SF%VEG_LSET_BETA / BETA_OP_ROTH)**E_ROTH)/C_ROTH)**(1/B_ROTH))*0.3048
-            UMF_TMP = SIGN(UMF_TMP,PHI_S_X(IIG,JJG))
-            UMF_X = UMF_X + UMF_TMP
+            UMF_TMP = &
+            0.3048_EB/PHI_S*(((SF%VEG_LSET_BETA / BETA_OP_ROTH)**E_ROTH)*PHI_S/C_ROTH)**(1._EB/B_ROTH)
 
-            UMF_TMP = (((ABS(PHI_S_Y(IIG,JJG)) * (SF%VEG_LSET_BETA / BETA_OP_ROTH)**E_ROTH)/C_ROTH)**(1/B_ROTH))*0.3048
-            UMF_TMP = SIGN(UMF_TMP,PHI_S_Y(IIG,JJG))
-            UMF_Y = UMF_Y + UMF_TMP
+            UMF_X = UMF_X + UMF_TMP*PHI_S_X(IIG,JJG)
+            UMF_Y = UMF_Y + UMF_TMP*PHI_S_Y(IIG,JJG)
 
          ELSE
 
@@ -553,18 +555,18 @@ IF (.NOT.PREDICTOR) THEN
                   WC => WALL(IW)
                   B1 => BOUNDARY_PROP1(WC%B1_INDEX)
                   OUTPUT_INDEX = IW
-                  IF (PHI_LS(IIG,JJG)>=0._EB .AND. B1%T_IGN>9.E5_EB) CALL IGNITE_GRID_CELL
                   B2 => BOUNDARY_PROP2(WC%B2_INDEX)
                   B2%PHI_LS = PHI_LS(IIG,JJG)
+                  IF (PHI_LS(IIG,JJG)>=0._EB .AND. B1%T_IGN>9.E5_EB) CALL IGNITE_GRID_CELL                  
                ELSE  
                   DO IW=1,CUT_FACE(ICF)%NFACE ! All CC_INBOUNDARY CFACES on this cell.
                      CFA => CFACE(CUT_FACE(ICF)%CFACE_INDEX(IW))
                      B1  => BOUNDARY_PROP1(CFA%B1_INDEX)
                      OUTPUT_INDEX = CUT_FACE(ICF)%CFACE_INDEX(IW) - &
                         INTERNAL_CFACE_CELLS_LB+N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-                     IF (PHI_LS(IIG,JJG)>=0._EB .AND. B1%T_IGN>9.E5_EB) CALL IGNITE_GRID_CELL
                      B2 => BOUNDARY_PROP2(CFA%B2_INDEX)
                      B2%PHI_LS = PHI_LS(IIG,JJG)
+                     IF (PHI_LS(IIG,JJG)>=0._EB .AND. B1%T_IGN>9.E5_EB) CALL IGNITE_GRID_CELL                     
                   ENDDO
                ENDIF
             ENDDO
@@ -581,9 +583,9 @@ IF (.NOT.PREDICTOR) THEN
             WC => WALL(IW)
             B1 => BOUNDARY_PROP1(WC%B1_INDEX)
             OUTPUT_INDEX = IW
-            IF (PHI_LS(IIG,JJG)>=0._EB .AND. B1%T_IGN>9.E5_EB) CALL IGNITE_GRID_CELL
             B2 => BOUNDARY_PROP2(WC%B2_INDEX)
             B2%PHI_LS = PHI_LS(IIG,JJG)
+            IF (PHI_LS(IIG,JJG)>=0._EB .AND. B1%T_IGN>9.E5_EB) CALL IGNITE_GRID_CELL            
          ENDDO
       ENDDO
    ENDIF
@@ -598,10 +600,10 @@ CONTAINS
 
 SUBROUTINE IGNITE_GRID_CELL
 
-REAL(EB) :: CROSSING_DISTANCE
+REAL(EB) :: CROSSING_DISTANCE,FIRE_DEPTH,TAU_2
 
 B1%T_IGN = T
-ROS_MAG = MAX(0.01_EB,SQRT(SR_X_LS(IIG,JJG)**2 + SR_Y_LS(IIG,JJG)**2))  ! Rate Of Spread magnitude
+ROS_MAG = MAX(0.0001_EB,SQRT(SR_X_LS(IIG,JJG)**2 + SR_Y_LS(IIG,JJG)**2))  ! Rate Of Spread magnitude
 IF (ABS(SR_X_LS(IIG,JJG))<TWO_EPSILON_EB) THEN
    CROSSING_DISTANCE = DY(JJG)
 ELSEIF (ABS(SR_Y_LS(IIG,JJG))<TWO_EPSILON_EB) THEN
@@ -610,11 +612,23 @@ ELSE
    CROSSING_DISTANCE = SQRT( (MIN(DX(IIG),ABS(SR_X_LS(IIG,JJG)/SR_Y_LS(IIG,JJG))*DY(JJG)))**2 + &
                              (MIN(DY(JJG),ABS(SR_Y_LS(IIG,JJG)/SR_X_LS(IIG,JJG))*DX(IIG)))**2 )
 ENDIF
-B1%BURN_DURATION = SF%BURN_DURATION + CROSSING_DISTANCE/ROS_MAG
-B1%AREA_ADJUST = SF%BURN_DURATION/B1%BURN_DURATION
-! Adjust mass flux for TAU ramp to conserve total energy output
+FIRE_DEPTH = SF%BURN_DURATION*ROS_MAG
+IF (FIRE_DEPTH >= CROSSING_DISTANCE) THEN
+   ! tau_1
+   B2%TAU_LS = CROSSING_DISTANCE/ROS_MAG
+   ! tau_2
+   TAU_2 = (FIRE_DEPTH - CROSSING_DISTANCE)/ROS_MAG
+ELSE
+   ! tau_1
+   B2%TAU_LS = FIRE_DEPTH/ROS_MAG
+   ! tau_2
+   TAU_2 = (CROSSING_DISTANCE - FIRE_DEPTH)/ROS_MAG
+ENDIF
+
+B1%BURN_DURATION = 2._EB*B2%TAU_LS + TAU_2
+! Adjust mass flux to conserve total energy output
 IF (LEVEL_SET_COUPLED_FIRE) B1%AREA_ADJUST =  B1%AREA_ADJUST * &
-      B1%BURN_DURATION/(B1%BURN_DURATION - TWTH*SF%RAMP(REACTION(1)%FUEL_SMIX_INDEX)%TAU)
+      SF%BURN_DURATION/(B2%TAU_LS+TAU_2)
 
 IF (STORE_LS_SPREAD_RATE) LS_SPREAD_RATE(OUTPUT_INDEX) = SQRT(SR_X_LS(IIG,JJG)**2 + SR_Y_LS(IIG,JJG)**2)
 

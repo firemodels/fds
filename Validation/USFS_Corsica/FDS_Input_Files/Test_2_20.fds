@@ -28,7 +28,7 @@
 
 &SURF ID                   = 'Pine Needles'
       MATL_ID              = 'GENERIC VEGETATION'
-      MOISTURE_FRACTION    = 0.08
+      MOISTURE_CONTENT    = 0.08
       SURFACE_VOLUME_RATIO = 3057.
       LENGTH               = 0.02
       GEOMETRY             = 'CYLINDRICAL' /
