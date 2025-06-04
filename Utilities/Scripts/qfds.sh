@@ -129,6 +129,7 @@ else
 fi
 EMAIL=
 casedir=
+cram=no
 use_default_casedir=
 USERMAX=
 dir=.
@@ -147,7 +148,7 @@ commandline=`echo $* | sed 's/-V//' | sed 's/-v//'`
 
 #*** read in parameters from command line
 
-while getopts 'A:b:d:e:GhHIj:Ln:o:Pp:q:stT:U:vw:y:Y' OPTION
+while getopts 'A:b:cd:e:GhHIj:Ln:o:Pp:q:stT:U:vw:y:Y' OPTION
 do
 case $OPTION  in
   A)
@@ -155,6 +156,9 @@ case $OPTION  in
    ;;
   b)
    EMAIL="$OPTARG"
+   ;;
+  c)
+   cram="yes"
    ;;
   d)
    dir="$OPTARG"
@@ -389,7 +393,6 @@ cat << EOF >> $scriptfile
 #SBATCH --partition=$queue
 #SBATCH --ntasks=$n_mpi_processes
 #SBATCH --cpus-per-task=$n_openmp_threads
-#SBATCH --nodes=$nodes
 #SBATCH --time=$walltime
 EOF
 if [ "$ACCOUNT" != "" ]; then
@@ -415,6 +418,12 @@ if [ "$benchmark" == "yes" ]; then
 cat << EOF >> $scriptfile
 #SBATCH --exclusive
 #SBATCH --cpu-freq=Performance
+EOF
+fi
+
+if [ "$cram" == "no" ]; then
+cat << EOF >> $scriptfile
+#SBATCH --nodes=$nodes
 EOF
 fi
 
