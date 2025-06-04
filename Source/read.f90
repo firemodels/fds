@@ -2622,12 +2622,12 @@ IF (VTK_DIR/=RESULTS_DIR) THEN
 ENDIF
 
 
-#ifdef _WIN32
-      CALL EXECUTE_COMMAND_LINE('cd > workingdir.txt')
-#else
-      CALL EXECUTE_COMMAND_LINE('pwd > workingdir.txt')
-#endif
 IF (MY_RANK==0) THEN
+#ifdef _WIN32
+   CALL EXECUTE_COMMAND_LINE('cd > workingdir.txt')
+#else
+   CALL EXECUTE_COMMAND_LINE('pwd > workingdir.txt')
+#endif
    OPEN(LU_WDIR, FILE="workingdir.txt", STATUS="OLD", ACTION="READ")
    READ(LU_WDIR, '(A)') WORKING_DIR
    CLOSE(LU_WDIR)
