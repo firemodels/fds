@@ -576,12 +576,14 @@ IF (WRITE_VTK_GEOM) THEN
 #ifdef WITH_HDF5
    CALL WRITE_VTKHDF_GEOM_FILE
 #endif
+IF (MY_RANK==0 .AND. VERBOSE) CALL VERBOSE_PRINTOUT('Completed VTK Geometry initialization')
 ENDIF
 
 ! Make an initial dump of ambient values
 IF (.NOT.RESTART) THEN
 #ifdef WITH_HDF5
    IF ((VTK_HDF).AND.(WRITE_VTK)) CALL INITIALIZE_VTKHDF_FILES(T,LOWER_MESH_INDEX)
+   IF (MY_RANK==0 .AND. VERBOSE) CALL VERBOSE_PRINTOUT('Completed VTK File initialization')
    CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)  ! Force all processes to sync up before dumping buffers
 #endif
    WROTE_SL3D = .FALSE.
@@ -1096,7 +1098,6 @@ MAIN_LOOP: DO
       ENDDO
    ENDIF
 #endif
-
    ! Dump outputs such as HRR, DEVC, etc.
 
    CALL DUMP_GLOBAL_OUTPUTS
