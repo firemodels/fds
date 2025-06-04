@@ -1,0 +1,30 @@
+
+&REAC SOOT_YIELD=0.02
+      FUEL='PBT' 
+      FORMULA='C4H10O2' 
+      FUEL_RADCAL_ID='MMA' /  4th SFPE Handbook, HoC, Table C.2; Soot, Table 3-4.16
+
+&SURF ID = 'SAMPLE FRONT'
+      COLOR  = 'BLACK'
+      MATL_ID  = 'PBT','MARINITE'
+      THICKNESS = 0.00635,0.0254 /
+
+&SURF ID = 'SAMPLE BACK'
+      COLOR  = 'BEIGE'
+      MATL_ID  = 'MARINITE','PBT'
+      THICKNESS = 0.0254,0.00635 /
+
+&MATL ID='PBT'
+      ABSORPTION_COEFFICIENT=2560.
+      N_REACTIONS=1
+      A(1) = 2.49E14
+      E(1) = 2.12E5
+      EMISSIVITY=0.88
+      DENSITY=1300.
+      SPEC_ID='PBT'
+      NU_SPEC=1.
+      HEAT_OF_REACTION=507.
+      HEAT_OF_COMBUSTION=19500.
+      CONDUCTIVITY = 0.29
+      SPECIFIC_HEAT = 2.23 /
+

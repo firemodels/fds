@@ -12,7 +12,7 @@
 
 &SURF ID                        = 'wet vegetation'
       MATL_ID                   = 'dry pine'
-      MOISTURE_FRACTION         = 0.25
+      MOISTURE_CONTENT         = 0.25
       SURFACE_VOLUME_RATIO      = 8000.
       LENGTH                    = 0.1
       GEOMETRY                  = 'CYLINDRICAL' /

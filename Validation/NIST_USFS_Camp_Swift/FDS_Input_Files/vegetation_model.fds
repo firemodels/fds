@@ -44,7 +44,7 @@
 &SURF ID = 'bluestem_lower_blade'
       MATL_ID = 'GENERIC VEGETATION'
       SURFACE_VOLUME_RATIO = 8439
-      MOISTURE_FRACTION = 0.259
+      MOISTURE_CONTENT = 0.259
       LENGTH =0.3
       GEOMETRY = 'CYLINDRICAL' /
 
@@ -71,7 +71,7 @@
 &SURF ID = 'bluestem_lower_cyl'
       MATL_ID = 'GENERIC VEGETATION'
       SURFACE_VOLUME_RATIO = 1850
-      MOISTURE_FRACTION = 0.259
+      MOISTURE_CONTENT = 0.259
       LENGTH =0.3
       GEOMETRY = 'CYLINDRICAL' /
 
@@ -100,7 +100,7 @@
 &SURF ID = 'bluestem_upper_blade'
       MATL_ID = 'GENERIC VEGETATION'
       SURFACE_VOLUME_RATIO = 9147
-      MOISTURE_FRACTION = 0.107
+      MOISTURE_CONTENT = 0.107
       LENGTH =0.5
       GEOMETRY = 'CYLINDRICAL' /
 
@@ -127,7 +127,7 @@
 &SURF ID = 'bluestem_upper_small_cyl'
       MATL_ID = 'GENERIC VEGETATION'
       SURFACE_VOLUME_RATIO = 6768
-      MOISTURE_FRACTION = 0.107
+      MOISTURE_CONTENT = 0.107
       LENGTH =0.5
       GEOMETRY = 'CYLINDRICAL' /
 
@@ -154,7 +154,7 @@
 &SURF ID = 'bluestem_upper_large_cyl'
       MATL_ID = 'GENERIC VEGETATION'
       SURFACE_VOLUME_RATIO = 2438
-      MOISTURE_FRACTION = 0.107
+      MOISTURE_CONTENT = 0.107
       LENGTH =0.5 
       GEOMETRY = 'CYLINDRICAL' /
 
@@ -183,7 +183,7 @@
 &SURF ID = 'camphorweed_leaf'
       MATL_ID = 'GENERIC VEGETATION'
       SURFACE_VOLUME_RATIO = 11170.
-      MOISTURE_FRACTION = 0.106
+      MOISTURE_CONTENT = 0.106
       LENGTH =0.20
       GEOMETRY = 'CYLINDRICAL' /
 
@@ -210,7 +210,7 @@
 &SURF ID = 'camphorweed_small_cyl'
       MATL_ID = 'GENERIC VEGETATION'
       SURFACE_VOLUME_RATIO = 3510.
-      MOISTURE_FRACTION = 0.106
+      MOISTURE_CONTENT = 0.106
       LENGTH =0.45
       GEOMETRY = 'CYLINDRICAL' /
 
@@ -237,7 +237,7 @@
 &SURF ID = 'camphorweed_large_cyl'
       MATL_ID = 'GENERIC VEGETATION'
       SURFACE_VOLUME_RATIO = 1580. 
-      MOISTURE_FRACTION = 0.106
+      MOISTURE_CONTENT = 0.106
       LENGTH = 0.45
       GEOMETRY = 'CYLINDRICAL' /
 
@@ -266,7 +266,7 @@
 &SURF ID = 'threeawn_blade'
       MATL_ID = 'GENERIC VEGETATION'
       SURFACE_VOLUME_RATIO = 12280.
-      MOISTURE_FRACTION = 0.065
+      MOISTURE_CONTENT = 0.065
       LENGTH =0.41
       GEOMETRY = 'CYLINDRICAL' /
 
@@ -293,7 +293,7 @@
 &SURF ID = 'threeawn_cyl'
       MATL_ID = 'GENERIC VEGETATION'
       SURFACE_VOLUME_RATIO = 5910. 
-      MOISTURE_FRACTION = 0.065
+      MOISTURE_CONTENT = 0.065
       LENGTH = 0.41
       GEOMETRY = 'CYLINDRICAL' /
 
@@ -325,7 +325,7 @@
       ! mass weighted average of SVR = ((.653*8439+.367*1850)*.3+(.046*2438+.110*6768+.080*9147)*.5)/(.53*.8)
       SURFACE_VOLUME_RATIO = 6252.
       ! mass weighted moisture = ((.653*.25+.367*.25)*.3+(.046*.096+.110*.096+.080*.096)*.5)/(.53*.8)
-      MOISTURE_FRACTION = 0.21
+      MOISTURE_CONTENT = 0.21
       LENGTH = 0.1
       GEOMETRY = 'CYLINDRICAL' /
 
