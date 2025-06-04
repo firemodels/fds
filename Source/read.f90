@@ -9995,7 +9995,7 @@ END SELECT
 #ifndef WITH_MKL
 #ifdef WITH_HYPRE
 IF (PRES_FLAG==ULMAT_FLAG ) ULMAT_SOLVER_LIBRARY =HYPRE_FLAG
-IF (PRES_FLAG==UGLMAT_FLAG) UGLMAT_SOLVER_LIBRARY=HYPRE_FLAG
+IF (PRES_FLAG==UGLMAT_FLAG .OR. PRES_FLAG==GLMAT_FLAG) UGLMAT_SOLVER_LIBRARY=HYPRE_FLAG
 #endif
 #endif
 #ifndef WITH_HYPRE
@@ -11179,7 +11179,7 @@ MESH_LOOP: DO NM=1,NMESHES
                   IF (SURF_ID6(5)      ==SURFACE(NNN)%ID) OB%SURF_INDEX(-3)   = NNN
                   IF (SURF_ID6(6)      ==SURFACE(NNN)%ID) OB%SURF_INDEX( 3)   = NNN
                ENDDO
-               
+
                DO NNN=-3,3
                   IF (SURFACE(OB%SURF_INDEX(NNN))%NODE_ID/='null') THEN
                      WRITE(MESSAGE,'(A,A,A)')  'ERROR(xxx): OBST_ID ',TRIM(ID),' cannot have a SURF with NODE_ID.'
@@ -12333,7 +12333,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
                ENDDO
                IF (SURFACE(VT%SURF_INDEX)%NODE_ID /='null') THEN
                   WRITE(MESSAGE,'(3A)') 'ERROR(812): VENT ',TRIM(ID),' Use SURF_ID HVAC instead of NODE_ID.'
-                  CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN               
+                  CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                ENDIF
 
                IF (SURF_ID=='OPEN')                            VT%TYPE_INDICATOR =  2
