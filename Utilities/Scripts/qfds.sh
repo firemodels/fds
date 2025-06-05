@@ -52,6 +52,7 @@ function usage {
   fi
   echo "Other options:"
   echo " -b email_address - send an email to email_address when jobs starts, aborts and finishes"
+  echo " -c remove restriction limiting the job to the minimum number of nodes"
   echo " -d dir - specify directory where the case is found [default: .]"
   echo " -G use GNU OpenMPI version of fds"
   echo " -I use Intel MPI version of fds"
