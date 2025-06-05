@@ -19,9 +19,9 @@
 {\newcommand{\gitrevision}{unknown} }
 
 \ifcompgeom
-    \includeonly{Introduction_Chapter, Equation_Chapter, Mass_Chapter, Momentum_Chapter, Combustion_Chapter, Radiation_Chapter, Solid_Chapter, Aerosol_Chapter, Particle_Chapter, Device_Chapter, HVAC_Chapter, Complex_Geometry_Chapter, Appendices}
+    \includeonly{Introduction_Chapter, Equation_Chapter, Mass_Chapter, Momentum_Chapter, Combustion_Chapter, Radiation_Chapter, Solid_Chapter, Aerosol_Chapter, Particle_Chapter, Device_Chapter, HVAC_Chapter, Complex_Geometry_Chapter, Wildland_Chapter, Appendices}
 \else
-    \includeonly{Introduction_Chapter, Equation_Chapter, Mass_Chapter, Momentum_Chapter, Combustion_Chapter, Radiation_Chapter, Solid_Chapter, Aerosol_Chapter, Particle_Chapter, Device_Chapter, HVAC_Chapter, Appendices}
+    \includeonly{Introduction_Chapter, Equation_Chapter, Mass_Chapter, Momentum_Chapter, Combustion_Chapter, Radiation_Chapter, Solid_Chapter, Aerosol_Chapter, Particle_Chapter, Device_Chapter, HVAC_Chapter, Wildland_Chapter, Appendices}
 \fi
 
 \begin{document}
@@ -187,6 +187,7 @@ The following individuals and organizations played a role in the development of 
 \ifcompgeom
     \include{Complex_Geometry_Chapter}
 \fi
+\include{Wildland_Chapter}
 
 \bibliography{../Bibliography/FDS_refs,../Bibliography/FDS_general,../Bibliography/FDS_mathcomp}
 
