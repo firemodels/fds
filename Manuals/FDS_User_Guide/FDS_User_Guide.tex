@@ -1677,7 +1677,6 @@ One current limitation of the unstructured geometry algorithm is that a Cartesia
 \item Thin geometries and corners cannot split cells, one side must be blocked. See Sec.~\ref{info:thin_geom}.
 \item Backing external is allowed only on a single mesh.  If the back surface is on another mesh the backing will be set to \ct{VOID} (quietly).
 \item A \ct{VENT} cannot be applied to a \ct{GEOM}.  Surface properties must be applied face by face via \ct{SURF_ID}.
-\item No \ct{VENT} implies \ct{HVAC} cannot be applied to a \ct{GEOM} surface.  This is on our priority list and will be available in the future.
 \item Imposing a tangential velocity in geometries cannot be done. \ct{NO_SLIP} conditions assume a zero tangential velocity. Allowing this capability is also a development priority.
 \item Neither 3D heat transfer nor \ct{BURN_AWAY} are available in \ct{GEOM}.
 \item The \ct{HOLE} namelist does not apply to \ct{GEOM}.

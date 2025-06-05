@@ -12056,6 +12056,10 @@ MESH_LOOP_1: DO NM=1,NMESHES
          WRITE(MESSAGE,'(3A)') 'ERROR(802): VENT ',TRIM(ID), ' needs an explicit ID because it involves HVAC.'
          CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
       ENDIF
+      IF (SURF_ID=='HVAC' .AND. GEOM) THEN
+         WRITE(MESSAGE,'(3A)') 'ERROR(xxx): VENT ',TRIM(ID), ' cannot have SURF_ID=HVAC and GEOM=T.'
+         CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
+      ENDIF
 
       ! Special cases where VENT is specified with PBX, PBY, PBZ, MB, or DB
 
@@ -12252,10 +12256,6 @@ MESH_LOOP_1: DO NM=1,NMESHES
                   ENDDO
                   IF (BLOCKED) REJECT_VENT = .TRUE.
                ENDIF
-
-               ! If the VENT is on a GEOM do not reject (further setup in READ_GEOM)
-
-               IF (GEOM .AND. .NOT.(TERRAIN_CASE .AND. ALL(XB(1:6)>-1.01E6_EB))) REJECT_VENT = .FALSE.
 
                ! If the VENT is rejected, cycle
 
@@ -12562,7 +12562,7 @@ MESH_LOOP_2: DO NM=1,NMESHES
          ENDDO
       ENDIF
 
-      IF (VT%IOR==0 .AND. .NOT. VT%GEOM) THEN
+      IF (VT%IOR==0) THEN
          WRITE(MESSAGE,'(3A)')  'ERROR(818): VENT ',TRIM(VT%ID),' requires an orientation index, IOR.'
          CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
       ENDIF
@@ -12610,17 +12610,9 @@ MESH_LOOP_2: DO NM=1,NMESHES
 
       ! Check UVW
 
-      IF (.NOT.VT%GEOM) THEN
-         IF (ABS(VT%UVW(ABS(VT%IOR))) < TWO_EPSILON_EB) THEN
-            WRITE(MESSAGE,'(3A)')  'ERROR(821): VENT ',TRIM(VT%ID),' cannot have normal component of UVW equal to 0.'
-            CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
-         ENDIF
-      ENDIF
-
-      ! Special treatment for coloring GEOM surface with HVAC_BOUNDARY
-
-      IF (VT%GEOM .AND. VT%BOUNDARY_TYPE==HVAC_BOUNDARY) THEN
-         SURFACE(VT%SURF_INDEX)%RGB = (/0,128,0/) ! green
+      IF (ABS(VT%UVW(ABS(VT%IOR))) < TWO_EPSILON_EB) THEN
+         WRITE(MESSAGE,'(3A)')  'ERROR(821): VENT ',TRIM(VT%ID),' cannot have normal component of UVW equal to 0.'
+         CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
       ENDIF
 
    ENDDO VENT_LOOP_2
