@@ -429,6 +429,16 @@ DO NN=1,N_HVAC_READ
             WRITE(MESSAGE,'(A,I5)') 'ERROR(513): Ductnode has no ID, HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
+         IF ((GEOM .OR. GEOM2) .AND. VENT_ID/='null') THEN
+            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR(yyy): Ductnode with GEOM cannot have a VENT_ID. Ductnode ID:',TRIM(DN%ID),&
+                                        ', HVAC line number:',NN
+            CALL SHUTDOWN(MESSAGE); RETURN
+         ENDIF
+         IF (.NOT. GEOM .AND. VENT_ID=='null' .AND. N_DUCTS==1) THEN
+            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR(yyy): Ductnode with one duct needs either GEOM or VENT_ID. Ductnode ID:',&
+                                        TRIM(DN%ID),', HVAC line number:',NN
+            CALL SHUTDOWN(MESSAGE); RETURN
+         ENDIF
          DN%VENT_ID = VENT_ID
          DN%GEOM = GEOM
          IF (DN%VENT .AND. DN%GEOM) THEN
@@ -457,12 +467,12 @@ DO NN=1,N_HVAC_READ
             DN%N_DUCTS=ND
          ENDDO
          IF (DN%N_DUCTS == 1 .AND. .NOT. GEOM .AND. .NOT. AMBIENT .AND. VENT_ID=='null') THEN
-            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR(515): Non-AMBIENT or non VENT-connected ductnode must have >=2 ducts. Ductnode ID:',&
-                                        TRIM(DN%ID),', HVAC line number:',NN
+            WRITE(MESSAGE,'(A,A,A,A,I5)') 'ERROR(515): Non-AMBIENT, non-VENT, and non-GEOM connected ductnode ',&
+               '(i.e., internal node) must have >=2 ducts. Ductnode ID:',TRIM(DN%ID),', HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
          IF (DN%N_DUCTS >= 2 .AND. (AMBIENT .OR. GEOM .OR. VENT_ID/='null')) THEN
-            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR(516): AMBIENT, GEOM, or VENT-connected ductnode must have 1 duct. Ductnode ID:',&
+            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR(516): AMBIENT, VENT, or GEOM-connected ductnode must have 1 duct. Ductnode ID:',&
                                         TRIM(DN%ID),', HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
