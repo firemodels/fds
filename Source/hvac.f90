@@ -434,9 +434,9 @@ DO NN=1,N_HVAC_READ
                                         ', HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
-         IF (.NOT. GEOM .AND. VENT_ID=='null') THEN
-            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR(yyy): Ductnode with needs either GEOM or VENT_ID. Ductnode ID:',TRIM(DN%ID),&
-                                        ', HVAC line number:',NN
+         IF (.NOT. GEOM .AND. VENT_ID=='null' .AND. N_DUCTS==1) THEN
+            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR(yyy): Ductnode with one duct needs either GEOM or VENT_ID. Ductnode ID:',&
+                                        TRIM(DN%ID),', HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
          DN%VENT_ID = VENT_ID
