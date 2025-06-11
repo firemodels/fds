@@ -149,7 +149,7 @@ r= \begin{cases}
 \end{equation}
 If we take the example of the face $i+\frac{1}{2}$ then
 \begin{gather}
-\phi_{\rm local} = \phi_{i+1, j}-\phi_{i, j}
+\phi_{\rm local} = \phi_{i+1, j}-\phi_{i, j} \\[6pt]
 \phi_{\rm upwind}= \begin{cases}
     \phi_{i, j}-\phi_{i-1, j} &  \quad R_x > 0 \\[6pt]
     \phi_{i+2, j}-\phi_{i+1, j} & \quad R_x < 0
@@ -200,7 +200,7 @@ To compute the burning of a grid cell, it is recognized that the area of the cel
 \begin{figure}
     \begin{center}
         \scalebox{0.6}{\includegraphics{FIGURES/LS_burning_rate}}
-        \caption[Determination of burning rate for cell ignited in level set spread]{\label{fig:LS_burning_rate} Determination of burning rate for cell ignited in level set spread. The heat release per unit area is ramped up linearly, held at a fixed value, and ramped down linearly. The values which define this trapezoidal shape are determined for two possible scenarios. The characteristic cell depth, $D_{\rm cell}$, is greater than the fire depth, $D_{\rm fire}$, or vice versa.}
+        \caption[Determination of burning rate for cell ignited in level set spread]{\label{fig:LS_burning_rate} Determination of burning rate for cell ignited in level set spread. The heat release per unit area, $\dot{q}''$, is ramped up linearly, held at a fixed value, then ramped down linearly. The values which define this trapezoidal shape are determined for two possible scenarios: the characteristic cell depth, $D_{\rm cell}$, is greater than the fire depth, $D_{\rm fire}$, or vice versa.}
     \end{center}
 \end{figure}
 
