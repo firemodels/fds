@@ -11,12 +11,14 @@ parser.add_argument("--background", help="Background species formula",default='n
 parser.add_argument("--yaml_file",help="yaml file",default='noinput',required=True)
 parser.add_argument("--spec_file",help="Cantera to FDS species name lookup csv file (default is yaml_file.spec) with column headings FORMULA and NAME ",default='noinput')
 parser.add_argument("--fds_prop",help="Set to True (default) to use FDS properties when species is in spec_file. ",type=bool,default=True)
+parser.add_argument("--radcal",help="Set to True (default) to use the RADCAL ID in the spec_file. ",type=bool,default=True)
 parser.add_argument("--mf0_file",help="csv file containing MASS_FRACTION_0 with column headings FORMULA and MF0",default='noinput')
 args = parser.parse_args()
 
 yaml_file = args.yaml_file
 bg = args.background
 prop_flag = False
+radcal = True
 spec_data_flag = True
 
 try:
@@ -99,8 +101,11 @@ for i2 in range(n_species):
             write_props = False
       else:
          name = gas.species(i).name
+      if (radcal):
+         radcal_id = spec_data['RADCAL_ID'][spec_index[i]]
    else:
       name = gas.species(i).name
+      radcal = False
    element_list = list(gas.species(i).composition.keys())
    atoms_list = list(gas.species(i).composition.values())
    sigma = gas.species(i).transport.diameter*1E10
@@ -125,7 +130,9 @@ for i2 in range(n_species):
       outstr+="BACKGROUND=T,"
    print(outstr)
    if (write_alt):
-      print("      ALT_ID='"+spec_data['FORMULA'][spec_index[i]]+"'")
+      print("      ALT_ID='"+spec_data['FORMULA'][spec_index[i]]+"',")
+   if (radcal and radcal_id!='NONE'):
+      print("      RADCAL_ID='"+radcal_id+"',")
    if (mf0_index[i]!=-1):
       print("      MASS_FRACTION_0=",mf0_index[i],",")
    if (write_props):
