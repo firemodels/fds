@@ -53,7 +53,7 @@ if [ -d "$FIREMODELS/sundials" ]; then
   cd $FIREMODELS/sundials/BUILDDIR
   echo "Creating library directry..."
   export SUNDIALS_VERSION=$(git describe)
-  mkdir $FIREMODELS/libs/sundials/$SUNDIALS_VERSION
+  mkdir -p $FIREMODELS/libs/sundials/$SUNDIALS_VERSION
   echo "Cleaning sundials repository..."
   rm -r $FIREMODELS/sundials/BUILDDIR/*
   cp $FIREMODELS/fds/Build/Scripts/SUNDIALS/$CONFMAKE .
