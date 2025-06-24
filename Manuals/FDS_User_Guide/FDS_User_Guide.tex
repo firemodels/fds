@@ -2594,7 +2594,6 @@ The volume enclosed by \ct{XB} encompasses the entire assembly. The integral on 
       SPATIAL_STATISTIC='SURFACE INTEGRAL', RELATIVE=T, CONVERSION_FACTOR=10000,  /
 \end{lstlisting}
 The quantity \ct{'WALL ENTHALPY'} is the total energy within the volume carved out by a wall cell from front to back. This is why the \ct{IOR} is included because the integration need only be carried out for upward facing wall cells. Also, because the unit associated with this quantity is kJ rather than kJ/m$^2$, the \ct{CONVERSION_FACTOR} is needed to cancel out the area of each wall cell (0.01~m by 0.01~m) after the summation. The parameter \ct{RELATIVE=T} means that only the change in enthalpy is desired.
-.
 
 \subsubsection{Example: Unprotected Structural Steel}
 
@@ -4017,7 +4016,7 @@ Assigning either a normal HVAC node or a localized leakage HVAC to a GEOM is don
 	&HVAC ID='MY NODE',TYPE_ID='NODE',GEOM=T,..../
 \end{lstlisting}
 
-The \ct{SURF} input \ct{NODE_ID} can only be applied to complex geometry. It cannot be used for \ct{OBST} or \ct{VENT}. While more than one \ct{GEOM} and more than one face of a \ct{GEOM} can use the same node, the same node cannot be shared by both a \ct{VENT} and a \ct{GEOM}. 
+The \ct{SURF} input \ct{NODE_ID} can only be applied to complex geometry. It cannot be used for \ct{OBST} or \ct{VENT}. While more than one \ct{GEOM} and more than one face of a \ct{GEOM} can use the same node, the same node cannot be shared by both a \ct{VENT} and a \ct{GEOM}.
 
 To apply localized leakage to \ct{GEOM}, the process is similar. \ct{NODE_ID} on \ct{SURF} is still used to link faces of \ct{GEOM} to the localized leakage. The input for the localized leakage changes slightly. The inputs \ct{VENT_ID} and \ct{VENT2_ID} use \ct{GEOM} and \ct{GEOM2} to determine if the respective \ct{ID} is attached to a \ct{VENT} or a \ct{GEOM}.  For example, to attach the second vent for a localized leakage path:
 
