@@ -2543,14 +2543,15 @@ DEVICE_LOOP: DO N=1,N_DEVC
 
    IF (DV%QUANTITY_INDEX(1)>=0) CYCLE DEVICE_LOOP  ! Do not process gas phsae devices
 
+   IW  = 0
+   ICF = 0
+
    IF (DV%INIT_ID=='null' .AND. DV%LP_TAG==0) THEN ! Assume the device is tied to a WALL cell or CFACE
 
       IF (NM/=DV%MESH) CYCLE DEVICE_LOOP
       II  = INT(GINV(DV%X-M%XS,1,NM)*M%RDXI   + 1._EB)
       JJ  = INT(GINV(DV%Y-M%YS,2,NM)*M%RDETA  + 1._EB)
       KK  = INT(GINV(DV%Z-M%ZS,3,NM)*M%RDZETA + 1._EB)
-      IW  = 0
-      ICF = 0
 
       IF (DV%IOR/=0) CALL GET_WALL_INDEX(NM,II,JJ,KK,DV%IOR,IW)
 
