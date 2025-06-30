@@ -120,7 +120,7 @@
       ROUGHNESS = 0.002
       COLOR = 'TAN'
       MATL_ID(1,1:2) = 'WRC','water'
-      MATL_MASS_FRACTION(1,1:2) = 0.926,0.074
+      MATL_MASS_FRACTION(1,1:2) = 0.943,0.057
       MATL_ID(2,1) = 'MARINITE'
       STRETCH_FACTOR(1:2) = 1.,2.
       THICKNESS = 0.021,0.0254 /
@@ -130,7 +130,7 @@
       COLOR  = 'GRAY'
       MATL_ID(1,1) = 'MARINITE'
       MATL_ID(2,1:2) = 'WRC','water'
-      MATL_MASS_FRACTION(2,1:2) = 0.926,0.074
+      MATL_MASS_FRACTION(2,1:2) = 0.943,0.057
       STRETCH_FACTOR(1:2) = 2.,1.
       THICKNESS = 0.0254,0.021 /
 
