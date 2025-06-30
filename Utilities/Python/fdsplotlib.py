@@ -65,7 +65,7 @@ def dataplot(config_filename,**kwargs):
 
     if kwargs.get('plot_range'):
         plot_range_in = kwargs.get('plot_range')
-        plot_range = range(plot_range_in[0]-2,plot_range_in[-1])
+        plot_range = range(plot_range_in[0]-2,plot_range_in[-1]-1)
 
     # read the config file
     df = pd.read_csv(configdir+config_filename, sep=',', engine='python', comment='#', quotechar='"')
@@ -103,19 +103,24 @@ def dataplot(config_filename,**kwargs):
             # read data from exp file
             # set header to the row where column names are stored (Python is 0 based)
             E = pd.read_csv(expdir+pp.d1_Filename, header=int(pp.d1_Col_Name_Row-1), sep=',', engine='python', comment='#', quotechar='"')
-            x = E[pp.d1_Ind_Col_Name].values[:].astype(float)
-            y = E[pp.d1_Dep_Col_Name].values[:].astype(float)
 
-            # plot the exp data
-            f = plot_to_fig(x_data=x, y_data=y,
-                data_label=pp.d1_Key,
-                x_label=pp.Ind_Title,
-                y_label=pp.Dep_Title,
-                marker_style=pp.d1_Style,
-                x_min=pp.Min_Ind,x_max=pp.Max_Ind,
-                y_min=pp.Min_Dep,y_max=pp.Max_Dep,
-                legend_location=pp.Key_Position
-                )
+            x = E[pp.d1_Ind_Col_Name].values[:].astype(float)
+            # y = E[pp.d1_Dep_Col_Name].values[:].astype(float)
+            col_names = [c.strip() for c in pp.d1_Dep_Col_Name.split('|')]
+            # print(col_names)
+            y = E[col_names].values.astype(float)
+
+            for i, label in enumerate(col_names):
+                # plot the exp data
+                f = plot_to_fig(x_data=x, y_data=y[:, i],
+                    data_label=pp.d1_Key,
+                    x_label=pp.Ind_Title,
+                    y_label=pp.Dep_Title,
+                    marker_style=pp.d1_Style,
+                    x_min=pp.Min_Ind,x_max=pp.Max_Ind,
+                    y_min=pp.Min_Dep,y_max=pp.Max_Dep,
+                    legend_location=pp.Key_Position
+                    )
 
             # plt.figure(f.number) # make figure current
             # plt.show()
@@ -145,7 +150,9 @@ def dataplot(config_filename,**kwargs):
         # get the model results
         M = pd.read_csv(cmpdir+pp.d2_Filename, header=int(pp.d2_Col_Name_Row-1), sep=',', engine='python', comment='#', quotechar='"')
         x = M[pp.d2_Ind_Col_Name].values[:].astype(float)
-        y = M[pp.d2_Dep_Col_Name].values[:].astype(float)
+        # y = M[pp.d2_Dep_Col_Name].values[:].astype(float)
+        col_names = [c.strip() for c in pp.d2_Dep_Col_Name.split('|')]
+        y = M[col_names].values.astype(float)
 
         version_string = revision
         if (pp.VerStr_Filename):
@@ -154,18 +161,19 @@ def dataplot(config_filename,**kwargs):
             version_string = Lines[0].strip()
             file1.close()
 
-        f = plot_to_fig(x_data=x, y_data=y,
-            revision_label=version_string,
-            figure_handle=f,
-            x_label=pp.Ind_Title,
-            y_label=pp.Dep_Title,
-            data_label=pp.d2_Key,
-            line_style=pp.d2_Style,
-            x_min=pp.Min_Ind,x_max=pp.Max_Ind,
-            y_min=pp.Min_Dep,y_max=pp.Max_Dep,
-            legend_location=pp.Key_Position,
-            plot_title=pp.Plot_Title
-            )
+        for i, label in enumerate(col_names):
+            f = plot_to_fig(x_data=x, y_data=y[:, i],
+                revision_label=version_string,
+                figure_handle=f,
+                x_label=pp.Ind_Title,
+                y_label=pp.Dep_Title,
+                data_label=pp.d2_Key,
+                line_style=pp.d2_Style,
+                x_min=pp.Min_Ind,x_max=pp.Max_Ind,
+                y_min=pp.Min_Dep,y_max=pp.Max_Dep,
+                legend_location=pp.Key_Position,
+                plot_title=pp.Plot_Title
+                )
 
         plt.figure(f.number) # make figure current
         # plt.show()
