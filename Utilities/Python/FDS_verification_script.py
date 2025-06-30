@@ -6,6 +6,7 @@ import subprocess
 import fdsplotlib
 import importlib
 importlib.reload(fdsplotlib) # use for development (while making changes to fdsplotlib.py)
+print("Using:", fdsplotlib.__file__)
 
 # Scripts to run prior to dataplot
 
