@@ -3239,14 +3239,21 @@ SENDING_MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             PHI_LS_P => M%PHI_LS
          ENDIF
          IF (RNODE/=SNODE) THEN
-            NQT2 = 4
+            NQT2 = 5
             PACK_REAL_SEND_PKG14: DO LL=1,M3%NIC_S
-               II1 = M3%IIO_S(LL)
-               JJ1 = M3%JJO_S(LL)
+               II1 = M3%IIO_S(LL) ; II2 = II1
+               JJ1 = M3%JJO_S(LL) ; JJ2 = JJ1
+               SELECT CASE(M3%IOR_S(LL))
+                  CASE(-1) ; II2=II1+1
+                  CASE( 1) ; II2=II1-1
+                  CASE(-2) ; JJ2=JJ1+1
+                  CASE( 2) ; JJ2=JJ1-1
+               END SELECT
                M3%REAL_SEND_PKG14(NQT2*(LL-1)+1) = PHI_LS_P(II1,JJ1)
-               M3%REAL_SEND_PKG14(NQT2*(LL-1)+2) = M%U_LS(II1,JJ1)
-               M3%REAL_SEND_PKG14(NQT2*(LL-1)+3) = M%V_LS(II1,JJ1)
-               M3%REAL_SEND_PKG14(NQT2*(LL-1)+4) = M%Z_LS(II1,JJ1)
+               M3%REAL_SEND_PKG14(NQT2*(LL-1)+2) = PHI_LS_P(II2,JJ2)
+               M3%REAL_SEND_PKG14(NQT2*(LL-1)+3) = M%U_LS(II1,JJ1)
+               M3%REAL_SEND_PKG14(NQT2*(LL-1)+4) = M%V_LS(II1,JJ1)
+               M3%REAL_SEND_PKG14(NQT2*(LL-1)+5) = M%Z_LS(II1,JJ1)
             ENDDO PACK_REAL_SEND_PKG14
          ELSE
             M2=>MESHES(NOM)%OMESH(NM)
@@ -3540,19 +3547,26 @@ RECV_MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       ENDIF IF_RECEIVE_PARTICLES
 
       IF (CODE==14 .AND. M2%NIC_R>0 .AND. RNODE/=SNODE) THEN
-            NQT2 = 4
+            NQT2 = 5
             IF (PREDICTOR) THEN
                PHI_LS_P => M2%PHI1_LS
             ELSE
                PHI_LS_P => M2%PHI_LS
             ENDIF
             UNPACK_REAL_RECV_PKG14: DO LL=1,M2%NIC_R
-               II1 = M2%IIO_R(LL)
-               JJ1 = M2%JJO_R(LL)
+               II1 = M2%IIO_R(LL) ; II2 = II1
+               JJ1 = M2%JJO_R(LL) ; JJ2 = JJ1
+               SELECT CASE(M2%IOR_R(LL))
+                  CASE(-1) ; II2=II1+1
+                  CASE( 1) ; II2=II1-1
+                  CASE(-2) ; JJ2=JJ1+1
+                  CASE( 2) ; JJ2=JJ1-1
+               END SELECT
                PHI_LS_P(II1,JJ1) = M2%REAL_RECV_PKG14(NQT2*(LL-1)+1)
-               M2%U_LS(II1,JJ1)  = M2%REAL_RECV_PKG14(NQT2*(LL-1)+2)
-               M2%V_LS(II1,JJ1)  = M2%REAL_RECV_PKG14(NQT2*(LL-1)+3)
-               M2%Z_LS(II1,JJ1)  = M2%REAL_RECV_PKG14(NQT2*(LL-1)+4)
+               PHI_LS_P(II2,JJ2) = M2%REAL_RECV_PKG14(NQT2*(LL-1)+2)
+               M2%U_LS(II1,JJ1)  = M2%REAL_RECV_PKG14(NQT2*(LL-1)+3)
+               M2%V_LS(II1,JJ1)  = M2%REAL_RECV_PKG14(NQT2*(LL-1)+4)
+               M2%Z_LS(II1,JJ1)  = M2%REAL_RECV_PKG14(NQT2*(LL-1)+5)
             ENDDO UNPACK_REAL_RECV_PKG14
       ENDIF
 
