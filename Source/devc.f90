@@ -46,7 +46,6 @@ TYPE SUBDEVICE_TYPE
    INTEGER :: I1=-1,I2=-1,J1=-1,J2=-1,K1=-1,K2=-1
    !> !\}
    INTEGER :: N_PATH=0 !< Number of grid cells along subdevice path for TRANSMISSION or PATH OBSCURATION
-   INTEGER :: N_VALUES=0 !< Number of values for the subdevice used for computing spatial statistics
    !> !\{
    !> Grid index for a grid cell along subdevice path for TRANSMISSION or PATH OBSCURATION
    INTEGER, ALLOCATABLE, DIMENSION(:) :: I_PATH,J_PATH,K_PATH

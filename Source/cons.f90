@@ -200,6 +200,7 @@ LOGICAL :: ACCUMULATE_WATER=.FALSE.         !< Indicates that integrated liquid 
 LOGICAL :: WRITE_XYZ=.FALSE.                !< Indicates that a Plot3D geometry file is specified by user
 LOGICAL :: WRITE_STL=.FALSE.                !< Indicates that a STL geometry file is specified by user
 LOGICAL :: CHECK_POISSON=.FALSE.            !< Check the accuracy of the Poisson solver
+LOGICAL :: WRITE_PARCSRPCG_MATRIX=.FALSE.   !< If true, write out matrix for UGLMAT HYPRE solver
 LOGICAL :: TWO_D=.FALSE.                    !< Perform a 2-D simulation
 LOGICAL :: SETUP_ONLY=.FALSE.               !< Indicates that the calculation should be stopped before time-stepping
 LOGICAL :: CHECK_MESH_ALIGNMENT=.FALSE.     !< Indicates that the user wants to check the mesh alignment and then stop
@@ -587,8 +588,8 @@ REAL(EB) :: ALIGNMENT_TOLERANCE=0.001_EB      !< Maximum ratio of sizes of abutt
 ! Logical units and output file names
 
 INTEGER                              :: LU_ERR=ERROR_UNIT,LU_END=2,LU_GIT=3,LU_SMV=4,LU_INPUT=5,LU_OUTPUT=6,LU_STOP=7,LU_CPU=8,&
-                                        LU_CATF=9,LU_RDIR=10,LU_GDIR=11,LU_SETCC=12,LU_BINGEOM=13,LU_PARAVIEW=14,LU_STL=15,&
-                                        LU_VRDIR=16,LU_WDIR=17
+                                        LU_CATF=9,LU_RDIR=10,LU_GDIR=11,LU_SETCC=12,LU_BINGEOM=13,LU_PARCSRPCG_MATRIX=14, &
+                                        LU_PARAVIEW=15,LU_STL=16,LU_VRDIR=17,LU_WDIR=18
 INTEGER                              :: LU_MASS,LU_HRR,LU_STEPS,LU_NOTREADY,LU_VELOCITY_ERROR,LU_CFL,LU_LINE=-1,LU_CUTCELL, &
                                         LU_CVODE_SUBSTEPS
 INTEGER                              :: LU_HISTOGRAM,LU_HVAC
@@ -949,6 +950,7 @@ LOGICAL  :: DO_CHEM_LOAD_BALANCE = .FALSE.
 INTEGER  :: MAX_CVODE_SUBSTEPS=100000
 REAL(EB) :: MAX_CHEM_TIME=1.E-6_EB
 INTEGER  :: CVODE_MAX_TRY=4
+LOGICAL  :: IS_EXPONENT_LT_1 = .FALSE.
 
 ! FOR WRITING CVODE SUBSTEPS
 LOGICAL  :: WRITE_CVODE_SUBSTEPS = .FALSE.
