@@ -97,7 +97,7 @@ jobs:
     - uses: rscohn2/setup-oneapi@v0
       with:
         components: |
-          mkl
+          mkl@2025.1.0
         prune: false  
 
     - uses: actions/checkout@v4
