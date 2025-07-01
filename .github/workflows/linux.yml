@@ -41,12 +41,6 @@ jobs:
          
     - uses: actions/checkout@v4
 
-    - name: Check Current Memory Limit
-      run: ulimit -a  # Check the memory limits
-
-    - name: free -h command
-      run: free -h  
-
     - name: build fds debug
       run: |
         source /opt/intel/oneapi/setvars.sh
@@ -54,19 +48,12 @@ jobs:
         ./make_fds.sh
         ./fds_impi_intel_linux_db
 
-    - name: free -h command
-      run: free -h  
-
     - name: build fds release
-      if: false # skip this run until ifx issue is sorted out
       run: |
         source /opt/intel/oneapi/setvars.sh
         cd ./Build/impi_intel_linux
         ./make_fds.sh
         ./fds_impi_intel_linux
-
-    - name: free -h command
-      run: free -h  
 
     # Setup python
     - uses: actions/setup-python@v5
