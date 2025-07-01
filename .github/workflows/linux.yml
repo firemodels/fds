@@ -55,19 +55,6 @@ jobs:
         ./make_fds.sh
         ./fds_impi_intel_linux
 
-    # Setup python
-    - uses: actions/setup-python@v5
-      with:
-        python-version: '3.9'
-        cache: 'pip' # caching pip dependencies
-    - run: pip install -r .github/requirements.txt
-
-    # Run Hello World test
-    - name: Python test
-      run: |
-        echo $GITHUB_WORKSPACE
-        cd $GITHUB_WORKSPACE/Utilities/Python
-        python hello_world.py
 
   linux-gnu-openmpi:
     # build on ubuntu using gfortran with openmpi and mkl based on
@@ -100,3 +87,26 @@ jobs:
         cd ./Build/ompi_gnu_linux
         ./make_fds.sh
         ./fds_ompi_gnu_linux
+
+
+  linux-python-helloworld:
+    # Run Hello World test
+
+    name: linux python helloworld
+    runs-on: [ubuntu-latest]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.9'
+        cache: 'pip' # caching pip dependencies
+    - run: pip install -r .github/requirements.txt
+
+    - name: Python test
+      run: |
+        echo $GITHUB_WORKSPACE
+        cd $GITHUB_WORKSPACE/Utilities/Python
+        python hello_world.py
+        : # python FDS_verification_script.py
