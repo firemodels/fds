@@ -110,17 +110,32 @@ def dataplot(config_filename,**kwargs):
             # print(col_names)
             y = E[col_names].values.astype(float)
 
+            styles = [c.strip() for c in pp.d1_Style.split('|')]
+            key_labels = [c.strip() for c in pp.d1_Key.split('|')]
+
             for i, label in enumerate(col_names):
-                # plot the exp data
-                f = plot_to_fig(x_data=x, y_data=y[:, i],
-                    data_label=pp.d1_Key,
-                    x_label=pp.Ind_Title,
-                    y_label=pp.Dep_Title,
-                    marker_style=pp.d1_Style,
-                    x_min=pp.Min_Ind,x_max=pp.Max_Ind,
-                    y_min=pp.Min_Dep,y_max=pp.Max_Dep,
-                    legend_location=pp.Key_Position
-                    )
+                if i==0:
+                    # plot the exp data
+                    f = plot_to_fig(x_data=x, y_data=y[:, i],
+                        data_label=key_labels[i],
+                        x_label=pp.Ind_Title,
+                        y_label=pp.Dep_Title,
+                        marker_style=styles[i],
+                        x_min=pp.Min_Ind,x_max=pp.Max_Ind,
+                        y_min=pp.Min_Dep,y_max=pp.Max_Dep,
+                        legend_location=matlab_legend_to_matplotlib(pp.Key_Position)
+                        )
+                elif i>0:
+                    f = plot_to_fig(x_data=x, y_data=y[:, i],
+                        figure_handle=f,
+                        data_label=key_labels[i],
+                        x_label=pp.Ind_Title,
+                        y_label=pp.Dep_Title,
+                        marker_style=styles[i],
+                        x_min=pp.Min_Ind,x_max=pp.Max_Ind,
+                        y_min=pp.Min_Dep,y_max=pp.Max_Dep,
+                        legend_location=matlab_legend_to_matplotlib(pp.Key_Position)
+                        )
 
             # plt.figure(f.number) # make figure current
             # plt.show()
@@ -144,7 +159,7 @@ def dataplot(config_filename,**kwargs):
                     marker_style=pp.d1_Style,
                     x_min=pp.Min_Ind,x_max=pp.Max_Ind,
                     y_min=pp.Min_Dep,y_max=pp.Max_Dep,
-                    legend_location=pp.Key_Position
+                    legend_location=matlab_legend_to_matplotlib(pp.Key_Position)
                     )
 
         # get the model results
@@ -161,17 +176,20 @@ def dataplot(config_filename,**kwargs):
             version_string = Lines[0].strip()
             file1.close()
 
+        styles = [c.strip() for c in pp.d2_Style.split('|')]
+        key_labels = [c.strip() for c in pp.d2_Key.split('|')]
+
         for i, label in enumerate(col_names):
             f = plot_to_fig(x_data=x, y_data=y[:, i],
                 revision_label=version_string,
                 figure_handle=f,
                 x_label=pp.Ind_Title,
                 y_label=pp.Dep_Title,
-                data_label=pp.d2_Key,
-                line_style=pp.d2_Style,
+                data_label=key_labels[i],
+                line_style=styles[i],
                 x_min=pp.Min_Ind,x_max=pp.Max_Ind,
                 y_min=pp.Min_Dep,y_max=pp.Max_Dep,
-                legend_location=pp.Key_Position,
+                legend_location=matlab_legend_to_matplotlib(pp.Key_Position),
                 plot_title=pp.Plot_Title
                 )
 
@@ -255,9 +273,11 @@ def plot_to_fig(x_data,y_data,**kwargs):
     # convert matlab styles to matplotlib
     if kwargs.get('marker_style'):
         style = kwargs.get('marker_style')
-
         color,marker,linestyle = parse_matlab_style(style)
 
+    if kwargs.get('line_style'):
+        style = kwargs.get('line_style')
+        color,marker,linestyle = parse_matlab_style(style)
 
     # other plot parameters
     if kwargs.get('data_markevery'):
@@ -367,14 +387,21 @@ def plot_to_fig(x_data,y_data,**kwargs):
     if kwargs.get('legend_location')=='outside':
         plt.legend(fontsize=legend_fontsize,bbox_to_anchor=(1,1),loc='upper left',framealpha=kwargs.get('legend_framealpha'))
     else:
-        if kwargs.get('show_legend'):
-            plt.legend(fontsize=legend_fontsize,loc=kwargs.get('legend_location'),framealpha=kwargs.get('legend_framealpha'))
+        # if kwargs.get('show_legend'):
+        plt.legend(fontsize=legend_fontsize,loc=kwargs.get('legend_location'),framealpha=kwargs.get('legend_framealpha'))
 
-    # plot titles
-    if kwargs.get('title_fontsize'):
-        title_fontsize=kwargs.get('title_fontsize')
-    else:
-        title_fontsize=default_title_fontsize
+    # plot title
+    if kwargs.get('plot_title'):
+        if kwargs.get('title_fontsize'):
+            title_fontsize=kwargs.get('title_fontsize')
+        else:
+            title_fontsize=default_title_fontsize
+
+        plt.text(0.05, 0.95, kwargs.get('plot_title'),
+        transform=plt.gca().transAxes,
+        fontsize=title_fontsize,
+        verticalalignment='top',
+        horizontalalignment='left')
 
     # set axes and tick properties
     ymin=kwargs.get('y_min')
@@ -685,4 +712,33 @@ def define_plot_parameters(C,irow):
         Font_Interpreter     = C.values[irow,C.columns.get_loc('Font_Interpreter')]
 
     return plot_parameters
+
+
+def matlab_legend_to_matplotlib(position):
+    """
+    Convert a MATLAB legend position string to the corresponding matplotlib location string.
+
+    Parameters:
+        position (str): MATLAB-style legend position (e.g., 'northeast', 'southwestoutside')
+
+    Returns:
+        str: Matplotlib-compatible legend location (e.g., 'upper right')
+    """
+    position = position.strip().lower()
+    mapping = {
+        'north': 'upper center',
+        'south': 'lower center',
+        'east': 'center right',
+        'west': 'center left',
+        'northeast': 'upper right',
+        'southeast': 'lower right',
+        'southwest': 'lower left',
+        'northwest': 'upper left',
+        'northeastoutside': 'center left',    # rough equivalent
+        'northwestoutside': 'center right',
+        'southeastoutside': 'center left',
+        'southwestoutside': 'center right',
+        'best': 'best'
+    }
+    return mapping.get(position, 'best')
 
