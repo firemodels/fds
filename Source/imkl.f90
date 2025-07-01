@@ -530,6 +530,13 @@ MODULE HYPRE_INTERFACE
          INTEGER,         INTENT(OUT)    :: IERR
       END SUBROUTINE HYPRE_PARCSRPCGGETFINALRELATIVE
 
+      SUBROUTINE HYPRE_PARCSRMATRIXPRINT(PARCSR_A, FILE_NAME, FILE_NAME_SIZE, IERR)
+         INTEGER(KIND=8), INTENT(IN)     :: PARCSR_A
+         CHARACTER(*),    INTENT(IN)     :: FILE_NAME
+         INTEGER,         INTENT(IN)     :: FILE_NAME_SIZE
+         INTEGER,         INTENT(OUT)    :: IERR
+      END SUBROUTINE HYPRE_PARCSRMATRIXPRINT
+
    END INTERFACE
 
    ! HYPRE info for ZONE_MESH defined in HYPRE_ZM, ZONE_MESH_TYPE, type.f90.
@@ -603,7 +610,8 @@ MODULE HYPRE_INTERFACE
              HYPRE_PARCSRPCGSETUP,                &  ! subroutine in HYPRE library
              HYPRE_PARCSRPCGSOLVE,                &  ! subroutine in HYPRE library
              HYPRE_PARCSRPCGGETNUMITERATIONS,     &  ! subroutine in HYPRE library
-             HYPRE_PARCSRPCGGETFINALRELATIVE         ! subroutine in HYPRE library
+             HYPRE_PARCSRPCGGETFINALRELATIVE,     &  ! subroutine in HYPRE library
+             HYPRE_PARCSRMATRIXPRINT                 ! subroutine in HYPRE library
 
 END MODULE HYPRE_INTERFACE
 #endif /* WITH_HYPRE */

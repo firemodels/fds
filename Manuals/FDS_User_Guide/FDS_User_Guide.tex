@@ -1029,7 +1029,6 @@ The parameter \ct{MPI_PROCESS} instructs FDS to assign that particular mesh to t
 
 For cases involving many meshes, you might want to assign them colors using either the character string \ct{COLOR} or the integer triplet \ct{RGB}. You may also want to consider using the multiplying feature to easily create a 3-D array of meshes. See Sec.~\ref{info:MULT} for details.
 
-One other useful parameter for larger MPI jobs is called \ct{VERBOSE} on the \ct{MISC} line. This logical parameter suppresses information related to MPI process and OpenMP thread assignments that is printed to the diagnostic output files. By default, its value is \ct{T} for MPI jobs involving 50 or less processes, and \ct{F} for larger jobs.
 
 
 \subsection{Mesh Alignment}
@@ -11877,7 +11876,8 @@ properties be specified as well. Simply prescribing as many properties as possib
 % ignorenamelistkw: /MISC/STRATIFICATION, /MISC/SUPPRESSION, /MISC/UVW_FILE, /MISC/TENSOR_DIFFUSIVITY
 % ignorenamelistkw: /MISC/CC_IBM, /MISC/CCVOL_LINK, /MISC/TEST_NEW_CHAR_MODEL, /MISC/FLUX_LIMITER_MW_CORRECTION
 % ignorenamelistkw: /PART/DEBUG, /PART/EMBER_SNAG_FACTOR
-% ignorenamelistkw: /REAC/C, /REAC/H, /REAC/O, /REAC/N, /REAC/FORMULA,
+% ignorenamelistkw: /PRES/WRITE_PARCSRPCG_MATRIX
+% ignorenamelistkw: /REAC/C, /REAC/H, /REAC/O, /REAC/N, /REAC/FORMULA
 % ignorenamelistkw: /SLCF/DEBUG, /SLCF/RLE_MIN, /SLCF/RLE_MAX, /SLCF/SLICETYPE
 % ignorenamelistkw: /SURF/MOISTURE_FRACTION
 % ignorenamelistkw: /TIME/RAMP_DT
@@ -12805,7 +12805,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{TURBULENCE_MODEL}                             & Character    & Section~\ref{info:LES}                  &            & \ct{'DEARDORFF'} \\ \hline
 \ct{TURBULENT_DEPOSITION}                         & Logical      & Section~\ref{info:deposition}           &            & \ct{T}           \\ \hline
 \ct{UNFREEZE_TIME}                               & Real          & Section~\ref{info:FREZ}                 &            &                  \\ \hline
-\ct{VERBOSE}                                       & Logical      & Section~\ref{info:multimesh}            &            &                   \\ \hline
+\ct{VERBOSE}                                       & Logical      & Section~\ref{out:file}                  &            & \ct{F}            \\ \hline
 \ct{VISIBILITY_FACTOR}                            & Real         & Section~\ref{info:visibility}           &            & 3                 \\ \hline
 \ct{VN_MAX}                                       & Real         & Section~\ref{info:VN}                   &            & 1.0               \\ \hline
 \ct{VN_MIN}                                       & Real         & Section~\ref{info:VN}                   &            & 0.8               \\ \hline
@@ -14613,6 +14613,9 @@ The \ct{Time Step} indicates the total number of iterations. The date and time i
 
 Following the completion of a successful run, a summary of the CPU usage per subroutine is listed in the file called \ct{CHID_cpu.csv} (Section~\ref{out:CPU}). This is useful in determining where most of the computational effort is being placed.
 
+Add \ct{VERBOSE=T} to the \ct{MISC} line to add addiational information about time usage to the diagnostic file.
+
+
 \section{Heat Release Rate and Related Quantities (\ct{_hrr.csv})}
 \label{out:hrr}
 
@@ -14689,96 +14692,6 @@ Routine     & Description  \\ \hline \hline
 \ct{VEGE}   & Wildland fire spread \\ \hline
 \ct{CHEM}   & Complex chemistry \\ \hline
 \end{tabular}
-\end{table}
-
-The \ct{CHID_cpu.csv} file is printed out at the end of the simulation. To force it to be printed out periodically during the simulation, set \ct{DT_CPU} or \ct{RAMP_CPU} on the \ct{DUMP} line. The latter parameter allows you to write out the files at specified times.
-
-\section{Time Step Data}
-\label{out:timestep}
-
-The file called \ct{CHID_steps.csv} records data on the size of time steps and the amount of elapsed CPU time.
-\begin{lstlisting}
-Time Step,Wall Time,Step Size,Simulation Time,CPU Time
-\end{table}
-
-The \ct{CHID_cpu.csv} file is printed out at the end of the simulation. To force it to be printed out periodically during the simulation, set \ct{DT_CPU} or \ct{RAMP_CPU} on the \ct{DUMP} line. The latter parameter allows you to write out the files at specified times.
-
-\section{Time Step Data}
-\label{out:timestep}
-
-The file called \ct{CHID_steps.csv} records data on the size of time steps and the amount of elapsed CPU time.
-\begin{lstlisting}
-Time Step,Wall Time,Step Size,Simulation Time,CPU Time
-\end{table}
-
-The \ct{CHID_cpu.csv} file is printed out at the end of the simulation. To force it to be printed out periodically during the simulation, set \ct{DT_CPU} or \ct{RAMP_CPU} on the \ct{DUMP} line. The latter parameter allows you to write out the files at specified times.
-
-\section{Time Step Data}
-\label{out:timestep}
-
-The file called \ct{CHID_steps.csv} records data on the size of time steps and the amount of elapsed CPU time.
-\begin{lstlisting}
-Time Step,Wall Time,Step Size,Simulation Time,CPU Time
-\end{table}
-
-The \ct{CHID_cpu.csv} file is printed out at the end of the simulation. To force it to be printed out periodically during the simulation, set \ct{DT_CPU} or \ct{RAMP_CPU} on the \ct{DUMP} line. The latter parameter allows you to write out the files at specified times.
-
-\section{Time Step Data}
-\label{out:timestep}
-
-The file called \ct{CHID_steps.csv} records data on the size of time steps and the amount of elapsed CPU time.
-\begin{lstlisting}
-Time Step,Wall Time,Step Size,Simulation Time,CPU Time
-\end{table}
-
-The \ct{CHID_cpu.csv} file is printed out at the end of the simulation. To force it to be printed out periodically during the simulation, set \ct{DT_CPU} or \ct{RAMP_CPU} on the \ct{DUMP} line. The latter parameter allows you to write out the files at specified times.
-
-\section{Time Step Data}
-\label{out:timestep}
-
-The file called \ct{CHID_steps.csv} records data on the size of time steps and the amount of elapsed CPU time.
-\begin{lstlisting}
-Time Step,Wall Time,Step Size,Simulation Time,CPU Time
-\end{table}
-
-The \ct{CHID_cpu.csv} file is printed out at the end of the simulation. To force it to be printed out periodically during the simulation, set \ct{DT_CPU} or \ct{RAMP_CPU} on the \ct{DUMP} line. The latter parameter allows you to write out the files at specified times.
-
-\section{Time Step Data}
-\label{out:timestep}
-
-The file called \ct{CHID_steps.csv} records data on the size of time steps and the amount of elapsed CPU time.
-\begin{lstlisting}
-Time Step,Wall Time,Step Size,Simulation Time,CPU Time
-\end{table}
-
-The \ct{CHID_cpu.csv} file is printed out at the end of the simulation. To force it to be printed out periodically during the simulation, set \ct{DT_CPU} or \ct{RAMP_CPU} on the \ct{DUMP} line. The latter parameter allows you to write out the files at specified times.
-
-\section{Time Step Data}
-\label{out:timestep}
-
-The file called \ct{CHID_steps.csv} records data on the size of time steps and the amount of elapsed CPU time.
-\begin{lstlisting}
-Time Step,Wall Time,Step Size,Simulation Time,CPU Time
-\end{table}
-
-The \ct{CHID_cpu.csv} file is printed out at the end of the simulation. To force it to be printed out periodically during the simulation, set \ct{DT_CPU} or \ct{RAMP_CPU} on the \ct{DUMP} line. The latter parameter allows you to write out the files at specified times.
-
-\section{Time Step Data}
-\label{out:timestep}
-
-The file called \ct{CHID_steps.csv} records data on the size of time steps and the amount of elapsed CPU time.
-\begin{lstlisting}
-Time Step,Wall Time,Step Size,Simulation Time,CPU Time
-\end{table}
-
-The \ct{CHID_cpu.csv} file is printed out at the end of the simulation. To force it to be printed out periodically during the simulation, set \ct{DT_CPU} or \ct{RAMP_CPU} on the \ct{DUMP} line. The latter parameter allows you to write out the files at specified times.
-
-\section{Time Step Data}
-\label{out:timestep}
-
-The file called \ct{CHID_steps.csv} records data on the size of time steps and the amount of elapsed CPU time.
-\begin{lstlisting}
-Time Step,Wall Time,Step Size,Simulation Time,CPU Time
 \end{table}
 
 The \ct{CHID_cpu.csv} file is printed out at the end of the simulation. To force it to be printed out periodically during the simulation, set \ct{DT_CPU} or \ct{RAMP_CPU} on the \ct{DUMP} line. The latter parameter allows you to write out the files at specified times.

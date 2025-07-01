@@ -2528,11 +2528,12 @@ SUBROUTINE INITIALIZE_DEVICES(NM)
 
 USE COMPLEX_GEOMETRY, ONLY : GET_CFACE_INDEX
 INTEGER, INTENT(IN) :: NM
-INTEGER :: III,N,II,JJ,KK,IOR,IW,SURF_INDEX,IIG,JJG,KKG,ICF
-REAL(EB) :: DEPTH
+INTEGER :: III,N,II,JJ,KK,IW,SURF_INDEX,ICF,N_CELLS_INI
+REAL(EB) :: DEPTH,THICKNESS
 TYPE (DEVICE_TYPE), POINTER :: DV
 TYPE (MESH_TYPE), POINTER :: M
-LOGICAL :: DO_CFACE
+TYPE (BOUNDARY_ONE_D_TYPE), POINTER :: ONE_D
+LOGICAL :: DO_CFACE,USE_SURF
 
 M => MESHES(NM)
 
@@ -2542,32 +2543,29 @@ DEVICE_LOOP: DO N=1,N_DEVC
 
    IF (DV%QUANTITY_INDEX(1)>=0) CYCLE DEVICE_LOOP  ! Do not process gas phsae devices
 
+   IW  = 0
+   ICF = 0
+
    IF (DV%INIT_ID=='null' .AND. DV%LP_TAG==0) THEN ! Assume the device is tied to a WALL cell or CFACE
 
       IF (NM/=DV%MESH) CYCLE DEVICE_LOOP
       II  = INT(GINV(DV%X-M%XS,1,NM)*M%RDXI   + 1._EB)
       JJ  = INT(GINV(DV%Y-M%YS,2,NM)*M%RDETA  + 1._EB)
       KK  = INT(GINV(DV%Z-M%ZS,3,NM)*M%RDZETA + 1._EB)
-      IIG = II
-      JJG = JJ
-      KKG = KK
-      IOR = DV%IOR
-      IW  = 0
-      ICF = 0
 
-      IF (IOR/=0) CALL GET_WALL_INDEX(NM,IIG,JJG,KKG,IOR,IW)
+      IF (DV%IOR/=0) CALL GET_WALL_INDEX(NM,II,JJ,KK,DV%IOR,IW)
 
       IF (CC_IBM)  THEN
          DO_CFACE=.FALSE.
-         IF(IW==0) DO_CFACE=.TRUE.
-         IF(.NOT.DO_CFACE .AND. IW>0) THEN
-            IF(M%WALL(IW)%BOUNDARY_TYPE/=SOLID_BOUNDARY) THEN
+         IF (IW==0) DO_CFACE=.TRUE.
+         IF (.NOT.DO_CFACE .AND. IW>0) THEN
+            IF (M%WALL(IW)%BOUNDARY_TYPE/=SOLID_BOUNDARY) THEN
                DO_CFACE=.TRUE.
                IW=0
             ENDIF
          ENDIF
          ! Search for CFACE index if no SOLID wall cell is associated to device:
-         IF(DO_CFACE) CALL GET_CFACE_INDEX(NM,IIG,JJG,KKG,DV%X,DV%Y,DV%Z,ICF)
+         IF (DO_CFACE) CALL GET_CFACE_INDEX(NM,II,JJ,KK,DV%X,DV%Y,DV%Z,ICF)
       ENDIF
 
       IF (IW==0 .AND. ICF==0 .AND. DV%SPATIAL_STATISTIC=='null') THEN
@@ -2591,24 +2589,56 @@ DEVICE_LOOP: DO N=1,N_DEVC
 
    ENDIF
 
-   ! Make sure that thermally-thick output is appropriate
+   ! For output quantities that are inside the solid, determine the appropriate interior cell node, I_DEPTH
 
-   IF (OUTPUT_QUANTITY(DV%QUANTITY_INDEX(1))%INSIDE_SOLID) THEN
+   IF_INSIDE_LOOP: IF (OUTPUT_QUANTITY(DV%QUANTITY_INDEX(1))%INSIDE_SOLID) THEN
+
       IF (SURFACE(SURF_INDEX)%THERMAL_BC_INDEX /= THERMALLY_THICK) THEN
          WRITE(LU_ERR,'(A,A,A)') 'ERROR(428): DEVC ',TRIM(DV%ID),' must be associated with a heat-conducting surface.'
          STOP_STATUS = SETUP_STOP
          RETURN
       ENDIF
+
+      IF (IW>0) THEN
+         ONE_D => M%BOUNDARY_ONE_D(M%WALL(IW)%OD_INDEX)
+         N_CELLS_INI = ONE_D%N_CELLS_INI
+         THICKNESS = SUM(ONE_D%LAYER_THICKNESS)
+         USE_SURF = .FALSE.
+      ELSEIF (ICF>0) THEN
+         ONE_D => M%BOUNDARY_ONE_D(M%CFACE(ICF)%OD_INDEX)
+         N_CELLS_INI = ONE_D%N_CELLS_INI
+         THICKNESS = SUM(ONE_D%LAYER_THICKNESS)
+         USE_SURF = .FALSE.
+      ELSEIF (DV%PART_CLASS_INDEX>0) THEN
+         N_CELLS_INI = SURFACE(SURF_INDEX)%N_CELLS_INI
+         THICKNESS = SUM(SURFACE(SURF_INDEX)%LAYER_THICKNESS)
+         USE_SURF = .TRUE.
+      ELSE
+         N_CELLS_INI = SURFACE(SURF_INDEX)%N_CELLS_INI
+         THICKNESS = SUM(SURFACE(SURF_INDEX)%LAYER_THICKNESS)
+         USE_SURF = .TRUE.
+      ENDIF
+
+      ! The given DV%DEPTH is taken as the distance from front surface if it is positive; from the back surface if negative.
+
       IF (DV%DEPTH>TWO_EPSILON_EB) THEN
          DEPTH = DV%DEPTH
       ELSE
-         DEPTH = MAX(0._EB,SUM(SURFACE(SURF_INDEX)%LAYER_THICKNESS)+DV%DEPTH)
+         DEPTH = MAX(0._EB,THICKNESS+DV%DEPTH)
       ENDIF
-      DV%I_DEPTH = SURFACE(SURF_INDEX)%N_CELLS_INI
-      DO III=SURFACE(SURF_INDEX)%N_CELLS_INI,1,-1
-         IF (DEPTH<=SURFACE(SURF_INDEX)%X_S(III)) DV%I_DEPTH = III
+
+      ! Determine the index of the interior node, I_DEPTH
+
+      DV%I_DEPTH = N_CELLS_INI
+      DO III=N_CELLS_INI,1,-1
+         IF (USE_SURF) THEN
+            IF (DEPTH<=SURFACE(SURF_INDEX)%X_S(III)) DV%I_DEPTH = III
+         ELSE
+            IF (DEPTH<=ONE_D%X(III)) DV%I_DEPTH = III
+         ENDIF
       ENDDO
-   ENDIF
+
+   ENDIF IF_INSIDE_LOOP
 
 ENDDO DEVICE_LOOP
 

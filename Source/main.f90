@@ -63,7 +63,6 @@ INTEGER  :: LO10,NM,IZERO,ANG_INC_COUNTER
 REAL(EB) :: T,DT,TNOW
 REAL :: CPUTIME
 REAL(EB), ALLOCATABLE, DIMENSION(:) ::  TC_ARRAY,DT_NEW
-INTEGER, ALLOCATABLE, DIMENSION(:) ::  N_VALUES
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) ::  TC2_ARRAY
 LOGICAL, ALLOCATABLE, DIMENSION(:) ::  STATE_ARRAY
 INTEGER :: ITER
@@ -1271,7 +1270,6 @@ SELECT CASE(TASK_NUMBER)
       ALLOCATE(STATE_ARRAY(2*N_DEVC),STAT=IZERO) ; CALL ChkMemErr('MAIN','STATE_ARRAY',IZERO)
       ALLOCATE(TC_ARRAY(4*N_DEVC),STAT=IZERO)    ; CALL ChkMemErr('MAIN','TC_ARRAY',IZERO)
       ALLOCATE(TC2_ARRAY(2,N_DEVC),STAT=IZERO)   ; CALL ChkMemErr('MAIN','TC2_ARRAY',IZERO)
-      ALLOCATE(N_VALUES(N_DEVC),STAT=IZERO)      ; CALL ChkMemErr('MAIN','N_VALUES',IZERO)
 
 
    CASE(3)
@@ -3377,14 +3375,21 @@ SENDING_MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             PHI_LS_P => M%PHI_LS
          ENDIF
          IF (RNODE/=SNODE) THEN
-            NQT2 = 4
+            NQT2 = 5
             PACK_REAL_SEND_PKG14: DO LL=1,M3%NIC_S
-               II1 = M3%IIO_S(LL)
-               JJ1 = M3%JJO_S(LL)
+               II1 = M3%IIO_S(LL) ; II2 = II1
+               JJ1 = M3%JJO_S(LL) ; JJ2 = JJ1
+               SELECT CASE(M3%IOR_S(LL))
+                  CASE(-1) ; II2=II1+1
+                  CASE( 1) ; II2=II1-1
+                  CASE(-2) ; JJ2=JJ1+1
+                  CASE( 2) ; JJ2=JJ1-1
+               END SELECT
                M3%REAL_SEND_PKG14(NQT2*(LL-1)+1) = PHI_LS_P(II1,JJ1)
-               M3%REAL_SEND_PKG14(NQT2*(LL-1)+2) = M%U_LS(II1,JJ1)
-               M3%REAL_SEND_PKG14(NQT2*(LL-1)+3) = M%V_LS(II1,JJ1)
-               M3%REAL_SEND_PKG14(NQT2*(LL-1)+4) = M%Z_LS(II1,JJ1)
+               M3%REAL_SEND_PKG14(NQT2*(LL-1)+2) = PHI_LS_P(II2,JJ2)
+               M3%REAL_SEND_PKG14(NQT2*(LL-1)+3) = M%U_LS(II1,JJ1)
+               M3%REAL_SEND_PKG14(NQT2*(LL-1)+4) = M%V_LS(II1,JJ1)
+               M3%REAL_SEND_PKG14(NQT2*(LL-1)+5) = M%Z_LS(II1,JJ1)
             ENDDO PACK_REAL_SEND_PKG14
          ELSE
             M2=>MESHES(NOM)%OMESH(NM)
@@ -3678,19 +3683,26 @@ RECV_MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       ENDIF IF_RECEIVE_PARTICLES
 
       IF (CODE==14 .AND. M2%NIC_R>0 .AND. RNODE/=SNODE) THEN
-            NQT2 = 4
+            NQT2 = 5
             IF (PREDICTOR) THEN
                PHI_LS_P => M2%PHI1_LS
             ELSE
                PHI_LS_P => M2%PHI_LS
             ENDIF
             UNPACK_REAL_RECV_PKG14: DO LL=1,M2%NIC_R
-               II1 = M2%IIO_R(LL)
-               JJ1 = M2%JJO_R(LL)
+               II1 = M2%IIO_R(LL) ; II2 = II1
+               JJ1 = M2%JJO_R(LL) ; JJ2 = JJ1
+               SELECT CASE(M2%IOR_R(LL))
+                  CASE(-1) ; II2=II1+1
+                  CASE( 1) ; II2=II1-1
+                  CASE(-2) ; JJ2=JJ1+1
+                  CASE( 2) ; JJ2=JJ1-1
+               END SELECT
                PHI_LS_P(II1,JJ1) = M2%REAL_RECV_PKG14(NQT2*(LL-1)+1)
-               M2%U_LS(II1,JJ1)  = M2%REAL_RECV_PKG14(NQT2*(LL-1)+2)
-               M2%V_LS(II1,JJ1)  = M2%REAL_RECV_PKG14(NQT2*(LL-1)+3)
-               M2%Z_LS(II1,JJ1)  = M2%REAL_RECV_PKG14(NQT2*(LL-1)+4)
+               PHI_LS_P(II2,JJ2) = M2%REAL_RECV_PKG14(NQT2*(LL-1)+2)
+               M2%U_LS(II1,JJ1)  = M2%REAL_RECV_PKG14(NQT2*(LL-1)+3)
+               M2%V_LS(II1,JJ1)  = M2%REAL_RECV_PKG14(NQT2*(LL-1)+4)
+               M2%Z_LS(II1,JJ1)  = M2%REAL_RECV_PKG14(NQT2*(LL-1)+5)
             ENDDO UNPACK_REAL_RECV_PKG14
       ENDIF
 
@@ -4105,7 +4117,6 @@ EXCHANGE_DEVICE: IF (N_DEVC>0) THEN
 
       IF (OP_INDEX==2 .AND. .NOT.MIN_DEVICES_EXIST) CYCLE OPERATION_LOOP
       IF (OP_INDEX==3 .AND. .NOT.MAX_DEVICES_EXIST) CYCLE OPERATION_LOOP
-      N_VALUES = 0
       SELECT CASE(OP_INDEX)
          CASE(1) ; TC_ARRAY  =  0._EB    ; MPI_OP_INDEX = MPI_SUM    ; DIM_FAC = 4
          CASE(2) ; TC2_ARRAY =  1.E10_EB ; MPI_OP_INDEX = MPI_MINLOC ; DIM_FAC = 1
@@ -4119,7 +4130,6 @@ EXCHANGE_DEVICE: IF (N_DEVC>0) THEN
          IF (OP_INDEX==3 .AND.  DV%SPATIAL_STATISTIC(1:3)/='MAX') CYCLE DEVICE_LOOP_1
          DO NN=1,DV%N_SUBDEVICES
             SDV => DV%SUBDEVICE(NN)
-            N_VALUES(N) = N_VALUES(N) + SDV%N_VALUES
             SELECT CASE(OP_INDEX)
                CASE(1)
                   TC_ARRAY(N)          = TC_ARRAY(N)          + SDV%VALUE_1
@@ -4143,7 +4153,6 @@ EXCHANGE_DEVICE: IF (N_DEVC>0) THEN
       ! Perform MPI exchanges to sum or take max/min of device values collected on meshes controlled by different processes
 
       IF (N_MPI_PROCESSES>1) THEN
-         CALL MPI_ALLREDUCE(MPI_IN_PLACE,N_VALUES,N_DEVC,MPI_INTEGER,MPI_SUM,MPI_COMM_WORLD,IERR)
          SELECT CASE(OP_INDEX)
             CASE(1)
                CALL MPI_ALLREDUCE(MPI_IN_PLACE,TC_ARRAY,DIM_FAC*N_DEVC,MPI_DOUBLE_PRECISION,MPI_OP_INDEX,MPI_COMM_WORLD,IERR)
@@ -4160,8 +4169,6 @@ EXCHANGE_DEVICE: IF (N_DEVC>0) THEN
          IF (OP_INDEX==1 .AND. (DV%SPATIAL_STATISTIC(1:3)=='MIN' .OR. DV%SPATIAL_STATISTIC(1:3)=='MAX')) CYCLE DEVICE_LOOP_2
          IF (OP_INDEX==2 .AND.  DV%SPATIAL_STATISTIC(1:3)/='MIN') CYCLE DEVICE_LOOP_2
          IF (OP_INDEX==3 .AND.  DV%SPATIAL_STATISTIC(1:3)/='MAX') CYCLE DEVICE_LOOP_2
-      !  IF (MY_RANK==0 .AND. N_VALUES(N)==0 .AND. DV%SPATIAL_STATISTIC/='null') &
-      !     WRITE(LU_ERR,'(3A)') 'WARNING: DEVC ',TRIM(DV%ID),' has no values.'
          IF (OP_INDEX==1) THEN
             DV%VALUE_1 = TC_ARRAY(N)
             DV%VALUE_2 = TC_ARRAY(  N_DEVC+N)
