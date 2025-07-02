@@ -3049,6 +3049,24 @@ CALL MOVE_ALLOC(DUMMY,P)
 END SUBROUTINE REALLOCATE_INTEGER_ARRAY
 
 
+!> \brief Change the allocation of an logical array with DIMENSION 1
+!> \param P Original array
+!> \param N1 Lower bound of old/new allocation
+!> \param N2 Upper bound of old allocation
+!> \param N3 Upper bound of new allocation
+
+SUBROUTINE REALLOCATE_LOGICAL_ARRAY(P,N1,N2,N3)
+
+LOGICAL, ALLOCATABLE, DIMENSION(:) :: P,DUMMY
+INTEGER, INTENT(IN) :: N1,N2,N3
+
+ALLOCATE(DUMMY(N1:N3))
+IF (ALLOCATED(P)) DUMMY(N1:N2) = P(N1:N2)
+CALL MOVE_ALLOC(DUMMY,P)
+
+END SUBROUTINE REALLOCATE_LOGICAL_ARRAY
+
+
 !> \brief Changes the allocation of a string array
 !> \param P Original array
 !> \param CLEN Length of string
