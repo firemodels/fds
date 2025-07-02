@@ -34,18 +34,12 @@ jobs:
     - uses: rscohn2/setup-oneapi@v0
       with:
         components: |
-          ifx@2025.0.1
-          impi@2021.14.1
-          mkl@2025.0.1
+          ifx
+          impi
+          mkl
         prune: false       
          
     - uses: actions/checkout@v4
-
-    - name: Check Current Memory Limit
-      run: ulimit -a  # Check the memory limits
-
-    - name: free -h command
-      run: free -h  
 
     - name: build fds debug
       run: |
@@ -54,19 +48,12 @@ jobs:
         ./make_fds.sh
         ./fds_impi_intel_linux_db
 
-    - name: free -h command
-      run: free -h  
-
     - name: build fds release
-      if: false # skip this run until ifx issue is sorted out
       run: |
         source /opt/intel/oneapi/setvars.sh
         cd ./Build/impi_intel_linux
         ./make_fds.sh
         ./fds_impi_intel_linux
-
-    - name: free -h command
-      run: free -h  
 
     # Setup python
     - uses: actions/setup-python@v5
@@ -97,7 +84,7 @@ jobs:
     - uses: rscohn2/setup-oneapi@v0
       with:
         components: |
-          mkl
+          mkl@2025.1.0
         prune: false  
 
     - uses: actions/checkout@v4
