@@ -2043,13 +2043,22 @@ DT_BC_SUB = DT_BC
 B1%N_SUBSTEPS = 1
 ONE_D%DELTA_TMP = 0._EB
 
+! Compute number of cells and density vector
+NWP = SUM(ONE_D%N_LAYER_CELLS(1:ONE_D%N_LAYERS))
+RHO_S = 0._EB
+DO I = 1,NWP
+   DO N=1,ONE_D%N_MATL
+      RHO_S(I)=RHO_S(I)+ONE_D%MATL_COMP(N)%RHO(I)
+   ENDDO
+ENDDO
+
 ! Compute initial thermal properties for Fo number calculation
 ! CHECK_FO=F by default
 ! CHECK_FO=T enforces near explicit time step accuracy (Forward-Euler would require 1/2 DT_FO)
 
+
 CHECK_FO_IF: IF (CHECK_FO) THEN
    ONE_D%K_S = 0._EB
-   RHO_S   = 0._EB
    ONE_D%RHO_C_S = 0._EB
    POINT_LOOP0: DO I=1,NWP
       VOLSUM = 0._EB
@@ -2060,7 +2069,6 @@ CHECK_FO_IF: IF (CHECK_FO) THEN
          VOLSUM = VOLSUM + ONE_D%MATL_COMP(N)%RHO(I)/RHO_ADJUSTED(LAYER_INDEX(I),N)
          ONE_D%K_S(I) = ONE_D%K_S(I) + ONE_D%MATL_COMP(N)%RHO(I)*ML%K_S(ITMP)/RHO_ADJUSTED(LAYER_INDEX(I),N)
          ONE_D%RHO_C_S(I) = ONE_D%RHO_C_S(I) + ONE_D%MATL_COMP(N)%RHO(I)*ML%C_S(ITMP)
-         RHO_S(I) = RHO_S(I) + ONE_D%MATL_COMP(N)%RHO(I)
       ENDDO MATERIAL_LOOP0
       IF (SF%PACKING_RATIO(LAYER_INDEX(I))>0._EB) ONE_D%K_S(I) = ONE_D%K_S(I)*SF%PACKING_RATIO(LAYER_INDEX(I))
 
@@ -2079,12 +2087,11 @@ SUB_TIMESTEP_LOOP: DO
    LAYER_DIVIDE = SF%LAYER_DIVIDE
 
    COMPUTE_GRID: IF (ONE_D%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED .OR. SF%HT_DIM>1 .OR. SF%VARIABLE_THICKNESS) THEN
-      NWP = SUM(ONE_D%N_LAYER_CELLS(1:ONE_D%N_LAYERS))
       CALL GET_WALL_NODE_WEIGHTS(NWP,ONE_D%N_LAYERS,ONE_D%N_LAYER_CELLS(1:ONE_D%N_LAYERS),ONE_D%LAYER_THICKNESS,SF%GEOMETRY, &
          ONE_D%X(0:NWP),LAYER_DIVIDE,DX_S(1:NWP),RDX_S(0:NWP+1),RDXN_S(0:NWP),DX_WGT_S(0:NWP),DXF,DXB,&
          LAYER_INDEX(0:NWP+1),MF_FRAC(1:NWP),SF%INNER_RADIUS,ONE_D%LAYER_DIVIDE_DEPTH)
    ELSE COMPUTE_GRID
-      NWP                  = SF%N_CELLS_INI
+!      NWP                  = SF%N_CELLS_INI
       DXF                  = SF%DXF
       DXB                  = SF%DXB
       DX_S(1:NWP)          = SF%DX(1:NWP)
@@ -2413,6 +2420,25 @@ SUB_TIMESTEP_LOOP: DO
 
       ENDDO POINT_LOOP2
 
+      ! Delamination layer fall-off
+
+      I = 0
+      DO NL=1,ONE_D%N_LAYERS
+         IF (ONE_D%LAYER_THICKNESS(NL).GT.ONE_D%MIN_LAYER_THICKNESS(NL) .AND. &
+              (ONE_D%TMP(I+ONE_D%N_LAYER_CELLS(NL)) > SF%FALLOFF_TMP(NL)) .OR.&
+              (    RHO_S(I+ONE_D%N_LAYER_CELLS(NL)) < SF%FALLOFF_DENSITY(NL))) THEN
+            REGRID_FACTOR(1:I+ONE_D%N_LAYER_CELLS(NL))=0._EB
+            ONE_D%RHO_C_S(1:I+ONE_D%N_LAYER_CELLS(NL))=0._EB
+            Q_S(1:I+ONE_D%N_LAYER_CELLS(NL))=0._EB
+            DO N=1,ONE_D%N_MATL
+               ONE_D%MATL_COMP(N)%RHO(1:I+ONE_D%N_LAYER_CELLS(NL))=0._EB
+            ENDDO
+            ONE_D%TMP(I+1:I+ONE_D%N_LAYER_CELLS(NL))=ONE_D%TMP(I+ONE_D%N_LAYER_CELLS(NL)+1)
+            B1%TMP_F = ONE_D%TMP(I+ONE_D%N_LAYER_CELLS(NL)+1)
+         ENDIF
+         I = I + ONE_D%N_LAYER_CELLS(NL)
+      ENDDO
+
       ! Compute new coordinates if the solid changes thickness. Save new coordinates in X_S_NEW.
       ! Remesh layer if any node goes to zero thickness
 
@@ -2465,7 +2491,7 @@ SUB_TIMESTEP_LOOP: DO
          ENDIF
          I = I + ONE_D%N_LAYER_CELLS(NL)
       ENDDO
-      
+
       ! If any nodes go to zero, apportion Q_S to surrounding nodes.
 
       IF (ANY(CELL_ZERO(1:ONE_D%N_LAYERS)) .AND. NWP > 1) THEN
@@ -2661,7 +2687,6 @@ SUB_TIMESTEP_LOOP: DO
          CALL INTERPOLATE_WALL_ARRAY(N_CELLS,NWP,NWP_NEW,INT_WGT,Q_S(1:N_CELLS))
          CALL INTERPOLATE_WALL_ARRAY(N_CELLS,NWP,NWP_NEW,INT_WGT,RHO_H_S(1:N_CELLS))
          CALL INTERPOLATE_WALL_ARRAY(N_CELLS,NWP,NWP_NEW,INT_WGT,TMP_S(1:N_CELLS))
-
          DO I=1,NWP_NEW
             VOL = (THICKNESS+SF%INNER_RADIUS-X_S_NEW(I-1))**I_GRAD-(THICKNESS+SF%INNER_RADIUS-X_S_NEW(I))**I_GRAD
             TMP_S(I) = TMP_S(I) / VOL
