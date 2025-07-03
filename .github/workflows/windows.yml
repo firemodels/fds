@@ -26,9 +26,9 @@ permissions:
 env:
   # update urls for oneapi packages according to
   # https://github.com/oneapi-src/oneapi-ci/blob/master/.github/workflows/build_all.yml
-  WINDOWS_BASEKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/ae29263e-38b9-4d43-86c3-376d6e0668e7/intel-oneapi-base-toolkit-2025.0.1.47_offline.exe
+  WINDOWS_BASEKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/09a8acaf-265f-4460-866c-a3375ed5b4ff/intel-oneapi-base-toolkit-2025.2.0.591_offline.exe
   WINDOWS_BASEKIT_COMPONENTS: intel.oneapi.win.mkl.devel
-  WINDOWS_HPCKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/a37c30c3-a846-4371-a85d-603e9a9eb94c/intel-oneapi-hpc-toolkit-2025.0.1.48_offline.exe
+  WINDOWS_HPCKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/3bbdaf75-6728-492e-a18c-be654dae9ee2/intel-oneapi-hpc-toolkit-2025.2.0.576_offline.exe
   WINDOWS_HPCKIT_COMPONENTS: intel.oneapi.win.ifort-compiler:intel.oneapi.win.mpi.devel
 
 
