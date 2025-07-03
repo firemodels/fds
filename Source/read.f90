@@ -5061,7 +5061,7 @@ END SUBROUTINE READ_REAC
 
 
 SUBROUTINE PROC_REAC_1
-USE CHEMCONS, ONLY: YP2ZZ
+USE CHEMCONS, ONLY: YP2ZZ, IS_EXPONENT_LT_1
 USE PROPERTY_DATA, ONLY : PARSE_EQUATION, SHUTDOWN_ATOM
 REAL(EB) :: MASS_PRODUCT,MASS_REACTANT,REACTION_BALANCE(118),NU_Y(N_SPECIES)
 INTEGER :: NS,NS2, NR
@@ -5284,6 +5284,15 @@ REAC_LOOP: DO NR=1,N_REACTIONS
       ENDIF
    ENDDO
 
+   IF(TRIM(ODE_SOLVER)=='CVODE' .AND. .NOT. IS_EXPONENT_LT_1) THEN
+      DO NS=1,RN%N_SPEC
+         IF (RN%N_S(NS) .LT. 1) THEN
+            IS_EXPONENT_LT_1 = .TRUE.
+            WRITE(LU_ERR,*)"Info: CVODE solver order set to 1 because one of the reaction involves exponent < 1.0. "
+            EXIT
+         ENDIF
+      ENDDO
+   ENDIF
 
    ! Normalize the stoichiometric coefficients by that of the fuel.
    RN%NU_FUEL_0 = -RN%NU(RN%FUEL_SMIX_INDEX)

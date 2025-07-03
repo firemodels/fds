@@ -9,7 +9,7 @@ USE_SSH=
 # set firebot host to spark
 # if using USE_SSH=1 over VPN add user name to HOST, e.g., HOST=usrname@spark.nist.gov
 HOST=spark.nist.gov
-HOSTDIR=/home/firebot/.firebot
+HOSTDIR=/home/firebot/FireModels_clone/fds
 
 # shouldn't have to change lines below
 
