@@ -719,10 +719,10 @@ DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
       IIO_2 = IIO
       JJO_2 = JJO
       SELECT CASE(IOR)
-         CASE( 1) ; IIO_2 = IIO - 1
-         CASE(-1) ; IIO_2 = IIO + 1
-         CASE( 2) ; JJO_2 = JJO - 1
-         CASE(-2) ; JJO_2 = JJO + 1
+         CASE(-1) ; IIO_2 = IIO - 1
+         CASE( 1) ; IIO_2 = IIO + 1
+         CASE(-2) ; JJO_2 = JJO - 1
+         CASE( 2) ; JJO_2 = JJO + 1
       END SELECT
       IF (PREDICTOR) THEN
          PHI_LS_OTHER   = PHI_LS_OTHER   + OMESH(NOM)%PHI_LS(IIO  ,JJO  )
