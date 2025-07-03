@@ -67,8 +67,16 @@ def dataplot(config_filename,**kwargs):
         plot_range_in = kwargs.get('plot_range')
         plot_range = range(plot_range_in[0]-2,plot_range_in[-1]-1)
 
+    # Rebuild the default NA strings *excluding* 'N/A'
+    default_na = {
+        '', '#N/A', '#N/A N/A', '#NA', '-1.#IND', '-1.#QNAN',
+        '1.#IND', '1.#QNAN', '<NA>', 'NA', 'NULL', 'NaN',
+        'n/a', 'nan', 'null'
+    }
+    safe_na_values = default_na  # 'N/A' intentionally not included
+
     # read the config file
-    df = pd.read_csv(configdir+config_filename, sep=',', engine='python', comment='#', quotechar='"')
+    df = pd.read_csv(configdir+config_filename, sep=',', engine='python', comment='#', quotechar='"', na_values=safe_na_values, keep_default_na=False)
     C = df.where(pd.notnull(df), None)
 
     Plot_Filename_Last = None
@@ -103,24 +111,44 @@ def dataplot(config_filename,**kwargs):
             # read data from exp file
             # set header to the row where column names are stored (Python is 0 based)
             E = pd.read_csv(expdir+pp.d1_Filename, header=int(pp.d1_Col_Name_Row-1), sep=',', engine='python', comment='#', quotechar='"')
+            E.columns = E.columns.str.strip()  # <-- Strip whitespace from headers
 
             x = E[pp.d1_Ind_Col_Name].values[:].astype(float)
             # y = E[pp.d1_Dep_Col_Name].values[:].astype(float)
             col_names = [c.strip() for c in pp.d1_Dep_Col_Name.split('|')]
-            # print(col_names)
-            y = E[col_names].values.astype(float)
+            # y = E[col_names].values.astype(float)
+            y = np.column_stack([
+                E[cols].astype(float).sum(axis=1) if '+' in name else E[[name]].astype(float).values.ravel()
+                for name in col_names
+                for cols in [name.split('+')]
+            ])
+
+            styles = [c.strip() for c in pp.d1_Style.split('|')]
+            key_labels = [c.strip() for c in pp.d1_Key.split('|')]
 
             for i, label in enumerate(col_names):
-                # plot the exp data
-                f = plot_to_fig(x_data=x, y_data=y[:, i],
-                    data_label=pp.d1_Key,
-                    x_label=pp.Ind_Title,
-                    y_label=pp.Dep_Title,
-                    marker_style=pp.d1_Style,
-                    x_min=pp.Min_Ind,x_max=pp.Max_Ind,
-                    y_min=pp.Min_Dep,y_max=pp.Max_Dep,
-                    legend_location=pp.Key_Position
-                    )
+                if i==0:
+                    # plot the exp data
+                    f = plot_to_fig(x_data=x, y_data=y[:, i],
+                        data_label=key_labels[i],
+                        x_label=pp.Ind_Title,
+                        y_label=pp.Dep_Title,
+                        marker_style=styles[i],
+                        x_min=pp.Min_Ind,x_max=pp.Max_Ind,
+                        y_min=pp.Min_Dep,y_max=pp.Max_Dep,
+                        legend_location=matlab_legend_to_matplotlib(pp.Key_Position)
+                        )
+                elif i>0:
+                    f = plot_to_fig(x_data=x, y_data=y[:, i],
+                        figure_handle=f,
+                        data_label=key_labels[i],
+                        x_label=pp.Ind_Title,
+                        y_label=pp.Dep_Title,
+                        marker_style=styles[i],
+                        x_min=pp.Min_Ind,x_max=pp.Max_Ind,
+                        y_min=pp.Min_Dep,y_max=pp.Max_Dep,
+                        legend_location=matlab_legend_to_matplotlib(pp.Key_Position)
+                        )
 
             # plt.figure(f.number) # make figure current
             # plt.show()
@@ -132,6 +160,7 @@ def dataplot(config_filename,**kwargs):
                 # read data from exp file
                 # set header to the row where column names are stored (Python is 0 based)
                 E = pd.read_csv(expdir+pp.d1_Filename, header=int(pp.d1_Col_Name_Row-1), sep=',', engine='python', comment='#', quotechar='"')
+                E.columns = E.columns.str.strip()  # <-- Strip whitespace from headers
                 x = E[pp.d1_Ind_Col_Name].values[:].astype(float)
                 y = E[pp.d1_Dep_Col_Name].values[:].astype(float)
 
@@ -144,15 +173,21 @@ def dataplot(config_filename,**kwargs):
                     marker_style=pp.d1_Style,
                     x_min=pp.Min_Ind,x_max=pp.Max_Ind,
                     y_min=pp.Min_Dep,y_max=pp.Max_Dep,
-                    legend_location=pp.Key_Position
+                    legend_location=matlab_legend_to_matplotlib(pp.Key_Position)
                     )
 
         # get the model results
         M = pd.read_csv(cmpdir+pp.d2_Filename, header=int(pp.d2_Col_Name_Row-1), sep=',', engine='python', comment='#', quotechar='"')
+        M.columns = M.columns.str.strip()  # <-- Strip whitespace from headers
         x = M[pp.d2_Ind_Col_Name].values[:].astype(float)
         # y = M[pp.d2_Dep_Col_Name].values[:].astype(float)
         col_names = [c.strip() for c in pp.d2_Dep_Col_Name.split('|')]
-        y = M[col_names].values.astype(float)
+        # y = M[col_names].values.astype(float)
+        y = np.column_stack([
+            M[cols].astype(float).sum(axis=1) if '+' in name else M[[name]].astype(float).values.ravel()
+            for name in col_names
+            for cols in [name.split('+')]
+        ])
 
         version_string = revision
         if (pp.VerStr_Filename):
@@ -161,17 +196,20 @@ def dataplot(config_filename,**kwargs):
             version_string = Lines[0].strip()
             file1.close()
 
+        styles = [c.strip() for c in pp.d2_Style.split('|')]
+        key_labels = [c.strip() for c in pp.d2_Key.split('|')]
+
         for i, label in enumerate(col_names):
             f = plot_to_fig(x_data=x, y_data=y[:, i],
                 revision_label=version_string,
                 figure_handle=f,
                 x_label=pp.Ind_Title,
                 y_label=pp.Dep_Title,
-                data_label=pp.d2_Key,
-                line_style=pp.d2_Style,
+                data_label=key_labels[i],
+                line_style=styles[i],
                 x_min=pp.Min_Ind,x_max=pp.Max_Ind,
                 y_min=pp.Min_Dep,y_max=pp.Max_Dep,
-                legend_location=pp.Key_Position,
+                legend_location=matlab_legend_to_matplotlib(pp.Key_Position),
                 plot_title=pp.Plot_Title
                 )
 
@@ -255,9 +293,11 @@ def plot_to_fig(x_data,y_data,**kwargs):
     # convert matlab styles to matplotlib
     if kwargs.get('marker_style'):
         style = kwargs.get('marker_style')
-
         color,marker,linestyle = parse_matlab_style(style)
 
+    if kwargs.get('line_style'):
+        style = kwargs.get('line_style')
+        color,marker,linestyle = parse_matlab_style(style)
 
     # other plot parameters
     if kwargs.get('data_markevery'):
@@ -367,14 +407,21 @@ def plot_to_fig(x_data,y_data,**kwargs):
     if kwargs.get('legend_location')=='outside':
         plt.legend(fontsize=legend_fontsize,bbox_to_anchor=(1,1),loc='upper left',framealpha=kwargs.get('legend_framealpha'))
     else:
-        if kwargs.get('show_legend'):
-            plt.legend(fontsize=legend_fontsize,loc=kwargs.get('legend_location'),framealpha=kwargs.get('legend_framealpha'))
+        # if kwargs.get('show_legend'):
+        plt.legend(fontsize=legend_fontsize,loc=kwargs.get('legend_location'),framealpha=kwargs.get('legend_framealpha'))
 
-    # plot titles
-    if kwargs.get('title_fontsize'):
-        title_fontsize=kwargs.get('title_fontsize')
-    else:
-        title_fontsize=default_title_fontsize
+    # plot title
+    if kwargs.get('plot_title'):
+        if kwargs.get('title_fontsize'):
+            title_fontsize=kwargs.get('title_fontsize')
+        else:
+            title_fontsize=default_title_fontsize
+
+        plt.text(0.05, 0.95, kwargs.get('plot_title'),
+        transform=plt.gca().transAxes,
+        fontsize=title_fontsize,
+        verticalalignment='top',
+        horizontalalignment='left')
 
     # set axes and tick properties
     ymin=kwargs.get('y_min')
@@ -685,4 +732,33 @@ def define_plot_parameters(C,irow):
         Font_Interpreter     = C.values[irow,C.columns.get_loc('Font_Interpreter')]
 
     return plot_parameters
+
+
+def matlab_legend_to_matplotlib(position):
+    """
+    Convert a MATLAB legend position string to the corresponding matplotlib location string.
+
+    Parameters:
+        position (str): MATLAB-style legend position (e.g., 'northeast', 'southwestoutside')
+
+    Returns:
+        str: Matplotlib-compatible legend location (e.g., 'upper right')
+    """
+    position = position.strip().lower()
+    mapping = {
+        'north': 'upper center',
+        'south': 'lower center',
+        'east': 'center right',
+        'west': 'center left',
+        'northeast': 'upper right',
+        'southeast': 'lower right',
+        'southwest': 'lower left',
+        'northwest': 'upper left',
+        'northeastoutside': 'center left',    # rough equivalent
+        'northwestoutside': 'center right',
+        'southeastoutside': 'center left',
+        'southwestoutside': 'center right',
+        'best': 'best'
+    }
+    return mapping.get(position, 'best')
 
