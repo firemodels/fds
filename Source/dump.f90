@@ -4296,13 +4296,16 @@ ENDDO
 QUANTITY => WORK3
 
 ISOF_LOOP: DO N=1,N_ISOF
+
    IS => ISOSURFACE_FILE(N)
    ERROR = 0
    ISOOFFSET = 1
    HAVE_ISO2 = 0
 
    ! Fill up the dummy array QUANTITY with the appropriate gas phase output
+
    IF (IS%DEBUG) THEN
+
       ISO_CENX = REAL((XS_MIN + XF_MAX)/2.0_EB, FB)
       ISO_CENY = REAL((YS_MIN + YF_MAX)/2.0_EB, FB)
       ISO_CENZ = REAL((ZS_MIN + ZF_MAX)/2.0_EB, FB)
@@ -4313,7 +4316,9 @@ ISOF_LOOP: DO N=1,N_ISOF
             ENDDO
          ENDDO
       ENDDO
+
    ELSE
+
       DO K=0,KBP1
          DO J=0,JBP1
             DO I=0,IBP1
@@ -4322,39 +4327,34 @@ ISOF_LOOP: DO N=1,N_ISOF
          ENDDO
       ENDDO
 
-   ! Mirror QUANTITY into ghost cells
-
-      QUANTITY(0   ,0:JBP1,0:KBP1) = QUANTITY(1   ,0:JBP1,0:KBP1)
-      QUANTITY(IBP1,0:JBP1,0:KBP1) = QUANTITY(IBAR,0:JBP1,0:KBP1)
-      QUANTITY(0:IBP1,0   ,0:KBP1) = QUANTITY(0:IBP1,1   ,0:KBP1)
-      QUANTITY(0:IBP1,JBP1,0:KBP1) = QUANTITY(0:IBP1,JBAR,0:KBP1)
-      QUANTITY(0:IBP1,0:JBP1,0   ) = QUANTITY(0:IBP1,0:JBP1,1   )
-      QUANTITY(0:IBP1,0:JBP1,KBP1) = QUANTITY(0:IBP1,0:JBP1,KBAR)
       CALL FILL_EDGES(QUANTITY)
 
-   ! Average the data (which is assumed to be cell-centered) at cell corners
+      ! Average the data (which is assumed to be cell-centered) at cell corners
 
       DO K=0,KBAR
          DO J=0,JBAR
             DO I=0,IBAR
                QQ(I,J,K,1) = REAL(S(I,J,K)*(QUANTITY(I,J,K)*B(I,J,K)        + QUANTITY(I+1,J,K)*B(I+1,J,K)+ &
-                                                  QUANTITY(I,J,K+1)*B(I,J,K+1)    + QUANTITY(I+1,J,K+1)*B(I+1,J,K+1)+ &
-                                                  QUANTITY(I,J+1,K)*B(I,J+1,K)    + QUANTITY(I+1,J+1,K)*B(I+1,J+1,K)+ &
-                                                  QUANTITY(I,J+1,K+1)*B(I,J+1,K+1)+ QUANTITY(I+1,J+1,K+1)*B(I+1,J+1,K+1)),FB)
+                                            QUANTITY(I,J,K+1)*B(I,J,K+1)    + QUANTITY(I+1,J,K+1)*B(I+1,J,K+1)+ &
+                                            QUANTITY(I,J+1,K)*B(I,J+1,K)    + QUANTITY(I+1,J+1,K)*B(I+1,J+1,K)+ &
+                                            QUANTITY(I,J+1,K+1)*B(I,J+1,K+1)+ QUANTITY(I+1,J+1,K+1)*B(I+1,J+1,K+1)),FB)
             ENDDO
          ENDDO
       ENDDO
+
    ENDIF
 
    ! Fill up QUANTITY2 and QQ2 arrays if the isosurface is colored with a second quantity
 
    INDEX2_IF: IF ( IS%INDEX2 /= -1 ) THEN
+
       HAVE_ISO2 = 1
       QUANTITY2 => WORK4
 
       ! Fill up the dummy array QUANTITY2 with the appropriate gas phase output
 
       IF (IS%DEBUG) THEN
+
          DO K=0,KBAR+1
             IF (K.EQ.KBAR+1) THEN
                ZZ = 2.0_FB*ZPLT(KBAR) - ZPLT(KBAR-1)
@@ -4367,7 +4367,9 @@ ISOF_LOOP: DO N=1,N_ISOF
                ENDDO
             ENDDO
          ENDDO
+
       ELSE
+
          DO K=0,KBP1
             DO J=0,JBP1
                DO I=0,IBP1
@@ -4376,17 +4378,9 @@ ISOF_LOOP: DO N=1,N_ISOF
             ENDDO
          ENDDO
 
-      ! Mirror QUANTITY into ghost cells
-
-         QUANTITY2(0   ,0:JBP1,0:KBP1) = QUANTITY2(1   ,0:JBP1,0:KBP1)
-         QUANTITY2(IBP1,0:JBP1,0:KBP1) = QUANTITY2(IBAR,0:JBP1,0:KBP1)
-         QUANTITY2(0:IBP1,0   ,0:KBP1) = QUANTITY2(0:IBP1,1   ,0:KBP1)
-         QUANTITY2(0:IBP1,JBP1,0:KBP1) = QUANTITY2(0:IBP1,JBAR,0:KBP1)
-         QUANTITY2(0:IBP1,0:JBP1,0   ) = QUANTITY2(0:IBP1,0:JBP1,1   )
-         QUANTITY2(0:IBP1,0:JBP1,KBP1) = QUANTITY2(0:IBP1,0:JBP1,KBAR)
          CALL FILL_EDGES(QUANTITY2)
 
-      ! Average the data (which is assumed to be cell-centered) at cell corners
+         ! Average the data (which is assumed to be cell-centered) at cell corners
 
          DO KK=0,KBAR+1
             K = MIN(KK, KBAR)
@@ -4401,6 +4395,7 @@ ISOF_LOOP: DO N=1,N_ISOF
                ENDDO
             ENDDO
          ENDDO
+
       ENDIF
 
    ENDIF INDEX2_IF
