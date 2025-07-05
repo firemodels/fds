@@ -3323,7 +3323,9 @@ Note that the 3-D heat conduction equation is solved via 1-D segments in all thr
 \label{box_burn_away_2D_fig}
 \end{figure}
 
-
+\subsection{Delamination of layers}
+\label{info:surf_delamination}
+Delamination (fall-off) of material layers can occur e.g. in glued materials, such as Cross-Laminated Timber (CLT). Two different criteria can be used to enforce a delamination of \ct{SURF} layers: \ct{DELAMINATION\_TMP(NL)} sets the temperature criterion; if the last cell of the layer \ct{NL} exceeds this temperature, all layers from the first to \ct{NL}'th (of this particular wall cell) will be removed. Their mass will simply disappear from the computation, and the following layer will befome the surface of the wall. Similarly, specifying \ct{DELAMINATION\_DENSITY(NL)} will remove the layers 1 to \ct{NL} if the density of the \ct{NL}th layer's last cell decreases below the threshold.
 
 \newpage
 
@@ -13532,6 +13534,8 @@ Keyword             & Type     & Description                      & Units       
 \ct{CONVECTIVE_HEAT_FLUX}                              & Real            & Section~\ref{info:convection}             & \si{kW/m^2}         &                         \\ \hline
 \ct{CONVERT_VOLUME_TO_MASS}                           & Logical         & Section~\ref{info:MASS_FLUX}              &                     & \ct{F}                 \\ \hline
 \ct{DEFAULT}                                             & Logical         & Section~\ref{info:SURF}                   &                     & \ct{F}                 \\ \hline
+\ct{DELAMINATION_DENSITY(:)}                         & Real Array     & Section~\ref{info:surf_delamination}        & \si{kg/m^3}        &                        \\ \hline
+\ct{DELAMINATION_TMP(:)}                             & Real Array     & Section~\ref{info:surf_delamination}        & $^\circ$C           &                        \\ \hline
 \ct{DELTA_TMP_MAX}                                     & Real            & Section~\ref{info:solid_phase_stability}  & $^\circ$C           & 10                      \\ \hline
 \ct{DRAG_COEFFICIENT}                                   & Real            & Section~\ref{info:boundary_fuel_model}    &                     & 2.8                     \\ \hline
 \ct{DSC_CONVERSION_FACTOR}                              & Real            & Section~\ref{info:TGA_DSC_MCC}            &                     & 1                       \\ \hline
