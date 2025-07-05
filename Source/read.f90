@@ -5288,7 +5288,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
       DO NS=1,RN%N_SPEC
          IF (RN%N_S(NS) .LT. 1) THEN
             IS_EXPONENT_LT_1 = .TRUE.
-            WRITE(LU_ERR,*)"Info: CVODE solver order set to 1 because one of the reaction involves exponent < 1.0. "
+            IF (MY_RANK==0) WRITE(LU_ERR,'(A)')"INFO: CVODE solver order set to 1 because one REAC has an N_S < 1."
             EXIT
          ENDIF
       ENDDO
