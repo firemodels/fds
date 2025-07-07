@@ -1510,7 +1510,7 @@ IF (T_END>TWO_EPSILON_EB) CHECK_MESH_ALIGNMENT=.FALSE. ! overwrite user-specifie
 
 IF (RAMP_TIME /='null' .AND. RAMP_DT /='null') THEN
    WRITE(MESSAGE,'(A)') &
-      'ERROR(XXX): On TIME, do not set both RAMP_TIME and RAMP_DT.'
+      'ERROR(1052): On TIME, do not set both RAMP_TIME and RAMP_DT.'
    CALL SHUTDOWN(MESSAGE) ; RETURN
 ENDIF
 
@@ -1519,7 +1519,7 @@ IF (RAMP_DT /='null') CALL GET_RAMP_INDEX(RAMP_DT,'TIME',RAMP_DT_INDEX)
 
 IF (DT_EXTERNAL_HEARTBEAT <= TWO_EPSILON_EB .NEQV. EXTERNAL_HEARTBEAT_FILENAME=='null') THEN
    WRITE(MESSAGE,'(A)') &
-      'ERROR(XXX): On TIME, if one of DT_EXTERNAL_HEARTBEAT or EXTERNAL_HEARTBEAT_FILENAME is set, both must be set.'
+      'ERROR(1053): On TIME, if one of DT_EXTERNAL_HEARTBEAT or EXTERNAL_HEARTBEAT_FILENAME is set, both must be set.'
    CALL SHUTDOWN(MESSAGE) ; RETURN
 ENDIF
 
@@ -1687,7 +1687,7 @@ READ_MULT_LOOP: DO N=0,N_MULT
    IF ( (I_UPPER-I_LOWER>0 .AND. ABS(DX)<TWO_EPSILON_EB) .OR. &
         (J_UPPER-J_LOWER>0 .AND. ABS(DY)<TWO_EPSILON_EB) .OR. &
         (K_UPPER-K_LOWER>0 .AND. ABS(DZ)<TWO_EPSILON_EB)      ) THEN
-      WRITE(MESSAGE,'(A)') 'ERROR(XXX): On MULT, must set DX if I_UPPER-I_LOWER>0, etc.'
+      WRITE(MESSAGE,'(A)') 'ERROR(1054): On MULT, must set DX if I_UPPER-I_LOWER>0, etc.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 
@@ -3361,7 +3361,7 @@ DO NS=1,MAX_SPECIES
          ENDIF
       ENDDO
       IF (N1 > N_TRACKED_SPECIES) THEN
-      WRITE(MESSAGE,'(A,A,A)') 'ERROR(XXX): BACK tracked species ',TRIM(SPEC_ID(NS)),' not found.'
+      WRITE(MESSAGE,'(A,A,A)') 'ERROR(179): BACK tracked species ',TRIM(SPEC_ID(NS)),' not found.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
    ENDIF
@@ -9217,7 +9217,7 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
          ENDIF
       ENDDO
       IF (SF%NODE_INDEX==0) THEN
-         WRITE(MESSAGE,'(A,A,A)') 'ERROR(xxx): SURF ',TRIM(SF%ID),' NODE_ID does not exist'
+         WRITE(MESSAGE,'(A,A,A)') 'ERROR(379): SURF ',TRIM(SF%ID),' NODE_ID does not exist'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
    ENDIF
@@ -11092,7 +11092,7 @@ MESH_LOOP: DO NM=1,NMESHES
 
                DO NNN=-3,3
                   IF (SURFACE(OB%SURF_INDEX(NNN))%NODE_ID/='null') THEN
-                     WRITE(MESSAGE,'(A,A,A)')  'ERROR(xxx): OBST_ID ',TRIM(ID),' cannot have a SURF with NODE_ID.'
+                     WRITE(MESSAGE,'(A,A,A)')  'ERROR(614): OBST_ID ',TRIM(ID),' cannot have a SURF with NODE_ID.'
                      CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                   ENDIF
                ENDDO
@@ -11967,7 +11967,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
          CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
       ENDIF
       IF (SURF_ID=='HVAC' .AND. GEOM) THEN
-         WRITE(MESSAGE,'(3A)') 'ERROR(xxx): VENT ',TRIM(ID), ' cannot have SURF_ID=HVAC and GEOM=T.'
+         WRITE(MESSAGE,'(3A)') 'ERROR(823): VENT ',TRIM(ID), ' cannot have SURF_ID=HVAC and GEOM=T.'
          CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
       ENDIF
 

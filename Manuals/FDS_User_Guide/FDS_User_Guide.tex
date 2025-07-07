@@ -3696,7 +3696,7 @@ Additionally you must define the locations where the HVAC network joins the comp
 \end{lstlisting}
 where:
 \begin{itemize}
-\item \ct{TYPE_ID} is a character string that indicates the type of component that the namelist group is defining.   \ct{TYPE_ID} can be \ct{DUCT}, \ct{NODE}, \ct{FAN}, \ct{FILTER}, \ct{AIRCOIL}, or \ct{LEAK} (see ~Sec.~\ref{info:local_leakage}).
+\item \ct{TYPE_ID} is a character string that indicates the type of component that the namelist group is defining.   \ct{TYPE_ID} can be \ct{DUCT}, \ct{NODE}, \ct{FAN}, \ct{FILTER}, \ct{AIRCOIL}, or \ct{LEAK} (see ~Sec.~\ref{info:local_leakage}). 
 \item \ct{ID} is a character string giving a name to the component.  The name must be unique amongst all other components of that type; however, the same name can be given to components of different types (i.e., a duct and a node can have the same name but two ducts cannot).
 \end{itemize}
 A number of examples of simple HVAC systems are given in the HVAC folder of the sample cases and are discussed in the FDS Verification Guide.
@@ -3807,6 +3807,7 @@ where:
 \item \ct{AMBIENT} is a logical value.  If \ct{T}, then the node is connected to the ambient (i.e., it is equivalent to the \ct{OPEN} boundary condition on a \ct{SURF} line).
 \item \ct{DUCT_ID} gives the \ct{ID}s of the ducts connected to the node. Only one duct is allowed if the node is \ct{AMBIENT} or has a \ct{VENT_ID}.  Up to 10 ducts can be connected to a node.
 \item \ct{FILTER_ID} gives the \ct{ID} a filter located at the node.  A node with a filter must have two connected ducts. This means a filter cannot be located at an ambient node, a node that is attached to a \ct{VENT}, or node with three or more ducts.
+\item \ct{GEOM} Indicates the node is attached to an unstructured geometry object (Section~\ref{info:hvac_geom}).
 \item \ct{LOSS} is an $n$ by $n$ array of real numbers giving the dimensionless loss coefficients for the node.  \ct{LOSS(I,J)} is the loss coefficient for flow from duct \ct{I} to duct \ct{J} expressed in terms of the downstream duct area (see discussion in ~\ref{info:HVACduct} on how to adjust losses for area changes).  For a terminal node (e.g., a node connected to the ambient or to a \ct{VENT}) the \ct{LOSS} is entered as a pair of numbers representing loss coefficient for flow entering the HVAC system and for flow exiting the HVAC system.
 \item \ct{NETWORK_ID} Used for Smokeview visualization. All ducts and nodes with a common \ct{NETWORK_ID} can be selected or deselected as a group in Smokeview. If no value is given, the node will be placed in the Unassigned network.
 \item \ct{VENT_ID} is the name of the \ct{VENT} where the node connects to the FDS computational domain.  No two \ct{VENTs} should be defined with the same \ct{VENT_ID}.
@@ -3817,6 +3818,8 @@ A duct node must either have two or more ducts attached to it or it must have ei
 It is permissible to have individual \ct{VENT} lines for an HVAC system span multiple meshes; however, the entire \ct{VENT} must lie within a single pressure zone.
 
 Note that a \ct{VENT} being used for an HVAC system must be present throughout the simulation. The \ct{VENT} should not have a \ct{CTRL_ID} or \ct{DEVC_ID}. This also includes the solid surface it is attached; i.e., any \ct{OBST} the \ct{VENT} is attached to also needs to be present throughout the simulation. Turning on or off a \ct{VENT} connected to an HVAC system, requires a damper in the duct connected to \ct{VENT}.
+
+The pressure zone and physical presence restrictions also apply to \ct{GEOM} being used for an HVAC system.
 
 \subsection{HVAC Fan Parameters}
 \label{info:HVACfan}
@@ -14003,6 +14006,7 @@ Keyword             & Type     & Description                      & Units       
 174  \> \ct{REAC, Not enough nitrogen for the FUEL_N_TO_HCN_FRACTION.} \> Section~\ref{info:simple_chemistry}  \\
 175  \> \ct{REAC, Not enough carbon for the FUEL_C_TO_CO_FRACTION ...} \> Section~\ref{info:simple_chemistry}  \\
 176  \> \ct{REAC, Not enough hydrogen for the FUEL_H_TO_H2_FRACTION ...} \> Section~\ref{info:simple_chemistry}  \\
+179  \> \ct{BACK tracked species ... not found.} \> Section~\ref{info:BACKGROUND_SPECIES}  \\
 180  \> \ct{SPEC ... does not have a SPECIFIC_HEAT_LIQUID ...} \> Section~\ref{info:liquid_props}  \\
 181  \> \ct{SPEC ... does not have a MELTING_TEMPERATURE.} \> Section~\ref{info:liquid_props}  \\
 182  \> \ct{SPEC ... does not have a VAPORIZATION_TEMPERATURE.} \> Section~\ref{info:liquid_props}  \\
@@ -14161,6 +14165,7 @@ Keyword             & Type     & Description                      & Units       
 376  \> \ct{Meshes must have the same y/z bounds for TUNNEL_PRECONDITIONER.} \> Section~\ref{tunnel_solver}  \\
 377  \> \ct{SURF ... IMPINGING JET model requires ...} \> Section~\ref{info:impinging_jet}  \\
 378  \> \ct{SURF ... cannot be applied to a 3-D conducting solid.} \> Section~\ref{info:BACKING}  \\
+379  \> \ct{SURF ... NODE_ID does not exist.} \> Section~\ref{hvac_geom}  \\
      \>                                                                               \>                                     \\
 381  \> \ct{Need more spectral band limits.} \> Section~\ref{info:RADI_Wide_Band}  \\
 382  \> \ct{Spectral band limits should be given in ascending order.} \> Section~\ref{info:RADI_Wide_Band}  \\
@@ -14290,6 +14295,13 @@ Keyword             & Type     & Description                      & Units       
     \> \ct{A_TROE, T1_TROE, and T3_TROE.}   \\
 567 \> \ct{REAC: ... Tracked species ... used in a finite rate reaction} \> Section~\ref{info:finite}  \\
     \> \ct{without N_S defined is not a primitive species.}   \\
+568 \> \ct{Ductnode with GEOM cannot have a VENT_ID. Ductnode ID:...} \> Section~\ref{info:hvac_geom}  \\
+569 \> \ct{Ductnode with one duct needs either AMBIENT, GEOM, or VENT_ID.} \> Section~\ref{info:hvac_geom}  \\
+    \> \ct{ Ductnode ID:...} \\
+570 \> \ct{Problem with ductnode:..., cannot assign to both VENT and GEOM.} \> Section~\ref{info:hvac_geom}  \\
+571 \> \ct{VENT_ID for leakage cannot be AMBIENT if GEOM is set. Leak ID:...} \> Section~\ref{info:hvac_geom}  \\
+572 \> \ct{VENT2_ID for leakage cannot be AMBIENT if GEOM2 is set. Leak ID:...}\> Section~\ref{info:hvac_geom}  \\
+573 \> \ct{Ductnode:...,Ductnode ID:... defined with GEOM had no CFACE found.}\> Section~\ref{info:hvac_geom}  \\
     \>                                                                               \>                          \\
 601 \> \ct{OBST ... MULT_ID ... not found.} \> Section~\ref{info:MULT}  \\
 602 \> \ct{OBST ... SHAPE requires RADIUS.} \> Section~\ref{info:multobst}  \\
@@ -14304,7 +14316,7 @@ Keyword             & Type     & Description                      & Units       
 611 \> \ct{OBST ... has a BULK_DENSITY but zero volume.} \> Section~\ref{info:BURN_AWAY}  \\
 612 \> \ct{OBST ... must have a volume to be assigned HT3D.} \> Section~\ref{checkerboard}  \\
 613 \> \ct{OBST ... and OBST ... cannot overlap in Mesh ...} \> Section~\ref{info:OVERLAY}  \\
-    \>                                                                                \>                          \\
+614 \> \ct{OBST_ID ... cannot have a SURF with NODE_ID} \> Section~\ref{info:hvac_geom}  \\    \>                                                                                \>                          \\
 701 \> \ct{problem with GEOM, local SURF_ID index ... out of bounds.} \> Section~\ref{info:GEOM_Basics}  \\
 702 \> \ct{problem with GEOM, SURF_IDS not defined properly.} \> Section~\ref{info:first_geom}  \\
 703 \> \ct{missing SURF_ID in \&GEOM line ...} \> Section~\ref{subsec:readbin}  \\
@@ -14362,6 +14374,7 @@ Keyword             & Type     & Description                      & Units       
 820 \> \ct{VENT ... has no solid backing or an IOR is needed.} \> Section~\ref{info:VENT_Basics} \\
 821 \> \ct{VENT ... cannot have normal component of UVW equal to 0.} \> Section~\ref{info:HVAClouvers} \\
 822 \> \ct{VENT ... has the same ID as another VENT.} \> Section~\ref{info:HVAC} \\
+823 \> \ct{VENT ... cannot have SURF_ID=HVAC and GEOM=T.} \> Section~\ref{info:hvac_geom} \\
     \>                                                                                \>                          \\
 841 \> \ct{INIT ... has an unknown MULT_ID ...} \> Section~\ref{info:MULT} \\
 842 \> \ct{INIT ... cannot have both MASS and VOLUME_FRACTION.} \> Section~\ref{info:init_species} \\
@@ -14488,9 +14501,13 @@ Keyword             & Type     & Description                      & Units       
 1043 \> \ct{PROP_ID ... not found.} \> Section~\ref{info:gasoutputquantities} \\
 1044 \> \ct{Cannot set EXTERNAL_FILE=T for a RAMP used for an output clock ...} \> Section~\ref{info:external_control} \\
 1045 \> \ct{QUANTITY ... requires a PART_ID for particles with mass.} \> Section~\ref{tab:particleoutputquantities} \\
-     \>                                                                               \>                                     \\
+\\
 1051 \> \ct{RESTART initial time equals T_END.} \> Section~\ref{info:restart} \\
-
+1052 \> \ct{On TIME, do not set both RAMP_TIME and RAMP_DT.} \> Section~\ref{info:simulation_time_ramp} \\
+1053 \> \ct{One TIME, if one of DT_EXTERNAL_HEARTBEAT or} \> Section~\ref{info:external_control} \\
+     \> \ct{EXTERNAL_HEARTBEAT_FILENAME is set, both must be set.} \\
+\\
+1054 \> \ct{On MULT, must set DX if I_UPPER-I_LOWER>0, etc.} \> Section~\ref{info:MULT} \\
 \end{tabbing}
 
 
