@@ -13,6 +13,7 @@ INTEGER, PARAMETER :: IB32 = SELECTED_INT_KIND(6)    !< Precision of "Four Byte"
 INTEGER, PARAMETER :: MAX_LPC=20                     !< Maximum number of declared particle classes
 INTEGER, PARAMETER :: MAX_SPECIES=20                 !< Maximum number of declared species
 INTEGER, PARAMETER :: MAX_LAYERS=20                  !< Maximum number of solid material layers
+INTEGER, PARAMETER :: MAX_LAYERS_HT3D=500            !< Maximum number of solid material layers for an HT3D solid
 INTEGER, PARAMETER :: MAX_MATERIALS=20               !< Maximum number of solid material components
 INTEGER, PARAMETER :: MAX_MATERIALS_TOTAL=400        !< Dimension of material work array
 INTEGER, PARAMETER :: MAX_CONE_CURVES=10             !< Maximum number of cone calorimeter curves
