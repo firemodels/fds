@@ -430,19 +430,19 @@ DO NN=1,N_HVAC_READ
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
          IF ((GEOM .OR. GEOM2) .AND. VENT_ID/='null') THEN
-            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR(yyy): Ductnode with GEOM cannot have a VENT_ID. Ductnode ID:',TRIM(DN%ID),&
+            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR(568): Ductnode with GEOM cannot have a VENT_ID. Ductnode ID:',TRIM(DN%ID),&
                                         ', HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
          IF (.NOT. AMBIENT .AND. .NOT. GEOM .AND. VENT_ID=='null' .AND. N_DUCTS==1) THEN
-            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR(yyy): Ductnode with one duct needs either AMBIENT, GEOM, or VENT_ID. Ductnode ID:',&
+            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR(569): Ductnode with one duct needs either AMBIENT, GEOM, or VENT_ID. Ductnode ID:',&
                                         TRIM(DN%ID),', HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
          DN%VENT_ID = VENT_ID
          DN%GEOM = GEOM
          IF (DN%VENT .AND. DN%GEOM) THEN
-            WRITE(MESSAGE,'(A,A,A,A)') 'ERROR(yyy): Problem with ductnode:',TRIM(DN%ID), &
+            WRITE(MESSAGE,'(A,A,A,A)') 'ERROR(570): Problem with ductnode:',TRIM(DN%ID), &
                                           ', cannot assign to both VENT and GEOM.'
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
@@ -604,7 +604,7 @@ DO NN=1,N_HVAC_READ
          IF (GEOM) THEN
             DN%GEOM = .TRUE.
             IF (TRIM(DN%VENT_ID)=='AMBIENT') THEN
-               WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR(yyy): VENT_ID for leakage cannot be AMBIENT if GEOM is set. Leak ID:',TRIM(ID),&
+               WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR(571): VENT_ID for leakage cannot be AMBIENT if GEOM is set. Leak ID:',TRIM(ID),&
                   ', HVAC line number:',NN
                CALL SHUTDOWN(MESSAGE); RETURN
             ENDIF
@@ -637,7 +637,7 @@ DO NN=1,N_HVAC_READ
          IF (GEOM2) THEN
             DN%GEOM = .TRUE.
             IF (TRIM(DN%VENT_ID)=='AMBIENT') THEN
-               WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR(yyy): VENT2_ID for leakage cannot be AMBIENT if GEOM2 is set. Leak ID:',&
+               WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR(572): VENT2_ID for leakage cannot be AMBIENT if GEOM2 is set. Leak ID:',&
                   TRIM(ID),', HVAC line number:',NN
                CALL SHUTDOWN(MESSAGE); RETURN
             ENDIF
@@ -1119,7 +1119,7 @@ NODE_LOOP_2: DO NN=1,N_DUCTNODES
    
    IF (DN%GEOM) THEN
       IF (CF_AREA(NN) < TWO_EPSILON_EB) THEN
-         WRITE(MESSAGE,'(A,I5,A,A,A)') 'ERROR(yyy): Ductnode:',NN,', Ductnode ID:',TRIM(DN%ID),&
+         WRITE(MESSAGE,'(A,I5,A,A,A)') 'ERROR(573): Ductnode:',NN,', Ductnode ID:',TRIM(DN%ID),&
                                      ' defined with GEOM had no CFACE found.'
          CALL SHUTDOWN(MESSAGE); RETURN
       ENDIF
