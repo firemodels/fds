@@ -177,10 +177,10 @@ jobs:
         if: startsWith(matrix.compiler_mpi, 'gnu_')
         shell: bash
         run: |
-          echo "CC=gcc-14" >> $GITHUB_ENV
-          echo "CXX=g++-14" >> $GITHUB_ENV
-          echo "FC=gfortran-14" >> $GITHUB_ENV
-          echo "OMPI_FC=gfortran-14" >> $GITHUB_ENV
+          echo "CC=gcc-15" >> $GITHUB_ENV
+          echo "CXX=g++-15" >> $GITHUB_ENV
+          echo "FC=gfortran-15" >> $GITHUB_ENV
+          echo "OMPI_FC=gfortran-15" >> $GITHUB_ENV
           brew install glew gd zlib json-c
 
       - name: set macos intel
