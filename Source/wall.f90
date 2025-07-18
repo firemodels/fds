@@ -3904,7 +3904,6 @@ ENDDO MATERIAL_LOOP
 
 IF (TGA_DT<0._EB) TGA_DT = 0.1_EB*ONE_D%RHO_C_S(1)*ONE_D%LAYER_THICKNESS(1)/SF%H_FIXED
 N_TGA = NINT((TGA_FINAL_TEMPERATURE-TMPA)/(TGA_HEATING_RATE*TGA_DT))
-WRITE(*,*) N_TGA,TGA_DT
 
 ! If a .stop file exists, only do a few time steps to check for errors
 
