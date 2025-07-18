@@ -54,6 +54,7 @@
       NU_SPEC=0.1
       MATL_ID='LB int'
       NU_MATL=0.9
+      HEAT_OF_REACTION=0.
       CONDUCTIVITY = 0.1
       SPECIFIC_HEAT = 1.80 /
 
@@ -81,6 +82,7 @@
       NU_SPEC=0.41
       MATL_ID='LB char2'
       NU_MATL=0.59
+      HEAT_OF_REACTION=0.
       CONDUCTIVITY_RAMP = 'k_LB_char'
       SPECIFIC_HEAT = 1.30 /
 
@@ -100,6 +102,7 @@
       NU_SPEC=0.1
       MATL_ID='CFL int'
       NU_MATL=0.9
+      HEAT_OF_REACTION=0.
       CONDUCTIVITY = 0.1
       SPECIFIC_HEAT = 1.80 /
 
@@ -127,6 +130,7 @@
       NU_SPEC=0.41
       MATL_ID='CFL char2'
       NU_MATL=0.59
+      HEAT_OF_REACTION=0.
       CONDUCTIVITY_RAMP = 'k_FL_char'
       SPECIFIC_HEAT = 1.30 /
 
@@ -146,6 +150,7 @@
       NU_SPEC=0.1
       MATL_ID='BFL int'
       NU_MATL=0.9
+      HEAT_OF_REACTION=0.
       CONDUCTIVITY = 0.1
       SPECIFIC_HEAT = 1.80 /
 
