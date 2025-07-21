@@ -5679,7 +5679,7 @@ Note that the stoichiometric coefficient for soot ensures that the mass of soot 
 &SPEC ID = 'NITROGEN',          LUMPED_COMPONENT_ONLY = T /
 &SPEC ID = 'WATER VAPOR',       LUMPED_COMPONENT_ONLY = T /
 &SPEC ID = 'CARBON DIOXIDE',    LUMPED_COMPONENT_ONLY = T /
-&SPEC ID = 'SOOT',              AEROSOL = T /
+&SPEC ID = 'SOOT',              AEROSOL = T, MEAN_DIAMETER=1.E-6 /
 \end{lstlisting}
 If Eq.~(\ref{eq:PROPANE_depo}) is properly balanced, you can directly use the stoichiometric coefficients of the primitive species to define the lumped species:
 
