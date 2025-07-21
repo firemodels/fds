@@ -744,7 +744,6 @@ def matlab_legend_to_matplotlib(position):
     Returns:
         str: Matplotlib-compatible legend location (e.g., 'upper right')
     """
-    position = position.strip().lower()
     mapping = {
         'north': 'upper center',
         'south': 'lower center',
@@ -760,5 +759,9 @@ def matlab_legend_to_matplotlib(position):
         'southwestoutside': 'center right',
         'best': 'best'
     }
-    return mapping.get(position, 'best')
+
+    if not isinstance(position, str):
+        return 'best'
+
+    return mapping.get(position.strip().lower(), 'best')
 
