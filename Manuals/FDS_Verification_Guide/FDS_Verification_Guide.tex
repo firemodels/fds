@@ -4602,18 +4602,32 @@ D     &  10.0     & 10000        &  1            &  10           & 0.1     \\ \h
 \end{center}
 
 \begin{figure}[ht]
-\noindent
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/heat_conduction_a} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/heat_conduction_b} \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/heat_conduction_c} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/heat_conduction_d}
-\end{tabular*}
-\caption[The \ct{heat\_conduction} test cases]{Comparison of heat conduction calculations with analytical solutions.}
-\label{heat_conduction}
+	\noindent
+	\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+		\includegraphics[height=2.2in]{SCRIPT_FIGURES/heat_conduction_a} &
+		\includegraphics[height=2.2in]{SCRIPT_FIGURES/heat_conduction_b} \\
+		\includegraphics[height=2.2in]{SCRIPT_FIGURES/heat_conduction_c} &
+		\includegraphics[height=2.2in]{SCRIPT_FIGURES/heat_conduction_d}
+	\end{tabular*}
+	\caption[The \ct{heat\_conduction} test cases]{Comparison of heat conduction calculations with analytical solutions.}
+	\label{heat_conduction}
 \end{figure}
 
+\section{Heat Conduction Through a Solid Slab Part 2 (\texorpdfstring{\ct{back\_wall}}{back\_wall})}
+\label{back_wall}
 
+A slab of thickness $L=0.01$~m with a conductivity of 10~\si{W/(m.K)} is exposed to a backside temperature of $T_g=200$~\si{\degree C}.
+The backside heat transfer conditions are $h$=50~\si{W/(m^2.K)} and $e$=0.5. The frontside heat transfer conditions are $h$=10~\si{W/(m^2.K)} and $e$=1. 
+This case test that both sets of conditions are applied.
+
+\begin{figure}[ht]
+	\centering
+	\begin{tabular}{c}
+		\includegraphics[height=2.2in]{SCRIPT_FIGURES/back_wall}
+	\end{tabular}
+	\caption[Front and back wall temperatures for the \ct{back\_wall} case]{Front and back wall temperatures for the \ct{back\_wall} case}
+	\label{fig:back_wall}
+\end{figure}
 
 \section{Temperature-Dependent Thermal Properties (\texorpdfstring{\ct{heat\_conduction\_kc}}{heat\_conduction\_kc})}
 \label{heat_conduction_kc}
