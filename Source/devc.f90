@@ -32,26 +32,26 @@ END TYPE PROPERTY_TYPE
 !> \brief Derived type storing location and value informaton for DEVICE\%SUBDEVICE
 
 TYPE SUBDEVICE_TYPE
-   !> !\{
+   !> @{
    !> Intermediate value used for computing device SPATIAL_STATISTIC or TEMPORAL_STATISTIC
    REAL(EB) :: VALUE_1=0._EB,VALUE_2=0._EB,VALUE_3=0._EB,VALUE_4=0._EB
-   !> !\}
-   !> !\{
+   !> @}
+   !> @{
    !> Subdevice point, line, or bounding box physical coordinate (m)
    REAL(EB) :: X1,X2,Y1,Y2,Z1,Z2
-   !> !\}
+   !> @}
    INTEGER :: MESH !< Subdevice mesh location
-   !> !\{
+   !> @{
    !> Subdevice point, line, or bounding box grid index
    INTEGER :: I1=-1,I2=-1,J1=-1,J2=-1,K1=-1,K2=-1
-   !> !\}
+   !> @}
    INTEGER :: N_PATH=0 !< Number of grid cells along subdevice path for TRANSMISSION or PATH OBSCURATION
-   !> !\{
+   !> @{
    !> Grid index for a grid cell along subdevice path for TRANSMISSION or PATH OBSCURATION
    INTEGER, ALLOCATABLE, DIMENSION(:) :: I_PATH,J_PATH,K_PATH
-   ! !\}
+   !> @}
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: D_PATH
-   !<Segment length in a grid cell along subdevice path for TRANSMISSION or PATH OBSCURATION
+   !< Segment length in a grid cell along subdevice path for TRANSMISSION or PATH OBSCURATION
 END TYPE SUBDEVICE_TYPE
 
 !> \brief Derived type for a measurement device (DEVC)
@@ -59,18 +59,18 @@ END TYPE SUBDEVICE_TYPE
 TYPE DEVICE_TYPE
    TYPE(SUBDEVICE_TYPE), ALLOCATABLE, DIMENSION(:) :: SUBDEVICE !<Array of subdevices
    REAL(EB) :: T !< Used to track time stuff for a DEVC that is part of an ASPIRATION detector.
-   !> !\{
+   !> @{
    !> Physical coordinate of a point DEVC
    REAL(EB) :: X,Y,Z
-   !> !\}
-   !> !\{
+   !> @}
+   !> @{
    !> Origin of a linear array of devices
    REAL(EB) :: X0,Y0,Z0
-   !> !\}
-   !> !\{
+   !> @}
+   !> @{
    !> Physical coordinates for DEVC spanning a line, plane, or volume
    REAL(EB) :: X1,X2,Y1,Y2,Z1,Z2
-   !> !\}
+   !> @}
    REAL(EB) :: INITIAL_VALUE=-1.E10_EB,INSTANT_VALUE,VALUE=0._EB,SMOOTHED_VALUE=-1.E10_EB,PREVIOUS_VALUE=0._EB, &
                DEPTH,TMP_L,Y_C,OBSCURATION,DELAY,ROTATION,SMOOTHING_FACTOR=0._EB,SMOOTHING_TIME=-1._EB, &
                VALUE_1,VALUE_2,VALUE_3,VALUE_4,&
@@ -134,7 +134,7 @@ USE PRECISION_PARAMETERS
 
 IMPLICIT NONE (TYPE,EXTERNAL)
 
-!> !\{
+!> @{
 !> Parameter defining the type of control function for CONTROL\%CONTROL_INDEX
 ! When adding more functions:
 ! 1-50 are fucntions with a logical output that have only one input
@@ -150,11 +150,11 @@ INTEGER, PARAMETER :: TIME_DELAY=1,CUSTOM=2,DEADBAND=3,KILL=4,CORE_DUMP=5,&
                       CF_POWER=201,CF_DIVIDE=202,&
                       CF_SUM=301,CF_SUBTRACT=302,CF_MULTIPLY=303,CF_MIN=304,CF_MAX=305,&
                       CF_PERCENTILE=401
-!> !\}
-!> !\{
+!> @}
+!> @{
 !> Parameter used to define the type of input for CONTROL\%INPUT_TYPE
 INTEGER, PARAMETER :: DEVICE_INPUT=1,CONTROL_INPUT=2,CONSTANT_INPUT=3
-!> !\}
+!> @}
 
 INTEGER :: N_CTRL = 0 !< Length of CONTROL
 INTEGER :: N_CTRL_FILES = 0 !< Number of CHID_ctrl.csv output files
@@ -183,7 +183,7 @@ TYPE CONTROL_TYPE
    INTEGER, ALLOCATABLE, DIMENSION (:) :: INPUT_TYPE
    !< Array of inidicating if a specific input to a control function is a device and a control functon
    REAL(EB) :: SETPOINT(2)=1.E30_EB
-   !<Setpoint for a control function. For a DEADBAND function contains the lower and upper bounds of the DEADBAND
+   !< Setpoint for a control function. For a DEADBAND function contains the lower and upper bounds of the DEADBAND
    REAL(EB) :: DELAY=0._EB !<Delay time (s) for a TIME_DELAY function
    REAL(EB) :: T_CHANGE=1000000._EB !<Time the control function changed state
    REAL(EB) :: CONSTANT=-9.E30_EB !<Value assigned to CONSTANT on a CTRL input
