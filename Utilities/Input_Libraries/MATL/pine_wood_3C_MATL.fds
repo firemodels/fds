@@ -16,7 +16,7 @@
       NU_SPEC(1,1)       = 0.75
       SPEC_ID(1:2,2)     = 'OXYGEN','FUEL VAPOR'
       NU_SPEC(1:2,2)     = -0.1, 0.85
-      HEAT_OF_REACTION(1:2) = 416./
+      HEAT_OF_REACTION(1:2) = 416.,416/
 
 &MATL ID                 = 'PINE 2' ! first hump of anaerobic curve
       DENSITY            = 360.
@@ -35,7 +35,7 @@
       NU_SPEC(1,1)       = 0.75
       SPEC_ID(1:2,2)     = 'OXYGEN','FUEL VAPOR'
       NU_SPEC(1:2,2)     = -0.1, 0.85
-      HEAT_OF_REACTION(1:2) = 416./ AC Tab 8
+      HEAT_OF_REACTION(1:2) = 416.,416/ AC Tab 8
 
 &MATL ID                 = 'PINE 3' ! broad third peak (tail of anaerobic curve)
       DENSITY            = 360.
@@ -54,7 +54,7 @@
       NU_SPEC(1,1)       = 0.75
       SPEC_ID(1:2,2)     = 'OXYGEN','FUEL VAPOR'
       NU_SPEC(1:2,2)     = -0.1, 0.85
-      HEAT_OF_REACTION(1:2) = 416./
+      HEAT_OF_REACTION(1:2) = 416.,416/
 
 &MATL ID                 = 'CHAR'
       DENSITY            = 90.

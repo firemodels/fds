@@ -17,7 +17,7 @@
       NU_SPEC(1,1)       = 0.69
       SPEC_ID(1:2,2)     = 'OXYGEN','FUEL VAPOR'
       NU_SPEC(1:2,2)     = -0.1, 0.79
-      HEAT_OF_REACTION(1:2) = 416./
+      HEAT_OF_REACTION(1:2) = 416.,416/
 
 &MATL ID                 = 'CHAR'
       DENSITY            = 112.     ! 112/360 = 0.31 to match yield from AC Tab 7
