@@ -92,6 +92,7 @@
       NU_SPEC=0.1
       MATL_ID='Corrugated Paper Intermediate'
       NU_MATL=0.9
+      HEAT_OF_REACTION=0.
       CONDUCTIVITY = 0.1
       SPECIFIC_HEAT = 1.80 /
 
@@ -129,6 +130,7 @@
       NU_SPEC=0.41
       MATL_ID='char'
       NU_MATL=0.59
+      HEAT_OF_REACTION=0.
       CONDUCTIVITY_RAMP = 'k_char'
       SPECIFIC_HEAT = 1.30 /
 
