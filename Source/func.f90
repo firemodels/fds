@@ -5839,7 +5839,6 @@ END SUBROUTINE TRANSFORM_COORDINATES
 !> \brief Find the determinant of a matrix A of order N
 !> \param A is a square matrix N x N
 !> \param N is the order of the matrix
-!> \param DET is the result
 
 RECURSIVE FUNCTION DETERMINANT(A, N) RESULT(DET)
 INTEGER, INTENT(IN) :: N
