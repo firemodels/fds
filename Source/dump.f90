@@ -8452,6 +8452,7 @@ END SUBROUTINE UPDATE_DEVICES_2
 !> \param IND2 Index of the sometimes needed second output quantity
 !> \param Y_INDEX Index of the primitive gas species
 !> \param Z_INDEX Index of the gas species mixture
+!> \param ELEM_INDX Index of the chemical element
 !> \param PART_INDEX Index of the Lagrangian particle class
 !> \param VELO_INDEX Index of the velocity component, x=1, y=2, z=3
 !> \param PIPE_INDEX Index of the pipe branch
