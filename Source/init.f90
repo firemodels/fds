@@ -3396,6 +3396,7 @@ END SUBROUTINE INIT_THIN_WALL_CELL
 !> \brief Assign internal values of temp, density, and mass fraction
 !> \param NM Mesh number
 !> \param IW WALL index
+!> \param TT Curent time (s)
 
 SUBROUTINE SET_DENSITY_AND_MASS_FRACTIONS_AT_WALL(NM,IW,TT)
 

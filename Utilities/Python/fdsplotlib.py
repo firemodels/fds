@@ -511,7 +511,7 @@ def get_version_string(filename):
     file1.close()
     return version_str
 
-def add_version_string(ax, version_str, plot_type='linear', scale_x=0.60, scale_y=1.02,
+def add_version_string(ax, version_str, plot_type='linear', scale_x=1.00, scale_y=1.02,
                        font_name='Times', font_size=10):
     """
     Adds a version string to a matplotlib plot.
@@ -553,7 +553,7 @@ def add_version_string(ax, version_str, plot_type='linear', scale_x=0.60, scale_
             x_pos = x_lim[0] + scale_x * (x_lim[1] - x_lim[0])
             y_pos = y_lim[0] + scale_y * (y_lim[1] - y_lim[0])
 
-        ax.text(x_pos, y_pos, version_str, fontsize=font_size, fontname=font_name, verticalalignment='bottom')
+        ax.text(x_pos, y_pos, version_str, fontsize=font_size, fontname=font_name, verticalalignment='bottom', horizontalalignment='right')
 
 
 
@@ -744,7 +744,6 @@ def matlab_legend_to_matplotlib(position):
     Returns:
         str: Matplotlib-compatible legend location (e.g., 'upper right')
     """
-    position = position.strip().lower()
     mapping = {
         'north': 'upper center',
         'south': 'lower center',
@@ -760,5 +759,9 @@ def matlab_legend_to_matplotlib(position):
         'southwestoutside': 'center right',
         'best': 'best'
     }
-    return mapping.get(position, 'best')
+
+    if not isinstance(position, str):
+        return 'best'
+
+    return mapping.get(position.strip().lower(), 'best')
 
