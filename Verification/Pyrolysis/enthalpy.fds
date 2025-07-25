@@ -30,6 +30,8 @@ curve after 80 degC.
       E = 0.
       N_S = 0.
       NU_MATL = 1.0
+      HEAT_OF_REACTION = 0.
+      ADJUST_H = F
       MATL_ID = 'MAT_B' /
 
 &RAMP ID = 'c_ramp' T = 20 F = 1.0 /
