@@ -322,7 +322,7 @@ $QFDS -d Heat_Transfer ht3d_slab.fds
 $QFDS -d Heat_Transfer ht3d_sphere_24.fds
 $QFDS -p 4 -d Heat_Transfer ht3d_sphere_48.fds
 $QFDS -p 64 -d Heat_Transfer ht3d_sphere_96.fds
-$QFDS -p Heat_Transfer back_wall.fds
+$QFDS -d Heat_Transfer back_wall.fds
 $QFDS -p 4 -d Heat_Transfer back_wall_test.fds
 $QFDS -p 3 -d Heat_Transfer back_wall_test_2.fds
 $QFDS -d Heat_Transfer SFPE_Case_1.fds
