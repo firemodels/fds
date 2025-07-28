@@ -29,6 +29,7 @@ The emissivity is measured using EMISSIVITY output quantity.
       A = 1.
       E = 0.
       N_S = 0.
+      HEAT_OF_REACTION = 0.
       NU_MATL    = 1.0
       MATL_ID = 'MAT_B'/
 

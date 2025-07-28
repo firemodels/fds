@@ -17,6 +17,7 @@
       N_REACTIONS          = 1
       SPEC_ID(1:4,1)       ='CARBON DIOXIDE','NITRIC OXIDE','NITROGEN DIOXIDE','CHLORINE',
       NU_SPEC(1:4,1)       = 0.4, 0.27, 0.13,0.2,
+      HEAT_OF_REACTION = 0
       REFERENCE_TEMPERATURE=400. /
 
 &SURF ID                   = 'CUBO'
