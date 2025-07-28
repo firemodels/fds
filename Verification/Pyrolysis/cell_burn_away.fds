@@ -28,6 +28,7 @@
       DENSITY = 50.
       SPEC_ID = 'PROPANE'
       NU_SPEC = 1.
+      HEAT_OF_REACTION = 0
       CONDUCTIVITY = 0.5
       SPECIFIC_HEAT = 1. /
 
