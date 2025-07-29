@@ -39,7 +39,7 @@ CONTAINS
 !> \param TN_C is the current time
 !> \param SUNVEC_Y is the current array of molar concentrations, temperature and pressure.
 !> \param SUNVEC_F is the array of derivatives returned
-!> \param USER_DATA is the user data array. Not yet used in FDS.
+!> \param C_USER_DATA is the user data array. Not yet used in FDS.
 !> \details The right hand side function of the ode d[c]/dt = wdot (=f). Provides the Derivative function to CVODE.
 INTEGER(C_INT) FUNCTION RHSFN(TN_C, SUNVEC_Y, SUNVEC_F, C_USER_DATA) &
     RESULT(IERR) BIND(C,NAME='RHSFN')
@@ -258,7 +258,7 @@ END FUNCTION CALCFCENT
 !> \param SUNVEC_Y is the current array of molar concentrations, temperature and pressure.
 !> \param SUNVEC_F is the array of derivatives returned
 !> \param SUNMAT_J is the Jacobian array returned to CVODE
-!> \param USER_DATA is the user data array. Not yet used in FDS.
+!> \param C_USER_DATA is the user data array. Hold unburned zone data for mixing+chem.
 !> \param TMP1 is not yet used in FDS.
 !> \param TMP2 is not yet used in FDS.
 !> \param TMP3 is not yet used in FDS.
@@ -328,6 +328,8 @@ END FUNCTION JACFN
 !> \param CVEC is the current array of molar concentrations, temperature and pressure.
 !> \param FVEC is the array of derivatives passed as input
 !> \param JMAT is the jacobian matrix returned
+!> \param TN is the current time provided by CVODE during callback, not the actual CFD time.
+!> \param USER_DATA is the user data array. Hold unburned zone data for mixing+chem.
 
 SUBROUTINE JACOBIAN(CVEC,FVEC,JMAT,TN,USER_DATA)
 
@@ -779,10 +781,11 @@ END FUNCTION DDTMP_TROE
 
 
 !> \brief cvode interface for ODE integrator. Call sundials cvode in serial mode.
-!> \param CC species mass fraction array
-!> \param TMP_IN is the temperature
+!> \param CC species concentration (kmol/m3) array
+!> \param ZZ_0 initial species mass fraction array (of the unbuned zone),needed for mixing+chem
+!> \param TMP_IN is the temperature of the cell (unburned zone)
 !> \param PR_IN is the pressure
-!> \param ZETA0 is the initial unmixed fraction
+!> \param ZETA0 is the initial unmixed fraction 
 !> \param TAU_MIX is Mixing timescale
 !> \param CELL_MASS total mass of the cell (mixed + unmixed)
 !> \param TCUR is the start time in seconds
