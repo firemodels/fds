@@ -39,7 +39,7 @@ CONTAINS
 !> \param TN_C is the current time
 !> \param SUNVEC_Y is the current array of molar concentrations, temperature and pressure.
 !> \param SUNVEC_F is the array of derivatives returned
-!> \param C_USER_DATA is the user data array. Not yet used in FDS.
+!> \param C_USER_DATA is the user data array. Hold unburned zone data for mixing+chem.
 !> \details The right hand side function of the ode d[c]/dt = wdot (=f). Provides the Derivative function to CVODE.
 INTEGER(C_INT) FUNCTION RHSFN(TN_C, SUNVEC_Y, SUNVEC_F, C_USER_DATA) &
     RESULT(IERR) BIND(C,NAME='RHSFN')
@@ -86,7 +86,7 @@ END FUNCTION RHSFN
 !> \param CVEC is the current array of molar concentrations, temperature and pressure.
 !> \param FVEC is the array of derivatives returned
 !> \param TN is the current time
-!> \param USER_DATA is the user data containing mixing information
+!> \param USER_DATA is the user data array. Hold unburned zone data for mixing+chem.
 
 SUBROUTINE DERIVATIVE(CVEC,FVEC, TN, USER_DATA)
 USE PHYSICAL_FUNCTIONS, ONLY : GET_SPECIFIC_HEAT_INTERP, GET_ENTHALPY, GET_ENTHALPY_Z, &
