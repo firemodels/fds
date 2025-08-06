@@ -7159,17 +7159,19 @@ The Particle Model and Boundary Fuel Model use the same basic pyrolysis model (S
 \section{Thermal Degradation Model for Vegetation}
 \label{vegetation_model}
 
+This section includes a relatively simple description of the thermal decomposition of a vegetative fuel. The FDS Github repository contains \href{https://github.com/firemodels/fds/blob/master/Utilities/Input_File_Tools/vegetation_chemistry.py}{a useful calculation script} for converting basic information about the vegetation into FDS input parameters.
+
 \subsection{Required Information}
 \label{veg_pyrolysis_gas_phase}
 
 To describe the solid and gas phase chemistry of wood or vegetation pyrolysis/combustion in FDS, the following information must be assumed or measured:
 \begin{enumerate}
 \item The elemental composition of the dry vegetation. Dry wood has an elemental composition (by mass) of approximately $Y_{\rm C}=0.50$ carbon, $Y_{\rm H}=0.06$ hydrogen, $Y_{\rm O}=0.44$ oxygen, and trace amounts of inorganics~\cite{Rowell:USFS_Handbook}. A global survey of a wide range of vegetation suggests that the average carbon mass fraction is approximately 0.47~\cite{Ma:BGS2018}.
-\item The char yield, $\nu_{\rm char}$, defined as the fraction of the dry mass that remains after complete anaerobic pyrolysis,
-which is specified with the parameter \ct{NU_MATL} on the \ct{MATL} line that describes the Dry Vegetation. The character string \ct{MATL_ID} on the same \ct{MATL} line indicates the name of the char. 
+\item The char yield, $\nu_{\rm char}$, defined as the fraction of the mass of dry vegetation that remains after complete anaerobic pyrolysis, which is specified with the parameter \ct{NU_MATL} on the \ct{MATL} line that describes the Dry Vegetation. The character string \ct{MATL_ID} on the same \ct{MATL} line indicates the name of the char. 
 \item The ash yield, $\nu_{\rm ash}$, defined as the fraction of the char mass that remains after complete oxidation, which is specified by \ct{NU_MATL} on the \ct{MATL} line describing the char.
-\item The elemental composition of char in terms of the mass fraction of carbon, $Y_{\rm C,char}$, oxygen, $Y_{\rm O,char}$, and inorganics (ash).
-\item The effective molecular weight, $W_{\rm pyr}$, of the fuel gas, or {\em pyrolyzate}, which is taken as a single composite gas species. Preliminary measurments~\cite{Tripi:INTERFLAM2025} suggest that the effective molecular weight of wood pyrolyzate is approximately 25~g/mol.
+\item The elemental composition of char in terms of the mass fraction of carbon, $Y_{\rm C,char}$, oxygen, $Y_{\rm O,char}$, and inorganics (ash). These values are not directly listed in the FDS input file, but rather determine the mass of oxygen that is required to oxidize a unit mass of char. In the formulae below, only the ratio of these two values is of importance.
+\item The energy released per unit mass of oxygen consumed, $E$ (kJ/kg), in the gas phase reaction of the vegetation pyrolyzate. This value is typically taken as $13\,100$~kJ/kg, but may vary for different varieties of vegetation. This value is used in calculation of the gas phase \ct{HEAT_OF_COMBUSTION}.
+\item The effective molecular weight, $W_{\rm pyr}$, of the fuel gas, or {\em pyrolyzate}, which is taken as a single composite gas species. Preliminary measurments~\cite{Tripi:INTERFLAM2025} suggest that the effective molecular weight of wood pyrolyzate is approximately 25~g/mol. This parameter is not directly input in the FDS input file; rather, the values ${\rm x''}$, ${\rm y''}$, and ${\rm z''}$ computed below are input as \ct{C}, \ct{H}, and \ct{O}, respectively, on the \ct{REAC} or \ct{SPEC} line.
 \end{enumerate}
 
 \subsection{Basic Pyrolysis Reactions}
