@@ -7159,37 +7159,84 @@ The Particle Model and Boundary Fuel Model use the same basic pyrolysis model (S
 \section{Thermal Degradation Model for Vegetation}
 \label{vegetation_model}
 
-\subsection{Solid Phase}
+This section includes a relatively simple description of the thermal decomposition of a vegetative fuel. The FDS Github repository contains \href{https://github.com/firemodels/fds/blob/master/Utilities/Input_File_Tools/vegetation_chemistry.py}{a useful calculation script} for converting basic information about the vegetation into FDS input parameters.
 
-The solid-phase thermal degradation process for generic vegetation are typically modeled with three reactions (note that the stoichiometric coefficients are mass-based)~\cite{Porterie:2006,Morvan:CF2004,Houssami:2016}:
+\subsection{Required Information}
+\label{veg_pyrolysis_gas_phase}
 
-\vspace{\baselineskip}
+To describe the solid and gas phase chemistry of wood or vegetation pyrolysis/combustion in FDS, the following information must be assumed or measured:
+\begin{enumerate}
+\item The elemental composition of the dry vegetation. Dry wood has an elemental composition (by mass) of approximately $Y_{\rm C}=0.50$ carbon, $Y_{\rm H}=0.06$ hydrogen, $Y_{\rm O}=0.44$ oxygen, and trace amounts of inorganics~\cite{Rowell:USFS_Handbook}. A global survey of a wide range of vegetation suggests that the average carbon mass fraction is approximately 0.47~\cite{Ma:BGS2018}.
+\item The char yield, $\nu_{\rm char}$, defined as the fraction of the mass of dry vegetation that remains after complete anaerobic pyrolysis, which is specified with the parameter \ct{NU_MATL} on the \ct{MATL} line that describes the Dry Vegetation. The character string \ct{MATL_ID} on the same \ct{MATL} line indicates the name of the char. 
+\item The ash yield, $\nu_{\rm ash}$, defined as the fraction of the char mass that remains after complete oxidation, which is specified by \ct{NU_MATL} on the \ct{MATL} line describing the char.
+\item The elemental composition of char in terms of the mass fraction of carbon, $Y_{\rm C,char}$, oxygen, $Y_{\rm O,char}$, and inorganics (ash). These values are not directly listed in the FDS input file, but rather determine the mass of oxygen that is required to oxidize a unit mass of char. In the formulae below, only the ratio of these two values is of importance.
+\item The energy released per unit mass of oxygen consumed, $E$ (kJ/kg), in the gas phase reaction of the vegetation pyrolyzate. This value is typically taken as $13\,100$~kJ/kg, but may vary for different varieties of vegetation. This value is used in calculation of the gas phase \ct{HEAT_OF_COMBUSTION}.
+\item The effective molecular weight, $W_{\rm pyr}$, of the fuel gas, or {\em pyrolyzate}, which is taken as a single composite gas species. Preliminary measurments~\cite{Tripi:INTERFLAM2025} suggest that the effective molecular weight of wood pyrolyzate is approximately 25~g/mol. This parameter is not directly input in the FDS input file; rather, the values ${\rm x''}$, ${\rm y''}$, and ${\rm z''}$ computed below are input as \ct{C}, \ct{H}, and \ct{O}, respectively, on the \ct{REAC} or \ct{SPEC} line.
+\end{enumerate}
 
-\noindent 1. Endothermic moisture evaporation
+\subsection{Basic Pyrolysis Reactions}
+
+It is assumed that the Dry Vegetation has an effective molecular formula C$_{\rm x}$H$_{\rm y}$O$_{\rm z}$A, where A represents the inorganic components that eventually form the Ash, and the subscripts are given by
+\begin{eqnarray}
+   {\rm x} = \frac{Y_{\rm C}'/12}{Y_{\rm C}'/12+Y_{\rm H}'+Y_{\rm O}'/16+\nu_{\rm ash}\nu_{\rm char}} \quad &;& \quad
+   Y_{\rm C}' = \frac{Y_{\rm C}(1-\nu_{\rm ash}\nu_{\rm char})}{Y_{\rm C}+Y_{\rm H}+Y_{\rm O}} \\[.1in]
+   {\rm y} = \frac{Y_{\rm H}'}{Y_{\rm C}'/12+Y_{\rm H}'+Y_{\rm O}'/16+\nu_{\rm ash}\nu_{\rm char}} \quad &;& \quad
+   Y_{\rm H}' = \frac{Y_{\rm H}(1-\nu_{\rm ash}\nu_{\rm char})}{Y_{\rm C}+Y_{\rm H}+Y_{\rm O}} \\[.1in]
+   {\rm z} = \frac{Y_{\rm O}'/16}{Y_{\rm C}'/12+Y_{\rm H}'+Y_{\rm O}'/16+\nu_{\rm ash}\nu_{\rm char}} \quad &;& \quad
+   Y_{\rm O}' = \frac{Y_{\rm O}(1-\nu_{\rm ash}\nu_{\rm char})}{Y_{\rm C}+Y_{\rm H}+Y_{\rm O}} \\[.1in]
+\end{eqnarray}
+The prime symbol here indicates a slight adjustment made to the elemental mass fractions such that the masses of oxygen, hydrogem, oxygen and inorganic compounds sum to one. 
+
+\paragraph{Endothermic moisture evaporation}
+
 \be
  {\rm Wet\ Vegetation} \rightarrow \nu_{\rm moist} \, {\rm Moisture} + (1-\nu_{\rm moist}) \, {\rm Dry\ Vegetation} \quad ; \quad \nu_{\rm moist} = \frac{M}{1+M} \label{water_reac}
 \ee
+$M$ is the vegetation {\em moisture content} or {\em moisture fraction} determined on a dry weight basis, specified with \ct{MOISTURE_CONTENT} on the \ct{SURF} line that describes the vegetation. 
 
-\noindent 2. Endothermic pyrolysis of Dry Vegetation
+\paragraph{Endothermic pyrolysis of Dry Vegetation}
+
 \be
- {\rm Dry\ Vegetation} \rightarrow \nu_{\rm char} \, {\rm Char} + (1-\nu_{\rm char}) \, {\rm Fuel\ Gas}  \label{pyr_reac}
+   \underbrace{\mathrm{C_xH_yO_zA \; (s)}}_{\rm Dry\ Vegetation} \rightarrow \underbrace{\mathrm{C_{x'}O_{z'}A \; (s)}}_{\rm Char} \; + \; \underbrace{\nu_{\rm pyr} \, \mathrm{C_{x''}H_{y''}O_{z''} \; (g)}}_{\rm Pyrolyzate} \label{pyr_reac}
+\ee
+\be
+   {\rm x}' = \frac{\nu_{\rm char} \, W_{\rm veg} \, (1-\nu_{\rm ash})}{12 \, (1+Y_{\rm O,char}/Y_{\rm C,char})}  \quad ; \quad
+   {\rm z}' = \frac{12 \, {\rm x'} \, Y_{\rm O,char}}{16 \, Y_{\rm C,char}} 
+\ee
+\be
+   \nu_{\rm pyr} = \frac{ 12 ({\rm x-x'}) + {\rm y} + 16 ({\rm z-z'})}{W_{\rm pyr} } \quad ; \quad
+   W_{\rm veg} = \frac{12 {\rm x} + {\rm y} + 16 {\rm z}}{1- \nu_{\rm ash} \, \nu_{\rm char}}
+\ee
+\be
+   {\rm x}'' = ({\rm x-x'})/\nu_{\rm pyr}  \quad ; \quad
+   {\rm y}'' = {\rm y}/\nu_{\rm pyr}  \quad ; \quad
+   {\rm z}'' = ({\rm z-z'})/\nu_{\rm pyr}
+\ee
+Note that $W_{\rm veg}$ and $\nu_{\rm pyr}$ are simply for bookkeeping and play no role in the reaction scheme other than to maintain consistency in the atom count.
+
+\paragraph{Exothermic char oxidation}
+
+\be
+   \underbrace{\mathrm{C_{x'}O_{z'}A \; (s)}}_{\rm Char} \; + \; \underbrace{\mathrm{\nu_{\rm O_2} O_2 \; (g)}}_{\rm Oxygen} \rightarrow \underbrace{\mathrm{\nu_{\rm CO_2} \, CO_2 \; (g)}}_{\rm Carbon\ Dioxide} \; + \; \underbrace{\mathrm{A \; (s)}}_{\rm Ash} \label{char_reaction}
 \ee
 
-\noindent 3. Exothermic char oxidation
 \be
- \label{char_reaction}
- {\rm Char} + \nu_{\rm O_2, char} \, {\rm O_2} \rightarrow (1+ \nu_{\rm O_2,char} - \nu_{\rm ash}) \, {\rm CO_2} + \nu_{\rm ash} \, {\rm Ash}
+   \nu_{\rm O_2} = \frac{\nu_{\rm O_2,char} \, \nu_{\rm char} \, W_{\rm veg}}{W_{\rm O_2}}   \quad ; \quad
+   \nu_{\rm CO_2} =  \frac{(1+ \nu_{\rm O_2,char} - \nu_{\rm ash}) \, \nu_{\rm char} \, W_{\rm veg}}{W_{\rm CO_2}}  
 \ee
-$M$ is the vegetation {\em moisture content} or {\em moisture fraction} determined on a dry weight basis, specified with \ct{MOISTURE_CONTENT} on the \ct{SURF} line. $\nu_{\rm char}$ is the mass fraction of Dry Vegetation that is converted to char during pyrolysis, specified with the parameter \ct{NU_MATL} on the \ct{MATL} line that describes the Dry Vegetation. The character string \ct{MATL_ID} on the same \ct{MATL} line indicates the name of the char.  $\nu_{\rm O_2,char}$ is the mass of oxygen consumed per unit mass of char oxidized. $\nu_{\rm ash}$ is the mass fraction of char that is converted to ash during char oxidation, specified by \ct{NU_MATL} on the \ct{MATL} line describing the char.
+\be
+   \nu_{\rm O_2,char} = \frac{W_{\rm O_2} \, \nu_{\rm char} \, W_{\rm veg} \, (1-\nu_{\rm ash}) - W_{\rm CO_2} \, 16 {\rm z'} }{ (W_{\rm CO_2}-W_{\rm O_2}) \nu_{\rm char} \, W_{\rm veg} }
+\ee
+$\nu_{\rm O_2,char}$ is the mass of oxygen consumed per unit mass of char oxidized. Although it is a function of the composition of the char, it is often given a fixed value of 1.65 in the literature~\cite{Kashiwagi:CF1992}.
 
-It is assumed that the Dry Vegetation in Eq.~(\ref{pyr_reac}) is 47~\% (by mass) carbon~\cite{Ma:BGS2018} with an effective organic component C$_{3.4}$H$_{6.2}$O$_{2.5}$~\cite{Ritchie:1}. In general, it is assumed that char may be comprised of more than pure carbon and is defined as $\mathrm{C_{x'}O_{z'}A}$ in Eq.~\ref{char_chemistry}. In the specific case where char is composed of pure carbon which reacts completely with O$_2$ to form CO$_2$ then $\nu_{\rm O_2,char}=2.67$ and $\nu_{\rm ash}=0$. A full discussion of the composition of the Char and Fuel Gas is given in Sec.~\ref{veg_pyrolysis_gas_phase}.
+\subsection{Simplification of Char Oxidation}
 
 The char reaction, Eq.~(\ref{char_reaction}), is usually modified in FDS when the default ``simple chemistry'' model is used; that is, the one-step, mixing-controlled reaction for the lumped species Fuel, Air, and Products. In this case, O$_2$ and CO$_2$ are not explicitly calculated, but rather are implicitly defined in terms of the lumped species, \ct{AIR} and \ct{PRODUCTS}, which are defined based on the stoichiometry of the reaction. Equation~(\ref{char_reaction}) cannot be written in terms of the lumped species, but a close approximation is as follows:
 \be
  \label{lumped_char_reaction}
  {\rm Char} + \frac{\nu_{\rm O_2, char}}{Y_{{\rm O_2},\infty}} \, {\rm Air} \rightarrow \left( 1+ \frac{\nu_{\rm O_2, char}}{Y_{{\rm O_2},\infty}} - \nu_{\rm ash} \right) \, {\rm Products} + \nu_{\rm ash} \, {\rm Ash}
 \ee
-In the input file, this reaction is specified by the following parameters on the \ct{MATL} line that defines the char:
+Assuming that $\nu_{\rm O_2, char}=1.65$, $Y_{{\rm O_2},\infty}=0.23$, and $\nu_{\rm ash}=0.02$, the reaction is specified by the following parameters on the \ct{MATL} line that defines the char:
 \begin{lstlisting}
 &MATL ID                 = 'char'
       ...
@@ -7198,7 +7245,25 @@ In the input file, this reaction is specified by the following parameters on the
       SPEC_ID            = 'PRODUCTS','AIR'
       NU_SPEC            = 8.15,-7.17 /
 \end{lstlisting}
-What this means is that the decomposition of 1~g of char requires 7.17~g of Air and produces 8.15~g of Products and 0.02~g of Ash. The Products in this case are the products of the single step gas phase reaction, not just CO$_2$. The discrepancy is minor, and the alternative to using this approximation is to explicitly track all gas species and apply Eq.~(\ref{char_reaction}) directly. If O$_2$ is not explicitly tracked FDS will infer $\nu_{\rm O_2,char}$ in Eq.~\ref{lumped_char_reaction} from the mass fraction of O$_2$ in the reactant (e.g. Air). Assuming $Y_{{\rm O_2},\infty}=0.23$, this example implies $\nu_{\rm O_2,char}=1.65$, which is a common value used for vegetative material~\cite{Porterie:2006}. An oxygen mass fraction of 0.23 is usually a good approximation for Air when converting between the lumped species and oxygen stoichiometric coefficients. The actual mass fractions of the components of a lumped species can always be confirmed by checking the \ct{CHID.out} file.
+This means that the decomposition of 1~g of char consumes 7.17~g of Air and produces 8.15~g of Products and 0.02~g of Ash. The Products in this case are the products of the single step gas phase reaction, not just CO$_2$. The discrepancy is minor, and the alternative to using this approximation is to explicitly track all gas species and apply Eq.~(\ref{char_reaction}) directly.
+
+\subsection{Gas Phase Combustion}
+
+The ideal one step gas phase reaction of the Pyrolyzate is as follows:
+\be
+   {\rm C}_{\rm x''}{\rm H}_{\rm y''}{\rm O}_{\rm z''} + \nu_{\rm O_2}' \, {\rm O}_2 \rightarrow {\rm x''} \, {\rm CO}_2 + \frac{{\rm y''}}{2} \, {\rm H_2O}  \quad ; \quad
+   \nu_{\rm O_2}' = \frac{2{\rm x''} + {\rm y''}/2-{\rm z''}}{2}
+\ee
+The heat of combustion of the gas phase combustion of the Pyrolyzate (heat release per unit mass fuel gas consumed) can be estimated from the heat release per unit mass of oxygen consumed, $E=13.98$~MJ/kg, measured by Tihay et al.~\cite{Tihay:CF2014}:
+\be
+   \Delta h_{\rm c,gas} \approx  \frac{W_{\rm O_2} \, \nu_{\rm O_2}'}{W_{\rm pyr} \, \nu_{\rm pyr}} E   \label{Delta_h_pyr}
+\ee
+The heat release rate of burning vegetation is the sum of the combustion of Pyrolyzate and the exothermic char oxidation reaction. The total heat of combustion, $\Delta h_{\rm c,total}$, is a weighted average of the two reactions. The heat of reaction for the char oxidation, $\Delta h_{\rm char}$, has a negative value because the reaction is {\em exothermic}. The total heat of combustion is found from:
+\be
+   (1-\nu_{\rm char}\nu_{\rm ash}) \, \Delta h_{\rm c,total} =  (1-\nu_{\rm char}) \Delta h_{\rm c,gas} + \nu_{\rm char}(1-\nu_{\rm ash}) (-\Delta h_{\rm char}) \label{DeltaHeff}
+\ee
+
+\subsection{Reaction Rates}
 
 In the referenced papers~\cite{Porterie:2006,Morvan:CF2004,Houssami:2016}, the reaction rates are written in terms of ``bulk'' quantities. For example,  in the paper by Mell et al.~\cite{Mell:2009}, the mass of dry vegetation per unit volume is denoted $\langle m^{\prime\prime\prime}_{\rm dry}\rangle_{V_{\rm b}}$, where the angled brackets denote the explicit LES filtering over the grid cell volume $V_{\rm b}$. However, in FDS the reaction rates are written in terms of the component densities of the composite solid:
 \be
@@ -7222,7 +7287,6 @@ This model is invoked by setting \ct{SURFACE_OXIDATION_MODEL} to \ct{T} on the \
 \end{eqnarray}
 The mass transfer coefficient is $h_m = h/c_p$, using the heat and mass transfer analogy ($h$ is obtained from Eq.~(\ref{h_particles})). A linear approximation of $\ln(B + 1) \approx B$ is applied, allowing $Y_{\rm O_2,surf}$ to be calculated from a quadratic equation and substituted into Eq.~(\ref{r_char}). It is important to note that the transport equation assumes a single reaction for char that produces CO$_2$, as in Eq.~(\ref{lumped_char_reaction}). This approach also assumes the oxidation of char is a surface reaction where the details of temperature and oxygen gradients through the particle depth can be neglected and is therefore most applicable for thermally thin solids. These assumptions are not enforced by FDS in any way, however, so consideration should be given when using the \ct{SURFACE_OXIDATION_MODEL}. Also note that because this model depends on full-scale parameters $\sigma$ and $h_m$ it is not necessarily appropriate to compare directly with micro-scale TGA data via \ct{TGA_ANALYSIS}.
 
-
 \begin{table}[!ht]
 \caption[Default vegetation kinetic constants]{Default vegetation pyrolysis constants.}
 \vspace{0.1in}
@@ -7231,19 +7295,12 @@ The mass transfer coefficient is $h_m = h/c_p$, using the heat and mass transfer
 \begin{tabular}{|l|l|l|}
 \hline
 Parameter               & Value                         & Reference                                  \\ \hline \hline
-Dry Vegetation          & $\rm{C_{3.4}H_{6.2}O_{2.5}A}$ & Ritchie et al.~\cite{Ritchie:1}            \\ \hline
-Fuel Gas                & $\rm{C_{2.1}H_{6.2}O_{2.2}}$  & Sec.~\ref{veg_pyrolysis_gas_phase}      \\ \hline
-Char                    & $\rm{C_{1.3}O_{0.3}A}$        & Sec.~\ref{veg_pyrolysis_gas_phase}      \\ \hline
 $A_{\rm H_2O}$          & 600,000 $\sqrt{K}$/s          & Porterie et al.~\cite{Porterie:2006}       \\ \hline
 $E_{\rm H_2O}$          & 48,200 J/mol                  & Porterie et al.~\cite{Porterie:2006}       \\ \hline
 $A_{\rm pyr}$           & 1040 s$^{-1}$                 & Grishin~\cite{Grishin:1997}                \\ \hline
 $E_{\rm pyr}$           & 61,041 J/mol                  & Grishin~\cite{Grishin:1997}                \\ \hline
 $A_{\rm char}$          & 465  kg/m$^2$/s               & Boonmee and Quintiere~\cite{Boonmee:2005}  \\ \hline
 $E_{\rm char}$          & 68,000 J/mol                  & Boonmee and Quintiere~\cite{Boonmee:2005}  \\ \hline
-$\nu_{\rm O_2,char}$    & 1.65                          & Kashiwagi and Nambu~\cite{Kashiwagi:CF1992} \\ \hline
-$\nu_{\rm char}$        & 0.25                          & Assumption                                  \\ \hline
-$\nu_{\rm ash}$         & 0.04                          & Assumption                                  \\ \hline
-$\Delta h_{\rm c}$      & 17,400 kJ/kg                  & Sec.~\ref{veg_pyrolysis_gas_phase}      \\ \hline
 $\Delta h_{\rm pyr}$    & 418 kJ/kg                     & Porterie et al.~\cite{Porterie:2006}        \\ \hline
 $\Delta h_{\rm char}$   & -25,000 kJ/kg                 & Kashiwagi and Nambu~\cite{Kashiwagi:CF1992} \\ \hline
 $\Delta h_{\rm H_2O}$   & 2,259 kJ/kg                   & Porterie et al.~\cite{Porterie:2006}        \\ \hline
@@ -7251,6 +7308,7 @@ $\Delta h_{\rm H_2O}$   & 2,259 kJ/kg                   & Porterie et al.~\cite{
 \end{center}
 \end{table}
 
+\subsection{Heat Transfer}
 
 The equation governing the temperature of the thermally-thick solid is
 \be
@@ -7309,7 +7367,7 @@ Figure~\ref{vege_inputs} includes sample input lines demonstrating how the veget
       CONDUCTIVITY = 0.1
       SPECIFIC_HEAT_RAMP = '...'
       A = 1040.
-      E = 61,041.
+      E = 61041.
       NU_MATL = 0.25
       MATL_ID = 'CHAR'
       NU_SPEC = 0.74
@@ -7339,50 +7397,6 @@ Figure~\ref{vege_inputs} includes sample input lines demonstrating how the veget
 \end{figure}
 
 \FloatBarrier
-
-\subsection{Gas Phase Chemistry}
-\label{veg_pyrolysis_gas_phase}
-
-The solid phase decomposition reactions given in Eqs.~(\ref{pyr_reac}) and (\ref{char_reaction}) can be written in terms of effective solid and gaseous molecules under the following assumptions:
-\begin{enumerate}
-\item The Dry Vegetation has the effective formula C$_{\rm x}$H$_{\rm y}$O$_{\rm z}$A, where A represents the inorganic components that eventually form the Ash.
-\item The char yield, $\nu_{\rm char}$, is taken as the fraction of the dry mass that remains after complete anaerobic pyrolysis.
-\item The ash yield, $\nu_{\rm ash}$, is taken as the fraction of the char mass that remains after complete oxidation.
-\item The mass of oxygen required to oxidize a unit mass of char, $\nu_{\rm O_2,char}$, as found in Eq.~(\ref{char_reaction}), is known. This parameter indirectly establishes the relative amount of carbon and oxygen in the char.
-\item The fuel gas, or {\em pyrolyzate}, is taken as a single composite gas species with an effective molecular weight, $W_{\rm pyr}$. Preliminary measurments~\cite{Tripi:INTERFLAM2025} suggest that the effective molecular weight of wood pyrolyzate is approximately 25~g/mol. 
-\end{enumerate}
-\begin{eqnarray}
-   \underbrace{\mathrm{C_xH_yO_zA \; (s)}}_{\rm Dry\ Vegetation} &\rightarrow& \underbrace{\mathrm{C_{x'}O_{z'}A \; (s)}}_{\rm Char} \; + \; \underbrace{\nu_{\rm pyr} \, \mathrm{C_{x''}H_{y''}O_{z''} \; (g)}}_{\rm Pyrolyzate} \\[.1in]
-   \underbrace{\mathrm{C_{x'}O_{z'}A \; (s)}}_{\rm Char} \; + \; \underbrace{\mathrm{\nu_{\rm O_2} O_2 \; (g)}}_{\rm Oxygen} &\rightarrow& \underbrace{\mathrm{\nu_{\rm CO_2} \, CO_2 \; (g)}}_{\rm Carbon\ Dioxide} \; + \; \underbrace{\mathrm{A \; (s)}}_{\rm Ash} \label{char_chemistry}
-\end{eqnarray}
-\be
-   \nu_{\rm O_2} = \frac{\nu_{\rm O_2,char} \, \nu_{\rm char} \, W_{\rm veg}}{W_{\rm O_2}}   \quad ; \quad
-   \nu_{\rm CO_2} =  \frac{(1+ \nu_{\rm O_2,char} - \nu_{\rm ash}) \, \nu_{\rm char} \, W_{\rm veg}}{W_{\rm CO_2}}  \quad ; \quad
-   W_{\rm veg} = \frac{12 {\rm x} + {\rm y} + 16 {\rm z}}{1- \nu_{\rm ash} \, \nu_{\rm char}}
-\ee
-\be
-   {\rm x}' = \nu_{\rm CO_2}  \quad ; \quad
-   {\rm z}' = 2 \left(\nu_{\rm CO_2} - \nu_{\rm O_2} \right) \quad ; \quad
-   \nu_{\rm pyr} = \frac{ 12 ({\rm x-x'}) + {\rm y} + 16 ({\rm z-z'})}{W_{\rm pyr} }
-\ee
-\be
-   {\rm x}'' = ({\rm x-x'})/\nu_{\rm pyr}  \quad ; \quad
-   {\rm y}'' = {\rm y}/\nu_{\rm pyr}  \quad ; \quad
-   {\rm z}'' = ({\rm z-z'})/\nu_{\rm pyr} 
-\ee
-The ideal one step gas phase reaction of the Fuel Gas is as follows:
-\be
-   {\rm C}_{\rm x''}{\rm H}_{\rm y''}{\rm O}_{\rm z''} + \nu_{\rm O_2}' \, {\rm O}_2 \rightarrow {\rm x''} \, {\rm CO}_2 + \frac{{\rm y''}}{2} \, {\rm H_2O}  \quad : \quad
-   \nu_{\rm O_2}' = \frac{2{\rm x''} + {\rm y''}/2-{\rm z''}}{2}
-\ee
-The heat of combustion of the gas phase reaction (heat release per unit mass fuel gas consumed) can be estimated from the heat release per unit mass of oxygen consumed, $E=13.98$~MJ/kg, measured by Tihay et al.~\cite{Tihay:CF2014}:
-\be
-   \Delta h_{\rm c} \approx  \frac{W_{\rm O_2} \, \nu_{\rm O_2}'}{W_{\rm pyr} \, \nu_{\rm pyr}} E   \label{Delta_h_pyr}
-\ee
-The total heat release rate of burning vegetation is the sum of both the gas phase combustion of pyrolyzed plant matter and the solid phase exothermic char oxidation reaction. The effective heat of combustion, $\Delta h_{\rm c,eff}$, is a weighted average of the two reactions. The heat of combustion of the pyrolyzed plant matter, $\Delta h_{\rm c}$, is approximately $17400$~kJ/kg according to Eq.~(\ref{Delta_h_pyr}). The heat of reaction for the char oxidation, $\Delta h_{\rm char}$ is approximately -$25000$~kJ/kg (the minus sign in this instance refers to an {\em exothermic} solid phase reaction). The effective heat of combustion is found from:
-\be
-   (1-\nu_{\rm char}\nu_{\rm ash}) \, \Delta h_{\rm c,eff} =  (1-\nu_{\rm char}) \Delta h_{\rm c} + \nu_{\rm char}(1-\nu_{\rm ash}) (-\Delta h_{\rm char}) \label{DeltaHeff}
-\ee
 
 \subsection{Examples}
 \label{char_oxidation_1}
