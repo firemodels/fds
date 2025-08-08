@@ -3467,7 +3467,7 @@ In the case of a singular matrix, a warning is written that no adjustment is don
 
 The value of $T_{\rm ref}$ used for a reaction is the value specified by the \ct{REFERENCE_TEMPERATURE} for that reaction. If no value is given (when the reaction is defined using \ct{A} and \ct{E}), then FDS will do a virtual TGA using just the single reaction for the single material. The temperature where the peak reaction rate occurs is used for $T_{\rm ref}$. Since in most cases the specific heat of a material and the specific heats of its residues and product gases are not the same, the heat of reaction is temperature dependent. FDS will create a temperature dependent array for the heat of reaction that accounts for this where the value at $T_{\rm ref}$ is fixed to the value specified with \ct{HEAT_OF_REACTION}.
 
-This process of adjusting enthalpies can be skipped by setting \ct{ADJUST_H=F} on a \ct{MATL} line. This should be done when material reactions do not represent actual chemical reactions. 
+This process of adjusting enthalpies can be skipped by setting \ct{ADJUST_H=F} on a \ct{MATL} line. This should be done when material reactions do not represent actual chemical reactions.
 
 If the sum of the yields is less than 1, then for the purpose of solving for the $H_{\rm adj}$ values, FDS will assume that the missing mass is a material with the same specific heat as the original material.
 
@@ -3696,7 +3696,7 @@ Additionally you must define the locations where the HVAC network joins the comp
 \end{lstlisting}
 where:
 \begin{itemize}
-\item \ct{TYPE_ID} is a character string that indicates the type of component that the namelist group is defining.   \ct{TYPE_ID} can be \ct{DUCT}, \ct{NODE}, \ct{FAN}, \ct{FILTER}, \ct{AIRCOIL}, or \ct{LEAK} (see ~Sec.~\ref{info:local_leakage}). 
+\item \ct{TYPE_ID} is a character string that indicates the type of component that the namelist group is defining.   \ct{TYPE_ID} can be \ct{DUCT}, \ct{NODE}, \ct{FAN}, \ct{FILTER}, \ct{AIRCOIL}, or \ct{LEAK} (see ~Sec.~\ref{info:local_leakage}).
 \item \ct{ID} is a character string giving a name to the component.  The name must be unique amongst all other components of that type; however, the same name can be given to components of different types (i.e., a duct and a node can have the same name but two ducts cannot).
 \end{itemize}
 A number of examples of simple HVAC systems are given in the HVAC folder of the sample cases and are discussed in the FDS Verification Guide.
@@ -4999,6 +4999,17 @@ Unless you are performing a Direct Numerical Simulation (DNS), the reaction rate
 \label{eq:edc_mix}
 \end{equation}
 Here, $\tau_{\rm mix}$ is the mixing time scale. The change in mass of a species is found from the combination of mixing and the production/destruction rate found from the chemical reaction. If a cell is initially unmixed, $\zeta_0=1$ by default, then combustion is considered non-premixed within the grid cell.  In this case, the fuel and air are considered completely separate at the start of the time step and must mix together before they burn.  This means if the mixing is slow enough, that unburned fuel may exist at the end of the time step even if sufficient oxygen is present in the grid cell to burn all the fuel. If the cell is initially fully mixed, $\zeta_0=0$, then the combustion is considered premixed (e.g., equivalent to infinitely fast mixing). You can set the amount of mixing in each cell at the beginning of every time step using the parameter \ct{INITIAL_UNMIXED_FRACTION} on the \ct{COMB} line.
+
+
+Setting \ct{INITIAL_UNMIXED_FRACTION=0} often leads to instabilities.  It may be useful to ramp the initial unmixed fraction in time to get over the initial steep transient for ignition.  The example below starts the calculation with the default \ct{INITIAL_UNMIXED_FRACTION=1}, then ramps it down to 0 within a second and holds it there for the remainder of the calculation.
+\begin{lstlisting}
+&COMB RAMP_ZETA_0='zeta_0 ramp' /
+
+&RAMP ID='zeta_0 ramp', T=0, F=1/
+&RAMP ID='zeta_0 ramp', T=1, F=0/
+&RAMP ID='zeta_0 ramp', T=..., F=0/
+\end{lstlisting}
+
 
 The mixing time, $\tau_{\rm mix}$, is a function of the the level of turbulence in the neighborhood of the point of interest. However, you may override the calculation of $\tau_{\rm mix}$ by setting a \ct{FIXED_MIX_TIME} (s) on the \ct{COMB} line. Alternatively, you can bound the computed value of $\tau_{\rm mix}$ by setting a lower bound \ct{TAU_CHEM} and/or an upper bound \ct{TAU_FLAME} on the \ct{COMB} line.
 
@@ -7167,7 +7178,7 @@ This section includes a relatively simple description of the thermal decompositi
 To describe the solid and gas phase chemistry of wood or vegetation pyrolysis/combustion in FDS, the following information must be assumed or measured:
 \begin{enumerate}
 \item The elemental composition of the dry vegetation. Dry wood has an elemental composition (by mass) of approximately $Y_{\rm C}=0.50$ carbon, $Y_{\rm H}=0.06$ hydrogen, $Y_{\rm O}=0.44$ oxygen, and trace amounts of inorganics~\cite{Rowell:USFS_Handbook}. A global survey of a wide range of vegetation suggests that the average carbon mass fraction is approximately 0.47~\cite{Ma:BGS2018}.
-\item The char yield, $\nu_{\rm char}$, defined as the fraction of the mass of dry vegetation that remains after complete anaerobic pyrolysis, which is specified with the parameter \ct{NU_MATL} on the \ct{MATL} line that describes the Dry Vegetation. The character string \ct{MATL_ID} on the same \ct{MATL} line indicates the name of the char. 
+\item The char yield, $\nu_{\rm char}$, defined as the fraction of the mass of dry vegetation that remains after complete anaerobic pyrolysis, which is specified with the parameter \ct{NU_MATL} on the \ct{MATL} line that describes the Dry Vegetation. The character string \ct{MATL_ID} on the same \ct{MATL} line indicates the name of the char.
 \item The ash yield, $\nu_{\rm ash}$, defined as the fraction of the char mass that remains after complete oxidation, which is specified by \ct{NU_MATL} on the \ct{MATL} line describing the char.
 \item The elemental composition of char in terms of the mass fraction of carbon, $Y_{\rm C,char}$, oxygen, $Y_{\rm O,char}$, and inorganics (ash). These values are not directly listed in the FDS input file, but rather determine the mass of oxygen that is required to oxidize a unit mass of char. In the formulae below, only the ratio of these two values is of importance.
 \item The energy released per unit mass of oxygen consumed, $E$ (kJ/kg), in the gas phase reaction of the vegetation pyrolyzate. This value is typically taken as $13\,100$~kJ/kg, but may vary for different varieties of vegetation. This value is used in calculation of the gas phase \ct{HEAT_OF_COMBUSTION}.
@@ -7185,14 +7196,14 @@ It is assumed that the Dry Vegetation has an effective molecular formula C$_{\rm
    {\rm z} = \frac{Y_{\rm O}'/16}{Y_{\rm C}'/12+Y_{\rm H}'+Y_{\rm O}'/16+\nu_{\rm ash}\nu_{\rm char}} \quad &;& \quad
    Y_{\rm O}' = \frac{Y_{\rm O}(1-\nu_{\rm ash}\nu_{\rm char})}{Y_{\rm C}+Y_{\rm H}+Y_{\rm O}} \\[.1in]
 \end{eqnarray}
-The prime symbol here indicates a slight adjustment made to the elemental mass fractions such that the masses of oxygen, hydrogem, oxygen and inorganic compounds sum to one. 
+The prime symbol here indicates a slight adjustment made to the elemental mass fractions such that the masses of oxygen, hydrogem, oxygen and inorganic compounds sum to one.
 
 \paragraph{Endothermic moisture evaporation}
 
 \be
  {\rm Wet\ Vegetation} \rightarrow \nu_{\rm moist} \, {\rm Moisture} + (1-\nu_{\rm moist}) \, {\rm Dry\ Vegetation} \quad ; \quad \nu_{\rm moist} = \frac{M}{1+M} \label{water_reac}
 \ee
-$M$ is the vegetation {\em moisture content} or {\em moisture fraction} determined on a dry weight basis, specified with \ct{MOISTURE_CONTENT} on the \ct{SURF} line that describes the vegetation. 
+$M$ is the vegetation {\em moisture content} or {\em moisture fraction} determined on a dry weight basis, specified with \ct{MOISTURE_CONTENT} on the \ct{SURF} line that describes the vegetation.
 
 \paragraph{Endothermic pyrolysis of Dry Vegetation}
 
@@ -7201,7 +7212,7 @@ $M$ is the vegetation {\em moisture content} or {\em moisture fraction} determin
 \ee
 \be
    {\rm x}' = \frac{\nu_{\rm char} \, W_{\rm veg} \, (1-\nu_{\rm ash})}{12 \, (1+Y_{\rm O,char}/Y_{\rm C,char})}  \quad ; \quad
-   {\rm z}' = \frac{12 \, {\rm x'} \, Y_{\rm O,char}}{16 \, Y_{\rm C,char}} 
+   {\rm z}' = \frac{12 \, {\rm x'} \, Y_{\rm O,char}}{16 \, Y_{\rm C,char}}
 \ee
 \be
    \nu_{\rm pyr} = \frac{ 12 ({\rm x-x'}) + {\rm y} + 16 ({\rm z-z'})}{W_{\rm pyr} } \quad ; \quad
@@ -7222,7 +7233,7 @@ Note that $W_{\rm veg}$ and $\nu_{\rm pyr}$ are simply for bookkeeping and play 
 
 \be
    \nu_{\rm O_2} = \frac{\nu_{\rm O_2,char} \, \nu_{\rm char} \, W_{\rm veg}}{W_{\rm O_2}}   \quad ; \quad
-   \nu_{\rm CO_2} =  \frac{(1+ \nu_{\rm O_2,char} - \nu_{\rm ash}) \, \nu_{\rm char} \, W_{\rm veg}}{W_{\rm CO_2}}  
+   \nu_{\rm CO_2} =  \frac{(1+ \nu_{\rm O_2,char} - \nu_{\rm ash}) \, \nu_{\rm char} \, W_{\rm veg}}{W_{\rm CO_2}}
 \ee
 \be
    \nu_{\rm O_2,char} = \frac{W_{\rm O_2} \, \nu_{\rm char} \, W_{\rm veg} \, (1-\nu_{\rm ash}) - W_{\rm CO_2} \, 16 {\rm z'} }{ (W_{\rm CO_2}-W_{\rm O_2}) \nu_{\rm char} \, W_{\rm veg} }
@@ -12008,7 +12019,7 @@ Keyword             & Type     & Description                      & Units       
 \hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
-\ct{CLIP_DT_RESTRICTIONS_MAX}   & Integer        & Section~\ref{info:CLIP:dens}                 &            & 5      \\ \hline
+\ct{CLIP_DT_RESTRICTIONS_MAX}     & Integer        & Section~\ref{info:CLIP:dens}                 &            & 5      \\ \hline
 \ct{MAXIMUM_DENSITY}              & Real           & Section~\ref{info:CLIP:dens}                 & kg/m$^3$   &        \\ \hline
 \ct{MAXIMUM_TEMPERATURE}          & Real           & Section~\ref{info:CLIP:temp}                 & $^\circ$C  &        \\ \hline
 \ct{MINIMUM_DENSITY}              & Real           & Section~\ref{info:CLIP:dens}                 & kg/m$^3$   &        \\ \hline
@@ -12034,26 +12045,27 @@ Keyword             & Type     & Description                      & Units       
 \hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
-\ct{CHECK_REALIZABILITY}                           & Logical    & Section~\ref{info:chem_integration}          &           & \ct{F}              \\ \hline
+\ct{CHECK_REALIZABILITY}                         & Logical    & Section~\ref{info:chem_integration}          &           & \ct{F}              \\ \hline
 \ct{COMPUTE_ADIABATIC_FLAME_TEMPERATURE}         & Logical    & Section~\ref{info:extinction}                &           & \ct{F}              \\ \hline
 \ct{DO_CHEM_LOAD_BALANCE}                        & Logical    & Section~\ref{info:chem_integration}          &           & \ct{F}              \\ \hline
-\ct{EQUIV_RATIO_CHECK}                            & Logical    & Section~\ref{info:chem_integration}          &           & \ct{T}              \\ \hline
-\ct{EXTINCTION_MODEL}                              & Character  & Section~\ref{info:extinction}                &           &                      \\ \hline
-\ct{FINITE_RATE_MIN_TEMP}                        & Real       & Section~\ref{info:finite}                    & $^\circ$C & -273.15              \\ \hline
-\ct{FIXED_MIX_TIME}                               & Real       & Section~\ref{info:turbulent_combustion}      &  s        &                      \\ \hline
-\ct{FREE_BURN_TEMPERATURE}                        & Real       & Section~\ref{info:extinction}                & $^\circ$C &  600                 \\ \hline
-\ct{INITIAL_UNMIXED_FRACTION}                     & Real       & Section~\ref{info:turbulent_combustion}      &           & 1.0                  \\ \hline
-\ct{MAX_CHEMISTRY_SUBSTEPS}                       & Integer    & Section~\ref{info:chem_integration}          &           & 20                   \\ \hline
-\ct{MAX_EQUIV_RATIO}                              & Real       & Section~\ref{info:chem_integration}          &           & 10.0                 \\ \hline
-\ct{MIN_EQUIV_RATIO}                              & Real       & Section~\ref{info:chem_integration}          &           & 0.2.                 \\ \hline
-\ct{N_FIXED_CHEMISTRY_SUBSTEPS}                  & Integer    & Section~\ref{info:chem_integration}          &           & -1                   \\ \hline
-\ct{ODE_SOLVER}                                    & Character  & Section~\ref{info:chem_integration}          &           &                      \\ \hline
-\ct{ODE_MIN_ATOL}                                 & Real       & Section~\ref{info:chem_integration}          &           &                      \\ \hline
-\ct{ODE_REL_ERROR}                                & Real       & Section~\ref{info:chem_integration}          &           &                      \\ \hline
-\ct{SUPPRESSION}                                    & Logical    & Section~\ref{info:extinction}                &           & \ct{T}              \\ \hline
-\ct{TAU_CHEM}                                      & Real       & Section~\ref{info:turbulent_combustion}      &           & 1.E-10               \\ \hline
-\ct{TAU_FLAME}                                     & Real       & Section~\ref{info:turbulent_combustion}      &           & 1.E10                \\ \hline
-\ct{ZZ_MIN_GLOBAL}                                & Real       & Section~\ref{info:finite}                    &           & 1.E-10               \\ \hline
+\ct{EQUIV_RATIO_CHECK}                           & Logical    & Section~\ref{info:chem_integration}          &           & \ct{T}              \\ \hline
+\ct{EXTINCTION_MODEL}                            & Character  & Section~\ref{info:extinction}                &           &                     \\ \hline
+\ct{FINITE_RATE_MIN_TEMP}                        & Real       & Section~\ref{info:finite}                    & $^\circ$C & -273.15             \\ \hline
+\ct{FIXED_MIX_TIME}                              & Real       & Section~\ref{info:turbulent_combustion}      &  s        &                     \\ \hline
+\ct{FREE_BURN_TEMPERATURE}                       & Real       & Section~\ref{info:extinction}                & $^\circ$C &  600                \\ \hline
+\ct{INITIAL_UNMIXED_FRACTION}                    & Real       & Section~\ref{info:turbulent_combustion}      &           & 1.0                 \\ \hline
+\ct{MAX_CHEMISTRY_SUBSTEPS}                      & Integer    & Section~\ref{info:chem_integration}          &           & 20                  \\ \hline
+\ct{MAX_EQUIV_RATIO}                             & Real       & Section~\ref{info:chem_integration}          &           & 10.0                \\ \hline
+\ct{MIN_EQUIV_RATIO}                             & Real       & Section~\ref{info:chem_integration}          &           & 0.2.                \\ \hline
+\ct{N_FIXED_CHEMISTRY_SUBSTEPS}                  & Integer    & Section~\ref{info:chem_integration}          &           & -1                  \\ \hline
+\ct{ODE_SOLVER}                                  & Character  & Section~\ref{info:chem_integration}          &           &                     \\ \hline
+\ct{ODE_MIN_ATOL}                                & Real       & Section~\ref{info:chem_integration}          &           &                     \\ \hline
+\ct{ODE_REL_ERROR}                               & Real       & Section~\ref{info:chem_integration}          &           &                     \\ \hline
+\ct{RAMP_ZETA_0}                                 & Character  & Section~\ref{info:turbulent_combustion}      &           &                     \\ \hline
+\ct{SUPPRESSION}                                 & Logical    & Section~\ref{info:extinction}                &           & \ct{T}              \\ \hline
+\ct{TAU_CHEM}                                    & Real       & Section~\ref{info:turbulent_combustion}      &           & 1.E-5               \\ \hline
+\ct{TAU_FLAME}                                   & Real       & Section~\ref{info:turbulent_combustion}      &           & 1.E10               \\ \hline
+\ct{ZZ_MIN_GLOBAL}                               & Real       & Section~\ref{info:finite}                    &           & 1.E-10              \\ \hline
 \end{longtable}
 
 \vspace{\baselineskip}
