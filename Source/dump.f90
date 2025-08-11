@@ -2809,8 +2809,8 @@ IF (SIM_MODE/=DNS_MODE) THEN
          END SELECT
       ENDIF
    ENDDO
-   WRITE(LU_OUTPUT,'(A,F8.2)')   '   Turbulent Prandtl Number:     ',PR
-   WRITE(LU_OUTPUT,'(A,F8.2)')   '   Turbulent Schmidt Number:     ',SC
+   WRITE(LU_OUTPUT,'(A,F8.2)')   '   Turbulent Prandtl Number:     ',PR_T
+   WRITE(LU_OUTPUT,'(A,F8.2)')   '   Turbulent Schmidt Number:     ',SC_T
    IF (ANY(SPECIES_MIXTURE(:)%SC_T_USER>0._EB)) &
         WRITE(LU_OUTPUT,'(A)')   '   Differential turbulent transport specified, see Tracked Species Information'
 
@@ -7518,9 +7518,7 @@ IND_SELECT: SELECT CASE(IND)
    CASE(37)  ! DIFFUSIVITY
       SELECT CASE (SIM_MODE)
          CASE DEFAULT
-            GAS_PHASE_OUTPUT_RES = MU(II,JJ,KK)*RSC/RHO(II,JJ,KK)
-         CASE (LES_MODE)
-            GAS_PHASE_OUTPUT_RES = (MU(II,JJ,KK)-MU_DNS(II,JJ,KK)*RSC)/RHO(II,JJ,KK)
+            GAS_PHASE_OUTPUT_RES = MU(II,JJ,KK)*RSC_T/RHO(II,JJ,KK)
          CASE (DNS_MODE)
             D_Z_N = D_Z(:,Z_INDEX)
             CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP(II,JJ,KK),GAS_PHASE_OUTPUT_RES)
@@ -7641,7 +7639,7 @@ IND_SELECT: SELECT CASE(IND)
       ELSE
          R_DX2 = RDX(II)**2 + RDY(JJ)**2 + RDZ(KK)**2
       ENDIF
-      GAS_PHASE_OUTPUT_RES = DT*2._EB*R_DX2*MAX(D_Z_MAX(II,JJ,KK),MAX(RPR,RSC)*MU(II,JJ,KK)/RHO(II,JJ,KK))
+      GAS_PHASE_OUTPUT_RES = DT*2._EB*R_DX2*MAX(D_Z_MAX(II,JJ,KK),MAX(RPR_T,RSC_T)*MU(II,JJ,KK)/RHO(II,JJ,KK))
 
    CASE(72)  ! CFL MAX
       GAS_PHASE_OUTPUT_RES = CFL
