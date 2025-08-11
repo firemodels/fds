@@ -4700,8 +4700,7 @@ The only instance where detailed liquid properties are needed is when defining a
 
 \subsubsection{Prandtl Number}
 
-The Prandtl number for a gas species can be specified using \ct{PR_GAS} on \ct{SPEC}. If no value is given, the default value of \ct{PR} on \ct{MISC} will be used. If
-\ct{PR_GAS} is defined for a known species, it will override the existing value.
+The Prandtl number for a gas species can be specified using \ct{PR_GAS} on \ct{SPEC}. If no value is given, the default value of \ct{PR_T} on \ct{MISC} will be used. If \ct{PR_GAS} is defined for a known species, this will override the database value.
 
 \subsection{Air}
 \label{info:AIR}
@@ -9000,7 +8999,7 @@ Options for the \ct{TURBULENCE_MODEL} on the \ct{MISC} line are listed in Table~
    k_{\hbox{\tiny LES}} = \frac{\mu_{\hbox{\tiny LES}} \, c_p}{\PR_{\rm t}}
    \quad ; \quad  (\rho D)_{\hbox{\tiny LES}} =\frac{\mu_{\hbox{\tiny LES}}}{\SC_{\rm t}}
 \ee
-The turbulent Prandtl number $\PR_t$ and the turbulent Schmidt number $\SC_t$ are assumed to be constant for a given scenario. Although it is not recommended for most calculations, you can modify $\PR_{\rm t}=0.5$, and $\SC_{\rm t}=0.5$ via the parameters \ct{PR}, and \ct{SC} on the \ct{MISC} line. A more detailed discussion of these parameters is given in the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
+The turbulent Prandtl number $\PR_t$ and the turbulent Schmidt number $\SC_t$ are assumed to be constant for a given scenario. Although it is not recommended for most calculations, you can modify $\PR_{\rm t}=0.5$, and $\SC_{\rm t}=0.5$ via the parameters \ct{PR_T}, and \ct{SC_T} on the \ct{MISC} line. A more detailed discussion of these parameters is given in the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 
 \begin{table}[ht]
 \caption[Turbulence model options]{Turbulence model options.}
@@ -9008,7 +9007,7 @@ The turbulent Prandtl number $\PR_t$ and the turbulent Schmidt number $\SC_t$ ar
 \centering
 \begin{tabular}{|lll|}
 \hline
-\ct{TURBULENCE_MODEL} \hfill  & Description    \hfill                                   & Coefficient(s)  \hfill  \\ \hline
+\ct{TURBULENCE_MODEL} \hfill   & Description    \hfill                                   & Coefficient(s)  \hfill  \\ \hline
 \ct{'CONSTANT SMAGORINSKY'}    & Constant-coefficient Smagorinsky \cite{Smagorinsky:1}   & \ct{C_SMAGORINSKY}  \\
 \ct{'DYNAMIC SMAGORINSKY'}     & Dynamic Smagorinsky \cite{Germano:1991,Moin:1991}       & None                  \\
 \ct{'DEARDORFF'}               & Deardorff \cite{Deardorff:1980,Pope:2000}               & \ct{C_DEARDORFF}    \\
@@ -12757,13 +12756,13 @@ Keyword             & Type     & Description                      & Units       
 \endhead
 \ct{AEROSOL_AL2O3}                                & Logical      & Section~\ref{info:RADI_Gas_and_Soot}    &            & \ct{F}           \\ \hline
 \ct{AEROSOL_SCRUBBING}                            & Logical      & Section~\ref{info:scrubbing}            &            & \ct{F}           \\ \hline
-\ct{AGGLOMERATION}                                 & Logical      & Section~\ref{info:agglomeration}        &            & \ct{T}           \\ \hline
+\ct{AGGLOMERATION}                                & Logical      & Section~\ref{info:agglomeration}        &            & \ct{T}           \\ \hline
 \ct{ALIGNMENT_TOLERANCE}                          & Real         & Section~\ref{info:mesh_alignment}       &            & 0.001             \\ \hline
 \ct{BNDF_DEFAULT}                                 & Logical      & Section~\ref{info:BNDF}                 &            & \ct{T}           \\ \hline
 \ct{C_DEARDORFF}                                  & Real         & Section~\ref{info:LES}                  &            & 0.1               \\ \hline
 \ct{CFL_MAX}                                      & Real         & Section~\ref{info:CFL}                  &            & 1.0               \\ \hline
 \ct{CFL_MIN}                                      & Real         & Section~\ref{info:CFL}                  &            & 0.8               \\ \hline
-\ct{CFL_VELOCITY_NORM}                           & Integer      & Section~\ref{info:CFL}                  &            &                   \\ \hline
+\ct{CFL_VELOCITY_NORM}                            & Integer      & Section~\ref{info:CFL}                  &            &                   \\ \hline
 \ct{CHECK_FO}                                     & Logical      & Section~\ref{info:solid_phase_stability}&            & \ct{F}           \\ \hline
 \ct{CHECK_HT}                                     & Logical      & Section~\ref{info:HT}                   &            & \ct{F}           \\ \hline
 \ct{CHECK_VN}                                     & Logical      & Section~\ref{info:VN}                   &            & \ct{T}           \\ \hline
@@ -12772,46 +12771,46 @@ Keyword             & Type     & Description                      & Units       
 \ct{C_SMAGORINSKY}                                & Real         & Section~\ref{info:LES}                  &            & 0.20              \\ \hline
 \ct{C_VREMAN}                                     & Real         & Section~\ref{info:LES}                  &            & 0.07              \\ \hline
 \ct{C_WALE}                                       & Real         & Section~\ref{info:LES}                  &            & 0.60              \\ \hline
-\ct{DEPOSITION}                                    & Logical      & Section~\ref{info:deposition}           &            & \ct{T}           \\ \hline
+\ct{DEPOSITION}                                   & Logical      & Section~\ref{info:deposition}           &            & \ct{T}           \\ \hline
 \ct{EXTERNAL_FILENAME}                            & Character    & Section~\ref{info:external_control}     &            &                   \\ \hline
-\ct{FIXED_LES_FILTER_WIDTH}                     & Real         & Section~\ref{info:LES}                  & m          &                   \\ \hline
+\ct{FIXED_LES_FILTER_WIDTH}                       & Real         & Section~\ref{info:LES}                  & m          &                   \\ \hline
 \ct{FLUX_LIMITER}                                 & Integer      & Section~\ref{info:flux_limiters}        &            & 2                 \\ \hline
 \ct{FREEZE_VELOCITY}                              & Logical      & Section~\ref{info:freeze_velocity}      &            & \ct{F}           \\ \hline
-\ct{GAMMA}                                         & Real         & Section~\ref{gas_species_props}         &            & 1.4               \\ \hline
+\ct{GAMMA}                                        & Real         & Section~\ref{gas_species_props}         &            & 1.4               \\ \hline
 \ct{GRAVITATIONAL_DEPOSITION}                     & Logical      & Section~\ref{info:deposition}           &            & \ct{T}           \\ \hline
 \ct{GRAVITATIONAL_SETTLING}                       & Logical      & Section~\ref{info:deposition}           &            & \ct{T}           \\ \hline
-\ct{GVEC(3)}                                       & Real Array   & Section~\ref{info:GVEC}                 & m/s$^2$    & 0,0,-9.81         \\ \hline
-\ct{H_F_REFERENCE_TEMPERATURE}                  & Real         & Section~\ref{info:enthalpy}             & $^\circ$C  & 25.               \\ \hline
-\ct{HUMIDITY}                                      & Real         & Section~\ref{info:humidity}             & \%         & 40.               \\ \hline
-\ct{HVAC_LOCAL_PRESSURE}                         & Logical      & Section~\ref{info:HVAC}                 &            &  \ct{T}          \\ \hline
-\ct{HVAC_MASS_TRANSPORT_CELL_L}                & Real          & Section ~\ref{info:hvacmasstransport}   & m          &                   \\ \hline
-\ct{HVAC_PRES_RELAX}                             & Real         & Section ~\ref{info:HVAC}                &            & 1.0               \\ \hline
+\ct{GVEC(3)}                                      & Real Array   & Section~\ref{info:GVEC}                 & m/s$^2$    & 0,0,-9.81         \\ \hline
+\ct{H_F_REFERENCE_TEMPERATURE}                    & Real         & Section~\ref{info:enthalpy}             & $^\circ$C  & 25.               \\ \hline
+\ct{HUMIDITY}                                     & Real         & Section~\ref{info:humidity}             & \%         & 40.               \\ \hline
+\ct{HVAC_LOCAL_PRESSURE}                          & Logical      & Section~\ref{info:HVAC}                 &            &  \ct{T}          \\ \hline
+\ct{HVAC_MASS_TRANSPORT_CELL_L}                   & Real         & Section ~\ref{info:hvacmasstransport}   & m          &                   \\ \hline
+\ct{HVAC_PRES_RELAX}                              & Real         & Section ~\ref{info:HVAC}                &            & 1.0               \\ \hline
 \ct{HVAC_QFAN}                                    & Logical      & Section ~\ref{info:HVAC_QFAN}           &            & \ct{F}           \\ \hline
 \ct{IBLANK_SMV}                                   & Logical      & Section~\ref{info:SLCF}                 &            & \ct{T}           \\ \hline
-\ct{I_MAX_TEMP}                                  & Integer      & Section~\ref{info:CLIP:temp}            & K          & 5000              \\ \hline
-\ct{LES_FILTER_TYPE}                             & Character    & Section~\ref{info:LES}                  &            & \ct{'MEAN'}      \\ \hline
-\ct{LEVEL_SET_ELLIPSE}                           & Logical      & Section~\ref{info:level_set}            &            & \ct{T}           \\ \hline
-\ct{LEVEL_SET_MODE}                              & Integer      & Section~\ref{info:level_set}            &            & 0                 \\ \hline
+\ct{I_MAX_TEMP}                                   & Integer      & Section~\ref{info:CLIP:temp}            & K          & 5000              \\ \hline
+\ct{LES_FILTER_TYPE}                              & Character    & Section~\ref{info:LES}                  &            & \ct{'MEAN'}      \\ \hline
+\ct{LEVEL_SET_ELLIPSE}                            & Logical      & Section~\ref{info:level_set}            &            & \ct{T}           \\ \hline
+\ct{LEVEL_SET_MODE}                               & Integer      & Section~\ref{info:level_set}            &            & 0                 \\ \hline
 \ct{MAXIMUM_VISIBILITY}                           & Real         & Section~\ref{info:visibility}           &  m         &  30               \\ \hline
-\ct{MAX_LEAK_PATHS}                              & Integer      & Section~\ref{info:Leaks}                &            &  200              \\ \hline
+\ct{MAX_LEAK_PATHS}                               & Integer      & Section~\ref{info:Leaks}                &            &  200              \\ \hline
 \ct{MAX_RAMPS}                                    & Integer      & Section~\ref{info:RAMP}                 &            &  100              \\ \hline
-\ct{MINIMUM_ZONE_VOLUME}                         & Real         & Section~\ref{info:filling_zones}        &  m$^3$     & 0                 \\ \hline
-\ct{MPI_TIMEOUT}                                 & Real          & Section~\ref{info:Errors}               &  s         & 600.              \\ \hline
-\ct{NEAR_WALL_PARTICLE_INTERPOLATION}            & Logical       & Section~\ref{info:particle_drag}        &            & \ct{F}            \\ \hline
-\ct{NEIGHBOR_SEPARATION_DISTANCE}                & Real         & Section~\ref{info:mesh_separation}      &  m         & 0.                \\ \hline
-\ct{NOISE}                                         & Logical      & Section~\ref{info:NOISE}                &            & \ct{T}           \\ \hline
+\ct{MINIMUM_ZONE_VOLUME}                          & Real         & Section~\ref{info:filling_zones}        &  m$^3$     & 0                 \\ \hline
+\ct{MPI_TIMEOUT}                                  & Real         & Section~\ref{info:Errors}               &  s         & 600.              \\ \hline
+\ct{NEAR_WALL_PARTICLE_INTERPOLATION}             & Logical      & Section~\ref{info:particle_drag}        &            & \ct{F}            \\ \hline
+\ct{NEIGHBOR_SEPARATION_DISTANCE}                 & Real         & Section~\ref{info:mesh_separation}      &  m         & 0.                \\ \hline
+\ct{NOISE}                                        & Logical      & Section~\ref{info:NOISE}                &            & \ct{T}           \\ \hline
 \ct{NOISE_VELOCITY}                               & Real         & Section~\ref{info:NOISE}                &  m/s       & 0.005             \\ \hline
-\ct{NO_PRESSURE_ZONES}                           & Logical      & Section~\ref{info:ZONE_Basics}          &            & \ct{F}           \\ \hline
+\ct{NO_PRESSURE_ZONES}                            & Logical      & Section~\ref{info:ZONE_Basics}          &            & \ct{F}           \\ \hline
 \ct{NORTH_BEARING}                                & Real         & Section~\ref{info:earth}                & deg.       &                   \\ \hline
 \ct{NUCLEATION_SITES}                             & Real         & Section~\ref{info:condensation}         & \#/m$^3$   & $1\times 10^7$    \\ \hline
 \ct{ORIGIN_LAT}                                   & Real         & Section~\ref{info:earth}                & deg.       &                   \\ \hline
 \ct{ORIGIN_LON}                                   & Real         & Section~\ref{info:earth}                & deg.       &                   \\ \hline
-\ct{OVERWRITE}                                     & Logical      & Section~\ref{info:OVERWRITE}            &            & \ct{T}           \\ \hline
+\ct{OVERWRITE}                                    & Logical      & Section~\ref{info:OVERWRITE}            &            & \ct{T}           \\ \hline
 \ct{PARTICLE_CFL}                                 & Logical      & Section~\ref{info:PART_Stability}       &            & \ct{F}           \\ \hline
-\ct{PARTICLE_CFL_MAX}                            & Real         & Section~\ref{info:PART_Stability}       &            & 1.0               \\ \hline
-\ct{PARTICLE_CFL_MIN}                            & Real         & Section~\ref{info:PART_Stability}       &            & 0.8               \\ \hline
+\ct{PARTICLE_CFL_MAX}                             & Real         & Section~\ref{info:PART_Stability}       &            & 1.0               \\ \hline
+\ct{PARTICLE_CFL_MIN}                             & Real         & Section~\ref{info:PART_Stability}       &            & 0.8               \\ \hline
 \ct{POROUS_FLOOR}                                 & Logical      & Section~\ref{info:particle_removal}     &            & \ct{T}           \\ \hline
-\ct{PR}                                            & Real         & Section~\ref{info:LES}                  &            & 0.5               \\ \hline
+\ct{PR_T}                                         & Real         & Section~\ref{info:LES}                  &            & 0.5               \\ \hline
 \ct{P_INF}                                        & Real         & Section~\ref{info:MISC_Basics}          & Pa         & 101325            \\ \hline
 \ct{RAMP_GX}                                      & Character    & Section~\ref{info:GVEC}                 &            &                   \\ \hline
 \ct{RAMP_GY}                                      & Character    & Section~\ref{info:GVEC}                 &            &                   \\ \hline
@@ -12828,10 +12827,10 @@ Keyword             & Type     & Description                      & Units       
 \ct{RESTART}                                      & Logical      & Section~\ref{info:restart}              &            & \ct{F}           \\ \hline
 \ct{RESTART_CHID}                                 & Character    & Section~\ref{info:restart}              &            & \ct{CHID}        \\ \hline
 \ct{RND_SEED}                                     & Integer      & Section~\ref{info:NOISE}                &            &                   \\ \hline
-\ct{SC}                                           & Real         & Section~\ref{info:LES}                  &            & 0.5               \\ \hline
+\ct{SC_T}                                         & Real         & Section~\ref{info:LES}                  &            & 0.5               \\ \hline
 \ct{SIMULATION_MODE}                              & Character    & Section~\ref{Sim_Mode}                  &            & \ct{'VLES'}      \\ \hline
 \ct{SMOKE_ALBEDO}                                 & Real         & Reference~\cite{Smokeview_Users_Guide}  &            & 0.3               \\ \hline
-\ct{SOLID_PHASE_ONLY}                            & Logical      & Section~\ref{solid_phase_verification}  &            & \ct{F}           \\ \hline
+\ct{SOLID_PHASE_ONLY}                             & Logical      & Section~\ref{solid_phase_verification}  &            & \ct{F}           \\ \hline
 \ct{SOOT_DENSITY}                                 & Real         & Section~\ref{info:deposition}           &            & 1800              \\ \hline
 \ct{SOOT_OXIDATION}                               & Logical      & Section~\ref{info:deposition}           &            & \ct{F}           \\ \hline
 \ct{TAU_DEFAULT}                                  & Real         & Section~\ref{info:RAMP_Time}            & s          & 1.                \\ \hline
@@ -12840,16 +12839,16 @@ Keyword             & Type     & Description                      & Units       
 \ct{THERMOPHORETIC_DEPOSITION}                    & Logical      & Section~\ref{info:deposition}           &            & \ct{T}           \\ \hline
 \ct{THERMOPHORETIC_SETTLING}                      & Logical      & Section~\ref{info:deposition}           &            & \ct{T}           \\ \hline
 \ct{THICKEN_OBSTRUCTIONS}                         & Logical      & Section~\ref{info:OBST_Basics}          &            & \ct{F}           \\ \hline
-\ct{TMPA}                                          & Real         & Section~\ref{info:MISC_Basics}          & $^\circ$C  & 20.               \\ \hline
+\ct{TMPA}                                         & Real         & Section~\ref{info:MISC_Basics}          & $^\circ$C  & 20.               \\ \hline
 \ct{TURBULENCE_MODEL}                             & Character    & Section~\ref{info:LES}                  &            & \ct{'DEARDORFF'} \\ \hline
 \ct{TURBULENT_DEPOSITION}                         & Logical      & Section~\ref{info:deposition}           &            & \ct{T}           \\ \hline
-\ct{UNFREEZE_TIME}                               & Real          & Section~\ref{info:FREZ}                 &            &                  \\ \hline
-\ct{VERBOSE}                                       & Logical      & Section~\ref{out:file}                  &            & \ct{F}            \\ \hline
+\ct{UNFREEZE_TIME}                                & Real         & Section~\ref{info:FREZ}                 &            &                  \\ \hline
+\ct{VERBOSE}                                      & Logical      & Section~\ref{out:file}                  &            & \ct{F}            \\ \hline
 \ct{VISIBILITY_FACTOR}                            & Real         & Section~\ref{info:visibility}           &            & 3                 \\ \hline
 \ct{VN_MAX}                                       & Real         & Section~\ref{info:VN}                   &            & 1.0               \\ \hline
 \ct{VN_MIN}                                       & Real         & Section~\ref{info:VN}                   &            & 0.8               \\ \hline
-\ct{Y_CO2_INFTY}                                 & Real         & Section~\ref{info:simple_chemistry}     &  kg/kg     &                   \\ \hline
-\ct{Y_O2_INFTY}                                  & Real         & Section~\ref{info:simple_chemistry}     &  kg/kg     &                   \\ \hline
+\ct{Y_CO2_INFTY}                                  & Real         & Section~\ref{info:simple_chemistry}     &  kg/kg     &                   \\ \hline
+\ct{Y_O2_INFTY}                                   & Real         & Section~\ref{info:simple_chemistry}     &  kg/kg     &                   \\ \hline
 \end{longtable}
 
 
