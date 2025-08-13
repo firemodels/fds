@@ -1,9 +1,9 @@
-&REAC FUEL='CELLULOSE'
-      SOOT_YIELD=0.01 
-      C=3.3
-      H=10.
-      O=5
-      HEAT_OF_COMBUSTION=12120 /
+&REAC FUEL='PYROLYZATE'
+      SOOT_YIELD=0.001 
+      C=0.867
+      H=1.781
+      O=0.801
+      HEAT_OF_COMBUSTION=15288 /
    
 &SPEC ID='WATER VAPOR' /
 
@@ -36,6 +36,7 @@
       MATL_ID = 'Corrugated Paper Simple'
       MOISTURE_FRACTION = 0.05
       COLOR = 'BROWN'
+      MINIMUM_LAYER_MASS_FRACTION = 0.06
       BURN_AWAY = .TRUE.
       THICKNESS = 0.0018 /
 
@@ -43,6 +44,7 @@
       MATL_ID = 'Corrugated Paper Simple'
       MOISTURE_FRACTION = 0.05
       COLOR = 'BROWN'
+      MINIMUM_LAYER_MASS_FRACTION = 0.06
       BURN_AWAY = .TRUE.
       THICKNESS = 0.0036 /
 
@@ -50,6 +52,7 @@
       MATL_ID = 'Corrugated Paper Simple'
       MOISTURE_FRACTION = 0.05
       COLOR = 'BROWN'
+      MINIMUM_LAYER_MASS_FRACTION = 0.06
       BURN_AWAY = .TRUE.
       THICKNESS = 0.0072 /
 
@@ -80,6 +83,7 @@
       MOISTURE_FRACTION = 0.05
       SURFACE_VOLUME_RATIO = 10000.
       GEOMETRY = 'CARTESIAN'
+      MINIMUM_LAYER_MASS_FRACTION = 0.06
       LENGTH = 0.03
       WIDTH = 0.004 /
 
@@ -88,7 +92,7 @@
       E(1) = 1.30E5
       EMISSIVITY=0.7
       DENSITY=350.
-      SPEC_ID='CELLULOSE'
+      SPEC_ID='PYROLYZATE'
       NU_SPEC=0.1
       MATL_ID='Corrugated Paper Intermediate'
       NU_MATL=0.9
@@ -102,7 +106,7 @@
       EMISSIVITY=0.775
       HEAT_OF_REACTION=126.
       DENSITY=315.
-      SPEC_ID='CELLULOSE'
+      SPEC_ID='PYROLYZATE'
       NU_SPEC=0.63
       MATL_ID='Corrugated Paper Char 1'
       NU_MATL=0.37
@@ -115,9 +119,10 @@
       EMISSIVITY=0.775
       HEAT_OF_REACTION=126.
       DENSITY=350.
-      SPEC_ID='CELLULOSE'
-      HEAT_OF_COMBUSTION=16120.
-      NU_SPEC=1.0
+      SPEC_ID='PYROLYZATE'
+      NU_SPEC=0.95
+      MATL_ID='ash'
+      NU_SPEC=0.05
       CONDUCTIVITY = 0.06
       SPECIFIC_HEAT = 1.55 /
 
@@ -126,7 +131,7 @@
       E(1) = 1.70E4
       EMISSIVITY=0.85
       DENSITY=170.
-      SPEC_ID='CELLULOSE'
+      SPEC_ID='PYROLYZATE'
       NU_SPEC=0.41
       MATL_ID='char'
       NU_MATL=0.59
@@ -141,7 +146,7 @@
       REFERENCE_TEMPERATURE = 320.
       MATL_ID            = 'char'
       NU_MATL            = 0.20
-      SPEC_ID            = 'CELLULOSE'
+      SPEC_ID            = 'PYROLYZATE'
       NU_SPEC            = 0.80
       HEAT_OF_REACTION   = 418. /
 
@@ -152,7 +157,7 @@
       REFERENCE_TEMPERATURE = 320.
       MATL_ID            = 'char'
       NU_MATL            = 0.20
-      SPEC_ID            = 'CELLULOSE'
+      SPEC_ID            = 'PYROLYZATE'
       NU_SPEC            = 0.80
       HEAT_OF_REACTION   = 418. /
 
@@ -228,4 +233,5 @@
 
 &BNDF QUANTITY='WALL TEMPERATURE', CELL_CENTERED=.TRUE. /
 &BNDF QUANTITY='BURNING RATE', CELL_CENTERED=.TRUE. /
+&BNDF QUANTITY='SURFACE DENSITY', CELL_CENTERED=.TRUE. /
 
