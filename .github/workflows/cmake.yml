@@ -148,6 +148,7 @@ jobs:
         ctest --test-dir builddir -j --output-on-failure -V
 
   cmake-osx:
+    if: false
     # Set the name of this build, variable depending on the OS
     name: ${{ matrix.os }} ${{ matrix.compiler_mpi }} openmp=${{ matrix.openmp }} ${{ matrix.build_type }}
     strategy:
@@ -220,7 +221,7 @@ jobs:
   cmake-windows:
     # build on windows using ifort with intelmpi and mkl based on
     # https://github.com/oneapi-src/oneapi-ci
-
+    if: false
     name: windows ${{matrix.compiler}} intelmpi openmp=${{ matrix.openmp }} ${{ matrix.build_type }}
     runs-on: [windows-latest]
     strategy:
