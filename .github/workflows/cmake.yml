@@ -178,7 +178,6 @@ jobs:
         if: startsWith(matrix.compiler_mpi, 'gnu_')
         shell: bash
         run: |
-          echo "Test"
           echo "CC=gcc-15" >> $GITHUB_ENV
           echo "CXX=g++-15" >> $GITHUB_ENV
           echo "FC=gfortran-15" >> $GITHUB_ENV
