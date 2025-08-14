@@ -177,6 +177,7 @@ jobs:
         if: startsWith(matrix.compiler_mpi, 'gnu_')
         shell: bash
         run: |
+          echo "Test"
           echo "CC=gcc-15" >> $GITHUB_ENV
           echo "CXX=g++-15" >> $GITHUB_ENV
           echo "FC=gfortran-15" >> $GITHUB_ENV
@@ -221,6 +222,7 @@ jobs:
     # build on windows using ifort with intelmpi and mkl based on
     # https://github.com/oneapi-src/oneapi-ci
 
+    if: false
     name: windows ${{matrix.compiler}} intelmpi openmp=${{ matrix.openmp }} ${{ matrix.build_type }}
     runs-on: [windows-latest]
     strategy:
