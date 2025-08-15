@@ -2699,7 +2699,7 @@ PROF_LOOP: DO N=1,N_PROF
 
    ! Check for potential errors
 
-   IF (SF%THERMAL_BC_INDEX/=THERMALLY_THICK) THEN
+   IF (SF%THERMAL_BC_INDEX/=THERMALLY_THICK .AND. (PF%IOR/=0 .OR. (PF%IOR==0 .AND. PF%MESH==NM))) THEN
       WRITE(LU_ERR,'(A,I0,A)') 'ERROR(430): PROF ',N,' must be associated with a heat-conducting surface.'
       STOP_STATUS = SETUP_STOP
       RETURN
