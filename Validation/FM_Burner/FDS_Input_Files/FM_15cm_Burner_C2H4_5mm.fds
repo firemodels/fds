@@ -5,11 +5,11 @@
       I_LOWER=0,I_LOWER_SKIP=1,I_UPPER_SKIP=2,I_UPPER=3,
       J_LOWER=0,J_LOWER_SKIP=1,J_UPPER_SKIP=2,J_UPPER=3,
       K_LOWER=0,K_LOWER_SKIP=0,K_UPPER_SKIP=3,K_UPPER=5 /  96 - 16 = 80 meshes
-&MESH IJK=30,30,30, XB=-0.60,-0.30,-0.60,-0.30,-0.370,-0.070, MULT_ID='m1' /
+&MESH IJK=30,30,30, XB=-0.60,-0.30,-0.60,-0.30,-0.380,-0.080, MULT_ID='m1' /
 
 &MULT ID='m2', DX=0.15,DY=0.15,DZ=0.15,
       I_UPPER=3,J_UPPER=3,K_UPPER=7 /  128 meshes
-&MESH IJK=30,30,30, XB=-0.30,-0.15,-0.30,-0.15,-0.370,-0.220, MULT_ID='m2', COLOR='RED' /
+&MESH IJK=30,30,30, XB=-0.30,-0.15,-0.30,-0.15,-0.380,-0.230, MULT_ID='m2', COLOR='RED' /
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 &TIME T_END=65/
@@ -17,6 +17,7 @@
 &DUMP DT_DEVC=1, DT_HRR=1 /
 
 &MISC SIMULATION_MODE='LES' /
+&PRES SOLVER='ULMAT HYPRE' /
 
 ! note: ethylene 2-step chemistry developed from
 ! &REAC FUEL='ETHYLENE', CO_YIELD=0.013, SOOT_YIELD=0.045, N_SIMPLE_CHEMISTRY_REACTIONS=2, FUEL_C_TO_CO_FRACTION=0.60/ Tewarson, SFPE Handbook 1st Ed.
@@ -60,7 +61,7 @@ https://material-properties.org/sand-density-heat-capacity-thermal-conductivity/
 &INIT PART_ID='ignitor', XYZ=0.0,0.0,0.01, RADIUS=0.08, SHAPE='RING', N_PARTICLES=36, UNIFORM=T/
 
 &VENT DB='ZMAX', SURF_ID='OPEN'/
-&VENT PBZ=-0.370, SURF_ID='coflow'/
+&VENT DB='ZMIN', SURF_ID='coflow'/
 
 &SLCF PBY=0, QUANTITY='VELOCITY', VECTOR=T/
 &SLCF PBY=0, QUANTITY='TEMPERATURE', CELL_CENTERED=T/
