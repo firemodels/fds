@@ -3467,7 +3467,7 @@ In the case of a singular matrix, a warning is written that no adjustment is don
 
 The value of $T_{\rm ref}$ used for a reaction is the value specified by the \ct{REFERENCE_TEMPERATURE} for that reaction. If no value is given (when the reaction is defined using \ct{A} and \ct{E}), then FDS will do a virtual TGA using just the single reaction for the single material. The temperature where the peak reaction rate occurs is used for $T_{\rm ref}$. Since in most cases the specific heat of a material and the specific heats of its residues and product gases are not the same, the heat of reaction is temperature dependent. FDS will create a temperature dependent array for the heat of reaction that accounts for this where the value at $T_{\rm ref}$ is fixed to the value specified with \ct{HEAT_OF_REACTION}.
 
-This process of adjusting enthalpies can be skipped by setting \ct{ADJUST_H=F} on a \ct{MATL} line. This should be done when material reactions do not represent actual chemical reactions. 
+This process of adjusting enthalpies can be skipped by setting \ct{ADJUST_H=F} on a \ct{MATL} line. This should be done when material reactions do not represent actual chemical reactions.
 
 If the sum of the yields is less than 1, then for the purpose of solving for the $H_{\rm adj}$ values, FDS will assume that the missing mass is a material with the same specific heat as the original material.
 
@@ -3696,7 +3696,7 @@ Additionally you must define the locations where the HVAC network joins the comp
 \end{lstlisting}
 where:
 \begin{itemize}
-\item \ct{TYPE_ID} is a character string that indicates the type of component that the namelist group is defining.   \ct{TYPE_ID} can be \ct{DUCT}, \ct{NODE}, \ct{FAN}, \ct{FILTER}, \ct{AIRCOIL}, or \ct{LEAK} (see ~Sec.~\ref{info:local_leakage}). 
+\item \ct{TYPE_ID} is a character string that indicates the type of component that the namelist group is defining.   \ct{TYPE_ID} can be \ct{DUCT}, \ct{NODE}, \ct{FAN}, \ct{FILTER}, \ct{AIRCOIL}, or \ct{LEAK} (see ~Sec.~\ref{info:local_leakage}).
 \item \ct{ID} is a character string giving a name to the component.  The name must be unique amongst all other components of that type; however, the same name can be given to components of different types (i.e., a duct and a node can have the same name but two ducts cannot).
 \end{itemize}
 A number of examples of simple HVAC systems are given in the HVAC folder of the sample cases and are discussed in the FDS Verification Guide.
@@ -4700,8 +4700,7 @@ The only instance where detailed liquid properties are needed is when defining a
 
 \subsubsection{Prandtl Number}
 
-The Prandtl number for a gas species can be specified using \ct{PR_GAS} on \ct{SPEC}. If no value is given, the default value of \ct{PR} on \ct{MISC} will be used. If
-\ct{PR_GAS} is defined for a known species, it will override the existing value.
+The Prandtl number for a gas species can be specified using \ct{PR_GAS} on \ct{SPEC}. If no value is given, the default value of \ct{PR_T} on \ct{MISC} will be used. If \ct{PR_GAS} is defined for a known species, this will override the database value.
 
 \subsection{Air}
 \label{info:AIR}
@@ -4999,6 +4998,17 @@ Unless you are performing a Direct Numerical Simulation (DNS), the reaction rate
 \label{eq:edc_mix}
 \end{equation}
 Here, $\tau_{\rm mix}$ is the mixing time scale. The change in mass of a species is found from the combination of mixing and the production/destruction rate found from the chemical reaction. If a cell is initially unmixed, $\zeta_0=1$ by default, then combustion is considered non-premixed within the grid cell.  In this case, the fuel and air are considered completely separate at the start of the time step and must mix together before they burn.  This means if the mixing is slow enough, that unburned fuel may exist at the end of the time step even if sufficient oxygen is present in the grid cell to burn all the fuel. If the cell is initially fully mixed, $\zeta_0=0$, then the combustion is considered premixed (e.g., equivalent to infinitely fast mixing). You can set the amount of mixing in each cell at the beginning of every time step using the parameter \ct{INITIAL_UNMIXED_FRACTION} on the \ct{COMB} line.
+
+
+Setting \ct{INITIAL_UNMIXED_FRACTION=0} often leads to instabilities.  It may be useful to ramp the initial unmixed fraction in time to get over the initial steep transient for ignition.  The example below starts the calculation with the default \ct{INITIAL_UNMIXED_FRACTION=1}, then ramps it down to 0 within a second and holds it there for the remainder of the calculation.
+\begin{lstlisting}
+&COMB RAMP_ZETA_0='zeta_0 ramp' /
+
+&RAMP ID='zeta_0 ramp', T=0, F=1/
+&RAMP ID='zeta_0 ramp', T=1, F=0/
+&RAMP ID='zeta_0 ramp', T=..., F=0/
+\end{lstlisting}
+
 
 The mixing time, $\tau_{\rm mix}$, is a function of the the level of turbulence in the neighborhood of the point of interest. However, you may override the calculation of $\tau_{\rm mix}$ by setting a \ct{FIXED_MIX_TIME} (s) on the \ct{COMB} line. Alternatively, you can bound the computed value of $\tau_{\rm mix}$ by setting a lower bound \ct{TAU_CHEM} and/or an upper bound \ct{TAU_FLAME} on the \ct{COMB} line.
 
@@ -7159,17 +7169,19 @@ The Particle Model and Boundary Fuel Model use the same basic pyrolysis model (S
 \section{Thermal Degradation Model for Vegetation}
 \label{vegetation_model}
 
+This section includes a relatively simple description of the thermal decomposition of a vegetative fuel. The FDS Github repository contains \href{https://github.com/firemodels/fds/blob/master/Utilities/Input_File_Tools/vegetation_chemistry.py}{a useful calculation script} for converting basic information about the vegetation into FDS input parameters.
+
 \subsection{Required Information}
 \label{veg_pyrolysis_gas_phase}
 
 To describe the solid and gas phase chemistry of wood or vegetation pyrolysis/combustion in FDS, the following information must be assumed or measured:
 \begin{enumerate}
 \item The elemental composition of the dry vegetation. Dry wood has an elemental composition (by mass) of approximately $Y_{\rm C}=0.50$ carbon, $Y_{\rm H}=0.06$ hydrogen, $Y_{\rm O}=0.44$ oxygen, and trace amounts of inorganics~\cite{Rowell:USFS_Handbook}. A global survey of a wide range of vegetation suggests that the average carbon mass fraction is approximately 0.47~\cite{Ma:BGS2018}.
-\item The char yield, $\nu_{\rm char}$, defined as the fraction of the dry mass that remains after complete anaerobic pyrolysis,
-which is specified with the parameter \ct{NU_MATL} on the \ct{MATL} line that describes the Dry Vegetation. The character string \ct{MATL_ID} on the same \ct{MATL} line indicates the name of the char. 
+\item The char yield, $\nu_{\rm char}$, defined as the fraction of the mass of dry vegetation that remains after complete anaerobic pyrolysis, which is specified with the parameter \ct{NU_MATL} on the \ct{MATL} line that describes the Dry Vegetation. The character string \ct{MATL_ID} on the same \ct{MATL} line indicates the name of the char.
 \item The ash yield, $\nu_{\rm ash}$, defined as the fraction of the char mass that remains after complete oxidation, which is specified by \ct{NU_MATL} on the \ct{MATL} line describing the char.
-\item The elemental composition of char in terms of the mass fraction of carbon, $Y_{\rm C,char}$, oxygen, $Y_{\rm O,char}$, and inorganics (ash).
-\item The effective molecular weight, $W_{\rm pyr}$, of the fuel gas, or {\em pyrolyzate}, which is taken as a single composite gas species. Preliminary measurments~\cite{Tripi:INTERFLAM2025} suggest that the effective molecular weight of wood pyrolyzate is approximately 25~g/mol.
+\item The elemental composition of char in terms of the mass fraction of carbon, $Y_{\rm C,char}$, oxygen, $Y_{\rm O,char}$, and inorganics (ash). These values are not directly listed in the FDS input file, but rather determine the mass of oxygen that is required to oxidize a unit mass of char. In the formulae below, only the ratio of these two values is of importance.
+\item The energy released per unit mass of oxygen consumed, $E$ (kJ/kg), in the gas phase reaction of the vegetation pyrolyzate. This value is typically taken as $13\,100$~kJ/kg, but may vary for different varieties of vegetation. This value is used in calculation of the gas phase \ct{HEAT_OF_COMBUSTION}.
+\item The effective molecular weight, $W_{\rm pyr}$, of the fuel gas, or {\em pyrolyzate}, which is taken as a single composite gas species. Preliminary measurments~\cite{Tripi:INTERFLAM2025} suggest that the effective molecular weight of wood pyrolyzate is approximately 25~g/mol. This parameter is not directly input in the FDS input file; rather, the values ${\rm x''}$, ${\rm y''}$, and ${\rm z''}$ computed below are input as \ct{C}, \ct{H}, and \ct{O}, respectively, on the \ct{REAC} or \ct{SPEC} line.
 \end{enumerate}
 
 \subsection{Basic Pyrolysis Reactions}
@@ -7183,14 +7195,14 @@ It is assumed that the Dry Vegetation has an effective molecular formula C$_{\rm
    {\rm z} = \frac{Y_{\rm O}'/16}{Y_{\rm C}'/12+Y_{\rm H}'+Y_{\rm O}'/16+\nu_{\rm ash}\nu_{\rm char}} \quad &;& \quad
    Y_{\rm O}' = \frac{Y_{\rm O}(1-\nu_{\rm ash}\nu_{\rm char})}{Y_{\rm C}+Y_{\rm H}+Y_{\rm O}} \\[.1in]
 \end{eqnarray}
-The prime symbol here indicates a slight adjustment made to the elemental mass fractions such that the masses of oxygen, hydrogem, oxygen and inorganic compounds sum to one. 
+The prime symbol here indicates a slight adjustment made to the elemental mass fractions such that the masses of oxygen, hydrogem, oxygen and inorganic compounds sum to one.
 
 \paragraph{Endothermic moisture evaporation}
 
 \be
  {\rm Wet\ Vegetation} \rightarrow \nu_{\rm moist} \, {\rm Moisture} + (1-\nu_{\rm moist}) \, {\rm Dry\ Vegetation} \quad ; \quad \nu_{\rm moist} = \frac{M}{1+M} \label{water_reac}
 \ee
-$M$ is the vegetation {\em moisture content} or {\em moisture fraction} determined on a dry weight basis, specified with \ct{MOISTURE_CONTENT} on the \ct{SURF} line that describes the vegetation. 
+$M$ is the vegetation {\em moisture content} or {\em moisture fraction} determined on a dry weight basis, specified with \ct{MOISTURE_CONTENT} on the \ct{SURF} line that describes the vegetation.
 
 \paragraph{Endothermic pyrolysis of Dry Vegetation}
 
@@ -7199,7 +7211,7 @@ $M$ is the vegetation {\em moisture content} or {\em moisture fraction} determin
 \ee
 \be
    {\rm x}' = \frac{\nu_{\rm char} \, W_{\rm veg} \, (1-\nu_{\rm ash})}{12 \, (1+Y_{\rm O,char}/Y_{\rm C,char})}  \quad ; \quad
-   {\rm z}' = \frac{12 \, {\rm x'} \, Y_{\rm O,char}}{16 \, Y_{\rm C,char}} 
+   {\rm z}' = \frac{12 \, {\rm x'} \, Y_{\rm O,char}}{16 \, Y_{\rm C,char}}
 \ee
 \be
    \nu_{\rm pyr} = \frac{ 12 ({\rm x-x'}) + {\rm y} + 16 ({\rm z-z'})}{W_{\rm pyr} } \quad ; \quad
@@ -7220,7 +7232,7 @@ Note that $W_{\rm veg}$ and $\nu_{\rm pyr}$ are simply for bookkeeping and play 
 
 \be
    \nu_{\rm O_2} = \frac{\nu_{\rm O_2,char} \, \nu_{\rm char} \, W_{\rm veg}}{W_{\rm O_2}}   \quad ; \quad
-   \nu_{\rm CO_2} =  \frac{(1+ \nu_{\rm O_2,char} - \nu_{\rm ash}) \, \nu_{\rm char} \, W_{\rm veg}}{W_{\rm CO_2}}  
+   \nu_{\rm CO_2} =  \frac{(1+ \nu_{\rm O_2,char} - \nu_{\rm ash}) \, \nu_{\rm char} \, W_{\rm veg}}{W_{\rm CO_2}}
 \ee
 \be
    \nu_{\rm O_2,char} = \frac{W_{\rm O_2} \, \nu_{\rm char} \, W_{\rm veg} \, (1-\nu_{\rm ash}) - W_{\rm CO_2} \, 16 {\rm z'} }{ (W_{\rm CO_2}-W_{\rm O_2}) \nu_{\rm char} \, W_{\rm veg} }
@@ -8987,7 +8999,7 @@ Options for the \ct{TURBULENCE_MODEL} on the \ct{MISC} line are listed in Table~
    k_{\hbox{\tiny LES}} = \frac{\mu_{\hbox{\tiny LES}} \, c_p}{\PR_{\rm t}}
    \quad ; \quad  (\rho D)_{\hbox{\tiny LES}} =\frac{\mu_{\hbox{\tiny LES}}}{\SC_{\rm t}}
 \ee
-The turbulent Prandtl number $\PR_t$ and the turbulent Schmidt number $\SC_t$ are assumed to be constant for a given scenario. Although it is not recommended for most calculations, you can modify $\PR_{\rm t}=0.5$, and $\SC_{\rm t}=0.5$ via the parameters \ct{PR}, and \ct{SC} on the \ct{MISC} line. A more detailed discussion of these parameters is given in the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
+The turbulent Prandtl number $\PR_t$ and the turbulent Schmidt number $\SC_t$ are assumed to be constant for a given scenario. Although it is not recommended for most calculations, you can modify $\PR_{\rm t}=0.5$, and $\SC_{\rm t}=0.5$ via the parameters \ct{PR_T}, and \ct{SC_T} on the \ct{MISC} line. A more detailed discussion of these parameters is given in the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 
 \begin{table}[ht]
 \caption[Turbulence model options]{Turbulence model options.}
@@ -8995,7 +9007,7 @@ The turbulent Prandtl number $\PR_t$ and the turbulent Schmidt number $\SC_t$ ar
 \centering
 \begin{tabular}{|lll|}
 \hline
-\ct{TURBULENCE_MODEL} \hfill  & Description    \hfill                                   & Coefficient(s)  \hfill  \\ \hline
+\ct{TURBULENCE_MODEL} \hfill   & Description    \hfill                                   & Coefficient(s)  \hfill  \\ \hline
 \ct{'CONSTANT SMAGORINSKY'}    & Constant-coefficient Smagorinsky \cite{Smagorinsky:1}   & \ct{C_SMAGORINSKY}  \\
 \ct{'DYNAMIC SMAGORINSKY'}     & Dynamic Smagorinsky \cite{Germano:1991,Moin:1991}       & None                  \\
 \ct{'DEARDORFF'}               & Deardorff \cite{Deardorff:1980,Pope:2000}               & \ct{C_DEARDORFF}    \\
@@ -12006,7 +12018,7 @@ Keyword             & Type     & Description                      & Units       
 \hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
-\ct{CLIP_DT_RESTRICTIONS_MAX}   & Integer        & Section~\ref{info:CLIP:dens}                 &            & 5      \\ \hline
+\ct{CLIP_DT_RESTRICTIONS_MAX}     & Integer        & Section~\ref{info:CLIP:dens}                 &            & 5      \\ \hline
 \ct{MAXIMUM_DENSITY}              & Real           & Section~\ref{info:CLIP:dens}                 & kg/m$^3$   &        \\ \hline
 \ct{MAXIMUM_TEMPERATURE}          & Real           & Section~\ref{info:CLIP:temp}                 & $^\circ$C  &        \\ \hline
 \ct{MINIMUM_DENSITY}              & Real           & Section~\ref{info:CLIP:dens}                 & kg/m$^3$   &        \\ \hline
@@ -12032,26 +12044,27 @@ Keyword             & Type     & Description                      & Units       
 \hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
-\ct{CHECK_REALIZABILITY}                           & Logical    & Section~\ref{info:chem_integration}          &           & \ct{F}              \\ \hline
+\ct{CHECK_REALIZABILITY}                         & Logical    & Section~\ref{info:chem_integration}          &           & \ct{F}              \\ \hline
 \ct{COMPUTE_ADIABATIC_FLAME_TEMPERATURE}         & Logical    & Section~\ref{info:extinction}                &           & \ct{F}              \\ \hline
 \ct{DO_CHEM_LOAD_BALANCE}                        & Logical    & Section~\ref{info:chem_integration}          &           & \ct{F}              \\ \hline
-\ct{EQUIV_RATIO_CHECK}                            & Logical    & Section~\ref{info:chem_integration}          &           & \ct{T}              \\ \hline
-\ct{EXTINCTION_MODEL}                              & Character  & Section~\ref{info:extinction}                &           &                      \\ \hline
-\ct{FINITE_RATE_MIN_TEMP}                        & Real       & Section~\ref{info:finite}                    & $^\circ$C & -273.15              \\ \hline
-\ct{FIXED_MIX_TIME}                               & Real       & Section~\ref{info:turbulent_combustion}      &  s        &                      \\ \hline
-\ct{FREE_BURN_TEMPERATURE}                        & Real       & Section~\ref{info:extinction}                & $^\circ$C &  600                 \\ \hline
-\ct{INITIAL_UNMIXED_FRACTION}                     & Real       & Section~\ref{info:turbulent_combustion}      &           & 1.0                  \\ \hline
-\ct{MAX_CHEMISTRY_SUBSTEPS}                       & Integer    & Section~\ref{info:chem_integration}          &           & 20                   \\ \hline
-\ct{MAX_EQUIV_RATIO}                              & Real       & Section~\ref{info:chem_integration}          &           & 10.0                 \\ \hline
-\ct{MIN_EQUIV_RATIO}                              & Real       & Section~\ref{info:chem_integration}          &           & 0.2.                 \\ \hline
-\ct{N_FIXED_CHEMISTRY_SUBSTEPS}                  & Integer    & Section~\ref{info:chem_integration}          &           & -1                   \\ \hline
-\ct{ODE_SOLVER}                                    & Character  & Section~\ref{info:chem_integration}          &           &                      \\ \hline
-\ct{ODE_MIN_ATOL}                                 & Real       & Section~\ref{info:chem_integration}          &           &                      \\ \hline
-\ct{ODE_REL_ERROR}                                & Real       & Section~\ref{info:chem_integration}          &           &                      \\ \hline
-\ct{SUPPRESSION}                                    & Logical    & Section~\ref{info:extinction}                &           & \ct{T}              \\ \hline
-\ct{TAU_CHEM}                                      & Real       & Section~\ref{info:turbulent_combustion}      &           & 1.E-10               \\ \hline
-\ct{TAU_FLAME}                                     & Real       & Section~\ref{info:turbulent_combustion}      &           & 1.E10                \\ \hline
-\ct{ZZ_MIN_GLOBAL}                                & Real       & Section~\ref{info:finite}                    &           & 1.E-10               \\ \hline
+\ct{EQUIV_RATIO_CHECK}                           & Logical    & Section~\ref{info:chem_integration}          &           & \ct{T}              \\ \hline
+\ct{EXTINCTION_MODEL}                            & Character  & Section~\ref{info:extinction}                &           &                     \\ \hline
+\ct{FINITE_RATE_MIN_TEMP}                        & Real       & Section~\ref{info:finite}                    & $^\circ$C & -273.15             \\ \hline
+\ct{FIXED_MIX_TIME}                              & Real       & Section~\ref{info:turbulent_combustion}      &  s        &                     \\ \hline
+\ct{FREE_BURN_TEMPERATURE}                       & Real       & Section~\ref{info:extinction}                & $^\circ$C &  600                \\ \hline
+\ct{INITIAL_UNMIXED_FRACTION}                    & Real       & Section~\ref{info:turbulent_combustion}      &           & 1.0                 \\ \hline
+\ct{MAX_CHEMISTRY_SUBSTEPS}                      & Integer    & Section~\ref{info:chem_integration}          &           & 20                  \\ \hline
+\ct{MAX_EQUIV_RATIO}                             & Real       & Section~\ref{info:chem_integration}          &           & 10.0                \\ \hline
+\ct{MIN_EQUIV_RATIO}                             & Real       & Section~\ref{info:chem_integration}          &           & 0.2.                \\ \hline
+\ct{N_FIXED_CHEMISTRY_SUBSTEPS}                  & Integer    & Section~\ref{info:chem_integration}          &           & -1                  \\ \hline
+\ct{ODE_SOLVER}                                  & Character  & Section~\ref{info:chem_integration}          &           &                     \\ \hline
+\ct{ODE_MIN_ATOL}                                & Real       & Section~\ref{info:chem_integration}          &           &                     \\ \hline
+\ct{ODE_REL_ERROR}                               & Real       & Section~\ref{info:chem_integration}          &           &                     \\ \hline
+\ct{RAMP_ZETA_0}                                 & Character  & Section~\ref{info:turbulent_combustion}      &           &                     \\ \hline
+\ct{SUPPRESSION}                                 & Logical    & Section~\ref{info:extinction}                &           & \ct{T}              \\ \hline
+\ct{TAU_CHEM}                                    & Real       & Section~\ref{info:turbulent_combustion}      &           & 1.E-5               \\ \hline
+\ct{TAU_FLAME}                                   & Real       & Section~\ref{info:turbulent_combustion}      &           & 1.E10               \\ \hline
+\ct{ZZ_MIN_GLOBAL}                               & Real       & Section~\ref{info:finite}                    &           & 1.E-10              \\ \hline
 \end{longtable}
 
 \vspace{\baselineskip}
@@ -12743,13 +12756,13 @@ Keyword             & Type     & Description                      & Units       
 \endhead
 \ct{AEROSOL_AL2O3}                                & Logical      & Section~\ref{info:RADI_Gas_and_Soot}    &            & \ct{F}           \\ \hline
 \ct{AEROSOL_SCRUBBING}                            & Logical      & Section~\ref{info:scrubbing}            &            & \ct{F}           \\ \hline
-\ct{AGGLOMERATION}                                 & Logical      & Section~\ref{info:agglomeration}        &            & \ct{T}           \\ \hline
+\ct{AGGLOMERATION}                                & Logical      & Section~\ref{info:agglomeration}        &            & \ct{T}           \\ \hline
 \ct{ALIGNMENT_TOLERANCE}                          & Real         & Section~\ref{info:mesh_alignment}       &            & 0.001             \\ \hline
 \ct{BNDF_DEFAULT}                                 & Logical      & Section~\ref{info:BNDF}                 &            & \ct{T}           \\ \hline
 \ct{C_DEARDORFF}                                  & Real         & Section~\ref{info:LES}                  &            & 0.1               \\ \hline
 \ct{CFL_MAX}                                      & Real         & Section~\ref{info:CFL}                  &            & 1.0               \\ \hline
 \ct{CFL_MIN}                                      & Real         & Section~\ref{info:CFL}                  &            & 0.8               \\ \hline
-\ct{CFL_VELOCITY_NORM}                           & Integer      & Section~\ref{info:CFL}                  &            &                   \\ \hline
+\ct{CFL_VELOCITY_NORM}                            & Integer      & Section~\ref{info:CFL}                  &            &                   \\ \hline
 \ct{CHECK_FO}                                     & Logical      & Section~\ref{info:solid_phase_stability}&            & \ct{F}           \\ \hline
 \ct{CHECK_HT}                                     & Logical      & Section~\ref{info:HT}                   &            & \ct{F}           \\ \hline
 \ct{CHECK_VN}                                     & Logical      & Section~\ref{info:VN}                   &            & \ct{T}           \\ \hline
@@ -12758,46 +12771,46 @@ Keyword             & Type     & Description                      & Units       
 \ct{C_SMAGORINSKY}                                & Real         & Section~\ref{info:LES}                  &            & 0.20              \\ \hline
 \ct{C_VREMAN}                                     & Real         & Section~\ref{info:LES}                  &            & 0.07              \\ \hline
 \ct{C_WALE}                                       & Real         & Section~\ref{info:LES}                  &            & 0.60              \\ \hline
-\ct{DEPOSITION}                                    & Logical      & Section~\ref{info:deposition}           &            & \ct{T}           \\ \hline
+\ct{DEPOSITION}                                   & Logical      & Section~\ref{info:deposition}           &            & \ct{T}           \\ \hline
 \ct{EXTERNAL_FILENAME}                            & Character    & Section~\ref{info:external_control}     &            &                   \\ \hline
-\ct{FIXED_LES_FILTER_WIDTH}                     & Real         & Section~\ref{info:LES}                  & m          &                   \\ \hline
+\ct{FIXED_LES_FILTER_WIDTH}                       & Real         & Section~\ref{info:LES}                  & m          &                   \\ \hline
 \ct{FLUX_LIMITER}                                 & Integer      & Section~\ref{info:flux_limiters}        &            & 2                 \\ \hline
 \ct{FREEZE_VELOCITY}                              & Logical      & Section~\ref{info:freeze_velocity}      &            & \ct{F}           \\ \hline
-\ct{GAMMA}                                         & Real         & Section~\ref{gas_species_props}         &            & 1.4               \\ \hline
+\ct{GAMMA}                                        & Real         & Section~\ref{gas_species_props}         &            & 1.4               \\ \hline
 \ct{GRAVITATIONAL_DEPOSITION}                     & Logical      & Section~\ref{info:deposition}           &            & \ct{T}           \\ \hline
 \ct{GRAVITATIONAL_SETTLING}                       & Logical      & Section~\ref{info:deposition}           &            & \ct{T}           \\ \hline
-\ct{GVEC(3)}                                       & Real Array   & Section~\ref{info:GVEC}                 & m/s$^2$    & 0,0,-9.81         \\ \hline
-\ct{H_F_REFERENCE_TEMPERATURE}                  & Real         & Section~\ref{info:enthalpy}             & $^\circ$C  & 25.               \\ \hline
-\ct{HUMIDITY}                                      & Real         & Section~\ref{info:humidity}             & \%         & 40.               \\ \hline
-\ct{HVAC_LOCAL_PRESSURE}                         & Logical      & Section~\ref{info:HVAC}                 &            &  \ct{T}          \\ \hline
-\ct{HVAC_MASS_TRANSPORT_CELL_L}                & Real          & Section ~\ref{info:hvacmasstransport}   & m          &                   \\ \hline
-\ct{HVAC_PRES_RELAX}                             & Real         & Section ~\ref{info:HVAC}                &            & 1.0               \\ \hline
+\ct{GVEC(3)}                                      & Real Array   & Section~\ref{info:GVEC}                 & m/s$^2$    & 0,0,-9.81         \\ \hline
+\ct{H_F_REFERENCE_TEMPERATURE}                    & Real         & Section~\ref{info:enthalpy}             & $^\circ$C  & 25.               \\ \hline
+\ct{HUMIDITY}                                     & Real         & Section~\ref{info:humidity}             & \%         & 40.               \\ \hline
+\ct{HVAC_LOCAL_PRESSURE}                          & Logical      & Section~\ref{info:HVAC}                 &            &  \ct{T}          \\ \hline
+\ct{HVAC_MASS_TRANSPORT_CELL_L}                   & Real         & Section ~\ref{info:hvacmasstransport}   & m          &                   \\ \hline
+\ct{HVAC_PRES_RELAX}                              & Real         & Section ~\ref{info:HVAC}                &            & 1.0               \\ \hline
 \ct{HVAC_QFAN}                                    & Logical      & Section ~\ref{info:HVAC_QFAN}           &            & \ct{F}           \\ \hline
 \ct{IBLANK_SMV}                                   & Logical      & Section~\ref{info:SLCF}                 &            & \ct{T}           \\ \hline
-\ct{I_MAX_TEMP}                                  & Integer      & Section~\ref{info:CLIP:temp}            & K          & 5000              \\ \hline
-\ct{LES_FILTER_TYPE}                             & Character    & Section~\ref{info:LES}                  &            & \ct{'MEAN'}      \\ \hline
-\ct{LEVEL_SET_ELLIPSE}                           & Logical      & Section~\ref{info:level_set}            &            & \ct{T}           \\ \hline
-\ct{LEVEL_SET_MODE}                              & Integer      & Section~\ref{info:level_set}            &            & 0                 \\ \hline
+\ct{I_MAX_TEMP}                                   & Integer      & Section~\ref{info:CLIP:temp}            & K          & 5000              \\ \hline
+\ct{LES_FILTER_TYPE}                              & Character    & Section~\ref{info:LES}                  &            & \ct{'MEAN'}      \\ \hline
+\ct{LEVEL_SET_ELLIPSE}                            & Logical      & Section~\ref{info:level_set}            &            & \ct{T}           \\ \hline
+\ct{LEVEL_SET_MODE}                               & Integer      & Section~\ref{info:level_set}            &            & 0                 \\ \hline
 \ct{MAXIMUM_VISIBILITY}                           & Real         & Section~\ref{info:visibility}           &  m         &  30               \\ \hline
-\ct{MAX_LEAK_PATHS}                              & Integer      & Section~\ref{info:Leaks}                &            &  200              \\ \hline
+\ct{MAX_LEAK_PATHS}                               & Integer      & Section~\ref{info:Leaks}                &            &  200              \\ \hline
 \ct{MAX_RAMPS}                                    & Integer      & Section~\ref{info:RAMP}                 &            &  100              \\ \hline
-\ct{MINIMUM_ZONE_VOLUME}                         & Real         & Section~\ref{info:filling_zones}        &  m$^3$     & 0                 \\ \hline
-\ct{MPI_TIMEOUT}                                 & Real          & Section~\ref{info:Errors}               &  s         & 600.              \\ \hline
-\ct{NEAR_WALL_PARTICLE_INTERPOLATION}            & Logical       & Section~\ref{info:particle_drag}        &            & \ct{F}            \\ \hline
-\ct{NEIGHBOR_SEPARATION_DISTANCE}                & Real         & Section~\ref{info:mesh_separation}      &  m         & 0.                \\ \hline
-\ct{NOISE}                                         & Logical      & Section~\ref{info:NOISE}                &            & \ct{T}           \\ \hline
+\ct{MINIMUM_ZONE_VOLUME}                          & Real         & Section~\ref{info:filling_zones}        &  m$^3$     & 0                 \\ \hline
+\ct{MPI_TIMEOUT}                                  & Real         & Section~\ref{info:Errors}               &  s         & 600.              \\ \hline
+\ct{NEAR_WALL_PARTICLE_INTERPOLATION}             & Logical      & Section~\ref{info:particle_drag}        &            & \ct{F}            \\ \hline
+\ct{NEIGHBOR_SEPARATION_DISTANCE}                 & Real         & Section~\ref{info:mesh_separation}      &  m         & 0.                \\ \hline
+\ct{NOISE}                                        & Logical      & Section~\ref{info:NOISE}                &            & \ct{T}           \\ \hline
 \ct{NOISE_VELOCITY}                               & Real         & Section~\ref{info:NOISE}                &  m/s       & 0.005             \\ \hline
-\ct{NO_PRESSURE_ZONES}                           & Logical      & Section~\ref{info:ZONE_Basics}          &            & \ct{F}           \\ \hline
+\ct{NO_PRESSURE_ZONES}                            & Logical      & Section~\ref{info:ZONE_Basics}          &            & \ct{F}           \\ \hline
 \ct{NORTH_BEARING}                                & Real         & Section~\ref{info:earth}                & deg.       &                   \\ \hline
 \ct{NUCLEATION_SITES}                             & Real         & Section~\ref{info:condensation}         & \#/m$^3$   & $1\times 10^7$    \\ \hline
 \ct{ORIGIN_LAT}                                   & Real         & Section~\ref{info:earth}                & deg.       &                   \\ \hline
 \ct{ORIGIN_LON}                                   & Real         & Section~\ref{info:earth}                & deg.       &                   \\ \hline
-\ct{OVERWRITE}                                     & Logical      & Section~\ref{info:OVERWRITE}            &            & \ct{T}           \\ \hline
+\ct{OVERWRITE}                                    & Logical      & Section~\ref{info:OVERWRITE}            &            & \ct{T}           \\ \hline
 \ct{PARTICLE_CFL}                                 & Logical      & Section~\ref{info:PART_Stability}       &            & \ct{F}           \\ \hline
-\ct{PARTICLE_CFL_MAX}                            & Real         & Section~\ref{info:PART_Stability}       &            & 1.0               \\ \hline
-\ct{PARTICLE_CFL_MIN}                            & Real         & Section~\ref{info:PART_Stability}       &            & 0.8               \\ \hline
+\ct{PARTICLE_CFL_MAX}                             & Real         & Section~\ref{info:PART_Stability}       &            & 1.0               \\ \hline
+\ct{PARTICLE_CFL_MIN}                             & Real         & Section~\ref{info:PART_Stability}       &            & 0.8               \\ \hline
 \ct{POROUS_FLOOR}                                 & Logical      & Section~\ref{info:particle_removal}     &            & \ct{T}           \\ \hline
-\ct{PR}                                            & Real         & Section~\ref{info:LES}                  &            & 0.5               \\ \hline
+\ct{PR_T}                                         & Real         & Section~\ref{info:LES}                  &            & 0.5               \\ \hline
 \ct{P_INF}                                        & Real         & Section~\ref{info:MISC_Basics}          & Pa         & 101325            \\ \hline
 \ct{RAMP_GX}                                      & Character    & Section~\ref{info:GVEC}                 &            &                   \\ \hline
 \ct{RAMP_GY}                                      & Character    & Section~\ref{info:GVEC}                 &            &                   \\ \hline
@@ -12814,10 +12827,10 @@ Keyword             & Type     & Description                      & Units       
 \ct{RESTART}                                      & Logical      & Section~\ref{info:restart}              &            & \ct{F}           \\ \hline
 \ct{RESTART_CHID}                                 & Character    & Section~\ref{info:restart}              &            & \ct{CHID}        \\ \hline
 \ct{RND_SEED}                                     & Integer      & Section~\ref{info:NOISE}                &            &                   \\ \hline
-\ct{SC}                                           & Real         & Section~\ref{info:LES}                  &            & 0.5               \\ \hline
+\ct{SC_T}                                         & Real         & Section~\ref{info:LES}                  &            & 0.5               \\ \hline
 \ct{SIMULATION_MODE}                              & Character    & Section~\ref{Sim_Mode}                  &            & \ct{'VLES'}      \\ \hline
 \ct{SMOKE_ALBEDO}                                 & Real         & Reference~\cite{Smokeview_Users_Guide}  &            & 0.3               \\ \hline
-\ct{SOLID_PHASE_ONLY}                            & Logical      & Section~\ref{solid_phase_verification}  &            & \ct{F}           \\ \hline
+\ct{SOLID_PHASE_ONLY}                             & Logical      & Section~\ref{solid_phase_verification}  &            & \ct{F}           \\ \hline
 \ct{SOOT_DENSITY}                                 & Real         & Section~\ref{info:deposition}           &            & 1800              \\ \hline
 \ct{SOOT_OXIDATION}                               & Logical      & Section~\ref{info:deposition}           &            & \ct{F}           \\ \hline
 \ct{TAU_DEFAULT}                                  & Real         & Section~\ref{info:RAMP_Time}            & s          & 1.                \\ \hline
@@ -12826,16 +12839,16 @@ Keyword             & Type     & Description                      & Units       
 \ct{THERMOPHORETIC_DEPOSITION}                    & Logical      & Section~\ref{info:deposition}           &            & \ct{T}           \\ \hline
 \ct{THERMOPHORETIC_SETTLING}                      & Logical      & Section~\ref{info:deposition}           &            & \ct{T}           \\ \hline
 \ct{THICKEN_OBSTRUCTIONS}                         & Logical      & Section~\ref{info:OBST_Basics}          &            & \ct{F}           \\ \hline
-\ct{TMPA}                                          & Real         & Section~\ref{info:MISC_Basics}          & $^\circ$C  & 20.               \\ \hline
+\ct{TMPA}                                         & Real         & Section~\ref{info:MISC_Basics}          & $^\circ$C  & 20.               \\ \hline
 \ct{TURBULENCE_MODEL}                             & Character    & Section~\ref{info:LES}                  &            & \ct{'DEARDORFF'} \\ \hline
 \ct{TURBULENT_DEPOSITION}                         & Logical      & Section~\ref{info:deposition}           &            & \ct{T}           \\ \hline
-\ct{UNFREEZE_TIME}                               & Real          & Section~\ref{info:FREZ}                 &            &                  \\ \hline
-\ct{VERBOSE}                                       & Logical      & Section~\ref{out:file}                  &            & \ct{F}            \\ \hline
+\ct{UNFREEZE_TIME}                                & Real         & Section~\ref{info:FREZ}                 &            &                  \\ \hline
+\ct{VERBOSE}                                      & Logical      & Section~\ref{out:file}                  &            & \ct{F}            \\ \hline
 \ct{VISIBILITY_FACTOR}                            & Real         & Section~\ref{info:visibility}           &            & 3                 \\ \hline
 \ct{VN_MAX}                                       & Real         & Section~\ref{info:VN}                   &            & 1.0               \\ \hline
 \ct{VN_MIN}                                       & Real         & Section~\ref{info:VN}                   &            & 0.8               \\ \hline
-\ct{Y_CO2_INFTY}                                 & Real         & Section~\ref{info:simple_chemistry}     &  kg/kg     &                   \\ \hline
-\ct{Y_O2_INFTY}                                  & Real         & Section~\ref{info:simple_chemistry}     &  kg/kg     &                   \\ \hline
+\ct{Y_CO2_INFTY}                                  & Real         & Section~\ref{info:simple_chemistry}     &  kg/kg     &                   \\ \hline
+\ct{Y_O2_INFTY}                                   & Real         & Section~\ref{info:simple_chemistry}     &  kg/kg     &                   \\ \hline
 \end{longtable}
 
 
