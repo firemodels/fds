@@ -2705,7 +2705,7 @@ PROF_LOOP: DO N=1,N_PROF
 
    ! Check for potential errors
 
-   IF (SF%THERMAL_BC_INDEX/=THERMALLY_THICK .AND. (PF%IOR/=0 .OR. (PF%IOR==0 .AND. PF%MESH==NM))) THEN
+   IF (SF%THERMAL_BC_INDEX/=THERMALLY_THICK) THEN
       WRITE(LU_ERR,'(A,I0,A)') 'ERROR(430): PROF ',N,' must be associated with a heat-conducting surface.'
       STOP_STATUS = SETUP_STOP
       RETURN
@@ -2720,7 +2720,7 @@ PROF_LOOP: DO N=1,N_PROF
          ENDIF
       ENDDO
       IF (.NOT. SUCCESS) THEN
-         WRITE(LU_ERR,'(A,I3,5A)') 'ERROR PROF ',N,'. MATL_ID ',TRIM(MATERIAL(PF%MATL_INDEX)%ID),&
+         WRITE(LU_ERR,'(A,I3,5A)') 'ERROR(448): PROF ',N,'. MATL_ID ',TRIM(MATERIAL(PF%MATL_INDEX)%ID),&
                               ' not part of surface type ',TRIM(SF%ID),' at the profile location.'
          STOP_STATUS = SETUP_STOP
          RETURN

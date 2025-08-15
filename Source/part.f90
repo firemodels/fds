@@ -1513,7 +1513,6 @@ IF (IN%ID/='null') THEN
             CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.)
          ENDIF
          PF%LP_TAG = PARTICLE_TAG
-         PF%PART_CLASS_INDEX = ILPC
          PF%MESH = NM
          PF%X = BC%X
          PF%Y = BC%Y
