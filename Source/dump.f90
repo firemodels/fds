@@ -1534,6 +1534,7 @@ TYPE (PATCH_TYPE), POINTER :: EP
 INTEGER :: STR_GATHER_LEN
 INTEGER, ALLOCATABLE, DIMENSION(:) :: RECV_USE_LEN,RECV_USE_OFF,RECV_COUNTS
 CHARACTER(LEN=:), ALLOCATABLE :: STR_GATHER
+INTEGER SHOW_BNDF(-3:3)
 
 ! If this is a RESTART case but an old .smv file does not exist, shutdown with an ERROR.
 
@@ -2278,12 +2279,23 @@ MESH_LOOP: DO NM=1,NMESHES
    ENDDO
    DO N=1,M%N_OBST
       OB => M%OBSTRUCTION(N)
+      DO NN=-3,3
+        IF (NN.EQ.0) CYCLE
+        SHOW_BNDF(NN)=0
+        IF (OB%SHOW_BNDF(NN)) SHOW_BNDF(NN) = 1
+      END DO
       IF (OB%COLOR_INDICATOR/=-3) THEN
-         WRITE(MYSTR,'(8I5,A,L1,1X,6I2)') OB%I1,OB%I2,OB%J1,OB%J2,OB%K1,OB%K2,OB%COLOR_INDICATOR,OB%TYPE_INDICATOR, &
-                                          ' ! ',OB%REMOVABLE,OB%EXPOSED_FACE_INDEX(1:6)
+         WRITE(MYSTR,'(8I5,A,L1,1X,6I2,1X,6I2)') OB%I1,OB%I2,OB%J1,OB%J2,OB%K1,OB%K2,OB%COLOR_INDICATOR,OB%TYPE_INDICATOR, &
+                                          ' ! ',OB%REMOVABLE,OB%EXPOSED_FACE_INDEX(1:6), &
+                                                SHOW_BNDF(-1),SHOW_BNDF(1), &
+                                                SHOW_BNDF(-2),SHOW_BNDF(2), &
+                                                SHOW_BNDF(-3),SHOW_BNDF(3)
       ELSE
-         WRITE(MYSTR,'(8I5,4F13.5,A,L1,1X,6I2)') OB%I1,OB%I2,OB%J1,OB%J2,OB%K1,OB%K2,OB%COLOR_INDICATOR,OB%TYPE_INDICATOR, &
-                                          REAL(OB%RGB,FB)/255._FB, OB%TRANSPARENCY,' ! ',OB%REMOVABLE,OB%EXPOSED_FACE_INDEX(1:6) 
+         WRITE(MYSTR,'(8I5,4F13.5,A,L1,1X,6I2,1X,6I2)') OB%I1,OB%I2,OB%J1,OB%J2,OB%K1,OB%K2,OB%COLOR_INDICATOR,OB%TYPE_INDICATOR, &
+                                          REAL(OB%RGB,FB)/255._FB, OB%TRANSPARENCY,' ! ',OB%REMOVABLE,OB%EXPOSED_FACE_INDEX(1:6), &
+                                          SHOW_BNDF(-1),SHOW_BNDF(1), &
+                                          SHOW_BNDF(-2),SHOW_BNDF(2), &
+                                          SHOW_BNDF(-3),SHOW_BNDF(3)
       ENDIF
       CALL ADDSTR
    ENDDO
