@@ -56,7 +56,8 @@ INTEGER, ALLOCATABLE, DIMENSION(:)   :: JM_MAT_Z
 REAL(EB), ALLOCATABLE, DIMENSION(:)  :: F_Z, RZ_Z, RZ_ZS, P_0_CV, TMP_0_CV, RHO_0_CV, ZCEN_CV
 REAL(EB), ALLOCATABLE, DIMENSION(:,:):: F_Z0, RZ_Z0
 
-REAL(EB), DIMENSION(0:3,0:3,0:3) :: U_TEMP,Z_TEMP,F_TEMP
+REAL(EB), DIMENSION(0:3,0:3,0:3) :: U_TEMP,F_TEMP
+REAL(EB), DIMENSION(-1:3,-1:3,-1:3) :: Z_TEMP
 
 ! Types of interpolation:
 INTEGER, PARAMETER :: CC_LINEAR_INTERPOLATION    = 1
@@ -11252,7 +11253,7 @@ IF (PREDICTOR) THEN
       ! Store RHO*ZZ values at step n:
       IF (.NOT.ALLOCATED(MESHES(NM)%RHO_ZZN)) ALLOCATE(MESHES(NM)%RHO_ZZN(0:IBP1,0:JBP1,0:KBP1,N_TOTAL_SCALARS))
       DO N=1,N_TOTAL_SCALARS
-         MESHES(NM)%RHO_ZZN(:,:,:,N) = RHO(:,:,:)*ZZ(:,:,:,N)
+         MESHES(NM)%RHO_ZZN(0:IBP1,0:JBP1,0:KBP1,N) = RHO(0:IBP1,0:JBP1,0:KBP1)*ZZ(0:IBP1,0:JBP1,0:KBP1,N)
       ENDDO
 
       ! Second cut-cells, these variables being filled are only used for exporting to slices and applying Boundary

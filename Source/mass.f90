@@ -24,7 +24,8 @@ USE PHYSICAL_FUNCTIONS, ONLY: GET_MOLECULAR_WEIGHT
 
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: TNOW,MW_F,MW_G,ZZ_GET(1:N_TRACKED_SPECIES)
-REAL(EB), DIMENSION(0:3,0:3,0:3) :: U_TEMP,Z_TEMP,F_TEMP
+REAL(EB), DIMENSION(0:3,0:3,0:3) :: U_TEMP,F_TEMP
+REAL(EB), DIMENSION(-1:3,-1:3,-1:3) :: Z_TEMP
 REAL(EB), PARAMETER :: DUMMY=0._EB
 INTEGER  :: I,J,K,N,IOR,IW,IIG,JJG,KKG,II,JJ,KK,IC
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,RHOP
@@ -62,12 +63,12 @@ IF (PREDICTOR) DT_RESTRICT_COUNT = 0
 
 SPECIES_LOOP: DO N=1,N_TOTAL_SCALARS
 
-   RHO_Z_P=>WORK1
+   RHO_Z_P=>WORK_PAD
 
    !$OMP PARALLEL DO
-   DO K=0,KBP1
-      DO J=0,JBP1
-         DO I=0,IBP1
+   DO K=-1,KBP1+1
+      DO J=-1,JBP1+1
+         DO I=-1,IBP1+1
             RHO_Z_P(I,J,K) = RHOP(I,J,K)*ZZP(I,J,K,N)
          ENDDO
       ENDDO
@@ -182,12 +183,12 @@ FACE_CORRECTION_IF: IF (FLUX_LIMITER_MW_CORRECTION) THEN
 
    ! Repeat the above for DENSITY
 
-   RHO_RMW=>WORK1
+   RHO_RMW=>WORK_PAD
 
    !$OMP PARALLEL DO PRIVATE(ZZ_GET,MW_G) SCHEDULE(STATIC)
-   DO K=0,KBP1
-      DO J=0,JBP1
-         DO I=0,IBP1
+   DO K=-1,KBP1+1
+      DO J=-1,JBP1+1
+         DO I=-1,IBP1+1
             ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K,1:N_TRACKED_SPECIES)
             CALL GET_MOLECULAR_WEIGHT(ZZ_GET,MW_G)
             RHO_RMW(I,J,K) = RHOP(I,J,K)/MW_G
@@ -444,7 +445,9 @@ CASE(.TRUE.) PREDICTOR_STEP
 
    ! Add gas production source term
 
-   IF (ALLOCATED(MESHES(NM)%M_DOT_PPP)) ZZS = ZZS + DT*M_DOT_PPP
+   IF (ALLOCATED(MESHES(NM)%M_DOT_PPP)) ZZS(0:IBP1,0:JBP1,0:KBP1,1:N_TRACKED_SPECIES) = &
+                                        ZZS(0:IBP1,0:JBP1,0:KBP1,1:N_TRACKED_SPECIES) + &
+                                        DT*M_DOT_PPP(0:IBP1,0:JBP1,0:KBP1,1:N_TRACKED_SPECIES)
 
    ! Manufactured solution
 
@@ -605,7 +608,8 @@ CASE(.FALSE.) PREDICTOR_STEP  ! CORRECTOR step
    ! Add gas production source term
 
    IF (ALLOCATED(MESHES(NM)%M_DOT_PPP)) THEN
-      ZZ = ZZ + 0.5_EB*DT*M_DOT_PPP
+      ZZ(0:IBP1,0:JBP1,0:KBP1,1:N_TRACKED_SPECIES) = ZZ(0:IBP1,0:JBP1,0:KBP1,1:N_TRACKED_SPECIES) + &
+                                                     0.5_EB*DT*M_DOT_PPP(0:IBP1,0:JBP1,0:KBP1,1:N_TRACKED_SPECIES)
       IF (.NOT. CC_IBM) THEN ! We will use these for Regular cells in cut-cell region in CC_DENSITY.
          M_DOT_PPP = 0._EB
          D_SOURCE  = 0._EB
