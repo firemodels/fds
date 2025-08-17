@@ -1596,6 +1596,31 @@ Plots of $u(x)$, $\rho(x)$, $\tp(x)$, and $T(x)$ are shown in Fig.~\ref{tunnel_l
 \label{tunnel_linear_cp_plots}
 \end{figure}
 
+\FloatBarrier
+
+
+\section{Discharge Coefficient}
+\label{thick_orifice}
+
+A useful way to assess the way the model handles velocity boundary conditions at corners is to examine flows through an orifice. Consider a 2~m square duct with a 1~m square orifice. The orifice is $l=0.4$~m wide and has a hydraulic diameter $D_{\rm h}=1$~m. A uniform flow of $w_1=0.5$~m/s is pushed through the duct. According to an empirical correlation presented in Diagram~4-15 of the Handbook of Hydraulic Resistance by Idelchik~\cite{Idelchik:1}, the pressure rise behind the orifice is given by
+\be
+   \Delta p = \frac{1}{2} \zeta_1 \, \rho \, w_1^2 \approx 4.09 \; \mbox{Pa}
+\ee
+where $\zeta_1=27.4$ and the density of air is $\rho=1.195$~kg/m$^3$. Figure~\ref{fig:thick_orifice} displays the pressure along the duct, where the flow is from left to right.
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/thick_orifice}
+\caption[Results of the \ct{thick_orifice} case]{Pressure rise behind an square, thick orifice in a duct.}
+\label{fig:thick_orifice}
+\end{figure}
+
+
+
+
+
+
+
 \chapter{Turbulence}
 
 
