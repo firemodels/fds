@@ -39,7 +39,7 @@ jobs:
           mkl
         prune: false       
          
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: build fds debug
       run: |
@@ -74,7 +74,7 @@ jobs:
           mkl@2025.1.0
         prune: false  
 
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - name: build fds debug
       run: |
         source /opt/intel/oneapi/setvars.sh
@@ -96,7 +96,7 @@ jobs:
     runs-on: [ubuntu-latest]
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - uses: actions/setup-python@v5
       with:

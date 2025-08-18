@@ -2,13 +2,14 @@
 
 &MULT ID='m1', DX=0.60,DY=0.60,DZ=0.60,
       I_UPPER=1,J_UPPER=1,K_UPPER=2 /  12 meshes
-&MESH IJK=30,30,30, XB=-0.60,-0.00,-0.60,-0.00,-0.370,0.230, MULT_ID='m1' /
+&MESH IJK=30,30,30, XB=-0.60,-0.00,-0.60,-0.00,-0.380,0.220, MULT_ID='m1' /
 
 &TIME T_END=65/
 
 &DUMP DT_DEVC=1, DT_HRR=1 /
 
 &MISC SIMULATION_MODE='LES' /
+&PRES SOLVER='ULMAT HYPRE' /
 
 ! note: propane 2-step chemistry developed from
 ! &REAC FUEL='PROPANE', CO_YIELD=0.006, SOOT_YIELD=0.026, N_SIMPLE_CHEMISTRY_REACTIONS=2, FUEL_C_TO_CO_FRACTION=0.85/ Tewarson, SFPE Handbook 1st Ed.
@@ -53,7 +54,7 @@ https://material-properties.org/sand-density-heat-capacity-thermal-conductivity/
 &INIT PART_ID='ignitor', XYZ=0.0,0.0,0.01, RADIUS=0.08, SHAPE='RING', N_PARTICLES=36, UNIFORM=T/
 
 &VENT DB='ZMAX', SURF_ID='OPEN'/
-&VENT PBZ=-0.370, SURF_ID='coflow'/
+&VENT DB='ZMIN', SURF_ID='coflow'/
 
 &SLCF PBY=0, QUANTITY='VELOCITY', VECTOR=T/
 &SLCF PBY=0, QUANTITY='TEMPERATURE', CELL_CENTERED=T/

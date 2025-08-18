@@ -94,7 +94,7 @@ jobs:
         sudo apt-get -y update
         sudo apt-get -y install libopenmpi-dev openmpi-bin
 
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - run: git config --global --add safe.directory /__w/fds/fds
 
     - name: set linux-gnu compiler
@@ -109,9 +109,9 @@ jobs:
       if: startsWith(matrix.compiler_mpi, 'intel_')
       shell: bash
       run: |
-        echo "CC=mpiicx" >> $GITHUB_ENV
-        echo "CXX=mpiicx" >> $GITHUB_ENV
-        echo "FC=mpiifx" >> $GITHUB_ENV
+        echo "CC=icx" >> $GITHUB_ENV
+        echo "CXX=icpx" >> $GITHUB_ENV
+        echo "FC=ifx" >> $GITHUB_ENV
 
     - name: build fds
       if: endsWith(matrix.compiler_mpi, '_intelmpi')
@@ -156,7 +156,7 @@ jobs:
       # and build configurations
       matrix:
         os:
-          - macos-latest
+          - macos-14
         compiler_mpi:
           - "gnu_openmpi"
         openmp:
@@ -168,10 +168,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: install openmpi
-        run: brew install open-mpi
+        run: brew install gcc@15 open-mpi
 
       - name: set macos gcc
         if: startsWith(matrix.compiler_mpi, 'gnu_')
@@ -180,6 +180,8 @@ jobs:
           echo "CC=gcc-15" >> $GITHUB_ENV
           echo "CXX=g++-15" >> $GITHUB_ENV
           echo "FC=gfortran-15" >> $GITHUB_ENV
+          echo "OMPI_CC=gcc-15" >> $GITHUB_ENV
+          echo "OMPI_CXX=g++-15" >> $GITHUB_ENV
           echo "OMPI_FC=gfortran-15" >> $GITHUB_ENV
           brew install glew gd zlib json-c
 
@@ -188,9 +190,11 @@ jobs:
         shell: bash
         run: |
           echo "CC=icx" >> $GITHUB_ENV
-          echo "CXX=icx" >> $GITHUB_ENV
-          echo "FC=mpiifx" >> $GITHUB_ENV
-          echo "OMPI_FC=mpiifx" >> $GITHUB_ENV
+          echo "CXX=icpx" >> $GITHUB_ENV
+          echo "FC=ifx" >> $GITHUB_ENV
+          echo "OMPI_CC=icx" >> $GITHUB_ENV
+          echo "OMPI_CXX=icpx" >> $GITHUB_ENV
+          echo "OMPI_FC=ifx" >> $GITHUB_ENV
 
       - name: Build
         if: startsWith(matrix.compiler_mpi, 'gnu_')
@@ -242,7 +246,7 @@ jobs:
         shell: cmd
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
       # install oneapi components from web installer based on
       # oneapi-ci/scripts/install_windows.bat
