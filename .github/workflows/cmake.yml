@@ -94,7 +94,7 @@ jobs:
         sudo apt-get -y update
         sudo apt-get -y install libopenmpi-dev openmpi-bin
 
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - run: git config --global --add safe.directory /__w/fds/fds
 
     - name: set linux-gnu compiler
@@ -168,7 +168,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: install openmpi
         run: brew install gcc@15 open-mpi
@@ -246,7 +246,7 @@ jobs:
         shell: cmd
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
       # install oneapi components from web installer based on
       # oneapi-ci/scripts/install_windows.bat
