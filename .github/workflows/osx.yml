@@ -34,7 +34,7 @@ jobs:
         shell: bash
         
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - name: install openmpi
       run: |
         brew install gcc@15 open-mpi
