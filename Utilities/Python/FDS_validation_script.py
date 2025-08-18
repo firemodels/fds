@@ -25,4 +25,6 @@ print("catchpole_spread_rates...");   subprocess.run(["python","./scripts/catchp
 
 # Special cases
 
+print("TUS_Facade...");   subprocess.run(["python","./scripts/TUS_Facade_contours.py"])
+
 print("Python validation scripts completed successfully!")
