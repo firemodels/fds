@@ -7,7 +7,7 @@ importlib.reload(fdsplotlib) # use for development (while making changes to fdsp
 
 # Scripts to run prior to dataplot
 
-print("catchpole_spread_rates...");   subprocess.run(["python","./scripts/catchpole_spread_rates.py"])
+#print("catchpole_spread_rates...");   subprocess.run(["python","./scripts/catchpole_spread_rates.py"])
 
 # Dataplot and scatplot options
 
