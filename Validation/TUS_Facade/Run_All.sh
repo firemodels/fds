@@ -10,3 +10,4 @@ $QFDS $DEBUG $QUEUE -p 3 -d $INDIR TUS_facade_1-1-2-3.fds
 $QFDS $DEBUG $QUEUE -p 2 -d $INDIR TUS_facade_2-1-2-3.fds
 $QFDS $DEBUG $QUEUE -p 27 -d $INDIR JIS_facade_5cm.fds
 $QFDS $DEBUG $QUEUE -p 34 -d $INDIR JIS_facade_2cm.fds
+$QFDS $DEBUG $QUEUE -p 90 -d $INDIR JIS_facade_1cm.fds
