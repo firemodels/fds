@@ -187,9 +187,9 @@ END TYPE BAND_TYPE
 
 TYPE BOUNDARY_COORD_TYPE
 
-   INTEGER :: II             !< Ghost cell x index
-   INTEGER :: JJ             !< Ghost cell y index
-   INTEGER :: KK             !< Ghost cell z index
+   INTEGER :: II,II2         !< Ghost cells x index
+   INTEGER :: JJ,JJ2         !< Ghost cells y index
+   INTEGER :: KK,KK2         !< Ghost cells z index
    INTEGER :: IIG            !< Gas cell x index
    INTEGER :: JJG            !< Gas cell y index
    INTEGER :: KKG            !< Gas cell z index
