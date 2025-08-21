@@ -893,16 +893,15 @@ The steady state analytical solution to this problem is that the scalar field re
    \label{fig_soborot_square_wave}
 \end{figure}
 
-For the cosine wave initial condition the derivatives of the scalar field are continuous.  Therefore, we see ${\cal O}(\delta x^2)$ convergence of the CHARM and MP5 schemes, as shown in Fig.~\ref{fig_soborot_cos_wave}.  Superbee shows smaller error at coarse resolution, but the gradient steepening degenerates its accuracy at higher resolutions---hence CHARM is selected for LES and DNS.
+For the cosine wave initial condition the derivatives of the scalar field are continuous.  Therefore, we see ${\cal O}(\delta x^2)$ convergence of the CHARM scheme, as shown in Fig.~\ref{fig_soborot_cos_wave}.  Superbee shows smaller error at coarse resolution, but the gradient steepening degenerates its accuracy at higher resolutions---hence CHARM is selected for LES and DNS.
 
 \begin{figure}[ht]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
       \includegraphics[height=2.2in]{SCRIPT_FIGURES/soborot_superbee_cos_wave} &
       \includegraphics[height=2.2in]{SCRIPT_FIGURES/soborot_charm_cos_wave}   \\
-      \includegraphics[height=2.2in]{SCRIPT_FIGURES/soborot_mp5_cos_wave} &
-      \includegraphics[height=2.2in]{SCRIPT_FIGURES/soborot_cos_wave_error}
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/soborot_cos_wave_error} &
    \end{tabular*}
-   \caption[Solid body rotation cosine wave convergence]{Solid body rotation cosine wave solution convergence.  Scalar fields along upper-left diagonal for Superbee (upper-left), CHARM (upper-right), and MP5 (lower-left).  (Lower-right) L2 Error.}
+   \caption[Solid body rotation cosine wave convergence]{Solid body rotation cosine wave solution convergence.  Scalar fields along upper-left diagonal for Superbee (upper-left) and CHARM (upper-right).  (Lower-left) L2 Error.}
    \label{fig_soborot_cos_wave}
 \end{figure}
 
