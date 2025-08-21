@@ -1424,13 +1424,12 @@ Hydrogen gas (2~g/mol) is injected into a small compartment filled with sulfur h
 \subsection{Temperature Lower Bound in a Fire Simulation (\texorpdfstring{\ct{tmp_lower_limit}}{tmp\_lower\_limit})}
 \label{tmp_lower_limit}
 
-A 2-D methane-air diffusion flame calculation is run three different ways to check that the temperature does not fall below the ambient (20~$^\circ$C). The results are shown in Fig.~\ref{tmp_lower_limit_fig}. The upper left plot shows the global minimum temperature for the case where the reaction stoichiometry is specified explicitly. The upper right plot is for the case where the initial time step is lowered to 0.001~s. The lower plot is for the case where the simple chemistry model is used.
+A 2-D methane-air diffusion flame calculation is run three different ways to check that the temperature does not fall below the ambient (20~$^\circ$C). The results are shown in Fig.~\ref{tmp_lower_limit_fig}. The left plot shows the global minimum temperature for the case where the reaction stoichiometry is specified explicitly. Theright plot is for the case where the simple chemistry model is used.
 
 \begin{figure}[!ht]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
       \includegraphics[height=2.2in]{SCRIPT_FIGURES/tmp_lower_limit_default} &
-      \includegraphics[height=2.2in]{SCRIPT_FIGURES/tmp_lower_limit_dt_p001} \\
-      \multicolumn{2}{c}{\includegraphics[height=2.2in]{SCRIPT_FIGURES/tmp_lower_limit_simple}}
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/tmp_lower_limit_simple} \\
    \end{tabular*}
    \caption[Results of the \ct{tmp_lower_limit} cases]{Results of the \ct{tmp_lower_limit} cases.}
    \label{tmp_lower_limit_fig}
