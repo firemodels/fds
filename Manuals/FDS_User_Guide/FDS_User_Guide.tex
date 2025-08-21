@@ -2837,7 +2837,7 @@ Data from up to ten experiments can be specified by specifying arrays for \ct{RE
 There are other optional parameters which can be used to adjust the model behavior, which are described below.
 
 \begin{itemize}
-\item \ct{MAXIMUM_SCALING_HEAT_FLUX} The upper limit on the predicted heat flux used to scale the test data (Default 300 \unit{kW/m^2}).
+\item \ct{MAXIMUM_SCALING_HEAT_FLUX} The upper limit on the predicted heat flux used to scale the test data (Default 1500 \unit{kW/m^2}).
 \item \ct{MINIMUM_SCALING_HEAT_FLUX} By default the model does not set a lower limit on the predicted heat flux used to scale the test data. Setting a lower bound to the flux used for scaling may help the model predictions in some cases such as weakly burning sources on coarse grids which may have poorly resolved heat feedback (Default 0 \unit{kW/m^2}).
 \item \ct{REFERENCE_HEAT_FLUX_TIME_INTERVAL} The instantaneous heat feedback in FDS can vary greatly from time step to time step. In an actual fire the burning rate is tied to the sample temperature, and thermal inertia means the burning rate changes more slowly than then instantaneous flux. This natural smoothing can be approximated by setting a smoothing window using \ct{REFERENCE_HEAT_FLUX_TIME_INTERVAL} in s (Default 1~s).
 \end{itemize}
@@ -13620,7 +13620,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{MASS_TRANSFER_COEFFICIENT}                         & Real            & Section~\ref{info:liquid_fuels}           & m/s                 &                         \\ \hline
 \ct{MATL_ID(:,:)}                                       & Char.~Array     & Section~\ref{info:solid_pyrolysis}        &                     &                         \\ \hline
 \ct{MATL_MASS_FRACTION(:,:)}                           & Real Array      & Section~\ref{info:solid_pyrolysis}        &                     &                         \\ \hline
-\ct{MAXIMUM_SCALING_HEAT_FLUX}                        & Real            & Section~\ref{info:scaled_burning}         & \si{kW/m^2}         & 300                     \\ \hline
+\ct{MAXIMUM_SCALING_HEAT_FLUX}                        & Real            & Section~\ref{info:scaled_burning}         & \si{kW/m^2}         & 1500                     \\ \hline
 \ct{MCC_CONVERSION_FACTOR}                              & Real            & Section~\ref{info:TGA_DSC_MCC}            &                     & 1                       \\ \hline
 \ct{MINIMUM_BURNOUT_TIME}                              & Real            & Section~\ref{veg_burnout_time}            & s                   & 1000000                 \\ \hline
 \ct{MINIMUM_LAYER_THICKNESS}                           & Real            & Section~\ref{info:solid_phase_stability}  & m                   & 1.E-4                   \\ \hline
