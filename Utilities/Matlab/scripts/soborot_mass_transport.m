@@ -448,10 +448,10 @@ H(4)=loglog(dx,[e_superbee_16 e_superbee_32 e_superbee_64 e_superbee_128],'k*-')
 
 % trap cosine wave error
 if e_charm_128>2.9e-04
-    display(['Error: soborot_godunov_square_wave_128 out of tolerance'])
+    display(['Error: soborot_charm_cos_wave_128 out of tolerance'])
 end
 if e_superbee_128>6.4e-04
-    display(['Error: soborot_charm_square_wave_128 out of tolerance'])
+    display(['Error: soborot_superbee_cos_wave_128 out of tolerance'])
 end
 
 axis([min(dx) .1 min(dx.^2) max(dx)])
@@ -462,7 +462,7 @@ text(.009,.04,'Cosine Wave Error','FontName',Font_Name,'FontSize',Label_Font_Siz
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 
-lh=legend(H,'{\itO}(\delta{\itx})','{\itO}(\delta{\itx}^2)','CHARM','Superbee');
+lh=legend(H(1:4),'{\itO}(\delta{\itx})','{\itO}(\delta{\itx}^2)','CHARM','Superbee');
 set(lh,'Location','Southeast')
 set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 legend boxoff
