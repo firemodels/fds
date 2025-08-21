@@ -98,14 +98,12 @@ Flux Limiter                           & $B(r)$                         \\
 \hline
 Central Difference                     & 1                              \\
 Godunov                                & 0                              \\
-MINMOD                                 & $\max(0,\min(1,r))$            \\
 Superbee \cite{Roe:1986} (LES default) & $\max(0,\min(2r,1),\min(r,2))$ \\
 CHARM \cite{Zhou:1995} (DNS default)   & $s(3s+1)/(s+1)^2$; $s=1/r$     \\
-MP5 \cite{Suresh:1997}                 & see below
 \end{tabular}
 \end{center}
 \end{table}
-\noindent For the Central Difference, Godunov, MINMOD, and Superbee limiters, the scalar face value is found from
+\noindent For the Central Difference, Godunov, and Superbee limiters, the scalar face value is found from
 \begin{equation}
 \label{eqn_flux_limiter}
 \overline{\phi}^{\rm FL}_{i+1/2} = \left\{ \begin{array}{lcll} \phi_i &+& B(r) \,\frac{1}{2} \,\delta \phi_{\rm loc} & \mbox{if} \quad u_i>0 \vspace{0.2 cm}\\
@@ -117,35 +115,30 @@ For CHARM, the face value is given by~\cite{Kempf:2003}
 \overline{\phi}^{\rm FL}_{i+1/2} = \left\{ \begin{array}{lcll} \phi_i &+& B(r) \,\frac{1}{2} \,\delta \phi_{\rm up} & \mbox{if} \quad u_i>0 \vspace{0.2 cm}\\
 \phi_{i+1} &-& B(r) \,\frac{1}{2} \,\delta \phi_{\rm up} & \mbox{if} \quad u_i<0 \end{array} \right.
 \end{equation}
-The MP5 scheme of Suresh and Huynh \cite{Suresh:1997} is based on the keen observation that three points cannot distinguish between extrema and discontinuities.  The functional form of the limiter is not as simple as the three-point schemes described above, so we refer the reader to the original paper or the FDS source code for details.  But the basic idea behind the method is to use a five-point stencil, three upwind and two downwind, to reconstruct the cell face value, considering both accuracy and monotonicity-preserving constraints.  An additional benefit of the MP5 scheme is that it was designed specifically with strong stability-preserving (SSP) Runge-Kutta time discretizations in mind.  The predictor-corrector scheme used by FDS is similar to the second-order SSP scheme described in \cite{Gottlieb:2001}.
 
 
 \subsubsection{Notes on Implementation}
 
 In practice, we set $r=0$ initially and only compute $r$ if the denominator is not zero.  Note that for $\delta \phi_{loc}=0$, it does not matter which limiter is used: all the limiters yield the same scalar face value.  For CHARM, we set both $r=0$ and $B=0$ initially and only compute $B$ if $r>0$ (this requires data variations to have the same sign). Otherwise, CHARM reduces to Godunov's scheme.
 
-The Central Difference, Godunov, and MINMOD limiters are included for completeness, debugging, and educational purposes.  These schemes have little utility for typical FDS applications.
+The Central Difference and Godunov limiters are included for completeness, debugging, and educational purposes.  These schemes have little utility for typical FDS applications.
 
-\subsubsection{Dealing with Variable Molecular Weights}
+% \subsubsection{Dealing with Variable Molecular Weights}
 
-Maintaining isothermal flow requires
-\begin{equation}
-T = \frac{\overline{W} \bar{p}}{\rho R} = \frac{\bar{p}}{R \rho \sum_\alpha \frac{Z_\alpha}{W_\alpha}} = \frac{\bar{p}}{R \sum_\alpha \frac{\rho Z_\alpha}{W_\alpha}}
-\end{equation}
-to be constant and uniform at all cells and faces. Therefore, with $\bar{p}$ and $R$ constant and uniform, we must maintain
-\begin{equation}
-\label{eq:rho_mw}
-\sum_\alpha \frac{(\rho Z_\alpha)}{W_\alpha} = \frac{\rho}{\overline{W}}
-\end{equation}
+%% leave this here for a moment as a reminder to write up the constant limiter coefficient method we are now using.
 
-The above condition is automatically satisfied in the cases of using Godunov or Central differencing or in the case of binary flow (two species).  However, if we apply a second-order flux limiter, such as Superbee or CHARM, independently to each species in a multi-component (three or more species) flow with variable molecular weights, then this condition is easily violated.
+% Maintaining isothermal flow requires
+% \begin{equation}
+% T = \frac{\overline{W} \bar{p}}{\rho R} = \frac{\bar{p}}{R \rho \sum_\alpha \frac{Z_\alpha}{W_\alpha}} = \frac{\bar{p}}{R \sum_\alpha \frac{\rho Z_\alpha}{W_\alpha}}
+% \end{equation}
+% to be constant and uniform at all cells and faces. Therefore, with $\bar{p}$ and $R$ constant and uniform, we must maintain
+% \begin{equation}
+% \label{eq:rho_mw}
+% \sum_\alpha \frac{(\rho Z_\alpha)}{W_\alpha} = \frac{\rho}{\overline{W}}
+% \end{equation}
 
-To handle this situation, in LES mode, FDS will apply a correction to the most abundant species locally.  We first compute the flux-limited face values of the mass density over the mixture-average molecular weight.  Then we compute flux-limited face values of the species densities.  Finally, the error in Eq.~(\ref{eq:rho_mw}) is absorbed into the most abundant species locally,
-\begin{equation}
-\label{eq:rhoZ_cor}
-\overline{\rho Z_\alpha}^{\rm COR} = W_\alpha \left( \overline{\left\{\frac{\rho}{\overline{W}}\right\}}^{\rm FL} - \sum_{\beta \ne \alpha} \frac{\overline{\{\rho Z_\beta\}}^{\rm FL}}{W_\beta} \right)
-\end{equation}
-where $\alpha$ is the most abundant species on the face.
+% The above condition is automatically satisfied in the cases of using Godunov or Central differencing or in the case of binary flow (two species).  However, if we apply a second-order flux limiter, such as Superbee or CHARM, independently to each species in a multi-component (three or more species) flow with variable molecular weights, then this condition is easily violated.
+
 
 \subsection{Time Splitting for Mass Source Terms}
 \label{sec_time_splitting}
