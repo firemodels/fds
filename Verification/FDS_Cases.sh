@@ -771,10 +771,6 @@ $QFDS -d Scalar_Analytical_Solution compression_wave_FL4_16.fds
 $QFDS -d Scalar_Analytical_Solution compression_wave_FL4_32.fds
 $QFDS -d Scalar_Analytical_Solution compression_wave_FL4_64.fds
 $QFDS -d Scalar_Analytical_Solution compression_wave_FL4_128.fds
-$QFDS -d Scalar_Analytical_Solution compression_wave_FL5_16.fds
-$QFDS -d Scalar_Analytical_Solution compression_wave_FL5_32.fds
-$QFDS -d Scalar_Analytical_Solution compression_wave_FL5_64.fds
-$QFDS -d Scalar_Analytical_Solution compression_wave_FL5_128.fds
 $QFDS -d Scalar_Analytical_Solution move_slug.fds
 $QFDS -d Scalar_Analytical_Solution move_slug_fl1.fds
 $QFDS -d Scalar_Analytical_Solution shunn3_32.fds
@@ -820,10 +816,6 @@ $QFDS      -d Scalar_Analytical_Solution soborot_superbee_cos_wave_16.fds
 $QFDS      -d Scalar_Analytical_Solution soborot_superbee_cos_wave_32.fds
 $QFDS      -d Scalar_Analytical_Solution soborot_superbee_cos_wave_64.fds
 $QFDS -p 4 -d Scalar_Analytical_Solution soborot_superbee_cos_wave_128.fds
-$QFDS      -d Scalar_Analytical_Solution soborot_mp5_cos_wave_16.fds
-$QFDS      -d Scalar_Analytical_Solution soborot_mp5_cos_wave_32.fds
-$QFDS      -d Scalar_Analytical_Solution soborot_mp5_cos_wave_64.fds
-$QFDS -p 4 -d Scalar_Analytical_Solution soborot_mp5_cos_wave_128.fds
 
 $QFDS -o 1 -d Thread_Check race_test_1.fds
 $QFDS -o 4 -d Thread_Check race_test_4.fds
