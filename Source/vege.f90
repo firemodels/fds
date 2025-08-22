@@ -451,6 +451,10 @@ DO JJG=1,JBAR
          UMF_Y = UMF_TMP * V_LS(IIG,JJG) * 60.0_EB
          UMF_MAG = SQRT(UMF_X**2 + UMF_Y**2)
 
+         ! Adjust wind for output slices
+         U_LS(IIG,JJG) = UMF_TMP * U_LS(IIG,JJG)
+         V_LS(IIG,JJG) = UMF_TMP * V_LS(IIG,JJG)
+
          ! Compute wind factor affecting spread rate R(U) = R_0*(1+WIND_FACTOR)
 
          IF (SF%I_RAMP_LS_WIND>0) THEN            
