@@ -60,6 +60,9 @@ TYPE MESH_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: D_Z_MAX     !< \f$ \max D_\alpha \f$
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: PP_RESIDUAL !< Pressure Poisson residual (debug)
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: LES_FILTER_WIDTH !< Characteristic cell dimension (m)
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: BFX              !< Flux limiter face B value for X-direction faces
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: BFY              !< Flux limiter face B value for Y-direction faces
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: BFZ              !< Flux limiter face B value for Z-direction faces
 
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: ZZ               !< Lumped species, current time step, \f$ Z_{\alpha,ijk}^n \f$
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: ZZS              !< Lumped species, next time step, \f$ Z_{\alpha,ijk}^* \f$
@@ -360,7 +363,7 @@ IMPLICIT NONE (TYPE,EXTERNAL)
 REAL(EB), POINTER, DIMENSION(:,:,:) :: &
    U,V,W,US,VS,WS,DDDT,D,DS,H,HS,KRES,FVX,FVY,FVZ,FVX_B,FVY_B,FVZ_B,FVX_D,FVY_D,FVZ_D,RHO,RHOS, &
    MU,MU_DNS,TMP,Q,KAPPA_GAS,CHI_R,QR,QR_W,RADIATION_EMISSION,RADIATION_ABSORPTION,UII,RSUM,D_SOURCE, &
-   CSD2,MTR,MSR,WEM,MIX_TIME,CHEM_SUBIT,STRAIN_RATE,D_Z_MAX,PP_RESIDUAL,LES_FILTER_WIDTH
+   CSD2,MTR,MSR,WEM,MIX_TIME,CHEM_SUBIT,STRAIN_RATE,D_Z_MAX,PP_RESIDUAL,LES_FILTER_WIDTH,BFX,BFY,BFZ
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZ,ZZS,REAC_SOURCE_TERM,DEL_RHO_D_DEL_Z,FX,FY,FZ, &
                                          SWORK1,SWORK2,SWORK3,SWORK4, &
                                          Q_REAC,AVG_DROP_DEN,AVG_DROP_TMP,AVG_DROP_RAD,AVG_DROP_AREA,M_DOT_PPP, &
@@ -560,6 +563,9 @@ DEL_RHO_D_DEL_Z=>M%DEL_RHO_D_DEL_Z
 FX=>M%FX
 FY=>M%FY
 FZ=>M%FZ
+BFX=>M%BFX
+BFY=>M%BFY
+BFZ=>M%BFZ
 POIS_PTB=>M%POIS_PTB
 POIS_ERR=>M%POIS_ERR
 SAVE1=>M%SAVE1

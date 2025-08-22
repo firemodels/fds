@@ -61,23 +61,6 @@ if ~exist([data_dir,'compression_wave_FL4_128_devc.csv'])
     skip_case = 1;
 end
 
-if ~exist([data_dir,'compression_wave_FL5_16_devc.csv'])
-    display(['Error: File ' [data_dir,'compression_wave_FL0_16_devc.csv'] ' does not exist. Skipping case.'])
-    skip_case = 1;
-end
-if ~exist([data_dir,'compression_wave_FL5_32_devc.csv'])
-    display(['Error: File ' [data_dir,'compression_wave_FL0_32_devc.csv'] ' does not exist. Skipping case.'])
-    skip_case = 1;
-end
-if ~exist([data_dir,'compression_wave_FL5_64_devc.csv'])
-    display(['Error: File ' [data_dir,'compression_wave_FL0_64_devc.csv'] ' does not exist. Skipping case.'])
-    skip_case = 1;
-end
-if ~exist([data_dir,'compression_wave_FL5_128_devc.csv'])
-    display(['Error: File ' [data_dir,'compression_wave_FL0_128_devc.csv'] ' does not exist. Skipping case.'])
-    skip_case = 1;
-end
-
 if skip_case
     return
 end
@@ -113,16 +96,6 @@ t_FL4_32 = M_FL4_32(:,1); rho_fds_FL4_32 = M_FL4_32(:,3);
 t_FL4_64 = M_FL4_64(:,1); rho_fds_FL4_64 = M_FL4_64(:,3);
 t_FL4_128 = M_FL4_128(:,1); rho_fds_FL4_128 = M_FL4_128(:,3);
 
-% MP5 limiter, FL=5
-M_FL5_16 = csvread([data_dir,'compression_wave_FL5_16_devc.csv'],2,0);
-M_FL5_32 = csvread([data_dir,'compression_wave_FL5_32_devc.csv'],2,0);
-M_FL5_64 = csvread([data_dir,'compression_wave_FL5_64_devc.csv'],2,0);
-M_FL5_128 = csvread([data_dir,'compression_wave_FL5_128_devc.csv'],2,0);
-t_FL5_16 = M_FL5_16(:,1); rho_fds_FL5_16 = M_FL5_16(:,3);
-t_FL5_32 = M_FL5_32(:,1); rho_fds_FL5_32 = M_FL5_32(:,3);
-t_FL5_64 = M_FL5_64(:,1); rho_fds_FL5_64 = M_FL5_64(:,3);
-t_FL5_128 = M_FL5_128(:,1); rho_fds_FL5_128 = M_FL5_128(:,3);
-
 % analytical solution
 
 a = 2;
@@ -146,11 +119,6 @@ rho_FL4_16 = compression_wave_soln(rho_fds_FL4_16(1),x-L/32,y-L/32,a,c,t_FL4_16)
 rho_FL4_32 = compression_wave_soln(rho_fds_FL4_32(1),x-L/64,y-L/64,a,c,t_FL4_32);      error_FL4_32 = norm(rho_fds_FL4_32-rho_FL4_32)/length(t_FL4_32);
 rho_FL4_64 = compression_wave_soln(rho_fds_FL4_64(1),x-L/128,y-L/128,a,c,t_FL4_64);    error_FL4_64 = norm(rho_fds_FL4_64-rho_FL4_64)/length(t_FL4_64);
 rho_FL4_128 = compression_wave_soln(rho_fds_FL4_128(1),x-L/256,y-L/256,a,c,t_FL4_128); error_FL4_128 = norm(rho_fds_FL4_128-rho_FL4_128)/length(t_FL4_128);
-
-rho_FL5_16 = compression_wave_soln(rho_fds_FL5_16(1),x-L/32,y-L/32,a,c,t_FL5_16);      error_FL5_16 = norm(rho_fds_FL5_16-rho_FL5_16)/length(t_FL5_16);
-rho_FL5_32 = compression_wave_soln(rho_fds_FL5_32(1),x-L/64,y-L/64,a,c,t_FL5_32);      error_FL5_32 = norm(rho_fds_FL5_32-rho_FL5_32)/length(t_FL5_32);
-rho_FL5_64 = compression_wave_soln(rho_fds_FL5_64(1),x-L/128,y-L/128,a,c,t_FL5_64);    error_FL5_64 = norm(rho_fds_FL5_64-rho_FL5_64)/length(t_FL5_64);
-rho_FL5_128 = compression_wave_soln(rho_fds_FL5_128(1),x-L/256,y-L/256,a,c,t_FL5_128); error_FL5_128 = norm(rho_fds_FL5_128-rho_FL5_128)/length(t_FL5_128);
 
 figure
 plot_style
@@ -197,20 +165,18 @@ h = 2*pi./[16 32 64 128];
 e_FL0 = [error_FL0_16 error_FL0_32 error_FL0_64 error_FL0_128];
 e_FL2 = [error_FL2_16 error_FL2_32 error_FL2_64 error_FL2_128];
 e_FL4 = [error_FL4_16 error_FL4_32 error_FL4_64 error_FL4_128];
-e_FL5 = [error_FL5_16 error_FL5_32 error_FL5_64 error_FL5_128];
 H(1)=loglog(h,e_FL0,'b*-','LineWidth',Line_Width); hold on
 H(2)=loglog(h,e_FL2,'ro-','LineWidth',Line_Width); hold on
 H(3)=loglog(h,e_FL4,'g^-','LineWidth',Line_Width); hold on
-H(4)=loglog(h,e_FL5,'c>-','LineWidth',Line_Width); hold on
-H(5)=loglog(h,.1*h,'k--','LineWidth',Line_Width);
-H(6)=loglog(h,.1*h.^2,'k-','LineWidth',Line_Width);
+H(4)=loglog(h,.1*h,'k--','LineWidth',Line_Width);
+H(5)=loglog(h,.1*h.^2,'k-','LineWidth',Line_Width);
 
 xlabel('Grid Spacing (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'FontName',Font_Name)
 ylabel('L2 Error (kg/m³)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'FontName',Font_Name)
 axis([1e-2 1e0 1e-4 1e-1])
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
-legend_handle=legend(H(1:6),'Central','Superbee','CHARM','MP5','{\it O}({\it\deltax})','{\it O}({\it\deltax^2})','Location','NorthWest');
+legend_handle=legend(H(1:5),'Central','Superbee','CHARM','{\it O}({\it\deltax})','{\it O}({\it\deltax^2})','Location','NorthWest');
 set(legend_handle,'Interpreter',Font_Interpreter);
 set(legend_handle,'Fontsize',Key_Font_Size);
 set(legend_handle,'Box','on');
