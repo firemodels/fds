@@ -397,7 +397,7 @@ ENDDO
 V=0._EB
 VS=0._EB
 
-DO K=-0,KBP1
+DO K=0,KBP1
    DO J=0,JBP1
       DO I=0,IBP1
          W(I,J,K) = -WSCAL*(XC(I)-XCLOC)
