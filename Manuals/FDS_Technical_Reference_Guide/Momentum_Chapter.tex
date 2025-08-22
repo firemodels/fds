@@ -577,7 +577,7 @@ This section describes how the tangential component of velocity is specified at 
 \subsection{Smooth Walls}
 \label{smooth_wall_model}
 
-In finite-volume LES, when the momentum equation is integrated over a cell adjacent to the wall it turns out that the most difficult term to handle is the viscous stress, $\tau_w$, because the wall-normal gradient of the stream-wise velocity component cannot be resolved; the SGS stress at the wall is identically zero.  We have, therefore, an entirely different situation than exists in the bulk flow at high Reynolds number where the viscous terms are negligible and the SGS stress is of critical importance.  The fidelity of the SGS model still influences the wall stress, however, since other components of the SGS tensor affect the value of the near-wall velocity and hence the resulting viscous stress determined by the wall model. FDS models $\tau_w$ with a logarithmic velocity profile \cite{Pope:2000} described below.
+In finite-volume LES, when the momentum equation is integrated over a cell adjacent to the wall, the most difficult term to handle is the viscous stress, $\tau_w$, because the wall-normal gradient of the stream-wise velocity component cannot be resolved; the SGS stress at the wall is identically zero.  We have, therefore, an entirely different situation than exists in the bulk flow at high Reynolds number where the viscous terms are negligible and the SGS stress is of critical importance.  The fidelity of the SGS model still influences the wall stress, however, since other components of the SGS tensor affect the value of the near-wall velocity and hence the resulting viscous stress determined by the wall model. FDS models $\tau_w$ with a logarithmic velocity profile \cite{Pope:2000} described below.
 
 An important scaling quantity in the near-wall region is the friction velocity, defined as $u_\tau \equiv \sqrt{\tau_w/\rho}$.
 From the friction velocity we can define the non-dimensional stream-wise velocity $u^+ \equiv u/u_\tau$ and non-dimensional wall-normal distance $y^+ \equiv y/\delta_\nu$, where $\delta_\nu = \nu/u_\tau = \mu/(\rho u_\tau)$ is the \emph{viscous length scale}. In FDS, the law of the wall is approximated by
@@ -595,6 +595,33 @@ where $\kappa = 0.41$ is the von K\'arm\'an constant and $B=5.2$.  The region $5
 %where $(1/\kappa)_{\mbox{\tiny\emph{buffer}}}=4.74$ and $B_{\mbox{\tiny\emph{buffer}}}=-2.63$.
 
 For the purposes of adapting the log law model to FDS we suppose that the first off-wall velocity component represents the profile sampled at a distance $\delta y/2$ in the wall-normal direction---stream-wise components of velocity are stored at the face center on a staggered grid.  The density and molecular viscosity are taken as the average of the neighboring cell values and uniform on the cell face where the stream-wise velocity component is stored.
+
+\subsection{Corners}
+\label{corner_velocity_bc}
+
+At the corner edge of a solid obstruction, a no-slip boundary condition is applied. Consider the diagram in Fig.~\ref{fig:corner}. The solid vectors represent the two velocity components on the cell faces adjacent to the corner edge, which in this figure would be normal to the plane shown. The upper left of the figure is a solid obstruction. For the purposes of computing the components of the vorticity and stress tensor at this edge, it is assumed that the ``ghost'' velocity components, represented by dashed vectors, take on the negative values of their in-flow counterparts.
+
+\begin{figure}[h!]
+\centering
+\begin{picture}(200,150)(0,0)
+\setlength{\unitlength}{0.02in}
+\multiput(10,0)(20,0){5}{\line(0,1){100}}
+\multiput(0,10)(0,20){5}{\line(1,0){100}}
+\put(45,40){\vector(1,0){10}}
+\put(60,45){\vector(0,1){10}}
+\multiput(55,60)(-2,0){5}{\line(-1,0){1}}
+\put(47,60){\vector(-1,0){2}}
+\multiput(40,55)(0,-2){5}{\line(0,-1){1}}
+\put(40,47){\vector(0,-1){2}}
+\thicklines
+\put(50,50){\line(0,1){50}}
+\put(50,50){\line(-1,0){50}}
+\end{picture}
+\caption[Diagram of wall corner velocity boundary condition]{Diagram of wall corner velocity boundary condition.}
+\label{fig:corner}
+\end{figure}
+
+\FloatBarrier
 
 \subsection{Rough Walls}
 \label{rough_wall_model}
