@@ -44,7 +44,7 @@ jobs:
         shell: cmd
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
       # install oneapi components from web installer based on
       # oneapi-ci/scripts/install_windows.bat

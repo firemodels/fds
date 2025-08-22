@@ -9123,7 +9123,7 @@ Note that the heat flux has units of \unit{W/m^2}.  Thus, a velocity scale may b
 \section{Flux Limiters}
 \label{info:flux_limiters}
 
-FDS employs \emph{total variation diminishing} (TVD) schemes for scalar transport.  The default for VLES (FDS default \ct{SIMULATION_MODE}) is Superbee \cite{Roe:1986}, so chosen because this scheme does the best job preserving the scalar variance in highly turbulent flows with coarse grid resolution.  The default scheme for DNS and LES is CHARM \cite{Zhou:1995} because the gradient steepening used in Superbee forces a stair step pattern at high resolution, while CHARM is convergent.   A few other schemes (including Godunov and central differencing) are included for completeness; more details can be found in the Tech Guide \cite{FDS_Tech_Guide}.  Table \ref{tab:flux_limiters} below shows the character strings which may be used to invoke the various limiter schemes.
+FDS employs \emph{total variation diminishing} (TVD) schemes for scalar transport.  The default for VLES (FDS default \ct{SIMULATION_MODE}) is Superbee \cite{Roe:1986}, so chosen because this scheme does the best job preserving the scalar variance in highly turbulent flows with coarse grid resolution.  The default scheme for DNS and LES is CHARM \cite{Zhou:1995} because the gradient steepening used in Superbee forces a stair step pattern at high resolution, while CHARM is convergent.   Godunov and central differencing are included for completeness; more details can be found in the Tech Guide \cite{FDS_Tech_Guide}.  Table \ref{tab:flux_limiters} below shows the character strings which may be used to invoke the various limiter schemes.
 
 \begin{lstlisting}
 &MISC FLUX_LIMITER='GODUNOV' / ! invoke Godunov (first-order upwind scheme)
@@ -9140,9 +9140,7 @@ Scheme                              & \ct{FLUX_LIMITER} \\
 Central differencing                & \ct{'CENTRAL'}  \\
 Godunov                             & \ct{'GODUNOV'}  \\
 Superbee (VLES, SVLES default)      & \ct{'SUPERBEE'}  \\
-MINMOD                              & \ct{'MINMOD'}  \\
 CHARM (DNS, LES default)            & \ct{'CHARM'}  \\
-MP5                                 & \ct{'MP5'}  \\ \hline
 \end{tabular}
 \end{table}
 
@@ -11912,7 +11910,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 % ignorenamelistkw: /ISOF/DEBUG
 % ignorenamelistkw: /MISC/PERIODIC_TEST, /MISC/POSITIVE_ERROR_TEST, /MISC/PROFILING, /MISC/RADIATION
 % ignorenamelistkw: /MISC/STRATIFICATION, /MISC/SUPPRESSION, /MISC/UVW_FILE, /MISC/TENSOR_DIFFUSIVITY
-% ignorenamelistkw: /MISC/CC_IBM, /MISC/CCVOL_LINK, /MISC/TEST_NEW_CHAR_MODEL, /MISC/FLUX_LIMITER_MW_CORRECTION
+% ignorenamelistkw: /MISC/CC_IBM, /MISC/CCVOL_LINK, /MISC/TEST_NEW_CHAR_MODEL, /MISC/PR, /MISC/SC
 % ignorenamelistkw: /PART/DEBUG, /PART/EMBER_SNAG_FACTOR
 % ignorenamelistkw: /PRES/WRITE_PARCSRPCG_MATRIX
 % ignorenamelistkw: /REAC/C, /REAC/H, /REAC/O, /REAC/N, /REAC/FORMULA
@@ -14255,6 +14253,7 @@ Keyword             & Type     & Description                      & Units       
 446  \> \ct{SURF REFERENCE_THICKNESS values must increase for each} \> Section~\ref{info:scaled_burning}  \\
      \> \ct{new group of REFERENCE_HEAT_FLUX.} \\
 447  \> \ct{RAMP ... used with REFERENCE_HEAT_FLUX must start at T = 0.} \> Section~\ref{info:scaled_burning}  \\
+448  \> \ct{PROF ... MATL_ID ... not a part of surface type ...} \> Section~\ref{info:solidoutputquantities}  \\
      \>                                                                               \>                          \\
 501 \> \ct{No ID provided ...} \> Section~\ref{info:HVAC}  \\
 502 \> \ct{Invalid TYPE_ID provided ...} \> Section~\ref{info:HVAC}  \\
@@ -14491,6 +14490,7 @@ Keyword             & Type     & Description                      & Units       
 951 \> \ct{PROF ... requires an orientation index, IOR.} \> Section~\ref{info:PROF} \\
 952 \> \ct{PROF ... is not valid.} \> Section~\ref{info:PROF} \\
 953 \> \ct{PROF ... requires a PART_ID.} \> Section~\ref{info:PROF} \\
+954 \> \ct{PROF ... MATL_ID ... not found.} \> Section~\ref{info:PROF} \\
     \>                                                                                \>                          \\
 961 \> \ct{CELL_CENTERED not allowed with AGL_SLICE.} \> Section~\ref{info:complex_terrain} \\
 962 \> \ct{BNDF ... CPUA_Z, MPUA_Z, and AMPUA_Z require liquid droplets.} \> Section~\ref{bucket_test_1} \\

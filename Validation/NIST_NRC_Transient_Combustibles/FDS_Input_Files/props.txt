@@ -122,7 +122,7 @@
       SPEC_ID='PYROLYZATE'
       NU_SPEC=0.95
       MATL_ID='ash'
-      NU_SPEC=0.05
+      NU_MATL=0.05
       CONDUCTIVITY = 0.06
       SPECIFIC_HEAT = 1.55 /
 
