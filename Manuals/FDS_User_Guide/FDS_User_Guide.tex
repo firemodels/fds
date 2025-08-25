@@ -10558,7 +10558,15 @@ Figure~\ref{fig:thermocouple_time_constant} shows the results of a simple test c
 \label{fig:thermocouple_time_constant}
 \end{figure}
 
+\subsection{Bi-Directional Probe}
+\label{info:bidir_probe}
 
+The output quantity \ct{BI-DIRECTIONAL PROBE} is the velocity of a modeled bi-directional probe. A bi-directional probe uses the following equation:
+\be
+C \sqrt{\frac{2 \Delta P}{\rho}}
+\label{BDP}
+\ee
+where $C$ is a calibration constant (default value is 0.93), $\Delta P$ is the pressure difference across the probe, and $\rho$ is the gas density at the probe. In a typical experiment, the gas density is computed assuming standard pressure (101325 Pa), the molecular weight of air (28.8 g/mol), and the temperature as measured by a thermocouple near the probe. Bi-directional probes have biases due to both the Reynolds number (based on the probe diameter) of the flow and the angle of the flow with respect to the probe axis. This model accounts for those sensitivities and the impact of density differences from varied molecular weight at the probe. The orientation of the probe can be specified with either \ct{IOR} or \ct{ORIENTATION} on \ct{DEVC}. A probe with \ct{IOR}=-1 would have a positive velocity output when the flow is in the negative x direction. Parameters for the probe can be specified with a \ct{PROP_ID} on the \ct {DEVC}. The calibration constant and the probe diameter (default of 0.0254 m) can be set respectively with \ct{CALIBRATION_CONSTANT} and \ct{PROBE_DIAMETER} on \ct{PROP}. If the probe temperature is an aspirated thermocouple or other measurement not sensitive to the radiative environment, then set \ct{TC=F} on \ct{PROP}.
 
 \subsection{Volume Flow}
 \label{info:volume_flow}
@@ -11726,6 +11734,7 @@ Table~\ref{tab:deviceoutputquantities} below lists output quantities associated 
 \endhead
 \ct{ACTUATED SPRINKLERS}                       & Section~\ref{info:TIMING}                     &                & D            \\ \hline
 \ct{ASPIRATION}                                & Section~\ref{info:aspiration_detector}        & \%/m           & D            \\ \hline
+\ct{BI-DIRECTIONAL PROBE}                      & Section~\ref{info:bidir_probe}                & m/s            & D            \\ \hline
 \ct{CHAMBER OBSCURATION}                       & Section~\ref{info:smoke_detector}             & \%/m           & D            \\ \hline
 \ct{CELL INDEX I}                              & Mesh cell index in x                          &                & D,S          \\ \hline
 \ct{CELL INDEX J}                              & Mesh cell index in y                          &                & D,S          \\ \hline
@@ -13171,6 +13180,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{ALPHA_E}                          & Real          & Section~\ref{info:smoke_detector}         &                       & 0.                   \\ \hline
 \ct{BETA_C}                           & Real          & Section~\ref{info:smoke_detector}         &                       & 1.                   \\ \hline
 \ct{BETA_E}                           & Real          & Section~\ref{info:smoke_detector}         &                       & 1.                   \\ \hline
+\ct{CALIBRATION_CONSTANT}             & Real          & Section~\ref{info:bidir_probe}            &                       & 0.93                 \\ \hline
 \ct{CHARACTERISTIC_VELOCITY}          & Real          & Section~\ref{info:pressure_coefficient}   & m/s                   & 1.                   \\ \hline
 \ct{C_FACTOR}                         & Real          & Section~\ref{info:sprinklers}             & (m/s)$^{1/2}$         & 0.                   \\ \hline
 \ct{DENSITY}                           & Real          & Section~\ref{info:THERMOCOUPLE}           & kg/m$^3$              & 8908.                \\ \hline
@@ -13207,6 +13217,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{PDPA_RADIUS}                      & Real          & Section~\ref{PDPA}                        & m                     & 0.                   \\ \hline
 \ct{PDPA_START}                       & Real          & Section~\ref{PDPA}                        & s                     & 0.                   \\ \hline
 \ct{PRESSURE_RAMP}                    & Character     & Section~\ref{info:sprinklers}             &                       &                      \\ \hline
+\ct{PROBE_DIAMETER}                    & Real          & Section~\ref{info:bidir_probe}           & m                     &  0.0254              \\ \hline
 \ct{P0}                                & Real          & Section~\ref{info:velocity_patch}         & m/s                   &  0.                  \\ \hline
 \ct{PX(3)}                             & Real          & Section~\ref{info:velocity_patch}         & m/s                   &  0.                  \\ \hline
 \ct{PXX(3,3)}                          & Real          & Section~\ref{info:velocity_patch}         & m/s                   &  0.                  \\ \hline
@@ -13222,6 +13233,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{SPRAY_PATTERN_MU}                & Real          & Section~\ref{info:sprinklers}             & degrees               & 0.                   \\ \hline
 \ct{SPRAY_PATTERN_SHAPE}             & Character     & Section~\ref{info:sprinklers}             &                       & \ct{'GAUSSIAN'}     \\ \hline
 \ct{SPRAY_PATTERN_TABLE}             & Character     & Section~\ref{info:sprinklers}             &                       &                      \\ \hline
+\ct{TC}                               & Logical       & Section~\ref{info:bidir_probe}            &                       & \ct{T}               \\ \hline
 \ct{TIME_CONSTANT}                    & Real          & Section~\ref{info:THERMOCOUPLE}           & s                     &                      \\ \hline
 \ct{VELOCITY_COMPONENT}               & Integer       & Section~\ref{info:velocity_patch}         &                       &                      \\ \hline
 \ct{VIEW_ANGLE}                       & Real          & Section~\ref{info:heat_flux}              & degrees               & 180.                 \\ \hline
@@ -14444,6 +14456,7 @@ Keyword             & Type     & Description                      & Units       
 885 \> \ct{DEVC ... must have coordinates, even if not a point quantity.} \> Section~\ref{info:DEVC} \\
 886 \> \ct{DEVC ... must have either an output QUANTITY or PROP_ID.} \> Section~\ref{info:DEVC} \\
 887 \> \ct{DEVC ... must have an ORIENTATION.} \> Section~\ref{info:heat_flux} \\
+    \>                                         \> or Section~\ref{info:bidir_probe} \\
 888 \> \ct{DEVC ... TEMPORAL_STATISTIC is not recognized.} \> Section~\ref{info:statistics} \\
 889 \> \ct{DEVC ... SPATIAL_STATISTIC is not recognized.} \> Section~\ref{info:statistics} \\
 890 \> \ct{DEVC ... STATISTICS is not recognized.} \> Section~\ref{info:statistics} \\
