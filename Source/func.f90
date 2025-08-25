@@ -1496,13 +1496,12 @@ SELECT CASE (LIMITER)
                DU_LOC = U(I+IP1,J+JP1,K+KP1) - U(I,J,K)
                IF (A(I,J,K) > 0._EB) THEN
                   DU_UP = U(I,J,K) - U(I+IM1,J+JM1,K+KM1)
-                  R = DU_UP / (DU_LOC + SIGN(TWO_EPSILON_EB, DU_LOC))
-                  B = MAX(0._EB, MIN(2._EB*R,1._EB), MIN(R,2._EB))
                ELSE
                   DU_UP = U(I+IP2,J+JP2,K+KP2) - U(I+IP1,J+JP1,K+KP1)
-                  R = DU_UP / (DU_LOC + SIGN(TWO_EPSILON_EB, DU_LOC))
-                  B = MAX(0._EB, MIN(2._EB*R,1._EB), MIN(R,2._EB))
                ENDIF
+               R = 0._EB ; B = 0._EB
+               IF (ABS(DU_LOC) > TWO_EPSILON_EB) R = DU_UP/DU_LOC
+               IF (R > TWO_EPSILON_EB) B = MAX(0._EB, MIN(2._EB*R,1._EB), MIN(R,2._EB))
                BF(I,J,K) = MAX(0._EB, MIN(B, BF(I,J,K)))
             ENDDO
          ENDDO
@@ -1517,15 +1516,12 @@ SELECT CASE (LIMITER)
                DU_LOC = U(I+IP1,J+JP1,K+KP1) - U(I,J,K)
                IF (A(I,J,K) > 0._EB) THEN
                   DU_UP = U(I,J,K) - U(I+IM1,J+JM1,K+KM1)
-                  R = 0._EB ; B = 0._EB
-                  IF (ABS(DU_UP) > TWO_EPSILON_EB) R = DU_LOC/DU_UP
-                  IF (R > 0._EB) B = R*(3._EB*R+1._EB)/((R+1._EB)**2)
                ELSE
                   DU_UP = U(I+IP2,J+JP2,K+KP2) - U(I+IP1,J+JP1,K+KP1)
-                  R = 0._EB ; B = 0._EB
-                  IF (ABS(DU_UP) > TWO_EPSILON_EB) R = DU_LOC/DU_UP
-                  IF (R > 0._EB) B = R*(3._EB*R+1._EB)/((R+1._EB)**2)
                ENDIF
+               R = 0._EB ; B = 0._EB
+               IF (ABS(DU_UP) > TWO_EPSILON_EB) R = DU_LOC/DU_UP
+               IF (R > TWO_EPSILON_EB) B = R*(3._EB*R+1._EB)/((R+1._EB)**2)
                BF(I,J,K) = MAX(0._EB, MIN(B, BF(I,J,K)))
             ENDDO
          ENDDO
