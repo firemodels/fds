@@ -2913,6 +2913,7 @@ REAL(EB) :: TNOW,XI,YJ,ZK
 INTEGER, INTENT(IN) :: CODE
 INTEGER :: NM,NOM,I,II,JJ,KK,LL,LLL,N,RNODE,SNODE,IMIN,IMAX,JMIN,JMAX,KMIN,KMAX,IJK_SIZE,RC,IC,LC
 INTEGER :: NNN,NN1,NN2,IPC,II1,II2,JJ1,JJ2,KK1,KK2,NQT2,NN,IOR,NRA,NRA_MAX,AIC,OBST_INDEX,IP,IW
+CHARACTER(50) :: ERR_STRING
 REAL(EB), POINTER, DIMENSION(:,:) :: PHI_LS_P
 REAL(EB), POINTER, DIMENSION(:,:,:) :: HP,HP2,RHOP,RHOP2,DP,DP2,UP,UP2,VP,VP2,WP,WP2
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP,ZZP2
@@ -3385,7 +3386,15 @@ ENDDO SENDING_MESH_LOOP
 ! Start the communications. Note that MPI_STARTALL starts the persistent send/receives
 
 IF (N_MPI_PROCESSES>1 .AND. N_REQ>0) THEN
-   CALL TIMEOUT('MPI exchange of particles',N_REQ,REQ(1:N_REQ))
+   SELECT CASE(CODE)
+      CASE( 8) ; ERR_STRING = 'MPI exchange of WALL information (CODE=8)'
+      CASE( 9) ; ERR_STRING = 'MPI exchange of WALL information (CODE=9)'
+      CASE(19) ; ERR_STRING = 'MPI exchange of WALL information (CODE=19)'
+      CASE(11) ; ERR_STRING = 'MPI exchange of PARTICLE information (CODE=11)'
+      CASE(16) ; ERR_STRING = 'MPI exchange of OBST information (CODE=16)'
+      CASE(18) ; ERR_STRING = 'MPI exchange of OBST information (CODE=18)'
+   END SELECT
+   CALL TIMEOUT(ERR_STRING,N_REQ,REQ(1:N_REQ))
    N_REQ = 0
 ENDIF
 
@@ -3400,37 +3409,41 @@ ENDIF
 
 IF (N_MPI_PROCESSES>1 .AND. CODE==7 .AND. N_REQ2>0) THEN
    CALL MPI_STARTALL(N_REQ2,REQ2(1:N_REQ2),IERR)
-   CALL TIMEOUT('MPI exchange of particle sizes',N_REQ2,REQ2(1:N_REQ2))
+   CALL TIMEOUT('MPI exchange of particle sizes (CODE=7)',N_REQ2,REQ2(1:N_REQ2))
 ENDIF
 
 IF (N_MPI_PROCESSES>1 .AND. (CODE==3.OR.CODE==6) .AND. N_REQ3>0) THEN
    CALL MPI_STARTALL(N_REQ3,REQ3(1:N_REQ3),IERR)
-   CALL TIMEOUT('MPI exchange of velocity and pressure',N_REQ3,REQ3(1:N_REQ3))
+   IF (CODE==3) THEN
+      CALL TIMEOUT('MPI exchange of velocity and pressure (CODE=3)',N_REQ3,REQ3(1:N_REQ3))
+   ELSE
+      CALL TIMEOUT('MPI exchange of velocity and pressure (CODE=6)',N_REQ3,REQ3(1:N_REQ3))
+   ENDIF
 ENDIF
 
 IF (N_MPI_PROCESSES>1 .AND. CODE==5 .AND. N_REQ7>0) THEN
    CALL MPI_STARTALL(N_REQ7,REQ7(1:N_REQ7),IERR)
-   CALL TIMEOUT('MPI exchange of pressure',N_REQ7,REQ7(1:N_REQ7))
+   CALL TIMEOUT('MPI exchange of pressure (CODE=5)',N_REQ7,REQ7(1:N_REQ7))
 ENDIF
 
 IF (N_MPI_PROCESSES>1 .AND. CODE==6 .AND. N_REQ6>0) THEN
    CALL MPI_STARTALL(N_REQ6,REQ6(1:N_REQ6),IERR)
-   CALL TIMEOUT('MPI exchange of back wall info',N_REQ6,REQ6(1:N_REQ6))
+   CALL TIMEOUT('MPI exchange of back wall info (CODE=6)',N_REQ6,REQ6(1:N_REQ6))
 ENDIF
 
 IF (N_MPI_PROCESSES>1 .AND. CODE==2 .AND. N_REQ5>0) THEN
    CALL MPI_STARTALL(N_REQ5,REQ5(1:N_REQ5),IERR)
-   CALL TIMEOUT('MPI exchange of radiation',N_REQ5,REQ5(1:N_REQ5))
+   CALL TIMEOUT('MPI exchange of radiation (CODE=2)',N_REQ5,REQ5(1:N_REQ5))
 ENDIF
 
 IF (N_MPI_PROCESSES>1 .AND. CODE==14 .AND. N_REQ14>0) THEN
    CALL MPI_STARTALL(N_REQ14,REQ14(1:N_REQ14),IERR)
-   CALL TIMEOUT('MPI exchange of level set values',N_REQ14,REQ14(1:N_REQ14))
+   CALL TIMEOUT('MPI exchange of level set values (CODE=14)',N_REQ14,REQ14(1:N_REQ14))
 ENDIF
 
 IF (N_MPI_PROCESSES>1 .AND. CODE==15 .AND. N_REQ15>0) THEN
    CALL MPI_STARTALL(N_REQ15,REQ15(1:N_REQ15),IERR)
-   CALL TIMEOUT('MPI exchange of obstruction mass',N_REQ15,REQ15(1:N_REQ15))
+   CALL TIMEOUT('MPI exchange of obstruction mass (CODE=15)',N_REQ15,REQ15(1:N_REQ15))
 ENDIF
 
 ! For each mesh, NM, controlled by the current MPI process, RNODE, loop over all
