@@ -1749,14 +1749,13 @@ ENDIF
 
 IF (LP_SF%FIRE_SPREAD_RATE>0._EB) THEN
    B1%T_IGN = T_BEGIN + SQRT((BC%X-LP_SF%XYZ(1))**2 + (BC%Y-LP_SF%XYZ(2))**2 + (BC%Z-LP_SF%XYZ(3))**2)/LP_SF%FIRE_SPREAD_RATE
-ELSE
-   B1%T_IGN = LP_SF%T_IGN
+ELSE  ! Assume that the ignition time is relative to the time of insertion, not the time of the simulation starting.
+   B1%T_IGN = T + (LP_SF%T_IGN-T_BEGIN)
 ENDIF
 
 ! Store volume over which gas-solid exchanges occur
-IF (BC%X>XS .AND. BC%X<XF .AND. BC%Y>YS .AND. BC%Y<YF .AND. BC%Z>ZS .AND. BC%Z<ZF) THEN
-   CALL GET_RVC(NM,BC%IIG,BC%JJG,BC%KKG,LP%RVC)
-ENDIF
+
+IF (BC%X>XS .AND. BC%X<XF .AND. BC%Y>YS .AND. BC%Y<YF .AND. BC%Z>ZS .AND. BC%Z<ZF) CALL GET_RVC(NM,BC%IIG,BC%JJG,BC%KKG,LP%RVC)
 
 END SUBROUTINE INITIALIZE_SINGLE_PARTICLE
 
