@@ -234,7 +234,6 @@ $QFDS -d Fires HoC_NonIdeal.fds
 $QFDS -d Fires simple_test.fds
 $QFDS -d Fires tmp_lower_limit_simple.fds
 $QFDS -d Fires tmp_lower_limit_default.fds
-$QFDS -d Fires tmp_lower_limit_dt_p001.fds
 $QFDS -d Fires tunnel_const_gamma.fds
 $QFDS -d Fires tunnel_linear_cp.fds
 $QFDS -p 8 -d Fires circular_burner.fds

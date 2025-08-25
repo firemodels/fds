@@ -113,7 +113,7 @@ for i2 in range(n_species):
             write_props = False
       else:
          name = gas.species(i).name
-      if (radcal):
+      if (radcal and spec_index[i]>-1):
          radcal_id = spec_data['RADCAL_ID'][spec_index[i]]
    else:
       name = gas.species(i).name
