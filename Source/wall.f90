@@ -59,9 +59,9 @@ IF (PREDICTOR) THEN
    PBAR_P => PBAR_S
    HP     => HS
 ELSE
-   UU => US
-   VV => VS
-   WW => WS
+   UU => U
+   VV => V
+   WW => W
    RHOP => RHO
    ZZP  => ZZ
    PBAR_P => PBAR
