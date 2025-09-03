@@ -3436,17 +3436,17 @@ ENDDO
 DO N1 = 1, N_TRACKED_SPECIES
    SPECIES_MIXTURE(N1)%OXR = (SPECIES_MIXTURE(N1)%ATOMS(1)  * 0.5_EB  + & ! H (H2O)
                               SPECIES_MIXTURE(N1)%ATOMS(6)  * 2.0_EB  + & ! C (CO2)
-                              SPECIES_MIXTURE(N1)%ATOMS(16) * 2.0_EB) & !+! S (SO2)
-!                         SPECIES_MIXTURE(N1)%ATOMS(15) * 2.5_EB  + & ! P (P4O10)
-!                         SPECIES_MIXTURE(N1)%ATOMS(26) * 1.5_EB  + & ! Fe (Fe2O3)
-!                         SPECIES_MIXTURE(N1)%ATOMS(13) * 1.5_EB  + & ! Al (Al2O3)
-!                         SPECIES_MIXTURE(N1)%ATOMS(14) * 2.0_EB  + & ! Si (SiO2)
-!                         SPECIES_MIXTURE(N1)%ATOMS(22) * 2.0_EB  + & ! Ti (TiO2)
-!                         SPECIES_MIXTURE(N1)%ATOMS(29) * 1.0_EB  + & ! Cu (CuO)
-!                         SPECIES_MIXTURE(N1)%ATOMS(30) * 1.0_EB  + & ! Zn (ZnO)
-!                         SPECIES_MIXTURE(N1)%ATOMS(11) * 0.5_EB  + & ! Na (Na2O)
-!                         SPECIES_MIXTURE(N1)%ATOMS(19) * 0.5_EB  + & ! K  (K2O)
-!                         SPECIES_MIXTURE(N1)%ATOMS(20) * 1.0_EB )    ! Ca (CaO)
+                              SPECIES_MIXTURE(N1)%ATOMS(16) * 2.0_EB  + & ! S (SO2)
+                              SPECIES_MIXTURE(N1)%ATOMS(15) * 2.5_EB  + & ! P (P4O10)
+                              SPECIES_MIXTURE(N1)%ATOMS(26) * 1.5_EB  + & ! Fe (Fe2O3)
+                              SPECIES_MIXTURE(N1)%ATOMS(13) * 1.5_EB  + & ! Al (Al2O3)
+                              SPECIES_MIXTURE(N1)%ATOMS(14) * 2.0_EB  + & ! Si (SiO2)
+                              SPECIES_MIXTURE(N1)%ATOMS(22) * 2.0_EB  + & ! Ti (TiO2)
+                              SPECIES_MIXTURE(N1)%ATOMS(29) * 1.0_EB  + & ! Cu (CuO)
+                              SPECIES_MIXTURE(N1)%ATOMS(30) * 1.0_EB  + & ! Zn (ZnO)
+                              SPECIES_MIXTURE(N1)%ATOMS(11) * 0.5_EB  + & ! Na (Na2O)
+                              SPECIES_MIXTURE(N1)%ATOMS(19) * 0.5_EB  + & ! K  (K2O)
+                              SPECIES_MIXTURE(N1)%ATOMS(20) * 1.0_EB ) &   ! Ca (CaO)
                                 * ELEMENT(8)%MASS / SPECIES_MIXTURE(N1)%MW
 
    SPECIES_MIXTURE(N1)%OXA = SPECIES_MIXTURE(N1)%ATOMS(8) * ELEMENT(8)%MASS / SPECIES_MIXTURE(N1)%MW
