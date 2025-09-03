@@ -783,7 +783,8 @@ END FUNCTION DDTMP_TROE
 !> \brief cvode interface for ODE integrator. Call sundials cvode in serial mode.
 !> \param CC species concentration (kmol/m3) array
 !> \param ZZ_0 initial species mass fraction array (of the unbuned zone),needed for mixing+chem
-!> \param TMP_IN is the temperature of the cell (unburned zone)
+!> \param TMP_IN is the temperature of the mixed zone (For DNS it is cell temp)
+!> \param TMP_UNMIX is the unmix zone temperature
 !> \param PR_IN is the pressure
 !> \param ZETA0 is the initial unmixed fraction 
 !> \param TAU_MIX is Mixing timescale
@@ -792,13 +793,13 @@ END FUNCTION DDTMP_TROE
 !> \param TEND is the end time in seconds
 !> \param RTOL is the relative error for all the species (REAL_EB)
 !> \param ATOL is the absolute error tolerance array for the species (REAL_EB)
-!> \param TMP_OUT reactor calculated temperature at the end
+!> \param TMP_OUT reactor calculated mixing zone temperature at the end
 !> \param CHEM_TIME Chemical time scale
 !> \param WRITE_SUBSTEPS Whether to write cvode substeps. Only write for first cfd step.
 !> \param CVODE_CALL_OPTION 1:CV_NORMAL, 2=CV_ONE_STEP
 !> \details This is the interface subroutine to the other modules.
 
-SUBROUTINE CVODE_SERIAL(CC,ZZ_0, TMP_IN, PR_IN, ZETA0, TAU_MIX, CELL_MASS, TCUR,TEND, RTOL, ATOL, &
+SUBROUTINE CVODE_SERIAL(CC,ZZ_0, TMP_IN, TMP_UNMIX, PR_IN, ZETA0, TAU_MIX, CELL_MASS, TCUR,TEND, RTOL, ATOL, &
                         TMP_OUT, CHEM_TIME, WRITE_SUBSTEPS, CVODE_CALL_OPTION)
 USE PHYSICAL_FUNCTIONS, ONLY : MOLAR_CONC_TO_MASS_FRAC, CALC_EQUIV_RATIO, GET_ENTHALPY, GET_MOLECULAR_WEIGHT
 USE COMP_FUNCTIONS, ONLY: GET_FILE_NUMBER
@@ -813,7 +814,7 @@ USE FSUNDIALS_MATRIX_MOD       ! FORTRAN INTERFACE TO GENERIC SUNMATRIX
 USE FSUNDIALS_NVECTOR_MOD      ! FORTRAN INTERFACE TO GENERIC N_VECTOR
 
 REAL(EB), INTENT(INOUT) :: CC(N_TRACKED_SPECIES)
-REAL(EB), INTENT(IN)    :: ZZ_0(N_TRACKED_SPECIES),TMP_IN,PR_IN,ZETA0,TAU_MIX,CELL_MASS,TCUR,TEND
+REAL(EB), INTENT(IN)    :: ZZ_0(N_TRACKED_SPECIES),TMP_IN,TMP_UNMIX,PR_IN,ZETA0,TAU_MIX,CELL_MASS,TCUR,TEND
 REAL(EB), INTENT(IN)    :: ATOL(N_TRACKED_SPECIES)
 REAL(EB), INTENT(IN)    :: RTOL
 REAL(EB), INTENT(OUT)   :: TMP_OUT,CHEM_TIME
@@ -841,7 +842,7 @@ TYPE(N_VECTOR),        POINTER :: SUNATOL      ! SUNDIALS VECTOR FOR ABSOLUTE TO
 TYPE(C_PTR)                    :: USERDATAPTR  ! USER DATA CONTAINS MIXING INFORMATION
 
 REAL(EB) :: ZZ(N_TRACKED_SPECIES), EQUIV, H_IN
-INTEGER :: CVODE_TASK, NS, NTRY, MAXTRY, SUBSTEP_COUNT
+INTEGER :: CVODE_TASK, NS, NTRY, MAXTRY, SUBSTEP_COUNT, MAXTRY_FAC
 REAL(EB) :: H_G
 TYPE(USERDATA), TARGET :: USER_DATA
 LOGICAL :: ONLY_FIRST_STEP=.TRUE. ! Needed in CV_ONE_STEP
@@ -948,7 +949,7 @@ USER_DATA%TAU_MIX = TAU_MIX
 USER_DATA%CELL_MASS = CELL_MASS
 ALLOCATE(USER_DATA%ZZ_0(N_TRACKED_SPECIES))
 USER_DATA%ZZ_0 = ZZ_0
-CALL GET_ENTHALPY(ZZ_0,H_IN,TMP_IN)
+CALL GET_ENTHALPY(ZZ_0,H_IN,TMP_UNMIX)
 USER_DATA%H_IN = H_IN 
 USERDATAPTR = C_LOC(USER_DATA)
 IERR_C = FCVODESETUSERDATA(CVODE_MEM, USERDATAPTR)
@@ -987,12 +988,14 @@ ELSE IF(CVODE_TASK == CV_ONE_STEP) THEN
       ENDIF  
    END DO
 
-
 ENDIF
 
 IF (IERR_C /= 0) THEN
-   MAXTRY = CVODE_MAX_TRY
    ! If all internal substeps are taken try two more times. This will allow larger CFD timestep.
+   ! Make MAXTRY at least CVODE_MAX_TRY or for larger timestep (>1E-3) scale it proportionaly.
+   MAXTRY_FAC = CEILING((TEND-TCUR)/1.0E-3_EB)
+   MAXTRY_FAC = MIN(MAX(MAXTRY_FAC,1),50)
+   MAXTRY = CVODE_MAX_TRY*MAXTRY_FAC
    IF (IERR_C == CV_TOO_MUCH_WORK) THEN !CV_TOO_MUCH_WORK == all internal substeps are taken
       NTRY = 0
       DO WHILE (NTRY < MAXTRY)
@@ -1008,8 +1011,8 @@ IF (IERR_C /= 0) THEN
 
    IF (IERR_C .NE. CV_SUCCESS) THEN
       IF (IERR_C == CV_TOO_MUCH_WORK) THEN
-         WRITE(LU_ERR,'(A, 2E18.8, A)')" WARN: CVODE took all internal substeps. CUR_CFD_TIME, DT=", CUR_CFD_TIME, (TEND-TCUR), &
-                     ". If the warning persists, reduce the timestep."
+         WRITE(LU_ERR,'(A, 2E18.8, I8, A)')" WARN: CVODE took all internal substeps. CUR_CFD_TIME, DT, MAXTRY=", CUR_CFD_TIME, &
+                     (TEND-TCUR), MAXTRY, ". If the warning persists, reduce the timestep."
       ELSE
          WRITE(LU_ERR,'(A, I4, A, 2E18.8, A)')" WARN: CVODE didn't finish ODE solution with message code:", IERR_C, &
                         " and CUR_CFD_TIME, DT=", CUR_CFD_TIME, (TEND-TCUR), ". If the warning persists, reduce the timestep."
