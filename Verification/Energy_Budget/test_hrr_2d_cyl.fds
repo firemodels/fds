@@ -4,6 +4,8 @@
 
 &TIME T_END=10/
 
+&DUMP DT_HRR=0.1 /
+
 &REAC FUEL='METHANE'/
 
 &SURF ID='burner', HRRPUA=200, COLOR='RED'/
