@@ -306,9 +306,10 @@ Many of the changes in FDS~6 are improvements to the various sub-models that do 
 \chapter{Getting Started}
 \label{info:gettingstarted}
 
-FDS is a computer program that solves equations that describe the evolution of fire. It is a Fortran program that reads input parameters from a text file, computes a numerical solution to the governing equations, and writes user-specified output data to files. Smokeview is a companion program that reads FDS output files and produces animations on the computer screen. Smokeview has a simple menu-driven interface. FDS does not. However, there are various third-party programs that have been developed to generate the text file containing the input parameters needed by FDS.
+FDS is a Fortran program that solves the equations governing fire or other thermally-driven, low Mach number flows. FDS reads input parameters from a text file, computes a numerical solution to the governing equations, and writes user-specified output data to files. Smokeview\footnote{A separate document~\cite{Smokeview_Users_Guide} describes how to use Smokeview.} is a companion program that reads FDS output files and produces animations on the computer screen. Smokeview has a simple menu-driven interface. FDS does not. However, there are various third-party programs that have been developed to generate the text file containing the input parameters needed by FDS.
 
-This guide describes how to obtain FDS and Smokeview and how to use FDS. A separate document~\cite{Smokeview_Users_Guide} describes how to use Smokeview.
+Some third-party applications, like \href{https://www.thunderheadeng.com/pyrosim/}{PyroSim from Thunderhead Engineering}, have graphical interfaces for specifying input parameters and for viewing results. FDS is the core solver of such a package, but Smokeview would be replaced by a program that is compatible with the geometry engine used to build the model. If you are using a package like PyroSim, FDS would be installed as part of the larger package and you can skip the next section which is intended for those who want to download and install FDS and Smokeview only.
+
 
 \section{How to Acquire FDS and Smokeview}
 \label{info:acquire}
@@ -322,7 +323,6 @@ The project homepage provides detailed instructions on how to download executabl
 \noindent
 The typical FDS/Smokeview distribution consists of an installation package or compressed archive, which is available for MS Windows, macOS, and Linux.
 
-Old versions can be kept by copying the old version's installation directly to another location so that it is not overwritten when installing a new version.
 
 
 \section{Computer Hardware Requirements}
@@ -346,6 +346,8 @@ The goal of making FDS and Smokeview publicly available has been to enable pract
 \section{Installation Testing}
 
 If you are running FDS under a quality assurance plan that requires installation testing, a test procedure is provided in Appendix B of the FDS Verification Guide~\cite{FDS_Verification_Guide}.  This guide can be obtained from the FDS-SMV website.
+
+If you are a first-time user or you simply want to ensure that FDS and Smokeview have been installed properly on your computer, run\footnote{On a Windows computer, FDS is typically installed in a directory that is read-only for most users. Copy the sample input file and move it to a directory for which you have write-privilege.} the case called \ct{Examples/Fire/simple_test.fds} following the instructions in the next chapter. This case requires only a few tens of minutes to complete and allows you to visualize the results of a very simple fire scenario. As you learn about new features in the chapters to follow, this case can serve as a useful testbed. The text file \ct{simple_test.fds} contains parameters organized by {\em namelist} groups that are listed alphabetically in Chapter~\ref{info:namelists}. All FDS input parameters are listed in these tables, and each has a hyperlink to a section in this guide that explains its use.
 
 
 
