@@ -9440,7 +9440,6 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
                            CALL SHUTDOWN(MESSAGE) ; RETURN
                         ENDIF
                         SF%MASS_FLUX(NS) = SF%MASS_FRACTION(NS)*RN%HOC_COMPLETE
-                        WRITE(LU_ERR,*)"RN%HOC_COMPLETE=",RN%HOC_COMPLETE
                         FUEL_MF = FUEL_MF + SF%MASS_FRACTION(NS)
                      ENDIF
                   ENDIF
@@ -9464,7 +9463,6 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
             ELSE
                RN => REACTION(1)
                SF%MASS_FLUX(RN%FUEL_SMIX_INDEX) = SF%HRRPUA/RN%HOC_COMPLETE
-               WRITE(LU_ERR,*)"1 RN%HOC_COMPLETE=",RN%HOC_COMPLETE
                IF (SF%N_LAYERS > 0 .AND. SF%THERMAL_BC_INDEX==THERMALLY_THICK) THEN
                   IF (MATERIAL(SF%MATL_INDEX(1))%HEAT_OF_COMBUSTION(1,1) > 0._EB) &
                      SF%M_DOT_G_PP_ACTUAL_FAC = RN%HOC_COMPLETE / MATERIAL(SF%MATL_INDEX(1))%HEAT_OF_COMBUSTION(1,1)
