@@ -915,7 +915,7 @@ INTEGER :: TOTAL_SUBSTEPS_TAKEN
 ! Adiabatic flame temperature calculation
 CHARACTER(LABEL_LENGTH) :: FUEL_ID_FOR_AFT='null'
 INTEGER :: I_FUEL,I_CO2,I_H2O,I_O2,I_N2 ! Store the index of the species in the ZZ array.
-LOGICAL  :: USE_MIXED_ZN_AFT_TMP = .TRUE.
+LOGICAL  :: USE_MIXED_ZN_AFT_TMP = .FALSE.
 
 ! Mixing
 REAL(EB) :: ZETA_ARTIFICAL_MIN_LIMIT=0.99_EB
@@ -924,6 +924,6 @@ REAL(EB) :: ZETA_FIRST_STEP_DIV=10._EB
 
 ! IGNITION ZONES (mainly for premixed flame)
 INTEGER :: N_IGNITION_ZONES = 0
-TYPE(IGNITION_ZONE_TYPE), DIMENSION(MAX_IGNITION_ZONES) :: IGNITION_ZONES      !< Coordinates of ignition zones used for detailed chemistry
+TYPE(IGNITION_ZONE_TYPE), DIMENSION(MAX_IGNITION_ZONES) :: IGNITION_ZONES !< Coordinates of ignition zones
 
 END MODULE CHEMCONS
