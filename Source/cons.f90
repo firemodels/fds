@@ -274,7 +274,6 @@ LOGICAL :: REACTING_THIN_OBSTRUCTIONS=.FALSE.       !< Thin obstructions that of
 LOGICAL :: TENSOR_DIFFUSIVITY=.FALSE.               !< If true, use experimental tensor diffusivity model for spec and tmp
 LOGICAL :: OXPYRO_MODEL=.FALSE.                     !< Flag to use oxidative pyrolysis mass transfer model
 LOGICAL :: OUTPUT_WALL_QUANTITIES=.FALSE.           !< Flag to force call to WALL_MODEL
-LOGICAL :: FLUX_LIMITER_SINGLE_COEF=.TRUE.          !< Flag to base flux coefficients off of a single worst-case scalar gradient
 LOGICAL :: STORE_FIRE_ARRIVAL=.FALSE.               !< Flag for tracking arrival of spreading fire front over a surface
 LOGICAL :: STORE_FIRE_RESIDENCE=.FALSE.             !< Flag for tracking residence time of spreading fire front over a surface
 LOGICAL :: STORE_LS_SPREAD_RATE=.FALSE.             !< Flag for outputting local level set spread rate magnitude
@@ -886,14 +885,25 @@ END MODULE RADCONS
 MODULE CHEMCONS
 USE PRECISION_PARAMETERS
 
+!> \brief Parameters associated with IGNITION_ZONES
+TYPE IGNITION_ZONE_TYPE
+   REAL(EB) :: X1            !< Lower x bound of Ignition Zone
+   REAL(EB) :: X2            !< Upper x bound of Ignition Zone
+   REAL(EB) :: Y1            !< Lower y bound of Ignition Zone
+   REAL(EB) :: Y2            !< Upper y bound of Ignition Zone
+   REAL(EB) :: Z1            !< Lower z bound of Ignition Zone
+   REAL(EB) :: Z2            !< Upper z bound of Ignition Zone
+   INTEGER :: DEVC_INDEX=0   !< Index of device controlling the status of the zone
+   CHARACTER(LABEL_LENGTH) :: DEVC_ID='null'  !< Name of device controlling the status of the zone
+END TYPE IGNITION_ZONE_TYPE
+
 INTEGER, ALLOCATABLE, DIMENSION(:) :: YP2ZZ
 REAL(EB) :: ODE_MIN_ATOL= -1._EB
 LOGICAL  :: EQUIV_RATIO_CHECK = .FALSE.
-REAL(EB) :: MIN_EQUIV_RATIO=0.0_EB
+REAL(EB) :: MIN_EQUIV_RATIO=0.1_EB
 REAL(EB) :: MAX_EQUIV_RATIO=20.0_EB
 LOGICAL  :: DO_CHEM_LOAD_BALANCE = .FALSE.
 INTEGER  :: MAX_CVODE_SUBSTEPS=100000
-REAL(EB) :: MAX_CHEM_TIME=1.E-6_EB
 INTEGER  :: CVODE_MAX_TRY=4
 LOGICAL  :: IS_EXPONENT_LT_1 = .FALSE.
 
@@ -902,5 +912,18 @@ LOGICAL  :: WRITE_CVODE_SUBSTEPS = .FALSE.
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: CVODE_SUBSTEP_DATA
 INTEGER :: TOTAL_SUBSTEPS_TAKEN
 
-END MODULE CHEMCONS
+! Adiabatic flame temperature calculation
+CHARACTER(LABEL_LENGTH) :: FUEL_ID_FOR_AFT='null'
+INTEGER :: I_FUEL,I_CO2,I_H2O,I_O2,I_N2 ! Store the index of the species in the ZZ array.
+LOGICAL  :: USE_MIXED_ZN_AFT_TMP = .FALSE.
 
+! Mixing
+REAL(EB) :: ZETA_ARTIFICAL_MIN_LIMIT=0.99_EB
+REAL(EB) :: ZETA_ARTIFICAL_MAX_LIMIT=0.9999_EB
+REAL(EB) :: ZETA_FIRST_STEP_DIV=10._EB
+
+! IGNITION ZONES (mainly for premixed flame)
+INTEGER :: N_IGNITION_ZONES = 0
+TYPE(IGNITION_ZONE_TYPE), DIMENSION(MAX_IGNITION_ZONES) :: IGNITION_ZONES !< Coordinates of ignition zones
+
+END MODULE CHEMCONS
