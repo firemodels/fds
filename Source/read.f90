@@ -10338,6 +10338,8 @@ READ_RAMP_LOOP: DO N=1,N_RAMP
          CTRL_ID = 'null'
          X       = -1.E6_EB
          Z       = -1.E6_EB
+         T       = 0._EB
+         F       = 1._EB
          CALL CHECKREAD('RAMP',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
          IF (IOS==1) EXIT SEARCH_LOOP2
          READ(LU_INPUT,RAMP)
