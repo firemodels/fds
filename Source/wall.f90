@@ -3172,7 +3172,7 @@ IF_DO_EVAPORATION: IF (DO_EVAPORATION) THEN
 
    ! Compute the Spalding B number
 
-   SUM_Y_SV = SUM(Y_SV)
+   SUM_Y_SV = SUM(Y_SV(1:N_MATS))
    SUM_Y_SV_SMIX = 0._EB
    MATERIAL_LOOP_1: DO N=1,N_MATS
       IF (.NOT.LIQUID(N)) CYCLE MATERIAL_LOOP_1
@@ -3180,7 +3180,7 @@ IF_DO_EVAPORATION: IF (DO_EVAPORATION) THEN
    ENDDO MATERIAL_LOOP_1
 
    IF (SUM_Y_SV<ONE_M_EPS) THEN
-      B_NUMBER = MAX(0._EB,(SUM_Y_SV-SUM(Y_GAS))/(1._EB-SUM_Y_SV))
+      B_NUMBER = MAX(0._EB,(SUM_Y_SV-SUM(Y_GAS(1:N_MATS)))/(1._EB-SUM_Y_SV))
    ELSE
       B_NUMBER = 1.E6_EB  ! Fictitiously high B number intended to push mass flux to its upper limit
    ENDIF
