@@ -83,7 +83,7 @@ while getopts 'bCe:EhIj:m:o:Oq:r:suvVw:xyz' OPTION
 do
 case $OPTION in
   b)
-   DEBUG="-b "
+   DEBUG="-T db "
    ;;
   C)
    CHECK=1

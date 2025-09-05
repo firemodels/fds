@@ -4423,6 +4423,15 @@ This verification test consists of two test cases. The second case, \ct{aerosol\
 
 This verification test consists of two test cases. The second case, \ct{aerosol\_thermophoretic\_deposition\_2}, reverses the temperature gradient. The case consists of a box 1~cm on a side with adiabatic, free-slip side walls and a 100 K temperature gradient over the height of the box. The box is filled with two gas species each having a molecular weight of 28.8~g/mol, a viscosity of $2\times10^{-5}$~\si{kg/(m.s)}, a thermal conductivity of 0.025~\si{W/(m.K)}, and specific heat of 1~\si{kJ/(kg.K)}, and zero diffusivity. One of the gas species is defined as an aerosol with a diameter of 1~$\mu$m, a solid phase density of 2000~\si{kg/m^3}, and a solid phase conductivity of 1~\si{W/(m.K)}. The initial mass fraction of the aerosol is $1\times10^{-5}$. The gas temperature is initialized to its steady-state temperature gradient. \ct{STRATIFICATION}, \ct{NOISE}, and all aerosol behaviors except for \ct{THERMOPHORETIC\_SETTLING} and \ct{THERMOPHORETIC\_DEPOSITION} are turned off. Thermophoretic settling rates are weakly dependent on the gas density. Since there is a temperature gradient, the settling rates are not uniform over the height of the box. Unlike the gravitational settling case, this means over long enough time periods the overall settling rate is not linear in time; however, for a short time period a near linear settling rate is expected and can be determined analytically.
 
+Using the equation for the thermophoretic velocity, $u_{\rm th}$, the thermophoretic velocities for the gas cells adjacent to the hot and cold walls are respectively 2.25E-4~\si{m/s} and 2.15E-4~\si{m/s}. Adjacent to the cold wall, $u_{\rm th}$ is the rate at which the aerosol deposits onto the wall. Over the simulation time of 2~s, the soot will move 4.29E-4~m which is 42.9~\% of the cell size. That fraction of the aerosol in the cell will deposit which is 5.05E-9~\si{kg/m^2}. Adjacent to the hot wall, $u_{\rm th}$ is the rate at which the aerosol leaves the cell. Over the simulation time of 2~s, the soot will move 4.49E-4~m which is 44.9~\% of the cell size. One minus that fraction of the original aerosol density in the cell will remain which is 4.98E-6~\si{kg/m^3}.
+
+The thermophorertic velocity is given by
+\be
+u_{\rm th} = \frac{K_{\rm th} \nu}{T_{\rm g}} \; \frac{\d T}{\d x}
+\ee
+where $K_{\rm th}$ is a coefficient dependent on the particle size and solid conductivity, $\nu$ is the kinematic viscosity, $T_{\rm g}$ is the cell gas temperature, and $\frac{\d T}{\d x}$ is the temperature gradient.
+
+
 \begin{figure}[ht]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}

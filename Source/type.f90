@@ -187,9 +187,12 @@ END TYPE BAND_TYPE
 
 TYPE BOUNDARY_COORD_TYPE
 
-   INTEGER :: II,II2         !< Ghost cells x index
-   INTEGER :: JJ,JJ2         !< Ghost cells y index
-   INTEGER :: KK,KK2         !< Ghost cells z index
+   INTEGER :: II             !< First ghost cell inside wall in the x direction
+   INTEGER :: JJ             !< First ghost cell inside wall in the y direction
+   INTEGER :: KK             !< First ghost cell inside wall in the z direction
+   INTEGER :: II2            !< Second ghost cell, x direction
+   INTEGER :: JJ2            !< Second ghost cell, y direction
+   INTEGER :: KK2            !< Second ghost cell, z direction
    INTEGER :: IIG            !< Gas cell x index
    INTEGER :: JJG            !< Gas cell y index
    INTEGER :: KKG            !< Gas cell z index

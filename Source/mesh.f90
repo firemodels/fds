@@ -53,8 +53,8 @@ TYPE MESH_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: D_SOURCE!< Source terms in the expression for the divergence
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: CSD2    !< \f$ C_s \Delta^2 \f$ in Smagorinsky turbulence expression
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: CHEM_SUBIT  !< Number of chemistry sub-iterations
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)   :: CHEM_ACTIVE_CELLS !< I , J ,K info of chemically active cells.
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)   :: CHEM_ACTIVE_CC !< ICC, JCC of chemically active cells.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)   :: CHEM_ACTIVE_CELLS !< I , J ,K, igntion_zone info of chemically active cells.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)   :: CHEM_ACTIVE_CC !< ICC, JCC, igntion_zone of chemically active cells.
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: MIX_TIME    !< Mixing-controlled combustion reaction time (s)
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: STRAIN_RATE !< Strain rate \f$ |S|_{ijk} \f$ (1/s)
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: D_Z_MAX     !< \f$ \max D_\alpha \f$

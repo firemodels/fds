@@ -3291,10 +3291,10 @@ MAKE_KAPPA_ARRAYS: IF (.NOT.SOLID_PHASE_ONLY .AND. ANY(SPECIES%RADCAL_ID/='null'
                         PARTIAL_PRESSURES_ATM(14,1) = 1._EB
                   END SELECT
                   CALL SUB_RADCAL(AMEAN,AP0,RADIANCE,TRANSMISSIVITY)
-                  IF (NSB==1 .AND. PATH_LENGTH > 0.0_EB) THEN
-                     RADCAL_SPECIES2KAPPA(NS,J,K,1) = MIN(AMEAN,AP0)
-                  ELSE
-                     RADCAL_SPECIES2KAPPA(NS,J,K,IBND) = AMEAN/BBF
+                  IF (PATH_LENGTH > 0.0_EB) THEN
+                     RADCAL_SPECIES2KAPPA(NS,J,K,1) = MIN(AMEAN,AP0)/BBF
+                  ELSE ! zero path length
+                     RADCAL_SPECIES2KAPPA(NS,J,K,1) = AP0/BBF
                   ENDIF
                END DO RADCAL_SPECIES_LOOP
             ENDDO Y_LOOP_Z
