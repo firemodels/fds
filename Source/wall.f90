@@ -10,7 +10,7 @@ IMPLICIT NONE (TYPE,EXTERNAL)
 PRIVATE
 
 REAL(EB), POINTER, DIMENSION(:,:) :: PBAR_P
-REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP,HP,UU,VV,WW
+REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP,UU,VV,WW
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP
 
 PUBLIC WALL_BC,TGA_ANALYSIS,HT3D_TEMPERATURE_EXCHANGE
@@ -57,7 +57,6 @@ IF (PREDICTOR) THEN
    RHOP => RHOS
    ZZP  => ZZS
    PBAR_P => PBAR_S
-   HP     => HS
 ELSE
    UU => U
    VV => V
@@ -65,7 +64,6 @@ ELSE
    RHOP => RHO
    ZZP  => ZZ
    PBAR_P => PBAR
-   HP     => H
 ENDIF
 
 ! For thermally-thick boundary conditions, set the flag, CALL_HT_1D, to call the subroutine SOLID_HEAT_TRANSFER.
