@@ -1031,12 +1031,11 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
 
       IF (B1%U_NORMAL_S<0._EB) THEN  ! If there is a non-zero velocity into the domain, assign appropriate species
                                      ! mass fractions to the face
-         DO N=1,N_TRACKED_SPECIES
+         DO N=2,N_TRACKED_SPECIES
             ZZ_GET(N) = SPECIES_MIXTURE(N)%ZZ0 + EVALUATE_RAMP(TSI,SF%RAMP(N)%INDEX,TAU=SF%RAMP(N)%TAU)* &
                            (SF%MASS_FRACTION(N)-SPECIES_MIXTURE(N)%ZZ0)
          ENDDO
-         N_ZZ_MAX = MAXLOC(ZZ_GET(1:N_TRACKED_SPECIES),1)
-         ZZ_GET(N_ZZ_MAX) = 1._EB-SUM(ZZ_GET(1:N_ZZ_MAX-1))-SUM(ZZ_GET(N_ZZ_MAX+1:N_TRACKED_SPECIES))
+         ZZ_GET(1) = 1._EB-SUM(ZZ_GET(2:N_TRACKED_SPECIES))
          CALL GET_REALIZABLE_MF(ZZ_GET)
          B1%ZZ_F = ZZ_GET
       ELSE
