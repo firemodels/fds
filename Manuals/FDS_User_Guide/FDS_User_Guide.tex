@@ -306,9 +306,10 @@ Many of the changes in FDS~6 are improvements to the various sub-models that do 
 \chapter{Getting Started}
 \label{info:gettingstarted}
 
-FDS is a computer program that solves equations that describe the evolution of fire. It is a Fortran program that reads input parameters from a text file, computes a numerical solution to the governing equations, and writes user-specified output data to files. Smokeview is a companion program that reads FDS output files and produces animations on the computer screen. Smokeview has a simple menu-driven interface. FDS does not. However, there are various third-party programs that have been developed to generate the text file containing the input parameters needed by FDS.
+FDS is a Fortran program that solves the equations governing fire or other thermally-driven, low Mach number flows. FDS reads input parameters from a text file, computes a numerical solution to the governing equations, and writes user-specified output data to files. Smokeview\footnote{A separate document~\cite{Smokeview_Users_Guide} describes how to use Smokeview.} is a companion program that reads FDS output files and produces animations on the computer screen. Smokeview has a simple menu-driven interface. FDS does not. However, there are various third-party programs that have been developed to generate the text file containing the input parameters needed by FDS.
 
-This guide describes how to obtain FDS and Smokeview and how to use FDS. A separate document~\cite{Smokeview_Users_Guide} describes how to use Smokeview.
+Some third-party applications, like \href{https://www.thunderheadeng.com/pyrosim/}{PyroSim from Thunderhead Engineering}, have graphical interfaces for specifying input parameters and for viewing results. FDS is the core solver of such a package, but Smokeview would be replaced by a program that is compatible with the geometry engine used to build the model. If you are using a package like PyroSim, FDS would be installed as part of the larger package and you can skip the next section which is intended for those who want to download and install FDS and Smokeview only.
+
 
 \section{How to Acquire FDS and Smokeview}
 \label{info:acquire}
@@ -322,7 +323,6 @@ The project homepage provides detailed instructions on how to download executabl
 \noindent
 The typical FDS/Smokeview distribution consists of an installation package or compressed archive, which is available for MS Windows, macOS, and Linux.
 
-Old versions can be kept by copying the old version's installation directly to another location so that it is not overwritten when installing a new version.
 
 
 \section{Computer Hardware Requirements}
@@ -346,6 +346,8 @@ The goal of making FDS and Smokeview publicly available has been to enable pract
 \section{Installation Testing}
 
 If you are running FDS under a quality assurance plan that requires installation testing, a test procedure is provided in Appendix B of the FDS Verification Guide~\cite{FDS_Verification_Guide}.  This guide can be obtained from the FDS-SMV website.
+
+If you are a first-time user or you simply want to ensure that FDS and Smokeview have been installed properly on your computer, run\footnote{On a Windows computer, FDS is typically installed in a directory that is read-only for most users. Copy the sample input file and move it to a directory for which you have write-privilege.} the case called \ct{Examples/Fire/simple_test.fds} following the instructions in the next chapter. This case requires only a few tens of minutes to complete and allows you to visualize the results of a very simple fire scenario. As you learn about new features in the chapters to follow, this case can serve as a useful testbed. The text file \ct{simple_test.fds} contains parameters organized by {\em namelist} groups that are listed alphabetically in Chapter~\ref{info:namelists}. All FDS input parameters are listed in these tables, and each has a hyperlink to a section in this guide that explains its use.
 
 
 
@@ -10545,7 +10547,7 @@ The output quantity \ct{THERMOCOUPLE} is the temperature of a modeled thermocoup
    \frac{D_{\rm TC}}{6} \, \rho_{\rm TC} \, c_{\rm TC} \, \frac{\d T_{\rm TC}}{\d t} = \epsilon_{\rm TC} \, (U/4 - \sigma T_{\rm TC}^4) + h(T_{\rm g} - T_{\rm TC})
    \label{TC}
 \ee
-where $\epsilon_{\rm TC}$ is the emissivity of the thermocouple, $U$ is the integrated radiative intensity, $T_{\rm g}$ is the true gas temperature, and $h$ is the heat transfer coefficient to a small sphere, $h=k \, \NU / D_{\rm TC}$. The bead \ct{DIAMETER}, \ct{EMISSIVITY}, \ct{DENSITY}, and \ct{SPECIFIC_HEAT} are given on the associated \ct{PROP} line. To over-ride the calculated value of the heat transfer coefficient, set \ct{HEAT_TRANSFER_COEFFICIENT} on the \ct{PROP} line (\si{W/(m.K)}). The default value for the bead diameter is 0.001~m. The default emissivity is 0.85. The default values for the bead density and specific heat are that of nickel; 8908~kg/m$^3$ and 0.44~kJ/kg/K, respectively. See the discussion on heat transfer to a water droplet in the Technical Reference Guide for details of the convective heat transfer to a small sphere.
+where $\epsilon_{\rm TC}$ is the emissivity of the thermocouple, $U$ is the integrated radiative intensity, $T_{\rm g}$ is the true gas temperature, and $h$ is the heat transfer coefficient to a small sphere, $h=k \, \NU / D_{\rm TC}$. The bead \ct{DIAMETER}, \ct{EMISSIVITY}, \ct{DENSITY}, and \ct{SPECIFIC_HEAT} or \ct{SPECIFIC_HEAT_RAMP} are given on the associated \ct{PROP} line. To over-ride the calculated value of the heat transfer coefficient, set \ct{HEAT_TRANSFER_COEFFICIENT} on the \ct{PROP} line (\si{W/(m.K)}). The default value for the bead diameter is 0.001~m. The default emissivity is 0.85. The default values for the bead density and specific heat are that for a Type-K thermocouple; 8700~kg/m$^3$ and a linear ramp from 0.4515~kJ/kg/K at 20\,$^\circ$C to 0.6010~kJ/kg/K at 1200\,$^\circ$C, respectively. See the discussion on heat transfer to a water droplet in the Technical Reference Guide for details of the convective heat transfer to a small sphere.
 
 The above discussion is appropriate for a so-called ``bare bead''  thermocouple, but often thermocouples are shielded or sheathed in various ways to mitigate the effect of thermal radiation. In such cases, there is no obvious bead diameter and there may be multiple metals and air gaps in the construction. Usually, the manufacturer provides a time constant, which is defined as the time required for the sensor to respond to 63.2~\% of its total output signal when suddenly plunged into a warm air stream flowing at 20~m/s. The analysis and testing is typically done at relatively low temperature, in which case the radiation term in Eq.~(\ref{TC}) can be neglected and the time constant, $\tau$, can be defined in terms of effective thermal properties and an effective diameter:
 \be
@@ -13188,7 +13190,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{CALIBRATION_CONSTANT}             & Real          & Section~\ref{info:bidir_probe}            &                       & 0.93                 \\ \hline
 \ct{CHARACTERISTIC_VELOCITY}          & Real          & Section~\ref{info:pressure_coefficient}   & m/s                   & 1.                   \\ \hline
 \ct{C_FACTOR}                         & Real          & Section~\ref{info:sprinklers}             & (m/s)$^{1/2}$         & 0.                   \\ \hline
-\ct{DENSITY}                           & Real          & Section~\ref{info:THERMOCOUPLE}           & kg/m$^3$              & 8908.                \\ \hline
+\ct{DENSITY}                           & Real          & Section~\ref{info:THERMOCOUPLE}           & kg/m$^3$              & 8700.                \\ \hline
 \ct{DIAMETER}                          & Real          & Section~\ref{info:THERMOCOUPLE}           & m                     & 0.001                \\ \hline
 \ct{EMISSIVITY}                        & Real          & Section~\ref{info:THERMOCOUPLE}           &                       & 0.85                 \\ \hline
 \ct{FED_ACTIVITY}                     & Integer       & Section~\ref{info:FED}                    &                       & 2                    \\ \hline
@@ -13232,7 +13234,8 @@ Keyword             & Type     & Description                      & Units       
 \ct{SMOKEVIEW_PARAMETERS(:)}          & Char.~Array   & Section~\ref{info:SMOKEVIEW_PARAMETERS}   &                       &                      \\ \hline
 \ct{SPARK}                             & Logical       & Section~\ref{info:ignition}               &                       & \ct{F}              \\ \hline
 \ct{SPEC_ID}                          & Character     & Section~\ref{info:alternative_smoke}      &                       &                      \\ \hline
-\ct{SPECIFIC_HEAT}                    & Real          & Section~\ref{info:THERMOCOUPLE}           & $\si{kJ/(kg.K)}$      & 0.44                 \\ \hline
+\ct{SPECIFIC_HEAT}                    & Real          & Section~\ref{info:THERMOCOUPLE}           & $\si{kJ/(kg.K)}$      &                     \\ \hline
+\ct{SPECIFIC_HEAT_RAMP}               & Character     & Section~\ref{info:THERMOCOUPLE}           &                       &                     \\ \hline
 \ct{SPRAY_ANGLE(2,2)}                 & Real          & Section~\ref{info:sprinklers}             & degrees               & 60.,75.              \\ \hline
 \ct{SPRAY_PATTERN_BETA}              & Real          & Section~\ref{info:sprinklers}             & degrees               & 5.                   \\ \hline
 \ct{SPRAY_PATTERN_MU}                & Real          & Section~\ref{info:sprinklers}             & degrees               & 0.                   \\ \hline
