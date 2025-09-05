@@ -28,8 +28,8 @@ end
 
 F = importdata([ddir,chid,'_devc.csv'],',',2);
 
-mdot_in  = F.data(:,find(strcmp(F.colheaders,'"H2O in"')));
-mdot_out = F.data(:,find(strcmp(F.colheaders,'"H2O out"')));
+mdot_in  = F.data(:,find(strcmp(F.colheaders,'H2O in')));
+mdot_out = F.data(:,find(strcmp(F.colheaders,'H2O out')));
 
 bal = dmdt - mdot_in - mdot_out;
 

@@ -65,23 +65,23 @@ r_128 = (D/256):(D/128):(D-(D/256));
 % FLUX_LIMITER='CHARM'
 
 M = importdata([data_dir,'soborot_charm_square_wave_16_devc.csv'],',',2);
-col_start = find(strcmp(M.colheaders,'"Y_TRACER-1"'));
-col_end   = find(strcmp(M.colheaders,'"Y_TRACER-16"'));
+col_start = find(strcmp(M.colheaders,'Y_TRACER-1'));
+col_end   = find(strcmp(M.colheaders,'Y_TRACER-16'));
 Y_charm_16 = M.data(end,col_start:col_end);
 
 M = importdata([data_dir,'soborot_charm_square_wave_32_devc.csv'],',',2);
-col_start = find(strcmp(M.colheaders,'"Y_TRACER-1"'));
-col_end   = find(strcmp(M.colheaders,'"Y_TRACER-32"'));
+col_start = find(strcmp(M.colheaders,'Y_TRACER-1'));
+col_end   = find(strcmp(M.colheaders,'Y_TRACER-32'));
 Y_charm_32 = M.data(end,col_start:col_end);
 
 M = importdata([data_dir,'soborot_charm_square_wave_64_devc.csv'],',',2);
-col_start = find(strcmp(M.colheaders,'"Y_TRACER-1"'));
-col_end   = find(strcmp(M.colheaders,'"Y_TRACER-64"'));
+col_start = find(strcmp(M.colheaders,'Y_TRACER-1'));
+col_end   = find(strcmp(M.colheaders,'Y_TRACER-64'));
 Y_charm_64 = M.data(end,col_start:col_end);
 
 M = importdata([data_dir,'soborot_charm_square_wave_128_devc.csv'],',',2);
-col_start = find(strcmp(M.colheaders,'"Y_TRACER-1"'));
-col_end   = find(strcmp(M.colheaders,'"Y_TRACER-128"'));
+col_start = find(strcmp(M.colheaders,'Y_TRACER-1'));
+col_end   = find(strcmp(M.colheaders,'Y_TRACER-128'));
 Y_charm_128 = M.data(end,col_start:col_end);
 
 figure
@@ -118,28 +118,28 @@ print(gcf,'-dpdf',[plot_dir,'soborot_charm_square_wave']);
 % FLUX_LIMITER='SUPERBEE'
 
 M = importdata([data_dir,'soborot_superbee_square_wave_16_devc.csv'],',',2);
-col_start = find(strcmp(M.colheaders,'"Y_TRACER-1"'));
-col_end   = find(strcmp(M.colheaders,'"Y_TRACER-16"'));
+col_start = find(strcmp(M.colheaders,'Y_TRACER-1'));
+col_end   = find(strcmp(M.colheaders,'Y_TRACER-16'));
 Y_superbee_16 = M.data(end,col_start:col_end);
 
 M = importdata([data_dir,'soborot_superbee_square_wave_32_devc.csv'],',',2);
-col_start = find(strcmp(M.colheaders,'"Y_TRACER-1"'));
-col_end   = find(strcmp(M.colheaders,'"Y_TRACER-32"'));
+col_start = find(strcmp(M.colheaders,'Y_TRACER-1'));
+col_end   = find(strcmp(M.colheaders,'Y_TRACER-32'));
 Y_superbee_32 = M.data(end,col_start:col_end);
 
 M = importdata([data_dir,'soborot_superbee_square_wave_64_devc.csv'],',',2);
-col_start = find(strcmp(M.colheaders,'"Y_TRACER-1"'));
-col_end   = find(strcmp(M.colheaders,'"Y_TRACER-64"'));
+col_start = find(strcmp(M.colheaders,'Y_TRACER-1'));
+col_end   = find(strcmp(M.colheaders,'Y_TRACER-64'));
 Y_superbee_64 = M.data(end,col_start:col_end);
 
 M = importdata([data_dir,'soborot_superbee_square_wave_128_devc.csv'],',',2);
-col_start = find(strcmp(M.colheaders,'"Y_TRACER-1"'));
-col_end   = find(strcmp(M.colheaders,'"Y_TRACER-128"'));
+col_start = find(strcmp(M.colheaders,'Y_TRACER-1'));
+col_end   = find(strcmp(M.colheaders,'Y_TRACER-128'));
 Y_superbee_128 = M.data(end,col_start:col_end);
 
 M = importdata([data_dir,'soborot_superbee_square_wave_128_1mesh_devc.csv'],',',2);
-col_start = find(strcmp(M.colheaders,'"Y_TRACER-1"'));
-col_end   = find(strcmp(M.colheaders,'"Y_TRACER-128"'));
+col_start = find(strcmp(M.colheaders,'Y_TRACER-1'));
+col_end   = find(strcmp(M.colheaders,'Y_TRACER-128'));
 Y_superbee_128_1mesh = M.data(end,col_start:col_end);
 
 figure
@@ -176,23 +176,23 @@ print(gcf,'-dpdf',[plot_dir,'soborot_superbee_square_wave']);
 % FLUX_LIMITER='GODUNOV'
 
 M = importdata([data_dir,'soborot_godunov_square_wave_16_devc.csv'],',',2);
-col_start = find(strcmp(M.colheaders,'"Y_TRACER-1"'));
-col_end   = find(strcmp(M.colheaders,'"Y_TRACER-16"'));
+col_start = find(strcmp(M.colheaders,'Y_TRACER-1'));
+col_end   = find(strcmp(M.colheaders,'Y_TRACER-16'));
 Y_godunov_16 = M.data(end,col_start:col_end);
 
 M = importdata([data_dir,'soborot_godunov_square_wave_32_devc.csv'],',',2);
-col_start = find(strcmp(M.colheaders,'"Y_TRACER-1"'));
-col_end   = find(strcmp(M.colheaders,'"Y_TRACER-32"'));
+col_start = find(strcmp(M.colheaders,'Y_TRACER-1'));
+col_end   = find(strcmp(M.colheaders,'Y_TRACER-32'));
 Y_godunov_32 = M.data(end,col_start:col_end);
 
 M = importdata([data_dir,'soborot_godunov_square_wave_64_devc.csv'],',',2);
-col_start = find(strcmp(M.colheaders,'"Y_TRACER-1"'));
-col_end   = find(strcmp(M.colheaders,'"Y_TRACER-64"'));
+col_start = find(strcmp(M.colheaders,'Y_TRACER-1'));
+col_end   = find(strcmp(M.colheaders,'Y_TRACER-64'));
 Y_godunov_64 = M.data(end,col_start:col_end);
 
 M = importdata([data_dir,'soborot_godunov_square_wave_128_devc.csv'],',',2);
-col_start = find(strcmp(M.colheaders,'"Y_TRACER-1"'));
-col_end   = find(strcmp(M.colheaders,'"Y_TRACER-128"'));
+col_start = find(strcmp(M.colheaders,'Y_TRACER-1'));
+col_end   = find(strcmp(M.colheaders,'Y_TRACER-128'));
 Y_godunov_128 = M.data(end,col_start:col_end);
 
 figure
@@ -311,23 +311,23 @@ print(gcf,'-dpdf',[plot_dir,'soborot_square_wave_error']);
 % FLUX_LIMITER='CHARM'
 
 M = importdata([data_dir,'soborot_charm_cos_wave_16_devc.csv'],',',2);
-col_start = find(strcmp(M.colheaders,'"Y_TRACER-1"'));
-col_end   = find(strcmp(M.colheaders,'"Y_TRACER-16"'));
+col_start = find(strcmp(M.colheaders,'Y_TRACER-1'));
+col_end   = find(strcmp(M.colheaders,'Y_TRACER-16'));
 Y_charm_16 = M.data(end,col_start:col_end);
 
 M = importdata([data_dir,'soborot_charm_cos_wave_32_devc.csv'],',',2);
-col_start = find(strcmp(M.colheaders,'"Y_TRACER-1"'));
-col_end   = find(strcmp(M.colheaders,'"Y_TRACER-32"'));
+col_start = find(strcmp(M.colheaders,'Y_TRACER-1'));
+col_end   = find(strcmp(M.colheaders,'Y_TRACER-32'));
 Y_charm_32 = M.data(end,col_start:col_end);
 
 M = importdata([data_dir,'soborot_charm_cos_wave_64_devc.csv'],',',2);
-col_start = find(strcmp(M.colheaders,'"Y_TRACER-1"'));
-col_end   = find(strcmp(M.colheaders,'"Y_TRACER-64"'));
+col_start = find(strcmp(M.colheaders,'Y_TRACER-1'));
+col_end   = find(strcmp(M.colheaders,'Y_TRACER-64'));
 Y_charm_64 = M.data(end,col_start:col_end);
 
 M = importdata([data_dir,'soborot_charm_cos_wave_128_devc.csv'],',',2);
-col_start = find(strcmp(M.colheaders,'"Y_TRACER-1"'));
-col_end   = find(strcmp(M.colheaders,'"Y_TRACER-128"'));
+col_start = find(strcmp(M.colheaders,'Y_TRACER-1'));
+col_end   = find(strcmp(M.colheaders,'Y_TRACER-128'));
 Y_charm_128 = M.data(end,col_start:col_end);
 
 figure
@@ -367,23 +367,23 @@ print(gcf,'-dpdf',[plot_dir,'soborot_charm_cos_wave']);
 % FLUX_LIMITER='SUPERBEE'
 
 M = importdata([data_dir,'soborot_superbee_cos_wave_16_devc.csv'],',',2);
-col_start = find(strcmp(M.colheaders,'"Y_TRACER-1"'));
-col_end   = find(strcmp(M.colheaders,'"Y_TRACER-16"'));
+col_start = find(strcmp(M.colheaders,'Y_TRACER-1'));
+col_end   = find(strcmp(M.colheaders,'Y_TRACER-16'));
 Y_superbee_16 = M.data(end,col_start:col_end);
 
 M = importdata([data_dir,'soborot_superbee_cos_wave_32_devc.csv'],',',2);
-col_start = find(strcmp(M.colheaders,'"Y_TRACER-1"'));
-col_end   = find(strcmp(M.colheaders,'"Y_TRACER-32"'));
+col_start = find(strcmp(M.colheaders,'Y_TRACER-1'));
+col_end   = find(strcmp(M.colheaders,'Y_TRACER-32'));
 Y_superbee_32 = M.data(end,col_start:col_end);
 
 M = importdata([data_dir,'soborot_superbee_cos_wave_64_devc.csv'],',',2);
-col_start = find(strcmp(M.colheaders,'"Y_TRACER-1"'));
-col_end   = find(strcmp(M.colheaders,'"Y_TRACER-64"'));
+col_start = find(strcmp(M.colheaders,'Y_TRACER-1'));
+col_end   = find(strcmp(M.colheaders,'Y_TRACER-64'));
 Y_superbee_64 = M.data(end,col_start:col_end);
 
 M = importdata([data_dir,'soborot_superbee_cos_wave_128_devc.csv'],',',2);
-col_start = find(strcmp(M.colheaders,'"Y_TRACER-1"'));
-col_end   = find(strcmp(M.colheaders,'"Y_TRACER-128"'));
+col_start = find(strcmp(M.colheaders,'Y_TRACER-1'));
+col_end   = find(strcmp(M.colheaders,'Y_TRACER-128'));
 Y_superbee_128 = M.data(end,col_start:col_end);
 
 figure
