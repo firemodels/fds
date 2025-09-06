@@ -10550,7 +10550,7 @@ The above discussion is appropriate for a so-called ``bare bead''  thermocouple,
    \tau = \frac{D_{\rm eff} \, \rho_{\rm eff} \, c_{\rm eff} }{6 \, h}  \quad ; \quad  h=\frac{k \, \NU}{D_{\rm eff}} \quad ; \quad \NU = 2 + 0.6 \, \RE^{1/2} \, \PR^{1/3}  \quad ; \quad
    \RE = \frac{\rho \|\bu\| D_{\rm eff}}{\mu}  \label{TC_tau}
 \ee
-For a given value of the time constant, $\tau$, and effective thermal properties, Eq.~(\ref{TC_tau}) can be solved implicitly for the effective diameter. The \ct{TIME_CONSTANT} is specified on a \ct{PROP} line which is identified by the \ct{DEVC} line using a \ct{PROP_ID}. If you specify the \ct{TIME_CONSTANT}, you can still specify the effective \ct{EMISSIVITY}, \ct{DENSITY}, \ct{SPECIFIC_HEAT}, and \ct{HEAT_TRANSFER_COEFFICIENT} as well, but not the \ct{DIAMETER} because this will be calculated automatically. In most cases, it is sufficient to simply specify the \ct{TIME_CONSTANT}.
+For a given value of the time constant, $\tau$, and effective thermal properties, Eq.~(\ref{TC_tau}) can be solved implicitly for the effective diameter. The \ct{TIME_CONSTANT} is specified on a \ct{PROP} line which is identified by the \ct{DEVC} line using a \ct{PROP_ID}. If you specify the \ct{TIME_CONSTANT}, you can still specify the effective \ct{EMISSIVITY}, \ct{DENSITY}, \ct{SPECIFIC_HEAT} (or \ct{SPECIFIC_HEAT_RAMP}), and \ct{HEAT_TRANSFER_COEFFICIENT} as well, but not the \ct{DIAMETER} because this will be calculated automatically. In most cases, it is sufficient to simply specify the \ct{TIME_CONSTANT}.
 
 Figure~\ref{fig:thermocouple_time_constant} shows the results of a simple test case called \ct{thermocouple_time_constant} whose input file is in the \ct{Heat_Transfer} samples folder. Three thermocouples with given time constants of 0.5~s, 3.0~s, and 8.0~s are suddenly subjected to a 20~m/s air stream of 30~$^\circ$C. It is expected that each TC should reach a temperature of 26.32~$^\circ$C at their given time constants.
 \begin{figure}[!ht]
@@ -10562,13 +10562,24 @@ Figure~\ref{fig:thermocouple_time_constant} shows the results of a simple test c
 
 \subsection{Bi-Directional Probe}
 \label{info:bidir_probe}
+\label{bi_dir}
 
 The output quantity \ct{BI-DIRECTIONAL PROBE} is the velocity of a modeled bi-directional probe. A bi-directional probe uses the following equation:
 \be
 C \sqrt{\frac{2 \Delta P}{\rho}}
 \label{BDP}
 \ee
-where $C$ is a calibration constant (default value is 0.93), $\Delta P$ is the pressure difference across the probe, and $\rho$ is the gas density at the probe. In a typical experiment, the gas density is computed assuming standard pressure (101325 Pa), the molecular weight of air (28.8 g/mol), and the temperature as measured by a thermocouple near the probe. Bi-directional probes have biases due to both the Reynolds number (based on the probe diameter) of the flow and the angle of the flow with respect to the probe axis. This model accounts for those sensitivities and the impact of density differences from varied molecular weight at the probe. The orientation of the probe can be specified with either \ct{IOR} or \ct{ORIENTATION} on \ct{DEVC}. A probe with \ct{IOR}=-1 would have a positive velocity output when the flow is in the negative x direction. Parameters for the probe can be specified with a \ct{PROP_ID} on the \ct {DEVC}. The calibration constant and the probe diameter (default of 0.0254 m) can be set respectively with \ct{CALIBRATION_CONSTANT} and \ct{PROBE_DIAMETER} on \ct{PROP}. If the probe temperature is an aspirated thermocouple or other measurement not sensitive to the radiative environment, then set \ct{TC=F} on \ct{PROP}.
+where $C$ is a calibration constant (default value is 0.93), $\Delta P$ is the pressure difference across the probe, and $\rho$ is the gas density at the probe. In a typical experiment, the gas density is computed assuming standard pressure (101325 Pa), the molecular weight of air (28.8 g/mol), and the temperature as measured by a thermocouple near the probe.
+
+Bi-directional probes have biases due to both the Reynolds number (based on the probe diameter) of the flow and the angle of the flow with respect to the probe axis~\cite{McCaffrey:1976}. At low Reynolds number a probe will measure a higher effective velocity. As the angle of the flow vector with the axis increases, the effective velocity at first increases up to an angle of 30$^\circ$ due to a low pressure region forming downstream of the probe, and then decreases reaching no measured flow at an angle of 90$^\circ$. This model accounts for these sensitivities and the impact of density differences from varied molecular weight at the probe. The orientation of the probe can be specified with either \ct{IOR} or \ct{ORIENTATION} on \ct{DEVC}. A probe with \ct{IOR}=-1 would have a positive velocity output when the flow is in the -x direction. Parameters for the probe can be specified with a \ct{PROP_ID} on the \ct {DEVC}. The calibration constant (default of 0.93) and the probe diameter (default of 0.0254 m) can be set respectively with \ct{CALIBRATION_CONSTANT} and \ct{PROBE_DIAMETER} on \ct{PROP}. If the probe temperature is an aspirated thermocouple or other measurement not sensitive to the radiative environment, then set \ct{TC=F} on \ct{PROP}. Thermocouple specific properties for a bi-directional probe, see Section~\ref{info:THERMOCOUPLE}, should be set with the same \ct{PROP} as for the probe.
+
+Figure~\ref{bi_dir_fig} shows the results of a bi-directional probe with varying angle to a 1~m/s flow and varying flow speed. 
+\begin{figure}[ht]
+	\includegraphics[width=3in]{SCRIPT_FIGURES/bi_dir}
+	\includegraphics[width=3in]{SCRIPT_FIGURES/bi_dir_2}
+	\caption[Results of the \ct{bi_dir} test case]{Measured velocities using a bi-directional probe. (Left) Varying angle for a 1~m/s flow. (Right) Probe axis aligned flow with varied flow speed.}
+	\label{bi_dir_fig}
+\end{figure}
 
 \subsection{Volume Flow}
 \label{info:volume_flow}

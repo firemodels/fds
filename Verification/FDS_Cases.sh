@@ -177,6 +177,7 @@ $QFDS -p 5 -d Complex_Geometry geom_stretched_grid.fds
 $QFDS -p 3 -d Complex_Geometry thin_object_mass.fds
 
 $QFDS -d Controls activate_vents.fds
+$QFDS -d Controls bi_dir.fds
 $QFDS -d Controls control_test.fds
 $QFDS -d Controls control_test_2.fds
 $QFDS -d Controls create_remove.fds
