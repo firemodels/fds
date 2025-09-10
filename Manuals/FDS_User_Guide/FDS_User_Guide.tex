@@ -2508,8 +2508,9 @@ The default parameters governing the node spacing are appropriate for simple hea
 \item[Improve the time resolution] by setting \ct{WALL_INCREMENT=1} on the \ct{TIME} line. This forces the solid phase solution to be updated every time step instead of the default every 2 time steps. If this is still not sufficient, you can direct that FDS use smaller time steps to update the solid phase heat conduction calculation than that used by the gas phase solver. This can be done specifically for a selected surface (\ct{SURF}) type using the parameter \ct{TIME_STEP_FACTOR}. Its default value is 10, meaning that the solid phase time step for that particular \ct{SURF} type can be sub-divided by {\em at most} a factor of 10. The decision to sub-divide the time step is based on the criterion that the internal temperature of the solid should not change by more than \ct{DELTA_TMP_MAX}~$^\circ$C during that sub-step. The default value of \ct{DELTA_TMP_MAX} is 10~$^\circ$C, and this is also a \ct{SURF} parameter. You can choose \ct{QUANTITY='SUBSTEPS'} on either a \ct{DEVC} or \ct{BNDF} output line to see how many sub-steps are being used by a particular surface cell or the entire domain, respectively.  You can also ask FDS to use a solid phase time step that obeys the Fourier number constraint, $\mathrm{Fo}=\delta t \alpha/\delta x^2=1$; this is done by setting \ct{CHECK_FO=T} on \ct{MISC}.
 \item[Limit the number of cells in any layer] by setting \ct{N_LAYER_CELLS_MAX(NL)} (default 1000), where \ct{NL} designates a particular layer. Reducing this value does not necessarily improve accuracy, but it does save computing time. However, rarely does the solid phase require this many cells. The output file \ct{CHID.out} contains the coordinates of the solid phase nodes.
 \item[Change when a wall cell is renoded] by setting \ct{REMESH_RATIO} on the \ct{SURF} line and/or \ct{REAC_RATE_DELTA} on the \ct{MATL} line. If nodes changes size during pyrolysis, FDS will try and renode layers with changing cell size to optimize the number of nodes. This renoding process is costly if it is done frequently. The parameter \ct{REMESH_RATIO} sets the fractional change in the size of a wall cell before FDS will check for renoding. For example, with the default value of 0.15, FDS will not attempt the first renode of a wall cell that is initially all 0.1~m nodes unless one node has either increased to 0.115~m or decreased to 0.085~m. A second potential challenge with renoding occurs when there are large cell-to-cell temperature differences inside a pyrolyzing layer. Renoding will combine cells causing changes in temperature. If there is a large enough temperature difference, this can cause large swings in the pyrolysis rate. The parameter \ct{REAC_RATE_DELTA}, default value of 0.05, sets the fractional change in the pyrolysis rate for a material that is considered acceptable. If renoding of a layer could cause a temperature change large enough to achieve that change in pyrolysis rate, then FDS will not renode that layer.
+\item[Make a very thin solid layer disappear] by specifying a lower bound on it thickness or mass. If all the material components react and leave no solid residue, the thickness of the solid will shrink to zero. Each of the shrinking layers will vanish from the computation when its thickness gets smaller than a prescribed limiting value. This value can be set on the \ct{SURF} line using \ct{MINIMUM_LAYER_THICKNESS(N)}, where \ct{N} is the index of the layer. If you do not specify a layer index, the value shall be applied to all layers. The default value is $10^{-6}$~m or 0.1 times the specified \ct{THICKNESS}, whichever is less. Alternatively, you can specify \ct{MINIMUM_LAYER_MASS_FRACTION(N)}, the fraction of the layer mass below which the layer is removed.
 \end{description}
-If all the material components react and leave no solid residue, the thickness of the solid will shrink. Each of the shrinking layers will vanish from the computation when its thickness gets smaller than a prescribed limiting value. This value can be set on a \ct{SURF} line using \ct{MINIMUM_LAYER_THICKNESS(N)}, where \ct{N} is the index of the layer. If you do not specify a layer index, the value shall be applied to all layers. The default value is 0.0001~m or 0.1 times the specified \ct{THICKNESS}, whichever is less. When all the material of a shrinking surface is consumed but \ct{BURN_AWAY} is not prescribed, the surface temperature is set to \ct{TMP_GAS_BACK}, convective heat flux to zero and burning rate to zero.
+When all the material of a shrinking surface is consumed but \ct{BURN_AWAY} is not prescribed, the surface temperature is set to \ct{TMP_GAS_BACK}, convective heat flux to zero and burning rate to zero.
 
 See Sec.~\ref{solid_phase_verification} for ways to check and improve the accuracy of the solid phase calculation.
 
@@ -11926,8 +11927,9 @@ properties be specified as well. Simply prescribing as many properties as possib
 
 % ignore namelist/keyword combinations
 % ignorenamelistkw: /BNDF/DEBUG
-% ignorenamelistkw: /DEVC/STATISTICS
-% ignorenamelistkw: /DUMP/MMS_TIMER, /DUMP/TURB_INIT_CLOCK, /DUMP/GET_CUTCELLS_VERBOSE
+% ignorenamelistkw: /COMB/CVODE_ORDER, /COMB/FUEL_ID_FOR_AFT, /COMB/USE_MIXED_ZN_AFT_TMP
+% ignorenamelistkw: /DEVC/ELEM_ID, /DEVC/STATISTICS
+% ignorenamelistkw: /DUMP/MMS_TIMER, /DUMP/TURB_INIT_CLOCK, /DUMP/GET_CUTCELLS_VERBOSE, /DUMP/WRITE_CVODE_SUBSTEPS
 % ignorenamelistkw: /HVAC/DEBUG
 % ignorenamelistkw: /ISOF/DEBUG
 % ignorenamelistkw: /MISC/PERIODIC_TEST, /MISC/POSITIVE_ERROR_TEST, /MISC/PROFILING, /MISC/RADIATION
@@ -11935,6 +11937,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 % ignorenamelistkw: /MISC/CC_IBM, /MISC/CCVOL_LINK, /MISC/TEST_NEW_CHAR_MODEL, /MISC/PR, /MISC/SC
 % ignorenamelistkw: /PART/DEBUG, /PART/EMBER_SNAG_FACTOR
 % ignorenamelistkw: /PRES/WRITE_PARCSRPCG_MATRIX
+% ignorenamelistkw: /PROP/IGNITION_ZONE
 % ignorenamelistkw: /REAC/C, /REAC/H, /REAC/O, /REAC/N, /REAC/FORMULA
 % ignorenamelistkw: /SLCF/DEBUG, /SLCF/RLE_MIN, /SLCF/RLE_MAX, /SLCF/SLICETYPE
 % ignorenamelistkw: /SURF/MOISTURE_FRACTION
@@ -13647,7 +13650,8 @@ Keyword             & Type     & Description                      & Units       
 \ct{MAXIMUM_SCALING_HEAT_FLUX}                        & Real            & Section~\ref{info:scaled_burning}         & \si{kW/m^2}         & 1500                     \\ \hline
 \ct{MCC_CONVERSION_FACTOR}                              & Real            & Section~\ref{info:TGA_DSC_MCC}            &                     & 1                       \\ \hline
 \ct{MINIMUM_BURNOUT_TIME}                              & Real            & Section~\ref{veg_burnout_time}            & s                   & 1000000                 \\ \hline
-\ct{MINIMUM_LAYER_THICKNESS}                           & Real            & Section~\ref{info:solid_phase_stability}  & m                   & 1.E-4                   \\ \hline
+\ct{MINIMUM_LAYER_MASS_FRACTION(:)}                    & Real Array      & Section~\ref{info:solid_phase_stability}  &                     & 1.E-12                  \\ \hline
+\ct{MINIMUM_LAYER_THICKNESS(:)}                        & Real Array      & Section~\ref{info:solid_phase_stability}  & m                   & 1.E-4                   \\ \hline
 \ct{MINIMUM_SCALING_HEAT_FLUX}                        & Real            & Section~\ref{info:scaled_burning}         & \si{kW/m^2}         & 0                       \\ \hline
 \ct{MLRPUA}                                              & Real            & Section~\ref{info:gas_burner}             & \si{kg/(m^2.s)}     &                         \\ \hline
 \ct{MOISTURE_CONTENT(:)}                                & Real Array      & Section~\ref{info:vegetation}             &                     & 0.                      \\ \hline
