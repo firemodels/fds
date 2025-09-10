@@ -1615,20 +1615,15 @@ Links to these tools can be found at the project home page at https://pages.nist
 \label{info:transform_geom}
 
 A geometry may be translated, rotated and scaled. For example, in the following \ct{GEOM}\ namelist,
-
-{\small
 \begin{lstlisting}
-&MOVE ID='ChairMove', AXIS=...,...,..., ROTATION_ANGLE=..., DX=, /
+&MOVE ID='ChairMove', AXIS=..., ROTATION_ANGLE=..., DX=, /
 &GEOM ID='chair'
       SURF_ID='woodSID','apholsterySID',
       VERTS=X1,Y1,Z1,...,XM,YM,ZM,
       FACES=F1_1,F1_2,F1_3,F1_SID,...,FN_1,FN_2,FN_3,FN_SID
-      MOVE_ID='ChairMove'
-/
+      MOVE_ID='ChairMove' /
 \end{lstlisting}
-}
-
-\noindent the \ct{chair} object is translated and rotated using a reference to the \ct{MOVE} namelist, defined and explained in Sec.~\ref{info:MOVE}.
+the \ct{chair} object is translated and rotated using a reference to the \ct{MOVE} namelist, defined and explained in Sec.~\ref{info:MOVE}.
 
 
 \subsection{Binary Geometry Files}
@@ -11950,7 +11945,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 \needspace{2.5in}
 \section{\texorpdfstring{{\tt BACK}}{BACK} (Background species)}
 
-\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\begin{xltabular}{\textwidth}{|p{6cm}|X|X|l|X|}     
 \caption[Background species (\ct{BACK} namelist group)]{For more information see Section~\ref{info:BACKGROUND_SPECIES}.}
 \label{tbl:BACK} \\
 \hline
@@ -11964,9 +11959,9 @@ Keyword              & Type         & Description                               
 \hline
 Keyword              & Type         & Description                                & Units     & Default   \\ \hline \hline
 \endhead
-\ct{SPEC_ID}         & Char. Array  & Section \ref{info:BACKGROUND_SPECIES}      &           &           \\ \hline
+\ct{SPEC_ID}         & Char.~Array  & Section \ref{info:BACKGROUND_SPECIES}      &           &           \\ \hline
 \ct{MASS_FRACTION}   & Real Array   & Section \ref{info:BACKGROUND_SPECIES}      &           &           \\ \hline
-\end{longtable}
+\end{xltabular}
 
 
 
@@ -11975,7 +11970,7 @@ Keyword              & Type         & Description                               
 \needspace{2.5in}
 \section{\texorpdfstring{{\tt BNDF}}{BNDF} (Boundary File Parameters)}
 
-\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\begin{xltabular}{\textwidth}{|p{6cm}|X|X|l|X|}     
 \caption[Boundary file parameters (\ct{BNDF} namelist group)]{For more information see Section~\ref{info:BNDF}.}
 \label{tbl:BNDF} \\
 \hline
@@ -11996,7 +11991,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{QUANTITY}                   & Character   & Section \ref{info:solidoutputquantities}     &           &                 \\ \hline
 \ct{SPEC_ID}                   & Character   & Section \ref{info:solidoutputquantities}     &           &                 \\ \hline
 \ct{TEMPORAL_STATISTIC}        & Character   & Section \ref{info:BNDF}                      &           &                 \\ \hline
-\end{longtable}
+\end{xltabular}
 
 
 
@@ -12005,7 +12000,7 @@ Keyword             & Type     & Description                      & Units       
 \needspace{2.5in}
 \section{\texorpdfstring{{\tt CATF}}{CATF} (Concatenate Input Files Parameters)}
 
-\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\begin{xltabular}{\textwidth}{|p{6cm}|X|X|l|X|}     
 \caption[Concatenate Input Files parameters (\ct{CATF} namelist group)]{For more information see Section~\ref{info:CATF}.}
 \label{tbl:CATF} \\
 \hline
@@ -12019,15 +12014,15 @@ Keyword             & Type     & Description                      & Units       
 \hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
-\ct{OTHER_FILES}    & Character Array  & Section \ref{info:CATF}                 &           &   \\ \hline
-\end{longtable}
+\ct{OTHER_FILES}    & Char. Array  & Section \ref{info:CATF}                 &           &   \\ \hline
+\end{xltabular}
 
 \vspace{\baselineskip}
 
 \needspace{2.5in}
 \section{\texorpdfstring{{\tt CLIP}}{CLIP} (Clipping Parameters)}
 
-\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\begin{xltabular}{\textwidth}{|p{6cm}|X|X|l|X|}     
 \caption[Clipping parameters (\ct{CLIP} namelist group)]{For more information see Section~\ref{info:CLIP}.}
 \label{tbl:CLIP} \\
 \hline
@@ -12046,14 +12041,14 @@ Keyword             & Type     & Description                      & Units       
 \ct{MAXIMUM_TEMPERATURE}          & Real           & Section~\ref{info:CLIP:temp}                 & $^\circ$C  &        \\ \hline
 \ct{MINIMUM_DENSITY}              & Real           & Section~\ref{info:CLIP:dens}                 & kg/m$^3$   &        \\ \hline
 \ct{MINIMUM_TEMPERATURE}          & Real           & Section~\ref{info:CLIP:temp}                 & $^\circ$C  &        \\ \hline
-\end{longtable}
+\end{xltabular}
 
 \vspace{\baselineskip}
 
 \needspace{2.5in}
 \section{\texorpdfstring{{\tt COMB}}{COMB} (General Combustion Parameters)}
 
-\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\begin{xltabular}{\textwidth}{|p{6cm}|X|X|l|X|}     
 \caption[General combustion parameters (\ct{COMB} namelist group)]{For more information see Chapter~\ref{info:COMB}.}
 \label{tbl:COMB} \\
 \hline
@@ -12088,7 +12083,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{TAU_CHEM}                                    & Real       & Section~\ref{info:turbulent_combustion}      &           & 1.E-5               \\ \hline
 \ct{TAU_FLAME}                                   & Real       & Section~\ref{info:turbulent_combustion}      &           & 1.E10               \\ \hline
 \ct{ZZ_MIN_GLOBAL}                               & Real       & Section~\ref{info:finite}                    &           & 1.E-10              \\ \hline
-\end{longtable}
+\end{xltabular}
 
 \vspace{\baselineskip}
 
@@ -12096,7 +12091,7 @@ Keyword             & Type     & Description                      & Units       
 \needspace{2.5in}
 \section{\texorpdfstring{{\tt CSVF}}{CSVF} (Comma Separated Velocity Files)}
 
-\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\begin{xltabular}{\textwidth}{|p{6cm}|X|X|l|X|}     
 \caption[Comma separated velocity files (\ct{CSVF} namelist group)]{For more information see Section~\ref{info:CSVF}.}
 \label{tbl:CSVF} \\
 \hline
@@ -12113,7 +12108,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{SPECFILE}        & Character      & Section~\ref{info:CSVF}      &            &         \\ \hline
 \ct{TMPFILE}         & Character      & Section~\ref{info:CSVF}      &            &         \\ \hline
 \ct{UVWFILE}         & Character      & Section~\ref{info:CSVF}      &            &         \\ \hline
-\end{longtable}
+\end{xltabular}
 
 
 \vspace{\baselineskip}
@@ -12122,7 +12117,7 @@ Keyword             & Type     & Description                      & Units       
 \needspace{2.5in}
 \section{\texorpdfstring{{\tt CTRL}}{CTRL} (Control Function Parameters)}
 
-\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\begin{xltabular}{\textwidth}{|p{6cm}|X|X|l|X|}     
 \caption[Control function parameters (\ct{CTRL} namelist group)]{For more information see Section~\ref{info:CTRL}.}
 \label{tbl:CTRL} \\
 \hline
@@ -12154,7 +12149,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{SETPOINT(2)}        & Real           & Section~\ref{info:basic_control}        &    &                        \\ \hline
 \ct{TARGET_VALUE}      & Real           & Section~\ref{info:CONTROL_PID}          &    &  0.                    \\ \hline
 \ct{TRIP_DIRECTION}    & Integer        & Section~\ref{info:basic_control}        &    &   1                    \\ \hline
-\end{longtable}
+\end{xltabular}
 
 
 \vspace{\baselineskip}
@@ -12162,7 +12157,7 @@ Keyword             & Type     & Description                      & Units       
 \needspace{2.5in}
 \section{\texorpdfstring{{\tt DEVC}}{DEVC} (Device Parameters)}
 
-\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\begin{xltabular}{\textwidth}{|p{6cm}|X|X|l|X|}     
 \caption[Device parameters (\ct{DEVC} namelist group)]{For more information see Section~\ref{info:DEVC}.}
 \label{tbl:DEVC} \\
 \hline
@@ -12246,7 +12241,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{Y_ID}                 & Character       & Section~\ref{info:line_file}                                    &       &  \ct{ID-y}   \\ \hline
 \ct{Z_ID}                 & Character       & Section~\ref{info:line_file}                                    &       &  \ct{ID-z}   \\ \hline
 \ct{XYZ_UNITS}            & Character       & Section~\ref{info:line_file}                                    &       &  \ct{'m'}    \\ \hline
-\end{longtable}
+\end{xltabular}
 
 \vspace{\baselineskip}
 
@@ -12254,7 +12249,7 @@ Keyword             & Type     & Description                      & Units       
 \needspace{2.5in}
 \section{\texorpdfstring{{\tt DUMP}}{DUMP} (Output Parameters)}
 
-\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\begin{xltabular}{\textwidth}{|p{6cm}|X|X|l|X|}     
 \caption[Output control parameters (\ct{DUMP} namelist group)]{For more information see Chapter~\ref{info:DUMP}.}
 \label{tbl:DUMP} \\
 \hline
@@ -12336,7 +12331,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{TEMP_MIN_SMV}                 & Real         & Section~\ref{info:SMOKE3D}             & $^\circ$C & 2000                          \\ \hline
 \ct{VELOCITY_ERROR_FILE}          & Logical      & Section~\ref{info:TIMING}              &           & \ct{F}                        \\ \hline
 \ct{WRITE_XYZ}                    & Logical      & Section~\ref{info:PL3D}                &           & \ct{F}                        \\ \hline
-\end{longtable}
+\end{xltabular}
 
 
 \noindent
@@ -12349,7 +12344,7 @@ $\Delta t$=\ct{T_END-T_BEGIN}
 \needspace{2.5in}
 \section{\texorpdfstring{{\tt GEOM}}{GEOM} (Unstructured Geometry Parameters)}
 
-\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\begin{xltabular}{\textwidth}{|p{6cm}|X|X|l|X|}     
 \caption[Unstructured geometry parameters (\ct{GEOM} namelist group)]{For more information see Section~\ref{info:GEOM}.}
 \label{tbl:GEOM} \\
 \hline
@@ -12424,7 +12419,7 @@ Keyword             & Type     & Description                      & Units       
 %\ct{SCALE_DOT}   & Real Triplet           & Section~\ref{info:GEOM}            &  1/s      &   1.0                    \\ \hline
 %\ct{XYZ_DOT}     & Real Triplet           & Section~\ref{info:GEOM}            &   m/s     &   0.0                    \\ \hline
 
-\end{longtable}
+\end{xltabular}
 
 \vspace{\baselineskip}
 
@@ -12433,7 +12428,7 @@ Keyword             & Type     & Description                      & Units       
 \needspace{2.5in}
 \section{\texorpdfstring{{\tt HEAD}}{HEAD} (Header Parameters)}
 
-\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\begin{xltabular}{\textwidth}{|p{6cm}|X|X|l|X|}     
 \caption[Header parameters (\ct{HEAD} namelist group)]{For more information see Section~\ref{info:HEAD}.}
 \label{tbl:HEAD} \\
 \hline
@@ -12449,7 +12444,7 @@ Keyword             & Type     & Description                      & Units       
 \endhead
 \ct{CHID}      & Character   & Section~\ref{info:HEAD}     &           & \ct{'output'}    \\ \hline
 \ct{TITLE}     & Character   & Section~\ref{info:PL3D}     &           &                   \\ \hline
-\end{longtable}
+\end{xltabular}
 
 \vspace{\baselineskip}
 
@@ -12457,7 +12452,7 @@ Keyword             & Type     & Description                      & Units       
 \section{\texorpdfstring{{\tt HOLE}}{HOLE} (Obstruction Cutout Parameters)}
 
 
-\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\begin{xltabular}{\textwidth}{|p{6cm}|X|X|l|X|}     
 \caption[Obstruction cutout parameters (\ct{HOLE} namelist group)]{For more information see Section~\ref{info:HOLE}.}
 \label{tbl:HOLE} \\
 \hline
@@ -12474,12 +12469,12 @@ Keyword             & Type     & Description                      & Units       
 \ct{COLOR}        & Character         & Section~\ref{info:colors}                              &       &                 \\ \hline
 \ct{CTRL_ID}     & Character         & Section~\ref{info:HOLE}                                &       &                 \\ \hline
 \ct{DEVC_ID}     & Character         & Section~\ref{info:HOLE}                                &       &                 \\ \hline
-\ct{ID}           & Character         & Identifier for input line                              &       &                 \\ \hline
+\ct{ID}           & Character         & Identifier                                             &       &                 \\ \hline
 \ct{MULT_ID}    & Character         & Section~\ref{info:MULT}                                &       &                 \\ \hline
 \ct{RGB(3)}    & Integer Triplet   & Section~\ref{info:colors}                              &       &                 \\ \hline
 \ct{TRANSPARENCY} & Real              & Section~\ref{info:HOLE}                                &       &                 \\ \hline
 \ct{XB(6)}    & Real Sextuplet    & Section~\ref{info:MULT}                                & m     &                 \\ \hline
-\end{longtable}
+\end{xltabular}
 
 \vspace{\baselineskip}
 
@@ -12487,7 +12482,7 @@ Keyword             & Type     & Description                      & Units       
 \section{\texorpdfstring{{\tt HVAC}}{HVAC} (HVAC System Definition)}
 
 
-\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\begin{xltabular}{\textwidth}{|p{5.5cm}|X|X|l|X|}     
 \caption[HVAC parameters (\ct{HVAC} namelist group)]{For more information see Section~\ref{info:HVAC}.}
 \label{tbl:HVAC} \\
 \hline
@@ -12554,7 +12549,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{VOLUME_FLOW}            & Real          & Section~\ref{info:HVACduct}, \ref{info:HVACfan}                          &  m$^3$/s      &                \\ \hline
 \ct{WAYPOINTS}               & Real Array    & Section~\ref{info:HVACduct}                                              &  m            &                \\ \hline
 \ct{XYZ}                     & Real Triplet  & Section~\ref{info:HVACnode}                                              &  m            &  0.0           \\ \hline
-\end{longtable}
+\end{xltabular}
 
 
 \vspace{\baselineskip}
@@ -12564,7 +12559,7 @@ Keyword             & Type     & Description                      & Units       
 \section{\texorpdfstring{{\tt INIT}}{INIT} (Initial Conditions)}
 
 
-\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\begin{xltabular}{\textwidth}{|p{6cm}|X|X|l|X|}     
 \caption[Initial conditions (\ct{INIT} namelist group)]{For more information see Section~\ref{info:INIT}.}
 \label{tbl:INIT} \\
 \hline
@@ -12615,7 +12610,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{RAMP_TMP_Z}                & Character         & Section~\ref{info:init_temperature}           &                &               \\ \hline
 \ct{RAMP_VF_Z}                 & Character         & Section~\ref{info:init_species}               &                &               \\ \hline
 \ct{SHAPE}                       & Character         & Section~\ref{info:initial_droplets}           &                & \ct{'BLOCK'} \\ \hline
-\ct{SPEC_ID(N)}                 & Character Array   & Section~\ref{info:init_species}               &                &               \\ \hline
+\ct{SPEC_ID(N)}                 & Char.~Array   & Section~\ref{info:init_species}               &                &               \\ \hline
 \ct{TEMPERATURE}                 & Real              & Section~\ref{info:init_temperature}           & \si{\degree C} & \ct{TMPA}    \\ \hline
 \ct{TREE_HEIGHT}                & Real              & Section~\ref{info:trees}                      & m              &               \\ \hline
 \ct{UNIFORM}                     & Logical           & Section~\ref{info:initial_droplets}           &                & \ct{F} \\ \hline
@@ -12623,7 +12618,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{VOLUME_FRACTION(:)}         & Real Array        & Section~\ref{info:init_species}               & mol/mol        & Ambient       \\ \hline
 \ct{XB(6)}                       & Real Array        & Section~\ref{info:init_species}               & m              &               \\ \hline
 \ct{XYZ(3)}                      & Real Array        & Section~\ref{info:initial_droplets}           & m              &               \\ \hline
-\end{longtable}
+\end{xltabular}
 
 
 \vspace{\baselineskip}
@@ -12633,7 +12628,7 @@ Keyword             & Type     & Description                      & Units       
 \section{\texorpdfstring{{\tt ISOF}}{ISOF} (Isosurface Parameters)}
 
 
-\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\begin{xltabular}{\textwidth}{|p{6cm}|X|X|l|X|}     
 \caption[Isosurface parameters (\ct{ISOF} namelist group)]{For more information see Section~\ref{info:ISOF}.}
 \label{tbl:ISOF} \\
 \hline
@@ -12656,7 +12651,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{VALUE(:)}              & Real Array    & Section~\ref{info:ISOF}                   &       &         \\ \hline
 \ct{VELO_INDEX}           & Integer       & Section~\ref{info:velocity}               &       &  0      \\ \hline
 \ct{VELO_INDEX2}          & Integer       & Section~\ref{info:velocity}               &       &  0      \\ \hline
-\end{longtable}
+\end{xltabular}
 
 
 \vspace{\baselineskip}
@@ -12665,7 +12660,7 @@ Keyword             & Type     & Description                      & Units       
 \section{\texorpdfstring{{\tt MATL}}{MATL} (Material Properties)}
 
 
-\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\begin{xltabular}{\textwidth}{|p{6cm}|X|X|l|X|}     
 \caption[Material properties (\ct{MATL} namelist group)]{For more information see Section~\ref{info:MATL}.}
 \label{tbl:MATL} \\
 \hline
@@ -12717,7 +12712,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{SPEC_ID(:,:)}                 & Char.~Array     & Section~\ref{info:solid_pyrolysis}    &                   &               \\ \hline
 \ct{SURFACE_OXIDATION_MODEL}     & Logical         & Section~\ref{vegetation_model}        &                   & \ct{F}       \\ \hline
 \ct{X_O2_PYRO}                    & Logical         & Section~\ref{solid_phase_energy_conservation}       &                   &        \\ \hline
-\end{longtable}
+\end{xltabular}
 
 
 \vspace{\baselineskip}
@@ -12726,8 +12721,7 @@ Keyword             & Type     & Description                      & Units       
 \needspace{2.5in}
 \section{\texorpdfstring{{\tt MESH}}{MESH} (Mesh Parameters)}
 
-
-\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\begin{xltabular}{\textwidth}{|p{6cm}|X|X|l|X|}     
 \caption[Mesh parameters (\ct{MESH} namelist group)]{For more information see Section~\ref{info:MESH}.}
 \label{tbl:MESH} \\
 \hline
@@ -12754,7 +12748,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{TRNY_ID}                       & Character                     & Section~\ref{info:TRNX}                   &    &                  \\ \hline
 \ct{TRNZ_ID}                       & Character                     & Section~\ref{info:TRNX}                   &    &                  \\ \hline
 \ct{XB(6)}                          & Real Sextuplet                & Section~\ref{info:MESH_Basics}            & m  & 0,1,0,1,0,1      \\ \hline
-\end{longtable}
+\end{xltabular}
 
 \vspace{\baselineskip}
 
@@ -12763,7 +12757,7 @@ Keyword             & Type     & Description                      & Units       
 \section{\texorpdfstring{{\tt MISC}}{MISC} (Miscellaneous Parameters)}
 
 
-\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\begin{xltabular}{\textwidth}{|p{6cm}|X|X|l|X|}     
 \caption[Miscellaneous parameters (\ct{MISC} namelist group)]{For more information see Section~\ref{info:MISC}.}
 \label{tbl:MISC} \\
 \hline
@@ -12872,7 +12866,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{VN_MIN}                                       & Real         & Section~\ref{info:VN}                   &            & 0.8               \\ \hline
 \ct{Y_CO2_INFTY}                                  & Real         & Section~\ref{info:simple_chemistry}     &  kg/kg     &                   \\ \hline
 \ct{Y_O2_INFTY}                                   & Real         & Section~\ref{info:simple_chemistry}     &  kg/kg     &                   \\ \hline
-\end{longtable}
+\end{xltabular}
 
 
 \vspace{\baselineskip}
@@ -12880,7 +12874,7 @@ Keyword             & Type     & Description                      & Units       
 \needspace{2.5in}
 \section{\texorpdfstring{{\tt MOVE}}{MOVE} (Coordinate Transformation Parameters)}
 
-\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\begin{xltabular}{\textwidth}{|p{6cm}|X|X|l|X|}     
 \caption[Coordinate transformation parameters (\ct{MULT} namelist group)]{For more information see Section~\ref{info:MOVE}.}
 \label{tbl:MOVE} \\
 \hline
@@ -12894,28 +12888,28 @@ Keyword             & Type     & Description                      & Units       
 \hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
-\ct{AXIS(3)}         & Real Array       & Axis of rotation                                &        & (0.,0.,1.)                 \\ \hline
-\ct{SCALE}           & Real             & Scaling in all directions                       &        & 1.                         \\ \hline
-\ct{SCALEX}          & Real             & Scaling in the unrotated $x$ direction          &        & 1.                         \\ \hline
-\ct{SCALEY}          & Real             & Scaling in the unrotated $y$ direction          &        & 1.                         \\ \hline
-\ct{SCALEZ}          & Real             & Scaling in the unrotated $z$ direction          &        & 1.                         \\ \hline
-\ct{DX}              & Real             & Translation in the $x$ direction                & m      & 0.                         \\ \hline
-\ct{DY}              & Real             & Translation in the $y$ direction                & m      & 0.                         \\ \hline
-\ct{DZ}              & Real             & Translation in the $z$ direction                & m      & 0.                         \\ \hline
-\ct{ID}              & Character        & Identification tag                              &        &                            \\ \hline
-\ct{ROTATION_ANGLE} & Real             & Angle of rotation about \ct{AXIS}              & deg.   & 0.                         \\ \hline
-\ct{T34}             & Real Array       & $3 \times 4$ Transformation Matrix              &        & 0.                         \\ \hline
-\ct{X0}              & Real             & $x$ origin                                      & m      & 0.                         \\ \hline
-\ct{Y0}              & Real             & $y$ origin                                      & m      & 0.                         \\ \hline
-\ct{Z0}              & Real             & $z$ origin                                      & m      & 0.                         \\ \hline
-\end{longtable}
+\ct{AXIS(3)}         & Real Array       & Section~\ref{info:MOVE}             &        & (0,0,1)                    \\ \hline
+\ct{SCALE}           & Real             & Section~\ref{info:MOVE}             &        & 1.                         \\ \hline
+\ct{SCALEX}          & Real             & Section~\ref{info:MOVE}             &        & 1.                         \\ \hline
+\ct{SCALEY}          & Real             & Section~\ref{info:MOVE}             &        & 1.                         \\ \hline
+\ct{SCALEZ}          & Real             & Section~\ref{info:MOVE}             &        & 1.                         \\ \hline
+\ct{DX}              & Real             & Section~\ref{info:MOVE}             & m      & 0.                         \\ \hline
+\ct{DY}              & Real             & Section~\ref{info:MOVE}             & m      & 0.                         \\ \hline
+\ct{DZ}              & Real             & Section~\ref{info:MOVE}             & m      & 0.                         \\ \hline
+\ct{ID}              & Character        & Section~\ref{info:MOVE}             &        &                            \\ \hline
+\ct{ROTATION_ANGLE}  & Real             & Section~\ref{info:MOVE}             & deg.   & 0.                         \\ \hline
+\ct{T34}             & Real Array       & Section~\ref{info:MOVE}             &        & 0.                         \\ \hline
+\ct{X0}              & Real             & Section~\ref{info:MOVE}             & m      & 0.                         \\ \hline
+\ct{Y0}              & Real             & Section~\ref{info:MOVE}             & m      & 0.                         \\ \hline
+\ct{Z0}              & Real             & Section~\ref{info:MOVE}             & m      & 0.                         \\ \hline
+\end{xltabular}
 
 \vspace{\baselineskip}
 
 \needspace{2.5in}
 \section{\texorpdfstring{{\tt MULT}}{MULT} (Multiplier Function Parameters)}
 
-\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\begin{xltabular}{\textwidth}{|p{6cm}|X|X|l|X|}     
 \caption[Multiplier function parameters (\ct{MULT} namelist group)]{For more information see Section~\ref{info:MULT}.}
 \label{tbl:MULT} \\
 \hline
@@ -12927,33 +12921,33 @@ Keyword             & Type     & Description                      & Units       
 \hline
 \multicolumn{5}{|c|}{\ct{MULT} (Multiplier Function Parameters)} \\
 \hline
-Keyword             & Type     & Description                      & Units          & Default   \\ \hline \hline
+Keyword             & Type     & Description                & Units          & Default   \\ \hline \hline
 \endhead
-\ct{DX}             & Real        & Spacing in the $x$ direction                & m  & 0.     \\ \hline
-\ct{DXB(6)}         & Real Array  & Spacing for all 6 coordinates               & m  & 0.     \\ \hline
-\ct{DX0}            & Real        & Translation in the $x$ direction            & m  & 0.     \\ \hline
-\ct{DY}             & Real        & Spacing in the $y$ direction                & m  & 0.     \\ \hline
-\ct{DY0}            & Real        & Translation in the $y$ direction            & m  & 0.     \\ \hline
-\ct{DZ}             & Real        & Spacing in the $z$ direction                & m  & 0.     \\ \hline
-\ct{DZ0}            & Real        & Translation in the $z$ direction            & m  & 0.     \\ \hline
-\ct{ID}             & Character   & Identification tag                          &    &        \\ \hline
-\ct{I_LOWER}       & Integer     & Lower array bound, $x$ direction            &    & 0      \\ \hline
-\ct{I_LOWER_SKIP} & Integer     & Lower array bound begin skip, $x$ direction &    &        \\ \hline
-\ct{I_UPPER}       & Integer     & Upper array bound, $x$ direction            &    & 0      \\ \hline
-\ct{I_UPPER_SKIP} & Integer     & Upper array bound end skip, $x$ direction   &    &        \\ \hline
-\ct{J_LOWER}       & Integer     & Lower array bound, $y$ direction            &    & 0      \\ \hline
-\ct{J_LOWER_SKIP} & Integer     & Lower array bound begin skip, $y$ direction &    &        \\ \hline
-\ct{J_UPPER}       & Integer     & Upper array bound, $y$ direction            &    & 0      \\ \hline
-\ct{J_UPPER_SKIP} & Integer     & Upper array bound end skip, $y$ direction   &    &        \\ \hline
-\ct{K_LOWER}       & Integer     & Lower array bound, $z$ direction            &    & 0      \\ \hline
-\ct{K_LOWER_SKIP} & Integer     & Lower array bound begin skip, $z$ direction &    &        \\ \hline
-\ct{K_UPPER}       & Integer     & Upper array bound, $z$ direction            &    & 0      \\ \hline
-\ct{K_UPPER_SKIP} & Integer     & Upper array bound end skip, $z$ direction   &    &        \\ \hline
-\ct{N_LOWER}       & Integer     & Lower sequence bound                        &    & 0      \\ \hline
-\ct{N_LOWER_SKIP} & Integer     & Lower sequence bound begin skip             &    &        \\ \hline
-\ct{N_UPPER}       & Integer     & Upper sequence bound                        &    & 0      \\ \hline
-\ct{N_UPPER_SKIP} & Integer     & Upper sequence bound end skip               &    &        \\ \hline
-\end{longtable}
+\ct{DX}             & Real        & Section~\ref{info:MULT} & m  & 0.     \\ \hline
+\ct{DXB(6)}         & Real Array  & Section~\ref{info:MULT} & m  & 0.     \\ \hline
+\ct{DX0}            & Real        & Section~\ref{info:MULT} & m  & 0.     \\ \hline
+\ct{DY}             & Real        & Section~\ref{info:MULT} & m  & 0.     \\ \hline
+\ct{DY0}            & Real        & Section~\ref{info:MULT} & m  & 0.     \\ \hline
+\ct{DZ}             & Real        & Section~\ref{info:MULT} & m  & 0.     \\ \hline
+\ct{DZ0}            & Real        & Section~\ref{info:MULT} & m  & 0.     \\ \hline
+\ct{ID}             & Character   & Section~\ref{info:MULT} &    &        \\ \hline
+\ct{I_LOWER}        & Integer     & Section~\ref{info:MULT} &    & 0      \\ \hline
+\ct{I_LOWER_SKIP}   & Integer     & Section~\ref{info:MULT} &    &        \\ \hline
+\ct{I_UPPER}        & Integer     & Section~\ref{info:MULT} &    & 0      \\ \hline
+\ct{I_UPPER_SKIP}   & Integer     & Section~\ref{info:MULT} &    &        \\ \hline
+\ct{J_LOWER}        & Integer     & Section~\ref{info:MULT} &    & 0      \\ \hline
+\ct{J_LOWER_SKIP}   & Integer     & Section~\ref{info:MULT} &    &        \\ \hline
+\ct{J_UPPER}        & Integer     & Section~\ref{info:MULT} &    & 0      \\ \hline
+\ct{J_UPPER_SKIP}   & Integer     & Section~\ref{info:MULT} &    &        \\ \hline
+\ct{K_LOWER}        & Integer     & Section~\ref{info:MULT} &    & 0      \\ \hline
+\ct{K_LOWER_SKIP}   & Integer     & Section~\ref{info:MULT} &    &        \\ \hline
+\ct{K_UPPER}        & Integer     & Section~\ref{info:MULT} &    & 0      \\ \hline
+\ct{K_UPPER_SKIP}   & Integer     & Section~\ref{info:MULT} &    &        \\ \hline
+\ct{N_LOWER}        & Integer     & Section~\ref{info:MULT} &    & 0      \\ \hline
+\ct{N_LOWER_SKIP}   & Integer     & Section~\ref{info:MULT} &    &        \\ \hline
+\ct{N_UPPER}        & Integer     & Section~\ref{info:MULT} &    & 0      \\ \hline
+\ct{N_UPPER_SKIP}   & Integer     & Section~\ref{info:MULT} &    &        \\ \hline
+\end{xltabular}
 
 \vspace{\baselineskip}
 
@@ -12962,7 +12956,7 @@ Keyword             & Type     & Description                      & Units       
 \section{\texorpdfstring{{\tt OBST}}{OBST} (Obstruction Parameters)}
 
 
-\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\begin{xltabular}{\textwidth}{|p{6cm}|X|X|l|X|}     
 \caption[Obstruction parameters (\ct{OBST} namelist group)]{For more information see Section~\ref{info:OBST}.}
 \label{tbl:OBST} \\
 \hline
@@ -13014,7 +13008,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{WIDTH}                   & Real            & Section~\ref{info:multobst}             & m         &               \\ \hline
 \ct{XB(6)}                   & Real Array      & Section~\ref{info:OBST_Basics}          & m         &               \\ \hline
 \ct{XYZ(3)}                  & Real Array      & Section~\ref{info:multobst}             & m         & (0.,0.,0.)    \\ \hline
-\end{longtable}
+\end{xltabular}
 
 
 
@@ -13024,7 +13018,7 @@ Keyword             & Type     & Description                      & Units       
 \section{\texorpdfstring{{\tt PART}}{PART} (Lagrangian Particles/Droplets)}
 
 
-\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\begin{xltabular}{\textwidth}{|p{6cm}|X|X|l|X|}     
 \caption[Lagrangian particles (\ct{PART} namelist group)]{For more information see Chapter~\ref{info:PART}.}
 \label{tbl:PART} \\
 \hline
@@ -13102,14 +13096,14 @@ Keyword             & Type     & Description                      & Units       
 \ct{TRACK_EMBERS}                      & Logical     & Section~\ref{info:ember_generation_part}                              &                   & \ct{T}               \\ \hline
 \ct{TURBULENT_DISPERSION}              & Logical     & Section~\ref{info:MASSLESS}                                           &                   & \ct{F}               \\ \hline
 \ct{VERTICAL_VELOCITY}                 & Real        & Section~\ref{info:surface_droplets}                                   & m/s               &  0.5                  \\ \hline
-\end{longtable}
+\end{xltabular}
 
 \vspace{\baselineskip}
 
 \needspace{2.5in}
 \section{\texorpdfstring{{\tt PRES}}{PRES} (Pressure Solver Parameters)}
 
-\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\begin{xltabular}{\textwidth}{|p{6cm}|X|X|l|X|}     
 \caption[Pressure solver parameters (\ct{PRES} namelist group)]{For more information see Section~\ref{info:PRES}.}
 \label{tbl:PRES} \\
 \hline
@@ -13135,7 +13129,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{SUSPEND_PRESSURE_ITERATIONS} & Logical       & Section~\ref{pressure_solver}               &               & \ct{T}              \\ \hline
 \ct{TUNNEL_PRECONDITIONER}        & Logical       & Section~\ref{tunnel_solver}                 &               & \ct{F}             \\ \hline
 \ct{VELOCITY_TOLERANCE}           & Real          & Section~\ref{pressure_solver}               & m/s           &                           \\ \hline
-\end{longtable}
+\end{xltabular}
 
 
 
@@ -13144,7 +13138,7 @@ Keyword             & Type     & Description                      & Units       
 \needspace{2.5in}
 \section{\texorpdfstring{{\tt PROF}}{PROF} (Wall Profile Parameters)}
 
-\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\begin{xltabular}{\textwidth}{|p{6cm}|X|X|l|X|}     
 \caption[Wall profile parameters (\ct{PROF} namelist group)]{For more information see Section~\ref{info:PROF}.}
 \label{tbl:PROF} \\
 \hline
@@ -13168,7 +13162,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{PART_ID}              & Character         & Section~\ref{info:PROF}      &            &       \\ \hline
 \ct{QUANTITY}              & Character         & Section~\ref{info:PROF}      &            &       \\ \hline
 \ct{XYZ}                   & Real Triplet      & Section~\ref{info:PROF}      & m          &       \\ \hline
-\end{longtable}
+\end{xltabular}
 
 \vspace{\baselineskip}
 
@@ -13176,7 +13170,7 @@ Keyword             & Type     & Description                      & Units       
 \section{\texorpdfstring{{\tt PROP}}{PROP} (Device Properties)}
 
 
-\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\begin{xltabular}{\textwidth}{|p{5.5cm}|X|X|l|X|}     
 \caption[Device properties (\ct{PROP} namelist group)]{For more information see Section~\ref{info:PROP}.}
 \label{tbl:PROP} \\
 \hline
@@ -13254,7 +13248,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{TIME_CONSTANT}                    & Real          & Section~\ref{info:THERMOCOUPLE}           & s                     &                      \\ \hline
 \ct{VELOCITY_COMPONENT}               & Integer       & Section~\ref{info:velocity_patch}         &                       &                      \\ \hline
 \ct{VIEW_ANGLE}                       & Real          & Section~\ref{info:heat_flux}              & degrees               & 180.                 \\ \hline
-\end{longtable}
+\end{xltabular}
 
 
 \vspace{\baselineskip}
@@ -13262,7 +13256,7 @@ Keyword             & Type     & Description                      & Units       
 \needspace{2.5in}
 \section{\texorpdfstring{{\tt RADF}}{RADF} (Radiation Output File Parameters)}
 
-\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\begin{xltabular}{\textwidth}{|p{6cm}|X|X|l|X|}     
 \caption[Radiation output file parameters (\ct{RADF} namelist group)]{For more information see Section~\ref{info:RADF}.}
 \label{tbl:RADF} \\
 \hline
@@ -13280,7 +13274,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{J_STEP}                       & Integer              & Section~\ref{info:RADF}            &                   &  1     \\ \hline
 \ct{K_STEP}                       & Integer              & Section~\ref{info:RADF}            &                   &  1     \\ \hline
 \ct{XB}                            & Real Sextuplet       & Section~\ref{info:RADF}            & m                 &        \\ \hline
-\end{longtable}
+\end{xltabular}
 
 
 \vspace{\baselineskip}
@@ -13288,7 +13282,7 @@ Keyword             & Type     & Description                      & Units       
 \needspace{2.5in}
 \section{\texorpdfstring{{\tt RADI}}{RADI} (Radiation Parameters)}
 
-\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\begin{xltabular}{\textwidth}{|p{6cm}|X|X|l|X|}     
 \caption[Radiation parameters (\ct{RADI} namelist group)]{For more information see Section~\ref{info:RADI}.}
 \label{tbl:RADI} \\
 \hline
@@ -13322,14 +13316,14 @@ Keyword             & Type     & Description                      & Units       
 \ct{TIME_STEP_INCREMENT}          & Integer      & Section~\ref{info:RADI_Resolution}   &            & 3              \\ \hline
 \ct{WIDE_BAND_MODEL}              & Logical      & Section~\ref{info:RADI_Wide_Band}    &            & \ct{F}  \\ \hline
 \ct{WSGG_MODEL}                    & Logical      & Section~\ref{info:RADI_WSGG}         &            & \ct{F}  \\ \hline
-\end{longtable}
+\end{xltabular}
 
 \vspace{\baselineskip}
 
 \needspace{2.5in}
 \section{\texorpdfstring{{\tt RAMP}}{RAMP} (Ramp Function Parameters)}
 
-\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\begin{xltabular}{\textwidth}{|p{6cm}|X|X|l|X|}     
 \caption[Ramp function parameters (\ct{RAMP} namelist group)]{For more information see Chapter~\ref{info:RAMP}.}
 \label{tbl:RAMP} \\
 \hline
@@ -13355,13 +13349,13 @@ Keyword             & Type     & Description                      & Units       
 \ct{T}                             & Real          & Chapter~\ref{info:RAMP}                     & s (or $^\circ$C)      &             \\ \hline
 \ct{X}                             & Real          & Section~\ref{info:GVEC}                     & m                     &             \\ \hline
 \ct{Z}                             & Real          & Section~\ref{info:wind_ramps}               & m                     &             \\ \hline
-\end{longtable}
+\end{xltabular}
 
 \vspace{\baselineskip}
 
 \needspace{2.5in}
 \section{\texorpdfstring{{\tt REAC}}{REAC} (Reaction Parameters)}
-\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\begin{xltabular}{\textwidth}{|p{6cm}|X|X|l|p{3cm}|}     
 \caption[Reaction parameters (\ct{REAC} namelist group)]{For more information see Chapter~\ref{chap:combustion}.}
 \label{tbl:REAC} \\
 \hline
@@ -13421,14 +13415,14 @@ Keyword             & Type     & Description                      & Units       
 \ct{THIRD_BODY}                         & Logical        & Section~\ref{info:finite}                    &                   & \ct{F}           \\ \hline
 \ct{THIRD_EFF(:)}                       & Real Array     & Section~\ref{info:third_body}                &                   &                   \\ \hline
 \ct{THIRD_EFF_ID(:)}                   & Char.~Array    & Section~\ref{info:third_body}                &                   &                   \\ \hline
-\end{longtable}
+\end{xltabular}
 
 \vspace{\baselineskip}
 
 \needspace{2.5in}
 \section{\texorpdfstring{{\tt SLCF}}{SLCF} (Slice File Parameters)}
 
-\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\begin{xltabular}{\textwidth}{|p{6cm}|X|X|l|X|}     
 \caption[Slice file parameters (\ct{SLCF} namelist group)]{For more information see Section~\ref{info:SLCF}.}
 \label{tbl:SLCF} \\
 \hline
@@ -13454,12 +13448,12 @@ Keyword             & Type     & Description                      & Units       
 \ct{PROP_ID}          & Character         & Section~\ref{info:FED}                    &           &                   \\ \hline
 \ct{QUANTITY}          & Character         & Section~\ref{info:gasoutputquantities}    &           &                   \\ \hline
 \ct{QUANTITY2}         & Character         & Section~\ref{info:gasoutputquantities}    &           &                   \\ \hline
-\ct{REAC_ID}          & Character         & See \ct{QUANTITY=`HRRPUV REAC`}          &           &                   \\ \hline
+\ct{REAC_ID}          & Character         & Section~\ref{tab:gasoutputquantities}      &           &                   \\ \hline
 \ct{SPEC_ID}          & Character         & Section~\ref{info:gasoutputquantities}    &           &                   \\ \hline
 \ct{VECTOR}            & Logical           & Section~\ref{info:SLCF}                   &           & \ct{F}     \\ \hline
 \ct{VELO_INDEX}       & Integer           & Section~\ref{info:velocity}               &           & 0                 \\ \hline
 \ct{XB(6)}             & Real Array        & Section~\ref{info:SLCF}                   & m         &                   \\ \hline
-\end{longtable}
+\end{xltabular}
 
 
 \vspace{\baselineskip}
@@ -13467,7 +13461,7 @@ Keyword             & Type     & Description                      & Units       
 \needspace{2.5in}
 \section{\texorpdfstring{{\tt SM3D}}{SM3D} (Smoke3D Parameters)}
 
-\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\begin{xltabular}{\textwidth}{|p{6cm}|X|X|l|X|}     
 \caption[Smoke3D parameters (\ct{SM3D} namelist group)]{For more information see Section~\ref{info:SMOKE3D}.}
 \label{tbl:SM3D} \\
 \hline
@@ -13483,14 +13477,14 @@ Keyword             & Type     & Description                      & Units       
 \endhead
 \ct{QUANTITY}    & Character   & Section~\ref{info:SMOKE3D}      &             &     \\ \hline
 \ct{SPEC_ID}    & Character   & Section~\ref{info:SMOKE3D}      &             &     \\ \hline
-\end{longtable}
+\end{xltabular}
 
 \vspace{\baselineskip}
 
 \needspace{2.5in}
 \section{\texorpdfstring{{\tt SPEC}}{SPEC} (Species Parameters)}
 
-\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\begin{xltabular}{\textwidth}{|p{6cm}|X|X|l|X|}     
 \caption[Species parameters (\ct{SPEC} namelist group)]{For more information see Section~\ref{info:SPEC}.}
 \label{tbl:SPEC} \\
 \hline
@@ -13566,14 +13560,14 @@ Keyword             & Type     & Description                      & Units       
 \ct{VISCOSITY}                     & Real              & Section~\ref{gas_species_props}         & \si{kg/(m.s)}     &               \\ \hline
 \ct{VISCOSITY_LIQUID}             & Real              & Section~\ref{thermal_part_props}        & \si{kg/(m.s)}     &               \\ \hline
 \ct{VOLUME_FRACTION(:)}           & Real Array        & Section~\ref{info:lumped}               &                   &               \\ \hline
-\end{longtable}
+\end{xltabular}
 
 \vspace{\baselineskip}
 
 \needspace{2.5in}
 \section{\texorpdfstring{{\tt SURF}}{SURF} (Surface Properties)}
 
-\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\begin{xltabular}{\textwidth}{|p{6cm}|X|X|l|X|}
 \caption[Surface properties (\ct{SURF} namelist group)]{For more information see Section~\ref{info:SURF}.}
 \label{tbl:SURF} \\
 \hline
@@ -13758,7 +13752,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{XYZ(3)}                                              & Real Array      & Section~\ref{info:spread}                 & m                   &                         \\ \hline
 \ct{Z0}                                                  & Real            & Section~\ref{info:stratification}         & m                   & 10.                     \\ \hline
 \ct{Z_0}                                                & Real            & Section~\ref{info:wind_general}           & m                   & 0.                      \\ \hline
-\end{longtable}
+\end{xltabular}
 
 
 
@@ -13768,7 +13762,7 @@ Keyword             & Type     & Description                      & Units       
 \section{\texorpdfstring{{\tt TABL}}{TABL} (Table Parameters)}
 
 
-\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\begin{xltabular}{\textwidth}{|p{6cm}|X|X|l|X|}     
 \caption[Table parameters (\ct{TABL} namelist group)]{For more information see Section~\ref{info:spraypattern}.}
 \label{tbl:TABL} \\
 \hline
@@ -13784,7 +13778,7 @@ Keyword             & Type     & Description                      & Units       
 \endhead
 \ct{ID}                & Character   & Section~\ref{info:spraypattern}      &             &     \\ \hline
 \ct{TABLE_DATA(9)}    & Real Array  & Section~\ref{info:spraypattern}      &             &     \\ \hline
-\end{longtable}
+\end{xltabular}
 
 
 \vspace{\baselineskip}
@@ -13792,7 +13786,7 @@ Keyword             & Type     & Description                      & Units       
 \needspace{2.5in}
 \section{\texorpdfstring{{\tt TIME}}{TIME} (Time Parameters)}
 
-\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\begin{xltabular}{\textwidth}{|p{6cm}|X|X|l|X|}     
 \caption[Time parameters (\ct{TIME} namelist group)]{For more information see Section~\ref{info:TIME}.}
 \label{tbl:TIME} \\
 \hline
@@ -13821,24 +13815,24 @@ Keyword             & Type     & Description                      & Units       
 \ct{T_END}                    & Real       & Section~\ref{info:TIME_Basics}            & s           & 1.              \\ \hline
 \ct{TIME_SHRINK_FACTOR}      & Real       & Section~\ref{info:steady_state}           &             & 1.              \\ \hline
 \ct{WALL_INCREMENT}           & Integer    & Section~\ref{info:solid_phase_stability}  &             & 2               \\ \hline
-\end{longtable}
+\end{xltabular}
 
 \vspace{\baselineskip}
 
 \needspace{2.5in}
-\section{\texorpdfstring{{\tt TRNX, TRNY, TRNZ}}{TRNX, TRNY, TRNZ} (MESH Transformations)}
+\section{\texorpdfstring{{\tt TRNX, TRNY, TRNZ}}{TRNX, TRNY, TRNZ} (Mesh Transformations)}
 
-\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\begin{xltabular}{\textwidth}{|p{6cm}|X|X|l|X|}     
 \caption[MESH transformation parameters (\ct{TRN*} namelist groups)]{For more information see Section~\ref{info:TRNX}.}
 \label{tbl:TRNX} \\
 \hline
-\multicolumn{5}{|c|}{\ct{TRNX, TRNY, TRNZ} (MESH Transformations)} \\
+\multicolumn{5}{|c|}{\ct{TRNX, TRNY, TRNZ} (Mesh Transformations)} \\
 \hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endfirsthead
 \caption[]{Continued} \\
 \hline
-\multicolumn{5}{|c|}{\ct{TRNX, TRNY, TRNZ} (MESH Transformations)} \\
+\multicolumn{5}{|c|}{\ct{TRNX, TRNY, TRNZ} (Mesh Transformations)} \\
 \hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
@@ -13847,7 +13841,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{IDERIV}            & Integer       & Section~\ref{info:TRNX}   &              &     \\ \hline
 \ct{MESH_NUMBER}      & Integer       & Section~\ref{info:TRNX}   &              &     \\ \hline
 \ct{PC}                & Real          & Section~\ref{info:TRNX}   &              &     \\ \hline
-\end{longtable}
+\end{xltabular}
 
 \clearpage % needed to remove spurious \hline above VENT table
 % \vspace{\baselineskip}
@@ -13856,7 +13850,7 @@ Keyword             & Type     & Description                      & Units       
 \section{\texorpdfstring{{\tt VENT}}{VENT} (Vent Parameters)}
 
 
-\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\begin{xltabular}{\textwidth}{|p{6cm}|X|X|l|X|}     
 \caption[Vent parameters (\ct{VENT} namelist group)]{For more information see Section~\ref{info:VENT}.}
 \label{tbl:VENT} \\
 \hline
@@ -13901,7 +13895,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{VEL_RMS}              & Real              & Section~\ref{info:synthetic_turbulence}                   & m/s           & 0.                  \\ \hline
 \ct{XB(6)}                & Real Array        & Section~\ref{info:VENT_Basics}                            & m             &                     \\ \hline
 \ct{XYZ(3)}               & Real Array        & Section~\ref{info:spread}                                 & m             &                     \\ \hline
-\end{longtable}
+\end{xltabular}
 
 
 \vspace{\baselineskip}
@@ -13910,7 +13904,7 @@ Keyword             & Type     & Description                      & Units       
 \needspace{2.5in}
 \section{\texorpdfstring{{\tt WIND}}{WIND} (Wind and Atmospheric Parameters)}
 
-\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\begin{xltabular}{\textwidth}{|p{6cm}|X|X|X|X|}
 \caption[Wind and atmospheric parameters (\ct{WIND} namelist group)]{For more information see Section~\ref{info:WIND}.}
 \label{tbl:WIND} \\
 \hline
@@ -13953,14 +13947,14 @@ Keyword             & Type     & Description                      & Units       
 \ct{USE_ATMOSPHERIC_INTERPOLATION}           & Logical       & FDS Tech Guide~\cite{FDS_Math_Guide}          &               & \ct{T}      \\ \hline
 \ct{Z_0}                                      & Real          & Section~\ref{info:WIND}                       & m             & 0.03              \\ \hline
 \ct{Z_REF}                                    & Real          & Section~\ref{info:WIND}                       & m             & 10.               \\ \hline
-\end{longtable}
+\end{xltabular}
 
 \vspace{\baselineskip}
 
 \needspace{2.5in}
 \section{\texorpdfstring{{\tt ZONE}}{ZONE} (Pressure Zone Parameters)}
 
-\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\begin{xltabular}{\textwidth}{|p{6cm}|X|X|X|X|}
 \caption[Pressure zone parameters (\ct{ZONE} namelist group)]{For more information see Section~\ref{info:ZONE}.}
 \label{tbl:ZONE} \\
 \hline
@@ -13980,7 +13974,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{LEAK_PRESSURE_EXPONENT(N)}  & Real                  & Section~\ref{info:Leaks}           &        & 0.5           \\ \hline
 \ct{LEAK_REFERENCE_PRESSURE(N)} & Real                  & Section~\ref{info:Leaks}           & Pa     & 4             \\ \hline
 \ct{XYZ(3,:)}                     & Real Array            & Section~\ref{info:ZONE_Basics}     & m      &               \\ \hline
-\end{longtable}
+\end{xltabular}
 
 
 
