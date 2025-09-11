@@ -12269,6 +12269,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{CLIP_RESTART_FILES}           & Logical      & Section~\ref{info:restart}             &           & \ct{T}                        \\ \hline
 \ct{COLUMN_DUMP_LIMIT}            & Logical      & Section~\ref{info:out:DEVC}            &           & \ct{F}                        \\ \hline
 \ct{CTRL_COLUMN_LIMIT}            & Integer      & Section~\ref{info:out:DEVC}            &           & 254                           \\ \hline
+\ct{DECIMAL_SPECIFIER}            & Character    & Section~\ref{chapter:output_formats}   &           & \ct{'PERIOD'}                 \\ \hline
 \ct{DEVC_COLUMN_LIMIT}            & Integer      & Section~\ref{info:out:DEVC}            &           & 254                           \\ \hline
 \ct{DIAGNOSTICS_INTERVAL}         & Integer      & Section~\ref{info:monitoring_progress} &           & 100                           \\ \hline
 \ct{DT_BNDF}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t$\ct{/NFRAMES}       \\ \hline
@@ -14672,8 +14673,11 @@ File Name  & Description  \\ \hline \hline
 
 
 \chapter{Output File Formats}
+\label{chapter:output_formats}
 
 The output from the code consists of the file \ct{CHID.out}, plus various data files that are described below. Most of these output files are written out by the subroutines within \ct{dump.f90}, and can easily be modified to accommodate various plotting packages.
+
+Some FDS results are written to ``comma-separated value'' (\ct{.csv}) files. By default, the decimal point is represented by a period and the column separator by a comma. You can change this so that the decimal point is represented by a comma and the column separator by a semi-colon by setting \ct{DECIMAL_SPPECIFIER='COMMA'} on the \ct{DUMP} line.
 
 \section{Diagnostic Output ({\tt .out})}
 \label{out:file}

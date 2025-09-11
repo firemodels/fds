@@ -32,12 +32,12 @@ YRMSL1 = L.data(1,find(strcmp(L.colheaders,'YO2_RMS')));
 YRMSL2 = L.data(2,find(strcmp(L.colheaders,'YO2_RMS')));
 YRMSL3 = L.data(3,find(strcmp(L.colheaders,'YO2_RMS')));
 
-RHO1 = M.data(find(M.data(:,1)>t_stats_start),find(strcmp(M.colheaders,'"RHO_1"')));
-RHO2 = M.data(find(M.data(:,1)>t_stats_start),find(strcmp(M.colheaders,'"RHO_2"')));
-RHO3 = M.data(find(M.data(:,1)>t_stats_start),find(strcmp(M.colheaders,'"RHO_3"')));
-RHOYO2_1 = M.data(find(M.data(:,1)>t_stats_start),find(strcmp(M.colheaders,'"RHOYO2_1"')));
-RHOYO2_2 = M.data(find(M.data(:,1)>t_stats_start),find(strcmp(M.colheaders,'"RHOYO2_2"')));
-RHOYO2_3 = M.data(find(M.data(:,1)>t_stats_start),find(strcmp(M.colheaders,'"RHOYO2_3"')));
+RHO1 = M.data(find(M.data(:,1)>t_stats_start),find(strcmp(M.colheaders,'RHO_1')));
+RHO2 = M.data(find(M.data(:,1)>t_stats_start),find(strcmp(M.colheaders,'RHO_2')));
+RHO3 = M.data(find(M.data(:,1)>t_stats_start),find(strcmp(M.colheaders,'RHO_3')));
+RHOYO2_1 = M.data(find(M.data(:,1)>t_stats_start),find(strcmp(M.colheaders,'RHOYO2_1')));
+RHOYO2_2 = M.data(find(M.data(:,1)>t_stats_start),find(strcmp(M.colheaders,'RHOYO2_2')));
+RHOYO2_3 = M.data(find(M.data(:,1)>t_stats_start),find(strcmp(M.colheaders,'RHOYO2_3')));
 
 % brute force integration for means
 
@@ -109,12 +109,12 @@ YRMSL1 = L.data(1,find(strcmp(L.colheaders,'YO2_RMS_INT')));
 YRMSL2 = L.data(2,find(strcmp(L.colheaders,'YO2_RMS_INT')));
 YRMSL3 = L.data(3,find(strcmp(L.colheaders,'YO2_RMS_INT')));
 
-RHO1 = M.data(find(M.data(:,1)>t_stats_start),find(strcmp(M.colheaders,'"RHO_1_INT"')));
-RHO2 = M.data(find(M.data(:,1)>t_stats_start),find(strcmp(M.colheaders,'"RHO_2_INT"')));
-RHO3 = M.data(find(M.data(:,1)>t_stats_start),find(strcmp(M.colheaders,'"RHO_3_INT"')));
-RHOYO2_1 = M.data(find(M.data(:,1)>t_stats_start),find(strcmp(M.colheaders,'"RHOYO2_1_INT"')));
-RHOYO2_2 = M.data(find(M.data(:,1)>t_stats_start),find(strcmp(M.colheaders,'"RHOYO2_2_INT"')));
-RHOYO2_3 = M.data(find(M.data(:,1)>t_stats_start),find(strcmp(M.colheaders,'"RHOYO2_3_INT"')));
+RHO1 = M.data(find(M.data(:,1)>t_stats_start),find(strcmp(M.colheaders,'RHO_1_INT')));
+RHO2 = M.data(find(M.data(:,1)>t_stats_start),find(strcmp(M.colheaders,'RHO_2_INT')));
+RHO3 = M.data(find(M.data(:,1)>t_stats_start),find(strcmp(M.colheaders,'RHO_3_INT')));
+RHOYO2_1 = M.data(find(M.data(:,1)>t_stats_start),find(strcmp(M.colheaders,'RHOYO2_1_INT')));
+RHOYO2_2 = M.data(find(M.data(:,1)>t_stats_start),find(strcmp(M.colheaders,'RHOYO2_2_INT')));
+RHOYO2_3 = M.data(find(M.data(:,1)>t_stats_start),find(strcmp(M.colheaders,'RHOYO2_3_INT')));
 
 % brute force integration
 
