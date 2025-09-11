@@ -11402,15 +11402,7 @@ MESH_LOOP_2: DO NM=1,NMESHES
                      IF (OB%I1==OB%I2) THEN ; OBT%X1=OB%X1 ; OBT%X2=OB%X2 ; ENDIF
                      IF (OB%J1==OB%J2) THEN ; OBT%Y1=OB%Y1 ; OBT%Y2=OB%Y2 ; ENDIF
                      IF (OB%K1==OB%K2) THEN ; OBT%Z1=OB%Z1 ; OBT%Z2=OB%Z2 ; ENDIF
-                     IF (OB%BULK_DENSITY > 0._EB .AND. OB%MASS<1.E5_EB) THEN
-                        OBT%MASS = OB%BULK_DENSITY*(OBT%X2-OBT%X1)*(OBT%Y2-OBT%Y1)*(OBT%Z2-OBT%Z1)
-                        IF (OB%I1==OB%I2 .AND. OB%UNDIVIDED_INPUT_LENGTH(1)<0.5_EB*DX(OB%I1)) &
-                           OBT%MASS = OB%BULK_DENSITY*OB%UNDIVIDED_INPUT_LENGTH(1)*(OBT%Y2-OBT%Y1)*(OBT%Z2-OBT%Z1)
-                        IF (OB%J1==OB%J2 .AND. OB%UNDIVIDED_INPUT_LENGTH(2)<0.5_EB*DY(OB%J1)) &
-                           OBT%MASS = OB%BULK_DENSITY*(OBT%X2-OBT%X1)*OB%UNDIVIDED_INPUT_LENGTH(2)*(OBT%Z2-OBT%Z1)
-                        IF (OB%K1==OB%K2 .AND. OB%UNDIVIDED_INPUT_LENGTH(3)<0.5_EB*DZ(OB%K1)) &
-                           OBT%MASS = OB%BULK_DENSITY*(OBT%X2-OBT%X1)*(OBT%Y2-OBT%Y1)*OB%UNDIVIDED_INPUT_LENGTH(3)
-                     ENDIF
+                     IF (OB%BULK_DENSITY > 0._EB .AND. OB%MASS<1.E5_EB) OBT%MASS = OB%MASS/N_NEW_OBST
                   ENDDO
                 ENDDO
             ENDDO
@@ -11574,7 +11566,7 @@ SUBROUTINE READ_HOLE
 USE MISC_FUNCTIONS, ONLY: PROCESS_MESH_NEIGHBORHOOD
 CHARACTER(LABEL_LENGTH) :: DEVC_ID,CTRL_ID,MULT_ID
 CHARACTER(25) :: COLOR
-INTEGER :: NM,N_HOLE,NN,NDO,N,I1,I2,J1,J2,K1,K2,RGB(3),N_HOLE_NEW,N_HOLE_O,II,JJ,KK,NNN,DEVC_INDEX_O,CTRL_INDEX_O
+INTEGER :: NM,N_HOLE,NN,NDO,N,I1,I2,J1,J2,K1,K2,RGB(3),N_HOLE_NEW,N_HOLE_O,II,JJ,KK,NNN,NNNN,DEVC_INDEX_O,CTRL_INDEX_O
 REAL(EB) :: X1,X2,Y1,Y2,Z1,Z2,TRANSPARENCY
 NAMELIST /HOLE/ COLOR,CTRL_ID,DEVC_ID,FYI,ID,MULT_ID,RGB,TRANSPARENCY,XB
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: TEMP_XB
@@ -11853,7 +11845,13 @@ READ_HOLE_LOOP: DO N=1,N_HOLE_O
                   NEW_OBST_IF: IF (NDO>0) THEN
                         CALL RE_ALLOCATE_OBST(NM,N_OBST,NDO)
                         OBSTRUCTION=>M%OBSTRUCTION
-                        OBSTRUCTION(N_OBST+1:N_OBST+NDO) = TEMP_OBST(1:NDO)
+                        DO NNNN = 1,NDO
+                           OB => OBSTRUCTION(N_OBST+NNNN)
+                           OB = TEMP_OBST(NNNN)
+                           IF (OB%BULK_DENSITY > 0._EB) &
+                              OB%MASS = OB%BULK_DENSITY*(TEMP_OBST(NNNN)%X2-TEMP_OBST(NNNN)%X1)*&
+                                        (TEMP_OBST(NNNN)%Y2-TEMP_OBST(NNNN)%Y1)*(TEMP_OBST(NNNN)%Z2-TEMP_OBST(NNNN)%Z1)
+                        ENDDO
                         N_OBST = N_OBST + NDO
                   ENDIF NEW_OBST_IF
 
@@ -11863,6 +11861,9 @@ READ_HOLE_LOOP: DO N=1,N_HOLE_O
 
                      OBSTRUCTION(NN) = TEMP_OBST(0)
                      OB => OBSTRUCTION(NN)
+                     IF (OB%BULK_DENSITY > 0._EB) &
+                        OB%MASS = OB%BULK_DENSITY*(TEMP_OBST(0)%X2-TEMP_OBST(0)%X1)*&
+                                  (TEMP_OBST(0)%Y2-TEMP_OBST(0)%Y1)*(TEMP_OBST(0)%Z2-TEMP_OBST(0)%Z1)
                      OB%DEVC_INDEX_O = DEVC_INDEX_O
                      OB%CTRL_INDEX_O = CTRL_INDEX_O
                      OB%DEVC_ID = DEVC_ID
