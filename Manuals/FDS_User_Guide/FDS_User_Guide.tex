@@ -7950,7 +7950,7 @@ over a span of the domain, like a beam smoke detector. For example, a sprinkler 
 \begin{lstlisting}
 &DEVC XYZ=3.0,5.6,2.3, PROP_ID='Acme Sprinkler 123', ID='Spk_39' /
 \end{lstlisting}
-The physical coordinates of the device are given by a triplet of real numbers, \ct{XYZ}.  FDS uses these coordinates to determine in which gas or wall cell the device is located. Devices are evaluated using cell centered or face centered values of the cell the device is located in; no interpolation is done. The properties of the device are contained on the \ct{PROP} line designated by \ct{PROP_ID}, which will be explained below for each of the special devices included in FDS. The character string \ct{ID} is merely a descriptor to identify the device in the output files, and if any action is tied to its activation.
+The physical coordinates of the device are given by a triplet of real numbers, \ct{XYZ}.  FDS uses these coordinates to determine in which gas or wall cell the device is located. Devices are evaluated using cell centered or face centered values of the cell the device is located in; no interpolation is done. The properties of the device are contained on the \ct{PROP} line designated by \ct{PROP_ID}, which will be explained below for each of the special devices included in FDS. The character string \ct{ID} is merely a descriptor to identify the device in the output files, and if any action is tied to its activation. There should be no commas in \ct{ID} because commas are used as column separators in the output file.
 
 Not all devices need to be associated with a particular set of properties via the \ct{PROP_ID}. For example, pointwise output quantities are specified with a single \ct{DEVC} line, like
 \begin{lstlisting}
@@ -12269,7 +12269,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{CLIP_RESTART_FILES}           & Logical      & Section~\ref{info:restart}             &           & \ct{T}                        \\ \hline
 \ct{COLUMN_DUMP_LIMIT}            & Logical      & Section~\ref{info:out:DEVC}            &           & \ct{F}                        \\ \hline
 \ct{CTRL_COLUMN_LIMIT}            & Integer      & Section~\ref{info:out:DEVC}            &           & 254                           \\ \hline
-\ct{DECIMAL_SPECIFIER}            & Character    & Section~\ref{chapter:output_formats}   &           & \ct{'PERIOD'}                 \\ \hline
+\ct{DECIMAL_SPECIFIER}            & Character    & Chapter~\ref{chapter:output_formats}   &           & \ct{'PERIOD'}                 \\ \hline
 \ct{DEVC_COLUMN_LIMIT}            & Integer      & Section~\ref{info:out:DEVC}            &           & 254                           \\ \hline
 \ct{DIAGNOSTICS_INTERVAL}         & Integer      & Section~\ref{info:monitoring_progress} &           & 100                           \\ \hline
 \ct{DT_BNDF}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t$\ct{/NFRAMES}       \\ \hline
@@ -14483,6 +14483,7 @@ Keyword             & Type     & Description                      & Units       
 896 \> \ct{DEVC ... requires XB for SPATIAL_STATISTIC.} \> Section~\ref{info:statistics} \\
 897 \> \ct{DEVC ... NODE 1 = NODE 2.} \> Section~\ref{info:hvacoutputquantities} \\
 898 \> \ct{DEVC ... should not use XYZ or XB for an HVAC output QUANTITY.} \> Section~\ref{info:hvacoutputquantities} \\
+899 \> \ct{DEVC ... ID should not contain a comma.} \> Section~\ref{info:DEVC} \\
     \>                                                                                \>                          \\
 901 \> \ct{CTRL ... must have a FUNCTION_TYPE.} \> Section~\ref{info:basic_control} \\
 902 \> \ct{CTRL ... PID controller must be given a TARGET_VALUE.} \> Section~\ref{info:CONTROL_PID} \\
@@ -14677,7 +14678,7 @@ File Name  & Description  \\ \hline \hline
 
 The output from the code consists of the file \ct{CHID.out}, plus various data files that are described below. Most of these output files are written out by the subroutines within \ct{dump.f90}, and can easily be modified to accommodate various plotting packages.
 
-Some FDS results are written to ``comma-separated value'' (\ct{.csv}) files. By default, the decimal point is represented by a period and the column separator by a comma. You can change this so that the decimal point is represented by a comma and the column separator by a semi-colon by setting \ct{DECIMAL_SPPECIFIER='COMMA'} on the \ct{DUMP} line.
+Some FDS results are written to ``comma-separated value'' (\ct{.csv}) files. By default, the decimal point is represented by a period and the column separator by a comma. You can change this so that the decimal point is represented by a comma and the column separator by a semi-colon by setting \ct{DECIMAL_SPECIFIER='COMMA'} on the \ct{DUMP} line.
 
 \section{Diagnostic Output ({\tt .out})}
 \label{out:file}
