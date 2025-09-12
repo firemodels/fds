@@ -18,18 +18,18 @@ ddir = '../../Verification/Species/';
 M = importdata([ddir,chid,'_devc.csv'],',',2);
 
 t = M.data(:,1);
-m = M.data(:,find(strcmp(M.colheaders,'"M"')));
+m = M.data(:,find(strcmp(M.colheaders,'M')));
 dmdt = zeros(length(t),1);
 for i=2:length(t)
     dmdt(i) = (m(i)-m(i-1))/(t(i)-t(i-1));
 end
 
-mf_x1  = M.data(:,find(strcmp(M.colheaders,'"TMF_X1"')));
-mf_x2  = M.data(:,find(strcmp(M.colheaders,'"TMF_X2"')));
-mf_y1  = M.data(:,find(strcmp(M.colheaders,'"TMF_Y1"')));
-mf_y2  = M.data(:,find(strcmp(M.colheaders,'"TMF_Y2"')));
-mf_z1  = M.data(:,find(strcmp(M.colheaders,'"TMF_Z1"')));
-mf_z2  = M.data(:,find(strcmp(M.colheaders,'"TMF_Z2"')));
+mf_x1  = M.data(:,find(strcmp(M.colheaders,'TMF_X1')));
+mf_x2  = M.data(:,find(strcmp(M.colheaders,'TMF_X2')));
+mf_y1  = M.data(:,find(strcmp(M.colheaders,'TMF_Y1')));
+mf_y2  = M.data(:,find(strcmp(M.colheaders,'TMF_Y2')));
+mf_z1  = M.data(:,find(strcmp(M.colheaders,'TMF_Z1')));
+mf_z2  = M.data(:,find(strcmp(M.colheaders,'TMF_Z2')));
 
 bal = dmdt + (mf_x2-mf_x1 + mf_y2-mf_y1 + mf_z2-mf_z1);
 

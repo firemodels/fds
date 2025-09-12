@@ -294,6 +294,8 @@ CHARACTER(CHID_LENGTH) :: CHID                                            !< Job
 CHARACTER(CHID_LENGTH) :: RESTART_CHID                                    !< Job ID for a restarted case
 CHARACTER(FILE_LENGTH) :: RESULTS_DIR                                     !< Custom directory for output
 CHARACTER(FILE_LENGTH) :: BINGEOM_DIR                                     !< Custom directory for writing binary geometry files
+CHARACTER(5) :: DECIMAL_SPECIFIER='POINT'                                 !< Use point or comma for real outputs
+CHARACTER(1) :: SEPARATOR                                                 !< Decimal point or comma
 
 ! Dates, version numbers, revision numbers
 
@@ -582,6 +584,9 @@ CHARACTER(FN_LENGTH), ALLOCATABLE, DIMENSION(:) :: FN_PART,FN_PROF,FN_XYZ,FN_TER
 CHARACTER(FN_LENGTH), ALLOCATABLE, DIMENSION(:,:) :: FN_SLCF,FN_SLCF_GEOM,FN_BNDF,FN_BNDG,FN_ISOF,FN_ISOF2,FN_SMOKE3D,FN_RADF
 
 CHARACTER(9) :: FMT_R
+CHARACTER(25) :: REAL_LIST
+CHARACTER( 9) :: CHAR_LIST
+CHARACTER(11) :: INTG_LIST
 LOGICAL :: OUT_FILE_OPENED=.FALSE.
 
 ! Boundary condition arrays

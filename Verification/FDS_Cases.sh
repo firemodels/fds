@@ -803,8 +803,8 @@ $QFDS -p 4 -d Scalar_Analytical_Solution soborot_godunov_square_wave_128.fds
 $QFDS      -d Scalar_Analytical_Solution soborot_superbee_square_wave_16.fds
 $QFDS      -d Scalar_Analytical_Solution soborot_superbee_square_wave_32.fds
 $QFDS      -d Scalar_Analytical_Solution soborot_superbee_square_wave_64.fds
-$QFDS -p 4 -d Scalar_Analytical_Solution soborot_superbee_square_wave_128.fds
-$QFDS      -d Scalar_Analytical_Solution soborot_superbee_square_wave_128_1mesh.fds
+$QFDS -p 4 -T db -d Scalar_Analytical_Solution soborot_superbee_square_wave_128.fds
+$QFDS      -T db -d Scalar_Analytical_Solution soborot_superbee_square_wave_128_1mesh.fds
 $QFDS      -d Scalar_Analytical_Solution soborot_charm_square_wave_16.fds
 $QFDS      -d Scalar_Analytical_Solution soborot_charm_square_wave_32.fds
 $QFDS      -d Scalar_Analytical_Solution soborot_charm_square_wave_64.fds

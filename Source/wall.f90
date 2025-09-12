@@ -51,9 +51,9 @@ TNOW=CURRENT_TIME()
 CALL POINT_TO_MESH(NM)
 
 IF (PREDICTOR) THEN
-   UU => U
-   VV => V
-   WW => W
+   UU => US
+   VV => VS
+   WW => WS
    RHOP => RHOS
    ZZP  => ZZS
    PBAR_P => PBAR_S
