@@ -91,6 +91,7 @@ To compile FireX using **GNU compilers**, add the following to your `~/.bash_pro
 
 ```sh
 module load gcc/13.2.0
+module load openmpi/5.0.7
 module load cuda
 module load nvidia_math
 export FIREMODELS_FC=mpif90
