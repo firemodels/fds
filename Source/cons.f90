@@ -313,6 +313,8 @@ CHARACTER(FILE_LENGTH) :: RESULTS_DIR                                     !< Cus
 CHARACTER(FILE_LENGTH) :: VTK_DIR                                         !< Custom directory for output
 CHARACTER(FILE_LENGTH) :: WORKING_DIR                                     !< Current working directory for output
 CHARACTER(FILE_LENGTH) :: BINGEOM_DIR                                     !< Custom directory for writing binary geometry files
+CHARACTER(5) :: DECIMAL_SPECIFIER='POINT'                                 !< Use point or comma for real outputs
+CHARACTER(1) :: SEPARATOR                                                 !< Decimal point or comma
 
 ! Dates, version numbers, revision numbers
 
@@ -612,6 +614,9 @@ CHARACTER(FN_LENGTH), ALLOCATABLE, DIMENSION(:,:):: FN_PART_VTK,FN_SL3D_VTK
 CHARACTER(FN_LENGTH)                             :: FN_PARAVIEW
 
 CHARACTER(9) :: FMT_R
+CHARACTER(25) :: REAL_LIST
+CHARACTER( 9) :: CHAR_LIST
+CHARACTER(11) :: INTG_LIST
 LOGICAL :: OUT_FILE_OPENED=.FALSE.
 #ifdef WITH_HDF5
 ! Total number of obst and geom patches in each mesh
@@ -961,7 +966,7 @@ REAL(EB) :: MAX_EQUIV_RATIO=20.0_EB
 LOGICAL  :: DO_CHEM_LOAD_BALANCE = .FALSE.
 INTEGER  :: MAX_CVODE_SUBSTEPS=100000
 INTEGER  :: CVODE_MAX_TRY=4
-LOGICAL  :: IS_EXPONENT_LT_1 = .FALSE.
+INTEGER  :: CVODE_ORDER=0
 
 ! FOR WRITING CVODE SUBSTEPS
 LOGICAL  :: WRITE_CVODE_SUBSTEPS = .FALSE.

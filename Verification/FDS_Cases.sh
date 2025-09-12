@@ -421,6 +421,7 @@ $QFDS -d Pressure_Effects zone_break_slow.fds
 $QFDS -d Pressure_Effects zone_break_fast_ulmat.fds
 $QFDS -d Pressure_Effects zone_break_slow_ulmat.fds
 $QFDS -p 4 -d Pressure_Effects zone_break_fast_uglmat.fds
+$QFDS -p 4 -d Pressure_Effects zone_break_fast_uglmat_hypre.fds
 $QFDS -p 2 -d Pressure_Effects zone_shape.fds
 $QFDS -p 8 -d Pressure_Effects zone_shape_2.fds
 $QFDS -d Pressure_Effects obst_coarse_fine_interface.fds
@@ -802,8 +803,8 @@ $QFDS -p 4 -d Scalar_Analytical_Solution soborot_godunov_square_wave_128.fds
 $QFDS      -d Scalar_Analytical_Solution soborot_superbee_square_wave_16.fds
 $QFDS      -d Scalar_Analytical_Solution soborot_superbee_square_wave_32.fds
 $QFDS      -d Scalar_Analytical_Solution soborot_superbee_square_wave_64.fds
-$QFDS -p 4 -d Scalar_Analytical_Solution soborot_superbee_square_wave_128.fds
-$QFDS      -d Scalar_Analytical_Solution soborot_superbee_square_wave_128_1mesh.fds
+$QFDS -p 4 -T db -d Scalar_Analytical_Solution soborot_superbee_square_wave_128.fds
+$QFDS      -T db -d Scalar_Analytical_Solution soborot_superbee_square_wave_128_1mesh.fds
 $QFDS      -d Scalar_Analytical_Solution soborot_charm_square_wave_16.fds
 $QFDS      -d Scalar_Analytical_Solution soborot_charm_square_wave_32.fds
 $QFDS      -d Scalar_Analytical_Solution soborot_charm_square_wave_64.fds
