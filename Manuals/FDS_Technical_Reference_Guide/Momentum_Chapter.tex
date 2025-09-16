@@ -557,9 +557,9 @@ Note that for both stages, the normal components of velocity at the interface ar
    \be
       \left| u_I^* - u_0^* \right| < 0.5 \, \delta x
    \ee
-    and the default convergence criteria for the pressure, $p=\rho(\cH-|\bu|^2/2)$, is
+    and the default convergence criteria for the pressure, $p=\rho(\cH-|\bu|^2/2)$, is derived by taking the divergence of Eq.~(\ref{momeq}) and separating out the baroclinic pressure terms:
    \be
-      \left| \nabla \cdot (p^k-p^{k-1}) \nabla (1/\rho) \right|<20/\dx^2
+       \left| \nabla \cdot (p^k-p^{k-1}) \nabla (1/\rho) \right| \equiv \left| \nabla \cdot \left( \frac{\partial \bu}{\partial t} + \bF_{\rm A} +  \nabla \frac{|\bu|^2}{2} + \frac{1}{\rho} \nabla p^k \right)  \right| < 20/\dx^2
    \ee
    If the criteria are not met, return to Step~\ref{step3}.
 \end{enumerate}
