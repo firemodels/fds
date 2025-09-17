@@ -10992,11 +10992,11 @@ The following example provides a normalized distribution of droplet volumes:
 \subsection{Additional Spray Outputs}
 \label{info:droplet_outputs}
 
-\paragraph{\ct{'ADA'},\ct{'ADA_Z'}} 
+\paragraph{\ct{'ADA'},\ct{'ADA_Z'}}
 
 These gas phase output quantities represent the total droplet surface area for droplets within the gas cell with indices $ijk$ divided by the volume of the cell, $V_{ijk}$
 \be
-   \overline{A}_{{\rm p},ijk}=\frac{\sum_{m=1,N}^N 4\pi r_{{\rm p},m}^2}{V_{ijk}} 
+   \overline{A}_{{\rm p},ijk}=\frac{\sum_{m=1,N}^N 4\pi r_{{\rm p},m}^2}{V_{ijk}}
 \ee
 The quantity \ct{'ADA'}, along with a \ct{PART_ID}, specifies a particular particle class. The quantity \ct{'ADA_Z'}, along with a \ct{SPEC_ID}, specifies all particles that generate that particular gas species.
 
@@ -13160,21 +13160,22 @@ Keyword             & Type     & Description                      & Units       
 \hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
-\ct{BAROCLINIC}                    & Logical       & Section~\ref{baroclinic_torque}             &               & \ct{T}              \\ \hline
-\ct{CHECK_POISSON}                & Logical       & Section~\ref{pressure_solver}               &               & \ct{F}             \\ \hline
-\ct{FISHPAK_BC(3)}                & Integer Array & Section~\ref{sec:periodic}                  &               &                           \\ \hline
-\ct{ITERATION_SUSPEND_FACTOR}    & Real          & Section~\ref{pressure_solver}               & s             & 0.95                      \\ \hline
-\ct{MAX_PRESSURE_ITERATIONS}     & Integer       & Section~\ref{pressure_solver}               &               & 10                        \\ \hline
-\ct{PRESSURE_RELAX_TIME}         & Real          & Section~\ref{background_pressure}           & s             & 1.                        \\ \hline
-\ct{PRESSURE_TOLERANCE}           & Real          & Section~\ref{pressure_solver}               & s$^{-2}$      &                           \\ \hline
-\ct{RELAXATION_FACTOR}            & Real          & Section~\ref{background_pressure}           &               & 1.                        \\ \hline
-\ct{SOLVER}                        & Character     & Section~\ref{optional_pressure_solver}      &               & \ct{'FFT'}               \\ \hline
-\ct{SUSPEND_PRESSURE_ITERATIONS} & Logical       & Section~\ref{pressure_solver}               &               & \ct{T}              \\ \hline
-\ct{TUNNEL_PRECONDITIONER}        & Logical       & Section~\ref{tunnel_solver}                 &               & \ct{F}             \\ \hline
-\ct{VELOCITY_TOLERANCE}           & Real          & Section~\ref{pressure_solver}               & m/s           &                           \\ \hline
+\ct{BAROCLINIC}                  & Logical       & Section~\ref{baroclinic_torque}             &               & \ct{T}       \\ \hline
+\ct{CHECK_POISSON}               & Logical       & Section~\ref{pressure_solver}               &               & \ct{F}       \\ \hline
+\ct{FISHPAK_BC(3)}               & Integer Array & Section~\ref{sec:periodic}                  &               &              \\ \hline
+\ct{ITERATION_SUSPEND_FACTOR}    & Real          & Section~\ref{pressure_solver}               & s             & 0.95         \\ \hline
+\ct{MAX_PREDICTOR_PRESSURE_ITERATIONS} & Integer & Section~\ref{pressure_solver}               &               & * \\ \hline
+\ct{MAX_PRESSURE_ITERATIONS}     & Integer       & Section~\ref{pressure_solver}               &               & 10           \\ \hline
+\ct{PRESSURE_RELAX_TIME}         & Real          & Section~\ref{background_pressure}           & s             & 1.           \\ \hline
+\ct{PRESSURE_TOLERANCE}          & Real          & Section~\ref{pressure_solver}               & s$^{-2}$      &              \\ \hline
+\ct{RELAXATION_FACTOR}           & Real          & Section~\ref{background_pressure}           &               & 1.           \\ \hline
+\ct{SOLVER}                      & Character     & Section~\ref{optional_pressure_solver}      &               & \ct{'FFT'}   \\ \hline
+\ct{SUSPEND_PRESSURE_ITERATIONS} & Logical       & Section~\ref{pressure_solver}               &               & \ct{T}       \\ \hline
+\ct{TUNNEL_PRECONDITIONER}       & Logical       & Section~\ref{tunnel_solver}                 &               & \ct{F}       \\ \hline
+\ct{VELOCITY_TOLERANCE}          & Real          & Section~\ref{pressure_solver}               & m/s           &              \\ \hline
 \end{xltabular}
-
-
+\vspace{-1.0em}
+\noindent\textsuperscript{*} Unless specified, this value defaults to the value set for \ct{MAX_PRESSURE_ITERATIONS}.
 
 \vspace{\baselineskip}
 
