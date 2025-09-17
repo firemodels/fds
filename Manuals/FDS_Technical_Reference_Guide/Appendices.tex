@@ -1015,7 +1015,7 @@ J &=
 
 \subsection*{Calculation of $\frac{\partial \boldsymbol{\dot{\hat{C}}_A}}{\mathbf{\partial \hat{C}}}$}
 Here, $\dot{\hat{C}}_{k,A} = \dot{\omega}_{k}$.
-By taking derivative of Eq.~(\ref{eq:chemistry_ode_system_appendix}) with respect to concentration, we can write:
+By taking derivative of Eq.~(\ref{eq:chemistry_ode_system}) with respect to concentration, we can write:
 \begin{align}\label{eq:JacCAC}
 \frac{\partial \dot{\omega}_k}{\partial \hat{C}_{l}} &= \sum_{i=1}^{N_{reac}} \left[ \nu_{ki} \ r_i \ \frac{\partial b_i}{\partial \hat{C}_{l}} +  b_i \nu_{ki} \  \left( k_{f,i} \nu_{li}^{'} \ \frac{\prod_{j=1}^{N_{\rm s}} (\hat{C}_j)^{{\nu}_{ji}^{'}} }{\hat{C}_{l}}  -  k_{r,i} \ \nu_{li}^{''} \ \frac{\prod_{j=1}^{N_{\rm s}} (\hat{C}_j)^{{\nu}_{ji}^{''}} }{\hat{C}_{l}} \right) \right],
 \end{align}
