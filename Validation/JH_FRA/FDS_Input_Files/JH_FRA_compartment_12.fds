@@ -1,7 +1,7 @@
 &HEAD CHID='JH_FRA_compartment_12', TITLE='FRA 1:2 Compartment Door and Window Inert'/
 &TIME T_END=960.0, /
 
-&CATF OTHER_FILES='common.fds' /
+&CATF OTHER_FILES='common.txt' /
 
 &MESH ID='Mesh-Inside-02', IJK=45,30,30, XB=0.0,1.8,-2.4,-1.2,0.0,1.2,   MPI_PROCESS=0/
 &MESH ID='Mesh-Outside-01', IJK=45,30,30, XB=0.0,1.8,-2.4,-1.2,1.2,2.4,  MPI_PROCESS=1/
@@ -92,6 +92,6 @@
 &RAMP ID='PROP_BURNER_RAMP_Q', T=900.0, F=1.0/
 &RAMP ID='PROP_BURNER_RAMP_Q', T=901.0, F=0.0/
 
-&CATF OTHER_FILES='props.fds' /
+&CATF OTHER_FILES='props.txt' /
 
 &TAIL /
