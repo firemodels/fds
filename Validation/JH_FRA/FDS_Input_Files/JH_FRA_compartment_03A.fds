@@ -1,8 +1,8 @@
 &HEAD CHID='JH_FRA_compartment_03A', TITLE='FRA 1:4 Compartment Door Only Plywood Full'/
 &TIME T_END=900.0, /
 
-&CATF OTHER_FILES='common.fds' /
-&CATF OTHER_FILES='plywood.fds' /
+&CATF OTHER_FILES='common.txt' /
+&CATF OTHER_FILES='plywood.txt' /
 
 &SURF ID='PROP_BURNER', RGB=188,0,0, HRRPUA=1777.7778, RAMP_Q='PROP_BURNER_RAMP_Q', TMP_FRONT=400 /
 
@@ -16,7 +16,7 @@
 &RAMP ID='PROP_BURNER_RAMP_Q', T=600.0, F=1.0/
 &RAMP ID='PROP_BURNER_RAMP_Q', T=601.0, F=0.0/
 
-&CATF OTHER_FILES='props.fds' /
-&CATF OTHER_FILES='quarterscale.fds' /
+&CATF OTHER_FILES='props.txt' /
+&CATF OTHER_FILES='quarterscale.txt' /
 
 &TAIL /

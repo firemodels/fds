@@ -127,7 +127,7 @@ elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "Intel" OR CMAKE_Fortran_COMPILER_ID S
     endif()
     # When compiling with Intel and not on Windows apply -no-wrap-margin.
     if (NOT(WIN32))
-        target_compile_definitions(fds PRIVATE -no-wrap-margin)
+        target_compile_options(fds PRIVATE -no-wrap-margin)
     endif()
 endif()
 

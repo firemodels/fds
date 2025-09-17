@@ -38,7 +38,7 @@ if strcmp(Stats_Output, 'Verification')
     fid = fopen(Statistics_Tex_Output, 'wt');
     % Generate table header information in .tex file
     fprintf(fid, '%s\n', '\scriptsize');
-    fprintf(fid, '%s\n', '\begin{longtable}[c]{@{\extracolsep{\fill}}|l|c|c|c|c|c|c|c|c|c|}');
+    fprintf(fid, '%s\n', '\begin{longtable}{|p{2.5in}|l|p{1in}|l|p{1in}|l|l|l|l|l|}');
     fprintf(fid, '%s\n', '\hline');
     fprintf(fid, '%s\n', 'Case Name & Section & Expected & Expected & Predicted & Predicted & Type of & Error & Error     & Within    \\');
     fprintf(fid, '%s\n', '          &         & Quantity & Value    & Quantity  & Value     & Error   &       & Tolerance & Tol.      \\ \hline \hline');
@@ -54,15 +54,15 @@ if strcmp(Stats_Output, 'Verification')
     [rows, cols] = size(output_stats);
     m = sortrows(output_stats(2:rows,:),1);
     for i_row = 1:rows-1
-        case_name = strrep(m{i_row, 3}, '_', '\_');
+        case_name = ['\lstinline[basicstyle=\scriptsize\ttfamily]!',m{i_row,3},'!'];
         if m{i_row,14}(1:14)=='FDS_User_Guide'
            case_name_section = ['\ref{UG-',m{i_row,3},'}'];
         else
            case_name_section = ['\ref{',m{i_row,3},'}'];
         end
-        expected_quantity = strrep(m{i_row, 5}, '_', '\_');
+        expected_quantity = ['\lstinline[basicstyle=\scriptsize\ttfamily]!',m{i_row,5},'!'];
         expected_value = m{i_row, 6};
-        predicted_quantity = strrep(m{i_row, 7}, '_', '\_');
+        predicted_quantity = ['\lstinline[basicstyle=\scriptsize\ttfamily]!',m{i_row, 7},'!'];
         predicted_value = m{i_row, 8};
         error_type = strrep(m{i_row,10}, ' Error', '');
         error_val = str2num(m{i_row,11});

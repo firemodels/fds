@@ -1,8 +1,8 @@
 &HEAD CHID='JH_FRA_compartment_24', TITLE='FRA 1:1 Compartment Door Only FRP'/
 &TIME T_END=660.0, /
 
-&CATF OTHER_FILES='common.fds' /
-&CATF OTHER_FILES='frp.fds' /
+&CATF OTHER_FILES='common.txt' /
+&CATF OTHER_FILES='frp.txt' /
 
 &SURF ID='PROP_BURNER', RGB=188,0,0, HRRPUA=3972.2222, RAMP_Q='PROP_BURNER_RAMP_Q', TMP_FRONT=400, /
 
@@ -17,7 +17,7 @@
 &RAMP ID='PROP_BURNER_RAMP_Q', T=601.0, F=0.0/
 
 
-&CATF OTHER_FILES='props.fds' /
-&CATF OTHER_FILES='fullscale.fds' /
+&CATF OTHER_FILES='props.txt' /
+&CATF OTHER_FILES='fullscale.txt' /
 
 &TAIL /
