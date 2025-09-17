@@ -920,7 +920,7 @@ INTEGER :: TOTAL_SUBSTEPS_TAKEN
 
 ! Adiabatic flame temperature calculation
 CHARACTER(LABEL_LENGTH) :: FUEL_ID_FOR_AFT='null'
-INTEGER :: I_FUEL,I_CO2,I_H2O,I_O2,I_N2 ! Store the index of the species in the ZZ array.
+INTEGER :: I_FUEL,I_CO2,I_H2O,I_O2 ! Store the index of the species in the ZZ array.
 LOGICAL  :: USE_MIXED_ZN_AFT_TMP = .FALSE.
 
 ! Mixing
