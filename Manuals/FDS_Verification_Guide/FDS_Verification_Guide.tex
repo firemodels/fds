@@ -7943,31 +7943,40 @@ The use of computer software for safety purposes is sometimes regulated under a 
 \end{enumerate}
 
 \begin{landscape}
-\centering
-\captionof{table}[FDS Installation Test Suite]{FDS Installation Test Suite. Details of each case may be found in the listed section or reference. Note that the light blue colored links refer to the FDS User's Guide.} \label{tbl:installation_test}
-\footnotesize
-\begin{tabular}{|l|c|l|l|l|}
-\hline
-Folder                  & Reference                       & Input File                                 & FDS Output File                                  & Expected Results File \\ \hline \hline
-Controls                & \ref{UG-activate_vents}         & activate\_vents.fds                        & activate\_vents\_ctrl.csv                        & activate\_vents.csv \\ \hline
-Pressure\_Effects       & \ref{isentropic2}               & isentropic2.fds                            & isentropic2\_devc.csv                           & isentropic2.csv \\ \hline
-Energy\_Budget          & \ref{energy_budget_tmix}        & energy\_budget\_tmix.fds                   & energy\_budget\_tmix\_devc.csv                   & energy\_budget\_tmix.csv \\ \hline
-Energy\_Budget          & \ref{energy_budget_walls}       & energy\_budget\_cold\_walls.fds            & energy\_budget\_cold\_walls\_hrr.csv             & energy\_budget\_cold\_walls.csv \\ \hline
-Fires                   & \ref{UG-spray_burner}           & spray\_burner.fds                          & spray\_burner\_hrr.csv                           & spray\_burner.csv \\ \hline
-Heat\_Transfer          & \ref{heat_conduction_kc}        & heat\_conduction\_kc.fds                   & heat\_conduction\_kc\_devc.csv                   & heat\_conduction\_kc.csv \\ \hline
-HVAC                    & \ref{ashrae7}                   & ashrae7\_table.fds                         & ashrae7\_table\_devc.csv                         & ashrae7\_exp.csv \\ \hline
-Pressure\_Solver        & \ref{UG-duct_flow}              & duct\_flow.fds                             & duct\_flow\_devc.csv                             & duct\_flow.csv \\ \hline
-Pressure\_Solver        & \ref{UG-duct_flow}              & duct\_flow\_uglmat.fds                     & duct\_flow\_uglmat\_devc.csv                     & duct\_flow.csv \\ \hline
-Pyrolysis               & \ref{enthalpy}                  & enthalpy.fds                               & enthalpy\_devc.csv                               & enthalpy.csv \\ \hline
-Pyrolysis               & \ref{shrink_swell}              & shrink\_swell.fds                          & shrink\_swell\_devc.csv                          & shrink\_swell.csv \\ \hline
-Radiation               & \ref{radiation_shield}          & radiation\_shield.fds                      & radiation\_shield\_devc.csv                      & radiation\_shield.csv \\ \hline
-Species                 & \ref{mixing_reactions}          & reactionrate\_EDC\_1step\_CH4\_nonmix.fds  & reactionrate\_EDC\_1step\_CH4\_nonmix\_devc.csv  & reactionrate\_EDC\_1step\_CH4\_nonmix\_spec.csv \\ \hline
-Species                 & \ref{finite_rate_reactions}     & reactionrate\_arrhenius\_2order\_1step.fds & reactionrate\_arrhenius\_2order\_1step\_devc.csv & reactionrate\_arrhenius\_2order\_1step\_soln.csv \\ \hline
-Sprinklers\_and\_Sprays & \ref{water_evaporation_1}       & water\_evaporation\_1.fds                  & water\_evaporation\_1\_devc.csv                  & water\_evaporation\_1.csv \\ \hline
-Sprinklers\_and\_Sprays & \ref{particle_drag}             & particle\_drag\_U50\_N16.fds               & particle\_drag\_U50\_N16\_devc.csv               & particle\_drag\_U50\_N16.csv \\ \hline
 
-\end{tabular}
+\scriptsize
+\begin{xltabular}{9in}{|p{1.4in}|X|p{2.1in}|p{2.1in}|p{2.1in}|}
+\caption[FDS Installation Test Suite]{FDS Installation Test Suite. Details of each case may be found in the listed section or reference. Note that the light blue colored links refer to the FDS User's Guide.}
+\label{tbl:installation_test} \\
+\hline
+Folder                      & Reference                     & Input File                                   & FDS Output File                                    & Expected Results File                              \\ 
+\hline \hline
+\endfirsthead
+\caption[]{FDS Installation Test (continued).} \\
+\hline
+Folder                      & Reference                     & Input File                                   & FDS Output File                                    & Expected Results File                              \\
+\hline \hline
+\endhead
+\tct{Controls}              & \ref{UG-activate_vents}      & \tct{activate_vents.fds}                      & \tct{activate_vents_ctrl.csv}                      & \tct{activate_vents.csv}                           \\ \hline
+\tct{Energy_Budget}         & \ref{energy_budget_tmix}     & \tct{energy_budget_tmix.fds}                  & \tct{energy_budget_tmix_devc.csv}                  & \tct{energy_budget_tmix.csv}                       \\ \hline
+\tct{Energy_Budget}         & \ref{energy_budget_walls}    & \tct{energy_budget_cold_walls.fds}            & \tct{energy_budget_cold_walls_hrr.csv}             & \tct{energy_budget_cold_walls.csv}                 \\ \hline
+\tct{Fires}                 & \ref{UG-spray_burner}        & \tct{spray_burner.fds}                        & \tct{spray_burner_hrr.csv}                         & \tct{spray_burner.csv}                             \\ \hline
+\tct{Heat_Transfer}         & \ref{heat_conduction_kc}     & \tct{heat_conduction_kc.fds}                  & \tct{heat_conduction_kc_devc.csv}                  & \tct{heat_conduction_kc.csv}                       \\ \hline
+\tct{HVAC}                  & \ref{ashrae7}                & \tct{ashrae7_table.fds}                       & \tct{ashrae7_table_devc.csv}                       & \tct{ashrae7_exp.csv}                              \\ \hline
+\tct{Pressure_Effects}      & \ref{isentropic2}            & \tct{isentropic2.fds}                         & \tct{isentropic2_devc.csv}                         & \tct{isentropic2.csv}                              \\ \hline
+\tct{Pressure_Solver}       & \ref{UG-duct_flow}           & \tct{duct_flow.fds}                           & \tct{duct_flow_devc.csv}                           & \tct{duct_flow.csv}                                \\ \hline
+\tct{Pressure_Solver}       & \ref{UG-duct_flow}           & \tct{duct_flow_uglmat.fds}                    & \tct{duct_flow_uglmat_devc.csv}                    & \tct{duct_flow.csv}                                \\ \hline
+\tct{Pyrolysis}             & \ref{enthalpy}               & \tct{enthalpy.fds}                            & \tct{enthalpy_devc.csv}                            & \tct{enthalpy.csv}                                 \\ \hline
+\tct{Pyrolysis}             & \ref{shrink_swell}           & \tct{shrink_swell.fds}                        & \tct{shrink_swell_devc.csv}                        & \tct{shrink_swell.csv}                             \\ \hline
+\tct{Radiation}             & \ref{radiation_shield}       & \tct{radiation_shield.fds}                    & \tct{radiation_shield_devc.csv}                    & \tct{radiation_shield.csv}                         \\ \hline
+\tct{Species}               & \ref{mixing_reactions}       & \tct{reactionrate_EDC_1step_CH4_nonmix.fds}   & \tct{reactionrate_EDC_1step_CH4_nonmix_devc.csv}   & \tct{reactionrate_EDC_1step_CH4_nonmix_spec.csv}   \\ \hline
+\tct{Species}               & \ref{finite_rate_reactions}  & \tct{reactionrate_arrhenius_2order_1step.fds} & \tct{reactionrate_arrhenius_2order_1step_devc.csv} & \tct{reactionrate_arrhenius_2order_1step_soln.csv} \\ \hline
+\tct{Sprinklers_and_Sprays} & \ref{water_evaporation_1}    & \tct{water_evaporation_1.fds}                 & \tct{water_evaporation_1_devc.csv}                 & \tct{water_evaporation_1.csv}                      \\ \hline
+\tct{Sprinklers_and_Sprays} & \ref{particle_drag}          & \tct{particle_drag_U50_N16.fds}               & \tct{particle_drag_U50_N16_devc.csv}               & \tct{particle_drag_U50_N16.csv}                    \\ \hline
+\end{xltabular}
 \end{landscape}
+
+\normalsize
 
 % Unstructured geometry Appendix:
 
