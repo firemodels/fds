@@ -650,6 +650,7 @@ TYPE SPECIES_MIXTURE_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: R50
    REAL(EB) :: OXR                  !< Required oxygen for complete combustion (gm/gm-species)
    REAL(EB) :: OXA                  !< Available oxygen for combustion (gm/gm-species)
+   REAL(EB) :: EQUIV                !< Species equiv ratio OXR/OXA
 
 
 END TYPE SPECIES_MIXTURE_TYPE
