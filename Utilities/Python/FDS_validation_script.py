@@ -25,6 +25,7 @@ importlib.reload(fdsplotlib) # use for development (while making changes to fdsp
 
 # Special cases
 
+#print("Sandia_Pools...");   subprocess.run(["python","./scripts/Sandia_Pools.py"])
 print("TUS_Facade...");   subprocess.run(["python","./scripts/TUS_Facade_contours.py"])
 
 print("Python validation scripts completed successfully!")
