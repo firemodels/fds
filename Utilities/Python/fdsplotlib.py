@@ -286,8 +286,10 @@ def plot_to_fig(x_data,y_data,**kwargs):
         fig = kwargs.get('figure_handle')
         ax = fig.axes[0]
         plt.figure(fig.number)
+        using_existing_figure = True
     else:
         fig, ax = plt.subplots(nrows=1, ncols=1, sharex=True, sharey=True, gridspec_kw={'hspace': 0, 'wspace': 0}, figsize=figure_size)
+        using_existing_figure = False
 
     # select plot type
     if kwargs.get('plot_type'):
@@ -410,19 +412,21 @@ def plot_to_fig(x_data,y_data,**kwargs):
     else:
         axeslabel_fontsize=default_axeslabel_fontsize
 
-    plt.xlabel(kwargs.get('x_label'), fontsize=axeslabel_fontsize)
-    plt.ylabel(kwargs.get('y_label'), fontsize=axeslabel_fontsize)
+    if not using_existing_figure:
+        plt.xlabel(kwargs.get('x_label'), fontsize=axeslabel_fontsize)
+        plt.ylabel(kwargs.get('y_label'), fontsize=axeslabel_fontsize)
 
     if kwargs.get('legend_fontsize'):
         legend_fontsize=kwargs.get('legend_fontsize')
     else:
         legend_fontsize=default_legend_fontsize
 
-    if kwargs.get('legend_location')=='outside':
-        plt.legend(fontsize=legend_fontsize,bbox_to_anchor=(1,1),loc='upper left',framealpha=legend_framealpha)
-    else:
-        # if kwargs.get('show_legend'):
-        plt.legend(fontsize=legend_fontsize,loc=legend_location,framealpha=legend_framealpha)
+    if kwargs.get('data_label'):
+        if kwargs.get('legend_location')=='outside':
+            plt.legend(fontsize=legend_fontsize,bbox_to_anchor=(1,1),loc='upper left',framealpha=legend_framealpha)
+        else:
+            # if kwargs.get('show_legend'):
+            plt.legend(fontsize=legend_fontsize,loc=legend_location,framealpha=legend_framealpha)
 
     # plot title
     if kwargs.get('plot_title'):
