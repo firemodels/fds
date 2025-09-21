@@ -81,45 +81,30 @@ for i in range(len(Qcorr)):
 
 # Plot Qstar vs Vstar along with Qcorr vs Vcorr (Wu and Bakar, Fig. 4)
 
-plot_style = fdsplotlib.get_plot_style("fds")
-fig = plt.figure(figsize=(plot_style["Paper_Width"], plot_style["Paper_Height"]))
-ax = fig.add_subplot(111)
+plot_style = fdsplotlib.get_plot_style('fds')
+git_file = outdir + 'Wu_Bakar_Tunnel_A_git.txt'
+version_string = fdsplotlib.get_version_string(git_file)
 
-ax.loglog(Qstar[0, :], Vstar[0, :], 'kd', label='Tunnel A')
-ax.loglog(Qstar[1, :], Vstar[1, :], 'rs', label='Tunnel B')
-ax.loglog(Qstar[2, :], Vstar[2, :], 'm^', label='Tunnel C')
-ax.loglog(Qstar[3, :], Vstar[3, :], 'cp', label='Tunnel D')
-ax.loglog(Qstar[4, :], Vstar[4, :], 'go', label='Tunnel E')
-ax.loglog(Qcorr, Vcorr, 'k-', label='Correlation')
+fig = fdsplotlib.plot_to_fig(x_data=Qcorr, y_data=Vcorr, data_label='Correlation', marker_style='k-',
+                             x_min=0.001, x_max=10, y_min=0.1, y_max=1,
+                             revision_label=version_string,
+                             figure_size=(plot_style['Plot_Width'], plot_style['Plot_Height']),
+                             x_label='Heat Release Rate, $Q^*$', y_label='Critical Velocity, $V^*$',
+                             legend_location='upper left',
+                             plot_type='loglog')
 
-ax.set_xlim([0.001, 10])
-ax.set_ylim([0.1, 1.0])
-ax.set_xlabel('Heat Release Rate, $Q*$',fontdict={"fontname": plot_style["Font_Name"], "fontsize": plot_style["Label_Font_Size"]})
-ax.set_ylabel('Critical Velocity, $V*$',fontdict={"fontname": plot_style["Font_Name"], "fontsize": plot_style["Label_Font_Size"]})
-ax.legend(loc='upper left')
-ax.grid(True, alpha=0.3)
-
-# Add Git revision if file is available
-def addverstr(ax, git_filename, plot_type='loglog'):
-    """Add version string to plot if git file is available"""
-    try:
-        if os.path.exists(git_filename):
-            with open(git_filename, 'r') as f:
-                git_info = f.read().strip()
-            if plot_type == 'loglog':
-                ax.text(0.02, 0.02, git_info, transform=ax.transAxes, 
-                       fontsize=8, verticalalignment='bottom')
-    except:
-        pass
-
-Git_Filename = outdir + 'Wu_Bakar_Tunnel_A_git.txt'
-addverstr(ax, Git_Filename, 'loglog')
+fig = fdsplotlib.plot_to_fig(x_data=Qstar[0, :], y_data=Vstar[0, :], marker_style='kd', data_label='Tunnel A', figure_handle=fig)
+fig = fdsplotlib.plot_to_fig(x_data=Qstar[1, :], y_data=Vstar[1, :], marker_style='rs', data_label='Tunnel B', figure_handle=fig)
+fig = fdsplotlib.plot_to_fig(x_data=Qstar[2, :], y_data=Vstar[2, :], marker_style='m^', data_label='Tunnel C', figure_handle=fig)
+fig = fdsplotlib.plot_to_fig(x_data=Qstar[3, :], y_data=Vstar[3, :], marker_style='c+', data_label='Tunnel D', figure_handle=fig)
+fig = fdsplotlib.plot_to_fig(x_data=Qstar[4, :], y_data=Vstar[4, :], marker_style='go', data_label='Tunnel E', figure_handle=fig)
 
 # Make the pdf figure
-plt.tight_layout()
-plt.savefig(pltdir + 'Wu_Bakar_Critical_Velocity.pdf', format='pdf', bbox_inches='tight')
+
+plt.savefig(pltdir + 'Wu_Bakar_Critical_Velocity.pdf', format='pdf')
 
 # Clear Qstar and Vstar for experimental data
+
 Qstar = np.zeros((5, 8))
 Vstar = np.zeros((5, 8))
 
@@ -137,26 +122,22 @@ Vstar[4, :] = np.array([0.288, 0.353, 0.393, 0.393, 0.393, 0.393, 0.393, 0.393])
 
 # Plot Wu and Bakar data along with Qcorr vs Vcorr (Wu and Bakar, Fig. 4)
 
-fig2 = plt.figure(figsize=(plot_style["Paper_Width"], plot_style["Paper_Height"]))
-ax2 = fig2.add_subplot(111)
+fig2 = fdsplotlib.plot_to_fig(x_data=Qcorr, y_data=Vcorr, data_label='Correlation', marker_style='k-',
+                              x_min=0.001, x_max=10, y_min=0.1, y_max=1,
+                              revision_label=version_string,
+                              figure_size=(plot_style['Plot_Width'], plot_style['Plot_Height']),
+                              x_label='Heat Release Rate, $Q^*$', y_label='Critical Velocity, $V^*$',
+                              legend_location='upper left',
+                              plot_type='loglog')
 
-ax2.loglog(Qstar[0, :], Vstar[0, :], 'd', markerfacecolor='k', markeredgecolor='k', label='Tunnel A')
-ax2.loglog(Qstar[1, :], Vstar[1, :], 's', markerfacecolor='r', markeredgecolor='r', label='Tunnel B')
-ax2.loglog(Qstar[2, :], Vstar[2, :], '^', markerfacecolor='m', markeredgecolor='m', label='Tunnel C')
-ax2.loglog(Qstar[3, :], Vstar[3, :], 'p', markerfacecolor='c', markeredgecolor='c', label='Tunnel D')
-ax2.loglog(Qstar[4, :], Vstar[4, :], 'o', markerfacecolor='g', markeredgecolor='g', label='Tunnel E')
-ax2.loglog(Qcorr, Vcorr, 'k-', label='Correlation')
-
-ax2.set_xlim([0.001, 10])
-ax2.set_ylim([0.1, 1.0])
-ax2.set_xlabel('Heat Release Rate, $Q*$',fontdict={"fontname": plot_style["Font_Name"], "fontsize": plot_style["Label_Font_Size"]})
-ax2.set_ylabel('Critical Velocity, $V*$',fontdict={"fontname": plot_style["Font_Name"], "fontsize": plot_style["Label_Font_Size"]})
-ax2.legend(loc='upper left')
-ax2.grid(True, alpha=0.3)
+fig2 = fdsplotlib.plot_to_fig(x_data=Qstar[0, :], y_data=Vstar[0, :], marker_style='kd', data_label='Tunnel A', figure_handle=fig2)
+fig2 = fdsplotlib.plot_to_fig(x_data=Qstar[1, :], y_data=Vstar[1, :], marker_style='rs', data_label='Tunnel B', figure_handle=fig2)
+fig2 = fdsplotlib.plot_to_fig(x_data=Qstar[2, :], y_data=Vstar[2, :], marker_style='m^', data_label='Tunnel C', figure_handle=fig2)
+fig2 = fdsplotlib.plot_to_fig(x_data=Qstar[3, :], y_data=Vstar[3, :], marker_style='c+', data_label='Tunnel D', figure_handle=fig2)
+fig2 = fdsplotlib.plot_to_fig(x_data=Qstar[4, :], y_data=Vstar[4, :], marker_style='go', data_label='Tunnel E', figure_handle=fig2)
 
 # Make the pdf figure
-plt.tight_layout()
-plt.savefig(pltdir + 'Wu_Bakar_Critical_Velocity_Exp_Data.pdf', format='pdf', bbox_inches='tight')
+plt.savefig(pltdir + 'Wu_Bakar_Critical_Velocity_Exp_Data.pdf', format='pdf')
 
 print('Wu_Bakar_Tunnels completed successfully')
 
