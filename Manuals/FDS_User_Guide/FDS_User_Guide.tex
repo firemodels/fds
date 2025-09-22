@@ -2271,7 +2271,7 @@ Sphere       & 2        & 0.6     & 0     & 0.5    &                \\ \hline
 \end{center}
 \end{table}
 
-The length scale, $L$, is specified by \ct{CONVECTION_LENGTH_SCALE} on the \ct{SURF} line. By default, it is 1~m for plates, and the diameter of a sphere or cylinder.
+The length scale, $L$, is specified by \ct{CONVECTION_LENGTH_SCALE} on the \ct{SURF} line. By default, it is 1~m for plates, and the diameter of a sphere or cylinder. The velocity used to compute Re can be output with the solid phase quantity \ct{'TANGENTIAL VELOCITY'}.
 
 \subsubsection{Output for Convective Heat Transfer Regime}
 \label{info:convection_regime}
@@ -11741,6 +11741,7 @@ Table~\ref{tab:solidoutputquantities} below lists solid phase output quantities.
 \ct{SUBSTEPS}                                  & Section~\ref{info:solid_phase_stability}      &                    & B,D          \\ \hline
 \ct{SURFACE DENSITY}$^4$                       & Section~\ref{info:material_components}        & kg/m$^2$           & B,D          \\ \hline
 \ct{SURFACE DEPOSITION}$^1$                    & Section~\ref{info:deposition}                 & kg/m$^2$           & B,D          \\ \hline
+\ct{TANGENTIAL VELOCITY}                       & Section~\ref{info:convection}                 & m/s                & B,D          \\ \hline
 \ct{TOTAL MASS FLUX WALL}$^1$                  & Section~\ref{info:wallflux}                   & kg/s/m$^2$         & B,D          \\ \hline
 \ct{VELOCITY ERROR}                            & Section~\ref{info:PRES}                       & m/s                & B,D          \\ \hline
 \ct{VISCOUS STRESS WALL}                       & Section~\ref{info:distributed_forces}         & Pa                 & B,D          \\ \hline

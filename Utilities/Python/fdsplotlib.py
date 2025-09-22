@@ -96,6 +96,9 @@ def dataplot(config_filename,**kwargs):
 
         # print(pp.__dict__) # helpful for debug
 
+        if pp.switch_id=='s':
+           continue
+
         if 'all' not in plot_list:
             if pp.Dataname not in plot_list:
                 continue
@@ -259,6 +262,8 @@ def plot_to_fig(x_data,y_data,**kwargs):
     default_ticklabel_fontsize = plot_style["Label_Font_Size"]
     default_axeslabel_fontsize = plot_style["Label_Font_Size"]
     default_legend_fontsize = plot_style["Key_Font_Size"]
+    default_legend_location = 'best'
+    default_legend_framealpha = 1
     default_title_fontsize = plot_style["Title_Font_Size"]
     default_markevery = 1
     markerfacecolor = 'none'
@@ -281,8 +286,10 @@ def plot_to_fig(x_data,y_data,**kwargs):
         fig = kwargs.get('figure_handle')
         ax = fig.axes[0]
         plt.figure(fig.number)
+        using_existing_figure = True
     else:
         fig, ax = plt.subplots(nrows=1, ncols=1, sharex=True, sharey=True, gridspec_kw={'hspace': 0, 'wspace': 0}, figsize=figure_size)
+        using_existing_figure = False
 
     # select plot type
     if kwargs.get('plot_type'):
@@ -305,6 +312,15 @@ def plot_to_fig(x_data,y_data,**kwargs):
     else:
         markevery = default_markevery
 
+    if kwargs.get('legend_location'):
+        legend_location = kwargs.get('legend_location')
+    else:
+        legend_location = default_legend_location
+
+    if kwargs.get('legend_framealpha'):
+        legend_framealpha = kwargs.get('legend_framealpha')
+    else:
+        legend_framealpha = default_legend_framealpha
 
     # generate the main x,y plot
     if plot_type=='linear':
@@ -396,19 +412,21 @@ def plot_to_fig(x_data,y_data,**kwargs):
     else:
         axeslabel_fontsize=default_axeslabel_fontsize
 
-    plt.xlabel(kwargs.get('x_label'), fontsize=axeslabel_fontsize)
-    plt.ylabel(kwargs.get('y_label'), fontsize=axeslabel_fontsize)
+    if not using_existing_figure:
+        plt.xlabel(kwargs.get('x_label'), fontsize=axeslabel_fontsize)
+        plt.ylabel(kwargs.get('y_label'), fontsize=axeslabel_fontsize)
 
     if kwargs.get('legend_fontsize'):
         legend_fontsize=kwargs.get('legend_fontsize')
     else:
         legend_fontsize=default_legend_fontsize
 
-    if kwargs.get('legend_location')=='outside':
-        plt.legend(fontsize=legend_fontsize,bbox_to_anchor=(1,1),loc='upper left',framealpha=kwargs.get('legend_framealpha'))
-    else:
-        # if kwargs.get('show_legend'):
-        plt.legend(fontsize=legend_fontsize,loc=kwargs.get('legend_location'),framealpha=kwargs.get('legend_framealpha'))
+    if kwargs.get('data_label'):
+        if kwargs.get('legend_location')=='outside':
+            plt.legend(fontsize=legend_fontsize,bbox_to_anchor=(1,1),loc='upper left',framealpha=legend_framealpha)
+        else:
+            # if kwargs.get('show_legend'):
+            plt.legend(fontsize=legend_fontsize,loc=legend_location,framealpha=legend_framealpha)
 
     # plot title
     if kwargs.get('plot_title'):
