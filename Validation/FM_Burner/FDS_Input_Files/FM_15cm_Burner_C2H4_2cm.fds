@@ -8,7 +8,7 @@
 
 &DUMP DT_DEVC=1, DT_HRR=1 /
 
-&MISC SIMULATION_MODE='LES' /
+&MISC SIMULATION_MODE='LES', SOOT_DENSITY=1740.0 /
 &PRES SOLVER='ULMAT HYPRE' /
 
 ! note: ethylene 2-step chemistry developed from
@@ -45,8 +45,18 @@ https://material-properties.org/sand-density-heat-capacity-thermal-conductivity/
 &RAMP ID='N2 RAMP', T= 5.0, F=0.00 /
 &RAMP ID='N2 RAMP', T=65.0, F=1.00 /
 
-! GEOM Vertices: 294 | Faces: 576
-&GEOM ID='burner' SURF_ID='burner','wall' BINARY_FILE='../../../../cad/Case_Studies/FM_Burner/burner.bingeom' /
+! ! GEOM Vertices: 294 | Faces: 576
+! &GEOM ID='burner' SURF_ID='burner','wall' BINARY_FILE='../../../../cad/Case_Studies/FM_Burner/burner.bingeom' /
+
+&MULT ID='cube array', DX=0.02,DY=0.02, I_UPPER=9,J_UPPER=9 /
+
+&OBST XB=-0.10,-0.08,-0.10,-0.08,-0.254,0.0000
+      MULT_ID='cube array'
+      SURF_IDS='burner','wall','wall'
+      SHAPE='CYLINDER'
+      RADIUS=0.0685
+      HEIGHT=0.254
+      XYZ=0,0,-0.254 /
 
 &PART ID='ignitor', SAMPLING_FACTOR=1, SURF_ID='pilot', STATIC=.TRUE./
 &SURF ID='pilot', MASS_FLUX(1)=0.002196663186903, SPEC_ID(1)='PILOT FUEL', RADIUS=0.0047, GEOMETRY='SPHERICAL' / HRRPUA=100. kW/m2

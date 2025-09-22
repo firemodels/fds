@@ -13,18 +13,28 @@
 
 &DUMP DT_HRR=0.5 /
 
-&MISC SIMULATION_MODE='LES' /
+&MISC SIMULATION_MODE='LES', SOOT_DENSITY=1740.0 /
 &PRES SOLVER='ULMAT HYPRE' /
 
 &REAC FUEL='ETHYLENE', SOOT_YIELD=0.043, CO_YIELD=0.013,RADIATIVE_FRACTION=0.0, N_SIMPLE_CHEMISTRY_REACTIONS=2, FUEL_C_TO_CO_FRACTION=0.60 /
 
 &SURF ID='side wall', COLOR='LIGHT BLUE', DEFAULT=T /
 &SURF ID='wall', COLOR='GRAY'/
-&SURF ID='burner', HRRPUA=1017.6, COLOR='RED', BLOWING=T /
+&SURF ID='burner', SPEC_ID(1)='ETHYLENE', MASS_FLUX(1)=0.0216, COLOR='RED', BLOWING=T / fuel flow = 0.318 g/s per MaCFP documentation
 &SURF ID='coflow', COLOR='BLUE', VEL=-0.041 /
 
-! GEOM Vertices: 294 | Faces: 576
-&GEOM ID='burner' SURF_ID='burner','wall' BINARY_FILE='../../../../cad/Case_Studies/FM_Burner/burner.bingeom' /
+! ! GEOM Vertices: 294 | Faces: 576
+! &GEOM ID='burner' SURF_ID='burner','wall' BINARY_FILE='../../../../cad/Case_Studies/FM_Burner/burner.bingeom' /
+
+&MULT ID='cube array', DX=0.005,DY=0.005, I_UPPER=39,J_UPPER=39 /
+
+&OBST XB=-0.10,-0.095,-0.10,-0.095,-0.254,0.0000
+      MULT_ID='cube array'
+      SURF_IDS='burner','wall','wall'
+      SHAPE='CYLINDER'
+      RADIUS=0.0685
+      HEIGHT=0.254
+      XYZ=0,0,-0.254 /
 
 &VENT DB='ZMAX', SURF_ID='OPEN'/
 &VENT DB='ZMIN', SURF_ID='coflow'/

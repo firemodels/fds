@@ -9,7 +9,7 @@
 &MULT ID='m2', DX=0.12,DY=0.12,DZ=0.300, I_UPPER=1,J_UPPER=1,K_UPPER=3 / 16 fine meshes
 &MESH IJK=12,12,30, XB=-0.12,0.000,-0.12,0.000,-0.380,-0.080, MULT_ID='m2', COLOR='RED' /
 
-&MISC Y_O2_INFTY=0.170, SIMULATION_MODE='LES' /
+&MISC Y_O2_INFTY=0.170, SIMULATION_MODE='LES', SOOT_DENSITY=1740.0 /
 &PRES SOLVER='ULMAT HYPRE' /
 
 &TIME T_END=20. /
@@ -20,11 +20,21 @@
 
 &SURF ID='side wall', COLOR='LIGHT BLUE', DEFAULT=T /
 &SURF ID='wall', COLOR='GRAY'/
-&SURF ID='burner', HRRPUA=1017.6, COLOR='RED', BLOWING=T /
+&SURF ID='burner', SPEC_ID(1)='ETHYLENE', MASS_FLUX(1)=0.0216, COLOR='RED', BLOWING=T / fuel flow = 0.318 g/s per MaCFP documentation
 &SURF ID='coflow', COLOR='BLUE', VEL=-0.041 /
 
-! GEOM Vertices: 294 | Faces: 576
-&GEOM ID='burner' SURF_ID='burner','wall' BINARY_FILE='../../../../cad/Case_Studies/FM_Burner/burner.bingeom' /
+! ! GEOM Vertices: 294 | Faces: 576
+! &GEOM ID='burner' SURF_ID='burner','wall' BINARY_FILE='../../../../cad/Case_Studies/FM_Burner/burner.bingeom' /
+
+&MULT ID='cube array', DX=0.01,DY=0.01, I_UPPER=19,J_UPPER=19 /
+
+&OBST XB=-0.10,-0.09,-0.10,-0.09,-0.254,0.0000
+      MULT_ID='cube array'
+      SURF_IDS='burner','wall','wall'
+      SHAPE='CYLINDER'
+      RADIUS=0.0685
+      HEIGHT=0.254
+      XYZ=0,0,-0.254 /
 
 &VENT DB='ZMAX', SURF_ID='OPEN'/
 &VENT DB='ZMIN', SURF_ID='coflow'/
