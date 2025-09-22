@@ -13,15 +13,15 @@ importlib.reload(fdsplotlib) # use for development (while making changes to fdsp
 
 # Statistics output options
 
-# Run dataplot and scatplot scripts
+# # Run dataplot and scatplot scripts
 
-# fdsplotlib.dataplot(config_filename='../Matlab/FDS_verification_dataplot_inputs.csv',
-#                     expdir='../../Verification/',
-#                     cmpdir='../../Verification/',
+# fdsplotlib.dataplot(config_filename='../Matlab/FDS_validation_dataplot_inputs.csv',
+#                     expdir='../../../exp/',
+#                     cmpdir='../../../out/',
 #                     pltdir='../../Manuals/',
 #                     close_figs=True,
 #                     verbose=True,
-#                     plot_range=[2])
+#                     plot_list=['all'])
 
 # Special cases
 
