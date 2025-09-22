@@ -7,7 +7,8 @@ importlib.reload(fdsplotlib) # use for development (while making changes to fdsp
 
 # Scripts to run prior to dataplot
 
-#print("catchpole_spread_rates...");   subprocess.run(["python","./scripts/catchpole_spread_rates.py"])
+# print("catchpole_spread_rates...");   subprocess.run(["python","./scripts/catchpole_spread_rates.py"])
+# print("NIST_deposition_gauge...");   subprocess.run(["python","./scripts/NIST_deposition_gauge.py"])
 
 # Dataplot and scatplot options
 
@@ -25,7 +26,7 @@ importlib.reload(fdsplotlib) # use for development (while making changes to fdsp
 
 # Special cases
 
-#print("Sandia_Pools...");       subprocess.run(["python","./scripts/Sandia_Pools.py"])
+# print("Sandia_Pools...");       subprocess.run(["python","./scripts/Sandia_Pools.py"])
 print("TUS_Facade...");         subprocess.run(["python","./scripts/TUS_Facade_contours.py"])
 print("Wu_Bakar_Tunnels...");   subprocess.run(["python","./scripts/Wu_Bakar_Tunnels.py"])
 
