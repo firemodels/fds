@@ -88,16 +88,15 @@ version_string = fdsplotlib.get_version_string(git_file)
 fig = fdsplotlib.plot_to_fig(x_data=Qcorr, y_data=Vcorr, data_label='Correlation', marker_style='k-',
                              x_min=0.001, x_max=10, y_min=0.1, y_max=1,
                              revision_label=version_string,
-                             figure_size=(plot_style['Plot_Width'], plot_style['Plot_Height']),
                              x_label='Heat Release Rate, $Q^*$', y_label='Critical Velocity, $V^*$',
                              legend_location='upper left',
                              plot_type='loglog')
 
-fig = fdsplotlib.plot_to_fig(x_data=Qstar[0, :], y_data=Vstar[0, :], marker_style='kd', data_label='Tunnel A', figure_handle=fig)
-fig = fdsplotlib.plot_to_fig(x_data=Qstar[1, :], y_data=Vstar[1, :], marker_style='rs', data_label='Tunnel B', figure_handle=fig)
-fig = fdsplotlib.plot_to_fig(x_data=Qstar[2, :], y_data=Vstar[2, :], marker_style='m^', data_label='Tunnel C', figure_handle=fig)
-fig = fdsplotlib.plot_to_fig(x_data=Qstar[3, :], y_data=Vstar[3, :], marker_style='c+', data_label='Tunnel D', figure_handle=fig)
-fig = fdsplotlib.plot_to_fig(x_data=Qstar[4, :], y_data=Vstar[4, :], marker_style='go', data_label='Tunnel E', figure_handle=fig)
+fdsplotlib.plot_to_fig(x_data=Qstar[0, :], y_data=Vstar[0, :], marker_style='kd', data_label='Tunnel A', figure_handle=fig)
+fdsplotlib.plot_to_fig(x_data=Qstar[1, :], y_data=Vstar[1, :], marker_style='rs', data_label='Tunnel B', figure_handle=fig)
+fdsplotlib.plot_to_fig(x_data=Qstar[2, :], y_data=Vstar[2, :], marker_style='m^', data_label='Tunnel C', figure_handle=fig)
+fdsplotlib.plot_to_fig(x_data=Qstar[3, :], y_data=Vstar[3, :], marker_style='c+', data_label='Tunnel D', figure_handle=fig)
+fdsplotlib.plot_to_fig(x_data=Qstar[4, :], y_data=Vstar[4, :], marker_style='go', data_label='Tunnel E', figure_handle=fig)
 
 # Make the pdf figure
 
@@ -125,20 +124,18 @@ Vstar[4, :] = np.array([0.288, 0.353, 0.393, 0.393, 0.393, 0.393, 0.393, 0.393])
 fig2 = fdsplotlib.plot_to_fig(x_data=Qcorr, y_data=Vcorr, data_label='Correlation', marker_style='k-',
                               x_min=0.001, x_max=10, y_min=0.1, y_max=1,
                               revision_label=version_string,
-                              figure_size=(plot_style['Plot_Width'], plot_style['Plot_Height']),
                               x_label='Heat Release Rate, $Q^*$', y_label='Critical Velocity, $V^*$',
                               legend_location='upper left',
                               plot_type='loglog')
 
-fig2 = fdsplotlib.plot_to_fig(x_data=Qstar[0, :], y_data=Vstar[0, :], marker_style='kd', data_label='Tunnel A', figure_handle=fig2)
-fig2 = fdsplotlib.plot_to_fig(x_data=Qstar[1, :], y_data=Vstar[1, :], marker_style='rs', data_label='Tunnel B', figure_handle=fig2)
-fig2 = fdsplotlib.plot_to_fig(x_data=Qstar[2, :], y_data=Vstar[2, :], marker_style='m^', data_label='Tunnel C', figure_handle=fig2)
-fig2 = fdsplotlib.plot_to_fig(x_data=Qstar[3, :], y_data=Vstar[3, :], marker_style='c+', data_label='Tunnel D', figure_handle=fig2)
-fig2 = fdsplotlib.plot_to_fig(x_data=Qstar[4, :], y_data=Vstar[4, :], marker_style='go', data_label='Tunnel E', figure_handle=fig2)
+fdsplotlib.plot_to_fig(x_data=Qstar[0, :], y_data=Vstar[0, :], marker_style='kd', data_label='Tunnel A', figure_handle=fig2)
+fdsplotlib.plot_to_fig(x_data=Qstar[1, :], y_data=Vstar[1, :], marker_style='rs', data_label='Tunnel B', figure_handle=fig2)
+fdsplotlib.plot_to_fig(x_data=Qstar[2, :], y_data=Vstar[2, :], marker_style='m^', data_label='Tunnel C', figure_handle=fig2)
+fdsplotlib.plot_to_fig(x_data=Qstar[3, :], y_data=Vstar[3, :], marker_style='c+', data_label='Tunnel D', figure_handle=fig2)
+fdsplotlib.plot_to_fig(x_data=Qstar[4, :], y_data=Vstar[4, :], marker_style='go', data_label='Tunnel E', figure_handle=fig2)
 
 # Make the pdf figure
 plt.savefig(pltdir + 'Wu_Bakar_Critical_Velocity_Exp_Data.pdf', format='pdf')
 
-print('Wu_Bakar_Tunnels completed successfully')
 
 
