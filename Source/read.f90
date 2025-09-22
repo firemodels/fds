@@ -14923,6 +14923,12 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
       WRITE(MESSAGE,'(4A)')  'ERROR(899): DEVC ',TRIM(DV%ID),' should not contain a ',SEPARATOR
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
+
+   COMMA_POSITION = INDEX(DV%ID,'+')
+   IF (COMMA_POSITION>0) THEN
+      WRITE(MESSAGE,'(3A)')  'ERROR(899): DEVC ',TRIM(DV%ID),' should not contain a + sign.'
+      CALL SHUTDOWN(MESSAGE) ; RETURN
+   ENDIF
    
    ! Check for HVAC outputs with no HVAC inputs
 
