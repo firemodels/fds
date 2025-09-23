@@ -259,6 +259,8 @@ def plot_to_fig(x_data,y_data,**kwargs):
 
     ##### default parameters ######
     default_figure_size = (plot_style["Paper_Width"],plot_style["Paper_Height"])
+    default_plot_size = (plot_style["Plot_Width"],plot_style["Plot_Height"])
+    default_plot_origin = (plot_style["Plot_X"],plot_style["Plot_Y"])
     default_ticklabel_fontsize = plot_style["Label_Font_Size"]
     default_axeslabel_fontsize = plot_style["Label_Font_Size"]
     default_legend_fontsize = plot_style["Key_Font_Size"]
@@ -281,6 +283,16 @@ def plot_to_fig(x_data,y_data,**kwargs):
     else:
         figure_size=default_figure_size
 
+    if kwargs.get('plot_size'):
+        plot_size=kwargs.get('plot_size')
+    else:
+        plot_size=default_plot_size
+
+    if kwargs.get('plot_origin'):
+        plot_origin=kwargs.get('plot_origin')
+    else:
+        plot_origin=default_plot_origin
+
     # if figure handle is passed, append to current figure, else generate a new figure
     if kwargs.get('figure_handle'):
         fig = kwargs.get('figure_handle')
@@ -288,8 +300,16 @@ def plot_to_fig(x_data,y_data,**kwargs):
         plt.figure(fig.number)
         using_existing_figure = True
     else:
-        fig, ax = plt.subplots(nrows=1, ncols=1, sharex=True, sharey=True, gridspec_kw={'hspace': 0, 'wspace': 0}, figsize=figure_size)
+        fig = plt.figure(figsize=figure_size)
         using_existing_figure = False
+        # Convert to fractions of the figure size:
+        ax_w = plot_size[0] / figure_size[0]
+        ax_h = plot_size[1] / figure_size[1]
+        left   = plot_origin[0] / figure_size[0]
+        bottom = plot_origin[1] / figure_size[1]
+        ax = fig.add_axes([left, bottom, ax_w, ax_h])
+
+
 
     # select plot type
     if kwargs.get('plot_type'):
@@ -453,7 +473,7 @@ def plot_to_fig(x_data,y_data,**kwargs):
     if kwargs.get('revision_label'):
         add_version_string(ax, kwargs.get('revision_label'), plot_type)
 
-    fig.tight_layout()
+    # fig.tight_layout() # this should not be needed if figure_size and plot_size are both specified
 
     return fig
 
