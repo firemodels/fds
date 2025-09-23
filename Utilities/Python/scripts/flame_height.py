@@ -10,9 +10,69 @@ integrates HRRPUL(z) from *_line.csv file to determine L_f/D (normalized flame h
 import pandas as pd
 import numpy as np
 import os
+import fdsplotlib
+
+def check_hrr():
+    # Get plot style parameters
+    plot_style = fdsplotlib.get_plot_style('fds')
+
+    outdir = '../../../out/Heskestad_Flame_Height/'
+    box_file = os.path.join(outdir, 'box_height.csv')
+    M = pd.read_csv(box_file, skiprows=1, header=None).values
+    Qs = M[:, 0]
+    Q = M[:, 1]
+    RI = ['_RI=05', '_RI=10', '_RI=20']
+    QI = ['p1','p2','p5','1','2','5','10','20','50','100','200','500','1000','2000','5000','10000']
+
+    # Get Git version string if file exists
+    git_file = os.path.join(outdir, 'Qs=1_RI=05_git.txt')
+    version_string = fdsplotlib.get_version_string(git_file)
+
+    # Create the figure
+    fig = fdsplotlib.plot_to_fig(Qs, Q,
+                                 x_min=0.05, x_max=1e4,
+                                 y_min=1e2, y_max=1e8,
+                                 x_label='{\it Q*}',
+                                 y_label='Heat Release Rate (kW)',
+                                 legend_location='lower right',
+                                 plot_type='loglog',
+                                 data_label='correct',
+                                 plot_title='Flame Height Heat Release Verification',
+                                 revision_label=version_string)
+
+    # Add FDS results markers
+    for j, q_val in enumerate(Qs):
+        for i, ri in enumerate(RI):
+            filename = f'Qs={QI[j]}{ri}_hrr.csv'
+            filepath = os.path.join(outdir, filename)
+            A = pd.read_csv(filepath, skiprows=2, header=None).values
+            n = A.shape[0]
+            Q_fds = np.mean(A[n//2:, 1])  # average over last half of rows
+
+            marker_map = {0: 'ks', 1: 'r^', 2: 'go'}
+            label_map = {0: r'$D^*/\delta x = 5$', 1: r'$D^*/\delta x = 10$', 2: r'$D^*/\delta x = 20$'}
+
+            # Only add a data label for the first Qs entry
+            if j == 0:
+                label = label_map[i]
+            else:
+                label = None
+
+            fdsplotlib.plot_to_fig([Qs[j]], [Q_fds],
+                                   figure_handle=fig,
+                                   marker_style=marker_map[i],
+                                   data_label=label)
+
+    # Save figure as PDF
+    plotdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Heskestad/'
+    fig_file = os.path.join(plotdir, 'Flame_Height_check_hrr.pdf')
+    fig.savefig(fig_file, format='pdf')
+
+
+
 
 # confirm heat release rate (uncomment or implement if needed)
-# check_hrr()
+check_hrr()
 
 outdir = '../../../out/Heskestad_Flame_Height/'
 expdir = '../../../exp/Heskestad_Flame_Height/'
@@ -94,3 +154,4 @@ for j in range(3):  # resolution loop
         A = new_cols if A is None else np.hstack((A,new_cols))
 
     pd.DataFrame(A,columns=header).to_csv(filename_out[j],index=False)
+
