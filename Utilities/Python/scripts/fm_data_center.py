@@ -79,12 +79,12 @@ fig = fdsplotlib.plot_to_fig(x,x,
 
 fdsplotlib.plot_to_fig(x, xerrp, figure_handle=fig, marker_style='k--')
 fdsplotlib.plot_to_fig(x, xerrm, figure_handle=fig, marker_style='k--')
-fdsplotlib.plot_to_fig(exp_data[5:8], fds_out[5:8], marker_style='ro', data_label='C3H6 Low SF')
-fdsplotlib.plot_to_fig(exp_data[8:11], fds_out[8:11], marker_style='r+', data_label='C3H6 High SF')
-fdsplotlib.plot_to_fig(exp_data[11:14], fds_out[11:14], marker_style='bo', data_label='C3H6 Low HA')
-fdsplotlib.plot_to_fig(exp_data[14:17], fds_out[14:17], marker_style='b+', data_label='C3H6 High HA')
-fdsplotlib.plot_to_fig(exp_data[17:20], fds_out[17:20], marker_style='go', data_label='Cable Low SF')
-fdsplotlib.plot_to_fig(exp_data[20:23], fds_out[20:23], marker_style='g+', data_label='Cable High SF')
+fdsplotlib.plot_to_fig(exp_data[5:8], fds_out[5:8], figure_handle=fig, marker_style='ro', data_label='C3H6 Low SF')
+fdsplotlib.plot_to_fig(exp_data[8:11], fds_out[8:11], figure_handle=fig, marker_style='r+', data_label='C3H6 High SF')
+fdsplotlib.plot_to_fig(exp_data[11:14], fds_out[11:14], figure_handle=fig, marker_style='bo', data_label='C3H6 Low HA')
+fdsplotlib.plot_to_fig(exp_data[14:17], fds_out[14:17], figure_handle=fig, marker_style='b+', data_label='C3H6 High HA')
+fdsplotlib.plot_to_fig(exp_data[17:20], fds_out[17:20], figure_handle=fig, marker_style='go', data_label='Cable Low SF')
+fdsplotlib.plot_to_fig(exp_data[20:23], fds_out[20:23], figure_handle=fig, marker_style='g+', data_label='Cable High SF')
 
 fig.savefig('../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Soot.pdf')
 
