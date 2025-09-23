@@ -2181,9 +2181,9 @@ MESH_LOOP: DO NM=1,NMESHES
    IF (.NOT.SETUP_ONLY) THEN
 
       ! Mesh grid dimensions and neighbor information.
-      ! Determine if the six mesh faces abut a single mesh (MESH_NEIGHBOR>0), nothing (MESH_NEIGHBOR=0), 
+      ! Determine if the six mesh faces abut a single mesh (MESH_NEIGHBOR>0), nothing (MESH_NEIGHBOR=0),
       ! or a combination of nothing and/or multiple meshes (MESH_NEIGHBOR=-1). Write six values to GRID line.
-   
+
       DO I=1,6
          SELECT CASE(I)
             CASE(1) ; IW1=1                                                 ; IW2=IW1+M%JBAR*M%KBAR-1
@@ -2203,7 +2203,7 @@ MESH_LOOP: DO NM=1,NMESHES
       ENDDO
 
    ENDIF
-   
+
    CALL EOL
    WRITE(MYSTR,'(A,3X,A)') 'GRID',TRIM(MESH_NAME(NM)); CALL ADDSTR
    WRITE(MYSTR,'(9I6)')     M%IBAR,M%JBAR,M%KBAR,MESH_NEIGHBOR(1:6) ; CALL ADDSTR
@@ -7882,9 +7882,9 @@ IND_SELECT: SELECT CASE(IND)
       ELSE
          PROBE_TMP = TMP(II,JJ,KK)
       ENDIF
-      UU  = U(II,JJ,KK)
-      VV  = V(II,JJ,KK)
-      WW  = W(II,JJ,KK)
+      UU = 0.5_EB*(U(MAX(0,II-1),JJ,KK)+U(MIN(IBAR,II),JJ,KK))
+      VV = 0.5_EB*(V(II,MAX(0,JJ-1),KK)+V(II,MIN(JBAR,JJ),KK))
+      WW = 0.5_EB*(W(II,JJ,MAX(0,KK-1))+W(II,JJ,MIN(KBAR,KK)))
       VEL2 = UU**2+VV**2+WW**2
       VEL = SQRT(VEL2)
       DP = 0.5_EB*VEL2*RHO(II,JJ,KK)
@@ -8293,7 +8293,7 @@ IND_SELECT: SELECT CASE(IND)
          IF(FCVAR(II,JJ,KK,CC_IDRC,JAXIS)>0) GAS_PHASE_OUTPUT_RES = REAL(RC_FACE(FCVAR(II,JJ,KK,CC_IDRC,JAXIS))%UNKF,EB)
       ENDIF
 
-   CASE(194) ! F_Z UNKNOWN NUMBER    
+   CASE(194) ! F_Z UNKNOWN NUMBER
       GAS_PHASE_OUTPUT_RES = 0._EB
       IF (CC_IBM) THEN
          GAS_PHASE_OUTPUT_RES = REAL(FCVAR(II,JJ,KK,CC_UNKF,KAXIS),EB)
@@ -10608,7 +10608,7 @@ FILE_LOOP: DO NF=1,N_BNDF
       ! Interpolate the boundary quantity PP at cell corners, PPN
 
       IF (.NOT.BF%CELL_CENTERED) THEN
-         
+
          ! Dont include undetermined values in interpolation for FIRE ARRIVAL TIME
          IF (OUTPUT_QUANTITY(BF%INDEX)%NAME=='FIRE ARRIVAL TIME') THEN
             WHERE(PP>9.E5_FB) IBK=0
@@ -11569,7 +11569,7 @@ IF (MY_RANK==0 .AND. ALLOCATED(CVODE_SUBSTEP_DATA)) THEN
    DO ROWI = 1, TOTAL_SUBSTEPS_TAKEN
       WRITE(LU_CVODE_SUBSTEPS,TCFORM) (CVODE_SUBSTEP_DATA(ROWI,COLI),COLI=1,NCOLS)
    ENDDO
-ENDIF   
+ENDIF
 
 END SUBROUTINE DUMP_CVODE_SUBSTEPS
 
