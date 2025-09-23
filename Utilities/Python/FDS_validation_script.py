@@ -30,7 +30,7 @@ importlib.reload(fdsplotlib) # use for development (while making changes to fdsp
 #                     pltdir='../../Manuals/',
 #                     close_figs=True,
 #                     verbose=True,
-#                     plot_list=['Sippola Aerosol Deposition'])
+#                     plot_list=['all'])
 
 # Special cases
 
