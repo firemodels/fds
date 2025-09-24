@@ -59,7 +59,7 @@ for j=1:length(res_str)
         % FDS results
 
         M = importdata([outdir,'impinging_jet_Re_',Re_str{i},'_',res_str{j},'_devc.csv'],',',2);
-        HF = mean(M.data(floor(end/2):end,find(strcmp(M.colheaders,'"HF"'))));
+        HF = mean(M.data(floor(end/2):end,find(strcmp(M.colheaders,'HF'))));
 
         qconv = HF * 1000; % W/m2
         h_fds = qconv/(T_j-T_w);

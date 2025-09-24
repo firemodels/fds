@@ -228,9 +228,9 @@ for j=1:length(res)
 
         % check for steady state
         t = M.data(:,1);
-        Q1 = M.data(:,find(strcmp(M.colheaders,'"Q1-0"')));
-        Q2 = M.data(:,find(strcmp(M.colheaders,'"Q2-0"')));
-        rho = M.data(end,find(strcmp(M.colheaders,'"rho"')));
+        Q1 = M.data(:,find(strcmp(M.colheaders,'Q1-0')));
+        Q2 = M.data(:,find(strcmp(M.colheaders,'Q2-0')));
+        rho = M.data(end,find(strcmp(M.colheaders,'rho')));
         alpha = k/(rho*cp);
         nu = mu/rho;
         b = 2./(T(i)+T2);
