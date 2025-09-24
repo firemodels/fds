@@ -116,12 +116,13 @@ def dataplot(config_filename,**kwargs):
             E = pd.read_csv(expdir+pp.d1_Filename, header=int(pp.d1_Col_Name_Row-1), sep=',', engine='python', comment='#', quotechar='"')
             E.columns = E.columns.str.strip()  # <-- Strip whitespace from headers
 
-            x = E[pp.d1_Ind_Col_Name].values[:].astype(float)
+            start_idx = int(pp.d1_Data_Row - pp.d1_Col_Name_Row - 1)
+            x = E[pp.d1_Ind_Col_Name].values[start_idx:].astype(float)
             # y = E[pp.d1_Dep_Col_Name].values[:].astype(float)
             col_names = [c.strip() for c in pp.d1_Dep_Col_Name.split('|')]
             # y = E[col_names].values.astype(float)
             y = np.column_stack([
-                E[cols].astype(float).sum(axis=1) if '+' in name else E[[name]].astype(float).values.ravel()
+                E[cols].iloc[start_idx:].astype(float).sum(axis=1) if '+' in name else E[[name]].iloc[start_idx:].astype(float).values.ravel()
                 for name in col_names
                 for cols in [name.split('+')]
             ])
@@ -164,8 +165,9 @@ def dataplot(config_filename,**kwargs):
                 # set header to the row where column names are stored (Python is 0 based)
                 E = pd.read_csv(expdir+pp.d1_Filename, header=int(pp.d1_Col_Name_Row-1), sep=',', engine='python', comment='#', quotechar='"')
                 E.columns = E.columns.str.strip()  # <-- Strip whitespace from headers
-                x = E[pp.d1_Ind_Col_Name].values[:].astype(float)
-                y = E[pp.d1_Dep_Col_Name].values[:].astype(float)
+                start_idx = int(pp.d1_Data_Row - pp.d1_Col_Name_Row - 1)
+                x = E[pp.d1_Ind_Col_Name].values[start_idx:].astype(float)
+                y = E[pp.d1_Dep_Col_Name].values[start_idx:].astype(float)
 
                 # plot the exp data
                 f = plot_to_fig(x_data=x, y_data=y,
@@ -182,12 +184,13 @@ def dataplot(config_filename,**kwargs):
         # get the model results
         M = pd.read_csv(cmpdir+pp.d2_Filename, header=int(pp.d2_Col_Name_Row-1), sep=',', engine='python', comment='#', quotechar='"')
         M.columns = M.columns.str.strip()  # <-- Strip whitespace from headers
-        x = M[pp.d2_Ind_Col_Name].values[:].astype(float)
+        start_idx = int(pp.d2_Data_Row - pp.d2_Col_Name_Row - 1)
+        x = M[pp.d2_Ind_Col_Name].values[start_idx:].astype(float)
         # y = M[pp.d2_Dep_Col_Name].values[:].astype(float)
         col_names = [c.strip() for c in pp.d2_Dep_Col_Name.split('|')]
         # y = M[col_names].values.astype(float)
         y = np.column_stack([
-            M[cols].astype(float).sum(axis=1) if '+' in name else M[[name]].astype(float).values.ravel()
+            M[cols].iloc[start_idx:].astype(float).sum(axis=1) if '+' in name else M[[name]].iloc[start_idx:].astype(float).values.ravel()
             for name in col_names
             for cols in [name.split('+')]
         ])
