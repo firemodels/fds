@@ -312,8 +312,6 @@ def plot_to_fig(x_data,y_data,**kwargs):
         bottom = plot_origin[1] / figure_size[1]
         ax = fig.add_axes([left, bottom, ax_w, ax_h])
 
-
-
     # select plot type
     if kwargs.get('plot_type'):
         plot_type=kwargs.get('plot_type')
@@ -345,11 +343,20 @@ def plot_to_fig(x_data,y_data,**kwargs):
     else:
         legend_framealpha = default_legend_framealpha
 
+    if kwargs.get('data_label'):
+        data_label = kwargs.get('data_label')
+    else:
+        data_label = None
+
+    # trap any data_labels set to blank (old matlab convention)
+    if isinstance(data_label, str) and data_label.lower() == 'blank':
+        data_label = None
+
     # generate the main x,y plot
     if plot_type=='linear':
         ax.plot(x_data,y_data,
             markevery=markevery,
-            label=kwargs.get('data_label'),
+            label=data_label,
             markerfacecolor=markerfacecolor,
             markeredgecolor=color,
             markeredgewidth=markeredgewidth,
@@ -362,7 +369,7 @@ def plot_to_fig(x_data,y_data,**kwargs):
     if plot_type=='loglog':
         ax.loglog(x_data,y_data,
             markevery=markevery,
-            label=kwargs.get('data_label'),
+            label=data_label,
             markerfacecolor=markerfacecolor,
             markeredgecolor=color,
             markeredgewidth=markeredgewidth,
@@ -375,7 +382,7 @@ def plot_to_fig(x_data,y_data,**kwargs):
     if plot_type=='semilogx':
         ax.semilogx(x_data,y_data,
             markevery=markevery,
-            label=kwargs.get('data_label'),
+            label=data_label,
             markerfacecolor=markerfacecolor,
             markeredgecolor=color,
             markeredgewidth=markeredgewidth,
@@ -388,7 +395,7 @@ def plot_to_fig(x_data,y_data,**kwargs):
     if plot_type=='semilogy':
         ax.semilogy(x_data,y_data,
             markevery=markevery,
-            label=kwargs.get('data_label'),
+            label=data_label,
             markerfacecolor=markerfacecolor,
             markeredgecolor=color,
             markeredgewidth=markeredgewidth,
@@ -444,7 +451,7 @@ def plot_to_fig(x_data,y_data,**kwargs):
     else:
         legend_fontsize=default_legend_fontsize
 
-    if kwargs.get('data_label'):
+    if data_label:
         if kwargs.get('legend_location')=='outside':
             plt.legend(fontsize=legend_fontsize,bbox_to_anchor=(1,1),loc='upper left',framealpha=legend_framealpha)
         else:
