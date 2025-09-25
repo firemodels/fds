@@ -93,9 +93,9 @@ end
 
 % REF_ERROR determined from initial run
 %            dx=25cm   dx=10cm   dx=2.5cm
-REF_ERROR = [0.1010,    0.1930,    0.0235;
-             0.2628,    0.0330,    0.2927;
-             0.3371,    0.1494,    0.1421];
+REF_ERROR = [0.1010    0.1930    0.0235; ...
+             0.2628    0.0330    0.2927; ...
+             0.3371    0.1494    0.1421];
 
 % Conclusion: Forced convection has approx 30% error.
 
