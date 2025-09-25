@@ -98,12 +98,12 @@ for i = [1,2,3,4]
 
     M = importdata([outdir,devcfile{i}],',',2);
 
-    rho = M.data(end,strcmp(M.colheaders,'"RHO"')); % should be about 1.19
+    rho = M.data(end,strcmp(M.colheaders,'RHO')); % should be about 1.19
     u_tau = sqrt(tau_w/rho);
     delta_nu = (mu/rho)/u_tau;
 
-    j1 = find(strcmp(M.colheaders,'"HF0B"'));
-    j2 = find(strcmp(M.colheaders,'"HF0T"'));
+    j1 = find(strcmp(M.colheaders,'HF0B'));
+    j2 = find(strcmp(M.colheaders,'HF0T'));
     q_w = mean(M.data(end,j1:j2));
     T_tau = q_w/(rho*u_tau*cp);
 
