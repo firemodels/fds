@@ -1274,18 +1274,7 @@ If the faces of two obstructions overlap each other, FDS will choose the surface
 
 When obstructions overlap, Smokeview renders both obstructions independently of each other, often leading to an unsightly cross-hatching of the two surface colors where there is an overlap. A simple remedy for this is to ``shrink'' the obstruction you do not wish to take precedence by slightly by adjusting its coordinates (\ct{XB}) accordingly. Then, in Smokeview, toggle the ``q'' key to show the obstructions as you specified them, rather than as FDS rendered them.
 
-The simulation will be stopped with an error if all of the following occur: (1) surfaces of two obstructions overlap, (2) the surface properties are different, and (3) one or both of the obstructions can be removed or created during the simulation.
-
-If you have two overlapping obstructions and one obstruction is to be added or removed during the simulation with a hole made in the region of overlap, then define a \ct{HOLE} for the obstruction being added or removed and set \ct{REMOVABLE=F} as discussed in the next two sections.
-
-\subsection{Preventing Obstruction Removal}
-
-Obstructions can be protected from the \ct{HOLE} punching feature. Sometimes creating create a door or window using a \ct{HOLE} is convenient. For example, suppose a \ct{HOLE} is punched in a wall to represent a door or window. An obstruction can be defined to fill this hole (presumably to be removed or colored differently or whatever) so long as the phrase \ct{PERMIT_HOLE=F} is included on the \ct{OBST} line. In general, any obstruction can be made impenetrable to a \ct{HOLE} using this phrase. By default, \ct{PERMIT_HOLE=T}, meaning that an obstruction is assumed to be penetrable unless otherwise directed. Note that if a penetrable  obstruction and an impenetrable  obstruction overlap, the obstruction with \ct{PERMIT_HOLE=F} should be listed first.
-
-If the obstruction is not to be removed or rejected for any reason, set \ct{REMOVABLE=F} This is sometimes needed to stop
-FDS from removing the obstruction if it is embedded within another, like a door within a wall.
-
-In rare cases, you might not want to allow a \ct{VENT} to be attached to a particular obstruction, in which case set \ct{ALLOW_VENT=F}.
+Two obstructions should not overlap; that is, they should not have a common grid cell, if one or both of the obstructions is to be removed or created during the simulation. This will prompt an error message and the simulation will be shut down. However, you can punch a \ct{HOLE} through one obstruction and then fill that \ct{HOLE} with another obstruction which has the attribute \ct{REMOVABLE=F} or \ct{PERMIT_HOLE=F} as discussed in Sec.~\ref{info:REMOVABLE}. In this way, the first obstruction shall be broken up into multiple obstructions, none of which overlap the second obstrction which will not be punched by the \ct{HOLE}.
 
 \subsection{Transparent or Outlined Obstructions}
 
@@ -1342,6 +1331,17 @@ If an obstruction is not to be punctured by a \ct{HOLE}, add \ct{PERMIT_HOLE=F} 
 
 It is a good idea to inspect the geometry by running either a setup job
 (\ct{T_END=0} on the \ct{TIME} line) or a short-time job to test the operation of devices and control functions.
+
+\subsection{Preventing Obstruction Removal or Hole Punching}
+\label{info:REMOVABLE}
+
+Obstructions can be protected from the \ct{HOLE} punching feature. Sometimes creating create a door or window using a \ct{HOLE} is convenient. For example, suppose a \ct{HOLE} is punched in a wall to represent a door or window. An obstruction can be defined to fill this hole (presumably to be removed or colored differently or whatever) so long as the phrase \ct{PERMIT_HOLE=F} is included on the \ct{OBST} line. In general, any obstruction can be made impenetrable to a \ct{HOLE} using this phrase. By default, \ct{PERMIT_HOLE=T}, meaning that an obstruction is assumed to be penetrable unless otherwise directed. Note that if a penetrable  obstruction and an impenetrable  obstruction overlap, the obstruction with \ct{PERMIT_HOLE=F} should be listed first.
+
+If the obstruction is not to be removed or rejected for any reason, set \ct{REMOVABLE=F} This is sometimes needed to stop
+FDS from removing the obstruction if it is embedded within another, like a door within a wall.
+
+In rare cases, you might not want to allow a \ct{VENT} to be attached to a particular obstruction, in which case set \ct{ALLOW_VENT=F}.
+
 
 \ifcompgeom
 
@@ -14419,8 +14419,9 @@ Keyword             & Type     & Description                      & Units       
 610 \> \ct{HOLE ... Cannot overlap HOLEs with a DEVC or CTRL_ID.} \> Section~\ref{info:HOLE}  \\
 611 \> \ct{OBST ... has a BULK_DENSITY but zero volume.} \> Section~\ref{info:BURN_AWAY}  \\
 612 \> \ct{OBST ... must have a volume to be assigned HT3D.} \> Section~\ref{checkerboard}  \\
-613 \> \ct{OBST ... and OBST ... cannot overlap in Mesh ...} \> Section~\ref{info:OVERLAY}  \\
-614 \> \ct{OBST_ID ... cannot have a SURF with NODE_ID} \> Section~\ref{info:hvac_geom}  \\    \>                                                                                \>                          \\
+614 \> \ct{OBST_ID ... cannot have a SURF with NODE_ID} \> Section~\ref{info:hvac_geom}  \\    
+615 \> \ct{OBST ... cannot overlap OBST ...}            \> Section~\ref{info:OVERLAY}  \\    
+    \>                                                  \>                          \\
 701 \> \ct{problem with GEOM, local SURF_ID index ... out of bounds.} \> Section~\ref{info:GEOM_Basics}  \\
 702 \> \ct{problem with GEOM, SURF_IDS not defined properly.} \> Section~\ref{info:first_geom}  \\
 703 \> \ct{missing SURF_ID in \&GEOM line ...} \> Section~\ref{subsec:readbin}  \\
