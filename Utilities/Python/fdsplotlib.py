@@ -112,7 +112,7 @@ def dataplot(config_filename,**kwargs):
     safe_na_values = default_na  # 'N/A' intentionally not included
 
     # read the config file
-    df = pd.read_csv(configdir+config_filename, sep=',', engine='python', comment='#', quotechar='"', na_values=safe_na_values, keep_default_na=False)
+    df = pd.read_csv(configdir+config_filename, sep=',', engine='python', quotechar='"', na_values=safe_na_values, keep_default_na=False)
     C = df.where(pd.notnull(df), None)
 
     if plot_range_in is not None:
@@ -139,6 +139,9 @@ def dataplot(config_filename,**kwargs):
     for pos, (irow, row) in enumerate(C.iterrows()):
 
         pp = define_plot_parameters(C, pos)  # use position, not label
+
+        # debug dump
+        # print(vars(pp))
 
         # print(pp.__dict__) # helpful for debug
 
@@ -552,10 +555,10 @@ def plot_to_fig(x_data,y_data,**kwargs):
         horizontalalignment='left')
 
     # set axes and tick properties
-    ymin=kwargs.get('y_min')
-    ymax=kwargs.get('y_max')
     xmin=kwargs.get('x_min')
     xmax=kwargs.get('x_max')
+    ymin=kwargs.get('y_min')
+    ymax=kwargs.get('y_max')
 
     ax.set_xlim(xmin,xmax)
     ax.set_ylim(ymin,ymax)
@@ -860,7 +863,27 @@ def define_plot_parameters(C,irow):
         Font_Interpreter     = C.values[irow,C.columns.get_loc('Font_Interpreter')]
 
     # --- sanitize string attributes ---
-    specials = {"&": r"\&"}  # extend if you need more replacements
+    specials = {
+        "&": r"\&",         # escape
+        "%": r"\%",         # escape
+        "_": r"\_",         # escape
+        "#": r"\#",         # escape
+        "$": r"\$",         # escape
+        "{": r"\{",         # escape
+        "}": r"\}",         # escape
+        "^": r"\^{}",       # escape
+        "~": r"\~{}",       # escape
+
+        # Matlab "TeX interpreter" to Matplotlib LaTeX
+        r"\eta": r"$\eta$",
+        r"\theta": r"$\theta$",
+        r"\alpha": r"$\alpha$",
+        r"\beta": r"$\beta$",
+        r"\mu": r"$\mu$",
+        r"\nu": r"$\nu$",
+        r"\rho": r"$\rho$",
+        # ... add as many as you want
+    }
 
     for attr, val in plot_parameters.__dict__.items():
         if not attr.startswith("__") and isinstance(val, str):
