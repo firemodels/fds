@@ -42,10 +42,11 @@ importlib.reload(fdsplotlib) # use for development (while making changes to fdsp
 
 # Special cases
 
+print("McCaffrey_Plume...");       subprocess.run(["python","./scripts/McCaffrey_Plume.py"])
 print("Sandia_Pools...");          subprocess.run(["python","./scripts/Sandia_Pools.py"])
 print("TUS_Facade...");            subprocess.run(["python","./scripts/TUS_Facade_contours.py"])
-print("Wu_Bakar_Tunnels...");      subprocess.run(["python","./scripts/Wu_Bakar_Tunnels.py"])
 print("USFS_Deep_Fuel_Beds...");   subprocess.run(["python","./scripts/USFS_Deep_Fuel_Beds.py"])
+print("Wu_Bakar_Tunnels...");      subprocess.run(["python","./scripts/Wu_Bakar_Tunnels.py"])
 
 print("Python validation scripts completed successfully!")
 
