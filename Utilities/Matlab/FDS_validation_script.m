@@ -82,7 +82,6 @@ flame_height2
 purdue_flames
 VTT_Sprays
 fm_datacenter_veltest
-mccaffrey_plume
 NIST_NRC_Parallel_Panels
 Memorial_Tunnel
 Memorial_Tunnel_2
