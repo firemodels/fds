@@ -864,25 +864,15 @@ def define_plot_parameters(C,irow):
 
     # --- sanitize string attributes ---
     specials = {
-        "&": r"\&",         # escape
-        "%": r"\%",         # escape
-        "_": r"\_",         # escape
-        "#": r"\#",         # escape
-        "$": r"\$",         # escape
-        "{": r"\{",         # escape
-        "}": r"\}",         # escape
-        "^": r"\^{}",       # escape
-        "~": r"\~{}",       # escape
-
-        # Matlab "TeX interpreter" to Matplotlib LaTeX
-        r"\eta": r"$\eta$",
-        r"\theta": r"$\theta$",
-        r"\alpha": r"$\alpha$",
-        r"\beta": r"$\beta$",
-        r"\mu": r"$\mu$",
-        r"\nu": r"$\nu$",
-        r"\rho": r"$\rho$",
-        # ... add as many as you want
+        "&": r"\&",
+        "%": r"\%",
+        "_": r"\_",
+        "#": r"\#",
+        "$": r"\$",
+        "{": r"\{",
+        "}": r"\}",
+        "^": r"\^{}",
+        "~": r"\~{}",
     }
 
     for attr, val in plot_parameters.__dict__.items():
