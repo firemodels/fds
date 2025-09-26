@@ -1047,6 +1047,7 @@ TYPE OMESH_TYPE
    INTEGER, ALLOCATABLE, DIMENSION(:) :: ICC_UNKZ_CT_S, ICC_UNKZ_CC_S, ICC_UNKZ_CT_R, ICC_UNKZ_CC_R,&
                                          ICF_UFFB_CF_S, ICF_UFFB_CF_R
    INTEGER, ALLOCATABLE, DIMENSION(:) :: UNKZ_CT_S, UNKZ_CC_S, UNKZ_CT_R, UNKZ_CC_R
+   INTEGER, ALLOCATABLE, DIMENSION(:,:,:) :: MUNKH,GSCH
 
    ! Face variables data (velocities):
    INTEGER, ALLOCATABLE, DIMENSION(:) :: IIO_FC_R,JJO_FC_R,KKO_FC_R,AXS_FC_R,IIO_FC_S,JJO_FC_S,KKO_FC_S,AXS_FC_S
@@ -1745,6 +1746,13 @@ TYPE ZONE_MESH_TYPE
 END TYPE ZONE_MESH_TYPE
 
 
+!> \brief Per-row container for variable nonzeros in H matrix (used by GLOBMAT_SOLVER)
+TYPE H_ROW_TYPE
+   INTEGER :: NNZ = 0
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: JD   !< Column indices for this row
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: D   !< Nonzero values for this row (same length as JD)
+END TYPE H_ROW_TYPE
+
 !> \brief Parameters associated with a ZONE, used in GLOBMAT_SOLVER unstructured pressure solver
 
 TYPE ZONE_SOLVE_TYPE
@@ -1766,14 +1774,12 @@ TYPE ZONE_SOLVE_TYPE
    INTEGER :: CONNECTED_ZONE_PARENT=0                 !< Index of first zone in a connected zone list.
    INTEGER, ALLOCATABLE, DIMENSION(:)   :: NUNKH_LOC  !< Number of local H unknowns per mesh for a given pressure zone.
    INTEGER, ALLOCATABLE, DIMENSION(:)   :: UNKH_IND   !< H unknown numbering start index per mesh for a given pressure zone.
-   INTEGER, ALLOCATABLE, DIMENSION(:)   :: NNZ_D_MAT_H!< Number of non-zeros per row of global matrix.
-   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: JD_MAT_H   !< Column index per row of non-zeros of global matrix.
-   REAL(EB),ALLOCATABLE, DIMENSION(:,:) :: D_MAT_H    !< Nonzero values per row for global matrix.
    INTEGER, ALLOCATABLE, DIMENSION(:,:) :: MESH_IJK   !< I,J,K positions of cell with unknown row IROW (1:3,1:NUNKH).
    REAL(EB),ALLOCATABLE, DIMENSION(:)   :: A_H        !< Matrix coefficients for pressure zone, up triang part, CSR format.
    INTEGER ,ALLOCATABLE, DIMENSION(:)   :: IA_H,JA_H  !< Matrix indexes for pressure zone, up triang part, CSR format.
    REAL(EB),ALLOCATABLE, DIMENSION(:)   :: F_H,X_H    !< RHS and Solution containers for pressure zone.
    REAL(FB),ALLOCATABLE, DIMENSION(:)   :: A_H_FB,F_H_FB,X_H_FB!< Arrays in case of single precision solve.
+   TYPE(H_ROW_TYPE), ALLOCATABLE, DIMENSION(:) :: ROW_H !< Variable-nnz per-row storage for assembly.
 END TYPE ZONE_SOLVE_TYPE
 
 TYPE (ZONE_SOLVE_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: ZONE_SOLVE

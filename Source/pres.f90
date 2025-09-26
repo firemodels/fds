@@ -2747,7 +2747,7 @@ ERROR = 0 ! initialize error flag
 
 ! Each MPI process builds its local set of rows.
 ! Matrix blocks defined on CRS distributed format.
-! Total number of nonzeros for JD_MAT_H, D_MAT_H:
+! Total number of nonzeros:
 TOT_NNZ_H = SUM( NNZ_H_MAT(1:ZM%NUNKH) )
 
 ! Allocate Solution and RHS vectors:
@@ -2766,7 +2766,7 @@ CASE(MKL_PARDISO_FLAG) LIBRARY_SELECT
    IF (ALLOCATED(ZM%JA_H)) DEALLOCATE(ZM%JA_H)
    ALLOCATE ( ZM%A_H(TOT_NNZ_H) , ZM%IA_H(ZM%NUNKH+1) , ZM%JA_H(TOT_NNZ_H) )
 
-   ! Store upper triangular part of symmetric D_MAT_H in CSR format for the ZONE_MESH (ZM%IA_H,ZM%JA_H,ZM%A_H):
+   ! Store upper triangular part of symmetric matrix in CSR format for the ZONE_MESH (ZM%IA_H,ZM%JA_H,ZM%A_H):
    INNZ = 0
    DO IROW=1,ZM%NUNKH
       ZM%IA_H(IROW) = INNZ + 1
@@ -3943,6 +3943,10 @@ INTEGER, ALLOCATABLE, DIMENSION(:,:) :: MB_FACTOR
 #ifdef WITH_HYPRE
 INTEGER ::END_ROW, COLOR
 CHARACTER(FN_LENGTH) :: FN_PARCSRPCG_MATRIX
+INTEGER :: NII2, K
+INTEGER, ALLOCATABLE :: COLS0(:)
+REAL(EB), ALLOCATABLE :: VALS(:)
+INTEGER :: ROWARR(1), NCOLSARR(1)
 #endif
 !.. All other variables
 INTEGER :: INNZ, IROW, JCOL, IERR
@@ -3982,8 +3986,17 @@ IPZ_LOOP : DO IPZ=0,N_ZONE_GLOBMAT
 
    ! Each MPI process builds its local set of rows.
    ! Matrix blocks defined on CRS distributed format.
-   ! Total number of nonzeros for ZSL%JD_MAT_H, ZSL%D_MAT_H:
-   ZSL%TOT_NNZ_H = 1; IF(ZSL%NUNKH_LOCAL>0) ZSL%TOT_NNZ_H = SUM( ZSL%NNZ_D_MAT_H(1:ZSL%NUNKH_LOCAL) )
+   ! Total number of nonzeros:
+   ZSL%TOT_NNZ_H = 1
+   IF (ZSL%NUNKH_LOCAL>0) THEN
+      IF (ALLOCATED(ZSL%ROW_H)) THEN
+         ZSL%TOT_NNZ_H = 0
+         DO IROW=1,ZSL%NUNKH_LOCAL
+            ZSL%TOT_NNZ_H = ZSL%TOT_NNZ_H + ZSL%ROW_H(IROW)%NNZ
+         ENDDO
+         IF (ZSL%TOT_NNZ_H<1) ZSL%TOT_NNZ_H = 1
+      ENDIF
+   ENDIF
 
    ! Allocate F_H ans H_H for this Process and IPZ:
    ALLOCATE( ZSL%X_H(MAX(ZSL%NUNKH_LOCAL,1)) , ZSL%F_H(MAX(ZSL%NUNKH_LOCAL,1)) ); ZSL%F_H=0._EB; ZSL%X_H=0._EB
@@ -4005,16 +4018,18 @@ IPZ_LOOP : DO IPZ=0,N_ZONE_GLOBMAT
    !--- This matrix definitoin used with MKL cluster solver -----
    ! Allocate A_H IA_H and JA_H matrices, considering all matrix coefficients:
    ALLOCATE ( ZSL%A_H(ZSL%TOT_NNZ_H) , ZSL%IA_H(MAX(ZSL%NUNKH_LOCAL,1)+1) , ZSL%JA_H(ZSL%TOT_NNZ_H) )
-   ! Store upper triangular part of symmetric D_MAT_H in CSR format:
+   ! Store upper triangular part of symmetric matrix in CSR format:
    IF(ZSL%NUNKH_LOCAL>0) THEN
       INNZ = 0
+      ZSL%A_H = 0._EB
       DO IROW=1,ZSL%NUNKH_LOCAL
          ZSL%IA_H(IROW) = INNZ + 1
-         DO JCOL=1,ZSL%NNZ_D_MAT_H(IROW)
-            IF ( ZSL%JD_MAT_H(JCOL,IROW) < ZSL%UNKH_IND(NM_START)+IROW ) CYCLE ! Only upper Triangular part.
+         I = ZSL%ROW_H(IROW)%NNZ
+         DO JCOL=1,I
+            IF ( ZSL%ROW_H(IROW)%JD(JCOL) < ZSL%UNKH_IND(NM_START)+IROW ) CYCLE ! Only upper triangular part
             INNZ = INNZ + 1
-            ZSL%A_H(INNZ)  =  ZSL%D_MAT_H(JCOL,IROW)
-            ZSL%JA_H(INNZ) = ZSL%JD_MAT_H(JCOL,IROW)
+            ZSL%A_H(INNZ)  =  ZSL%ROW_H(IROW)%D(JCOL)
+            ZSL%JA_H(INNZ) =  ZSL%ROW_H(IROW)%JD(JCOL)
          ENDDO
       ENDDO
       ZSL%IA_H(ZSL%NUNKH_LOCAL+1) = INNZ + 1
@@ -4124,41 +4139,59 @@ IPZ_LOOP : DO IPZ=0,N_ZONE_GLOBMAT
       CALL HYPRE_IJMATRIXSETOBJECTTYPE(ZSL%HYPRE_ZSL%A_H,HYPRE_PARCSR,HYPRE_IERR)
       CALL HYPRE_IJMATRIXINITIALIZE(ZSL%HYPRE_ZSL%A_H,HYPRE_IERR)
 
-      IF (ZSL%MTYPE==SYMM_INDEFINITE) THEN
-         IF(ZSL%NUNKH_TOTAL==1) THEN ! Single unknown, zero coefficient matrix (1,1). Set coefficient to 1.
-            IF(ZSL%NUNKH_LOCAL==1) THEN
-               ZSL%NNZ_D_MAT_H(1) = 1
-               DEALLOCATE(ZSL%JD_MAT_H); ALLOCATE(ZSL%JD_MAT_H(1,1)); ZSL%JD_MAT_H(1,1) = 1
-               DEALLOCATE(ZSL%D_MAT_H ); ALLOCATE(ZSL%D_MAT_H(1,1) ); ZSL%D_MAT_H(1,1)  = 1._EB
-            ENDIF
-         ELSE ! More than one unknown
-            IF(ZSL%UPPER_ROW==ZSL%NUNKH_TOTAL) THEN
-               END_ROW = ZSL%NUNKH_LOCAL-1
-            ELSE
-               END_ROW = ZSL%NUNKH_LOCAL
-            ENDIF
-            ! Rows 1 to ZM%NUNKH-1, last column, set all to zero:
-            DO IROW=1,END_ROW
-               DO JCOL=1,ZSL%NNZ_D_MAT_H(IROW)
-                  IF ( ZSL%JD_MAT_H(JCOL,IROW) /= ZSL%NUNKH_TOTAL ) CYCLE ! Make zero matrix entries in last column.
-                  ZSL%D_MAT_H(JCOL,IROW) = 0._EB
-               ENDDO
-            ENDDO
-            ! Last row, all zeros except the diagonal that keeps diagonal number:
-            IF(ZSL%UPPER_ROW==ZSL%NUNKH_TOTAL) THEN
-               IROW = ZSL%NUNKH_LOCAL
-               DO JCOL=1,ZSL%NNZ_D_MAT_H(IROW)
-                  IF ( ZSL%JD_MAT_H(JCOL,IROW) /= ZSL%NUNKH_TOTAL ) ZSL%D_MAT_H(JCOL,IROW) = 0._EB
-               ENDDO
-            ENDIF
-         ENDIF
-      ENDIF
-
-      ZSL%JD_MAT_H = ZSL%JD_MAT_H - 1
+      ! Assemble from per-row storage
       DO IROW=1,ZSL%NUNKH_LOCAL
-      ZSL%HYPRE_ZSL%INDICES(IROW)=ZSL%LOWER_ROW+IROW-2
-      CALL HYPRE_IJMATRIXSETVALUES(ZSL%HYPRE_ZSL%A_H, 1, ZSL%NNZ_D_MAT_H(IROW), ZSL%HYPRE_ZSL%INDICES(IROW), &
-            ZSL%JD_MAT_H(1:ZSL%NNZ_D_MAT_H(IROW),IROW), ZSL%D_MAT_H(1:ZSL%NNZ_D_MAT_H(IROW),IROW), HYPRE_IERR)
+         ZSL%HYPRE_ZSL%INDICES(IROW)=ZSL%LOWER_ROW+IROW-2
+         ! Determine row entries and apply indefinite adjustments if needed
+         NII2 = ZSL%ROW_H(IROW)%NNZ; IF (NII2 < 1) CYCLE
+         ALLOCATE(COLS0(NII2),VALS(NII2))
+         K = 0
+         IF (ZSL%MTYPE==SYMM_INDEFINITE) THEN
+            IF (ZSL%NUNKH_TOTAL==1 .AND. ZSL%NUNKH_LOCAL==1) THEN
+               DEALLOCATE(COLS0); DEALLOCATE(VALS)
+               ALLOCATE(COLS0(1)); ALLOCATE(VALS(1))
+               COLS0(1) = ZSL%NUNKH_TOTAL-1
+               VALS(1)  = 1._EB
+               ROWARR(1)   = ZSL%HYPRE_ZSL%INDICES(IROW)
+               NCOLSARR(1) = 1
+               CALL HYPRE_IJMATRIXSETVALUES(ZSL%HYPRE_ZSL%A_H, 1, NCOLSARR, ROWARR, COLS0, VALS, HYPRE_IERR)
+               DEALLOCATE(COLS0); DEALLOCATE(VALS)
+               CYCLE
+            ELSE
+               IF(ZSL%UPPER_ROW==ZSL%NUNKH_TOTAL) THEN
+                  END_ROW = ZSL%NUNKH_LOCAL-1
+               ELSE
+                  END_ROW = ZSL%NUNKH_LOCAL
+               ENDIF
+               IF (IROW <= END_ROW) THEN
+                  DO JCOL=1,NII2
+                     IF (ZSL%ROW_H(IROW)%JD(JCOL) == ZSL%NUNKH_TOTAL) CYCLE
+                     K = K + 1
+                     COLS0(K) = ZSL%ROW_H(IROW)%JD(JCOL) - 1
+                     VALS(K)  = ZSL%ROW_H(IROW)%D(JCOL)
+                  ENDDO
+               ELSEIF (ZSL%UPPER_ROW==ZSL%NUNKH_TOTAL .AND. IROW==ZSL%NUNKH_LOCAL) THEN
+                  DO JCOL=1,NII2
+                     IF (ZSL%ROW_H(IROW)%JD(JCOL) /= ZSL%NUNKH_TOTAL) CYCLE
+                     K = K + 1
+                     COLS0(K) = ZSL%ROW_H(IROW)%JD(JCOL) - 1
+                     VALS(K)  = ZSL%ROW_H(IROW)%D(JCOL)
+                  ENDDO
+               ENDIF
+            ENDIF
+         ELSE
+            DO JCOL=1,NII2
+               K = K + 1
+               COLS0(K) = ZSL%ROW_H(IROW)%JD(JCOL) - 1
+               VALS(K)  = ZSL%ROW_H(IROW)%D(JCOL)
+            ENDDO
+         ENDIF
+         IF (K > 0) THEN
+            ROWARR(1)   = ZSL%HYPRE_ZSL%INDICES(IROW)
+            NCOLSARR(1) = K
+            CALL HYPRE_IJMATRIXSETVALUES(ZSL%HYPRE_ZSL%A_H, 1, NCOLSARR, ROWARR, COLS0(1:K), VALS(1:K), HYPRE_IERR)
+         ENDIF
+         DEALLOCATE(COLS0); DEALLOCATE(VALS)
       ENDDO
 
       CALL HYPRE_IJMATRIXASSEMBLE(ZSL%HYPRE_ZSL%A_H, HYPRE_IERR)
@@ -4212,10 +4245,8 @@ IPZ_LOOP : DO IPZ=0,N_ZONE_GLOBMAT
 
    END SELECT LIBRARY_SELECT
 
-   ! Deallocate MAT_H arrays:
-   IF (ALLOCATED(ZSL%NNZ_D_MAT_H)) DEALLOCATE(ZSL%NNZ_D_MAT_H)
-   IF (ALLOCATED(ZSL%D_MAT_H))     DEALLOCATE(ZSL%D_MAT_H)
-   IF (ALLOCATED(ZSL%JD_MAT_H))    DEALLOCATE(ZSL%JD_MAT_H)
+   ! Deallocate ROW_H:
+   IF(ALLOCATED(ZSL%ROW_H)) DEALLOCATE(ZSL%ROW_H)
 
 ENDDO IPZ_LOOP
 
@@ -4277,14 +4308,11 @@ INTEGER :: NM,NM1,JLOC,JCOL,IND(LOW_IND:HIGH_IND),IND_LOC(LOW_IND:HIGH_IND),IERR
 REAL(EB):: AF,IDX,BIJ
 TYPE(WALL_TYPE), POINTER :: WC
 TYPE (BOUNDARY_COORD_TYPE), POINTER :: BC
-REAL(EB), POINTER, DIMENSION(:,:) :: D_MAT_HP
 INTEGER :: H_MAT_IVEC
 
 IPZ_LOOP : DO IPZ=0,N_ZONE_GLOBMAT
    ZSL => ZONE_SOLVE(IPZ)
 
-   ! Allocate D_MAT_H:
-   D_MAT_HP => ZSL%D_MAT_H
    NM1 = NM_START
 
    H_MAT_IVEC = 0
@@ -4335,16 +4363,16 @@ IPZ_LOOP : DO IPZ=0,N_ZONE_GLOBMAT
          ! Case of unstructured projection:
          IF(WC%CUT_FACE_INDEX>0) CALL GET_CFACE_OPEN_BC_COEF(WC%CUT_FACE_INDEX,BOUNDARY_COORD(WC%BC_INDEX)%IOR,IDX,BIJ)
 
-         ! Find diagonal column number:
+         ! Find diagonal column number in per-row JD
          JCOL = -1
-         DO JLOC = 1,ZSL%NNZ_D_MAT_H(IND_LOC(LOW_IND))
-            IF (IND(LOW_IND) == ZSL%JD_MAT_H(JLOC,IND_LOC(LOW_IND))) THEN
+         DO JLOC = 1,ZSL%ROW_H(IND_LOC(LOW_IND))%NNZ
+            IF (IND(LOW_IND) == ZSL%ROW_H(IND_LOC(LOW_IND))%JD(JLOC)) THEN
                JCOL = JLOC
                EXIT
             ENDIF
          ENDDO
          ! Add diagonal coefficient due to DIRICHLET BC:
-         D_MAT_HP(JCOL,IND_LOC(LOW_IND)) = D_MAT_HP(JCOL,IND_LOC(LOW_IND)) + 2._EB*BIJ
+         ZSL%ROW_H(IND_LOC(LOW_IND))%D(JCOL) = ZSL%ROW_H(IND_LOC(LOW_IND))%D(JCOL) + 2._EB*BIJ
          ! Add to mesh dirichlet bc counter
          H_MAT_IVEC = H_MAT_IVEC + 1
       ENDDO WALL_LOOP_1
@@ -4373,7 +4401,6 @@ USE CC_SCALARS, ONLY : GET_H_MATRIX_CC
 ! Local Variables:
 INTEGER :: NM,NM1,NREG
 INTEGER :: LOW_FACE,HIGH_FACE,X1AXIS,X2AXIS,X3AXIS,IFACE
-REAL(EB), POINTER, DIMENSION(:,:) :: D_MAT_HP
 REAL(EB), POINTER, DIMENSION(:)   :: DX1,DX2,DX3
 INTEGER :: I,J,K,I1,I2,I3,IIP,JJP,KKP,IIM,JJM,KKM
 INTEGER :: ILOC,JLOC,IROW,JCOL,IND(LOW_IND:HIGH_IND),IND_LOC(LOW_IND:HIGH_IND)
@@ -4390,9 +4417,6 @@ IPZ_LOOP : DO IPZ=0,N_ZONE_GLOBMAT
 
    ZSL => ZONE_SOLVE(IPZ)
 
-   ! Allocate D_MAT_H:
-   ALLOCATE( ZSL%D_MAT_H(1:NNZ_ROW_H,1:ZSL%NUNKH_LOCAL) ); ZSL%D_MAT_H = 0._EB
-   D_MAT_HP => ZSL%D_MAT_H
    NM1 = NM_START
 
    ! Main Mesh Loop:
@@ -4471,9 +4495,8 @@ IPZ_LOOP : DO IPZ=0,N_ZONE_GLOBMAT
             DO ILOC = LOW_IND,HIGH_IND                   ! Local row number in Kface
                DO JLOC = LOW_IND,HIGH_IND                ! Local col number in Kface, JD
                   IROW = IND_LOC(ILOC)                   ! Unknown number.
-                  JCOL = RGF(IFACE)%JD(ILOC,JLOC); ! Local position of coef in D_MAT_H
-                  ! Add coefficient:
-                  D_MAT_HP(JCOL,IROW) = D_MAT_HP(JCOL,IROW) + KFACE(ILOC,JLOC)
+                  JCOL = RGF(IFACE)%JD(ILOC,JLOC)
+                  ZSL%ROW_H(IROW)%D(JCOL) = ZSL%ROW_H(IROW)%D(JCOL) + KFACE(ILOC,JLOC)
                ENDDO
             ENDDO
          ENDDO IFACE_LOOP_1
@@ -4534,14 +4557,13 @@ IPZ_LOOP : DO IPZ=0,N_ZONE_GLOBMAT
          ILOC = LOCROW                             ! Local row number in Kface, only for cell IIG,JJG,KKG.
          DO JLOC = LOW_IND,HIGH_IND                ! Local col number in Kface, JD
             IROW = IND_LOC(ILOC)                   ! Unknown number.
-            JCOL = WC_JD(ILOC,JLOC)                ! Local position of coef in D_MAT_H
-            ! Add coefficient:
-            D_MAT_HP(JCOL,IROW) = D_MAT_HP(JCOL,IROW) + KFACE(ILOC,JLOC)
+            JCOL = WC_JD(ILOC,JLOC)
+            ZSL%ROW_H(IROW)%D(JCOL) = ZSL%ROW_H(IROW)%D(JCOL) + KFACE(ILOC,JLOC)
          ENDDO
       ENDDO WALL_LOOP_1
 
       ! Contribution to Laplacian matrix from RC and cut-faces:
-      IF ( CC_IBM ) CALL GET_H_MATRIX_CC(NM,NM1,IPZ,D_MAT_HP)
+      IF ( CC_IBM ) CALL GET_H_MATRIX_CC(NM,NM1,IPZ)
 
    ENDDO MESH_LOOP_1
 ENDDO IPZ_LOOP
@@ -4561,8 +4583,7 @@ USE MPI_F08
 INTEGER :: NM
 INTEGER :: X1AXIS,IFACE,I,I1,J,K,IND(LOW_IND:HIGH_IND),IND_LOC(LOW_IND:HIGH_IND)
 INTEGER :: LOCROW,IIND,NII,ILOC
-INTEGER :: NREG,IIM,JJM,KKM,IIP,JJP,KKP,LOW_FACE,HIGH_FACE,JLOC,IW,II,JJ,KK,IIG,JJG,KKG,ICF
-LOGICAL :: INLIST
+INTEGER :: NREG,IIM,JJM,KKM,IIP,JJP,KKP,LOW_FACE,HIGH_FACE,IW,II,JJ,KK,IIG,JJG,KKG,ICF
 TYPE(CC_REGFACE_TYPE), POINTER, DIMENSION(:) :: RGF
 TYPE(CC_RCFACE_TYPE), POINTER :: RCF
 TYPE(WALL_TYPE), POINTER :: WC
@@ -4611,9 +4632,13 @@ IPZ_LOOP : DO IPZ=0,N_ZONE_GLOBMAT
 
    ZSL => ZONE_SOLVE(IPZ)
    ZSL%NUNKH_LOCAL = SUM(ZSL%NUNKH_LOC(LOWER_MESH_INDEX:UPPER_MESH_INDEX))
-   ! Allocate NNZ_D_MAT_H, JD_MAT_H:
-   ALLOCATE( ZSL%NNZ_D_MAT_H(1:ZSL%NUNKH_LOCAL) );          ZSL%NNZ_D_MAT_H(:) = 0
-   ALLOCATE( ZSL%JD_MAT_H(1:NNZ_ROW_H,1:ZSL%NUNKH_LOCAL) ); ZSL%JD_MAT_H(:,:)  = HUGE(I)
+   ! Allocate per-row variable storage for graph build (ROW_H):
+   IF (ALLOCATED(ZSL%ROW_H)) DEALLOCATE(ZSL%ROW_H)
+   IF (ZSL%NUNKH_LOCAL > 0) THEN
+      ALLOCATE(ZSL%ROW_H(1:ZSL%NUNKH_LOCAL))
+   ELSE
+      ALLOCATE(ZSL%ROW_H(1:1))
+   ENDIF
 
    ! Define NM_START: first mesh that belongs to the processor.
    NM_START = LOWER_MESH_INDEX
@@ -4691,29 +4716,7 @@ IPZ_LOOP : DO IPZ=0,N_ZONE_GLOBMAT
          IND(HIGH_IND)    = CCVAR(II,JJ,KK,UNKH)     ! guard-cell.
          IND_LOC(LOW_IND) = IND(LOW_IND) - ZSL%UNKH_IND(NM_START) ! All row indexes must refer to ind_loc.
          IND_LOC(HIGH_IND)= IND(HIGH_IND)- ZSL%UNKH_IND(NM_START)
-         ! Same code ADD_INPLACE_NNZ_H_WHLDOM(LOCROW,LOCROW,IND,IND_LOC):
-         DO IIND=LOW_IND,HIGH_IND
-            NII = ZSL%NNZ_D_MAT_H(IND_LOC(LOCROW))
-            ! Check that column index hasn't been already counted:
-            INLIST = .FALSE.
-            DO ILOC=1,NII
-               IF ( IND(IIND) == ZSL%JD_MAT_H(ILOC,IND_LOC(LOCROW)) ) THEN
-                  INLIST = .TRUE.
-                  EXIT
-               ENDIF
-            ENDDO
-            IF (INLIST) CYCLE
-            ! Now add in place:
-            NII = NII + 1
-            DO ILOC=1,NII
-               IF ( ZSL%JD_MAT_H(ILOC,IND_LOC(LOCROW)) > IND(IIND) ) EXIT
-            ENDDO
-            DO JLOC=NII,ILOC+1,-1
-               ZSL%JD_MAT_H(JLOC,IND_LOC(LOCROW)) = ZSL%JD_MAT_H(JLOC-1,IND_LOC(LOCROW))
-            ENDDO
-            ZSL%NNZ_D_MAT_H(IND_LOC(LOCROW))   = NII
-            ZSL%JD_MAT_H(ILOC,IND_LOC(LOCROW)) = IND(IIND)
-         ENDDO
+         CALL ADD_INPLACE_NNZ_H_WHLDOM(LOCROW,LOCROW,IND,IND_LOC,IPZ)
       ENDDO WALL_LOOP_1
 
       ! Finally Add nonzeros corresponding to RC_FACE, CUT_FACE
@@ -4768,10 +4771,10 @@ IPZ_LOOP : DO IPZ=0,N_ZONE_GLOBMAT
             RGF(IFACE)%JD(1:2,1:2) = IS_UNDEFINED
             DO LOCROW = LOW_IND,HIGH_IND
                DO IIND=LOW_IND,HIGH_IND
-                  NII = ZSL%NNZ_D_MAT_H(IND_LOC(LOCROW))
+                  NII = ZSL%ROW_H(IND_LOC(LOCROW))%NNZ
                   DO ILOC=1,NII
-                     IF ( IND(IIND) == ZSL%JD_MAT_H(ILOC,IND_LOC(LOCROW)) ) THEN
-                        RGF(IFACE)%JD(LOCROW,IIND) = ILOC;
+                     IF ( IND(IIND) == ZSL%ROW_H(IND_LOC(LOCROW))%JD(ILOC) ) THEN
+                        RGF(IFACE)%JD(LOCROW,IIND) = ILOC
                         EXIT
                      ENDIF
                   ENDDO
@@ -4806,9 +4809,9 @@ IPZ_LOOP : DO IPZ=0,N_ZONE_GLOBMAT
          IND_LOC(LOW_IND) = IND(LOW_IND) - ZSL%UNKH_IND(NM_START) ! All row indexes must refer to ind_loc.
          IND_LOC(HIGH_IND)= IND(HIGH_IND)- ZSL%UNKH_IND(NM_START)
          DO IIND=LOW_IND,HIGH_IND
-            NII = ZSL%NNZ_D_MAT_H(IND_LOC(LOCROW))
+            NII = ZSL%ROW_H(IND_LOC(LOCROW))%NNZ
             DO ILOC=1,NII
-               IF ( IND(IIND) == ZSL%JD_MAT_H(ILOC,IND_LOC(LOCROW)) ) THEN
+               IF ( IND(IIND) == ZSL%ROW_H(IND_LOC(LOCROW))%JD(ILOC) ) THEN
                   WC_JD(LOCROW,IIND) = ILOC
                   EXIT
                ENDIF
