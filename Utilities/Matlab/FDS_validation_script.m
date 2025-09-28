@@ -80,7 +80,6 @@ sandia_methane_fire
 spray_attenuation
 flame_height2
 purdue_flames
-VTT_Sprays
 NIST_NRC_Parallel_Panels
 Memorial_Tunnel
 Memorial_Tunnel_2
