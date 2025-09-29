@@ -16,6 +16,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib import rc
 # rc('text', usetex=True) # Enable TeX rendering
+from matplotlib.ticker import ScalarFormatter
 import numpy as np
 import pandas as pd
 
@@ -563,12 +564,81 @@ def plot_to_fig(x_data,y_data,**kwargs):
     ax.set_xlim(xmin,xmax)
     ax.set_ylim(ymin,ymax)
 
+    if plot_type in ('loglog', 'semilogy'):
+        apply_global_exponent(ax, axis='y', fontsize=axeslabel_fontsize)
+    if plot_type in ('loglog', 'semilogx'):
+        apply_global_exponent(ax, axis='x', fontsize=axeslabel_fontsize)
+
     if kwargs.get('revision_label'):
         add_version_string(ax, kwargs.get('revision_label'), plot_type)
 
     # fig.tight_layout() # this should not be needed if figure_size and plot_size are both specified
 
     return fig
+
+
+def apply_global_exponent(ax, axis='y', fontsize=10, minor_subs=None):
+    import numpy as np
+    from matplotlib.ticker import FuncFormatter, LogLocator
+
+    if axis == 'y':
+        ticks = ax.get_yticks()
+        axis_obj = ax.yaxis
+        lims = ax.get_ylim()
+    else:
+        ticks = ax.get_xticks()
+        axis_obj = ax.xaxis
+        lims = ax.get_xlim()
+
+    # Keep only positive finite ticks (for log axes)
+    ticks = np.array([t for t in ticks if t > 0 and np.isfinite(t)])
+    if ticks.size == 0:
+        return
+
+    # Choose representative exponent
+    exp = int(np.floor(np.log10(np.median(ticks))))
+    scale = 10.0**exp
+
+    # Major formatter: fixed-point decimals
+    def fmt(val, pos):
+        v = val / scale
+        return "{:g}".format(v)
+
+    axis_obj.set_major_formatter(FuncFormatter(fmt))
+    axis_obj.get_offset_text().set_visible(False)
+
+    # Decide what to do with minor tick labels
+    span_decades = np.log10(lims[1]) - np.log10(max(lims[0], 1e-300))
+
+    # Default subs = 2, 4, 6, 8
+    if minor_subs is None:
+        minor_subs = [2, 4, 6, 8]
+
+    if span_decades <= 1.1:  # only ~1 decade
+        axis_obj.set_minor_locator(LogLocator(base=10.0, subs=minor_subs, numticks=10))
+        axis_obj.set_minor_formatter(FuncFormatter(lambda val, pos: "{:g}".format(val/scale)))
+    else:
+        ax.tick_params(axis=axis, which='minor', labelleft=False, labelbottom=False)
+
+    # Force tick labels NOT to go through TeX
+    if axis == 'y':
+        for label in ax.get_yticklabels() + ax.get_yticklabels(minor=True):
+            label.set_usetex(False)
+    else:
+        for label in ax.get_xticklabels() + ax.get_xticklabels(minor=True):
+            label.set_usetex(False)
+
+    # Place the ×10^exp text at the axis end
+    if exp != 0:
+        if axis == 'y':
+            ax.text(0, 1.01, rf"$\times 10^{{{exp}}}$",
+                    transform=ax.transAxes,
+                    ha='left', va='bottom', fontsize=fontsize)
+        else:
+            ax.text(1.0, -0.1, rf"$\times 10^{{{exp}}}$",
+                    transform=ax.transAxes,
+                    ha='right', va='top', fontsize=fontsize)
+
 
 
 def parse_matlab_style(style):
