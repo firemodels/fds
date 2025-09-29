@@ -12,7 +12,7 @@ PRIVATE
 PUBLIC INITIALIZE_LEVEL_SET_FIRESPREAD_1,INITIALIZE_LEVEL_SET_FIRESPREAD_2,LEVEL_SET_FIRESPREAD,UPDATE_FIRE_SPREAD_OUTPUTS
 INTEGER :: IZERO
 INTEGER  :: LIMITER_LS
-REAL(EB) :: B_ROTH,BETA_OP_ROTH,C_ROTH,E_ROTH,T_NOW
+REAL(EB) :: BETA_OP_ROTH,E_ROTH,T_NOW
 REAL(EB), POINTER, DIMENSION(:,:) :: PHI_LS_P
 REAL(EB), PARAMETER :: PHI_LS_MIN=-1._EB, PHI_LS_MAX=1._EB
 TYPE(MESH_TYPE),    POINTER :: M
@@ -294,10 +294,12 @@ DO JJG=1,JBAR
 
          ! Variables used in Phi_W slope factor formulas below (Rothermel model)
 
-         B_ROTH = 0.15988_EB * (SF%VEG_LSET_SIGMA**0.54_EB)
-         C_ROTH = 7.47_EB * EXP(-0.8711_EB * (SF%VEG_LSET_SIGMA**0.55_EB))
+         SF%B_ROTH = 0.15988_EB * (SF%VEG_LSET_SIGMA**0.54_EB)
+         SF%C_ROTH = 7.47_EB * EXP(-0.8711_EB * (SF%VEG_LSET_SIGMA**0.55_EB))
          E_ROTH = 0.715_EB * EXP(-0.01094_EB * SF%VEG_LSET_SIGMA)
          BETA_OP_ROTH = 0.20395_EB * (SF%VEG_LSET_SIGMA**(-0.8189_EB))! Optimum packing ratio
+         ! Beta contribution to Rothermel wind factor
+         SF%BETA_ROTH = (SF%VEG_LSET_BETA/BETA_OP_ROTH)**(-E_ROTH)
 
          ! Slope vector
          DZTDX_DUM = DZTDX(IIG,JJG)
@@ -460,7 +462,7 @@ DO JJG=1,JBAR
          IF (SF%I_RAMP_LS_WIND>0) THEN            
             WIND_FACTOR = EVALUATE_RAMP(UMF_MAG/60._EB,SF%I_RAMP_LS_WIND)
          ELSE
-            WIND_FACTOR = C_ROTH * ((3.281_EB * UMF_MAG)**B_ROTH) * (SF%VEG_LSET_BETA/BETA_OP_ROTH)**(-E_ROTH) ! Bova et al., Eq. A1
+            WIND_FACTOR = SF%C_ROTH * ((3.281_EB * UMF_MAG)**SF%B_ROTH) * SF%BETA_ROTH ! Bova et al., Eq. A1
          ENDIF
 
 
@@ -499,7 +501,7 @@ DO JJG=1,JBAR
             ! 0.3048 ~= 1/3.281
 
             UMF_TMP = &
-            0.3048_EB/PHI_S*(((SF%VEG_LSET_BETA / BETA_OP_ROTH)**E_ROTH)*PHI_S/C_ROTH)**(1._EB/B_ROTH)
+            0.3048_EB/PHI_S*(SF%BETA_ROTH*PHI_S/SF%C_ROTH)**(1._EB/SF%B_ROTH)
 
             UMF_X = UMF_X + UMF_TMP*PHI_S_X(IIG,JJG)
             UMF_Y = UMF_Y + UMF_TMP*PHI_S_Y(IIG,JJG)

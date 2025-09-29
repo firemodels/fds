@@ -32,10 +32,11 @@
 %\pgfplotsset{compat=1.7}
 \usepackage{tocloft}
 \usepackage{color}
-\usepackage{amsmath}
 \definecolor{linknavy}{rgb}{0,0,0.50196}
 \definecolor{linkred}{rgb}{1,0,0}
 \definecolor{linkblue}{rgb}{0,0,1}
+\usepackage{amsmath}
+\usepackage{cancel}
 \usepackage{float}
 \usepackage{caption}
 \usepackage{pict2e}
@@ -65,6 +66,7 @@
 
 \newcommand{\nopart}{\expandafter\def\csname Parent-1\endcsname{}} % To fix table of contents in pdf.
 \newcommand{\ct}[1]{\lstinline{#1}}
+\newcommand{\tct}[1]{\lstinline[basicstyle=\scriptsize\ttfamily]!#1!}
 
 \usepackage{siunitx}
 

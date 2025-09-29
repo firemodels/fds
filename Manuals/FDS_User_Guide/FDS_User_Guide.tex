@@ -1274,16 +1274,7 @@ If the faces of two obstructions overlap each other, FDS will choose the surface
 
 When obstructions overlap, Smokeview renders both obstructions independently of each other, often leading to an unsightly cross-hatching of the two surface colors where there is an overlap. A simple remedy for this is to ``shrink'' the obstruction you do not wish to take precedence by slightly by adjusting its coordinates (\ct{XB}) accordingly. Then, in Smokeview, toggle the ``q'' key to show the obstructions as you specified them, rather than as FDS rendered them.
 
-The simulation will be stopped with an error if all of the following occur: (1) surfaces of two obstructions overlap, (2) the surface properties are different, and (3) one or both of the obstructions can be removed or created during the simulation.
-
-\subsection{Preventing Obstruction Removal}
-
-Obstructions can be protected from the \ct{HOLE} punching feature. Sometimes creating create a door or window using a \ct{HOLE} is convenient. For example, suppose a \ct{HOLE} is punched in a wall to represent a door or window. An obstruction can be defined to fill this hole (presumably to be removed or colored differently or whatever) so long as the phrase \ct{PERMIT_HOLE=F} is included on the \ct{OBST} line. In general, any obstruction can be made impenetrable to a \ct{HOLE} using this phrase. By default, \ct{PERMIT_HOLE=T}, meaning that an obstruction is assumed to be penetrable unless otherwise directed. Note that if a penetrable  obstruction and an impenetrable  obstruction overlap, the obstruction with \ct{PERMIT_HOLE=F} should be listed first.
-
-If the obstruction is not to be removed or rejected for any reason, set \ct{REMOVABLE=F} This is sometimes needed to stop
-FDS from removing the obstruction if it is embedded within another, like a door within a wall.
-
-In rare cases, you might not want to allow a \ct{VENT} to be attached to a particular obstruction, in which case set \ct{ALLOW_VENT=F}.
+Two obstructions should not overlap; that is, they should not have a common grid cell, if one or both of the obstructions is to be removed or created during the simulation. This will prompt an error message and the simulation will be shut down. However, you can punch a \ct{HOLE} through one obstruction and then fill that \ct{HOLE} with another obstruction which has the attribute \ct{REMOVABLE=F} or \ct{PERMIT_HOLE=F} as discussed in Sec.~\ref{info:REMOVABLE}. In this way, the first obstruction shall be broken up into multiple obstructions, none of which overlap the second obstrction which will not be punched by the \ct{HOLE}.
 
 \subsection{Transparent or Outlined Obstructions}
 
@@ -1340,6 +1331,17 @@ If an obstruction is not to be punctured by a \ct{HOLE}, add \ct{PERMIT_HOLE=F} 
 
 It is a good idea to inspect the geometry by running either a setup job
 (\ct{T_END=0} on the \ct{TIME} line) or a short-time job to test the operation of devices and control functions.
+
+\subsection{Preventing Obstruction Removal or Hole Punching}
+\label{info:REMOVABLE}
+
+Obstructions can be protected from the \ct{HOLE} punching feature. Sometimes creating create a door or window using a \ct{HOLE} is convenient. For example, suppose a \ct{HOLE} is punched in a wall to represent a door or window. An obstruction can be defined to fill this hole (presumably to be removed or colored differently or whatever) so long as the phrase \ct{PERMIT_HOLE=F} is included on the \ct{OBST} line. In general, any obstruction can be made impenetrable to a \ct{HOLE} using this phrase. By default, \ct{PERMIT_HOLE=T}, meaning that an obstruction is assumed to be penetrable unless otherwise directed. Note that if a penetrable  obstruction and an impenetrable  obstruction overlap, the obstruction with \ct{PERMIT_HOLE=F} should be listed first.
+
+If the obstruction is not to be removed or rejected for any reason, set \ct{REMOVABLE=F} This is sometimes needed to stop
+FDS from removing the obstruction if it is embedded within another, like a door within a wall.
+
+In rare cases, you might not want to allow a \ct{VENT} to be attached to a particular obstruction, in which case set \ct{ALLOW_VENT=F}.
+
 
 \ifcompgeom
 
@@ -2269,7 +2271,7 @@ Sphere       & 2        & 0.6     & 0     & 0.5    &                \\ \hline
 \end{center}
 \end{table}
 
-The length scale, $L$, is specified by \ct{CONVECTION_LENGTH_SCALE} on the \ct{SURF} line. By default, it is 1~m for plates, and the diameter of a sphere or cylinder.
+The length scale, $L$, is specified by \ct{CONVECTION_LENGTH_SCALE} on the \ct{SURF} line. By default, it is 1~m for plates, and the diameter of a sphere or cylinder. The velocity used to compute Re can be output with the solid phase quantity \ct{'TANGENTIAL VELOCITY'}.
 
 \subsubsection{Output for Convective Heat Transfer Regime}
 \label{info:convection_regime}
@@ -10154,7 +10156,7 @@ Normally, FDS averages slice file data at cell corners. For example, gas tempera
 \end{lstlisting}
 will show the staggered velocity components as cell face normal vectors in Smokeview.
 
-Slice file information is recorded in files (See Sec.~\ref{out:SLCF}) labeled \ct{CHID_$n$.sf}, where $n$ is the index of the slice file. A short Fortran program \ct{fds2ascii.f90} produces a text file from a line, plane or volume of data. See Sec.~\ref{info:fds2ascii} for more details.
+Slice file information is recorded in files (See Sec.~\ref{out:SLCF}) labeled \ct{CHID_n.sf}, where \ct{n} is the index of the slice file. A short Fortran program \ct{fds2ascii.f90} produces a text file from a line, plane or volume of data. See Sec.~\ref{info:fds2ascii} for more details.
 
 By default, Smokeview will blank slice file data inside obstructions.  However, this is expensive to load at startup in Smokeview for large cases.  If you wish Smokeview not to store this blanking array, set \ct{IBLANK_SMV=F} on \ct{MISC}.  Another option is to run Smokeview from the command line and to add \ct{-noblank} as an option.
 
@@ -10167,7 +10169,7 @@ You may add a name via \ct{ID} on the \ct{SLCF} as an identifier sent to Smokevi
 \section{Animated Boundary Quantities: The \texorpdfstring{{\tt BNDF}}{BNDF} Namelist Group}
 \label{info:BNDF}
 
-The \ct{BNDF} (``boundary file'') namelist group parameters allows you to record surface quantities at all solid obstructions. As with the \ct{SLCF} group, each quantity is prescribed with a separate \ct{BNDF} line, and the output files are of the form \ct{CHID_$n$.bf}. No physical coordinates need be specified, however, just \ct{QUANTITY}. See Table \ref{tab:solidoutputquantities}. For certain output quantities, additional parameters need to be specified via the \ct{PROP} namelist group. In such cases, add the character string, \ct{PROP_ID}, to the \ct{BNDF} line to tell FDS where to find the necessary extra information.
+The \ct{BNDF} (``boundary file'') namelist group parameters allows you to record surface quantities at all solid obstructions. As with the \ct{SLCF} group, each quantity is prescribed with a separate \ct{BNDF} line, and the output files are of the form \ct{CHID_n.bf}. No physical coordinates need be specified, however, just \ct{QUANTITY}. See Table \ref{tab:solidoutputquantities}. For certain output quantities, additional parameters need to be specified via the \ct{PROP} namelist group. In such cases, add the character string, \ct{PROP_ID}, to the \ct{BNDF} line to tell FDS where to find the necessary extra information.
 
 \ct{BNDF} files (Sec.~\ref{out:BNDF}) can become very large, so be careful in prescribing the time interval, \ct{DT_BNDF}, or discrete times, \ct{RAMP_BNDF}, on the \ct{DUMP} line. One way to reduce the size of the output file is to turn off the drawing of boundary information on desired obstructions. On any given \ct{OBST} line, if the string \ct{BNDF_OBST=F} is included, the obstruction is not colored. To turn off all boundary drawing, set \ct{BNDF_DEFAULT=F} on the \ct{MISC} line. Then individual obstructions can be turned back on with \ct{BNDF_OBST=T} on the appropriate \ct{OBST} line. Individual faces of a given obstruction can be controlled via \ct{BNDF_FACE(IOR)}, where \ct{IOR} is the index of orientation (+1 for the positive $x$ direction, -1 for negative, and so on). Another way is to disable \ct{BNDF} output for specific meshes by setting \ct{BNDF_MESH=F} on the \ct{MESH} lines where no \ct{BNDF} output is desired. Disabling output for a \ct{MESH} includes all wall cells at the exterior boundary of that \ct{MESH}.
 
@@ -10187,7 +10189,7 @@ The \ct{ISOF} (``ISOsurface File'') namelist group creates three-dimensional ani
 \begin{lstlisting}
 &ISOF QUANTITY='TEMPERATURE', VALUE(1)=50., VALUE(2)=200., VALUE(3)=500. /
 \end{lstlisting}
-where the values are in $^\circ$C. Note that the isosurface output files \ct{CHID_$n$.iso} can become very large, so experiment with different sampling rates, (\ct{DT_ISOF}, or discrete times, \ct{RAMP_ISOF}, either of which is specified on the \ct{DUMP} line).
+where the values are in $^\circ$C. Note that the isosurface output files \ct{CHID_n.iso} can become very large, so experiment with different sampling rates, (\ct{DT_ISOF}, or discrete times, \ct{RAMP_ISOF}, either of which is specified on the \ct{DUMP} line).
 The parameter \ct{QUANTITY2}\ can be used to color the isosurface.
 For example, the line:
 \begin{lstlisting}
@@ -10987,6 +10989,40 @@ The following example provides a normalized distribution of droplet volumes:
 
 
 
+\subsection{Additional Spray Outputs}
+\label{info:droplet_outputs}
+
+\paragraph{\ct{'ADA'},\ct{'ADA_Z'}}
+
+These gas phase output quantities represent the total droplet surface area for droplets within the gas cell with indices $ijk$ divided by the volume of the cell, $V_{ijk}$
+\be
+   \overline{A}_{{\rm p},ijk}=\frac{\sum_{m=1,N}^N 4\pi r_{{\rm p},m}^2}{V_{ijk}}
+\ee
+The quantity \ct{'ADA'}, along with a \ct{PART_ID}, specifies a particular particle class. The quantity \ct{'ADA_Z'}, along with a \ct{SPEC_ID}, specifies all particles that generate that particular gas species.
+
+\paragraph{\ct{'ADD'},\ct{'ADD_Z'}}
+
+These gas phase output quantities represent the average diameter of the droplets within the gas cell with indices $ijk$
+\be
+   \overline{D}_{{\rm p},ijk}=2 \frac{\sum_{m=1,N}^N r_{{\rm p},m}^3}{\sum_{m=1,N}^N r_{{\rm p},m}^2} \label{ADD}
+\ee
+The quantity \ct{'ADD'}, along with a \ct{PART_ID}, specifies a particular particle class. The quantity \ct{'ADD_Z'}, along with a \ct{SPEC_ID}, specifies all particles that generate that particular gas species. On output, these quantities are multiplied by $10^6$ to convert from units of m to $\mu$m.
+
+\paragraph{\ct{'ADT'},\ct{'ADT_Z'}}
+
+These gas phase output quantities represent the average droplet temperature within the gas cell with indices $ijk$
+\be
+   \overline{T}_{{\rm p},ijk}= \frac{\sum_{m=1,N}^N m_{{\rm p},m}T_{\rm p}}{\sum_{m=1,N}^N m_{{\rm p},m}}
+\ee
+The quantity \ct{'ADT'}, along with a \ct{PART_ID}, specifies a particular particle class. The quantity \ct{'ADT_Z'}, along with a \ct{SPEC_ID}, specifies all particles that generate that particular gas species. On output, these quantities are subtracted by 273.15 to convert from units of K to $^\circ$C.
+
+\paragraph{\ct{'QABS'},\ct{'QABS_Z'}}
+
+These gas phase output quantities represent the absorption efficiency, averaged over all wavelengths, of droplets with a radius of one-half the average diameter given by Eq.~(\ref{ADD}). This quantity is denoted $\overline{Q}_{\rm a}(\overline{r}_{\rm p}$. The quantity \ct{'QABS'}, along with a \ct{PART_ID}, specifies a particular particle class. The quantity \ct{'QABS_Z'}, along with a \ct{SPEC_ID}, specifies all particles that generate that particular gas species. These quantities are dimensionless.
+
+\paragraph{\ct{'QSCA'},\ct{'QSCA_Z'}}
+
+These gas phase output quantities represent the scattering efficiency, averaged over all wavelengths, of droplets with a radius of one-half the average diameter given by Eq.~(\ref{ADD}). This quantity is denoted $\overline{Q}_{\rm s}(\overline{r}_{\rm p}$. The quantity \ct{'QSCA'}, along with a \ct{PART_ID}, specifies a particular particle class. The quantity \ct{'QSCA_Z'}, along with a \ct{SPEC_ID}, specifies all particles that generate that particular gas species. These quantities are dimensionless.
 
 
 
@@ -11671,14 +11707,14 @@ Table~\ref{tab:solidoutputquantities} below lists solid phase output quantities.
 \ct{GAUGE HEAT FLUX}                           & Section~\ref{info:heat_flux}                  & \unit{kW/m^2}      & B,D          \\ \hline
 \ct{ENTHALPY FLUX WALL}                        & Section~\ref{info:enthalpy_flux}              & \unit{kW/m^2}      & B,D          \\ \hline
 \ct{TOTAL HEAT FLUX}                           & Section~\ref{info:heat_flux}                  & \unit{kW/m^2}      & B,D          \\ \hline
-\ct{EMISSIVITY}                                & Surface emissivity (usually constant)         &                    & B,D          \\ \hline
+\ct{EMISSIVITY}                                & Surface emissivity                            &                    & B,D          \\ \hline
 \ct{FIRE ARRIVAL TIME}                         & Section \ref{info:fire_spread_output}         & \si{s}             & B,D          \\ \hline
 \ct{FIRE RESIDENCE TIME}                       & Section \ref{info:fire_spread_output}         & \si{s}             & B,D          \\ \hline
 \ct{LS SPREAD RATE}                            & Section \ref{info:fire_spread_output}         & \si{m/s}           & B,D          \\ \hline
 \ct{GAS DENSITY}                               & Gas Density near wall                         & \si{kg/m^3}        & B,D          \\ \hline
 \ct{GAS TEMPERATURE}                           & Gas Temperature near wall                     & $^\circ$C          & B,D          \\ \hline
 \ct{HEAT TRANSFER COEFFICIENT}                 & Section \ref{info:convection}                 & \si{W/(m^2.K)}     & B,D          \\ \hline
-\ct{HRRPUA}                                    & $\dq''$                                       & \unit{kW/m^2}      & B,D          \\ \hline
+\ct{HRRPUA}                                    & $\dq''=\dot{m} \Delta H$                      & \unit{kW/m^2}      & B,D          \\ \hline
 \ct{INCIDENT HEAT FLUX}                        & Section~\ref{info:heat_flux}                  & \unit{kW/m^2}      & B,D          \\ \hline
 \ct{INSIDE WALL TEMPERATURE}                   & Section~\ref{info:DEPTH}                      & $^\circ$C          & D,Pr         \\ \hline
 \ct{INSIDE WALL DEPTH}                         & Section~\ref{info:DEPTH}                      & m                  & D,Pr         \\ \hline
@@ -11705,6 +11741,7 @@ Table~\ref{tab:solidoutputquantities} below lists solid phase output quantities.
 \ct{SUBSTEPS}                                  & Section~\ref{info:solid_phase_stability}      &                    & B,D          \\ \hline
 \ct{SURFACE DENSITY}$^4$                       & Section~\ref{info:material_components}        & kg/m$^2$           & B,D          \\ \hline
 \ct{SURFACE DEPOSITION}$^1$                    & Section~\ref{info:deposition}                 & kg/m$^2$           & B,D          \\ \hline
+\ct{TANGENTIAL VELOCITY}                       & Section~\ref{info:convection}                 & m/s                & B,D          \\ \hline
 \ct{TOTAL MASS FLUX WALL}$^1$                  & Section~\ref{info:wallflux}                   & kg/s/m$^2$         & B,D          \\ \hline
 \ct{VELOCITY ERROR}                            & Section~\ref{info:PRES}                       & m/s                & B,D          \\ \hline
 \ct{VISCOUS STRESS WALL}                       & Section~\ref{info:distributed_forces}         & Pa                 & B,D          \\ \hline
@@ -11733,7 +11770,7 @@ $^5$                 \> Requires a \ct{MATL_ID}. \\
 
 Table~\ref{tab:deviceoutputquantities} below lists output quantities associated with devices and controls, as well as other miscellaneous output. The File Type ``D'' refers to the device output file \ct{CHID_devc.csv}. The File Type ``S'' refers to a contour or ``slice'' file.
 
-\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|}
+\begin{xltabular}{\textwidth}{|p{6cm}|X|X|X|}
 \caption[Output quantities for devices, controls, and miscellaneous functions]{Output quantities for devices, controls, and miscellaneous functions.}
 \label{tab:deviceoutputquantities} \\
 \hline
@@ -11749,9 +11786,9 @@ Table~\ref{tab:deviceoutputquantities} below lists output quantities associated 
 \ct{ASPIRATION}                                & Section~\ref{info:aspiration_detector}        & \%/m           & D            \\ \hline
 \ct{BI-DIRECTIONAL PROBE}                      & Section~\ref{info:bidir_probe}                & m/s            & D            \\ \hline
 \ct{CHAMBER OBSCURATION}                       & Section~\ref{info:smoke_detector}             & \%/m           & D            \\ \hline
-\ct{CELL INDEX I}                              & Mesh cell index in x                          &                & D,S          \\ \hline
-\ct{CELL INDEX J}                              & Mesh cell index in y                          &                & D,S          \\ \hline
-\ct{CELL INDEX K}                              & Mesh cell index in z                          &                & D,S          \\ \hline
+\ct{CELL INDEX I}                              & First cell index                              &                & D,S          \\ \hline
+\ct{CELL INDEX J}                              & Second cell index                             &                & D,S          \\ \hline
+\ct{CELL INDEX K}                              & Third cell index                              &                & D,S          \\ \hline
 \ct{CONTROL}                                   & Section~\ref{info:CTRL}                       &                & D            \\ \hline
 \ct{CONTROL VALUE}                             & Section~\ref{info:CTRL}                       &                & D            \\ \hline
 \ct{CPU TIME}                                  & Section~\ref{info:TIMING}                     & s              & D            \\ \hline
@@ -11766,7 +11803,7 @@ Table~\ref{tab:deviceoutputquantities} below lists output quantities associated 
 \ct{OPEN NOZZLES}                              & Section~\ref{info:TIMING}                     &                & D            \\ \hline
 \ct{PATH OBSCURATION}                          & Section~\ref{info:beam_detector}              & \%             & D            \\ \hline
 \ct{RAM}                                       & Section~\ref{info:TIMING}                     & MB             & D            \\ \hline
-\ct{RANDOM NUMBER}                             & Uniform random variable over [0,1]            &                & D            \\ \hline
+\ct{RANDOM NUMBER}                             & $\mathcal{U}(0,1)$                            &                & D            \\ \hline
 \ct{SPRINKLER LINK TEMPERATURE}                & Section~\ref{info:sprinklers}                 & $^\circ$C      & D            \\ \hline
 \ct{THERMOCOUPLE}                              & Section~\ref{info:THERMOCOUPLE}               & $^\circ$C      & D            \\ \hline
 \ct{TIME}                                      & Section~\ref{info:DEVC2}                      & s              & D            \\ \hline
@@ -11775,7 +11812,7 @@ Table~\ref{tab:deviceoutputquantities} below lists output quantities associated 
 \ct{UPPER TEMPERATURE}                         & Section~\ref{info:layerheight}                & $^\circ$C      & D            \\ \hline
 \ct{WALL CLOCK TIME}                           & Section~\ref{info:TIMING}                     & s              & D            \\ \hline
 \ct{WALL CLOCK TIME ITERATIONS}                & Section~\ref{info:TIMING}                     & s              & D            \\ \hline
-\end{longtable}
+\end{xltabular}
 
 
 \newpage
@@ -11785,7 +11822,7 @@ Table~\ref{tab:deviceoutputquantities} below lists output quantities associated 
 
 Table~\ref{tab:particleoutputquantities} below lists some less often used output quantities. These are mainly used for diagnostic purposes. Explanations for most can be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 
-\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|}
+\begin{xltabular}{\textwidth}{|p{8cm}|l|X|X|}
 \caption[Particle and droplet output quantities]{Particle and droplet output quantities.}
 \label{tab:particleoutputquantities} \\
 \hline
@@ -11797,47 +11834,47 @@ Table~\ref{tab:particleoutputquantities} below lists some less often used output
 \ct{QUANTITY}                                  & Explanation                                       & Units             & File Type    \\
 \hline \hline
 \endhead
-\ct{ADA}$^2$                                   & Avg.~Droplet (cross sectional) Area               & m$^2$/m$^3$       & D,I,P,S      \\ \hline
-\ct{ADA_Z}$^1$                                & Avg.~Droplet (cross sectional) Area               & m$^2$/m$^3$       & D,I,P,S      \\ \hline
-\ct{ADD}$^2$                                   & Avg.~Droplet Diameter                             & $\mu$m            & D,I,P,S      \\ \hline
-\ct{ADD_Z}$^1$                                & Avg.~Droplet Diameter                             & $\mu$m            & D,I,P,S      \\ \hline
-\ct{ADT}$^2$                                   & Avg.~Droplet Temperature                          & $^\circ$C         & D,I,P,S      \\ \hline
-\ct{ADT_Z}$^1$                                & Avg.~Droplet Temperature                          & $^\circ$C         & D,I,P,S      \\ \hline
-\ct{DROPLET VOLUME FRACTION}$^2$               & Section~\ref{bucket_test_4}                       &                   & D,P,S        \\ \hline
-\ct{MPUV}$^3$                                  & Section~\ref{bucket_test_4}                       & kg/m$^3$          & D,P,S        \\ \hline
-\ct{MPUV_Z}$^3$                               & Section~\ref{bucket_test_4}                       & kg/m$^3$          & D,P,S        \\ \hline
-\ct{PARTICLE ACCEL X}$^2$                      & Section~\ref{particle_colors}                     & m/s$^2$           & PA          \\ \hline
-\ct{PARTICLE ACCEL Y}$^2$                      & Section~\ref{particle_colors}                     & m/s$^2$           & PA          \\ \hline
-\ct{PARTICLE ACCEL Z}$^2$                      & Section~\ref{particle_colors}                     & m/s$^2$           & PA          \\ \hline
-\ct{PARTICLE AGE}                              & Section~\ref{particle_colors}                     & s                 & PA           \\ \hline
-\ct{PARTICLE BULK DENSITY}                     & Section~\ref{particle_colors}                     & kg/(m$^3$)        & PA           \\ \hline
-\ct{PARTICLE DIAMETER}                         & Section~\ref{particle_colors}                     & $\mu$m            & PA           \\ \hline
-\ct{PARTICLE DRAG COEFFICIENT}$^2$             & Section~\ref{particle_colors}                     &                   & PA          \\ \hline
-\ct{PARTICLE DRAG FORCE X}$^2$                 & Section~\ref{particle_colors}                     & N                 & PA          \\ \hline
-\ct{PARTICLE DRAG FORCE Y}$^2$                 & Section~\ref{particle_colors}                     & N                 & PA          \\ \hline
-\ct{PARTICLE DRAG FORCE Z}$^2$                 & Section~\ref{particle_colors}                     & N                 & PA          \\ \hline
-\ct{PARTICLE FLUX X}$^2$                       & Section~\ref{bucket_test_4}                       & \unit{kg/(m^2.s)} & P,S          \\ \hline
-\ct{PARTICLE FLUX Y}$^2$                       & Section~\ref{bucket_test_4}                       & \unit{kg/(m^2.s)} & P,S          \\ \hline
-\ct{PARTICLE FLUX Z}$^2$                       & Section~\ref{bucket_test_4}                       & \unit{kg/(m^2.s)} & P,S          \\ \hline
-\ct{PARTICLE HEAT TRANSFER COEFFICIENT}$^2$    & Section~\ref{particle_colors}                     & W/m$^2$/K         & PA          \\ \hline
-\ct{PARTICLE MASS}                             & Section~\ref{particle_colors}                     & kg                & PA           \\ \hline
-\ct{PARTICLE PHASE}                            & Section~\ref{particle_colors}                     &                   & PA           \\ \hline
-\ct{PARTICLE RADIATION LOSS}                   & Section~\ref{bucket_test_4}                       & kW/m$^3$          & D,I,P,S      \\ \hline
-\ct{PARTICLE TEMPERATURE}                      & Section~\ref{particle_colors}                     & $^\circ$C         & PA           \\ \hline
-\ct{PARTICLE U}                                & Section~\ref{particle_colors}                     & m/s               & PA           \\ \hline
-\ct{PARTICLE V}                                & Section~\ref{particle_colors}                     & m/s               & PA           \\ \hline
-\ct{PARTICLE VELOCITY}                         & Section~\ref{particle_colors}                     & m/s               & PA           \\ \hline
-\ct{PARTICLE W}                                & Section~\ref{particle_colors}                     & m/s               & PA           \\ \hline
-\ct{PARTICLE WEIGHTING FACTOR}                 & Section~\ref{particle_colors}                     &                   & PA           \\ \hline
-\ct{PARTICLE X}                                & Section~\ref{particle_colors}                     & m                 & PA           \\ \hline
-\ct{PARTICLE Y}                                & Section~\ref{particle_colors}                     & m                 & PA           \\ \hline
-\ct{PARTICLE Z}                                & Section~\ref{particle_colors}                     & m                 & PA           \\ \hline
-\ct{PDPA}                                      & Droplet statistics, Section~\ref{PDPA}            &                   & D            \\ \hline
-\ct{QABS}$^2$                                  & Absorption efficiency of droplets                 &                   & D,I,P,S      \\ \hline
-\ct{QABS_Z}$^1$                               & Absorption efficiency of droplets                 &                   & D,I,P,S      \\ \hline
-\ct{QSCA}$^2$                                  & Scattering efficiency of droplets                 &                   & D,I,P,S      \\ \hline
-\ct{QSCA_Z}$^1$                               & Scattering efficiency of droplets                 &                   & D,I,P,S      \\ \hline
-\end{longtable}
+\ct{ADA}$^2$                                  & Section~\ref{info:droplet_outputs}                & m$^2$/m$^3$       & D,I,P,S      \\ \hline
+\lstinline[mathescape=true]!ADA_Z$^1$!        & Section~\ref{info:droplet_outputs}                & m$^2$/m$^3$       & D,I,P,S      \\ \hline
+\ct{ADD}$^2$                                  & Section~\ref{info:droplet_outputs}                & $\mu$m            & D,I,P,S      \\ \hline
+\lstinline[mathescape=true]!ADD_Z$^1$!        & Section~\ref{info:droplet_outputs}                & $\mu$m            & D,I,P,S      \\ \hline
+\ct{ADT}$^2$                                  & Section~\ref{info:droplet_outputs}                & $^\circ$C         & D,I,P,S      \\ \hline
+\lstinline[mathescape=true]!ADT_Z$^1$!        & Section~\ref{info:droplet_outputs}                & $^\circ$C         & D,I,P,S      \\ \hline
+\ct{DROPLET VOLUME FRACTION}$^2$              & Section~\ref{bucket_test_4}                       &                   & D,P,S        \\ \hline
+\ct{MPUV}$^3$                                 & Section~\ref{bucket_test_4}                       & kg/m$^3$          & D,P,S        \\ \hline
+\lstinline[mathescape=true]!MPUV_Z$^3$!       & Section~\ref{bucket_test_4}                       & kg/m$^3$          & D,P,S        \\ \hline
+\ct{PARTICLE ACCEL X}$^2$                     & Section~\ref{particle_colors}                     & m/s$^2$           & PA          \\ \hline
+\ct{PARTICLE ACCEL Y}$^2$                     & Section~\ref{particle_colors}                     & m/s$^2$           & PA          \\ \hline
+\ct{PARTICLE ACCEL Z}$^2$                     & Section~\ref{particle_colors}                     & m/s$^2$           & PA          \\ \hline
+\ct{PARTICLE AGE}                             & Section~\ref{particle_colors}                     & s                 & PA           \\ \hline
+\ct{PARTICLE BULK DENSITY}                    & Section~\ref{particle_colors}                     & kg/(m$^3$)        & PA           \\ \hline
+\ct{PARTICLE DIAMETER}                        & Section~\ref{particle_colors}                     & $\mu$m            & PA           \\ \hline
+\ct{PARTICLE DRAG COEFFICIENT}$^2$            & Section~\ref{particle_colors}                     &                   & PA          \\ \hline
+\ct{PARTICLE DRAG FORCE X}$^2$                & Section~\ref{particle_colors}                     & N                 & PA          \\ \hline
+\ct{PARTICLE DRAG FORCE Y}$^2$                & Section~\ref{particle_colors}                     & N                 & PA          \\ \hline
+\ct{PARTICLE DRAG FORCE Z}$^2$                & Section~\ref{particle_colors}                     & N                 & PA          \\ \hline
+\ct{PARTICLE FLUX X}$^2$                      & Section~\ref{bucket_test_4}                       & \unit{kg/(m^2.s)} & P,S          \\ \hline
+\ct{PARTICLE FLUX Y}$^2$                      & Section~\ref{bucket_test_4}                       & \unit{kg/(m^2.s)} & P,S          \\ \hline
+\ct{PARTICLE FLUX Z}$^2$                      & Section~\ref{bucket_test_4}                       & \unit{kg/(m^2.s)} & P,S          \\ \hline
+\ct{PARTICLE HEAT TRANSFER COEFFICIENT}$^2$   & Section~\ref{particle_colors}                     & W/m$^2$/K         & PA          \\ \hline
+\ct{PARTICLE MASS}                            & Section~\ref{particle_colors}                     & kg                & PA           \\ \hline
+\ct{PARTICLE PHASE}                           & Section~\ref{particle_colors}                     &                   & PA           \\ \hline
+\ct{PARTICLE RADIATION LOSS}                  & Section~\ref{bucket_test_4}                       & kW/m$^3$          & D,I,P,S      \\ \hline
+\ct{PARTICLE TEMPERATURE}                     & Section~\ref{particle_colors}                     & $^\circ$C         & PA           \\ \hline
+\ct{PARTICLE U}                               & Section~\ref{particle_colors}                     & m/s               & PA           \\ \hline
+\ct{PARTICLE V}                               & Section~\ref{particle_colors}                     & m/s               & PA           \\ \hline
+\ct{PARTICLE VELOCITY}                        & Section~\ref{particle_colors}                     & m/s               & PA           \\ \hline
+\ct{PARTICLE W}                               & Section~\ref{particle_colors}                     & m/s               & PA           \\ \hline
+\ct{PARTICLE WEIGHTING FACTOR}                & Section~\ref{particle_colors}                     &                   & PA           \\ \hline
+\ct{PARTICLE X}                               & Section~\ref{particle_colors}                     & m                 & PA           \\ \hline
+\ct{PARTICLE Y}                               & Section~\ref{particle_colors}                     & m                 & PA           \\ \hline
+\ct{PARTICLE Z}                               & Section~\ref{particle_colors}                     & m                 & PA           \\ \hline
+\ct{PDPA}                                     & Section~\ref{PDPA}                                &                   & D            \\ \hline
+\ct{QABS}$^2$                                 & Section~\ref{info:droplet_outputs}                &                   & D,I,P,S      \\ \hline
+\lstinline[mathescape=true]!QABS_Z$^1$!       & Section~\ref{info:droplet_outputs}                &                   & D,I,P,S      \\ \hline
+\ct{QSCA}$^2$                                 & Section~\ref{info:droplet_outputs}                &                   & D,I,P,S      \\ \hline
+\lstinline[mathescape=true]!QSCA_Z$^1$!       & Section~\ref{info:droplet_outputs}                &                   & D,I,P,S      \\ \hline
+\end{xltabular}
 
 \noindent
 \begin{tabbing}
@@ -13124,21 +13161,22 @@ Keyword             & Type     & Description                      & Units       
 \hline
 Keyword             & Type     & Description                      & Units          & Default   \\ \hline  \hline
 \endhead
-\ct{BAROCLINIC}                    & Logical       & Section~\ref{baroclinic_torque}             &               & \ct{T}              \\ \hline
-\ct{CHECK_POISSON}                & Logical       & Section~\ref{pressure_solver}               &               & \ct{F}             \\ \hline
-\ct{FISHPAK_BC(3)}                & Integer Array & Section~\ref{sec:periodic}                  &               &                           \\ \hline
-\ct{ITERATION_SUSPEND_FACTOR}    & Real          & Section~\ref{pressure_solver}               & s             & 0.95                      \\ \hline
-\ct{MAX_PRESSURE_ITERATIONS}     & Integer       & Section~\ref{pressure_solver}               &               & 10                        \\ \hline
-\ct{PRESSURE_RELAX_TIME}         & Real          & Section~\ref{background_pressure}           & s             & 1.                        \\ \hline
-\ct{PRESSURE_TOLERANCE}           & Real          & Section~\ref{pressure_solver}               & s$^{-2}$      &                           \\ \hline
-\ct{RELAXATION_FACTOR}            & Real          & Section~\ref{background_pressure}           &               & 1.                        \\ \hline
-\ct{SOLVER}                        & Character     & Section~\ref{optional_pressure_solver}      &               & \ct{'FFT'}               \\ \hline
-\ct{SUSPEND_PRESSURE_ITERATIONS} & Logical       & Section~\ref{pressure_solver}               &               & \ct{T}              \\ \hline
-\ct{TUNNEL_PRECONDITIONER}        & Logical       & Section~\ref{tunnel_solver}                 &               & \ct{F}             \\ \hline
-\ct{VELOCITY_TOLERANCE}           & Real          & Section~\ref{pressure_solver}               & m/s           &                           \\ \hline
+\ct{BAROCLINIC}                  & Logical       & Section~\ref{baroclinic_torque}             &               & \ct{T}       \\ \hline
+\ct{CHECK_POISSON}               & Logical       & Section~\ref{pressure_solver}               &               & \ct{F}       \\ \hline
+\ct{FISHPAK_BC(3)}               & Integer Array & Section~\ref{sec:periodic}                  &               &              \\ \hline
+\ct{ITERATION_SUSPEND_FACTOR}    & Real          & Section~\ref{pressure_solver}               & s             & 0.95         \\ \hline
+\ct{MAX_PREDICTOR_PRESSURE_ITERATIONS} & Integer & Section~\ref{pressure_solver}               &               & * \\ \hline
+\ct{MAX_PRESSURE_ITERATIONS}     & Integer       & Section~\ref{pressure_solver}               &               & 10           \\ \hline
+\ct{PRESSURE_RELAX_TIME}         & Real          & Section~\ref{background_pressure}           & s             & 1.           \\ \hline
+\ct{PRESSURE_TOLERANCE}          & Real          & Section~\ref{pressure_solver}               & s$^{-2}$      &              \\ \hline
+\ct{RELAXATION_FACTOR}           & Real          & Section~\ref{background_pressure}           &               & 1.           \\ \hline
+\ct{SOLVER}                      & Character     & Section~\ref{optional_pressure_solver}      &               & \ct{'FFT'}   \\ \hline
+\ct{SUSPEND_PRESSURE_ITERATIONS} & Logical       & Section~\ref{pressure_solver}               &               & \ct{T}       \\ \hline
+\ct{TUNNEL_PRECONDITIONER}       & Logical       & Section~\ref{tunnel_solver}                 &               & \ct{F}       \\ \hline
+\ct{VELOCITY_TOLERANCE}          & Real          & Section~\ref{pressure_solver}               & m/s           &              \\ \hline
 \end{xltabular}
-
-
+\vspace{-1.0em}
+\noindent\textsuperscript{*} Unless specified, this value defaults to the value set for \ct{MAX_PRESSURE_ITERATIONS}.
 
 \vspace{\baselineskip}
 
@@ -13177,7 +13215,7 @@ Keyword             & Type     & Description                      & Units       
 \section{\texorpdfstring{{\tt PROP}}{PROP} (Device Properties)}
 
 
-\begin{xltabular}{\textwidth}{|p{5.5cm}|X|X|l|X|}
+\begin{xltabular}{\textwidth}{|p{5cm}|X|X|l|X|}
 \caption[Device properties (\ct{PROP} namelist group)]{For more information see Section~\ref{info:PROP}.}
 \label{tbl:PROP} \\
 \hline
@@ -13263,7 +13301,7 @@ Keyword             & Type     & Description                      & Units       
 \needspace{2.5in}
 \section{\texorpdfstring{{\tt RADF}}{RADF} (Radiation Output File Parameters)}
 
-\begin{xltabular}{\textwidth}{|p{6cm}|X|X|l|X|}
+\begin{xltabular}{\textwidth}{|p{5cm}|X|X|l|X|}
 \caption[Radiation output file parameters (\ct{RADF} namelist group)]{For more information see Section~\ref{info:RADF}.}
 \label{tbl:RADF} \\
 \hline
@@ -13360,9 +13398,10 @@ Keyword             & Type     & Description                      & Units       
 
 \vspace{\baselineskip}
 
-\needspace{2.5in}
+%\needspace{2.5in}
 \section{\texorpdfstring{{\tt REAC}}{REAC} (Reaction Parameters)}
-\begin{xltabular}{\textwidth}{|p{6cm}|X|X|l|p{3cm}|}
+
+\begin{xltabular}{\textwidth}{|p{5.5cm}|X|X|l|p{3cm}|}
 \caption[Reaction parameters (\ct{REAC} namelist group)]{For more information see Chapter~\ref{chap:combustion}.}
 \label{tbl:REAC} \\
 \hline
@@ -13491,7 +13530,7 @@ Keyword             & Type     & Description                      & Units       
 \needspace{2.5in}
 \section{\texorpdfstring{{\tt SPEC}}{SPEC} (Species Parameters)}
 
-\begin{xltabular}{\textwidth}{|p{6cm}|X|X|l|X|}
+\begin{xltabular}{\textwidth}{|p{6cm}|l|l|l|X|}
 \caption[Species parameters (\ct{SPEC} namelist group)]{For more information see Section~\ref{info:SPEC}.}
 \label{tbl:SPEC} \\
 \hline
@@ -13911,7 +13950,7 @@ Keyword             & Type     & Description                      & Units       
 \needspace{2.5in}
 \section{\texorpdfstring{{\tt WIND}}{WIND} (Wind and Atmospheric Parameters)}
 
-\begin{xltabular}{\textwidth}{|p{6cm}|X|X|X|X|}
+\begin{xltabular}{\textwidth}{|p{6cm}|l|l|X|X|}
 \caption[Wind and atmospheric parameters (\ct{WIND} namelist group)]{For more information see Section~\ref{info:WIND}.}
 \label{tbl:WIND} \\
 \hline
@@ -14385,8 +14424,9 @@ Keyword             & Type     & Description                      & Units       
 610 \> \ct{HOLE ... Cannot overlap HOLEs with a DEVC or CTRL_ID.} \> Section~\ref{info:HOLE}  \\
 611 \> \ct{OBST ... has a BULK_DENSITY but zero volume.} \> Section~\ref{info:BURN_AWAY}  \\
 612 \> \ct{OBST ... must have a volume to be assigned HT3D.} \> Section~\ref{checkerboard}  \\
-613 \> \ct{OBST ... and OBST ... cannot overlap in Mesh ...} \> Section~\ref{info:OVERLAY}  \\
-614 \> \ct{OBST_ID ... cannot have a SURF with NODE_ID} \> Section~\ref{info:hvac_geom}  \\    \>                                                                                \>                          \\
+614 \> \ct{OBST_ID ... cannot have a SURF with NODE_ID} \> Section~\ref{info:hvac_geom}  \\    
+615 \> \ct{OBST ... cannot overlap OBST ...}            \> Section~\ref{info:OVERLAY}  \\    
+    \>                                                  \>                          \\
 701 \> \ct{problem with GEOM, local SURF_ID index ... out of bounds.} \> Section~\ref{info:GEOM_Basics}  \\
 702 \> \ct{problem with GEOM, SURF_IDS not defined properly.} \> Section~\ref{info:first_geom}  \\
 703 \> \ct{missing SURF_ID in \&GEOM line ...} \> Section~\ref{subsec:readbin}  \\
@@ -14575,6 +14615,7 @@ Keyword             & Type     & Description                      & Units       
 1044 \> \ct{Cannot set EXTERNAL_FILE=T for a RAMP used for an output clock ...} \> Section~\ref{info:external_control} \\
 1045 \> \ct{QUANTITY ... requires a PART_ID for particles with mass.} \> Section~\ref{tab:particleoutputquantities} \\
 \\
+1050 \> \ct{The file ... does not exist. Set RESTART=.FALSE.} \> Section~\ref{info:restart} \\
 1051 \> \ct{RESTART initial time equals T_END.} \> Section~\ref{info:restart} \\
 1052 \> \ct{On TIME, do not set both RAMP_TIME and RAMP_DT.} \> Section~\ref{info:simulation_time_ramp} \\
 1053 \> \ct{One TIME, if one of DT_EXTERNAL_HEARTBEAT or} \> Section~\ref{info:external_control} \\

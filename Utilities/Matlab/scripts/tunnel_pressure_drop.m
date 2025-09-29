@@ -50,14 +50,14 @@ for i=1:length(cases)
 
         M = importdata([datadir,chid,'_',cases{i},'_',res{j},'_devc.csv'],',',2);
         t = M.data(:,find(strcmp(M.colheaders,'Time')));
-        U = M.data(:,find(strcmp(M.colheaders,'"UBAR"')));
+        U = M.data(:,find(strcmp(M.colheaders,'UBAR')));
         % plot(t,U)
         % xlabel('time (s)')
         % ylabel('u velocity (m/s)')
 
         % compute friction factor (f) from Colebrook equation
-        mu = M.data(end,find(strcmp(M.colheaders,'"MU"'))); % dynamic viscosity of AIR
-        rho = M.data(end,find(strcmp(M.colheaders,'"RHO"'))); % density of AIR
+        mu = M.data(end,find(strcmp(M.colheaders,'MU'))); % dynamic viscosity of AIR
+        rho = M.data(end,find(strcmp(M.colheaders,'RHO'))); % density of AIR
 
         Re = rho*H(i)*VEL(i)/mu;
         [f,error,iter] = colebrook(Re,s(i)/H(i),.001,1e-9);
@@ -66,7 +66,7 @@ for i=1:length(cases)
 
         % pressure drop
 
-        P = M.data(end,find(strcmp(M.colheaders,'"P10"')):end)';
+        P = M.data(end,find(strcmp(M.colheaders,'P10')):end)';
 
         hh(nh)=plot(x,P,markers{j}); hold on;
         nh=nh+1;

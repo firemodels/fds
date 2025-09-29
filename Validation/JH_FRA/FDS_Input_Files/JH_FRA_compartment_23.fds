@@ -1,7 +1,7 @@
 &HEAD CHID='JH_FRA_compartment_23', TITLE='FRA 1:1 Compartment Door Only Plywood'/
 &TIME T_END=900.0, /
 
-&CATF OTHER_FILES='common.fds' /
+&CATF OTHER_FILES='common.txt' /
 
 &SURF ID='PLYWOOD',
       COLOR='RED',
@@ -50,7 +50,7 @@
 &RAMP ID='PROP_BURNER_RAMP_Q', T=600.0, F=1.0/
 &RAMP ID='PROP_BURNER_RAMP_Q', T=601.0, F=0.0/
 
-&CATF OTHER_FILES='props.fds' /
-&CATF OTHER_FILES='fullscale.fds' /
+&CATF OTHER_FILES='props.txt' /
+&CATF OTHER_FILES='fullscale.txt' /
 
 &TAIL /

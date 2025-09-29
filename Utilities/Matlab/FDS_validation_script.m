@@ -80,15 +80,10 @@ sandia_methane_fire
 spray_attenuation
 flame_height2
 purdue_flames
-VTT_Sprays
-fm_datacenter_veltest
-mccaffrey_plume
 NIST_NRC_Parallel_Panels
-Wu_Bakar_Tunnels
 Memorial_Tunnel
 Memorial_Tunnel_2
 FHWA_Tunnel
 Theobald_Hose_Stream
-USFS_Deep_Fuel_Beds
 
 display('validation scripts completed successfully!')

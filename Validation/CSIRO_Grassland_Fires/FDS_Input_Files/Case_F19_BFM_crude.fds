@@ -48,10 +48,11 @@
       MATL_ID(1,1:1)            = 'GENERIC VEGETATION'
       MATL_ID(2,1)              = 'DIRT'
       THICKNESS(1:2)            = 0.51,0.10
-      MOISTURE_CONTENT(1)      = 0.058
+      MOISTURE_CONTENT(1)       = 0.058
       MASS_PER_VOLUME(1)        = 0.6144
       DRAG_COEFFICIENT          = 2.8
-      SURFACE_VOLUME_RATIO(1)   = 12240. /
+      SURFACE_VOLUME_RATIO(1)   = 12240. 
+      TIME_STEP_FACTOR          = 15/
 
 &CATF OTHER_FILES='vegetation_model.txt' /
 

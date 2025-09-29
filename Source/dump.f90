@@ -1803,12 +1803,10 @@ ENDIF
 
 ! If this is a RESTART case but an old .smv file does not exist, shutdown with an ERROR.
 
-IF( MY_RANK==0) THEN
-   INQUIRE(FILE=FN_SMV,EXIST=EX)
-   IF (.NOT.EX .AND. APPEND) THEN
-      WRITE(MESSAGE,'(A,A,A)') "ERROR: The file, ",TRIM(FN_SMV),", does not exist. Set RESTART=.FALSE."
-      CALL SHUTDOWN(MESSAGE) ; RETURN
-   ENDIF
+INQUIRE(FILE=FN_SMV,EXIST=EX)
+IF (.NOT.EX .AND. APPEND) THEN
+   WRITE(MESSAGE,'(A,A,A)') "ERROR(1050): The file, ",TRIM(FN_SMV),", does not exist. Set RESTART=.FALSE."
+   CALL SHUTDOWN(MESSAGE) ; RETURN
 ENDIF
 
 ! If this is a RESTART case, there is no need to open the .smv file except for Process 0.
@@ -2456,9 +2454,9 @@ MESH_LOOP: DO NM=1,NMESHES
    IF (.NOT.SETUP_ONLY) THEN
 
       ! Mesh grid dimensions and neighbor information.
-      ! Determine if the six mesh faces abut a single mesh (MESH_NEIGHBOR>0), nothing (MESH_NEIGHBOR=0), 
+      ! Determine if the six mesh faces abut a single mesh (MESH_NEIGHBOR>0), nothing (MESH_NEIGHBOR=0),
       ! or a combination of nothing and/or multiple meshes (MESH_NEIGHBOR=-1). Write six values to GRID line.
-   
+
       DO I=1,6
          SELECT CASE(I)
             CASE(1) ; IW1=1                                                 ; IW2=IW1+M%JBAR*M%KBAR-1
@@ -2478,7 +2476,7 @@ MESH_LOOP: DO NM=1,NMESHES
       ENDDO
 
    ENDIF
-   
+
    CALL EOL
    WRITE(MYSTR,'(A,3X,A)') 'GRID',TRIM(MESH_NAME(NM)); CALL ADDSTR
    WRITE(MYSTR,'(9I6)')     M%IBAR,M%JBAR,M%KBAR,MESH_NEIGHBOR(1:6) ; CALL ADDSTR
@@ -9047,9 +9045,9 @@ IND_SELECT: SELECT CASE(IND)
       ELSE
          PROBE_TMP = TMP(II,JJ,KK)
       ENDIF
-      UU  = U(II,JJ,KK)
-      VV  = V(II,JJ,KK)
-      WW  = W(II,JJ,KK)
+      UU = 0.5_EB*(U(MAX(0,II-1),JJ,KK)+U(MIN(IBAR,II),JJ,KK))
+      VV = 0.5_EB*(V(II,MAX(0,JJ-1),KK)+V(II,MIN(JBAR,JJ),KK))
+      WW = 0.5_EB*(W(II,JJ,MAX(0,KK-1))+W(II,JJ,MIN(KBAR,KK)))
       VEL2 = UU**2+VV**2+WW**2
       VEL = SQRT(VEL2)
       DP = 0.5_EB*VEL2*RHO(II,JJ,KK)
@@ -9458,7 +9456,7 @@ IND_SELECT: SELECT CASE(IND)
          IF(FCVAR(II,JJ,KK,CC_IDRC,JAXIS)>0) GAS_PHASE_OUTPUT_RES = REAL(RC_FACE(FCVAR(II,JJ,KK,CC_IDRC,JAXIS))%UNKF,EB)
       ENDIF
 
-   CASE(194) ! F_Z UNKNOWN NUMBER    
+   CASE(194) ! F_Z UNKNOWN NUMBER
       GAS_PHASE_OUTPUT_RES = 0._EB
       IF (CC_IBM) THEN
          GAS_PHASE_OUTPUT_RES = REAL(FCVAR(II,JJ,KK,CC_UNKF,KAXIS),EB)
@@ -10702,6 +10700,9 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
 
    CASE(100) ! CONDENSATION HEAT FLUX
       SOLID_PHASE_OUTPUT = B1%Q_CONDENSE * 0.001_EB
+
+   CASE(101) ! TANGENTIAL VELOCITY
+      IF (ASSOCIATED(B1)) SOLID_PHASE_OUTPUT = B1%U_TANG
 
 END SELECT SOLID_PHASE_SELECT
 
@@ -13094,7 +13095,7 @@ IF (MY_RANK==0 .AND. ALLOCATED(CVODE_SUBSTEP_DATA)) THEN
    DO ROWI = 1, TOTAL_SUBSTEPS_TAKEN
       WRITE(LU_CVODE_SUBSTEPS,TCFORM) (CVODE_SUBSTEP_DATA(ROWI,COLI),COLI=1,NCOLS)
    ENDDO
-ENDIF   
+ENDIF
 
 END SUBROUTINE DUMP_CVODE_SUBSTEPS
 

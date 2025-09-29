@@ -1,7 +1,7 @@
 &HEAD CHID='JH_FRA_compartment_11', TITLE='FRA 1:2 Compartment Door Only Inert'/
 &TIME T_END=720.0, /
 
-&CATF OTHER_FILES='common.fds' /
+&CATF OTHER_FILES='common.txt' /
 
 
 &SURF ID='PROP_BURNER', RGB=188,0,0, HRRPUA=1777.7778, RAMP_Q='PROP_BURNER_RAMP_Q', TMP_FRONT=400, /
@@ -17,7 +17,7 @@
 &RAMP ID='PROP_BURNER_RAMP_Q', T=600.0, F=1.0/
 &RAMP ID='PROP_BURNER_RAMP_Q', T=601.0, F=0.0/
 
-&CATF OTHER_FILES='props.fds' /
-&CATF OTHER_FILES='halfscale.fds' /
+&CATF OTHER_FILES='props.txt' /
+&CATF OTHER_FILES='halfscale.txt' /
 
 &TAIL /
