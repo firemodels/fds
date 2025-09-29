@@ -397,40 +397,24 @@ def plot_to_fig(x_data,y_data,**kwargs):
         ax = fig.add_axes([left, bottom, ax_w, ax_h])
 
     # select plot type
-    if kwargs.get('plot_type'):
-        plot_type=kwargs.get('plot_type')
-    else:
-        plot_type='linear'
+    plot_type=kwargs.get('plot_type','linear')
 
     # convert matlab styles to matplotlib
-    if kwargs.get('marker_style'):
-        style = kwargs.get('marker_style')
-        color,marker,linestyle = parse_matlab_style(style)
+    style = kwargs.get('marker_style','ko')
+    color,marker,linestyle = parse_matlab_style(style)
 
     if kwargs.get('line_style'):
         style = kwargs.get('line_style')
         color,marker,linestyle = parse_matlab_style(style)
 
+    fill_color = kwargs.get('fill_color',color)
+
     # other plot parameters
-    if kwargs.get('data_markevery'):
-        markevery = kwargs.get('data_markevery')
-    else:
-        markevery = default_markevery
+    markevery = kwargs.get('data_markevery',default_markevery)
+    legend_location = kwargs.get('legend_location',default_legend_location)
+    legend_framealpha = kwargs.get('legend_framealpha',default_legend_framealpha)
 
-    if kwargs.get('legend_location'):
-        legend_location = kwargs.get('legend_location')
-    else:
-        legend_location = default_legend_location
-
-    if kwargs.get('legend_framealpha'):
-        legend_framealpha = kwargs.get('legend_framealpha')
-    else:
-        legend_framealpha = default_legend_framealpha
-
-    if kwargs.get('data_label'):
-        data_label = kwargs.get('data_label')
-    else:
-        data_label = None
+    data_label = kwargs.get('data_label',None)
 
     # trap any data_labels set to blank (old matlab convention)
     if isinstance(data_label, str) and data_label.lower() == 'blank':
@@ -489,51 +473,58 @@ def plot_to_fig(x_data,y_data,**kwargs):
             linewidth=linewidth,
             color=color)
 
-    # if error range is passed, add it to the plot
-    if kwargs.get('y_error_absolute') and not kwargs.get('y_error_relative'):
-        if kwargs.get('y_error_absolute')>0.:
-            ax.fill_between(x_data,y_data-kwargs.get('y_error_absolute'),y_data+kwargs.get('y_error_absolute'),
+    # if y fill range is passed, add it to the plot
+    if kwargs.get('y_fill_absolute') and not kwargs.get('y_fill_relative'):
+        if kwargs.get('y_fill_absolute')>0.:
+            ax.fill_between(x_data,y_data-kwargs.get('y_fill_absolute'),y_data+kwargs.get('y_fill_absolute'),
                 alpha=0.1,color=kwargs.get('marker_edge_color'))
 
-    if kwargs.get('y_error_relative') and not kwargs.get('y_error_absolute'):
-        if kwargs.get('y_error_relative')>0.:
-            ax.fill_between(x_data,y_data*(1.-kwargs.get('y_error_relative')),y_data*(1.+kwargs.get('y_error_relative')),
+    if kwargs.get('y_fill_relative') and not kwargs.get('y_fill_absolute'):
+        if kwargs.get('y_fill_relative')>0.:
+            ax.fill_between(x_data,y_data*(1.-kwargs.get('y_fill_relative')),y_data*(1.+kwargs.get('y_fill_relative')),
                 alpha=0.1,color=kwargs.get('marker_edge_color'))
 
-    if kwargs.get('y_error_relative') and kwargs.get('y_error_absolute'):
-        if kwargs.get('y_error_relative')>0.:
-            ax.fill_between(x_data,y_data*(1.-kwargs.get('y_error_relative'))-kwargs.get('y_error_absolute'),y_data*(1.+kwargs.get('y_error_relative'))+kwargs.get('y_error_absolute'),
+    if kwargs.get('y_fill_relative') and kwargs.get('y_fill_absolute'):
+        if kwargs.get('y_fill_relative')>0.:
+            ax.fill_between(x_data,y_data*(1.-kwargs.get('y_fill_relative'))-kwargs.get('y_fill_absolute'),y_data*(1.+kwargs.get('y_fill_relative'))+kwargs.get('y_fill_absolute'),
                 alpha=0.1,color=kwargs.get('marker_edge_color'))
 
-    try:
-        y_error = kwargs.get('y_error_vector')
-        if len(y_data)==len(y_error):
-            ax.fill_between(x_data,y_data-y_error,y_data+y_error,
-                alpha=0.1,color=kwargs.get('marker_edge_color'))
-    except:
-        y_error = 0.
+    if kwargs.get('y_fill'):
+        y_fill = kwargs.get('y_fill')
+        if len(y_data)==len(y_fill):
+            ax.fill_between(x_data,y_data-y_fill,y_data+y_fill,
+                alpha=0.1,color=fill_color)
+        else:
+            raise ValueError(f"y_fill must the same length as y_data")
 
-    if kwargs.get('ticklabel_fontsize'):
-        ticklabel_fontsize=kwargs.get('ticklabel_fontsize')
-    else:
-        ticklabel_fontsize=default_ticklabel_fontsize
+    xerr = kwargs.get('x_error', None)
+    yerr = kwargs.get('y_error', None)
+    if xerr is not None or yerr is not None:
+        ax.errorbar(
+            x_data, y_data,
+            xerr=xerr,                               # can be scalar, array, or [lower, upper]
+            yerr=yerr,                               # same flexibility
+            fmt=style,                               # marker style for data points
+            markeredgewidth=markeredgewidth,         # marker edge width
+            markerfacecolor=markerfacecolor,         # make marker hollow
+            markeredgecolor=color,                   # outline color
+            linestyle=linestyle,
+            linewidth=linewidth,
+            capsize=kwargs.get('error_capsize', 5),  # size of caps at ends
+            capthick=linewidth,
+        )
 
+
+    ticklabel_fontsize=kwargs.get('ticklabel_fontsize',default_ticklabel_fontsize)
     plt.setp( ax.xaxis.get_majorticklabels(), rotation=0, fontsize=ticklabel_fontsize )
     plt.setp( ax.yaxis.get_majorticklabels(), rotation=0, fontsize=ticklabel_fontsize )
 
-    if kwargs.get('axeslabel_fontsize'):
-        axeslabel_fontsize=kwargs.get('axeslabel_fontsize')
-    else:
-        axeslabel_fontsize=default_axeslabel_fontsize
-
+    axeslabel_fontsize=kwargs.get('axeslabel_fontsize',default_axeslabel_fontsize)
     if not using_existing_figure:
         plt.xlabel(kwargs.get('x_label'), fontsize=axeslabel_fontsize)
         plt.ylabel(kwargs.get('y_label'), fontsize=axeslabel_fontsize)
 
-    if kwargs.get('legend_fontsize'):
-        legend_fontsize=kwargs.get('legend_fontsize')
-    else:
-        legend_fontsize=default_legend_fontsize
+    legend_fontsize=kwargs.get('legend_fontsize',default_legend_fontsize)
 
     if data_label:
         if kwargs.get('legend_location')=='outside':
