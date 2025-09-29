@@ -16,6 +16,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib import rc
 # rc('text', usetex=True) # Enable TeX rendering
+from matplotlib.ticker import ScalarFormatter
 import numpy as np
 import pandas as pd
 
@@ -396,40 +397,24 @@ def plot_to_fig(x_data,y_data,**kwargs):
         ax = fig.add_axes([left, bottom, ax_w, ax_h])
 
     # select plot type
-    if kwargs.get('plot_type'):
-        plot_type=kwargs.get('plot_type')
-    else:
-        plot_type='linear'
+    plot_type=kwargs.get('plot_type','linear')
 
     # convert matlab styles to matplotlib
-    if kwargs.get('marker_style'):
-        style = kwargs.get('marker_style')
-        color,marker,linestyle = parse_matlab_style(style)
+    style = kwargs.get('marker_style','ko')
+    color,marker,linestyle = parse_matlab_style(style)
 
     if kwargs.get('line_style'):
         style = kwargs.get('line_style')
         color,marker,linestyle = parse_matlab_style(style)
 
+    fill_color = kwargs.get('fill_color',color)
+
     # other plot parameters
-    if kwargs.get('data_markevery'):
-        markevery = kwargs.get('data_markevery')
-    else:
-        markevery = default_markevery
+    markevery = kwargs.get('data_markevery',default_markevery)
+    legend_location = kwargs.get('legend_location',default_legend_location)
+    legend_framealpha = kwargs.get('legend_framealpha',default_legend_framealpha)
 
-    if kwargs.get('legend_location'):
-        legend_location = kwargs.get('legend_location')
-    else:
-        legend_location = default_legend_location
-
-    if kwargs.get('legend_framealpha'):
-        legend_framealpha = kwargs.get('legend_framealpha')
-    else:
-        legend_framealpha = default_legend_framealpha
-
-    if kwargs.get('data_label'):
-        data_label = kwargs.get('data_label')
-    else:
-        data_label = None
+    data_label = kwargs.get('data_label',None)
 
     # trap any data_labels set to blank (old matlab convention)
     if isinstance(data_label, str) and data_label.lower() == 'blank':
@@ -488,51 +473,58 @@ def plot_to_fig(x_data,y_data,**kwargs):
             linewidth=linewidth,
             color=color)
 
-    # if error range is passed, add it to the plot
-    if kwargs.get('y_error_absolute') and not kwargs.get('y_error_relative'):
-        if kwargs.get('y_error_absolute')>0.:
-            ax.fill_between(x_data,y_data-kwargs.get('y_error_absolute'),y_data+kwargs.get('y_error_absolute'),
+    # if y fill range is passed, add it to the plot
+    if kwargs.get('y_fill_absolute') and not kwargs.get('y_fill_relative'):
+        if kwargs.get('y_fill_absolute')>0.:
+            ax.fill_between(x_data,y_data-kwargs.get('y_fill_absolute'),y_data+kwargs.get('y_fill_absolute'),
                 alpha=0.1,color=kwargs.get('marker_edge_color'))
 
-    if kwargs.get('y_error_relative') and not kwargs.get('y_error_absolute'):
-        if kwargs.get('y_error_relative')>0.:
-            ax.fill_between(x_data,y_data*(1.-kwargs.get('y_error_relative')),y_data*(1.+kwargs.get('y_error_relative')),
+    if kwargs.get('y_fill_relative') and not kwargs.get('y_fill_absolute'):
+        if kwargs.get('y_fill_relative')>0.:
+            ax.fill_between(x_data,y_data*(1.-kwargs.get('y_fill_relative')),y_data*(1.+kwargs.get('y_fill_relative')),
                 alpha=0.1,color=kwargs.get('marker_edge_color'))
 
-    if kwargs.get('y_error_relative') and kwargs.get('y_error_absolute'):
-        if kwargs.get('y_error_relative')>0.:
-            ax.fill_between(x_data,y_data*(1.-kwargs.get('y_error_relative'))-kwargs.get('y_error_absolute'),y_data*(1.+kwargs.get('y_error_relative'))+kwargs.get('y_error_absolute'),
+    if kwargs.get('y_fill_relative') and kwargs.get('y_fill_absolute'):
+        if kwargs.get('y_fill_relative')>0.:
+            ax.fill_between(x_data,y_data*(1.-kwargs.get('y_fill_relative'))-kwargs.get('y_fill_absolute'),y_data*(1.+kwargs.get('y_fill_relative'))+kwargs.get('y_fill_absolute'),
                 alpha=0.1,color=kwargs.get('marker_edge_color'))
 
-    try:
-        y_error = kwargs.get('y_error_vector')
-        if len(y_data)==len(y_error):
-            ax.fill_between(x_data,y_data-y_error,y_data+y_error,
-                alpha=0.1,color=kwargs.get('marker_edge_color'))
-    except:
-        y_error = 0.
+    if kwargs.get('y_fill'):
+        y_fill = kwargs.get('y_fill')
+        if len(y_data)==len(y_fill):
+            ax.fill_between(x_data,y_data-y_fill,y_data+y_fill,
+                alpha=0.1,color=fill_color)
+        else:
+            raise ValueError(f"y_fill must the same length as y_data")
 
-    if kwargs.get('ticklabel_fontsize'):
-        ticklabel_fontsize=kwargs.get('ticklabel_fontsize')
-    else:
-        ticklabel_fontsize=default_ticklabel_fontsize
+    xerr = kwargs.get('x_error', None)
+    yerr = kwargs.get('y_error', None)
+    if xerr is not None or yerr is not None:
+        ax.errorbar(
+            x_data, y_data,
+            xerr=xerr,                               # can be scalar, array, or [lower, upper]
+            yerr=yerr,                               # same flexibility
+            fmt=style,                               # marker style for data points
+            markeredgewidth=markeredgewidth,         # marker edge width
+            markerfacecolor=markerfacecolor,         # make marker hollow
+            markeredgecolor=color,                   # outline color
+            linestyle=linestyle,
+            linewidth=linewidth,
+            capsize=kwargs.get('error_capsize', 5),  # size of caps at ends
+            capthick=linewidth,
+        )
 
+
+    ticklabel_fontsize=kwargs.get('ticklabel_fontsize',default_ticklabel_fontsize)
     plt.setp( ax.xaxis.get_majorticklabels(), rotation=0, fontsize=ticklabel_fontsize )
     plt.setp( ax.yaxis.get_majorticklabels(), rotation=0, fontsize=ticklabel_fontsize )
 
-    if kwargs.get('axeslabel_fontsize'):
-        axeslabel_fontsize=kwargs.get('axeslabel_fontsize')
-    else:
-        axeslabel_fontsize=default_axeslabel_fontsize
-
+    axeslabel_fontsize=kwargs.get('axeslabel_fontsize',default_axeslabel_fontsize)
     if not using_existing_figure:
         plt.xlabel(kwargs.get('x_label'), fontsize=axeslabel_fontsize)
         plt.ylabel(kwargs.get('y_label'), fontsize=axeslabel_fontsize)
 
-    if kwargs.get('legend_fontsize'):
-        legend_fontsize=kwargs.get('legend_fontsize')
-    else:
-        legend_fontsize=default_legend_fontsize
+    legend_fontsize=kwargs.get('legend_fontsize',default_legend_fontsize)
 
     if data_label:
         if kwargs.get('legend_location')=='outside':
@@ -563,12 +555,81 @@ def plot_to_fig(x_data,y_data,**kwargs):
     ax.set_xlim(xmin,xmax)
     ax.set_ylim(ymin,ymax)
 
+    if plot_type in ('loglog', 'semilogy'):
+        apply_global_exponent(ax, axis='y', fontsize=axeslabel_fontsize)
+    if plot_type in ('loglog', 'semilogx'):
+        apply_global_exponent(ax, axis='x', fontsize=axeslabel_fontsize)
+
     if kwargs.get('revision_label'):
         add_version_string(ax, kwargs.get('revision_label'), plot_type)
 
     # fig.tight_layout() # this should not be needed if figure_size and plot_size are both specified
 
     return fig
+
+
+def apply_global_exponent(ax, axis='y', fontsize=10, minor_subs=None):
+    import numpy as np
+    from matplotlib.ticker import FuncFormatter, LogLocator
+
+    if axis == 'y':
+        ticks = ax.get_yticks()
+        axis_obj = ax.yaxis
+        lims = ax.get_ylim()
+    else:
+        ticks = ax.get_xticks()
+        axis_obj = ax.xaxis
+        lims = ax.get_xlim()
+
+    # Keep only positive finite ticks (for log axes)
+    ticks = np.array([t for t in ticks if t > 0 and np.isfinite(t)])
+    if ticks.size == 0:
+        return
+
+    # Choose representative exponent
+    exp = int(np.floor(np.log10(np.median(ticks))))
+    scale = 10.0**exp
+
+    # Major formatter: fixed-point decimals
+    def fmt(val, pos):
+        v = val / scale
+        return "{:g}".format(v)
+
+    axis_obj.set_major_formatter(FuncFormatter(fmt))
+    axis_obj.get_offset_text().set_visible(False)
+
+    # Decide what to do with minor tick labels
+    span_decades = np.log10(lims[1]) - np.log10(max(lims[0], 1e-300))
+
+    # Default subs = 2, 4, 6, 8
+    if minor_subs is None:
+        minor_subs = [2, 4, 6, 8]
+
+    if span_decades <= 1.1:  # only ~1 decade
+        axis_obj.set_minor_locator(LogLocator(base=10.0, subs=minor_subs, numticks=10))
+        axis_obj.set_minor_formatter(FuncFormatter(lambda val, pos: "{:g}".format(val/scale)))
+    else:
+        ax.tick_params(axis=axis, which='minor', labelleft=False, labelbottom=False)
+
+    # Force tick labels NOT to go through TeX
+    if axis == 'y':
+        for label in ax.get_yticklabels() + ax.get_yticklabels(minor=True):
+            label.set_usetex(False)
+    else:
+        for label in ax.get_xticklabels() + ax.get_xticklabels(minor=True):
+            label.set_usetex(False)
+
+    # Place the ×10^exp text at the axis end
+    if exp != 0:
+        if axis == 'y':
+            ax.text(0, 1.01, rf"$\times 10^{{{exp}}}$",
+                    transform=ax.transAxes,
+                    ha='left', va='bottom', fontsize=fontsize)
+        else:
+            ax.text(1.0, -0.1, rf"$\times 10^{{{exp}}}$",
+                    transform=ax.transAxes,
+                    ha='right', va='top', fontsize=fontsize)
+
 
 
 def parse_matlab_style(style):
