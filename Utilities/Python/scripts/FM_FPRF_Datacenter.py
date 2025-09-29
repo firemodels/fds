@@ -98,9 +98,10 @@ for j in range(8):
                                  y_label=f'Predicted {dir1[j]}Velocity (m/s)')
     fdsplotlib.plot_to_fig(x_data=x_err, y_data=y_err_p, marker_style='k--', figure_handle=fig)
     fdsplotlib.plot_to_fig(x_data=x_err, y_data=y_err_m, marker_style='k--', figure_handle=fig)
-    fdsplotlib.plot_to_fig(x_data=exp_data[:,exp_index[j]], y_data=fds_points, marker_style='ro', figure_handle=fig)
-    plt.errorbar(exp_data[:,exp_index[j]], fds_points, xerr=exp_data[:, exp_rms_index[j]], yerr=fds_u_rms, fmt='ro',
-                 capsize=5, capthick=1, markersize=8, linewidth=1)
+    fdsplotlib.plot_to_fig(x_data=exp_data[:,exp_index[j]], y_data=fds_points,
+                           x_error=exp_data[:, exp_rms_index[j]], y_error=fds_u_rms,
+                           marker_style='ro', figure_handle=fig)
+
     plt.savefig(pltdir + f'FM_Datacenter_Veltest_{flow}_{dir2[j]}.pdf', format='pdf')
     plt.close()
 
