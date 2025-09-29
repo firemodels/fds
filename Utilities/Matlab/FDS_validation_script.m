@@ -76,7 +76,6 @@ scatplot(saved_data, drange, ...
 backward_facing_step
 sandia_helium_plume
 sandia_methane_fire
-spray_attenuation
 flame_height2
 purdue_flames
 NIST_NRC_Parallel_Panels
