@@ -19720,22 +19720,17 @@ END SUBROUTINE GET_CUTCELL_FH
 
 ! ---------------------------- GET_H_MATRIX_CC ------------------------------------
 
-SUBROUTINE GET_H_MATRIX_CC(NM,NM1,IPZ,D_MAT_HP)
+SUBROUTINE GET_H_MATRIX_CC(NM,NM1,IPZ)
 
 ! This routine assumes the calling subroutine has called POINT_TO_MESH for NM.
 
 INTEGER, INTENT(IN) :: NM,NM1,IPZ
-REAL(EB), POINTER, DIMENSION(:,:) :: D_MAT_HP
 
 ! Local Variables:
 INTEGER :: X1AXIS,IFACE,ICF,I,J,K,IND(LOW_IND:HIGH_IND),IND_LOC(LOW_IND:HIGH_IND)
 INTEGER :: LOCROW_1,LOCROW_2,ILOC,JLOC,JCOL,IROW
 REAL(EB) :: AF,IDX,BIJ,KFACE(2,2)
 
-IF (.NOT. ASSOCIATED(D_MAT_HP)) THEN
-   WRITE(LU_ERR,*) 'GET_H_MATRIX_CC in geom.f90: Pointer D_MAT_HP not associated.'
-   RETURN
-ENDIF
 
 ! X direction bounds:
 ILO_FACE = 0                ! Low mesh boundary face index.
@@ -19792,8 +19787,7 @@ DO IFACE=1,MESHES(NM)%CC_NRCFACE_H
       DO JLOC=LOW_IND,HIGH_IND ! Local col number in Kface, JD
           IROW=IND_LOC(ILOC)                                ! Process Local Unknown number.
           JCOL=RCF%JDH(ILOC,JLOC) ! Local position of coef in D_MAT_H
-          ! Add coefficient:
-          D_MAT_HP(JCOL,IROW) = D_MAT_HP(JCOL,IROW) + KFACE(ILOC,JLOC)
+          ZONE_SOLVE(IPZ)%ROW_H(IROW)%D(JCOL) = ZONE_SOLVE(IPZ)%ROW_H(IROW)%D(JCOL) + KFACE(ILOC,JLOC)
       ENDDO
    ENDDO
 ENDDO
@@ -19841,8 +19835,7 @@ DO ICF = 1,MESHES(NM)%N_CUTFACE_MESH
          DO JLOC=LOW_IND,HIGH_IND ! Local col number in Kface, JD
                IROW=IND_LOC(ILOC)
                JCOL=CF%JDH(ILOC,JLOC,IFACE)
-               ! Add coefficient:
-               D_MAT_HP(JCOL,IROW) = D_MAT_HP(JCOL,IROW) + KFACE(ILOC,JLOC)
+               ZONE_SOLVE(IPZ)%ROW_H(IROW)%D(JCOL) = ZONE_SOLVE(IPZ)%ROW_H(IROW)%D(JCOL) + KFACE(ILOC,JLOC)
          ENDDO
       ENDDO
    ENDDO
@@ -19972,9 +19965,9 @@ ELSE ! MESH_LOOP_2 in calling routine.
       ! Add to global matrix arrays:
       DO LOCROW=LOCROW_1,LOCROW_2
          DO IIND=LOW_IND,HIGH_IND
-            NII = ZONE_SOLVE(IPZ)%NNZ_D_MAT_H(IND_LOC(LOCROW))
+            NII = ZONE_SOLVE(IPZ)%ROW_H(IND_LOC(LOCROW))%NNZ
             DO ILOC=1,NII
-               IF ( IND(IIND) == ZONE_SOLVE(IPZ)%JD_MAT_H(ILOC,IND_LOC(LOCROW)) ) THEN
+               IF ( IND(IIND) == ZONE_SOLVE(IPZ)%ROW_H(IND_LOC(LOCROW))%JD(ILOC) ) THEN
                    RCF%JDH(LOCROW,IIND) = ILOC
                    EXIT
                ENDIF
@@ -20016,9 +20009,9 @@ ELSE ! MESH_LOOP_2 in calling routine.
          ! Add to global matrix arrays:
          DO LOCROW=LOCROW_1,LOCROW_2
             DO IIND=LOW_IND,HIGH_IND
-               NII = ZONE_SOLVE(IPZ)%NNZ_D_MAT_H(IND_LOC(LOCROW))
+               NII = ZONE_SOLVE(IPZ)%ROW_H(IND_LOC(LOCROW))%NNZ
                DO ILOC=1,NII
-                  IF ( IND(IIND) == ZONE_SOLVE(IPZ)%JD_MAT_H(ILOC,IND_LOC(LOCROW)) ) THEN
+                  IF ( IND(IIND) == ZONE_SOLVE(IPZ)%ROW_H(IND_LOC(LOCROW))%JD(ILOC) ) THEN
                         CF%JDH(LOCROW,IIND,IFACE) = ILOC
                         EXIT
                   ENDIF
@@ -20039,37 +20032,93 @@ SUBROUTINE ADD_INPLACE_NNZ_H_WHLDOM(LOCROW_1,LOCROW_2,IND,IND_LOC,IPZ)
 INTEGER, INTENT(IN) :: LOCROW_1,LOCROW_2,IND(LOW_IND:HIGH_IND),IND_LOC(LOW_IND:HIGH_IND),IPZ
 
 ! Local Variables:
-INTEGER LOCROW, IIND, NII, ILOC, JLOC
+INTEGER LOCROW, IIND, ILOC
 LOGICAL INLIST
 
 LOCROW_LOOP : DO LOCROW=LOCROW_1,LOCROW_2
    DO IIND=LOW_IND,HIGH_IND
-      NII = ZONE_SOLVE(IPZ)%NNZ_D_MAT_H(IND_LOC(LOCROW))
-      ! Check that column index hasn't been already counted:
-      INLIST = .FALSE.
-      DO ILOC=1,NII
-         IF ( IND(IIND) == ZONE_SOLVE(IPZ)%JD_MAT_H(ILOC,IND_LOC(LOCROW)) ) THEN
-            INLIST = .TRUE.
-            EXIT
+      ! Populate variable per-row storage ROW_H only:
+      ILOC = IND_LOC(LOCROW)
+      IF (ILOC>=1 .AND. ILOC<=SIZE(ZONE_SOLVE(IPZ)%ROW_H)) THEN
+         IF (.NOT. ALLOCATED(ZONE_SOLVE(IPZ)%ROW_H(ILOC)%JD)) THEN
+            ALLOCATE(ZONE_SOLVE(IPZ)%ROW_H(ILOC)%JD(7))
+            ALLOCATE(ZONE_SOLVE(IPZ)%ROW_H(ILOC)%D(7))
+            ZONE_SOLVE(IPZ)%ROW_H(ILOC)%JD(1) = IND(IIND)
+            ZONE_SOLVE(IPZ)%ROW_H(ILOC)%D(1)  = 0._EB
+            ZONE_SOLVE(IPZ)%ROW_H(ILOC)%NNZ   = 1
+         ELSE
+            INLIST = ANY(ZONE_SOLVE(IPZ)%ROW_H(ILOC)%JD(1:ZONE_SOLVE(IPZ)%ROW_H(ILOC)%NNZ) == IND(IIND))
+            IF (.NOT. INLIST) THEN
+               CALL INSERT_SORTED_INT_REAL(            &
+                     ZONE_SOLVE(IPZ)%ROW_H(ILOC)%JD,   &
+                     ZONE_SOLVE(IPZ)%ROW_H(ILOC)%D,    &
+                     ZONE_SOLVE(IPZ)%ROW_H(ILOC)%NNZ,  &
+                     IND(IIND))
+            ENDIF
          ENDIF
-      ENDDO
-      IF ( INLIST ) CYCLE
-
-      ! Now add in place:
-      NII = NII + 1
-      DO ILOC=1,NII
-          IF ( ZONE_SOLVE(IPZ)%JD_MAT_H(ILOC,IND_LOC(LOCROW)) > IND(IIND) ) EXIT
-      ENDDO
-      DO JLOC=NII,ILOC+1,-1
-         ZONE_SOLVE(IPZ)%JD_MAT_H(JLOC,IND_LOC(LOCROW)) = ZONE_SOLVE(IPZ)%JD_MAT_H(JLOC-1,IND_LOC(LOCROW))
-      ENDDO
-      ZONE_SOLVE(IPZ)%NNZ_D_MAT_H(IND_LOC(LOCROW))   = NII
-      ZONE_SOLVE(IPZ)%JD_MAT_H(ILOC,IND_LOC(LOCROW)) = IND(IIND)
+      ENDIF
    ENDDO
 ENDDO LOCROW_LOOP
 
 RETURN
 END SUBROUTINE ADD_INPLACE_NNZ_H_WHLDOM
+
+! Helper: insert NEWCOL into sorted integer array JD and mirror REAL array D, grow allocs
+SUBROUTINE INSERT_SORTED_INT_REAL(JD, D, NNZ, NEWCOL)
+USE PRECISION_PARAMETERS
+IMPLICIT NONE (TYPE,EXTERNAL)
+INTEGER, ALLOCATABLE, INTENT(INOUT) :: JD(:)
+REAL(EB), ALLOCATABLE, INTENT(INOUT) :: D(:)
+INTEGER, INTENT(INOUT) :: NNZ
+INTEGER, INTENT(IN) :: NEWCOL
+
+INTEGER :: POS, CAP
+INTEGER :: I
+INTEGER, ALLOCATABLE :: JD_TMP(:)
+REAL(EB), ALLOCATABLE :: D_TMP(:)
+
+! Determine current capacity from allocated size
+CAP = SIZE(JD)
+
+! Grow capacity geometrically if needed
+IF (NNZ+1 > CAP) THEN
+   CAP = MAX(2*MAX(CAP,1), NNZ+1)
+   ALLOCATE(JD_TMP(CAP))
+   ALLOCATE(D_TMP(CAP))
+   IF (NNZ > 0) THEN
+      JD_TMP(1:NNZ) = JD(1:NNZ)
+      D_TMP(1:NNZ)  = D(1:NNZ)
+   ENDIF
+   IF (ALLOCATED(JD)) DEALLOCATE(JD)
+   IF (ALLOCATED(D))  DEALLOCATE(D)
+   CALL MOVE_ALLOC(JD_TMP, JD)
+   CALL MOVE_ALLOC(D_TMP,  D)
+ENDIF
+
+! Find insertion position (ascending order)
+POS = 1
+DO WHILE (POS <= NNZ)
+   IF(JD(POS) < NEWCOL) THEN
+      POS = POS + 1
+   ELSE
+      EXIT
+   ENDIF
+ENDDO
+
+! Shift in-place to make room
+IF (NNZ >= POS) THEN
+   DO I = NNZ, POS, -1
+      JD(I+1) = JD(I)
+      D(I+1)  = D(I)
+   ENDDO
+ENDIF
+
+! Insert new entry
+JD(POS) = NEWCOL
+D(POS)  = 0._EB
+NNZ = NNZ + 1
+
+END SUBROUTINE INSERT_SORTED_INT_REAL
 
 
 ! --------------------------- GET_MMATRIX_SCALAR_3D -------------------------------

@@ -16,8 +16,67 @@ import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib import rc
 # rc('text', usetex=True) # Enable TeX rendering
+from matplotlib.ticker import ScalarFormatter
 import numpy as np
 import pandas as pd
+
+
+def expand_ranges(items, df, header_rows=1):
+    """
+    Expand a list of row specifiers into pandas row indices.
+    Supports:
+      - int: row number (1-based, with headers counted)
+      - "start:stop": inclusive range of row numbers
+      - "start:": open-ended range (to the end)
+      - "all": keep everything
+      - plain string: match Dataname column (case-insensitive)
+    """
+    nrows = len(df)
+    result = []
+
+    for item in items:
+        if isinstance(item, int):
+            # single row number
+            result.append(item - (header_rows + 1))
+
+        elif isinstance(item, str):
+            s = item.strip()
+            low = s.lower()
+
+            if low == "all":
+                return list(range(nrows))  # everything
+
+            if ":" in s:  # range form
+                start, _, end = s.partition(":")
+                start = int(start)
+
+                if end == "":
+                    # open-ended: go to the last row of df
+                    end = nrows + header_rows  # Excel-style row count
+                else:
+                    end = int(end)
+
+                # Convert to iloc positions (0-based, exclusive of end)
+                start_pos = start - (header_rows + 1)
+                end_pos = end - header_rows
+
+                # Clamp so we don't go past the last row
+                end_pos = min(end_pos, nrows)
+
+                rng = range(start_pos, end_pos)
+                result.extend(rng)
+
+            else:
+                # assume it's a Dataname match
+                matches = df.index[df['Dataname'].str.lower() == low].tolist()
+                if not matches:
+                    raise ValueError(f"No match for Dataname '{item}'")
+                result.extend(matches)
+
+        else:
+            raise TypeError(f"Unsupported plot_range element: {item}")
+
+    return sorted(set(result))
 
 
 def dataplot(config_filename,**kwargs):
@@ -32,40 +91,18 @@ def dataplot(config_filename,**kwargs):
     logging.getLogger('matplotlib.font_manager').setLevel(logging.ERROR)
 
     # defaults
-    revision  = ''
-    configdir = ''
-    expdir = ''
-    cmpdir = ''
-    pltdir = ''
-    close_figs = False
-    verbose = False
-    plot_list = ['all']
-    plot_range = range(10000)
 
-    if kwargs.get('revision'):
-        revision = kwargs.get('revision')
+    configdir = kwargs.get('configdir','')
+    revision = kwargs.get('revision','')
+    expdir = kwargs.get('expdir','')
+    cmpdir = kwargs.get('cmpdir','')
+    pltdir = kwargs.get('pltdir','')
+    close_figs = kwargs.get('close_figs', False)
+    verbose = kwargs.get('verbose', False)
 
-    if kwargs.get('expdir'):
-        expdir = kwargs.get('expdir')
-
-    if kwargs.get('cmpdir'):
-        cmpdir = kwargs.get('cmpdir')
-
-    if kwargs.get('pltdir'):
-        pltdir = kwargs.get('pltdir')
-
-    if kwargs.get('close_figs'):
-        close_figs = kwargs.get('close_figs')
-
-    if kwargs.get('verbose'):
-        verbose = kwargs.get('verbose')
-
-    if kwargs.get('plot_list'):
-        plot_list = kwargs.get('plot_list')
-
-    if kwargs.get('plot_range'):
-        plot_range_in = kwargs.get('plot_range')
-        plot_range = range(plot_range_in[0]-2,plot_range_in[-1]-1)
+    plot_list = kwargs.get('plot_list', ['all'])
+    plot_range_in = kwargs.get('plot_range', None)
+    header_rows = kwargs.get('header_rows', 1)
 
     # Rebuild the default NA strings *excluding* 'N/A'
     default_na = {
@@ -76,32 +113,41 @@ def dataplot(config_filename,**kwargs):
     safe_na_values = default_na  # 'N/A' intentionally not included
 
     # read the config file
-    df = pd.read_csv(configdir+config_filename, sep=',', engine='python', comment='#', quotechar='"', na_values=safe_na_values, keep_default_na=False)
+    df = pd.read_csv(configdir+config_filename, sep=',', engine='python', quotechar='"', na_values=safe_na_values, keep_default_na=False)
     C = df.where(pd.notnull(df), None)
+
+    if plot_range_in is not None:
+        if isinstance(plot_range_in, (list, tuple)):
+            adjusted = expand_ranges(plot_range_in, C, header_rows)
+            if len(adjusted) < len(C):  # filtering happened
+                C = C.iloc[adjusted]
+        elif isinstance(plot_range_in, range):
+            start, end = plot_range_in.start, plot_range_in.stop
+            adjusted = range(start - (header_rows + 1),
+                             end - header_rows)  # Python range already exclusive
+            C = C.iloc[adjusted]
+        else:
+            raise TypeError("plot_range must be a list, tuple, or range")
+    elif plot_list and 'all' not in [p.lower() for p in plot_list]:
+        # Only filter by plot_list if no plot_range was passed
+        C = C[C['Dataname'].str.lower().isin([p.lower() for p in plot_list])]
 
     Plot_Filename_Last = None
     d1_Key_Last = None
     f_Last = plt.figure()
 
     # loop over the rows of the config file
-    for irow in C.index:
+    for pos, (irow, row) in enumerate(C.iterrows()):
 
-        if irow not in plot_range:
-            continue
+        pp = define_plot_parameters(C, pos)  # use position, not label
 
-        # try:
-
-        # define plot parameters and return them in an object called pp
-        pp = define_plot_parameters(C,irow)
+        # debug dump
+        # print(vars(pp))
 
         # print(pp.__dict__) # helpful for debug
 
         if pp.switch_id=='s':
            continue
-
-        if 'all' not in plot_list:
-            if pp.Dataname not in plot_list:
-                continue
 
         if pp.Plot_Filename!=Plot_Filename_Last:
 
@@ -115,19 +161,22 @@ def dataplot(config_filename,**kwargs):
             # set header to the row where column names are stored (Python is 0 based)
             E = pd.read_csv(expdir+pp.d1_Filename, header=int(pp.d1_Col_Name_Row-1), sep=',', engine='python', comment='#', quotechar='"')
             E.columns = E.columns.str.strip()  # <-- Strip whitespace from headers
+            start_idx = int(pp.d1_Data_Row - pp.d1_Col_Name_Row - 1)
+            x, col_names = get_data(E, pp.d1_Ind_Col_Name, start_idx)
+            y, col_names = get_data(E, pp.d1_Dep_Col_Name, start_idx)
 
-            x = E[pp.d1_Ind_Col_Name].values[:].astype(float)
-            # y = E[pp.d1_Dep_Col_Name].values[:].astype(float)
-            col_names = [c.strip() for c in pp.d1_Dep_Col_Name.split('|')]
-            # y = E[col_names].values.astype(float)
-            y = np.column_stack([
-                E[cols].astype(float).sum(axis=1) if '+' in name else E[[name]].astype(float).values.ravel()
-                for name in col_names
-                for cols in [name.split('+')]
-            ])
+            if pp.d1_Style:
+                raw_styles = [c.strip() for c in pp.d1_Style.split('|')]
+            else:
+                raw_styles = []
+            styles = (raw_styles + [None] * len(col_names))[:len(col_names)]
 
-            styles = [c.strip() for c in pp.d1_Style.split('|')]
-            key_labels = [c.strip() for c in pp.d1_Key.split('|')]
+            if pp.d1_Key:
+                raw_keys = [c.strip() for c in pp.d1_Key.split('|')]
+            else:
+                raw_keys = []
+            # Pad or truncate to match col_names
+            key_labels = (raw_keys + [None] * len(col_names))[:len(col_names)]
 
             for i, label in enumerate(col_names):
                 if i==0:
@@ -164,8 +213,9 @@ def dataplot(config_filename,**kwargs):
                 # set header to the row where column names are stored (Python is 0 based)
                 E = pd.read_csv(expdir+pp.d1_Filename, header=int(pp.d1_Col_Name_Row-1), sep=',', engine='python', comment='#', quotechar='"')
                 E.columns = E.columns.str.strip()  # <-- Strip whitespace from headers
-                x = E[pp.d1_Ind_Col_Name].values[:].astype(float)
-                y = E[pp.d1_Dep_Col_Name].values[:].astype(float)
+                start_idx = int(pp.d1_Data_Row - pp.d1_Col_Name_Row - 1)
+                x, col_names = get_data(E, pp.d1_Ind_Col_Name, start_idx)
+                y, col_names = get_data(E, pp.d1_Dep_Col_Name, start_idx)
 
                 # plot the exp data
                 f = plot_to_fig(x_data=x, y_data=y,
@@ -182,15 +232,10 @@ def dataplot(config_filename,**kwargs):
         # get the model results
         M = pd.read_csv(cmpdir+pp.d2_Filename, header=int(pp.d2_Col_Name_Row-1), sep=',', engine='python', comment='#', quotechar='"')
         M.columns = M.columns.str.strip()  # <-- Strip whitespace from headers
-        x = M[pp.d2_Ind_Col_Name].values[:].astype(float)
-        # y = M[pp.d2_Dep_Col_Name].values[:].astype(float)
-        col_names = [c.strip() for c in pp.d2_Dep_Col_Name.split('|')]
-        # y = M[col_names].values.astype(float)
-        y = np.column_stack([
-            M[cols].astype(float).sum(axis=1) if '+' in name else M[[name]].astype(float).values.ravel()
-            for name in col_names
-            for cols in [name.split('+')]
-        ])
+        start_idx = int(pp.d2_Data_Row - pp.d2_Col_Name_Row - 1)
+
+        x, col_names = get_data(M, pp.d2_Ind_Col_Name, start_idx)
+        y, col_names = get_data(M, pp.d2_Dep_Col_Name, start_idx)
 
         version_string = revision
         if (pp.VerStr_Filename):
@@ -199,8 +244,17 @@ def dataplot(config_filename,**kwargs):
             version_string = Lines[0].strip()
             file1.close()
 
-        styles = [c.strip() for c in pp.d2_Style.split('|')]
-        key_labels = [c.strip() for c in pp.d2_Key.split('|')]
+        if pp.d2_Style:
+            raw_styles = [c.strip() for c in pp.d2_Style.split('|')]
+        else:
+            raw_styles = []
+        styles = (raw_styles + [None] * len(col_names))[:len(col_names)]
+
+        if pp.d2_Key:
+            raw_keys = [c.strip() for c in pp.d2_Key.split('|')]
+        else:
+            raw_keys = []
+        key_labels = (raw_keys + [None] * len(col_names))[:len(col_names)]
 
         for i, label in enumerate(col_names):
             f = plot_to_fig(x_data=x, y_data=y[:, i],
@@ -234,6 +288,35 @@ def dataplot(config_filename,**kwargs):
         #     print("Error in row {whichrow}, skipping case...".format(whichrow=irow+1))
         #     continue
 
+
+def get_data(E, spec, start_idx):
+    """
+    Extract data columns from DataFrame E according to spec string.
+
+    spec: "colA" | "colA|colB" | "colA+colB"
+    start_idx: integer row index where numeric data starts
+
+    Returns
+    -------
+    tuple (y, col_names)
+        y : 2D numpy array (nrows x ncols)
+        col_names : list of str, resolved column names (with '+' grouped)
+    """
+    names = [s.strip() for s in spec.split('|')]
+    out = []
+    col_names = []
+    for name in names:
+        if '+' in name:
+            cols = [n.strip() for n in name.split('+')]
+            series = E[cols].iloc[start_idx:].astype(float).sum(axis=1).values
+            out.append(series)
+            col_names.append('+'.join(cols))  # keep group name
+        else:
+            series = E[[name]].iloc[start_idx:].astype(float).values.ravel()
+            out.append(series)
+            col_names.append(name)
+    y = np.column_stack(out) if len(out) > 1 else np.array(out[0]).reshape(-1, 1)
+    return y, col_names
 
 
 def plot_to_fig(x_data,y_data,**kwargs):
@@ -296,7 +379,11 @@ def plot_to_fig(x_data,y_data,**kwargs):
     # if figure handle is passed, append to current figure, else generate a new figure
     if kwargs.get('figure_handle'):
         fig = kwargs.get('figure_handle')
-        ax = fig.axes[0]
+        if fig.axes:
+            ax = fig.axes[0]
+        else:
+            # Ensure we have at least one axes
+            ax = fig.add_subplot(111)
         plt.figure(fig.number)
         using_existing_figure = True
     else:
@@ -309,44 +396,35 @@ def plot_to_fig(x_data,y_data,**kwargs):
         bottom = plot_origin[1] / figure_size[1]
         ax = fig.add_axes([left, bottom, ax_w, ax_h])
 
-
-
     # select plot type
-    if kwargs.get('plot_type'):
-        plot_type=kwargs.get('plot_type')
-    else:
-        plot_type='linear'
+    plot_type=kwargs.get('plot_type','linear')
 
     # convert matlab styles to matplotlib
-    if kwargs.get('marker_style'):
-        style = kwargs.get('marker_style')
-        color,marker,linestyle = parse_matlab_style(style)
+    style = kwargs.get('marker_style','ko')
+    color,marker,linestyle = parse_matlab_style(style)
 
     if kwargs.get('line_style'):
         style = kwargs.get('line_style')
         color,marker,linestyle = parse_matlab_style(style)
 
+    fill_color = kwargs.get('fill_color',color)
+
     # other plot parameters
-    if kwargs.get('data_markevery'):
-        markevery = kwargs.get('data_markevery')
-    else:
-        markevery = default_markevery
+    markevery = kwargs.get('data_markevery',default_markevery)
+    legend_location = kwargs.get('legend_location',default_legend_location)
+    legend_framealpha = kwargs.get('legend_framealpha',default_legend_framealpha)
 
-    if kwargs.get('legend_location'):
-        legend_location = kwargs.get('legend_location')
-    else:
-        legend_location = default_legend_location
+    data_label = kwargs.get('data_label',None)
 
-    if kwargs.get('legend_framealpha'):
-        legend_framealpha = kwargs.get('legend_framealpha')
-    else:
-        legend_framealpha = default_legend_framealpha
+    # trap any data_labels set to blank (old matlab convention)
+    if isinstance(data_label, str) and data_label.lower() == 'blank':
+        data_label = None
 
     # generate the main x,y plot
     if plot_type=='linear':
         ax.plot(x_data,y_data,
             markevery=markevery,
-            label=kwargs.get('data_label'),
+            label=data_label,
             markerfacecolor=markerfacecolor,
             markeredgecolor=color,
             markeredgewidth=markeredgewidth,
@@ -359,7 +437,7 @@ def plot_to_fig(x_data,y_data,**kwargs):
     if plot_type=='loglog':
         ax.loglog(x_data,y_data,
             markevery=markevery,
-            label=kwargs.get('data_label'),
+            label=data_label,
             markerfacecolor=markerfacecolor,
             markeredgecolor=color,
             markeredgewidth=markeredgewidth,
@@ -372,7 +450,7 @@ def plot_to_fig(x_data,y_data,**kwargs):
     if plot_type=='semilogx':
         ax.semilogx(x_data,y_data,
             markevery=markevery,
-            label=kwargs.get('data_label'),
+            label=data_label,
             markerfacecolor=markerfacecolor,
             markeredgecolor=color,
             markeredgewidth=markeredgewidth,
@@ -385,7 +463,7 @@ def plot_to_fig(x_data,y_data,**kwargs):
     if plot_type=='semilogy':
         ax.semilogy(x_data,y_data,
             markevery=markevery,
-            label=kwargs.get('data_label'),
+            label=data_label,
             markerfacecolor=markerfacecolor,
             markeredgecolor=color,
             markeredgewidth=markeredgewidth,
@@ -395,53 +473,60 @@ def plot_to_fig(x_data,y_data,**kwargs):
             linewidth=linewidth,
             color=color)
 
-    # if error range is passed, add it to the plot
-    if kwargs.get('y_error_absolute') and not kwargs.get('y_error_relative'):
-        if kwargs.get('y_error_absolute')>0.:
-            ax.fill_between(x_data,y_data-kwargs.get('y_error_absolute'),y_data+kwargs.get('y_error_absolute'),
+    # if y fill range is passed, add it to the plot
+    if kwargs.get('y_fill_absolute') and not kwargs.get('y_fill_relative'):
+        if kwargs.get('y_fill_absolute')>0.:
+            ax.fill_between(x_data,y_data-kwargs.get('y_fill_absolute'),y_data+kwargs.get('y_fill_absolute'),
                 alpha=0.1,color=kwargs.get('marker_edge_color'))
 
-    if kwargs.get('y_error_relative') and not kwargs.get('y_error_absolute'):
-        if kwargs.get('y_error_relative')>0.:
-            ax.fill_between(x_data,y_data*(1.-kwargs.get('y_error_relative')),y_data*(1.+kwargs.get('y_error_relative')),
+    if kwargs.get('y_fill_relative') and not kwargs.get('y_fill_absolute'):
+        if kwargs.get('y_fill_relative')>0.:
+            ax.fill_between(x_data,y_data*(1.-kwargs.get('y_fill_relative')),y_data*(1.+kwargs.get('y_fill_relative')),
                 alpha=0.1,color=kwargs.get('marker_edge_color'))
 
-    if kwargs.get('y_error_relative') and kwargs.get('y_error_absolute'):
-        if kwargs.get('y_error_relative')>0.:
-            ax.fill_between(x_data,y_data*(1.-kwargs.get('y_error_relative'))-kwargs.get('y_error_absolute'),y_data*(1.+kwargs.get('y_error_relative'))+kwargs.get('y_error_absolute'),
+    if kwargs.get('y_fill_relative') and kwargs.get('y_fill_absolute'):
+        if kwargs.get('y_fill_relative')>0.:
+            ax.fill_between(x_data,y_data*(1.-kwargs.get('y_fill_relative'))-kwargs.get('y_fill_absolute'),y_data*(1.+kwargs.get('y_fill_relative'))+kwargs.get('y_fill_absolute'),
                 alpha=0.1,color=kwargs.get('marker_edge_color'))
 
-    try:
-        y_error = kwargs.get('y_error_vector')
-        if len(y_data)==len(y_error):
-            ax.fill_between(x_data,y_data-y_error,y_data+y_error,
-                alpha=0.1,color=kwargs.get('marker_edge_color'))
-    except:
-        y_error = 0.
+    if kwargs.get('y_fill'):
+        y_fill = kwargs.get('y_fill')
+        if len(y_data)==len(y_fill):
+            ax.fill_between(x_data,y_data-y_fill,y_data+y_fill,
+                alpha=0.1,color=fill_color)
+        else:
+            raise ValueError(f"y_fill must the same length as y_data")
 
-    if kwargs.get('ticklabel_fontsize'):
-        ticklabel_fontsize=kwargs.get('ticklabel_fontsize')
-    else:
-        ticklabel_fontsize=default_ticklabel_fontsize
+    xerr = kwargs.get('x_error', None)
+    yerr = kwargs.get('y_error', None)
+    if xerr is not None or yerr is not None:
+        ax.errorbar(
+            x_data, y_data,
+            xerr=xerr,                               # can be scalar, array, or [lower, upper]
+            yerr=yerr,                               # same flexibility
+            fmt=style,                               # marker style for data points
+            markeredgewidth=markeredgewidth,         # marker edge width
+            markerfacecolor=markerfacecolor,         # make marker hollow
+            markeredgecolor=color,                   # outline color
+            linestyle=linestyle,
+            linewidth=linewidth,
+            capsize=kwargs.get('error_capsize', 5),  # size of caps at ends
+            capthick=linewidth,
+        )
 
+
+    ticklabel_fontsize=kwargs.get('ticklabel_fontsize',default_ticklabel_fontsize)
     plt.setp( ax.xaxis.get_majorticklabels(), rotation=0, fontsize=ticklabel_fontsize )
     plt.setp( ax.yaxis.get_majorticklabels(), rotation=0, fontsize=ticklabel_fontsize )
 
-    if kwargs.get('axeslabel_fontsize'):
-        axeslabel_fontsize=kwargs.get('axeslabel_fontsize')
-    else:
-        axeslabel_fontsize=default_axeslabel_fontsize
-
+    axeslabel_fontsize=kwargs.get('axeslabel_fontsize',default_axeslabel_fontsize)
     if not using_existing_figure:
         plt.xlabel(kwargs.get('x_label'), fontsize=axeslabel_fontsize)
         plt.ylabel(kwargs.get('y_label'), fontsize=axeslabel_fontsize)
 
-    if kwargs.get('legend_fontsize'):
-        legend_fontsize=kwargs.get('legend_fontsize')
-    else:
-        legend_fontsize=default_legend_fontsize
+    legend_fontsize=kwargs.get('legend_fontsize',default_legend_fontsize)
 
-    if kwargs.get('data_label'):
+    if data_label:
         if kwargs.get('legend_location')=='outside':
             plt.legend(fontsize=legend_fontsize,bbox_to_anchor=(1,1),loc='upper left',framealpha=legend_framealpha)
         else:
@@ -462,13 +547,18 @@ def plot_to_fig(x_data,y_data,**kwargs):
         horizontalalignment='left')
 
     # set axes and tick properties
-    ymin=kwargs.get('y_min')
-    ymax=kwargs.get('y_max')
     xmin=kwargs.get('x_min')
     xmax=kwargs.get('x_max')
+    ymin=kwargs.get('y_min')
+    ymax=kwargs.get('y_max')
 
     ax.set_xlim(xmin,xmax)
     ax.set_ylim(ymin,ymax)
+
+    if plot_type in ('loglog', 'semilogy'):
+        apply_global_exponent(ax, axis='y', fontsize=axeslabel_fontsize)
+    if plot_type in ('loglog', 'semilogx'):
+        apply_global_exponent(ax, axis='x', fontsize=axeslabel_fontsize)
 
     if kwargs.get('revision_label'):
         add_version_string(ax, kwargs.get('revision_label'), plot_type)
@@ -476,6 +566,70 @@ def plot_to_fig(x_data,y_data,**kwargs):
     # fig.tight_layout() # this should not be needed if figure_size and plot_size are both specified
 
     return fig
+
+
+def apply_global_exponent(ax, axis='y', fontsize=10, minor_subs=None):
+    import numpy as np
+    from matplotlib.ticker import FuncFormatter, LogLocator
+
+    if axis == 'y':
+        ticks = ax.get_yticks()
+        axis_obj = ax.yaxis
+        lims = ax.get_ylim()
+    else:
+        ticks = ax.get_xticks()
+        axis_obj = ax.xaxis
+        lims = ax.get_xlim()
+
+    # Keep only positive finite ticks (for log axes)
+    ticks = np.array([t for t in ticks if t > 0 and np.isfinite(t)])
+    if ticks.size == 0:
+        return
+
+    # Choose representative exponent
+    exp = int(np.floor(np.log10(np.median(ticks))))
+    scale = 10.0**exp
+
+    # Major formatter: fixed-point decimals
+    def fmt(val, pos):
+        v = val / scale
+        return "{:g}".format(v)
+
+    axis_obj.set_major_formatter(FuncFormatter(fmt))
+    axis_obj.get_offset_text().set_visible(False)
+
+    # Decide what to do with minor tick labels
+    span_decades = np.log10(lims[1]) - np.log10(max(lims[0], 1e-300))
+
+    # Default subs = 2, 4, 6, 8
+    if minor_subs is None:
+        minor_subs = [2, 4, 6, 8]
+
+    if span_decades <= 1.1:  # only ~1 decade
+        axis_obj.set_minor_locator(LogLocator(base=10.0, subs=minor_subs, numticks=10))
+        axis_obj.set_minor_formatter(FuncFormatter(lambda val, pos: "{:g}".format(val/scale)))
+    else:
+        ax.tick_params(axis=axis, which='minor', labelleft=False, labelbottom=False)
+
+    # Force tick labels NOT to go through TeX
+    if axis == 'y':
+        for label in ax.get_yticklabels() + ax.get_yticklabels(minor=True):
+            label.set_usetex(False)
+    else:
+        for label in ax.get_xticklabels() + ax.get_xticklabels(minor=True):
+            label.set_usetex(False)
+
+    # Place the ×10^exp text at the axis end
+    if exp != 0:
+        if axis == 'y':
+            ax.text(0, 1.01, rf"$\times 10^{{{exp}}}$",
+                    transform=ax.transAxes,
+                    ha='left', va='bottom', fontsize=fontsize)
+        else:
+            ax.text(1.0, -0.1, rf"$\times 10^{{{exp}}}$",
+                    transform=ax.transAxes,
+                    ha='right', va='top', fontsize=fontsize)
+
 
 
 def parse_matlab_style(style):
@@ -768,6 +922,24 @@ def define_plot_parameters(C,irow):
         Group_Style          = C.values[irow,C.columns.get_loc('Group_Style')]
         Fill_Color           = C.values[irow,C.columns.get_loc('Fill_Color')]
         Font_Interpreter     = C.values[irow,C.columns.get_loc('Font_Interpreter')]
+
+    # --- sanitize string attributes ---
+    specials = {
+        "&": r"\&",
+        "%": r"\%",
+        "_": r"\_",
+        "#": r"\#",
+        "$": r"\$",
+        "{": r"\{",
+        "}": r"\}",
+        "^": r"\^{}",
+        "~": r"\~{}",
+    }
+
+    for attr, val in plot_parameters.__dict__.items():
+        if not attr.startswith("__") and isinstance(val, str):
+            for k, v in specials.items():
+                setattr(plot_parameters, attr, val.replace(k, v))
 
     return plot_parameters
 

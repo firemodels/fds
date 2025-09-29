@@ -1803,12 +1803,10 @@ ENDIF
 
 ! If this is a RESTART case but an old .smv file does not exist, shutdown with an ERROR.
 
-IF( MY_RANK==0) THEN
-   INQUIRE(FILE=FN_SMV,EXIST=EX)
-   IF (.NOT.EX .AND. APPEND) THEN
-      WRITE(MESSAGE,'(A,A,A)') "ERROR: The file, ",TRIM(FN_SMV),", does not exist. Set RESTART=.FALSE."
-      CALL SHUTDOWN(MESSAGE) ; RETURN
-   ENDIF
+INQUIRE(FILE=FN_SMV,EXIST=EX)
+IF (.NOT.EX .AND. APPEND) THEN
+   WRITE(MESSAGE,'(A,A,A)') "ERROR(1050): The file, ",TRIM(FN_SMV),", does not exist. Set RESTART=.FALSE."
+   CALL SHUTDOWN(MESSAGE) ; RETURN
 ENDIF
 
 ! If this is a RESTART case, there is no need to open the .smv file except for Process 0.
