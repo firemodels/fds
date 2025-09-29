@@ -74,7 +74,6 @@ scatplot(saved_data, drange, ...
 % Miscellaneous other scripts for special cases
 
 backward_facing_step
-beyler_hood
 sandia_helium_plume
 sandia_methane_fire
 spray_attenuation
