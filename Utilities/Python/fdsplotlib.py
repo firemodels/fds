@@ -159,8 +159,9 @@ def dataplot(config_filename,**kwargs):
 
             # read data from exp file
             # set header to the row where column names are stored (Python is 0 based)
-            E = pd.read_csv(expdir+pp.d1_Filename, header=int(pp.d1_Col_Name_Row-1), sep=',', engine='python', comment='#', quotechar='"')
+            E = pd.read_csv(expdir+pp.d1_Filename, header=int(pp.d1_Col_Name_Row-1), sep=',', engine='python', quotechar='"')
             E.columns = E.columns.str.strip()  # <-- Strip whitespace from headers
+
             start_idx = int(pp.d1_Data_Row - pp.d1_Col_Name_Row - 1)
             x, col_names = get_data(E, pp.d1_Ind_Col_Name, start_idx)
             y, col_names = get_data(E, pp.d1_Dep_Col_Name, start_idx)
@@ -211,7 +212,7 @@ def dataplot(config_filename,**kwargs):
 
                 # read data from exp file
                 # set header to the row where column names are stored (Python is 0 based)
-                E = pd.read_csv(expdir+pp.d1_Filename, header=int(pp.d1_Col_Name_Row-1), sep=',', engine='python', comment='#', quotechar='"')
+                E = pd.read_csv(expdir+pp.d1_Filename, header=int(pp.d1_Col_Name_Row-1), sep=',', engine='python', quotechar='"')
                 E.columns = E.columns.str.strip()  # <-- Strip whitespace from headers
                 start_idx = int(pp.d1_Data_Row - pp.d1_Col_Name_Row - 1)
                 x, col_names = get_data(E, pp.d1_Ind_Col_Name, start_idx)
@@ -230,7 +231,7 @@ def dataplot(config_filename,**kwargs):
                     )
 
         # get the model results
-        M = pd.read_csv(cmpdir+pp.d2_Filename, header=int(pp.d2_Col_Name_Row-1), sep=',', engine='python', comment='#', quotechar='"')
+        M = pd.read_csv(cmpdir+pp.d2_Filename, header=int(pp.d2_Col_Name_Row-1), sep=',', engine='python', quotechar='"')
         M.columns = M.columns.str.strip()  # <-- Strip whitespace from headers
         start_idx = int(pp.d2_Data_Row - pp.d2_Col_Name_Row - 1)
 
@@ -918,24 +919,17 @@ def define_plot_parameters(C, irow):
 
     inst = plot_parameters()
 
-    latex_fields = {
-        "Plot_Title", "Ind_Title", "Dep_Title",
-        "Quantity", "Metric", "Group_Key_Label"
-    }
-
     specials = {
         "&": r"\&", "%": r"\%", "_": r"\_", "#": r"\#",
         "$": r"\$", "{": r"\{", "}": r"\}", "^": r"\^{}", "~": r"\~{}",
     }
 
-    def sanitize_latex(text: str) -> str:
-        """Escape specials outside of $...$ math regions."""
-        # Split into math and non-math parts
+    def sanitize(text: str) -> str:
         parts = re.split(r"(\$.*?\$)", text)
         sanitized = []
         for part in parts:
             if part.startswith("$") and part.endswith("$"):
-                sanitized.append(part)  # leave math untouched
+                sanitized.append(part)  # math untouched
             else:
                 s = part
                 for k, v in specials.items():
@@ -943,12 +937,22 @@ def define_plot_parameters(C, irow):
                 sanitized.append(s)
         return "".join(sanitized)
 
-    for attr, val in inst.__dict__.items():
-        if attr in latex_fields and isinstance(val, str):
-            setattr(inst, attr, sanitize_latex(val.strip()))
+    def safe_strip(val):
+        if isinstance(val, str):
+            return val.strip()
+        return ""  # or return val if you prefer to keep None
+
+    # Explicit sanitization of only the human-facing fields
+    inst.Plot_Title      = sanitize(safe_strip(inst.Plot_Title))
+    inst.Ind_Title       = sanitize(safe_strip(inst.Ind_Title))
+    inst.Dep_Title       = sanitize(safe_strip(inst.Dep_Title))
+    inst.Quantity        = sanitize(safe_strip(inst.Quantity))
+    inst.Metric          = sanitize(safe_strip(inst.Metric))
+    inst.Group_Key_Label = sanitize(safe_strip(inst.Group_Key_Label))
+    inst.d1_Key          = sanitize(safe_strip(inst.d1_Key))
+    inst.d2_Key          = sanitize(safe_strip(inst.d2_Key))
 
     return inst
-
 
 
 def matlab_legend_to_matplotlib(position):
