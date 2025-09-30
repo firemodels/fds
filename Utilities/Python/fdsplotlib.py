@@ -152,7 +152,7 @@ def dataplot(config_filename,**kwargs):
         if pp.Plot_Filename!=Plot_Filename_Last:
 
             if verbose:
-                print(f'Generating plot {irow} ' + pltdir + pp.Plot_Filename + '...')
+                print(f'Generating plot {irow+2} ' + pltdir + pp.Plot_Filename + '...')
 
             if close_figs:
                 plt.close('all')
