@@ -22,28 +22,40 @@
       COLOR               = 'BLUE'
       BACKING             = 'INSULATED'
       THICKNESS(1:2)      = 0.15,0.6
-      ROUGHNESS           = 0.05 /
+      ROUGHNESS           = 0.0 /
 
 &SURF ID          = 'TUNNEL_WALL'
       MATL_ID     = 'CONCRETE'
       COLOR       = 'GRAY'
       BACKING     = 'INSULATED'
       THICKNESS   = 0.6
-      ROUGHNESS   = 0.05
+      ROUGHNESS   = 0.0
       DEFAULT     = T /
 
 &SURF ID          = 'ROAD'
       MATL_ID     = 'CONCRETE'
       COLOR       = 'BLACK'
       BACKING     = 'INSULATED'
-      ROUGHNESS   = 0.05
+      ROUGHNESS   = 0.0
       THICKNESS   = 0.6 /
 
 &SURF ID          = 'CAR'
       COLOR       = 'ORCHID'
-      ROUGHNESS   = 0.05 /
+      ROUGHNESS   = 0.0 /
 
 &SURF ID          = 'COVER'
       COLOR       = 'BRICK'
-      ROUGHNESS   = 0.05 /
+      ROUGHNESS   = 0.0 /
+
+&MATL ID            = 'STEEL'
+      SPECIFIC_HEAT = 0.46
+      DENSITY       = 7850.0
+      EMISSIVITY    = 0.6
+      CONDUCTIVITY  = 46.0 /
+
+&SURF ID          = 'LOOPX'
+      MATL_ID     = 'STEEL'
+      COLOR       = 'SILVER'
+      BACKING     = 'INSULATED'
+      THICKNESS   = 0.002 /
 
