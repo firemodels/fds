@@ -351,7 +351,7 @@ def plot_to_fig(x_data,y_data,**kwargs):
     default_legend_framealpha = 1
     default_title_fontsize = plot_style["Title_Font_Size"]
     default_markevery = 1
-    markerfacecolor = 'none'
+    markerfacecolor = None
     markeredgecolor = 'black'
     markeredgewidth = 1
     marker = None
@@ -361,20 +361,9 @@ def plot_to_fig(x_data,y_data,**kwargs):
     color = 'black'
     ###############################
 
-    if kwargs.get('figure_size'):
-        figure_size=kwargs.get('figure_size')
-    else:
-        figure_size=default_figure_size
-
-    if kwargs.get('plot_size'):
-        plot_size=kwargs.get('plot_size')
-    else:
-        plot_size=default_plot_size
-
-    if kwargs.get('plot_origin'):
-        plot_origin=kwargs.get('plot_origin')
-    else:
-        plot_origin=default_plot_origin
+    figure_size=kwargs.get('figure_size',default_figure_size)
+    plot_size=kwargs.get('plot_size',default_plot_size)
+    plot_origin=kwargs.get('plot_origin',default_plot_origin)
 
     # if figure handle is passed, append to current figure, else generate a new figure
     if kwargs.get('figure_handle'):
@@ -407,7 +396,10 @@ def plot_to_fig(x_data,y_data,**kwargs):
         style = kwargs.get('line_style')
         color,marker,linestyle = parse_matlab_style(style)
 
-    fill_color = kwargs.get('fill_color',color)
+    marker_fill_color = kwargs.get('marker_fill_color',None)
+    markerfacecolor = marker_fill_color
+
+    error_fill_color = kwargs.get('error_fill_color',None)
 
     # other plot parameters
     markevery = kwargs.get('data_markevery',default_markevery)
@@ -474,26 +466,27 @@ def plot_to_fig(x_data,y_data,**kwargs):
             color=color)
 
     # if y fill range is passed, add it to the plot
-    if kwargs.get('y_fill_absolute') and not kwargs.get('y_fill_relative'):
-        if kwargs.get('y_fill_absolute')>0.:
+    if kwargs.get('y_error_fill_absolute') and not kwargs.get('y_error_fill_relative'):
+        if kwargs.get('y_error_fill_absolute')>0.:
             ax.fill_between(x_data,y_data-kwargs.get('y_fill_absolute'),y_data+kwargs.get('y_fill_absolute'),
-                alpha=0.1,color=kwargs.get('marker_edge_color'))
+                alpha=0.1,color=error_fill_color)
 
-    if kwargs.get('y_fill_relative') and not kwargs.get('y_fill_absolute'):
-        if kwargs.get('y_fill_relative')>0.:
-            ax.fill_between(x_data,y_data*(1.-kwargs.get('y_fill_relative')),y_data*(1.+kwargs.get('y_fill_relative')),
-                alpha=0.1,color=kwargs.get('marker_edge_color'))
+    if kwargs.get('y_error_fill_relative') and not kwargs.get('y_error_fill_absolute'):
+        if kwargs.get('y_error_fill_relative')>0.:
+            ax.fill_between(x_data,y_data*(1.-kwargs.get('y_error_fill_relative')),y_data*(1.+kwargs.get('y_error_fill_relative')),
+                alpha=0.1,color=error_fill_color)
 
-    if kwargs.get('y_fill_relative') and kwargs.get('y_fill_absolute'):
-        if kwargs.get('y_fill_relative')>0.:
-            ax.fill_between(x_data,y_data*(1.-kwargs.get('y_fill_relative'))-kwargs.get('y_fill_absolute'),y_data*(1.+kwargs.get('y_fill_relative'))+kwargs.get('y_fill_absolute'),
-                alpha=0.1,color=kwargs.get('marker_edge_color'))
+    if kwargs.get('y_error_fill_relative') and kwargs.get('y_error_fill_absolute'):
+        if kwargs.get('y_error_fill_relative')>0.:
+            ax.fill_between(x_data,y_data*(1.-kwargs.get('y_error_fill_relative'))-kwargs.get('y_error_fill_absolute'),
+                                   y_data*(1.+kwargs.get('y_error_fill_relative'))+kwargs.get('y_error_fill_absolute'),
+                alpha=0.1,color=error_fill_color)
 
-    if kwargs.get('y_fill'):
-        y_fill = kwargs.get('y_fill')
-        if len(y_data)==len(y_fill):
-            ax.fill_between(x_data,y_data-y_fill,y_data+y_fill,
-                alpha=0.1,color=fill_color)
+    if kwargs.get('y_error_fill'):
+        y_error_fill = kwargs.get('y_error_fill')
+        if len(y_data)==len(y_error_fill):
+            ax.fill_between(x_data,y_data-y_error_fill,y_data+y_error_fill,
+                alpha=0.1,color=error_fill_color)
         else:
             raise ValueError(f"y_fill must the same length as y_data")
 

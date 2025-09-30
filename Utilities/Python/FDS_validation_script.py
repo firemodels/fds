@@ -43,6 +43,7 @@ importlib.reload(fdsplotlib) # use for development (while making changes to fdsp
 # Special cases
 
 print("Beyler_Hood...");           subprocess.run(["python","./scripts/Beyler_Hood.py"])
+print("BRE_LEMTA_Sprays...");      subprocess.run(["python","./scripts/BRE_LEMTA_Sprays.py"])
 print("FM_FPRF_Datacenter...");    subprocess.run(["python","./scripts/FM_FPRF_Datacenter.py"])
 print("McCaffrey_Plume...");       subprocess.run(["python","./scripts/McCaffrey_Plume.py"])
 print("Sandia_Pools...");          subprocess.run(["python","./scripts/Sandia_Pools.py"])
