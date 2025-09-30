@@ -852,10 +852,10 @@ def get_plot_style(style="fds"):
 
 def define_plot_parameters(C, irow):
     import numpy as np
+    import re
 
     class plot_parameters:
         def __init__(self):
-
             self.switch_id            = C.values[irow,C.columns.get_loc('switch_id')]
             self.Dataname             = C.values[irow,C.columns.get_loc('Dataname')]
             self.VerStr_Filename      = C.values[irow,C.columns.get_loc('VerStr_Filename')]
@@ -916,29 +916,39 @@ def define_plot_parameters(C, irow):
         def __repr__(self):
             return str(self.__dict__)
 
-    # LaTeX specials
-    specials = {
-        "&": r"\&", "%": r"\%", "_": r"\_", "#": r"\#",
-        "$": r"\$", "{": r"\{", "}": r"\}", "^": r"\^{}", "~": r"\~{}",
-    }
-
     inst = plot_parameters()
 
     latex_fields = {
         "Plot_Title", "Ind_Title", "Dep_Title",
         "Quantity", "Metric", "Group_Key_Label"
-        # add any other fields that appear in labels
     }
+
+    specials = {
+        "&": r"\&", "%": r"\%", "_": r"\_", "#": r"\#",
+        "$": r"\$", "{": r"\{", "}": r"\}", "^": r"\^{}", "~": r"\~{}",
+    }
+
+    def sanitize_latex(text: str) -> str:
+        """Escape specials outside of $...$ math regions."""
+        # Split into math and non-math parts
+        parts = re.split(r"(\$.*?\$)", text)
+        sanitized = []
+        for part in parts:
+            if part.startswith("$") and part.endswith("$"):
+                sanitized.append(part)  # leave math untouched
+            else:
+                s = part
+                for k, v in specials.items():
+                    s = s.replace(k, v)
+                sanitized.append(s)
+        return "".join(sanitized)
 
     for attr, val in inst.__dict__.items():
         if attr in latex_fields and isinstance(val, str):
-            s = val.strip()
-            for k, v in specials.items():
-                s = s.replace(k, v)
-            setattr(inst, attr, s)
+            setattr(inst, attr, sanitize_latex(val.strip()))
 
-    # print("DEBUG sanitized:", inst.Plot_Title)
     return inst
+
 
 
 def matlab_legend_to_matplotlib(position):
