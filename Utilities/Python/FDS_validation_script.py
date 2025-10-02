@@ -1,31 +1,30 @@
 #!$FIREMODELS/fds/.github/fds_python_env/bin/python
 
-import subprocess
 import fdsplotlib
 import importlib
-import os, runpy
+import runpy
 importlib.reload(fdsplotlib) # use for development (while making changes to fdsplotlib.py)
 
-# # Scripts to run prior to dataplot
+# Scripts to run prior to dataplot
 
-# print("catchpole_spread_rates...");       subprocess.run(["python","./scripts/catchpole_spread_rates.py"])
-# print("NIST_deposition_gauge...");        subprocess.run(["python","./scripts/NIST_deposition_gauge.py"])
-# print("flame_height...");                 subprocess.run(["python","./scripts/flame_height.py"])
-# print("NIST_RSE...");                     subprocess.run(["python","./scripts/NIST_RSE.py"])
-# print("sippola_aerosol_deposition...");   subprocess.run(["python","./scripts/sippola_aerosol_deposition.py"])
-# print("layer_height...");                 subprocess.run(["python","./scripts/layer_height.py"])
-# print("NIST_NRC_Corner_Effects...");      subprocess.run(["python","./scripts/NIST_NRC_Corner_Effects.py"])
-# # print("fm_data_center...");               subprocess.run(["python","./scripts/fm_data_center.py"])
-# print("LNG_Dispersion...");               subprocess.run(["python","./scripts/LNG_Dispersion.py"])
-# print("LNG_wind_profiles...");            subprocess.run(["python","./scripts/LNG_wind_profiles.py"])
-# print("FM_Vertical_Wall_Flames...");      subprocess.run(["python","./scripts/FM_Vertical_Wall_Flames.py"])
-# print("umd_line_burner_process...");      subprocess.run(["python","./scripts/umd_line_burner_process.py"])
-# # print("Askervein_Hill...");               subprocess.run(["python","./scripts/Askervein_Hill.py"])
-# print("UWO_Wind_Tunnel...");              subprocess.run(["python","./scripts/UWO_Wind_Tunnel.py"])
-# print("FM_Burner...");                    subprocess.run(["python","./scripts/FM_Burner.py"])
-# print("Crown_Fires...");                  subprocess.run(["python","./scripts/Crown_Fires.py"])
-# print("Ranz_Marshall...");                subprocess.run(["python","./scripts/Ranz_Marshall.py"])
-# print("Phoenix_LNG_Fires...");            subprocess.run(["python","./scripts/Phoenix_LNG_Fires.py"])
+print("catchpole_spread_rates...");       runpy.run_path("./scripts/catchpole_spread_rates.py", run_name="__main__")
+print("NIST_deposition_gauge...");        runpy.run_path("./scripts/NIST_deposition_gauge.py", run_name="__main__")
+print("flame_height...");                 runpy.run_path("./scripts/flame_height.py", run_name="__main__")
+print("NIST_RSE...");                     runpy.run_path("./scripts/NIST_RSE.py", run_name="__main__")
+print("sippola_aerosol_deposition...");   runpy.run_path("./scripts/sippola_aerosol_deposition.py", run_name="__main__")
+print("layer_height...");                 runpy.run_path("./scripts/layer_height.py", run_name="__main__")
+print("NIST_NRC_Corner_Effects...");      runpy.run_path("./scripts/NIST_NRC_Corner_Effects.py", run_name="__main__")
+# print("fm_data_center...");               runpy.run_path("./scripts/fm_data_center.py", run_name="__main__")
+print("LNG_Dispersion...");               runpy.run_path("./scripts/LNG_Dispersion.py", run_name="__main__")
+print("LNG_wind_profiles...");            runpy.run_path("./scripts/LNG_wind_profiles.py", run_name="__main__")
+print("FM_Vertical_Wall_Flames...");      runpy.run_path("./scripts/FM_Vertical_Wall_Flames.py", run_name="__main__")
+print("umd_line_burner_process...");      runpy.run_path("./scripts/umd_line_burner_process.py", run_name="__main__")
+# print("Askervein_Hill...");               runpy.run_path("./scripts/Askervein_Hill.py", run_name="__main__")
+print("UWO_Wind_Tunnel...");              runpy.run_path("./scripts/UWO_Wind_Tunnel.py", run_name="__main__")
+print("FM_Burner...");                    runpy.run_path("./scripts/FM_Burner.py", run_name="__main__")
+print("Crown_Fires...");                  runpy.run_path("./scripts/Crown_Fires.py", run_name="__main__")
+print("Ranz_Marshall...");                runpy.run_path("./scripts/Ranz_Marshall.py", run_name="__main__")
+print("Phoenix_LNG_Fires...");            runpy.run_path("./scripts/Phoenix_LNG_Fires.py", run_name="__main__")
 
 # Dataplot and scatplot options
 
