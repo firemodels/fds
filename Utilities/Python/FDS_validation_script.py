@@ -3,12 +3,8 @@
 import subprocess
 import fdsplotlib
 import importlib
-import os
+import os, runpy
 importlib.reload(fdsplotlib) # use for development (while making changes to fdsplotlib.py)
-
-# Set up python path variables
-my_env = os.environ.copy()
-my_env['PYTHONPATH'] = os.path.dirname(__file__)
 
 # # Scripts to run prior to dataplot
 
@@ -46,15 +42,15 @@ my_env['PYTHONPATH'] = os.path.dirname(__file__)
 #                     plot_range=["all"]) # see notes below on plot_range
 
 # Special cases
-print("Beyler_Hood...");                 subprocess.run(["python","./scripts/Beyler_Hood.py"], env=my_env)
-print("BRE_LEMTA_Sprays...");            subprocess.run(["python","./scripts/BRE_LEMTA_Sprays.py"], env=my_env)
-print("FM_FPRF_Datacenter...");          subprocess.run(["python","./scripts/FM_FPRF_Datacenter.py"], env=my_env)
-print("Heskestad_Flame_Height_2...");    subprocess.run(["python","./scripts/Heskestad_Flame_Height_2.py"], env=my_env)
-print("McCaffrey_Plume...");             subprocess.run(["python","./scripts/McCaffrey_Plume.py"], env=my_env)
-print("Sandia_Pools...");                subprocess.run(["python","./scripts/Sandia_Pools.py"], env=my_env)
-print("TUS_Facade...");                  subprocess.run(["python","./scripts/TUS_Facade_contours.py"], env=my_env)
-print("USFS_Deep_Fuel_Beds...");         subprocess.run(["python","./scripts/USFS_Deep_Fuel_Beds.py"], env=my_env)
-print("Wu_Bakar_Tunnels...");            subprocess.run(["python","./scripts/Wu_Bakar_Tunnels.py"], env=my_env)
+print("Beyler_Hood...");                  runpy.run_path("./scripts/Beyler_Hood.py", run_name="__main__")
+print("BRE_LEMTA_Sprays...");             runpy.run_path("./scripts/BRE_LEMTA_Sprays.py", run_name="__main__")
+print("FM_FPRF_Datacenter...");           runpy.run_path("./scripts/FM_FPRF_Datacenter.py", run_name="__main__")
+print("Heskestad_Flame_Height_2...");     runpy.run_path("./scripts/Heskestad_Flame_Height_2.py", run_name="__main__")
+print("McCaffrey_Plume...");              runpy.run_path("./scripts/McCaffrey_Plume.py", run_name="__main__")
+print("Sandia_Pools...");                 runpy.run_path("./scripts/Sandia_Pools.py", run_name="__main__")
+print("TUS_Facade...");                   runpy.run_path("./scripts/TUS_Facade_contours.py", run_name="__main__")
+print("USFS_Deep_Fuel_Beds...");          runpy.run_path("./scripts/USFS_Deep_Fuel_Beds.py", run_name="__main__")
+print("Wu_Bakar_Tunnels...");             runpy.run_path("./scripts/Wu_Bakar_Tunnels.py", run_name="__main__")
 
 print("Python validation scripts completed successfully!")
 
