@@ -3,7 +3,12 @@
 import subprocess
 import fdsplotlib
 import importlib
+import os
 importlib.reload(fdsplotlib) # use for development (while making changes to fdsplotlib.py)
+
+# Set up python path variables
+my_env = os.environ.copy()
+my_env['PYTHONPATH'] = os.path.dirname(__file__)
 
 # # Scripts to run prior to dataplot
 
@@ -41,16 +46,15 @@ importlib.reload(fdsplotlib) # use for development (while making changes to fdsp
 #                     plot_range=["all"]) # see notes below on plot_range
 
 # Special cases
-
-print("Beyler_Hood...");                 subprocess.run(["python","./scripts/Beyler_Hood.py"], shell=True)
-print("BRE_LEMTA_Sprays...");            subprocess.run(["python","./scripts/BRE_LEMTA_Sprays.py"], shell=True)
-print("FM_FPRF_Datacenter...");          subprocess.run(["python","./scripts/FM_FPRF_Datacenter.py"], shell=True)
-print("Heskestad_Flame_Height_2...");    subprocess.run(["python","./scripts/Heskestad_Flame_Height_2.py"], shell=True)
-print("McCaffrey_Plume...");             subprocess.run(["python","./scripts/McCaffrey_Plume.py"], shell=True)
-print("Sandia_Pools...");                subprocess.run(["python","./scripts/Sandia_Pools.py"], shell=True)
-print("TUS_Facade...");                  subprocess.run(["python","./scripts/TUS_Facade_contours.py"], shell=True)
-print("USFS_Deep_Fuel_Beds...");         subprocess.run(["python","./scripts/USFS_Deep_Fuel_Beds.py"], shell=True)
-print("Wu_Bakar_Tunnels...");            subprocess.run(["python","./scripts/Wu_Bakar_Tunnels.py"], shell=True)
+print("Beyler_Hood...");                 subprocess.run(["python","./scripts/Beyler_Hood.py"], env=my_env)
+print("BRE_LEMTA_Sprays...");            subprocess.run(["python","./scripts/BRE_LEMTA_Sprays.py"], env=my_env)
+print("FM_FPRF_Datacenter...");          subprocess.run(["python","./scripts/FM_FPRF_Datacenter.py"], env=my_env)
+print("Heskestad_Flame_Height_2...");    subprocess.run(["python","./scripts/Heskestad_Flame_Height_2.py"], env=my_env)
+print("McCaffrey_Plume...");             subprocess.run(["python","./scripts/McCaffrey_Plume.py"], env=my_env)
+print("Sandia_Pools...");                subprocess.run(["python","./scripts/Sandia_Pools.py"], env=my_env)
+print("TUS_Facade...");                  subprocess.run(["python","./scripts/TUS_Facade_contours.py"], env=my_env)
+print("USFS_Deep_Fuel_Beds...");         subprocess.run(["python","./scripts/USFS_Deep_Fuel_Beds.py"], env=my_env)
+print("Wu_Bakar_Tunnels...");            subprocess.run(["python","./scripts/Wu_Bakar_Tunnels.py"], env=my_env)
 
 print("Python validation scripts completed successfully!")
 
