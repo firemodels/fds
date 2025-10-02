@@ -52,8 +52,8 @@ fig = fdsplotlib.plot_to_fig([0,100],[0,100],
                              plot_size=(plot_style['Scat_Plot_Width'],plot_style['Scat_Plot_Height']),
                              plot_origin=(plot_style['Scat_Plot_X'],plot_style['Scat_Plot_Y']),
                              revision_label=version_string,
-                             x_label='Measured Fuel Consumption (\%)',
-                             y_label='Predicted Fuel Consumption (\%)'
+                             x_label='Measured Fuel Consumption (%)',
+                             y_label='Predicted Fuel Consumption (%)'
                              )
 
 fdsplotlib.plot_to_fig(BURN_PCT_EXP, BURN_PCT_FDS, figure_handle=fig, marker_style='ko')
