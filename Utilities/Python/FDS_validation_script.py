@@ -42,15 +42,15 @@ importlib.reload(fdsplotlib) # use for development (while making changes to fdsp
 
 # Special cases
 
-print("Beyler_Hood...");                 subprocess.run(["python","./scripts/Beyler_Hood.py"])
-print("BRE_LEMTA_Sprays...");            subprocess.run(["python","./scripts/BRE_LEMTA_Sprays.py"])
-print("FM_FPRF_Datacenter...");          subprocess.run(["python","./scripts/FM_FPRF_Datacenter.py"])
-print("Heskestad_Flame_Height_2...");    subprocess.run(["python","./scripts/Heskestad_Flame_Height_2.py"])
-print("McCaffrey_Plume...");             subprocess.run(["python","./scripts/McCaffrey_Plume.py"])
-print("Sandia_Pools...");                subprocess.run(["python","./scripts/Sandia_Pools.py"])
-print("TUS_Facade...");                  subprocess.run(["python","./scripts/TUS_Facade_contours.py"])
-print("USFS_Deep_Fuel_Beds...");         subprocess.run(["python","./scripts/USFS_Deep_Fuel_Beds.py"])
-print("Wu_Bakar_Tunnels...");            subprocess.run(["python","./scripts/Wu_Bakar_Tunnels.py"])
+print("Beyler_Hood...");                 subprocess.run(["python","./scripts/Beyler_Hood.py"], shell=True)
+print("BRE_LEMTA_Sprays...");            subprocess.run(["python","./scripts/BRE_LEMTA_Sprays.py"], shell=True)
+print("FM_FPRF_Datacenter...");          subprocess.run(["python","./scripts/FM_FPRF_Datacenter.py"], shell=True)
+print("Heskestad_Flame_Height_2...");    subprocess.run(["python","./scripts/Heskestad_Flame_Height_2.py"], shell=True)
+print("McCaffrey_Plume...");             subprocess.run(["python","./scripts/McCaffrey_Plume.py"], shell=True)
+print("Sandia_Pools...");                subprocess.run(["python","./scripts/Sandia_Pools.py"], shell=True)
+print("TUS_Facade...");                  subprocess.run(["python","./scripts/TUS_Facade_contours.py"], shell=True)
+print("USFS_Deep_Fuel_Beds...");         subprocess.run(["python","./scripts/USFS_Deep_Fuel_Beds.py"], shell=True)
+print("Wu_Bakar_Tunnels...");            subprocess.run(["python","./scripts/Wu_Bakar_Tunnels.py"], shell=True)
 
 print("Python validation scripts completed successfully!")
 
