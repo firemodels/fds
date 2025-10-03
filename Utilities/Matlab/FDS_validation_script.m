@@ -79,7 +79,6 @@ sandia_methane_fire
 NIST_NRC_Parallel_Panels
 Memorial_Tunnel
 Memorial_Tunnel_2
-FHWA_Tunnel
 Theobald_Hose_Stream
 
 display('validation scripts completed successfully!')
