@@ -22,12 +22,12 @@ for i_fuel=1:2;
       HRR = importdata([outdir,fuel_name{i_fuel},'_dx_',res_name{fds_resolution},'_hrr.csv'],',',2);
 
       Time_FDS = DEV.data(:,find(strcmp(DEV.colheaders,'Time')));
-      XO2_FDS  = DEV.data(:,find(strcmp(DEV.colheaders,'"XO2"')));
+      XO2_FDS  = DEV.data(:,find(strcmp(DEV.colheaders,'XO2')));
       Qdot_FDS = HRR.data(:,find(strcmp(HRR.colheaders,'HRR')));
       Qrad_FDS = HRR.data(:,find(strcmp(HRR.colheaders,'Q_RADI')));
-      q_R_FDS  = 0.5*( DEV.data(:,find(strcmp(DEV.colheaders,'"qrad1"'))) + DEV.data(:,find(strcmp(DEV.colheaders,'"qrad2"'))) );
+      q_R_FDS  = 0.5*( DEV.data(:,find(strcmp(DEV.colheaders,'qrad1'))) + DEV.data(:,find(strcmp(DEV.colheaders,'qrad2'))) );
       ntp      = length(Time_FDS);
-      Lf_FDS   = DEV.data(:,find(strcmp(DEV.colheaders,'"L_F"')));
+      Lf_FDS   = DEV.data(:,find(strcmp(DEV.colheaders,'L_F')));
 
       Lf_tmp = Lf_FDS;
       for n=1:ntp

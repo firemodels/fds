@@ -32,7 +32,7 @@ def check_hrr():
     fig = fdsplotlib.plot_to_fig(Qs, Q,
                                  x_min=0.05, x_max=1e4,
                                  y_min=1e2, y_max=1e8,
-                                 x_label='{\it Q*}',
+                                 x_label='$Q*$',
                                  y_label='Heat Release Rate (kW)',
                                  legend_location='lower right',
                                  plot_type='loglog',

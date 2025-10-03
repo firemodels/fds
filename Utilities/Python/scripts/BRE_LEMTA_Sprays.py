@@ -41,7 +41,7 @@ FDS_Attenuation = np.zeros((4, 8))
 figd = fdsplotlib.plot_to_fig(x_data=[0,0], y_data=[0,0],
                               x_min=0, x_max=9, y_min=0, y_max=800,
                               revision_label=version_string,
-                              x_label='Pressure (bar)', y_label='Mean Diameter ($\mu$m)',
+                              x_label='Pressure (bar)', y_label=r'Mean Diameter ($\mu$m)',
                               legend_location='upper left')
 
 figw = fdsplotlib.plot_to_fig(x_data=[0,0], y_data=[0,0],
@@ -56,8 +56,8 @@ figa = fdsplotlib.plot_to_fig(x_data=[0,40], y_data=[0,40], marker_style='k-',
                               plot_size=(plot_style['Scat_Plot_Width'],plot_style['Scat_Plot_Height']),
                               plot_origin=(plot_style['Scat_Plot_X'],plot_style['Scat_Plot_Y']),
                               revision_label=version_string,
-                              x_label='Measured Attenuation (\%)',
-                              y_label='Predicted Attenuation (\%)')
+                              x_label='Measured Attenuation (%)',
+                              y_label='Predicted Attenuation (%)')
 
 # Plot diameter and velocity for Nozzles A, B, and D
 

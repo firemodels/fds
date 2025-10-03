@@ -38,10 +38,10 @@ for i_fuel in range(2):
 
         # Locate columns (match MATLAB’s strcmp behavior exactly)
         Time_idx = dev_headers.index('Time')
-        XO2_idx = dev_headers.index('"XO2"')
-        qrad1_idx = dev_headers.index('"qrad1"')
-        qrad2_idx = dev_headers.index('"qrad2"')
-        Lf_idx = dev_headers.index('"L_F"')
+        XO2_idx = dev_headers.index('XO2')
+        qrad1_idx = dev_headers.index('qrad1')
+        qrad2_idx = dev_headers.index('qrad2')
+        Lf_idx = dev_headers.index('L_F')
 
         HRR_idx = hrr_headers.index('HRR')
         Qrad_idx = hrr_headers.index('Q_RADI')
