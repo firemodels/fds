@@ -20,7 +20,7 @@ for i_fuel=1:4;
       HRR = importdata([outdir,'FM_15cm_Burner_',fuel_name{i_fuel},'_',res_name{fds_resolution},'_hrr.csv'],',',2);
 
       Time_FDS = DEV.data(:,find(strcmp(DEV.colheaders,'Time')));
-      XO2_FDS  = DEV.data(:,find(strcmp(DEV.colheaders,'"XO2"')));
+      XO2_FDS  = DEV.data(:,find(strcmp(DEV.colheaders,'XO2')));
       Qdot_FDS = HRR.data(:,find(strcmp(HRR.colheaders,'HRR')));
       Qrad_FDS = HRR.data(:,find(strcmp(HRR.colheaders,'Q_RADI')));
       ntp      = length(Time_FDS);

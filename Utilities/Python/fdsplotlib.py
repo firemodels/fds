@@ -152,15 +152,16 @@ def dataplot(config_filename,**kwargs):
         if pp.Plot_Filename!=Plot_Filename_Last:
 
             if verbose:
-                print('Generating plot ' + pltdir + pp.Plot_Filename + '...')
+                print(f'Generating plot {irow+2} ' + pltdir + pp.Plot_Filename + '...')
 
             if close_figs:
                 plt.close('all')
 
             # read data from exp file
             # set header to the row where column names are stored (Python is 0 based)
-            E = pd.read_csv(expdir+pp.d1_Filename, header=int(pp.d1_Col_Name_Row-1), sep=',', engine='python', comment='#', quotechar='"')
+            E = pd.read_csv(expdir+pp.d1_Filename, header=int(pp.d1_Col_Name_Row-1), sep=',', engine='python', quotechar='"')
             E.columns = E.columns.str.strip()  # <-- Strip whitespace from headers
+
             start_idx = int(pp.d1_Data_Row - pp.d1_Col_Name_Row - 1)
             x, col_names = get_data(E, pp.d1_Ind_Col_Name, start_idx)
             y, col_names = get_data(E, pp.d1_Dep_Col_Name, start_idx)
@@ -211,7 +212,7 @@ def dataplot(config_filename,**kwargs):
 
                 # read data from exp file
                 # set header to the row where column names are stored (Python is 0 based)
-                E = pd.read_csv(expdir+pp.d1_Filename, header=int(pp.d1_Col_Name_Row-1), sep=',', engine='python', comment='#', quotechar='"')
+                E = pd.read_csv(expdir+pp.d1_Filename, header=int(pp.d1_Col_Name_Row-1), sep=',', engine='python', quotechar='"')
                 E.columns = E.columns.str.strip()  # <-- Strip whitespace from headers
                 start_idx = int(pp.d1_Data_Row - pp.d1_Col_Name_Row - 1)
                 x, col_names = get_data(E, pp.d1_Ind_Col_Name, start_idx)
@@ -230,7 +231,7 @@ def dataplot(config_filename,**kwargs):
                     )
 
         # get the model results
-        M = pd.read_csv(cmpdir+pp.d2_Filename, header=int(pp.d2_Col_Name_Row-1), sep=',', engine='python', comment='#', quotechar='"')
+        M = pd.read_csv(cmpdir+pp.d2_Filename, header=int(pp.d2_Col_Name_Row-1), sep=',', engine='python', quotechar='"')
         M.columns = M.columns.str.strip()  # <-- Strip whitespace from headers
         start_idx = int(pp.d2_Data_Row - pp.d2_Col_Name_Row - 1)
 
@@ -850,91 +851,108 @@ def get_plot_style(style="fds"):
         raise ValueError(f"Unknown style '{style}'. Please choose 'fds' or 'paper'.")
 
 
-def define_plot_parameters(C,irow):
-    """
-    gathers parameters from config file
-    """
+def define_plot_parameters(C, irow):
+    import numpy as np
+    import re
+
     class plot_parameters:
+        def __init__(self):
+            self.switch_id            = C.values[irow,C.columns.get_loc('switch_id')]
+            self.Dataname             = C.values[irow,C.columns.get_loc('Dataname')]
+            self.VerStr_Filename      = C.values[irow,C.columns.get_loc('VerStr_Filename')]
+            self.d1_Filename          = C.values[irow,C.columns.get_loc('d1_Filename')]
+            self.d1_Col_Name_Row      = C.values[irow,C.columns.get_loc('d1_Col_Name_Row')]
+            self.d1_Data_Row          = C.values[irow,C.columns.get_loc('d1_Data_Row')]
+            self.d1_Ind_Col_Name      = C.values[irow,C.columns.get_loc('d1_Ind_Col_Name')]
+            self.d1_Dep_Col_Name      = C.values[irow,C.columns.get_loc('d1_Dep_Col_Name')]
+            self.d1_Key               = C.values[irow,C.columns.get_loc('d1_Key')]
+            self.d1_Style             = C.values[irow,C.columns.get_loc('d1_Style')]
+            self.d1_Start             = C.values[irow,C.columns.get_loc('d1_Start')]
+            self.d1_End               = C.values[irow,C.columns.get_loc('d1_End')]
+            self.d1_Tick              = C.values[irow,C.columns.get_loc('d1_Tick')]
+            self.d1_Comp_Start        = C.values[irow,C.columns.get_loc('d1_Comp_Start')]
+            self.d1_Comp_End          = C.values[irow,C.columns.get_loc('d1_Comp_End')]
+            self.d1_Dep_Comp_Start    = C.values[irow,C.columns.get_loc('d1_Dep_Comp_Start')]
+            self.d1_Dep_Comp_End      = C.values[irow,C.columns.get_loc('d1_Dep_Comp_End')]
+            self.d1_Initial_Value     = C.values[irow,C.columns.get_loc('d1_Initial_Value')]
+            self.d2_Filename          = C.values[irow,C.columns.get_loc('d2_Filename')]
+            self.d2_Col_Name_Row      = C.values[irow,C.columns.get_loc('d2_Col_Name_Row')]
+            self.d2_Data_Row          = C.values[irow,C.columns.get_loc('d2_Data_Row')]
+            self.d2_Ind_Col_Name      = C.values[irow,C.columns.get_loc('d2_Ind_Col_Name')]
+            self.d2_Dep_Col_Name      = C.values[irow,C.columns.get_loc('d2_Dep_Col_Name')]
+            self.d2_Key               = C.values[irow,C.columns.get_loc('d2_Key')]
+            self.d2_Style             = C.values[irow,C.columns.get_loc('d2_Style')]
+            self.d2_Start             = C.values[irow,C.columns.get_loc('d2_Start')]
+            self.d2_End               = C.values[irow,C.columns.get_loc('d2_End')]
+            self.d2_Tick              = C.values[irow,C.columns.get_loc('d2_Tick')]
+            self.d2_Comp_Start        = C.values[irow,C.columns.get_loc('d2_Comp_Start')]
+            self.d2_Comp_End          = C.values[irow,C.columns.get_loc('d2_Comp_End')]
+            self.d2_Dep_Comp_Start    = C.values[irow,C.columns.get_loc('d2_Dep_Comp_Start')]
+            self.d2_Dep_Comp_End      = C.values[irow,C.columns.get_loc('d2_Dep_Comp_End')]
+            self.d2_Initial_Value     = C.values[irow,C.columns.get_loc('d2_Initial_Value')]
+            self.Plot_Title           = C.values[irow,C.columns.get_loc('Plot_Title')]
+            self.Ind_Title            = C.values[irow,C.columns.get_loc('Ind_Title')]
+            self.Dep_Title            = C.values[irow,C.columns.get_loc('Dep_Title')]
+            self.Min_Ind              = C.values[irow,C.columns.get_loc('Min_Ind')]
+            self.Max_Ind              = C.values[irow,C.columns.get_loc('Max_Ind')]
+            self.Scale_Ind            = C.values[irow,C.columns.get_loc('Scale_Ind')]
+            self.Min_Dep              = C.values[irow,C.columns.get_loc('Min_Dep')]
+            self.Max_Dep              = C.values[irow,C.columns.get_loc('Max_Dep')]
+            self.Scale_Dep            = C.values[irow,C.columns.get_loc('Scale_Dep')]
+            self.Flip_Axis            = C.values[irow,C.columns.get_loc('Flip_Axis')]
+            self.Title_Position       = C.values[irow,C.columns.get_loc('Title_Position')]
+            self.Key_Position         = C.values[irow,C.columns.get_loc('Key_Position')]
+            self.Legend_XYWidthHeight = C.values[irow,C.columns.get_loc('Legend_XYWidthHeight')]
+            self.Paper_Width_Factor   = C.values[irow,C.columns.get_loc('Paper_Width_Factor')]
+            self.Plot_Type            = C.values[irow,C.columns.get_loc('Plot_Type')]
+            self.Plot_Filename        = C.values[irow,C.columns.get_loc('Plot_Filename')]
+            self.Quantity             = C.values[irow,C.columns.get_loc('Quantity')]
+            self.Metric               = C.values[irow,C.columns.get_loc('Metric')]
+            self.Error_Tolerance      = C.values[irow,C.columns.get_loc('Error_Tolerance')]
+            self.Group_Key_Label      = C.values[irow,C.columns.get_loc('Group_Key_Label')]
+            self.Group_Style          = C.values[irow,C.columns.get_loc('Group_Style')]
+            self.Fill_Color           = C.values[irow,C.columns.get_loc('Fill_Color')]
+            self.Font_Interpreter     = C.values[irow,C.columns.get_loc('Font_Interpreter')]
 
         def __repr__(self):
-            return str(self)
+            return str(self.__dict__)
 
-        switch_id            = C.values[irow,C.columns.get_loc('switch_id')]
-        Dataname             = C.values[irow,C.columns.get_loc('Dataname')]
-        VerStr_Filename      = C.values[irow,C.columns.get_loc('VerStr_Filename')]
-        d1_Filename          = C.values[irow,C.columns.get_loc('d1_Filename')]
-        d1_Col_Name_Row      = C.values[irow,C.columns.get_loc('d1_Col_Name_Row')]
-        d1_Data_Row          = C.values[irow,C.columns.get_loc('d1_Data_Row')]
-        d1_Ind_Col_Name      = C.values[irow,C.columns.get_loc('d1_Ind_Col_Name')]
-        d1_Dep_Col_Name      = C.values[irow,C.columns.get_loc('d1_Dep_Col_Name')]
-        d1_Key               = C.values[irow,C.columns.get_loc('d1_Key')]
-        d1_Style             = C.values[irow,C.columns.get_loc('d1_Style')]
-        d1_Start             = C.values[irow,C.columns.get_loc('d1_Start')]
-        d1_End               = C.values[irow,C.columns.get_loc('d1_End')]
-        d1_Tick              = C.values[irow,C.columns.get_loc('d1_Tick')]
-        d1_Comp_Start        = C.values[irow,C.columns.get_loc('d1_Comp_Start')]
-        d1_Comp_End          = C.values[irow,C.columns.get_loc('d1_Comp_End')]
-        d1_Dep_Comp_Start    = C.values[irow,C.columns.get_loc('d1_Dep_Comp_Start')]
-        d1_Dep_Comp_End      = C.values[irow,C.columns.get_loc('d1_Dep_Comp_End')]
-        d1_Initial_Value     = C.values[irow,C.columns.get_loc('d1_Initial_Value')]
-        d2_Filename          = C.values[irow,C.columns.get_loc('d2_Filename')]
-        d2_Col_Name_Row      = C.values[irow,C.columns.get_loc('d2_Col_Name_Row')]
-        d2_Data_Row          = C.values[irow,C.columns.get_loc('d2_Data_Row')]
-        d2_Ind_Col_Name      = C.values[irow,C.columns.get_loc('d2_Ind_Col_Name')]
-        d2_Dep_Col_Name      = C.values[irow,C.columns.get_loc('d2_Dep_Col_Name')]
-        d2_Key               = C.values[irow,C.columns.get_loc('d2_Key')]
-        d2_Style             = C.values[irow,C.columns.get_loc('d2_Style')]
-        d2_Start             = C.values[irow,C.columns.get_loc('d2_Start')]
-        d2_End               = C.values[irow,C.columns.get_loc('d2_End')]
-        d2_Tick              = C.values[irow,C.columns.get_loc('d2_Tick')]
-        d2_Comp_Start        = C.values[irow,C.columns.get_loc('d2_Comp_Start')]
-        d2_Comp_End          = C.values[irow,C.columns.get_loc('d2_Comp_End')]
-        d2_Dep_Comp_Start    = C.values[irow,C.columns.get_loc('d2_Dep_Comp_Start')]
-        d2_Dep_Comp_End      = C.values[irow,C.columns.get_loc('d2_Dep_Comp_End')]
-        d2_Initial_Value     = C.values[irow,C.columns.get_loc('d2_Initial_Value')]
-        Plot_Title           = C.values[irow,C.columns.get_loc('Plot_Title')]
-        Ind_Title            = C.values[irow,C.columns.get_loc('Ind_Title')]
-        Dep_Title            = C.values[irow,C.columns.get_loc('Dep_Title')]
-        Min_Ind              = C.values[irow,C.columns.get_loc('Min_Ind')]
-        Max_Ind              = C.values[irow,C.columns.get_loc('Max_Ind')]
-        Scale_Ind            = C.values[irow,C.columns.get_loc('Scale_Ind')]
-        Min_Dep              = C.values[irow,C.columns.get_loc('Min_Dep')]
-        Max_Dep              = C.values[irow,C.columns.get_loc('Max_Dep')]
-        Scale_Dep            = C.values[irow,C.columns.get_loc('Scale_Dep')]
-        Flip_Axis            = C.values[irow,C.columns.get_loc('Flip_Axis')]
-        Title_Position       = C.values[irow,C.columns.get_loc('Title_Position')]
-        Key_Position         = C.values[irow,C.columns.get_loc('Key_Position')]
-        Legend_XYWidthHeight = C.values[irow,C.columns.get_loc('Legend_XYWidthHeight')]
-        Paper_Width_Factor   = C.values[irow,C.columns.get_loc('Paper_Width_Factor')]
-        Plot_Type            = C.values[irow,C.columns.get_loc('Plot_Type')]
-        Plot_Filename        = C.values[irow,C.columns.get_loc('Plot_Filename')]
-        Quantity             = C.values[irow,C.columns.get_loc('Quantity')]
-        Metric               = C.values[irow,C.columns.get_loc('Metric')]
-        Error_Tolerance      = C.values[irow,C.columns.get_loc('Error_Tolerance')]
-        Group_Key_Label      = C.values[irow,C.columns.get_loc('Group_Key_Label')]
-        Group_Style          = C.values[irow,C.columns.get_loc('Group_Style')]
-        Fill_Color           = C.values[irow,C.columns.get_loc('Fill_Color')]
-        Font_Interpreter     = C.values[irow,C.columns.get_loc('Font_Interpreter')]
+    inst = plot_parameters()
 
-    # --- sanitize string attributes ---
     specials = {
-        "&": r"\&",
-        "%": r"\%",
-        "_": r"\_",
-        "#": r"\#",
-        "$": r"\$",
-        "{": r"\{",
-        "}": r"\}",
-        "^": r"\^{}",
-        "~": r"\~{}",
+        "&": r"\&", "%": r"\%", "_": r"\_", "#": r"\#",
+        "$": r"\$", "{": r"\{", "}": r"\}", "^": r"\^{}", "~": r"\~{}",
     }
 
-    for attr, val in plot_parameters.__dict__.items():
-        if not attr.startswith("__") and isinstance(val, str):
-            for k, v in specials.items():
-                setattr(plot_parameters, attr, val.replace(k, v))
+    def sanitize(text: str) -> str:
+        parts = re.split(r"(\$.*?\$)", text)
+        sanitized = []
+        for part in parts:
+            if part.startswith("$") and part.endswith("$"):
+                sanitized.append(part)  # math untouched
+            else:
+                s = part
+                for k, v in specials.items():
+                    s = s.replace(k, v)
+                sanitized.append(s)
+        return "".join(sanitized)
 
-    return plot_parameters
+    def safe_strip(val):
+        if isinstance(val, str):
+            return val.strip()
+        return ""  # or return val if you prefer to keep None
+
+    # Explicit sanitization of only the human-facing fields
+    inst.Plot_Title      = sanitize(safe_strip(inst.Plot_Title))
+    inst.Ind_Title       = sanitize(safe_strip(inst.Ind_Title))
+    inst.Dep_Title       = sanitize(safe_strip(inst.Dep_Title))
+    inst.Quantity        = sanitize(safe_strip(inst.Quantity))
+    inst.Metric          = sanitize(safe_strip(inst.Metric))
+    inst.Group_Key_Label = sanitize(safe_strip(inst.Group_Key_Label))
+    inst.d1_Key          = sanitize(safe_strip(inst.d1_Key))
+    inst.d2_Key          = sanitize(safe_strip(inst.d2_Key))
+
+    return inst
 
 
 def matlab_legend_to_matplotlib(position):
