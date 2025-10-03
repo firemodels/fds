@@ -43,6 +43,7 @@ print("Phoenix_LNG_Fires...");            runpy.run_path("./scripts/Phoenix_LNG_
 # Special cases
 print("Beyler_Hood...");                  runpy.run_path("./scripts/Beyler_Hood.py", run_name="__main__")
 print("BRE_LEMTA_Sprays...");             runpy.run_path("./scripts/BRE_LEMTA_Sprays.py", run_name="__main__")
+print("FHWA_Tunnel...");                  runpy.run_path("./scripts/FHWA_Tunnel.py", run_name="__main__")
 print("FM_FPRF_Datacenter...");           runpy.run_path("./scripts/FM_FPRF_Datacenter.py", run_name="__main__")
 print("Heskestad_Flame_Height_2...");     runpy.run_path("./scripts/Heskestad_Flame_Height_2.py", run_name="__main__")
 print("McCaffrey_Plume...");              runpy.run_path("./scripts/McCaffrey_Plume.py", run_name="__main__")
