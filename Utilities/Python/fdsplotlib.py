@@ -348,9 +348,10 @@ def plot_to_fig(x_data,y_data,**kwargs):
     default_ticklabel_fontsize = plot_style["Label_Font_Size"]
     default_axeslabel_fontsize = plot_style["Label_Font_Size"]
     default_legend_fontsize = plot_style["Key_Font_Size"]
+    default_title_fontsize = plot_style["Title_Font_Size"]
+    default_version_fontsize = 10
     default_legend_location = 'best'
     default_legend_framealpha = 1
-    default_title_fontsize = plot_style["Title_Font_Size"]
     default_markevery = 1
     markerfacecolor = None
     markeredgecolor = 'black'
@@ -365,6 +366,7 @@ def plot_to_fig(x_data,y_data,**kwargs):
     figure_size=kwargs.get('figure_size',default_figure_size)
     plot_size=kwargs.get('plot_size',default_plot_size)
     plot_origin=kwargs.get('plot_origin',default_plot_origin)
+    version_fontsize=kwargs.get('version_fontsize',default_version_fontsize)
 
     # if figure handle is passed, append to current figure, else generate a new figure
     if kwargs.get('figure_handle'):
@@ -555,7 +557,7 @@ def plot_to_fig(x_data,y_data,**kwargs):
         apply_global_exponent(ax, axis='x', fontsize=axeslabel_fontsize)
 
     if kwargs.get('revision_label'):
-        add_version_string(ax, kwargs.get('revision_label'), plot_type)
+        add_version_string(ax=ax, version_str=kwargs.get('revision_label'), plot_type=plot_type, font_size=version_fontsize)
 
     # fig.tight_layout() # this should not be needed if figure_size and plot_size are both specified
 
