@@ -157,25 +157,6 @@ def dataplot(config_filename,**kwargs):
 
         pp = define_plot_parameters(C, pos)  # use position, not label
 
-        #---TO DELETE---
-        # drange.append(irow + 2)  # +2 to match MATLAB’s 1-based file line numbers
-
-        # # --- Collect basic metadata for scatplot ---
-        # Save_Dataname.append(pp.Dataname)
-        # Save_Plot_Filename.append(pp.Plot_Filename)
-        # Save_Dep_Title.append(pp.Dep_Title)
-        # Save_Error_Tolerance.append(pp.Error_Tolerance)
-        # Save_Metric_Type.append(pp.Metric)
-        # Save_Group_Key_Label.append(pp.Group_Key_Label)
-        # Save_Measured_Metric.append(np.nan)    # placeholder for now
-        # Save_Predicted_Metric.append(np.nan)
-        # Save_Quantity.append(pp.Quantity)
-        # Save_Group_Style.append(pp.Group_Style)
-        # Save_Fill_Color.append(pp.Fill_Color)
-        # Save_Measured_Quantity.append(None)
-        # Save_Predicted_Quantity.append(None)
-        #---TO DELETE---
-
         # debug dump
         # print(vars(pp))
 
