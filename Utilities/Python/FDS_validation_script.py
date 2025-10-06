@@ -49,6 +49,7 @@ print("Heskestad_Flame_Height_2...");     runpy.run_path("./scripts/Heskestad_Fl
 print("McCaffrey_Plume...");              runpy.run_path("./scripts/McCaffrey_Plume.py", run_name="__main__")
 print("Memorial_Tunnel...");              runpy.run_path("./scripts/Memorial_Tunnel.py", run_name="__main__")
 print("Memorial_Tunnel_2...");            runpy.run_path("./scripts/Memorial_Tunnel_2.py", run_name="__main__")
+print("NIST_NRC_Parallel_Panels...");     runpy.run_path("./scripts/NIST_NRC_Parallel_Panels.py", run_name="__main__")
 print("Sandia_Pools...");                 runpy.run_path("./scripts/Sandia_Pools.py", run_name="__main__")
 print("TUS_Facade...");                   runpy.run_path("./scripts/TUS_Facade_contours.py", run_name="__main__")
 print("USFS_Deep_Fuel_Beds...");          runpy.run_path("./scripts/USFS_Deep_Fuel_Beds.py", run_name="__main__")
