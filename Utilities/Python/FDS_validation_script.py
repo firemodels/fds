@@ -43,9 +43,12 @@ print("Phoenix_LNG_Fires...");            runpy.run_path("./scripts/Phoenix_LNG_
 # Special cases
 print("Beyler_Hood...");                  runpy.run_path("./scripts/Beyler_Hood.py", run_name="__main__")
 print("BRE_LEMTA_Sprays...");             runpy.run_path("./scripts/BRE_LEMTA_Sprays.py", run_name="__main__")
+print("FHWA_Tunnel...");                  runpy.run_path("./scripts/FHWA_Tunnel.py", run_name="__main__")
 print("FM_FPRF_Datacenter...");           runpy.run_path("./scripts/FM_FPRF_Datacenter.py", run_name="__main__")
 print("Heskestad_Flame_Height_2...");     runpy.run_path("./scripts/Heskestad_Flame_Height_2.py", run_name="__main__")
 print("McCaffrey_Plume...");              runpy.run_path("./scripts/McCaffrey_Plume.py", run_name="__main__")
+print("Memorial_Tunnel...");              runpy.run_path("./scripts/Memorial_Tunnel.py", run_name="__main__")
+print("Memorial_Tunnel_2...");            runpy.run_path("./scripts/Memorial_Tunnel_2.py", run_name="__main__")
 print("Sandia_Pools...");                 runpy.run_path("./scripts/Sandia_Pools.py", run_name="__main__")
 print("TUS_Facade...");                   runpy.run_path("./scripts/TUS_Facade_contours.py", run_name="__main__")
 print("USFS_Deep_Fuel_Beds...");          runpy.run_path("./scripts/USFS_Deep_Fuel_Beds.py", run_name="__main__")
