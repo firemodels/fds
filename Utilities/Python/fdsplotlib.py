@@ -104,6 +104,22 @@ def dataplot(config_filename,**kwargs):
     plot_range_in = kwargs.get('plot_range', None)
     header_rows = kwargs.get('header_rows', 1)
 
+    # --- Initialize scaffolding for scatplot compatibility ---
+    drange = []
+    Save_Quantity = []
+    Save_Group_Style = []
+    Save_Fill_Color = []
+    Save_Group_Key_Label = []
+    Save_Measured_Metric = []
+    Save_Predicted_Metric = []
+    Save_Dataname = []
+    Save_Plot_Filename = []
+    Save_Dep_Title = []
+    Save_Error_Tolerance = []
+    Save_Metric_Type = []
+    Save_Measured_Quantity = []
+    Save_Predicted_Quantity = []
+
     # Rebuild the default NA strings *excluding* 'N/A'
     default_na = {
         '', '#N/A', '#N/A N/A', '#NA', '-1.#IND', '-1.#QNAN',
@@ -146,8 +162,57 @@ def dataplot(config_filename,**kwargs):
 
         # print(pp.__dict__) # helpful for debug
 
-        if pp.switch_id=='s':
-           continue
+        # ----------------------------------------------------------------------
+        # Handle MATLAB dataplot switch_id behavior (d, f, o, g, s)
+        # ----------------------------------------------------------------------
+        switch_id = str(pp.switch_id).strip().lower()
+
+        # Skip 's' outright
+        if switch_id == 's':
+            continue
+
+        # If ANY 'o' lines exist in the filtered config C, process only those
+        otest_active = any( str(C.iloc[j]['switch_id']).strip().lower() == 'o' for j in range(len(C)) )
+
+        if otest_active and switch_id != 'o':
+            continue
+
+        # 'g' lines: generate plots but EXCLUDE from scatplot stats & drange
+        gtest = (switch_id == 'g')
+
+        # 'd' default, 'f' follow-on (your filename reuse already mimics “hold on”)
+        dtest = (switch_id == 'd')
+        ftest = (switch_id == 'f')
+
+        # If it’s none of the recognized ones, skip safely
+        if not (dtest or ftest or gtest or switch_id == 'o'):
+            if verbose:
+                print(f"[dataplot] Skipping unrecognized switch_id '{pp.switch_id}' on line {irow+2}")
+            continue
+
+        # Track drange like MATLAB (1-based CSV lines starting at row 2)
+        if not gtest:
+            drange.append(irow + 2)
+
+        # Append metadata only for rows that should appear in scatplot
+        if not gtest:
+            Save_Dataname.append(pp.Dataname)
+            Save_Plot_Filename.append(pp.Plot_Filename)
+            Save_Dep_Title.append(pp.Dep_Title)
+            Save_Error_Tolerance.append(pp.Error_Tolerance)
+            Save_Metric_Type.append(pp.Metric)
+            Save_Group_Key_Label.append(pp.Group_Key_Label)
+            Save_Quantity.append(pp.Quantity)
+            Save_Group_Style.append(pp.Group_Style)
+            Save_Fill_Color.append(pp.Fill_Color)
+
+            # Placeholders (we will overwrite for this row below)
+            Save_Measured_Metric.append(np.nan)
+            Save_Predicted_Metric.append(np.nan)
+            Save_Measured_Quantity.append(None)
+            Save_Predicted_Quantity.append(None)
+
+
 
         if pp.Plot_Filename!=Plot_Filename_Last:
 
@@ -230,6 +295,15 @@ def dataplot(config_filename,**kwargs):
                     legend_location=matlab_legend_to_matplotlib(pp.Key_Position)
                     )
 
+        # --- Save measured (experimental) metric using the numeric arrays from get_data ---
+        try:
+            if not gtest:
+                Save_Measured_Metric[-1] = compute_metric(y, pp.Metric, x, pp.d1_Initial_Value)
+                Save_Measured_Quantity[-1] = col_names
+        except Exception as e:
+            print(f"[dataplot] Warning: measured metric failed for {pp.Dataname}: {e}")
+
+
         # get the model results
         M = pd.read_csv(cmpdir+pp.d2_Filename, header=int(pp.d2_Col_Name_Row-1), sep=',', engine='python', quotechar='"')
         M.columns = M.columns.str.strip()  # <-- Strip whitespace from headers
@@ -271,6 +345,17 @@ def dataplot(config_filename,**kwargs):
                 plot_title=pp.Plot_Title
                 )
 
+
+        # --- Save predicted (model) metric using the numeric arrays from get_data ---
+        try:
+            if not gtest:
+                Save_Predicted_Metric[-1] = compute_metric(y, pp.Metric, x, pp.d2_Initial_Value)
+                Save_Predicted_Quantity[-1] = col_names
+        except Exception as e:
+            print(f"[dataplot] Warning: predicted metric failed for {pp.Dataname}: {e}")
+
+
+
         plt.figure(f.number) # make figure current
         # plt.show()
 
@@ -288,6 +373,51 @@ def dataplot(config_filename,**kwargs):
         # except:
         #     print("Error in row {whichrow}, skipping case...".format(whichrow=irow+1))
         #     continue
+
+    # --- MATLAB-compatible output scaffolding for scatplot interface ---
+    try:
+        saved_data = [
+            Save_Quantity,
+            Save_Group_Style,
+            Save_Fill_Color,
+            Save_Group_Key_Label,
+            Save_Measured_Metric,
+            Save_Predicted_Metric,
+            Save_Dataname,
+            Save_Plot_Filename,
+            Save_Dep_Title,
+            Save_Error_Tolerance,
+            Save_Metric_Type,
+            Save_Measured_Quantity,
+            Save_Predicted_Quantity,
+        ]
+    except Exception as e:
+        print(f"[dataplot] Error assembling saved_data: {e}")
+        saved_data = []
+
+    print("[dataplot] returning saved_data and drange")
+    return saved_data, drange
+
+
+def compute_metric(data, metric_type, x=None, initial_value=0.0):
+    import numpy as np
+    try:
+        if metric_type == 'max':
+            return np.nanmax(data) - initial_value
+        elif metric_type == 'min':
+            return initial_value - np.nanmin(data)
+        elif metric_type == 'maxabs':
+            return np.nanmax(np.abs(data - initial_value))
+        elif metric_type == 'mean':
+            return abs(np.nanmean(data) - initial_value)
+        elif metric_type == 'area' and x is not None:
+            return np.trapz(data, x) - initial_value
+        elif metric_type == 'all':
+            return data - initial_value
+        else:
+            return np.nanmean(data) - initial_value  # default
+    except Exception:
+        return np.nan
 
 
 def get_data(E, spec, start_idx):
@@ -988,3 +1118,414 @@ def matlab_legend_to_matplotlib(position):
 
     return mapping.get(position.strip().lower(), 'best')
 
+
+def define_qrow_variables(Q, j):
+    """
+    Define scatterplot parameters from the Scatterplot_Inputs.csv row j.
+
+    Mirrors the MATLAB 'define_qrow_variables.m' behavior and returns
+    a simple Python object with all scatterplot configuration fields.
+
+    Parameters
+    ----------
+    Q : pandas.DataFrame
+        The scatterplot input file loaded by pandas.read_csv().
+    j : int
+        Row index (0-based).
+
+    Returns
+    -------
+    q : object
+        Object with attributes corresponding to scatterplot input fields.
+    """
+    import re
+
+    class qrow:
+        def __init__(self):
+            self.Scatter_Plot_Title  = Q.loc[j, "Scatter_Plot_Title"]
+            self.Ind_Title           = Q.loc[j, "Ind_Title"]
+            self.Dep_Title           = Q.loc[j, "Dep_Title"]
+            self.Plot_Min            = Q.loc[j, "Plot_Min"]
+            self.Plot_Max            = Q.loc[j, "Plot_Max"]
+            self.Title_Position      = Q.loc[j, "Title_Position"]
+            self.Key_Position        = Q.loc[j, "Key_Position"]
+            self.Paper_Width_Factor  = Q.loc[j, "Paper_Width_Factor"]
+            self.Sigma_E             = Q.loc[j, "Sigma_E"]
+            self.Weight_Data         = Q.loc[j, "Weight_Data"]
+            self.Plot_Type           = Q.loc[j, "Plot_Type"]
+            self.Plot_Filename       = Q.loc[j, "Plot_Filename"]
+
+        def __repr__(self):
+            return str(self.__dict__)
+
+    q = qrow()
+
+    # --- Sanitization helpers (same style as define_plot_parameters) ---
+    specials = {
+        "&": r"\&", "%": r"\%", "_": r"\_", "#": r"\#",
+        "$": r"\$", "{": r"\{", "}": r"\}", "^": r"\^{}", "~": r"\~{}",
+    }
+
+    def sanitize(text: str) -> str:
+        if not isinstance(text, str):
+            return text
+        parts = re.split(r"(\$.*?\$)", text)
+        sanitized = []
+        for part in parts:
+            if part.startswith("$") and part.endswith("$"):
+                sanitized.append(part)
+            else:
+                s = part
+                for k, v in specials.items():
+                    s = s.replace(k, v)
+                sanitized.append(s)
+        return "".join(sanitized)
+
+    def safe_strip(val):
+        if isinstance(val, str):
+            return val.strip()
+        return val
+
+    # Sanitize only human-readable fields
+    q.Scatter_Plot_Title = sanitize(safe_strip(q.Scatter_Plot_Title))
+    q.Ind_Title = sanitize(safe_strip(q.Ind_Title))
+    q.Dep_Title = sanitize(safe_strip(q.Dep_Title))
+    q.Plot_Filename = safe_strip(q.Plot_Filename)
+    q.Key_Position = safe_strip(q.Key_Position)
+    q.Plot_Type = safe_strip(q.Plot_Type)
+
+    # Parse numeric fields
+    def to_float(val):
+        try:
+            return float(val)
+        except Exception:
+            return np.nan
+
+    q.Plot_Min = to_float(q.Plot_Min)
+    q.Plot_Max = to_float(q.Plot_Max)
+    q.Paper_Width_Factor = to_float(q.Paper_Width_Factor)
+    q.Sigma_E = to_float(q.Sigma_E)
+
+    # Parse Title_Position as [x, y] floats
+    if isinstance(q.Title_Position, str):
+        try:
+            vals = [float(x) for x in q.Title_Position.split()]
+            if len(vals) == 2:
+                q.Title_Position = vals
+            else:
+                q.Title_Position = [0.03, 0.95]
+        except Exception:
+            q.Title_Position = [0.03, 0.95]
+    else:
+        q.Title_Position = [0.03, 0.95]
+
+    # Normalize Weight_Data (yes/no → bool)
+    if isinstance(q.Weight_Data, str):
+        q.Weight_Data = q.Weight_Data.strip().lower() == "yes"
+    else:
+        q.Weight_Data = bool(q.Weight_Data)
+
+    return q
+
+
+def scatplot(saved_data, drange, **kwargs):
+    import os
+    import pandas as pd
+    import numpy as np
+    import matplotlib.pyplot as plt
+
+    # --- Inputs ---
+    manuals_dir = kwargs.get('Manuals_Dir', '')
+    scatterplot_inputs_file = kwargs.get('Scatterplot_Inputs_File', '')
+    stats_output = kwargs.get('Stats_Output', 'Validation')
+    scatterplot_dir = kwargs.get('Scatterplot_Dir', '')
+    verbose = kwargs.get('verbose', True)
+
+    # --- Prepare paths ---
+    scatterplot_path = scatterplot_inputs_file  # use exactly what the caller passed
+    if not os.path.exists(scatterplot_path):
+        raise FileNotFoundError(f"[scatplot] Cannot find Scatterplot_Inputs_File: {scatterplot_path}")
+    
+    df = pd.read_csv(scatterplot_path, sep=',', engine='python', quotechar='"')
+
+    if verbose:
+        print(f"[scatplot] Loaded {len(df)} lines from scatterplot inputs")
+
+    # --- Unpack dataplot output ---
+    (Save_Quantity,
+     Save_Group_Style,
+     Save_Fill_Color,
+     Save_Group_Key_Label,
+     Save_Measured_Metric,
+     Save_Predicted_Metric,
+     Save_Dataname,
+     Save_Plot_Filename,
+     Save_Dep_Title,
+     Save_Error_Tolerance,
+     Save_Metric_Type,
+     Save_Measured_Quantity,
+     Save_Predicted_Quantity) = saved_data
+
+    # Ensure output directory exists
+    os.makedirs(scatterplot_dir, exist_ok=True)
+
+    # --- Loop over scatterplot CSV rows ---
+    for idx, row in df.iterrows():
+        title = row['Scatter_Plot_Title']
+        ind_title = row['Ind_Title']
+        dep_title = row['Dep_Title']
+        plot_min = float(row['Plot_Min'])
+        plot_max = float(row['Plot_Max'])
+        plot_type = row['Plot_Type'].strip().lower()
+        plot_filename = os.path.join(manuals_dir, row['Plot_Filename'] + '.pdf')
+
+        if verbose:
+            print(f"[scatplot] Generating scatter plot: {title}")
+
+        # --- Find dataplot rows matching this title ---
+        match_indices = [i for i, q in enumerate(Save_Quantity)
+                         if title.split(',')[0].strip().lower() in str(q).lower()]
+
+        if not match_indices:
+            print(f"[scatplot] No dataplot entries matched '{title}' — skipping.")
+            continue
+
+        # --- Collect measured/predicted data ---
+        measured_vals = []
+        predicted_vals = []
+        for i in match_indices:
+            m = np.atleast_1d(Save_Measured_Metric[i]).astype(float)
+            p = np.atleast_1d(Save_Predicted_Metric[i]).astype(float)
+            # Filter out invalids
+            mask = np.isfinite(m) & np.isfinite(p)
+            measured_vals.extend(m[mask])
+            predicted_vals.extend(p[mask])
+
+        measured_vals = np.array(measured_vals)
+        predicted_vals = np.array(predicted_vals)
+
+        if len(measured_vals) == 0:
+            print(f"[scatplot] Warning: No valid data points for '{title}'")
+            continue
+
+        # --- Create scatter plot ---
+        plt.figure(figsize=(5,5))
+        if plot_type == 'loglog':
+            plt.loglog(measured_vals, predicted_vals, 'o', markersize=5, alpha=0.6)
+        else:
+            plt.plot(measured_vals, predicted_vals, 'o', markersize=5, alpha=0.6)
+
+        # 1:1 line
+        plt.plot([plot_min, plot_max], [plot_min, plot_max], 'k--', linewidth=1)
+
+        plt.xlim([plot_min, plot_max])
+        plt.ylim([plot_min, plot_max])
+        plt.xlabel(ind_title)
+        plt.ylabel(dep_title)
+        plt.title(title)
+        plt.grid(True, which='both', linestyle=':')
+
+        plt.tight_layout()
+        os.makedirs(os.path.dirname(plot_filename), exist_ok=True)
+        plt.savefig(plot_filename)
+        plt.close()
+
+
+    # --- Placeholder output_stats table ---
+    # This will later be replaced with computed statistics per quantity
+    # For now, collect each scatterplot title with basic counts
+    output_stats = []
+    output_stats.append([
+        "Quantity", "Datasets", "Points", "Sigma_E", "Sigma_M", "Bias"
+    ])
+
+    for idx, row in df.iterrows():
+        title = row['Scatter_Plot_Title']
+        match_indices = [i for i, q in enumerate(Save_Quantity)
+                         if title.split(',')[0].strip().lower() in str(q).lower()]
+        if not match_indices:
+            continue
+        num_datasets = len(match_indices)
+        num_points = sum(
+            len(np.atleast_1d(Save_Measured_Metric[i])) for i in match_indices
+        )
+        sigma_e = np.nanstd([Save_Measured_Metric[i] for i in match_indices])
+        sigma_m = np.nanstd([Save_Predicted_Metric[i] for i in match_indices])
+        bias = np.nanmean([
+            np.nanmean(Save_Predicted_Metric[i]) - np.nanmean(Save_Measured_Metric[i])
+            for i in match_indices
+        ])
+        output_stats.append([
+            title, num_datasets, num_points, sigma_e, sigma_m, bias
+        ])
+
+
+    # --- Stats output placeholder ---
+    stats_csv = os.path.join(scatterplot_dir, f"ScatterPlot_Stats_{stats_output}.csv")
+    tex_out   = os.path.join(scatterplot_dir, f"ScatterPlot_Tables_{stats_output}.tex")
+    hist_out  = os.path.join(scatterplot_dir, f"ScatterPlot_Histograms_{stats_output}.tex")
+
+    statistics_output(
+        Stats_Output=stats_output,
+        output_stats=output_stats,
+        Output_File=stats_csv,
+        Statistics_Tex_Output=tex_out,
+        Histogram_Tex_Output=hist_out,
+        Output_Histograms=[]
+    )
+
+
+    print("[scatplot] Completed successfully.")
+
+
+
+def statistics_output(
+    Stats_Output,
+    output_stats,
+    Output_File,
+    Statistics_Tex_Output=None,
+    Histogram_Tex_Output=None,
+    Output_Histograms=None,
+):
+    """
+    Python translation of statistics_output.m (K. Overholt, 2013)
+    Modernized using pandas for CSV I/O.
+
+    Parameters
+    ----------
+    Stats_Output : str
+        'Validation', 'Verification', or 'None'
+    output_stats : list of lists, numpy array, or pandas DataFrame
+        Statistical results to write
+    Output_File : str
+        Path to write CSV file
+    Statistics_Tex_Output : str, optional
+        Path to write LaTeX table file
+    Histogram_Tex_Output : str, optional
+        Path to write LaTeX histogram file
+    Output_Histograms : list, optional
+        List of histogram figure filenames
+    """
+    import os
+    import numpy as np
+    import pandas as pd
+
+    if Stats_Output == "None":
+        print("[statistics_output] Skipping (Stats_Output=None)")
+        return
+
+    # --- normalize to DataFrame ---
+    if not isinstance(output_stats, pd.DataFrame):
+        try:
+            output_stats = pd.DataFrame(output_stats)
+        except Exception as e:
+            print(f"[statistics_output] Could not convert output_stats to DataFrame: {e}")
+            return
+
+    if output_stats.empty:
+        print("[statistics_output] No stats to write")
+        return
+
+    # --- Write CSV ---
+    os.makedirs(os.path.dirname(Output_File), exist_ok=True)
+    output_stats.to_csv(Output_File, index=False, quoting=1)  # quote all non-numerics
+    print(f"[statistics_output] Wrote CSV: {Output_File}")
+
+    # --- Write LaTeX for Verification ---
+    if Stats_Output == "Verification" and Statistics_Tex_Output:
+        with open(Statistics_Tex_Output, "w") as fid:
+            fid.write("\\scriptsize\n")
+            fid.write("\\begin{longtable}{|p{2.5in}|l|p{1in}|l|p{1in}|l|l|l|l|l|}\n")
+            fid.write("\\hline\n")
+            fid.write(
+                "Case Name & Section & Expected & Expected & Predicted & Predicted & "
+                "Type of & Error & Error & Within \\\\\n"
+            )
+            fid.write(
+                "          &         & Quantity & Value & Quantity & Value & Error &  "
+                "& Tolerance & Tol. \\\\ \\hline \\hline\n"
+            )
+            fid.write("\\endfirsthead\n\\hline\n")
+            fid.write(
+                "Case Name & Section & Expected & Expected & Predicted & Predicted & "
+                "Type of & Error & Error & Within \\\\\n"
+            )
+            fid.write(
+                "          &         & Quantity & Value & Quantity & Value & Error &  "
+                "& Tolerance & Tol. \\\\ \\hline \\hline\n"
+            )
+            fid.write("\\endhead\n\\hline\n\\endfoot\n\\hline\n\\endlastfoot\n")
+
+            m = output_stats.iloc[1:].sort_values(by=output_stats.columns[0])
+            for _, r in m.iterrows():
+                try:
+                    case = f"\\lstinline[basicstyle=\\scriptsize\\ttfamily]!{r[2]}!"
+                    section = f"\\ref{{{r[2]}}}"
+                    exp_q = f"\\lstinline[basicstyle=\\scriptsize\\ttfamily]!{r[4]}!"
+                    pred_q = f"\\lstinline[basicstyle=\\scriptsize\\ttfamily]!{r[6]}!"
+                    fid.write(
+                        f"{case} & {section} & {exp_q} & {float(r[5]):1.2e} & "
+                        f"{pred_q} & {float(r[7]):1.2e} & "
+                        f"{str(r[9]).replace(' Error','')} & "
+                        f"{float(r[10]):1.2e} & {float(r[11]):1.2e} & {r[12]} \\\\\n"
+                    )
+                except Exception as e:
+                    print(f"[statistics_output] Skipped Verification row due to error: {e}")
+
+            fid.write("\\end{longtable}\n\\normalsize\n")
+        print(f"[statistics_output] Wrote LaTeX Verification table: {Statistics_Tex_Output}")
+
+    # --- Write LaTeX for Validation ---
+    if Stats_Output == "Validation" and Statistics_Tex_Output:
+        with open(Statistics_Tex_Output, "w") as fid:
+            fid.write("\\begin{longtable}[c]{|l|c|c|c|c|c|c|}\n")
+            fid.write(
+                "\\caption[Summary statistics]{Summary statistics for all quantities of interest}\n"
+            )
+            fid.write("\\label{summary_stats}\n\\\\ \\hline\n")
+            fid.write(
+                "Quantity & Section & Datasets & Points & "
+                "$\\widetilde{\\sigma}_{\\rm E}$ & $\\widetilde{\\sigma}_{\\rm M}$ & Bias \\\\ \\hline \\hline\n"
+            )
+            fid.write("\\endfirsthead\n\\hline\n")
+            fid.write(
+                "Quantity & Section & Datasets & Points & "
+                "$\\widetilde{\\sigma}_{\\rm E}$ & $\\widetilde{\\sigma}_{\\rm M}$ & Bias \\\\ \\hline \\hline\n"
+            )
+            fid.write("\\endhead\n")
+
+            for _, r in output_stats.iloc[1:].iterrows():
+                try:
+                    sigma_e = float(r[3])
+                    if sigma_e < 0:
+                        continue
+                    quantity = r[0]
+                    section = f"\\ref{{{quantity}}}"
+                    fid.write(
+                        f"{quantity} & {section} & {int(r[1])} & {int(r[2])} & "
+                        f"{sigma_e:0.2f} & {float(r[4]):0.2f} & {float(r[5]):0.2f} \\\\ \\hline\n"
+                    )
+                except Exception as e:
+                    print(f"[statistics_output] Skipped Validation row due to error: {e}")
+
+            fid.write("\\end{longtable}\n")
+        print(f"[statistics_output] Wrote LaTeX Validation table: {Statistics_Tex_Output}")
+
+    # --- Histogram LaTeX (optional) ---
+    if Stats_Output == "Validation" and Output_Histograms:
+        os.makedirs(os.path.dirname(Histogram_Tex_Output), exist_ok=True)
+        with open(Histogram_Tex_Output, "w") as fid:
+            num_hist = len(Output_Histograms)
+            pages = int(np.ceil(num_hist / 8))
+            for i in range(pages):
+                fid.write("\\begin{figure}[p]\n")
+                fid.write("\\begin{tabular*}{\\textwidth}{l@{\\extracolsep{\\fill}}r}\n")
+                for j in range(i * 8, min((i + 1) * 8, num_hist)):
+                    line_ending = "&" if j % 2 == 0 else "\\\\"
+                    fid.write(
+                        f"\\includegraphics[height=2.2in]"
+                        f"{{SCRIPT_FIGURES/ScatterPlots/{Output_Histograms[j]}}} {line_ending}\n"
+                    )
+                fid.write("\\end{tabular*}\n")
+                fid.write(f"\\label{{Histogram_{i+1}}}\n\\end{figure}\n\n")
+        print(f"[statistics_output] Wrote LaTeX histograms: {Histogram_Tex_Output}")

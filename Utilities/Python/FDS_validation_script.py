@@ -26,19 +26,38 @@ print("Crown_Fires...");                  runpy.run_path("./scripts/Crown_Fires.
 print("Ranz_Marshall...");                runpy.run_path("./scripts/Ranz_Marshall.py", run_name="__main__")
 print("Phoenix_LNG_Fires...");            runpy.run_path("./scripts/Phoenix_LNG_Fires.py", run_name="__main__")
 
-# Dataplot and scatplot options
+# # Dataplot and scatplot options
 
-# Statistics output options
+# Dataplot_Inputs_File = '../Matlab/FDS_validation_dataplot_inputs.csv'
+# EXP_Dir = '../../../exp/'
+# OUT_Dir = '../../../out/'
+# Manuals_Dir = '../../Manuals/'
+# Scatterplot_Inputs_File = '../Matlab/FDS_validation_scatterplot_inputs.csv'
+
+# # Statistics output options
+
+# Stats_Output = 'Validation'
+# Scatterplot_Dir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/'
 
 # # Run dataplot and scatplot scripts
 
-# fdsplotlib.dataplot(config_filename='../Matlab/FDS_validation_dataplot_inputs.csv',
-#                     expdir='../../../exp/',
-#                     cmpdir='../../../out/',
-#                     pltdir='../../Manuals/',
-#                     close_figs=True,
-#                     verbose=True,
-#                     plot_range=["all"]) # see notes below on plot_range
+# saved_data, drange = fdsplotlib.dataplot(config_filename=Dataplot_Inputs_File,
+#                                          expdir=EXP_Dir,
+#                                          cmpdir=OUT_Dir,
+#                                          pltdir=Manuals_Dir,
+#                                          close_figs=True,
+#                                          verbose=True,
+#                                          plot_range=["4:15"],
+#                                          ) # see notes below on plot_range
+
+# fdsplotlib.scatplot(saved_data,drange,
+# 				    Manuals_Dir=Manuals_Dir,
+# 				    Scatterplot_Inputs_File=Scatterplot_Inputs_File,
+# 				    Stats_Output=Stats_Output,
+# 				    Scatterplot_Dir=Scatterplot_Dir,
+# 				    verbose=True,
+# 				    )
+
 
 # Special cases
 print("Beyler_Hood...");                  runpy.run_path("./scripts/Beyler_Hood.py", run_name="__main__")
