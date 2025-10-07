@@ -50,10 +50,8 @@ for runno in range(s_Theobald):
     # import fds data
     AMPUAx = out_import['AMPUA-x'].values
     AMPUA = out_import['AMPUA'].values
-    AMPUA = AMPUA[~np.isnan(AMPUA)]
     ZMAXz = out_import['ZMAX-z'].values
     ZMAX = out_import['ZMAX'].values
-    ZMAX = ZMAX[~np.isnan(ZMAX)]
     ZMAX_Xz = out_import['ZMAX_X-z'].values
     ZMAX_X = out_import['ZMAX_X'].values
 
@@ -91,8 +89,6 @@ exp_dia1 = exp_dia * 12
 TheoArr1 = np.column_stack((max_range_exp, max_range_out, exp_noz, exp_dia1, exp_bar, exp_deg))
 TheoArr2 = np.column_stack((max_height_exp, max_height_out, exp_noz, exp_dia1, exp_bar, exp_deg))
 TheoArr3 = np.column_stack((max_height_dist_exp, max_height_dist_out, exp_noz, exp_dia1, exp_bar, exp_deg))
-TheoArr2 = TheoArr2[~np.isnan(TheoArr2).any(axis=1)]
-TheoArr3 = TheoArr3[~np.isnan(TheoArr3).any(axis=1)]
 T1 = pd.DataFrame(TheoArr1, columns=['max range exp', 'max range out', 'nozzle', 'diameter', 'operating pressure', 'firing angle'])
 T2 = pd.DataFrame(TheoArr2, columns=['max height exp', 'max height out', 'nozzle', 'diameter', 'operating pressure', 'firing angle'])
 T3 = pd.DataFrame(TheoArr3, columns=['max height dist exp', 'max height dist out', 'nozzle', 'diameter', 'operating pressure', 'firing angle'])
