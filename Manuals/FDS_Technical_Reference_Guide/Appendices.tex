@@ -424,11 +424,11 @@ where $I_b(T) = \sigma T^4/\pi$.
 
 By default in FDS, the pathlength, $L$, is 10~cm. It can also be specified by the user. If $T=T_{\rm rad}$ the intensity does not depend on $\kappa_{n,i,{\rm e}}$, and the value $\kappa_{n,i,{\rm e}}(T_{\rm rad})$ is therefore interpolated from the neighboring temperatures.
 
-In cases with only one band ($N$=1), the smaller of the two absorption coefficients is used:
+In cases of non-zero path length, the smaller of the two absorption coefficients is used:
 \be
    \kappa_{n,i}=\min \Big( \kappa_{n,i,{\rm P}}(Y_i,T),\kappa_{n,i,{\rm e}}(Y_i,T,L) \Big)
 \ee
-If $N>1$ or $L=0$, $\kappa_{n,i}=\kappa_{n,i,{\rm P}}$. Note that the spectral data within RADCAL are used whenever the gas mixture contains water vapor, fuel or combustion products, regardless of the number of radiation bands $N$.
+If $L=0$, $\kappa_{n,i}=\kappa_{n,i,{\rm P}}$. Note that the spectral data within RADCAL are used whenever the gas mixture contains water vapor, fuel or combustion products, regardless of the number of radiation bands $N$.
 
 \textbf{Note on wavenumber, wavelength, and frequency}: some confusion might arise when dealing with the various quantities describing the wave nature of radiation. These quantities are wavenumber $\om$, wavelength $\la$, and frequency denoted here $\nu$. Most users may be familiar with the frequency $\nu$, in units of \textit{hertz}, ${\rm Hz}$, representing the number of cycles per second. While this unit is preferred for radiation waves of low energy such as radio waves, wavelength and wavenumber are preferred for waves of higher energy. Wavenumber and wavelength are related to frequency through \cite{Penner:1959}
 \be
@@ -841,8 +841,286 @@ to the absolute value of the sum of the differences,
 The ratio of Eq.~(\ref{eq:sum_abs_tv}) and Eq.~(\ref{eq:abs_sum_tv}) is 3, which indicates that this data is fluctuating. For the implementation of this scheme in FDS, instead of comparing directly to 3, we use 2.9 because floating point division might not return a value of exactly 3. If fluctuations have been identified, then the values at the fourth point in the stencil are frozen and become the final values at the end of an integration time step. This prevents unnecessary sub-time steps being taken by the integrator. Because the error controller is bounding the solution, any one of the values within the stencil is also within the error tolerance and is therefore acceptable.
 
 
-\chapter{Analytical Jacobian Calculation for Detailed Chemical Mechanism}
+\chapter{Analytical Jacobian for Mixing and Detailed Chemistry}
 \label{chemistry_analytical_jacobian}
+
+The system of ODEs for concentration and temperature contains additional terms to account for turbulent mixing. Following the theory of Sec.~\ref{sec:subgrid_evironment}, we can derive these ODEs as follows.
+
+\section{Mass Balance}
+\label{mass_balance_mixing_chem}
+
+Each cell in divided in two zones, unmixed and mixed.  Chemical reaction is only allowed in the mixed zone. The total mass in the cell is $\rho V_c$ where $V_c$ is the cell volume.  For the purposes of discussing the time integration for mixing and chemical kinetics, the variable $t$ here can be taken as zero at the start of an LES time step.  Thus, we are concerned with integration of the state of mixing and reaction within the cell from $0 \le t \le \delta t_{\mathrm{LES}}$.  The mass in the unmixed portion of the cell is $U(t)$ and the mass in the mixed zone is $M(t)$:
+\begin{align} \label{eq:mixedAndUnmixedZoneMass}
+\rho V_c &= U(t) + M(t) \\
+U(t) &= \zeta(t) \rho V_c \\
+M(t) &= (1-\zeta[t]) \rho V_c
+\end{align}
+Here, $\zeta(t)$ is the ``unmixed fraction'', which evolves by the following ODE:
+\begin{equation}
+\label{eq:zeta_copy}
+\frac{\d \zeta}{\d t}=-\frac{\zeta}{\tau_{\rm mix}}
+\end{equation}
+with the solution{}
+\begin{equation}
+\label{eq:zeta_soln_copy}
+\zeta(t) = \zeta_0 \,{\rm e}^{-t/\tau_{\rm mix}}
+\end{equation}
+where the state of mixing at the start of a CFD time step is $\zeta_0$ in this model.  In reality, the initial state of mixing in a computational cell obeys a transport equation, which itself requires modeling.  For present purposes we are choosing to set this value.  It can be shown that, if chemistry is infinitely fast, setting $\zeta_0=1$ corresponds to the basic ``eddy dissipation model'' or EDM.  Further, it can be shown \cite{FDS_Math_Guide} that Eq.~(\ref{eq:zeta_copy}) corresponds to a mixing model based on ``interaction by exchange with the \emph{mixed} mean'' or IEMM.  This model has the advantage over ``interaction by exchange with the mean '' or IEM \cite{Dopazo:1974}, which is often used in practical probability density function (PDF) models \cite{Pope:2000}, in that it avoids the issue of ``magical mixing'' across the reaction zone.
+
+From Eqs.~(\ref{eq:mixedAndUnmixedZoneMass}), (\ref{eq:zeta_copy}), and (\ref{eq:zeta_soln_copy}), we can show
+\begin{equation}
+\label{eq:mixedzonemasstimederivative}
+\frac{\d M}{\d t}= \frac{\zeta}{\tau_{\rm mix}} (\rho V_c) = \frac{\zeta}{(1-\zeta)\tau_{\rm mix}} M
+\end{equation}
+
+For the unmixed zone the mass fraction of species does not change with time. The mass fraction of $k$th species in the unmixed zone is $\widetilde{Y}_k^0$, same as the mean cell mass fraction at the beginning of the timestep. Let $\dot{m}_{k}^{'''}$ and $\dot{\omega}_k$ denote, respectively, the mass and molar time rate of change of species $k$ per unit volume. Similar to Eq.~(\ref{eq:mixmass}), using Eq.~(\ref{eq:mixedzonemasstimederivative}), we can derive an equation for the rate of change of mass of the $k$th species in the mixed zone as:
+\begin{align} \label{eq:jspeciesmass}
+    \frac{\d {\hat{m}_{k}}}{\d t} &= \dot{m}'''_{k} \hat{V} + \dot{m}_{k,in} \\
+    &=\dot{\omega}_k W_k \hat{V} + \widetilde{Y}_k^0 \frac{\d M}{\d t} \\
+    &=\dot{\omega}_k W_k \hat{V} + \widetilde{Y}_k^0 \frac{\zeta}{\tau_{\rm mix}} (\rho V_c)   \\
+    &=\dot{\omega}_k W_k \hat{V} + \widetilde{Y}_k^0 \frac{\zeta}{(1-\zeta)\tau_{\rm mix}} M
+\end{align}
+Here the first term on the right hand side is due to chemistry, and second term is due to transfer of mass from unmixed zone to mixed zone. The Eqs.~(\ref{eq:mixedAndUnmixedZoneMass}), (\ref{eq:zeta_copy}), and (\ref{eq:zeta_soln_copy}) are used to derive this equation.
+
+
+Now, using Eqs.~(\ref{eq:jspeciesmass}) and (\ref{eq:mixedzonemasstimederivative}), the change of mass fraction of the $k$th species in the mixed zone can be derived as follows:
+\begin{align} \label{eq:jspeciesmassfraction}
+    \hat{Y}_{k} &= \frac{\hat{m}_{k}}{M} \\
+    \frac{\d {\hat{Y}_{k}}}{\d t} &= \frac{M \frac{\d {\hat{m}_{k}}}{\d t} - \hat{m}_{k} \frac{\d M}{\d t}}{M^2} \\
+    &=\frac{1}{M} \left( \dot{\omega}_k W_k \hat{V} + \widetilde{Y}_k^0 \frac{\zeta}{(1-\zeta)\tau_{\rm mix}} M - \hat{Y}_{k} \frac{\d {M}}{\d t} \right)  \\
+    &= \frac{\dot{\omega}_k W_k}{\hat{\rho}} + \left( \widetilde{Y}_k^0 - \hat{Y}_{k}\right) \frac{\zeta}{(1-\zeta) \tau_{\rm mix}}
+\end{align}
+
+Using Eq.~(\ref{eq:jspeciesmass}), the change of molar concentration of the $k$th species in the mixed zone can be derived as follows:
+\begin{align} \label{eq:jspeciemolarconcentration}
+    \hat{C}_{k} &= \frac{\hat{m}_{k}}{W_k \hat{V}} \\
+    \frac{\d {\hat{C}_{k}}}{\d t} &= \frac{1}{W_k} \frac{\hat{V} \frac{\d {\hat{m}_{k}}}{\d t} - \hat{m}_{k} \frac{\d {\hat{V}}}{\d t}}{V^2_{mix}} \\
+    &=\frac{1}{W_k \hat{V}} \left( \dot{\omega}_k W_k \hat{V} + \widetilde{Y}_k^0 \frac{\zeta}{(1-\zeta)\tau_{\rm mix}} M \right) - \hat{C}_{k} \frac{1}{\hat{V}}\frac{\d {\hat{V}}}{\d t}  \\
+    &= \dot{\omega}_k +  \frac{\hat{\rho} \widetilde{Y}_k^0}{W_k} \frac{\zeta}{(1-\zeta) \tau_{\rm mix}} - \hat{C}_{k} \frac{1}{\hat{V}}\frac{\d {\hat{V}}}{\d t}
+\end{align}
+
+Again using Eq.~(\ref{eq:jspeciesmass}), the change of number of moles of the $k$th species in the mixed zone can be derived as follows:
+
+\begin{align} \label{eq:jspeciesmole}
+    \hat{N}_{k} &= \frac{\hat{m}_{k}}{W_k} \\
+    \frac{\d {\hat{N}_{k}}}{\d t} &= \frac{1}{W_k} \frac{\d {\hat{m}_{k}}}{\d t} \\
+    &= \frac{1}{W_k} \left( \dot{\omega}_k W_k \hat{V} + \widetilde{Y}_k^0 \frac{\zeta}{(1-\zeta)\tau_{\rm mix}} M \right)    \\
+    &=\dot{\omega}_k \hat{V} + \frac{\widetilde{Y}_k^0}{W_k} \frac{\zeta}{(1-\zeta)\tau_{\rm mix}} M
+\end{align}
+
+
+For a constant pressure process, from the ideal gas equation of state, using Eq.~(\ref{eq:jspeciesmole}), we can write:
+\begin{align} \label{eq:volumeterm}
+     P\hat{V} &= \left(\sum{\hat{N}_j}\right) R \hat{T} \\
+     \frac{1}{\hat{V}}\frac{\d {\hat{V}}}{\d t} & = \frac{1}{\hat{V}} \frac{R}{P} \left[ \left(\sum{\hat{N}_j}\right) \frac{\d \hat{T}}{\d t} + \hat{T} \left(\sum{\frac{\d \hat{N}_j}{\d t}}\right) \right] \\
+     &= \frac{\left(\sum{\hat{N}_j}\right) R}{P \hat{V}} \frac{\d \hat{T}}{\d t} + \frac{R \hat{T}}{P \hat{V}} \left(\sum{\frac{\d \hat{N}_j}{\d t}}\right) \\
+     &=\frac{1}{\hat{T}} \frac{\d \hat{T}}{\d t} + \frac{\left(\sum{\frac{\d \hat{N}_j}{\d t}}\right)}{\left(\sum{\hat{N}_j}\right)} \\
+     & = \frac{1}{\hat{T}} \frac{\d \hat{T}}{\d t} + \frac{1}{\left(\sum{\hat{N}_j}\right)} \left[ \sum{\left(\dot{\omega}_j \hat{V} + \frac{\widetilde{Y}_j^0}{W_j} \frac{\zeta}{(1-\zeta)\tau_{\rm mix}} M \right) }\right]  \\
+     &= \frac{1}{\hat{T}} \frac{\d \hat{T}}{\d t} + \frac{\sum{\dot{\omega}_j}}{\sum{\hat{C}_j}}+\frac{\zeta}{(1-\zeta)\tau_{\rm mix}}\sum{\frac{\hat{W}}{W_j} \widetilde{Y}_j^0} \\
+     &= \frac{1}{\hat{T}} \frac{\d \hat{T}}{\d t} + \frac{\sum{\dot{\omega}_j}}{\sum{\hat{C}_j}}+\frac{\zeta}{(1-\zeta)\tau_{\rm mix}}\frac{\hat{W}}{\widetilde{W}^0}
+\end{align}
+Here $\hat{W}$ and $\widetilde{W}^0$ are the molecular weights of the mixed and unmixed zones, respectively.
+
+Applying Eq.~(\ref{eq:volumeterm}) to Eq.~(\ref{eq:jspeciemolarconcentration}):
+\begin{align} \label{eq:jspeciemolarconcentration2}
+    \frac{\d {\hat{C}_{k}}}{\d t} &= \dot{\hat{C}}_k = \dot{\omega}_k +  \frac{\hat{\rho} \widetilde{Y}_k^0}{W_k} \frac{\zeta}{(1-\zeta) \tau_{\rm mix}} - \hat{C}_{k} \left[ \frac{1}{\hat{T}} \frac{\d \hat{T}}{\d t} + \frac{\sum{\dot{\omega}_j}}{\sum{\hat{C}_j}}+\frac{\zeta}{(1-\zeta)\tau_{\rm mix}}\frac{\hat{W}}{\widetilde{W}^0} \right]
+\end{align}
+
+Deatails of chemistry source term $\dot{{\omega}_k}$ can be found in Section \ref{chem_source_term}.
+
+\section{Energy Balance}
+\label{energy_balance_mixing_chem}
+
+Now consider the total internal energy balance in the mixing zone:
+
+\begin{align} \label{eq:mixedenergy}
+    \frac{\d (M \hat{u}) }{\d t} &= \dot{m}_{in} \widetilde{h}^0 - \dot{W}_{pv} \\
+    M \frac{\d  \hat{u} }{\d t} + \hat{u}\frac{\d  M }{\d t} &= \frac{\d  M }{\d t} \widetilde{h}^0 - P \frac{\d \left(M \hat{v} \right)}{\d t}
+\end{align}
+
+Here, $\dot{W}_{pv}$ is the work done by the mixed zone under constant pressure process, $\hat{u}$ is the specific internal energy of the mixed zone, $\widetilde{h}^0 \equiv \sum h_j(\widetilde{T}) \widetilde{Y}_j^0$ is the specific enthalpy of the unmixed zone, $\hat{v} = 1/\hat{\rho}$ is specific volume of the mixed zone.
+
+Considering specific enthalpy of the mixed zone:
+\begin{align} \label{eq:mixedinternalenergy}
+    \hat{u}=\hat{h} - P\hat{v} = \hat{h} - \frac{P}{\hat{\rho}}
+\end{align}
+
+
+Applying Eq.~(\ref{eq:mixedinternalenergy}) to Eq.~(\ref{eq:mixedenergy}):
+
+\begin{align} \label{eq:mixedenergy2}
+     M \left[\frac{\d  \hat{h} }{\d t} -\cancel{P \frac{\d  \hat{v} }{\d t}} \right] + \hat{u}\frac{\d  M }{\d t} &= \frac{\d  M }{\d t} \widetilde{h}^0 - M \cancel{P \frac{\d  \hat{v} }{\d t}} - P \hat{v} \frac{\d  M }{\d t}\\
+    \frac{\d  \hat{h} }{\d t} &= -\frac{1}{M} \frac{\d  M }{\d t} (\hat{u} -\widetilde{h}^0 - P \hat{v}) \\
+    &= -\frac{\zeta}{(1-\zeta) \tau_{\rm mix}} (\hat{h} - \widetilde{h}^0)
+\end{align}
+
+Now writing the specific enthalpy as sum of the species specific enthalpy:
+\begin{align} \label{eq:mixedenthalpy}
+    \hat{h} &= \sum{\hat{Y}_j \hat{h}_j} \quad ; \quad \hat{h}_j \equiv h_j(\hat{T}) \\
+    \frac{\d  \hat{h}}{\d t} &= \sum{ \left(\hat{Y}_j \frac{\d  \hat{h}_{j} }{\d t} \right) } + \sum{\left( \hat{h}_j \frac{\d  \hat{Y}_j }{\d t} \right)}
+\end{align}
+
+Using $\frac{\d  h_{j} }{\d t} = \hat{C}_{p,j} \frac{\d  T }{\d t}$, where $\hat{C}_{p,j}$ is the specific heat of species $j$, with Eq.~(\ref{eq:jspeciesmassfraction}) above we get,
+\begin{align} \label{eq:mixedenthalpy2}
+    \frac{\d  \hat{h} }{\d t} &= \frac{\d \hat{T}}{\d t} \sum{\left(\hat{Y}_j \hat{C}_{p,j} \right)} + \sum{\left(\hat{h}_j \frac{\d  \hat{Y}_j }{\d t} \right)} \\
+    &=\hat{c}_p \frac{\d \hat{T}}{\d t} + \sum{\hat{h}_j \left(\frac{\dot{\omega}_j W_j}{\hat{\rho}} + \left( \widetilde{Y}_j^0 - \hat{Y}_j\right) \frac{\zeta}{(1-\zeta) \tau_{\rm mix}} \right)}
+\end{align}
+
+Now, equating Eq. \ref{eq:mixedenthalpy2} with Eq. \ref{eq:mixedenergy2}:
+
+\begin{align} \label{eq:tempeqn}
+ \frac{\d \hat{T} }{\d t} &= \dot{\hat{T}} = -\frac{1}{\hat{\rho} \hat{c}_p} (\underbrace{\sum \hat{h}_j W_j \dot{\omega}_j}_{\dot{q}'''} - \dot{q}_{\rm loss}^{'''})  -  \frac{\zeta}{(1-\zeta) \tau_{\rm mix}} \frac{1}{\hat{c}_p}  \left[ \cancel{\hat{h}} - \widetilde{h}^0 + \sum{\hat{h}_j \widetilde{Y}_j^0} - \cancel{\sum{\hat{h}_j \hat{Y}_j}} \right] \\
+ &=-\frac{1}{\hat{\rho} \hat{c}_p} \left[ \dot{q}''' (1-\chi_{\rm loss}) +  \frac{\zeta}{(1-\zeta) \tau_{\rm mix}}  \left( \hat{\rho} \sum{(\hat{h}_j \widetilde{Y}_j^0)} - \hat{\rho} \widetilde{h}^0 \right) \right]
+\end{align}
+Here, $\chi_{\rm loss}$ can be considered a radiation loss fraction if known \emph{a priori}.
+
+Eqs.~(\ref{eq:jspeciemolarconcentration2}) and (\ref{eq:tempeqn}) will be used in CVODE as the ODE RHS.
+
+Deatails of chemistry source term $\dot{{\omega}_j}$ can be found in Section \ref{chem_source_term}.
+
+
+\section{Analytical Jacobian formulation}
+\label{jacobian_mixing_chem}
+
+Providing an analytical Jacobian to the CVODE solver can significantly accelerate the chemistry calculations. The Jacobian for the given system can be written as:
+
+\begin{align}
+J &=
+\begin{bmatrix}
+\frac{\partial\dot{\hat{C}}_{1}}{\partial \hat{C}_{1}}& \frac{\partial \dot{\hat{C}}_{2}}{\partial \hat{C}_{1}} & \ldots & \frac{\partial \dot{\hat{C}}_{N_{\rm s}}}{\partial \hat{C}_{1}} & | & \frac{\partial \dot{\hat{T}}}{\partial \hat{C}_{1}}\\
+\frac{\partial\dot{\hat{C}}_{1}}{\partial \hat{C}_{2}}& \frac{\partial \dot{\hat{C}}_{2}}{\partial \hat{C}_{2}} & \ldots & \frac{\partial \dot{\hat{C}}_{N_{\rm s}}}{\partial \hat{C}_{2}} & | &\frac{\partial \dot{\hat{T}}}{\partial \hat{C}_{2}}\\
+\ldots & \ldots & \ldots & \ldots & | & \ldots\\
+\frac{\partial \dot{\hat{C}}_{1}}{\partial \hat{C}_{N_{\rm s}}}& \frac{\partial \dot{\hat{C}}_{2}}{\partial \hat{C}_{N_{\rm s}}} & \ldots & \frac{\partial \dot{\hat{C}}_{N_{\rm s}}}{\partial \hat{C}_{N_{\rm s}}} & | & \frac{\partial \dot{\hat{T}}}{\partial \hat{C}_{N_{\rm s}}}\\
+---& --- & --- & --- & | & ---\\
+\frac{\partial \dot{\hat{C}}_{1}}{\partial \hat{T}}& \frac{\partial \dot{\hat{C}}_{2}}{\partial \hat{T}} & \ldots & \frac{\partial \dot{\hat{C}}_{N_{\rm s}}}{\partial \hat{T}} & | & \frac{\partial \dot{\hat{T}}}{\partial \hat{T}}\\
+\end{bmatrix}
+=\begin{bmatrix}
+\frac{\partial \boldsymbol{\dot{\hat{C}}}}{\boldsymbol{\partial \hat{C}}}& \frac{\partial \dot{\hat{T}}}{\partial \boldsymbol{\hat{C}}}\\
+\frac{\partial \boldsymbol{\dot{\hat{C}}}}{\partial \hat{T}}& \frac{\partial \dot{\hat{T}}}{\partial \hat{T}}
+\end{bmatrix}
+\label{eq:jacobian_mix_chem}
+\end{align}
+
+
+\begin{align} \label{eq:jspeciemolarconcentration3}
+    \frac{\d {\hat{C}_{k}}}{\d t} &= \dot{\hat{C}}_k = \underbrace{\dot{\omega}_k}_{\dot{\hat{C}}_{k,A}}
+    + \underbrace{\frac{\hat{\rho} \widetilde{Y}_k^0}{W_k} \frac{\zeta}{(1-\zeta) \tau_{\rm mix}}}_{\dot{\hat{C}}_{k,B}}
+    - \underbrace{\hat{C}_{k} \left[ \frac{1}{\hat{T}} \frac{\d \hat{T}}{\d t} + \frac{\sum{\dot{\omega}_j}}{\sum{\hat{C}_j}}+\frac{\zeta}{(1-\zeta)\tau_{\rm mix}}\frac{\hat{W}}{\widetilde{W}^0} \right] }_{\dot{\hat{C}}_{k,C}}
+\end{align}
+
+\begin{align} \label{eq:jspeciemolarconcentration4}
+   \boldsymbol{\dot{\hat{C}}} = \boldsymbol{\dot{\hat{C}}_A}+\boldsymbol{\dot{\hat{C}}_B} + \boldsymbol{\dot{\hat{C}}_C}
+\end{align}
+
+\begin{align} \label{eq:tempeqn2}
+ \frac{\d \hat{T} }{\d t} &= \dot{\hat{T}} = \underbrace{-\frac{1}{\hat{\rho} \hat{c}_p} \sum{\hat{h}_j W_j \dot{\omega}_j }}_{\dot{\hat{T}}_A}
+ -  \underbrace{\frac{\zeta}{(1-\zeta) \tau_{\rm mix}} \frac{1}{\hat{c}_p}  \left[ \sum{\hat{h}_j \widetilde{Y}_j^0} - \widetilde{h}^0 \right]}_{\dot{\hat{T}}_B}
+\end{align}
+
+\begin{align} \label{eq:tempeqn4}
+   \boldsymbol{\dot{\hat{T}}} = \boldsymbol{\dot{\hat{T}}_A}+\boldsymbol{\dot{\hat{T}}_B}
+\end{align}
+
+\subsection*{Calculation of $\frac{\partial \boldsymbol{\dot{\hat{C}}_A}}{\mathbf{\partial \hat{C}}}$}
+Here, $\dot{\hat{C}}_{k,A} = \dot{\omega}_{k}$. This term can be be calculated using Eq. \ref{eq:Jac1st} detailed in Section \ref{chem_source_term}.
+
+\subsection*{Calculation of $\frac{\partial \boldsymbol{\dot{\hat{C}}_B}}{\mathbf{\partial \hat{C}}}$}
+
+\begin{align}\label{eq:JacCBC}
+\frac{\partial \dot{\hat{C}}_{k,B}}{\partial \hat{C}_{l}} &= \frac{W_l}{W_k} \frac{\zeta}{(1-\zeta) \tau_{\rm mix}} \widetilde{Y}_k^0
+\end{align}
+Here, we used the relation, $\frac{\partial \hat{\rho}}{\partial \hat{C}_{l}} = W_l$.
+
+\subsection*{Calculation of $\frac{\partial \boldsymbol{\dot{\hat{C}}_C}}{\mathbf{\partial \hat{C}}}$}
+\begin{align}\label{eq:JacCCC}
+\frac{\partial \dot{\hat{C}}_{k,C}}{\partial \hat{C}_{l}} &= - \delta_{lk} \left[ \frac{1}{\hat{T}} \frac{\d \hat{T}}{\d t} + \frac{\sum{\dot{\omega}_j}}{\sum{\hat{C}_j}}+\frac{\zeta}{(1-\zeta)\tau_{\rm mix}}\frac{\hat{W}}{\widetilde{W}^0} \right] \notag\\
+&- \hat{C}_{k} \left[ \frac{\partial}{\partial \hat{C}_{l}} \left( \frac{1}{\hat{T}} \frac{\d \hat{T}}{\d t} \right) + \frac{\partial}{\partial \hat{C}_{l}} \left( \frac{\sum{\dot{\omega}_j}}{\sum{\hat{C}_j}}\right) + \frac{\zeta}{(1-\zeta)\tau_{\rm mix}} \frac{\partial}{\partial \hat{C}_{l}} \left( \frac{\hat{W}}{\widetilde{W}^0} \right)\right]
+\end{align}
+
+Now calculate each of the individual terms of the second line.
+\begin{align}\label{eq:dTempByDConc}
+\frac{\partial \hat{T}}{\partial \hat{C}_{l}} &= \frac{\partial \left(\frac{P}{R \sum{\hat{C}_j}} \right) }{\partial \hat{C}_{l}} \\
+&= -\frac{P\sum{\delta_{jl}}}{R \left(\sum{\hat{C}_j}\right)^2}
+= - \frac{\hat{T}\sum{\delta_{jl}}}{\sum{\hat{C}_j}}
+= - \frac{\hat{T}}{\sum{\hat{C}_j}} \quad ; \quad \text{since $\sum{\delta_{jl}}$ =1}
+\end{align}
+
+\begin{align}\label{eq:JacCCC_1}
+\frac{\partial}{\partial \hat{C}_{l}} \left( \frac{1}{\hat{T}} \frac{\d \hat{T}}{\d t} \right)&= \frac{1}{\hat{T}} \frac{\partial}{\partial \hat{C}_{l}} \left( \frac{\d \hat{T}}{\d t} \right) - \frac{1}{\hat{T}^2} \frac{\d \hat{T}}{\d t} \frac{\partial \hat{T}}{\partial \hat{C}_{l}} \\
+&= \frac{1}{\hat{T}} \frac{\partial}{\partial \hat{C}_{l}} \left( \frac{\d \hat{T}}{\d t} \right) + \frac{1}{\hat{T}} \frac{\d \hat{T}}{\d t} \frac{1}{\sum{\hat{C}_j}} \\
+&=\frac{1}{\hat{T}} \left[ \frac{\partial}{\partial \hat{C}_{l}} \left( \frac{\d \hat{T}}{\d t} \right) + \frac{1}{\sum{\hat{C}_j}} \frac{\d \hat{T}}{\d t} \right]
+\end{align}
+
+\begin{align}\label{eq:JacCCC_2}
+\frac{\partial}{\partial \hat{C}_{l}} \left( \frac{\sum{\dot{\omega}_j}}{\sum{\hat{C}_j}}\right) &= \frac{1}{\sum{\hat{C}_j}} \sum{\left(\frac{\partial \dot{\omega}_j}{\partial \hat{C}_{l}} \right)} - \frac{\sum{\delta_{jl}}}{\sum{(\hat{C}_j)}^2} \sum{\dot{\omega}_j} \\
+&= \frac{1}{\sum{\hat{C}_j}} \left[ \sum{\left(\frac{\partial \dot{\omega}_j}{\partial \hat{C}_{l}} \right)} - \frac{\sum{\dot{\omega}_j}}{\sum{(\hat{C}_j)}}  \right]
+\end{align}
+
+
+\begin{align}\label{eq:JacCCC_3}
+\frac{\zeta}{(1-\zeta)\tau_{\rm mix}} \frac{\partial}{\partial \hat{C}_{l}} \left( \frac{\hat{W}}{\widetilde{W}^0} \right) &= \frac{\zeta}{(1-\zeta)\tau_{\rm mix} \widetilde{W}^0} \frac{\partial}{\partial \hat{C}_{l}} \left( \frac{\sum{\hat{C}_j W_j}}{\sum{\hat{C}_j}} \right) \\
+&=\frac{\zeta}{(1-\zeta)\tau_{\rm mix} \widetilde{W}^0 \left(\sum{\hat{C}_j} \right)} \left(W_l-\hat{W} \right)
+\end{align}
+
+
+\subsection*{Calculation of $\frac{\partial \boldsymbol{\dot{\hat{C}}_A}}{\partial \hat{T}}$}
+\begin{align}\label{eq:JacCAT}
+\frac{\partial {\dot{\hat{C}}_{k,A}}}{\partial \hat{T}} = \frac{\partial \dot{\omega}_k}{\partial \hat{T}}
+\end{align}
+This term can be be calculated using Eq. \ref{eq:Jac2nd} detailed in Section \ref{chem_source_term}.
+
+
+
+
+\subsection*{Calculation of $\frac{\partial \boldsymbol{\dot{\hat{C}}_B}}{\partial \hat{T}}$}
+\begin{align}\label{eq:JacCBT}
+\frac{\partial {\dot{\hat{C}}_{k,B}}}{\partial \hat{T}} = - \frac{\hat{\rho}}{\hat{T} W_k} \frac{\zeta}{(1-\zeta) \tau_{\rm mix}} \widetilde{Y}_k^0
+\end{align}
+Here the relation $\frac{\partial \hat{\rho}}{\partial \hat{T}} = -\frac{\hat{\rho}}{\hat{T}}$ is used.
+
+\subsection*{Calculation of $\frac{\partial \boldsymbol{\dot{\hat{C}}_C}}{\partial \hat{T}}$}
+
+\begin{align}\label{eq:JacCCT}
+\frac{\partial {\dot{\hat{C}}_{k,C}}}{\partial \hat{T}} &= - \frac{\partial \hat{C}_{k}}{\partial \hat{T}} \left[ \frac{1}{\hat{T}} \frac{\d \hat{T}}{\d t} + \frac{\sum{\dot{\omega}_j}}{\sum{\hat{C}_j}}+\frac{\zeta}{(1-\zeta)\tau_{\rm mix}}\frac{\hat{W}}{\widetilde{W}^0} \right] \notag\\
+& - \hat{C}_{k} \left[ \frac{\partial}{\partial \hat{T}} \left( \frac{1}{\hat{T}} \frac{\d \hat{T}}{\d t} \right) + \frac{\partial}{\partial \hat{T}} \left( \frac{\sum{\dot{\omega}_j}}{\sum{\hat{C}_j}}\right) + \frac{\zeta}{(1-\zeta)\tau_{\rm mix}} \frac{\partial}{\partial \hat{T}} \left( \frac{\hat{W}}{\widetilde{W}^0} \right)\right] \\
+&= \frac{\hat{C}_{k}}{\hat{T}} \left[ \frac{1}{\hat{T}} \frac{\d \hat{T}}{\d t} + \cancel{\frac{\sum{\dot{\omega}_j}}{\sum{\hat{C}_j}}}+\frac{\zeta}{(1-\zeta)\tau_{\rm mix}}\frac{\hat{W}}{\widetilde{W}^0} \right] \notag\\
+& - \hat{C}_{k} \left [ \left[ \frac{1}{\hat{T}} \frac{\partial}{\partial \hat{T}} \left( \frac{\d \hat{T}}{\d t} \right) - \frac{1}{\hat{T}^2} \frac{\d \hat{T}}{\d t} \right] + \left[\frac{1}{\sum{\hat{C}_j}} \sum{\frac{\partial \dot{\omega}_j}{\partial \hat{T}}} + \cancel{\frac{\sum{\dot{\omega}_j}}{\left(\sum{\hat{C}_j}\right)^2} \sum{\frac{\hat{C}_j}{\hat{T}}}} \right] \right. \notag\\
+&+  \left. \left[\frac{\zeta}{(1-\zeta)\tau_{\rm mix}\widetilde{W}^0} \frac{\partial}{\partial \hat{T}} \left( \frac{\sum{\hat{C}_j W_j}}{\sum{\hat{C}_j}} \right) \right] \right] \\
+&= - \hat{C}_{k} \left[ \frac{1}{\hat{T}} \frac{\partial}{\partial \hat{T}} \left( \frac{\d \hat{T}}{\d t} \right) + \frac{1}{\sum{\hat{C}_j}} \sum{\frac{\partial \dot{\omega}_j}{\partial \hat{T}}} - \frac{2}{\hat{T}^2}\frac{\d \hat{T}}{\d t}\right]
+\end{align}
+
+It can be shown that $\frac{\partial \hat{W}}{\partial \hat{T}} = \frac{\partial}{\partial \hat{T}} \left( \frac{\sum{\hat{C}_j W_j}}{\sum{\hat{C}_j}} \right) = 0 $. Here, the relation $\frac{\partial \hat{C}_j}{\partial \hat{T}} = - \frac{\hat{C}_j}{\hat{T}}$ is used.
+
+
+\subsection*{Calculation of $\frac{\partial \dot{\hat{T}}_A}{\mathbf{\partial \hat{C}}}$}
+\begin{align}\label{eq:JacTAC}
+\frac{\partial {\dot{\hat{T}}_{k,A}}}{\partial \hat{C}_{l}} = \frac{\partial}{\partial \hat{C}_{l}} \left( -\frac{1}{\hat{\rho} \hat{c}_p} \sum{\hat{h}_j W_j \dot{\omega}_j }\right)
+\end{align}
+This term can be be calculated using Eq. \ref{eq:Jac3rd} detailed in Section \ref{chem_source_term}.
+
+\subsection*{Calculation of $\frac{\partial \dot{\hat{T}}_B}{\mathbf{\partial \hat{C}}}$}
+\begin{align}\label{eq:JacTBC}
+\frac{\partial {\dot{\hat{T}}_{k,B}}}{\partial \hat{C}_{l}} &= - \frac{\zeta}{(1-\zeta) \tau_{\rm mix}} \left[\left( \sum{\hat{h}_j \widetilde{Y}_j^0} - \widetilde{h}^0 \right) \frac{1}{\left(\hat{c}_p\right)^2} \frac{W_l}{\hat{\rho}} \left( \hat{c}_p - \hat{C}_{p,l}\right)   \right] \\
+&= - \frac{\zeta}{(1-\zeta) \tau_{\rm mix}} \frac{W_l}{\hat{\rho} \hat{c}_p} \left[ \left( \sum{\hat{h}_j \widetilde{Y}_j^0} - \widetilde{h}^0 \right) \frac{\left( \hat{c}_p - \hat{C}_{p,l}\right)}{\hat{c}_p} \right]
+\end{align}
+The relation $\frac{\partial \hat{c}_p}{\partial \hat{C}_{l}} = - \frac{W_l}{\hat{\rho}}\left( \hat{c}_p -\hat{C}_{p,l} \right)$ is used here.
+
+\subsection*{Calculation of $\frac{\partial \dot{\hat{T}}_A}{\partial \hat{T}}$}
+\begin{align}\label{eq:JacTAT}
+\frac{\partial {\dot{\hat{T}}_{k,A}}}{\partial \hat{T}} = \frac{\partial}{\partial \hat{T}} \left( -\frac{1}{\hat{\rho} \hat{c}_p} \sum{\hat{h}_j W_j \dot{\omega}_j }\right)
+\end{align}
+This term can be be calculated using Eq. \ref{eq:Jac4th} detailed in Section \ref{chem_source_term}.
+
+\subsection*{Calculation of $\frac{\partial \dot{\hat{T}}_B}{\partial \hat{T}}$}
+
+\begin{align}\label{eq:JacTBT}
+\frac{\partial {\dot{\hat{T}}_{k,B}}}{\partial \hat{T}} &= - \frac{\zeta}{(1-\zeta) \tau_{\rm mix}} \left[\frac{1}{\hat{c}_p}  \left( \sum{\hat{C}_{p,j}\widetilde{Y}_j^0} \right)
++ \left( \sum{\hat{h}_j \widetilde{Y}_j^0} - \widetilde{h}^0 \right) \frac{1}{\left(\hat{c}_p\right)^2} \frac{\partial \hat{c}_p}{\partial \hat{T}}   \right] \\
+&= - \frac{\zeta}{(1-\zeta) \tau_{\rm mix}} \frac{1}{\hat{c}_p} \left[ \sum{\hat{C}_{p,j}\widetilde{Y}_j^0} + \frac{1}{\hat{c}_p}\left( \sum{\hat{h}_j \widetilde{Y}_j^0} - \widetilde{h}^0 \right) \frac{\partial \hat{c}_p}{\partial \hat{T}}  \right]
+\end{align}
+
+\section{Chemistry Source Term Calculation}
+\label{chem_source_term}
 
 The system of ODEs to solve a detailed chemical mechanism is given by Eqs.~(\ref{eq:chemistry_ode_system}) and (\ref{eq:TemperatureDerivative})
 \begin{equation}\label{eq:chemistry_ode_system_appendix}
@@ -881,8 +1159,11 @@ J &=
 \frac{\partial \mathbf{\dot{\omega}}}{\mathbf{\partial C}}& \frac{\partial \dot{T}}{\partial \mathbf{C}}\\
 \frac{\partial \mathbf{\dot{\omega}}}{\partial T}& \frac{\partial \dot{T}}{\partial T}
 \end{bmatrix}
+\label{eq:jacobian_chem}
 \end{aligned}
 \ee
+
+This Jacobian is the first part of equations \ref{eq:jspeciemolarconcentration3} and \ref{eq:tempeqn2} for the mixing and chemistry Jacobian matrix (\ref{eq:jacobian_mix_chem}).
 
 \subsection*{Calculation of $\frac{\partial \mathbf{\dot{\omega}}}{\mathbf{\partial C}}$}
 By taking derivative of Eq.~(\ref{eq:chemistry_ode_system_appendix}) with respect to concentration, we can write:

@@ -10,4 +10,7 @@ seaborn
 pygments
 ipython
 cantera
+pyfdstools
 
+# Local utility packages (imports fdsplotlib)
+-e ../Utilities/Python

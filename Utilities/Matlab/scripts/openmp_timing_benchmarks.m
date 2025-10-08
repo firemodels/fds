@@ -20,7 +20,7 @@ for i=1:length(a)
         return
     end
     M = importdata(filename,',',2);
-    j = find(strcmp(M.colheaders,'"clock time"'));
+    j = find(strcmp(M.colheaders,'clock time'));
     time64(i) = M.data(end,j);
 end
 time64 = time64/time64(1) * 100;
@@ -32,7 +32,7 @@ for i=1:length(a)
         return
     end
     M = importdata(filename,',',2);
-    j = find(strcmp(M.colheaders,'"clock time"'));
+    j = find(strcmp(M.colheaders,'clock time'));
     time128(i) = M.data(end,j);
 end
 time128 = time128/time128(1) * 100;

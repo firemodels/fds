@@ -2037,7 +2037,7 @@ Extinction is modeled using the ``Extinction 1'' algorithm in which the reaction
 \section{NIST/NRC Parallel Panel Experiments}
 \label{NIST_NRC_Parallel_Panels_Description}
 
-As part of a Nuclear Regulatory Commission (NRC) research project to assess fire behavior in electrical enclosures, rate of spread and heat release rate measurements were made on various plastics lining a parallel panel apparatus. The panels were 0.6~m (2~ft) wide, 2.4~m (8~ft) tall, and separated by 0.3~m (1~ft). A 60~kW propane sand burner was positioned at the base of the two panels. Plastics tested to date include PMMA, PVC, and PBT, cut into 6.4~mm (0.25~in) thick panels. A sketch of the apparatus, originally developed by Factory Mutual, is shown in Fig.~\ref{Parallel_Panel_Sketch}.
+As part of a Nuclear Regulatory Commission (NRC) research project to assess fire behavior in electrical enclosures, rate of spread and heat release rate measurements were made on various materials lining a parallel panel apparatus~\cite{Leventon:NIST_TN_2282}. The panels were 0.6~m (2~ft) wide, 2.4~m (8~ft) tall, and separated by 0.3~m (1~ft). A 60~kW propane sand burner was positioned at the base of the two panels. A sketch of the apparatus, originally developed by Factory Mutual, is shown in Fig.~\ref{Parallel_Panel_Sketch}.
 
 The Parallel Panel experiment involving black PMMA is part of the suite of cases contributed to the MaCFP (Measurements and Computation of Fire Phenomena) working group of the IAFSS. Its properties are listed in Section~\ref{NIST_Polymers_Properties}.
 
@@ -3020,9 +3020,13 @@ The compartment dimension were 4.0~m by 4.0~m by 1.7~m. Note that the dimensions
 
 A mixture of gaseous fuels supplied by the local utility was used as a fuel. It was supplied to the compartment through four, room-wide burner pipes with holes on the top surface, approximately 20~cm above the floor. The experiments were conducted in three series, named I, 1 and 2. For each, multiple fires were generated between which changes were made to the ventilation and HRR. The test duration was 5~min with 10~min of cooling between each. 
 
+A second set of experiments was performed in this facility by Sun et~al.~\cite{Sun:FAM2024} using a configuration based on the JIS~A~1310 test standard. The fire compartment for this test is 1.35~m by 1.35~m by 1.35~m with a 0.91~m by 0.91~m opening. The 0.6~m by 0.6~m propane burner is flush with the floor at the rear of the compartment with heat release rates of 600~kW, 750~kW, and 900~kW.
+
 \subsubsection{Modeling Notes}
 
 Gleb Bytskov at the University of Aalto, Finland, performed numerical simulations of these experiments using FDS as part of his master's thesis~\cite{Bytskov:Thesis}. The grid resolution is 10~cm. The fuel is assumed to be propane with a soot yield of 0.015, CO yield of 0.015, and radiative fraction of 0.20. 
+
+The JIS~A~1310 simulations use propane with a radiative fraction of 0.30.
 
 
 \section{UL/NIST Vent Experiments}

@@ -44,12 +44,15 @@ if [ -d "$FIREMODELS/sundials" ]; then
   if [[ "$(git tag -l $SUNDIALS_LIB_TAG)" == $SUNDIALS_LIB_TAG ]]; then
     echo "Checking out $SUNDIALS_LIB_TAG"
     git checkout $SUNDIALS_LIB_TAG
+  else
+    echo "Your SUNDIALS repository is not up to date with the required tag: $SUNDIALS_LIB_TAG."
+    echo "The FDS build requires SUNDIALS version $SUNDIALS_LIB_TAG. Please update your SUNDIALS repository."
+    exit 1
   fi 
   mkdir $FIREMODELS/sundials/BUILDDIR
   cd $FIREMODELS/sundials/BUILDDIR
   echo "Creating library directry..."
   export SUNDIALS_VERSION=$(git describe)
-  mkdir $FIREMODELS/libs/sundials/$SUNDIALS_VERSION
   echo "Cleaning sundials repository..."
   rm -r $FIREMODELS/sundials/BUILDDIR/*
   cp $FIREMODELS/fds/Build/Scripts/SUNDIALS/$CONFMAKE .

@@ -10,6 +10,7 @@ INTEGER, PARAMETER :: QB = SELECTED_REAL_KIND(33,4931) !< Precision of "Sixteen 
 INTEGER, PARAMETER :: MAX_LPC=20                     !< Maximum number of declared particle classes
 INTEGER, PARAMETER :: MAX_SPECIES=20                 !< Maximum number of declared species
 INTEGER, PARAMETER :: MAX_LAYERS=20                  !< Maximum number of solid material layers
+INTEGER, PARAMETER :: MAX_LAYERS_HT3D=500            !< Maximum number of solid material layers for an HT3D solid
 INTEGER, PARAMETER :: MAX_MATERIALS=20               !< Maximum number of solid material components
 INTEGER, PARAMETER :: MAX_MATERIALS_TOTAL=400        !< Dimension of material work array
 INTEGER, PARAMETER :: MAX_CONE_CURVES=10             !< Maximum number of cone calorimeter curves
@@ -20,6 +21,7 @@ INTEGER, PARAMETER :: MAX_TERRAIN_IMAGES=10          !< Maximum number of images
 INTEGER, PARAMETER :: MAX_INPUT_ID=40                !< Maximum number of CTRL INPUT_IDs
 INTEGER, PARAMETER :: N_ZONE_POINTS=100              !< Maximum number of declared ZONE points (deprecated)
 INTEGER, PARAMETER :: MAX_AIT_EXCLUSION_ZONES=10     !< Maximum number of AUTO_IGNITION_TEMPERATURE exclusion zones
+INTEGER, PARAMETER :: MAX_IGNITION_ZONES=10          !< Maximum number of Ignition zones
 INTEGER, PARAMETER :: SMOKEVIEW_OBJECTS_DIMENSION=20 !< Number of parameters that can be passed to Smokeview to describe objects
 INTEGER, PARAMETER :: LABEL_LENGTH=60                !< Maximum length of most labels
 INTEGER, PARAMETER :: MESSAGE_LENGTH=200             !< Maximum length of error and warning labels
@@ -40,6 +42,7 @@ REAL(EB), PARAMETER :: TWO_EPSILON_EB=2._EB*EPSILON(1._EB)    !< A very small nu
 REAL(FB), PARAMETER :: TWO_EPSILON_FB=2._EB*EPSILON(1._FB)    !< A very small number 4 byte accuracy
 REAL(EB), PARAMETER :: TINY_EB=TINY(1._EB)                    !< The smallest resolvable 8 byte real number
 REAL(EB), PARAMETER :: HUGE_EB=HUGE(1._EB)                    !< The largest resolvable 8 btye real number
+REAL(EB), PARAMETER :: HUGE_FB=HUGE(1._FB)                    !< A large number but not too large for various operations
 
 ! Often used numbers
 

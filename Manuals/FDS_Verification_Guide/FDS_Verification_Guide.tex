@@ -893,16 +893,15 @@ The steady state analytical solution to this problem is that the scalar field re
    \label{fig_soborot_square_wave}
 \end{figure}
 
-For the cosine wave initial condition the derivatives of the scalar field are continuous.  Therefore, we see ${\cal O}(\delta x^2)$ convergence of the CHARM and MP5 schemes, as shown in Fig.~\ref{fig_soborot_cos_wave}.  Superbee shows smaller error at coarse resolution, but the gradient steepening degenerates its accuracy at higher resolutions---hence CHARM is selected for LES and DNS.
+For the cosine wave initial condition the derivatives of the scalar field are continuous.  Therefore, we see ${\cal O}(\delta x^2)$ convergence of the CHARM scheme, as shown in Fig.~\ref{fig_soborot_cos_wave}.  Superbee shows smaller error at coarse resolution, but the gradient steepening degenerates its accuracy at higher resolutions---hence CHARM is selected for LES and DNS.
 
 \begin{figure}[ht]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
       \includegraphics[height=2.2in]{SCRIPT_FIGURES/soborot_superbee_cos_wave} &
       \includegraphics[height=2.2in]{SCRIPT_FIGURES/soborot_charm_cos_wave}   \\
-      \includegraphics[height=2.2in]{SCRIPT_FIGURES/soborot_mp5_cos_wave} &
-      \includegraphics[height=2.2in]{SCRIPT_FIGURES/soborot_cos_wave_error}
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/soborot_cos_wave_error} &
    \end{tabular*}
-   \caption[Solid body rotation cosine wave convergence]{Solid body rotation cosine wave solution convergence.  Scalar fields along upper-left diagonal for Superbee (upper-left), CHARM (upper-right), and MP5 (lower-left).  (Lower-right) L2 Error.}
+   \caption[Solid body rotation cosine wave convergence]{Solid body rotation cosine wave solution convergence.  Scalar fields along upper-left diagonal for Superbee (upper-left) and CHARM (upper-right).  (Lower-left) L2 Error.}
    \label{fig_soborot_cos_wave}
 \end{figure}
 
@@ -1425,13 +1424,12 @@ Hydrogen gas (2~g/mol) is injected into a small compartment filled with sulfur h
 \subsection{Temperature Lower Bound in a Fire Simulation (\texorpdfstring{\ct{tmp_lower_limit}}{tmp\_lower\_limit})}
 \label{tmp_lower_limit}
 
-A 2-D methane-air diffusion flame calculation is run three different ways to check that the temperature does not fall below the ambient (20~$^\circ$C). The results are shown in Fig.~\ref{tmp_lower_limit_fig}. The upper left plot shows the global minimum temperature for the case where the reaction stoichiometry is specified explicitly. The upper right plot is for the case where the initial time step is lowered to 0.001~s. The lower plot is for the case where the simple chemistry model is used.
+A 2-D methane-air diffusion flame calculation is run three different ways to check that the temperature does not fall below the ambient (20~$^\circ$C). The results are shown in Fig.~\ref{tmp_lower_limit_fig}. The left plot shows the global minimum temperature for the case where the reaction stoichiometry is specified explicitly. Theright plot is for the case where the simple chemistry model is used.
 
 \begin{figure}[!ht]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
       \includegraphics[height=2.2in]{SCRIPT_FIGURES/tmp_lower_limit_default} &
-      \includegraphics[height=2.2in]{SCRIPT_FIGURES/tmp_lower_limit_dt_p001} \\
-      \multicolumn{2}{c}{\includegraphics[height=2.2in]{SCRIPT_FIGURES/tmp_lower_limit_simple}}
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/tmp_lower_limit_simple}
    \end{tabular*}
    \caption[Results of the \ct{tmp_lower_limit} cases]{Results of the \ct{tmp_lower_limit} cases.}
    \label{tmp_lower_limit_fig}
@@ -1486,7 +1484,7 @@ In this case a 128 \si{m^3} box is initially filled with air at 20 \si{\degreeCe
       \includegraphics[height=2.2in]{SCRIPT_FIGURES/fire_const_gamma_dH} &
       \includegraphics[height=2.2in]{SCRIPT_FIGURES/fire_const_gamma_dP}
    \end{tabular*}
-   \caption[Results of the \ct{fire\_const\_gamma} case]{Results of the \ct{fire\_const\_gamma} case.}
+   \caption[Results of the \ct{fire_const_gamma} case]{Results of the \ct{fire_const_gamma} case.}
    \label{fig_fire_const_gamma}
 \end{figure}
 
@@ -1595,6 +1593,31 @@ Plots of $u(x)$, $\rho(x)$, $\tp(x)$, and $T(x)$ are shown in Fig.~\ref{tunnel_l
 \caption[Sample case \ct{tunnel_linear_cp}]{Output of the \ct{tunnel_linear_cp} test case.}
 \label{tunnel_linear_cp_plots}
 \end{figure}
+
+\FloatBarrier
+
+
+\section{Discharge Coefficient}
+\label{thick_orifice}
+
+A useful way to assess the way the model handles velocity boundary conditions at corners is to examine flows through an orifice. Consider a 2~m square duct with a 1~m square orifice. The orifice is $l=0.4$~m wide and has a hydraulic diameter $D_{\rm h}=1$~m. A uniform flow of $w_1=0.5$~m/s is pushed through the duct. According to an empirical correlation presented in Diagram~4-15 of the Handbook of Hydraulic Resistance by Idelchik~\cite{Idelchik:1}, the pressure rise behind the orifice is given by
+\be
+   \Delta p = \frac{1}{2} \zeta_1 \, \rho \, w_1^2 \approx 4.09 \; \mbox{Pa}
+\ee
+where $\zeta_1=27.4$ and the density of air is $\rho=1.195$~kg/m$^3$. Figure~\ref{fig:thick_orifice} displays the pressure along the duct, where the flow is from left to right.
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/thick_orifice}
+\caption[Results of the \ct{thick_orifice} case]{Pressure rise behind an square, thick orifice in a duct.}
+\label{fig:thick_orifice}
+\end{figure}
+
+
+
+
+
+
 
 \chapter{Turbulence}
 
@@ -2291,10 +2314,10 @@ Unstable & $4000 \times 2000 \times 1500$ & $40\times 40 \times 40$     & 0.0200
 
 \begin{figure}[ht]
    \centering
-   \includegraphics[height=2.2in]{../FDS_Validation_Guide/SCRIPT_FIGURES/Schoenberg_Ekman_Layers/ekman_neutral_winds}
+   \includegraphics[height=2.2in]{SCRIPT_FIGURES/ekman_neutral_winds}
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \includegraphics[height=2.2in]{../FDS_Validation_Guide/SCRIPT_FIGURES/Schoenberg_Ekman_Layers/ekman_stable_winds} &
-      \includegraphics[height=2.2in]{../FDS_Validation_Guide/SCRIPT_FIGURES/Schoenberg_Ekman_Layers/ekman_unstable_winds}
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/ekman_stable_winds} &
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/ekman_unstable_winds}
    \end{tabular*}
    \caption[Schoenberg Ekman Layers]{\label{fig:ekman_layers} Comparison Ekman layer profiles for neutral (top), stable (bottom-left), and unstable (bottom-right) atmospheric boundary layers with the simulation results of Schoenberg \cite{Schoenberg:2004}.}
 \end{figure}
@@ -3973,6 +3996,75 @@ Six additional constant volume ignition delay cases are configured using the fol
 \end{figure}
 
 
+\section{Mixing with detailed chemistry (\ct{edc\_mixing\_cvode})}
+\label{edc_mixing_cvode}
+
+Mixing with detailed chemistry is implemented using the Eddy Dissipation Concept (EDC) model, in which a system of ordinary differential equations (ODEs) describing species concentrations and temperature is solved using the CVODE solver. For detailed information on the formulation of the ODE system, please refer to the Technical Guide~\cite{FDS_Math_Guide}.
+
+This implementation has been validated against results obtained using Cantera~\cite{cantera:2023}. Note that Cantera does not provide a direct method to solve the coupled mixing-chemistry ODE system as done here in FDS; therefore, in Cantera an operator splitting approach was employed, where mixing and chemistry are handled sequentially. Specifically, within each CFD timestep (0.1 s), substeps for chemistry calculations in Cantera are kept sufficiently small (0.0001 s) to resolve the fast dynamics. All comparisons are carried out using the GRI-Mech 3.0 chemical mechanism~\cite{gri3:1999}.
+
+Figure~\ref{fig:edc_mixing_cvode_onecfdstep_vary_zeta0} presents comparisons of temperature and OH mass fraction between FDS and Cantera within a single CFD timestep for five constant-volume ignition delay cases, with varying initial unmixed fractions \(\zeta_0 = 1.0, 0.75, 0.5, 0.25, 0.0\).
+
+Figure~\ref{fig:edc_mixing_cvode_multicfdstep_vary_zeta0} shows similar comparisons over multiple CFD timesteps for the same ignition delay cases and initial unmixed fractions. These results also verify that elemental mass is conserved throughout the entire process.
+
+Finally, Figure~\ref{fig:edc_mixing_cvode_onecfdstep_vary_taumix} compares temperature and OH mass fraction for a single CFD timestep across five cases with varying mixing times \(\tau_{\text{mix}} = 0.1, 0.01, 0.001, 0.0001, 0.00001\) s. As the mixing time decreases, the solution becomes independent of \(\tau_{\text{mix}}\), approaching the well-stirred reactor limit corresponding to (\(\zeta_0 = 0.0\)).
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_Zeta1p0_TMP} &
+\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_Zeta1p0_OH} \\
+\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_Zeta0p75_TMP} &
+\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_Zeta0p75_OH} \\
+\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_Zeta0p5_TMP} &
+\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_Zeta0p5_OH} \\
+\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_Zeta0p25_TMP} &
+\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_Zeta0p25_OH} \\
+\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_Zeta0p0_TMP} &
+\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_Zeta0p0_OH} 
+\end{tabular*}
+\caption[Results of the \ct{edc\_mixing\_cvode} test cases]{Comparison of CVODE substeps for a single CFD step of 0.1 s, showing the effect of varying the initial unmixed fraction between FDS and Cantera. The simulation uses the Methane GRI mechanism with an equivalence ratio of 0.6, a mixing time of 0.01 s, and an initial temperature of 1200 K.}
+\label{fig:edc_mixing_cvode_onecfdstep_vary_zeta0}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{lcr}
+\includegraphics[height=1.6in,width=0.32\textwidth]{SCRIPT_FIGURES/EDC_MultiCFDStep_Methane_grimech30_Zeta1p0_TMP} &
+\includegraphics[height=1.6in,width=0.32\textwidth]{SCRIPT_FIGURES/EDC_MultiCFDStep_Methane_grimech30_Zeta1p0_OH} &
+\includegraphics[height=1.6in,width=0.32\textwidth]{SCRIPT_FIGURES/EDC_MultiCFDStep_Methane_grimech30_Zeta1p0_elements} \\
+\includegraphics[height=1.6in,width=0.32\textwidth]{SCRIPT_FIGURES/EDC_MultiCFDStep_Methane_grimech30_Zeta0p75_TMP} &
+\includegraphics[height=1.6in,width=0.32\textwidth]{SCRIPT_FIGURES/EDC_MultiCFDStep_Methane_grimech30_Zeta0p75_OH} &
+\includegraphics[height=1.6in,width=0.32\textwidth]{SCRIPT_FIGURES/EDC_MultiCFDStep_Methane_grimech30_Zeta0p75_elements} \\
+\includegraphics[height=1.6in,width=0.32\textwidth]{SCRIPT_FIGURES/EDC_MultiCFDStep_Methane_grimech30_Zeta0p5_TMP} &
+\includegraphics[height=1.6in,width=0.32\textwidth]{SCRIPT_FIGURES/EDC_MultiCFDStep_Methane_grimech30_Zeta0p5_OH} &
+\includegraphics[height=1.6in,width=0.32\textwidth]{SCRIPT_FIGURES/EDC_MultiCFDStep_Methane_grimech30_Zeta0p5_elements} \\
+\includegraphics[height=1.6in,width=0.32\textwidth]{SCRIPT_FIGURES/EDC_MultiCFDStep_Methane_grimech30_Zeta0p25_TMP} &
+\includegraphics[height=1.6in,width=0.32\textwidth]{SCRIPT_FIGURES/EDC_MultiCFDStep_Methane_grimech30_Zeta0p25_OH} &
+\includegraphics[height=1.6in,width=0.32\textwidth]{SCRIPT_FIGURES/EDC_MultiCFDStep_Methane_grimech30_Zeta0p25_elements} \\
+\includegraphics[height=1.6in,width=0.32\textwidth]{SCRIPT_FIGURES/EDC_MultiCFDStep_Methane_grimech30_Zeta0p0_TMP} &
+\includegraphics[height=1.6in,width=0.32\textwidth]{SCRIPT_FIGURES/EDC_MultiCFDStep_Methane_grimech30_Zeta0p0_OH} &
+\includegraphics[height=1.6in,width=0.32\textwidth]{SCRIPT_FIGURES/EDC_MultiCFDStep_Methane_grimech30_Zeta0p0_elements} \\
+\end{tabular*}
+\caption[Results of the \ct{edc\_mixing\_cvode} test cases]{Comparison of mixing with detailed chemistry over several CFD steps of 0.1 s, showing the effect of varying the initial unmixed fraction between FDS and Cantera. The simulation uses the Methane GRI mechanism with an equivalence ratio of 0.6, a mixing time of 0.01 s, and an initial temperature of 900 K.}
+\label{fig:edc_mixing_cvode_multicfdstep_vary_zeta0}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_taumix0p1_TMP} &
+\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_taumix0p1_OH} \\
+\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_taumix0p01_TMP} &
+\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_taumix0p01_OH} \\
+\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_taumix0p001_TMP} &
+\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_taumix0p001_OH} \\
+\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_taumix0p0001_TMP} &
+\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_taumix0p0001_OH} \\
+\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_taumix0p00001_TMP} &
+\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_taumix0p00001_OH}
+\end{tabular*}
+\caption[Results of the \ct{edc\_mixing\_cvode} test cases]{Comparison of CVODE substeps for a single CFD step of 0.1 s, showing the effect of varying the mixing time between FDS and Cantera. The simulation uses the Methane GRI mechanism with an equivalence ratio of 0.6, an initial unmixed fraction of 1.0 s, and an initial temperature of 1200 K.}
+\label{fig:edc_mixing_cvode_onecfdstep_vary_taumix}
+\end{figure}
+
 \section{Combustion Load Balancing (\ct{comb\_load\_bal})}
 \label{comb_load_bal}
 
@@ -3989,6 +4081,8 @@ Figure \ref{fig:comb_load_bal_2step_fast} shows a load-balancing test for two-st
 
 Overall, combustion load balancing provides significant speedup for detailed chemistry cases. For small multi-step Arrhenius reactions, the speedup may be limited depending on the stiffness of the reactions. For fast chemistry, combustion load balancing is generally not beneficial.
 
+Figure \ref{fig:EDC_load_bal_methane_smooke} shows the load-balancing test for the Methane\_Smoke detailed chemical mechanism with mixing.  
+
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{lr}
@@ -4003,10 +4097,10 @@ Overall, combustion load balancing provides significant speedup for detailed che
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Propanee_Arrhenius_FIRE} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Propanee_Arrhenius_COMM} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Propanee_Arrhenius_TOT} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Propanee_Arrhenius_DEVC}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Propane_Arrhenius_FIRE} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Propane_Arrhenius_COMM} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Propane_Arrhenius_TOT} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Propane_Arrhenius_DEVC}
 \end{tabular*}
 \caption[Results of the \ct{comb\_load\_balance} test cases]{Combustion load balance case using two-step Propane Arrhenius reactions.}
 \label{fig:comb_load_bal_2step_Arrhenius}
@@ -4023,6 +4117,16 @@ Overall, combustion load balancing provides significant speedup for detailed che
 \label{fig:comb_load_bal_2step_fast}
 \end{figure}
 
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/EDC_load_bal_Methane_Smooke_CHEM} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/EDC_load_bal_Methane_Smooke_COMM} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/EDC_load_bal_Methane_Smooke_TOT} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/EDC_load_bal_Methane_Smooke_DEVC}
+\end{tabular*}
+\caption[Results of the \ct{comb\_load\_balance} test cases]{Combustion load balance case for mixing with detailed chemistry using Methane\_Smooke detailed chemical mechanism. The initial unmixed fraction is 1.0 and mixing time is 0.01 s.}
+\label{fig:EDC_load_bal_methane_smooke}
+\end{figure}
 
 \section{Mixture Fraction (\ct{burke\_schumann})}
 \label{Mix_Frac}
@@ -4317,7 +4421,16 @@ This verification test consists of two test cases. The second case, \ct{aerosol\
 \subsection{Thermophoretic Settling and Deposition of Aerosols\\(\texorpdfstring{\ct{aerosol_thermophoretic_deposition}}{aerosol\_thermophoretic\_deposition})}
     \label{aerosol_thermophoretic_deposition}
 
-This verification test consists of two test cases. The second case, \ct{aerosol\_thermophoretic\_deposition\_2}, reverses the temperature gradient. The case consists of a box 1~cm on side with adiabatic, free-slip side walls and a 100 K temperature gradient over the height of the box. The box is filled with two gas species each having a molecular weight of 28.8~g/mol, a viscosity of 0.00002~\si{kg/(m.s}, a thermal conductivity of 0.025~\si{W/(m.K}, and specific heat of 1~\si{kJ/(kg.K}, and zero diffusivity. One of the gas species is defined as an aerosol with a diameter of 1~$\mu$m, a solid phase density of 2000~kg/m$^3$, and a solid phase conductivity of 1~\si{W/(m.K}. The initial mass fraction of the aerosol is 0.00001. The gas temperature is initialized to its steady-state temperature gradient. \ct{STRATIFICATION}, \ct{NOISE}, and all aerosol behaviors except for \ct{THERMOPHORETIC\_SETTLING} and \ct{THERMOPHORETIC\_DEPOSITION} are turned off. Thermophoretic settling rates are weakly dependent on the gas density. Since there is a temperature gradient, the settling rates are not uniform over the height of the box. Unlike the gravitational settling case, this means over long enough time periods the overall settling rate is not linear in time; however, for a short time period a near linear settling rate is expected and can be determined analytically
+This verification test consists of two test cases. The second case, \ct{aerosol\_thermophoretic\_deposition\_2}, reverses the temperature gradient. The case consists of a box 1~cm on a side with adiabatic, free-slip side walls and a 100 K temperature gradient over the height of the box. The box is filled with two gas species each having a molecular weight of 28.8~g/mol, a viscosity of $2\times10^{-5}$~\si{kg/(m.s)}, a thermal conductivity of 0.025~\si{W/(m.K)}, and specific heat of 1~\si{kJ/(kg.K)}, and zero diffusivity. One of the gas species is defined as an aerosol with a diameter of 1~$\mu$m, a solid phase density of 2000~\si{kg/m^3}, and a solid phase conductivity of 1~\si{W/(m.K)}. The initial mass fraction of the aerosol is $1\times10^{-5}$. The gas temperature is initialized to its steady-state temperature gradient. \ct{STRATIFICATION}, \ct{NOISE}, and all aerosol behaviors except for \ct{THERMOPHORETIC\_SETTLING} and \ct{THERMOPHORETIC\_DEPOSITION} are turned off. Thermophoretic settling rates are weakly dependent on the gas density. Since there is a temperature gradient, the settling rates are not uniform over the height of the box. Unlike the gravitational settling case, this means over long enough time periods the overall settling rate is not linear in time; however, for a short time period a near linear settling rate is expected and can be determined analytically.
+
+Using the equation for the thermophoretic velocity, $u_{\rm th}$, the thermophoretic velocities for the gas cells adjacent to the hot and cold walls are respectively 2.25E-4~\si{m/s} and 2.15E-4~\si{m/s}. Adjacent to the cold wall, $u_{\rm th}$ is the rate at which the aerosol deposits onto the wall. Over the simulation time of 2~s, the soot will move 4.29E-4~m which is 42.9~\% of the cell size. That fraction of the aerosol in the cell will deposit which is 5.05E-9~\si{kg/m^2}. Adjacent to the hot wall, $u_{\rm th}$ is the rate at which the aerosol leaves the cell. Over the simulation time of 2~s, the soot will move 4.49E-4~m which is 44.9~\% of the cell size. One minus that fraction of the original aerosol density in the cell will remain which is 4.98E-6~\si{kg/m^3}.
+
+The thermophorertic velocity is given by
+\be
+u_{\rm th} = \frac{K_{\rm th} \nu}{T_{\rm g}} \; \frac{\d T}{\d x}
+\ee
+where $K_{\rm th}$ is a coefficient dependent on the particle size and solid conductivity, $\nu$ is the kinematic viscosity, $T_{\rm g}$ is the cell gas temperature, and $\frac{\d T}{\d x}$ is the temperature gradient.
+
 
 \begin{figure}[ht]
 \noindent
@@ -4334,7 +4447,7 @@ This verification test consists of two test cases. The second case, \ct{aerosol\
 \subsection{Turbulent Deposition of Aerosols (\texorpdfstring{\ct{aerosol\_turbulent\_deposition}}{aerosol\_turbulent\_deposition})}
     \label{aerosol_turbulent_deposition}
 
-This verification test consists of three tunnel like geometries 10~cm on side with adiabatic, free-slip walls. One end of the tunnel is \ct{OPEN} and the other end has a constant inlet velocity of 0.001 m/s, 0.1 m/s, or 1 m/s. The tunnels are filled with two gas species each having a molecular weight of 28.8~g/mol, a viscosity of 0.00002~\si{kg/(m.s)}, a thermal conductivity of 0.025~\si{W/(m.K)}, and specific heat of 1~\si{kJ/(kg.K)}, and zero diffusivity. One of the gas species is defined as an aerosol with a diameter of 100~$\mu$m, a solid phase density of 2000~kg/m$^3$, and a solid phase conductivity of 1~\si{W/(m.K}. The initial mass fraction of the aerosol is 0.00001. \ct{STRATIFICATION}, \ct{NOISE}, and all aerosol behaviors except for \ct{TURBULENT\_DEPOSITION} are turned off. Turbulent deposition is computed using a correlation based open the wall friction velocity and the wall dimensionless stopping distance. The correlation has three parts, and the selected velocities test each part. Since the inlet condition is a constant velocity with a constant aerosol mass fraction, the first wall cell after the inlet will see a uniform settling rate over time.
+This verification test consists of three tunnel like geometries 10~cm on side with adiabatic, free-slip walls. One end of the tunnel is \ct{OPEN} and the other end has a constant inlet velocity of 0.001 m/s, 0.1 m/s, or 1 m/s. The tunnels are filled with two gas species each having a molecular weight of 28.8~g/mol, a viscosity of $2\times10^{-5}$~\si{kg/(m.s)}, a thermal conductivity of 0.025~\si{W/(m.K)}, and specific heat of 1~\si{kJ/(kg.K)}, and zero diffusivity. One of the gas species is defined as an aerosol with a diameter of 100~$\mu$m, a solid phase density of 2000~\si{kg/m^3}, and a solid phase conductivity of 1~\si{W/(m.K}. The initial mass fraction of the aerosol is $1\times10^{-5}$. \ct{STRATIFICATION}, \ct{NOISE}, and all aerosol behaviors except for \ct{TURBULENT\_DEPOSITION} are turned off. Turbulent deposition is computed using a correlation based open the wall friction velocity and the wall dimensionless stopping distance. The correlation has three parts, and the selected velocities test each part. Since the inlet condition is a constant velocity with a constant aerosol mass fraction, the first wall cell after the inlet will see a uniform settling rate over time.
 
 \begin{figure}[ht]
     \centering
@@ -4521,18 +4634,32 @@ D     &  10.0     & 10000        &  1            &  10           & 0.1     \\ \h
 \end{center}
 
 \begin{figure}[ht]
-\noindent
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/heat_conduction_a} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/heat_conduction_b} \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/heat_conduction_c} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/heat_conduction_d}
-\end{tabular*}
-\caption[The \ct{heat\_conduction} test cases]{Comparison of heat conduction calculations with analytical solutions.}
-\label{heat_conduction}
+	\noindent
+	\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+		\includegraphics[height=2.2in]{SCRIPT_FIGURES/heat_conduction_a} &
+		\includegraphics[height=2.2in]{SCRIPT_FIGURES/heat_conduction_b} \\
+		\includegraphics[height=2.2in]{SCRIPT_FIGURES/heat_conduction_c} &
+		\includegraphics[height=2.2in]{SCRIPT_FIGURES/heat_conduction_d}
+	\end{tabular*}
+	\caption[The \ct{heat\_conduction} test cases]{Comparison of heat conduction calculations with analytical solutions.}
+	\label{heat_conduction}
 \end{figure}
 
+\section{Heat Conduction Through a Solid Slab Part 2 (\texorpdfstring{\ct{back\_wall}}{back\_wall})}
+\label{back_wall}
 
+A slab of thickness $L=0.01$~m with a conductivity of 10~\si{W/(m.K)} is exposed to a backside temperature of $T_g=200$~\si{\degree C}.
+The backside heat transfer conditions are $h$=50~\si{W/(m^2.K)} and $e$=0.5. The frontside heat transfer conditions are $h$=10~\si{W/(m^2.K)} and $e$=1. 
+This case test that both sets of conditions are applied.
+
+\begin{figure}[ht]
+	\centering
+	\begin{tabular}{c}
+		\includegraphics[height=2.2in]{SCRIPT_FIGURES/back_wall}
+	\end{tabular}
+	\caption[Front and back wall temperatures for the \ct{back\_wall} case]{Front and back wall temperatures for the \ct{back\_wall} case}
+	\label{fig:back_wall}
+\end{figure}
 
 \section{Temperature-Dependent Thermal Properties (\texorpdfstring{\ct{heat\_conduction\_kc}}{heat\_conduction\_kc})}
 \label{heat_conduction_kc}
@@ -4616,7 +4743,7 @@ This example tests the simple thermocouple model in FDS. It consists of a box wh
 
 
 
-\section{Heat Conduction through Insulated Steel (\texorpdfstring{\ct{insulated\_steel\_x}}{insulated\_steel\_x})}
+\section{Heat Conduction through Insulated Steel (\texorpdfstring{\ct{insulated_steel_x}}{insulated\_steel\_x})}
 \label{insulated_steel_pipe}
 \label{insulated_steel_plate}
 
@@ -4641,7 +4768,7 @@ where $T_{s,i}$ is the surface temperature corresponding to radial coordinates 1
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/insulated_steel_pipe} \\
 \multicolumn{2}{c}{\includegraphics[height=2.2in]{SCRIPT_FIGURES/insulated_steel_pipe_2d}}
 \end{tabular*}
-\caption[The \ct{insulated\_steel} test cases]{Steady-state temperature profile within an insulated steel plate and pipe. Note that the pipe conduction case has been performed as part of a 3-D calculation (upper right) and a 2-D, axi-symmetric calculation (bottom).}
+\caption[The \ct{insulated_steel} test cases]{Steady-state temperature profile within an insulated steel plate and pipe. Note that the pipe conduction case has been performed as part of a 3-D calculation (upper right) and a 2-D, axi-symmetric calculation (bottom).}
 \label{insulated_steel_fig}
 \end{figure}
 
@@ -4934,6 +5061,140 @@ An 18~cm long solid consisting of three 6~cm long abutting rectangular obstructi
 \caption[The \ct{ht1d\_pile} and \ct{ht3d\_pile} test cases]{Temperature profiles through a stack of three materials with different thermal conductivities. (Left) A 1-D calculation with non-uniform internal nodes. (Right) A 3-D calculation with uniform internal nodes.}
 \label{fig:ht3d_pile}
 \end{figure}
+
+\clearpage
+
+\section{SFPE Verification Cases}
+
+The Society of Fire Protection Engineers (SFPE) has developed a standard entitled {\em S.02 -- Calculation Methods to Predict the Thermal Performance of Structures \& Fire Resistive Assemblies}~\cite{SFPE_S.02} that contains an appendix with verification cases to benchmark basic heat transfer calculations. This section contains several of these cases.
+
+\subsection{Case 1: Lumped Mass Subjected to Standard Fire}
+\label{SFPE_Case_1}
+
+A plate ($\rho=7850$~kg/m$^3$, $c=0.52$~kJ/(kg~K), $\epsilon=0.7$) that has a thickness of 4~cm and an initial temperature of 20~°C is heated on the top and bottom surfaces according to the standard ISO~834 fire curve
+\be
+   T(t) = T_\infty + 345 \, \ln \left( 8t/60 + 1 \right) \label{ISO_834}
+\ee
+where the time, $t$, is in seconds. If the thermal conductivity of the material is relatively large, the temperature in the section can be taken as uniform. For the convection heat transfer coefficient, $h=25$~W/(m$^2$~K), calculate the temperature of the plate as a function of time (Fig.~\ref{fig:SFPE_Case_1}).
+
+\begin{figure}[ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/SFPE_Case_1}
+\caption[The SFPE heat transfer verification Case 1]{Temperature of a 4~cm thick plate that is heated top and bottom by the standard fire curve.}
+\label{fig:SFPE_Case_1}
+\end{figure}
+
+\FloatBarrier
+
+\subsection{Case 2: Lumped Mass Subjected to Incident Flux}
+\label{SFPE_Case_2}
+
+A 1~cm thick horizontal flat plate ($\rho=7850$~kg/m$^3$, $c=0.56$~kJ/(kg~K), $\epsilon=0.9$) with an initial temperature of 20~°C is exposed from above with a radiant heater set to an incident flux of 50~kW/m$^2$. The gas temperature is 20~°C and $h=12$~W/(m$^2$~K). Assuming that the bottom and sides of the plate are perfectly insulated, and that the thermal conductivity of the material is sufficiently large to assume a uniform temperature with depth, calculate the temperature of the plate as a function of time (Fig.~\ref{fig:SFPE_Case_2}).
+
+\begin{figure}[ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/SFPE_Case_2}
+\caption[The SFPE heat transfer verification Case 2]{Temperature of a 1~cm thick plate that is heated on top via an incident flux and insulated below.}
+\label{fig:SFPE_Case_2}
+\end{figure}
+
+\FloatBarrier
+
+
+\subsection{Case 6: 2-D Heat Transfer with Cooling by Convection}
+\label{SFPE_Case_6}
+
+A 2~m by 2~m square column ($k=1$~W/(m~K), $\rho=1$~kg/m$^3$, $c=0.001$~kJ/(kg~K), $\epsilon=0$) with an initial temperature of 1000~°C cools via convection only. Assuming that $h=1$~W/(m$^2$~K) and the surrounding air temperature is 0~°C, calculate the temperature at the center of the column as a function of time (Fig.~\ref{fig:SFPE_Case_6}).
+
+\begin{figure}[ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/SFPE_Case_6}
+\caption[The SFPE heat transfer verification Case 6]{Temperature at the center of a 2~m by 2~m column that is initially hot and is cooled via convection by surrounding air.}
+\label{fig:SFPE_Case_6}
+\end{figure}
+
+\FloatBarrier
+
+\subsection{Case 7: 2-D Heat Transfer by Convection and Radiation}
+\label{SFPE_Case_7}
+
+A 0.2 m by 0.2 m square column ($k=1$~W/(m~K), $\rho=2400$~kg/m$^3$, $c=1$~kJ/(kg~K), $\epsilon=0.8$) is heated according to the ISO~834 time-temperature curve, Eq.~(\ref{ISO_834}). Assuming that $h=10$~W/(m$^2$~K) and that the initial temperature is $T_\infty=273$~K, calculate the temperature at the column center, corner and middle side surface as a function of time (Fig.~\ref{fig:SFPE_Case_7}).
+
+\begin{figure}[ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/SFPE_Case_7}
+\caption[The SFPE heat transfer verification Case 7]{Temperature at the center, corner and side of a 20~cm by 20~cm column heated by a fire that follows a specified time-temperature curve.}
+\label{fig:SFPE_Case_7}
+\end{figure}
+
+\FloatBarrier
+
+
+\subsection{Case 8: 2-D Heat Transfer with Temperature-Dependent Conductivity}
+\label{SFPE_Case_8}
+
+A 0.2~m by 0.2~m square column ($\rho=2400$~kg/m$^3$, $c=1$~kJ/(kg~K), $\epsilon=0.8$) is heated according to the ISO~834 time-temperature curve, Eq.~(\ref{ISO_834}. The thermal conductivity of the column material varies linearly with temperature such that its value is 1.5~W/(m~K) at 0~°C, 0.7~W/(m~K) at 200~°C, and 0.5~W/(m~K) at 1000~°C. Assuming that $h=10$~W/(m$^2$~K) and that the initial air temperature is 0~°C, calculate the temperature at the column center, corner and middle side surface as a function of time (Fig.~\ref{fig:SFPE_Case_8}).
+
+\begin{figure}[ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/SFPE_Case_8}
+\caption[The SFPE heat transfer verification Case 8]{Temperature at the center, corner and side of a 20~cm by 20~cm column heated by a fire that follows a specified time-temperature curve. The thermal conductivity of the material varies with temperature.}
+\label{fig:SFPE_Case_8}
+\end{figure}
+
+\FloatBarrier
+
+
+\subsection{Case 9: 2-D Heat Transfer in a Composite Section with Temperature-Dependent Conductivity}
+\label{SFPE_Case_9}
+
+A hollow square metal tube ($\rho=7850$~kg/m$^3$, $c=0.6$~kJ/(kg~K), $\epsilon=0.8$) is filled with an insulation material ($k=0.05$~W/(m~K), $\rho=50$~kg/m$^3$, $c=1$~kJ/(kg~K)). The thermal conductivity of the metal tube varies linearly with temperature such that its value is 54.7~W/(m~K) at 0~°C, 27.3~W/(m~K) at 800~°C, and 27.3~W/(m~K) at 1200~°C. The tube walls are 0.5~mm thick, and the exterior width of the assembly is 0.201~m. The surrounding air temperature is 1000~°C, and the initial temperature of the assembly is 0~°C. Assuming that the heating is by convection and radiation, and that the heat transfer coefficient is 10~W/(m$^2$~K), calculate the temperature at the center of the tube as a function of time (Fig.~\ref{fig:SFPE_Case_9}).
+
+Normally, a 3-D conducting solid with a thin ``skin'' would be modeled by assigning a thin layer to the \ct{SURF} line that describes the surface properties of the obstruction. However, in this case, the difference in the enthalpy, $c_{\rm s} \rho_{\rm s}$, between the metal and the insulation material leads to inaccuracies in the alternating direction implicit (ADI) solver. In short, the energy absorbed by the thin metal skin is transferred from the $x$ or $y$ direction to the $z$ direction, which has no metal skin. Thus, the temperature in the $z$ direction becomes fictitiously high because its thermal mass is relatively low. As a work-around, the metal skin is thickened from 0.5~mm to 10~mm, the width of a gas phase cell, while its density is decreased by a factor of 20.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/SFPE_Case_9}
+\caption[The SFPE heat transfer verification Case 9]{Temperature at the center of a 20~cm by 20~cm thin metal tube filled with insulation material.}
+\label{fig:SFPE_Case_9}
+\end{figure}
+
+\FloatBarrier
+
+\subsection{Case 13: 2-D Heat Transfer with Moisture Evaporation}
+\label{SFPE_Case_13}
+
+A 0.2~m by 0.2~m square column (dry properties: $\rho_{\rm d}=2400$~kg/m$^3$, $c_{\rm d}=1$~kJ/(kg~K), $\epsilon=0.8$) is heated according to the ISO~834 time-temperature curve, Eq.~(\ref{ISO_834}). The thermal conductivity of the column material varies linearly with temperature such that its value is 1.5~W/(m~K) at 0~°C, 0.7~W/(m~K) at 200~°C, and 0.5~W/(m~K) at 1000~°C. The mass fraction of water within the column is $Y_{\rm w}=0.0208$, and it is assumed that the water evaporates at temperatures between 100~°C and 120~°C. The density of water and specific heat capacity of water can be taken as $\rho_{\rm w}=1000$~kg/m$^3$ and $c_{\rm w}=4.187$~kJ/(kg~K), respectively. The latent heat of evaporation of water ($h_{\rm v}=2260$~kJ/kg) is assumed to be added to the specific heat of the material. During evaporation, the amount of water is assumed to decrease linearly to zero. Assuming that $h=10$~W/(m$^2$~K) and that the initial temperature is 20~°C, calculate the temperature at the column center, corner and middle side surface as a function of time (Fig.~\ref{fig:SFPE_Case_13}).
+
+Normally, this scenario would be modeled in FDS by assuming that the water boils in the neighborhood of 100~$^\circ$C following an Arhennius reaction. However, this method would not allow for a linear decrease in the amount of water during its evaporation from 100~$^\circ$C to 120~$^\circ$C. Instead, the latent heat of vaporization of water has been incorporated into an effective specific heat of the column material, shown in the left plot of Fig.~\ref{fig:SFPE_Case_13}. The area of the triangular region is the product of the latent heat of evaporation and the mass fraction of water, $h_{\rm v} Y_{\rm w}$. The effective specific heat of the wet column is given by
+\be
+   c_{\rm eff} = \frac{ m_{\rm d}''' c_{\rm d} + m_{\rm w}''' c_{\rm w} }{ \rho_{\rm d} } \approx 1.089 \; \hbox{kJ/(kg K)} \quad ; \quad m_{\rm d}''' = 2400 \; \hbox{kg/m}^3 \quad ; \quad m_{\rm w}''' = \frac{ Y_{\rm w}}{1-Y_{\rm w}} \,  m_{\rm d}''' \approx 50.1  \hbox{kg/m}^3
+\ee
+where $m_{\rm d}'''$ is the mass per unit volume of the dry column material and $m_{\rm w}'''$ is the mass per unit volume of the water that fills the pores of the column material. Note that it is assumed that the volume of the wet column is the same as that of the dry. Also note that FDS does not allow for a change in material density without a reaction. Thus, in this case, the density of the column is taken as its dry density, which is seen in the denominator of the formula for the effective specific heat of the wet column.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/SFPE_Case_13b}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/SFPE_Case_13}
+\caption[The SFPE heat transfer verification Case 13]{(Left) The effective specific heat of the column material that incorporates the latent heat of evaporation of water. (Right) The temperature at the center, corner and side of a 20~cm by 20~cm column heated by a fire that follows a specified time-temperature curve.}
+\label{fig:SFPE_Case_13}
+\end{figure}
+
+
+\FloatBarrier
+
+\subsection{Case 16: 3-D Heat Transfer with Non-Uniform Heat Flux}
+\label{SFPE_Case_16}
+
+A 1~m by 2~m rectangular metal plate ($k=50$~W/(m~K), $\rho=7850$~kg/m$^3$, $c=0.5$~kJ/(kg~K), $\epsilon=0.8$) that is 10~cm thick is heated over a quarter of its upper surface with an incident radiant heat flux of 30~kW/m$^2$ with convection to ambient. In Cartesian coordinates $(x,y)$, the corners of the plate are $(0,0)$, $(1,0)$, $(1,2)$, and $(0,2)$. All lengths are in meters. The heating occurs at the top of the plate within the rectangular area whose corners are $(0,0)$, $(0.5,0)$, $(0.5,1)$, $(0,1)$. The bottom surface and the remainder of the top surface are cooled by convection and radiation to ambient. The sides of the plate are insulated. Assuming that the surrounding air temperature is 20~°C, and that the heat transfer coefficient is 10~W/(m$^2$~K), calculate the temperature along the lines $x=0.25$~m and $y=0.5$~m at the mid-depth of the plate at 60~min (Fig.~\ref{fig:SFPE_Case_16}).
+
+\begin{figure}[ht]
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/SFPE_Case_16a}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/SFPE_Case_16b}
+\caption[The SFPE heat transfer verification Case 16]{Temperature along the length (left) and width (right) of a metal plate heated over a quarter of its surface by a radiant heater of 30~kW/m$^2$ for 60~min.}
+\label{fig:SFPE_Case_16}
+\end{figure}
+
 
 
 
@@ -6688,7 +6949,7 @@ By default, $C_{\rm d}=1$, $n=0.5$ and $\Delta p_{\rm ref}=4$~Pa, meaning that t
 
 The first verification case involves three 1000~m$^3$ compartments that have 0.01~m$^2$ of leakage to the ambient. Each compartment is supplied with 0.16~m$^3$/s of inlet flow. The first compartment has the default values for the exponent and reference pressure, the second changes the exponent to 0.6, and the third third changes exponent and the reference pressure respectively to 0.6 and 10~Pa. The expected leakage velocities for these conditions are 160~m/s, 11.8~m/s, and 12.8~m/s. Note in the left plot of Fig.~\ref{leak_exponent_fig} that the velocities are negative because the FDS output for the leakage velocity is from the lower numbered pressure zone (in this case ambient) to the higher number (inside the compartment). Negative velocity indicates flow from inside to outside as expected.
 
-The second case involves a steel enclosure with four localized leaks, two near the bottom and two near the top. The air flow into the compartment is ramped up slowly, and the right hand plot of Fig.~\ref{leak_exponent_fig} shows the ideal and predicted relationship between the volume flow and compartment pressure. In this case, $C_{\rm d}=0.61$, $n=0.6$, $\Delta p_{\rm ref}=1$~Pa, and $A_{\rm L,ref}=0.18$ at each of the four ``cracks.''
+The second case involves a steel e	nclosure with four localized leaks, two near the bottom and two near the top. The air flow into the compartment is ramped up slowly, and the right hand plot of Fig.~\ref{leak_exponent_fig} shows the ideal and predicted relationship between the volume flow and compartment pressure. In this case, $C_{\rm d}=0.61$, $n=0.6$, $\Delta p_{\rm ref}=1$~Pa, and $A_{\rm L,ref}=0.18$ at each of the four ``cracks.''
 
 \begin{figure}[ht]
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_leak_exponent}
@@ -6699,6 +6960,23 @@ The second case involves a steel enclosure with four localized leaks, two near t
 
 \FloatBarrier
 
+\section{Complex Geometry (\texorpdfstring{\ct{HVAC\_geom} and \ct{leak\_geom}} {HVAC\_geom and leak\_geom})}
+Two verification cases demonstrate the usage of HVAC for complex geometry.
+
+\label{HVAC_geom}
+In the first verification case (\ct{HVAC\_geom}), two, sealed, 1~m$^3$ compartments are separated by a common wall. An HVAC duct defined with \ct{GEOM} connects the two compartments and is given a duct velocity of 2~m/s. Two meshes are defined that divide the compartments along their centerline such that the \ct{GEOM} duct lies in each mesh. HVAC ducts are added to connect the other two ends of the compartments to ambient. The ducts have the same area as the \ct{GEOM} duct. At steady-state, all duct velocities should be the same.
+
+\label{leak_geom}
+In the second verification case (\ct{leak\_geom}), three, sealed, 1~m$^3$ compartments are defined in a row, separated by common walls. The left domain boundary is \ct{OPEN} with one grid cell before the start of the left compartment. The left side of the left compartment has a leak path that is a \ct{VENT} on the \ct{OPEN} side and a \ct{GEOM} inside the compartment. It is defined as four grid cells and given the leak area of a single grid cell. The right side of the left compartment has two leak paths connecting to the left side of the middle compartment. One path is defined with two \ct{VENT} inputs and the other with two \ct{GEOM} inputs. These are each defined with two grid cells and given half of the area of the first leak path. The right side of the middle compartment is connected to the left side of the right compartment with a leak path that is a \ct{GEOM} in the middle compartment and a \ct{VENT} in the right. It has the size and leak area as the first leak path. Combined these leak paths represent all combinations of \ct{VENT} and \ct{GEOM}. The right side of the right compartment has a single grid cell exhaust \ct{VENT}. At steady-state all four leak paths should have the same velocity.
+
+\begin{figure}[ht]
+	\includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_geom}
+	\includegraphics[height=2.2in]{SCRIPT_FIGURES/leak_geom}
+	\caption[The HVAC + complex geometry cases]{(Left) Results of the \ct{HVAC\_geom} case. (Right) Results of the \ct{leak\_geom} case.}
+	\label{HVAC_geom_fig}
+\end{figure}
+
+\FloatBarrier
 
 \section{ASHRAE Sample Problem 7\\(\texorpdfstring{\ct{ashrae\_7\_fixed\_flow}}{ashrae\_7\_fixed\_flow}, \texorpdfstring{\ct{ashrae\_7\_quadratic}}{ashrae\_7\_quadratic}, \texorpdfstring{\ct{ashrae\_7\_table}}{ashrae\_7\_table})}
 \label{ashrae7}
@@ -6900,6 +7178,35 @@ The shapes of the fire fronts are shown in Figure~\ref{fig:level_set_ellipse}. T
  \caption[Level set fire front ellipse error]{Relative error between FDS and empirical model. FDS spread rates are obtained from arrival times at devices placed \SI{4}{\meter} from the ignition point at compass angle increments of \SI{45}{\degree}.}
 \label{fig:level_set_ellipse_error}
 \end{figure}
+
+\subsection{Custom Wind Fuction (\texorpdfstring{\ct{LS\_wind\_ramp}}{LS\_wind\_ramp})}
+\label{LS_wind_ramp}
+
+The level set model determines a wind-aided head fire spread rate based on the function  
+\be
+   R = R_{\rm 0} \, (1+\phi_{\rm W})
+\ee
+where the no-wind, no-slope spread rate, $R_{\rm 0}$, is increased by a factor $\phi_W$, which is a function of the wind speed. Note that there may be an additional term accounting for slope, $\phi_{\rm S}$, but this is excluded for simplicity in this example. The ability to customize the form of $\phi_W$ as a function of the reference wind speed, using \ct{VEG_LSET_WIND_RAMP}, is tested here. A line fire is ignited on a level set surface with a no-wind, no-slope spread rate, \ct{VEG_LSET_ROS_00}, of 0.03~m/s. The wind speed, using a flat wind profile, is progressively increased from 0~m/s to 5~m/s. In the first case,\ct{LS_wind_ramp_lin.fds}, the wind ramp is set to reproduce a linear function
+\be
+   R = R_{\rm 0} \, (1+0.4 \, U)
+\ee
+and in the second case, \ct{LS_wind_ramp_quad.fds}, it is set to match a quadratic function 
+\be
+   R = R_{\rm 0} \, (1+ 0.1 \, U^2)
+\ee
+The maximum spread rate as a function of wind speed is plotted in Figure~\ref{fig:LS_wind_ramp} to confirm that the functions are properly applied.
+
+
+\begin{figure}[h]
+\begin{center}
+\begin{tabular}{cc}
+ \includegraphics[height=2.2in]{SCRIPT_FIGURES/LS_wind_ramp.pdf}
+\end{tabular}
+\end{center}
+ \caption[Level set wind ramp]{Expected versus predicted spread rate as a function of linear and quadratic wind speed functions.}
+\label{fig:LS_wind_ramp}
+\end{figure}
+
 
 \subsection{Ember Generation (\texorpdfstring{\ct{LS4\_ember\_yield}}{LS4\_ember\_yield})}
 \label{LS4_ember_yield}
@@ -7636,31 +7943,40 @@ The use of computer software for safety purposes is sometimes regulated under a 
 \end{enumerate}
 
 \begin{landscape}
-\centering
-\captionof{table}[FDS Installation Test Suite]{FDS Installation Test Suite. Details of each case may be found in the listed section or reference. Note that the light blue colored links refer to the FDS User's Guide.} \label{tbl:installation_test}
-\footnotesize
-\begin{tabular}{|l|c|l|l|l|}
-\hline
-Folder                  & Reference                       & Input File                                 & FDS Output File                                  & Expected Results File \\ \hline \hline
-Controls                & \ref{UG-activate_vents}         & activate\_vents.fds                        & activate\_vents\_ctrl.csv                        & activate\_vents.csv \\ \hline
-Pressure\_Effects       & \ref{isentropic2}               & isentropic2.fds                            & isentropic2\_devc.csv                           & isentropic2.csv \\ \hline
-Energy\_Budget          & \ref{energy_budget_tmix}        & energy\_budget\_tmix.fds                   & energy\_budget\_tmix\_devc.csv                   & energy\_budget\_tmix.csv \\ \hline
-Energy\_Budget          & \ref{energy_budget_walls}       & energy\_budget\_cold\_walls.fds            & energy\_budget\_cold\_walls\_hrr.csv             & energy\_budget\_cold\_walls.csv \\ \hline
-Fires                   & \ref{UG-spray_burner}           & spray\_burner.fds                          & spray\_burner\_hrr.csv                           & spray\_burner.csv \\ \hline
-Heat\_Transfer          & \ref{heat_conduction_kc}        & heat\_conduction\_kc.fds                   & heat\_conduction\_kc\_devc.csv                   & heat\_conduction\_kc.csv \\ \hline
-HVAC                    & \ref{ashrae7}                   & ashrae7\_table.fds                         & ashrae7\_table\_devc.csv                         & ashrae7\_exp.csv \\ \hline
-Pressure\_Solver        & \ref{UG-duct_flow}              & duct\_flow.fds                             & duct\_flow\_devc.csv                             & duct\_flow.csv \\ \hline
-Pressure\_Solver        & \ref{UG-duct_flow}              & duct\_flow\_uglmat.fds                     & duct\_flow\_uglmat\_devc.csv                     & duct\_flow.csv \\ \hline
-Pyrolysis               & \ref{enthalpy}                  & enthalpy.fds                               & enthalpy\_devc.csv                               & enthalpy.csv \\ \hline
-Pyrolysis               & \ref{shrink_swell}              & shrink\_swell.fds                          & shrink\_swell\_devc.csv                          & shrink\_swell.csv \\ \hline
-Radiation               & \ref{radiation_shield}          & radiation\_shield.fds                      & radiation\_shield\_devc.csv                      & radiation\_shield.csv \\ \hline
-Species                 & \ref{mixing_reactions}          & reactionrate\_EDC\_1step\_CH4\_nonmix.fds  & reactionrate\_EDC\_1step\_CH4\_nonmix\_devc.csv  & reactionrate\_EDC\_1step\_CH4\_nonmix\_spec.csv \\ \hline
-Species                 & \ref{finite_rate_reactions}     & reactionrate\_arrhenius\_2order\_1step.fds & reactionrate\_arrhenius\_2order\_1step\_devc.csv & reactionrate\_arrhenius\_2order\_1step\_soln.csv \\ \hline
-Sprinklers\_and\_Sprays & \ref{water_evaporation_1}       & water\_evaporation\_1.fds                  & water\_evaporation\_1\_devc.csv                  & water\_evaporation\_1.csv \\ \hline
-Sprinklers\_and\_Sprays & \ref{particle_drag}             & particle\_drag\_U50\_N16.fds               & particle\_drag\_U50\_N16\_devc.csv               & particle\_drag\_U50\_N16.csv \\ \hline
 
-\end{tabular}
+\scriptsize
+\begin{xltabular}{9in}{|p{1.4in}|X|p{2.1in}|p{2.1in}|p{2.1in}|}
+\caption[FDS Installation Test Suite]{FDS Installation Test Suite. Details of each case may be found in the listed section or reference. Note that the light blue colored links refer to the FDS User's Guide.}
+\label{tbl:installation_test} \\
+\hline
+Folder                      & Reference                     & Input File                                   & FDS Output File                                    & Expected Results File                              \\ 
+\hline \hline
+\endfirsthead
+\caption[]{FDS Installation Test (continued).} \\
+\hline
+Folder                      & Reference                     & Input File                                   & FDS Output File                                    & Expected Results File                              \\
+\hline \hline
+\endhead
+\tct{Controls}              & \ref{UG-activate_vents}      & \tct{activate_vents.fds}                      & \tct{activate_vents_ctrl.csv}                      & \tct{activate_vents.csv}                           \\ \hline
+\tct{Energy_Budget}         & \ref{energy_budget_tmix}     & \tct{energy_budget_tmix.fds}                  & \tct{energy_budget_tmix_devc.csv}                  & \tct{energy_budget_tmix.csv}                       \\ \hline
+\tct{Energy_Budget}         & \ref{energy_budget_walls}    & \tct{energy_budget_cold_walls.fds}            & \tct{energy_budget_cold_walls_hrr.csv}             & \tct{energy_budget_cold_walls.csv}                 \\ \hline
+\tct{Fires}                 & \ref{UG-spray_burner}        & \tct{spray_burner.fds}                        & \tct{spray_burner_hrr.csv}                         & \tct{spray_burner.csv}                             \\ \hline
+\tct{Heat_Transfer}         & \ref{heat_conduction_kc}     & \tct{heat_conduction_kc.fds}                  & \tct{heat_conduction_kc_devc.csv}                  & \tct{heat_conduction_kc.csv}                       \\ \hline
+\tct{HVAC}                  & \ref{ashrae7}                & \tct{ashrae7_table.fds}                       & \tct{ashrae7_table_devc.csv}                       & \tct{ashrae7_exp.csv}                              \\ \hline
+\tct{Pressure_Effects}      & \ref{isentropic2}            & \tct{isentropic2.fds}                         & \tct{isentropic2_devc.csv}                         & \tct{isentropic2.csv}                              \\ \hline
+\tct{Pressure_Solver}       & \ref{UG-duct_flow}           & \tct{duct_flow.fds}                           & \tct{duct_flow_devc.csv}                           & \tct{duct_flow.csv}                                \\ \hline
+\tct{Pressure_Solver}       & \ref{UG-duct_flow}           & \tct{duct_flow_uglmat.fds}                    & \tct{duct_flow_uglmat_devc.csv}                    & \tct{duct_flow.csv}                                \\ \hline
+\tct{Pyrolysis}             & \ref{enthalpy}               & \tct{enthalpy.fds}                            & \tct{enthalpy_devc.csv}                            & \tct{enthalpy.csv}                                 \\ \hline
+\tct{Pyrolysis}             & \ref{shrink_swell}           & \tct{shrink_swell.fds}                        & \tct{shrink_swell_devc.csv}                        & \tct{shrink_swell.csv}                             \\ \hline
+\tct{Radiation}             & \ref{radiation_shield}       & \tct{radiation_shield.fds}                    & \tct{radiation_shield_devc.csv}                    & \tct{radiation_shield.csv}                         \\ \hline
+\tct{Species}               & \ref{mixing_reactions}       & \tct{reactionrate_EDC_1step_CH4_nonmix.fds}   & \tct{reactionrate_EDC_1step_CH4_nonmix_devc.csv}   & \tct{reactionrate_EDC_1step_CH4_nonmix_spec.csv}   \\ \hline
+\tct{Species}               & \ref{finite_rate_reactions}  & \tct{reactionrate_arrhenius_2order_1step.fds} & \tct{reactionrate_arrhenius_2order_1step_devc.csv} & \tct{reactionrate_arrhenius_2order_1step_soln.csv} \\ \hline
+\tct{Sprinklers_and_Sprays} & \ref{water_evaporation_1}    & \tct{water_evaporation_1.fds}                 & \tct{water_evaporation_1_devc.csv}                 & \tct{water_evaporation_1.csv}                      \\ \hline
+\tct{Sprinklers_and_Sprays} & \ref{particle_drag}          & \tct{particle_drag_U50_N16.fds}               & \tct{particle_drag_U50_N16_devc.csv}               & \tct{particle_drag_U50_N16.csv}                    \\ \hline
+\end{xltabular}
 \end{landscape}
+
+\normalsize
 
 % Unstructured geometry Appendix:
 

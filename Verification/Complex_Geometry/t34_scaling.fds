@@ -1,0 +1,35 @@
+&HEAD CHID='t34_scaling' /
+
+&MESH IJK=100,100,100, XB=-5,5,-5,5,-5,5 /
+
+&TIME T_END=0/
+
+&SURF ID='default', COLOR='GRAY' /
+&SURF ID='scale',  COLOR='BLUE' /
+&SURF ID='move x', COLOR='PINK' /
+&SURF ID='move y', COLOR='ORANGE' /
+&SURF ID='move z', COLOR='RED' /
+&SURF ID='flip x', COLOR='SKY BLUE' /
+&SURF ID='flip y', COLOR='CYAN' /
+&SURF ID='flip z', COLOR='AQUAMARINE' /
+
+&MOVE ID='scale and move',  T34(1:12)=.5,0,0, 0,.5,0, 0,0,.5, -3,0,0 /
+&MOVE ID='move x', T34(1:12)=1,0,0, 0,1,0, 0,0,1, 2,0,0 /
+&MOVE ID='move y', T34(1:12)=1,0,0, 0,1,0, 0,0,1, 0,3,0 /
+&MOVE ID='move z', T34(1:12)=1,0,0, 0,1,0, 0,0,1, 0,0,4 /
+&MOVE ID='flip x', T34(1:12)=-1,0,0, 0,1,0, 0,0,1, -2,-2,0 /
+&MOVE ID='flip y', T34(1:12)=1,0,0, 0,-1,0, 0,0,1, 0,-3,0 /
+&MOVE ID='flip z', T34(1:12)=1,0,0, 0,1,0, 0,0,-1, 0,0,-4 /
+
+&GEOM ID='base', XB=0,1,0,1,0,1, SURF_ID='default' /
+&GEOM ID='scale and move', XB=0,1,0,1,0,1, SURF_ID='scale', MOVE_ID='scale and move' /
+
+&GEOM ID='move x', XB=0,1,0,1,0,1, SURF_ID='move x', MOVE_ID='move x' /
+&GEOM ID='move y', XB=0,1,0,1,0,1, SURF_ID='move y', MOVE_ID='move y' /
+&GEOM ID='move z', XB=0,1,0,1,0,1, SURF_ID='move z', MOVE_ID='move z' /
+
+&GEOM ID='flip x', XB=0,1,0,1,0,1, SURF_ID6='default','flip x','default','default','default','default', MOVE_ID='flip x' /
+&GEOM ID='flip y', XB=0,1,0,1,0,1, SURF_ID6='default','default','default','flip y','default','default', MOVE_ID='flip y' /
+&GEOM ID='flip z', XB=0,1,0,1,0,1, SURF_ID6='default','default','default','default','default','flip z', MOVE_ID='flip z' /
+
+&TAIL /

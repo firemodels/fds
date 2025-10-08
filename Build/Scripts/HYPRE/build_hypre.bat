@@ -1,5 +1,5 @@
 @echo off
-set LIB_TAG=v2.32.0
+set LIB_TAG=v2.33.0
 
 ::*** library and tag name are the same
 
@@ -76,6 +76,15 @@ echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
 
+echo Running CMake version check...
+call %CURDIR%/../check_cmake_version.bat
+if errorlevel 1 (
+    echo Exiting due to CMake version error.
+    pause
+    exit /b 1
+)
+echo Proceeding with build...
+
 echo.
 echo ----------------------------------------------------------
 echo ----------------------------------------------------------
@@ -84,18 +93,17 @@ echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
 cd %LIB_REPO%
-git checkout %LIB_REPO%\src\config\HYPRE_config.h.cmake.in
-git checkout %LIB_TAG%
 
-echo.
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
-echo changing HYPRE_FMANGLE 0 to HYPRE_FMANGLE 4
-echo in the file HYPRE_config.h.cmake.in
-echo ----------------------------------------------------------
-echo ----------------------------------------------------------
-echo.
-powershell -Command "(Get-Content %LIB_REPO%\src\config\HYPRE_config.h.cmake.in) -replace 'HYPRE_FMANGLE 0', 'HYPRE_FMANGLE 4' | Set-Content %LIB_REPO%\src\config\HYPRE_config.h.cmake.in"
+for /f %%i in ('git tag -l %LIB_TAG%') do set FOUND_TAG=%%i
+if "%FOUND_TAG%" == "%LIB_TAG%" (
+    git checkout %LIB_REPO%\src\config\HYPRE_config.h.cmake.in
+    git checkout %LIB_TAG%
+) else (
+    echo Your HYPRE repository is not up to date with the required tag: %LIB_TAG%.
+    echo The FDS build requires HYPRE version %LIB_TAG%. Please update your HYPRE repository.
+    pause
+    exit /b 1
+)
 
 cd %CURDIR%
 
@@ -118,16 +126,18 @@ echo ----------------------------------------------------------
 echo ----------------------------------------------------------
 echo.
 
-set BUILDDIR=%LIB_REPO%\src\cmbuild
+set BUILDDIR=%LIB_REPO%\build
 cd %BUILDDIR%
-cmake ..\  ^
+cmake ..\src  ^
 -G "MinGW Makefiles" ^
 -DCMAKE_INSTALL_PREFIX="%INSTALLDIR%" ^
 -DCMAKE_C_COMPILER=%COMP_CC% ^
 -DCMAKE_C_FLAGS="/DWIN32 -O3 /fp:precise" ^
 -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded" ^
 -DCMAKE_MAKE_PROGRAM="%CMAKE_MAKE_PROGRAM%" ^
+-DHYPRE_FMANGLE=4 ^
 -DCMAKE_INSTALL_LIBDIR="lib"
+
 
 echo.
 echo ----------------------------------------------------------

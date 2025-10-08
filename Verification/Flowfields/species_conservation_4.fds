@@ -18,6 +18,7 @@
       N_REACTIONS          = 1
       SPEC_ID(1:4,1)       = 'CARBON DIOXIDE','NITRIC OXIDE','NITROGEN DIOXIDE','CHLORINE',
       NU_SPEC(1:4,1)       = 0.25, 0.25, 0.25,0.25,
+      HEAT_OF_REACTION = 0
       REFERENCE_TEMPERATURE=330. /
 
 &SURF ID                   = 'PATCH'

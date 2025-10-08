@@ -1,0 +1,225 @@
+&HEAD CHID='SFPE_Case_8', TITLE='Verification Case 8, SFPE Guide to Thermal Performance of Resistive Assemblies'/
+
+&MESH IJK=24,24,3, XB=-0.12,0.12,-0.12,0.12,-0.01,0.02 /
+
+&TIME T_END=10800, DT=1., WALL_INCREMENT=1 /
+
+&MISC SOLID_PHASE_ONLY=T, TMPA=0. /
+
+&RADI RADIATION=T /
+
+&OBST XB=-0.10, 0.10,-0.10, 0.10,0.0,0.01, SURF_IDS='ADIABATIC','STUFF','ADIABATIC', MATL_ID='STUFF' /
+
+&SURF ID='STUFF', COLOR='GRAY', HEAT_TRANSFER_COEFFICIENT=10.0, EMISSIVITY=0.8, HT3D=T, CELL_SIZE=0.01, TMP_GAS_FRONT=1., RAMP_TMP_GAS_FRONT='fire_ramp' /
+&SURF ID='ADIABATIC', HEAT_TRANSFER_COEFFICIENT=0.0, EMISSIVITY=0.0, HT3D=T, CELL_SIZE=0.01 /
+
+&RAMP ID='fire_ramp',  T=0, F=0 /
+&RAMP ID='fire_ramp',  T=60, F=329.2136658 /
+&RAMP ID='fire_ramp',  T=120, F=424.5048779 /
+&RAMP ID='fire_ramp',  T=180, F=482.289303 /
+&RAMP ID='fire_ramp',  T=240, F=523.8873093 /
+&RAMP ID='fire_ramp',  T=300, F=556.4104306 /
+&RAMP ID='fire_ramp',  T=360, F=583.1176476 /
+&RAMP ID='fire_ramp',  T=420, F=605.7768252 /
+&RAMP ID='fire_ramp',  T=480, F=625.455108 /
+&RAMP ID='fire_ramp',  T=540, F=642.8463867 /
+&RAMP ID='fire_ramp',  T=600, F=658.4273315 /
+&RAMP ID='fire_ramp',  T=660, F=672.5395523 /
+&RAMP ID='fire_ramp',  T=720, F=685.4362483 /
+&RAMP ID='fire_ramp',  T=780, F=697.3103082 /
+&RAMP ID='fire_ramp',  T=840, F=708.312063 /
+&RAMP ID='fire_ramp',  T=900, F=718.5609528 /
+&RAMP ID='fire_ramp',  T=960, F=728.1534501 /
+&RAMP ID='fire_ramp',  T=1020, F=737.1685957 /
+&RAMP ID='fire_ramp',  T=1080, F=745.6719608 /
+&RAMP ID='fire_ramp',  T=1140, F=753.7185436 /
+&RAMP ID='fire_ramp',  T=1200, F=761.3549272 /
+&RAMP ID='fire_ramp',  T=1260, F=768.6209131 /
+&RAMP ID='fire_ramp',  T=1320, F=775.5507769 /
+&RAMP ID='fire_ramp',  T=1380, F=782.1742463 /
+&RAMP ID='fire_ramp',  T=1440, F=788.5172716 /
+&RAMP ID='fire_ramp',  T=1500, F=794.6026398 /
+&RAMP ID='fire_ramp',  T=1560, F=800.4504687 /
+&RAMP ID='fire_ramp',  T=1620, F=806.0786082 /
+&RAMP ID='fire_ramp',  T=1680, F=811.5029687 /
+&RAMP ID='fire_ramp',  T=1740, F=816.7377928 /
+&RAMP ID='fire_ramp',  T=1800, F=821.7958797 /
+&RAMP ID='fire_ramp',  T=1860, F=826.6887747 /
+&RAMP ID='fire_ramp',  T=1920, F=831.4269275 /
+&RAMP ID='fire_ramp',  T=1980, F=836.0198265 /
+&RAMP ID='fire_ramp',  T=2040, F=840.4761132 /
+&RAMP ID='fire_ramp',  T=2100, F=844.8036804 /
+&RAMP ID='fire_ramp',  T=2160, F=849.0097558 /
+&RAMP ID='fire_ramp',  T=2220, F=853.100975 /
+&RAMP ID='fire_ramp',  T=2280, F=857.0834446 /
+&RAMP ID='fire_ramp',  T=2340, F=860.9627965 /
+&RAMP ID='fire_ramp',  T=2400, F=864.7442362 /
+&RAMP ID='fire_ramp',  T=2460, F=868.4325848 /
+&RAMP ID='fire_ramp',  T=2520, F=872.0323158 /
+&RAMP ID='fire_ramp',  T=2580, F=875.5475878 /
+&RAMP ID='fire_ramp',  T=2640, F=878.9822734 /
+&RAMP ID='fire_ramp',  T=2700, F=882.3399847 /
+&RAMP ID='fire_ramp',  T=2760, F=885.6240963 /
+&RAMP ID='fire_ramp',  T=2820, F=888.8377658 /
+&RAMP ID='fire_ramp',  T=2880, F=891.9839517 /
+&RAMP ID='fire_ramp',  T=2940, F=895.0654299 /
+&RAMP ID='fire_ramp',  T=3000, F=898.0848086 /
+&RAMP ID='fire_ramp',  T=3060, F=901.0445413 /
+&RAMP ID='fire_ramp',  T=3120, F=903.946939 /
+&RAMP ID='fire_ramp',  T=3180, F=906.7941809 /
+&RAMP ID='fire_ramp',  T=3240, F=909.5883242 /
+&RAMP ID='fire_ramp',  T=3300, F=912.3313134 /
+&RAMP ID='fire_ramp',  T=3360, F=915.0249876 /
+&RAMP ID='fire_ramp',  T=3420, F=917.671089 /
+&RAMP ID='fire_ramp',  T=3480, F=920.2712687 /
+&RAMP ID='fire_ramp',  T=3540, F=922.8270936 /
+&RAMP ID='fire_ramp',  T=3600, F=925.3400513 /
+&RAMP ID='fire_ramp',  T=3660, F=927.8115564 /
+&RAMP ID='fire_ramp',  T=3720, F=930.2429541 /
+&RAMP ID='fire_ramp',  T=3780, F=932.6355255 /
+&RAMP ID='fire_ramp',  T=3840, F=934.990491 /
+&RAMP ID='fire_ramp',  T=3900, F=937.3090145 /
+&RAMP ID='fire_ramp',  T=3960, F=939.5922069 /
+&RAMP ID='fire_ramp',  T=4020, F=941.8411286 /
+&RAMP ID='fire_ramp',  T=4080, F=944.0567933 /
+&RAMP ID='fire_ramp',  T=4140, F=946.2401703 /
+&RAMP ID='fire_ramp',  T=4200, F=948.3921871 /
+&RAMP ID='fire_ramp',  T=4260, F=950.5137319 /
+&RAMP ID='fire_ramp',  T=4320, F=952.6056555 /
+&RAMP ID='fire_ramp',  T=4380, F=954.6687738 /
+&RAMP ID='fire_ramp',  T=4440, F=956.7038692 /
+&RAMP ID='fire_ramp',  T=4500, F=958.7116928 /
+&RAMP ID='fire_ramp',  T=4560, F=960.692966 /
+&RAMP ID='fire_ramp',  T=4620, F=962.6483816 /
+&RAMP ID='fire_ramp',  T=4680, F=964.578606 /
+&RAMP ID='fire_ramp',  T=4740, F=966.48428 /
+&RAMP ID='fire_ramp',  T=4800, F=968.3660202 /
+&RAMP ID='fire_ramp',  T=4860, F=970.2244204 /
+&RAMP ID='fire_ramp',  T=4920, F=972.0600525 /
+&RAMP ID='fire_ramp',  T=4980, F=973.8734676 /
+&RAMP ID='fire_ramp',  T=5040, F=975.6651972 /
+&RAMP ID='fire_ramp',  T=5100, F=977.4357536 /
+&RAMP ID='fire_ramp',  T=5160, F=979.1856316 /
+&RAMP ID='fire_ramp',  T=5220, F=980.9153084 /
+&RAMP ID='fire_ramp',  T=5280, F=982.6252454 /
+&RAMP ID='fire_ramp',  T=5340, F=984.3158878 /
+&RAMP ID='fire_ramp',  T=5400, F=985.9876663 /
+&RAMP ID='fire_ramp',  T=5460, F=987.6409973 /
+&RAMP ID='fire_ramp',  T=5520, F=989.2762833 /
+&RAMP ID='fire_ramp',  T=5580, F=990.8939141 /
+&RAMP ID='fire_ramp',  T=5640, F=992.4942668 /
+&RAMP ID='fire_ramp',  T=5700, F=994.0777066 /
+&RAMP ID='fire_ramp',  T=5760, F=995.6445872 /
+&RAMP ID='fire_ramp',  T=5820, F=997.1952515 /
+&RAMP ID='fire_ramp',  T=5880, F=998.7300316 /
+&RAMP ID='fire_ramp',  T=5940, F=1000.24925 /
+&RAMP ID='fire_ramp',  T=6000, F=1001.753218 /
+&RAMP ID='fire_ramp',  T=6060, F=1003.24224 /
+&RAMP ID='fire_ramp',  T=6120, F=1004.71661 /
+&RAMP ID='fire_ramp',  T=6180, F=1006.176612 /
+&RAMP ID='fire_ramp',  T=6240, F=1007.622525 /
+&RAMP ID='fire_ramp',  T=6300, F=1009.054619 /
+&RAMP ID='fire_ramp',  T=6360, F=1010.473153 /
+&RAMP ID='fire_ramp',  T=6420, F=1011.878384 /
+&RAMP ID='fire_ramp',  T=6480, F=1013.270557 /
+&RAMP ID='fire_ramp',  T=6540, F=1014.649914 /
+&RAMP ID='fire_ramp',  T=6600, F=1016.016688 /
+&RAMP ID='fire_ramp',  T=6660, F=1017.371108 /
+&RAMP ID='fire_ramp',  T=6720, F=1018.713393 /
+&RAMP ID='fire_ramp',  T=6780, F=1020.04376 /
+&RAMP ID='fire_ramp',  T=6840, F=1021.362418 /
+&RAMP ID='fire_ramp',  T=6900, F=1022.669572 /
+&RAMP ID='fire_ramp',  T=6960, F=1023.965421 /
+&RAMP ID='fire_ramp',  T=7020, F=1025.250159 /
+&RAMP ID='fire_ramp',  T=7080, F=1026.523974 /
+&RAMP ID='fire_ramp',  T=7140, F=1027.787051 /
+&RAMP ID='fire_ramp',  T=7200, F=1029.039569 /
+&RAMP ID='fire_ramp',  T=7260, F=1030.281703 /
+&RAMP ID='fire_ramp',  T=7320, F=1031.513624 /
+&RAMP ID='fire_ramp',  T=7380, F=1032.7355 /
+&RAMP ID='fire_ramp',  T=7440, F=1033.947491 /
+&RAMP ID='fire_ramp',  T=7500, F=1035.149757 /
+&RAMP ID='fire_ramp',  T=7560, F=1036.342452 /
+&RAMP ID='fire_ramp',  T=7620, F=1037.525729 /
+&RAMP ID='fire_ramp',  T=7680, F=1038.699734 /
+&RAMP ID='fire_ramp',  T=7740, F=1039.864611 /
+&RAMP ID='fire_ramp',  T=7800, F=1041.020502 /
+&RAMP ID='fire_ramp',  T=7860, F=1042.167543 /
+&RAMP ID='fire_ramp',  T=7920, F=1043.305871 /
+&RAMP ID='fire_ramp',  T=7980, F=1044.435615 /
+&RAMP ID='fire_ramp',  T=8040, F=1045.556904 /
+&RAMP ID='fire_ramp',  T=8100, F=1046.669864 /
+&RAMP ID='fire_ramp',  T=8160, F=1047.774619 /
+&RAMP ID='fire_ramp',  T=8220, F=1048.871287 /
+&RAMP ID='fire_ramp',  T=8280, F=1049.959986 /
+&RAMP ID='fire_ramp',  T=8340, F=1051.040832 /
+&RAMP ID='fire_ramp',  T=8400, F=1052.113936 /
+&RAMP ID='fire_ramp',  T=8460, F=1053.17941 /
+&RAMP ID='fire_ramp',  T=8520, F=1054.23736 /
+&RAMP ID='fire_ramp',  T=8580, F=1055.287893 /
+&RAMP ID='fire_ramp',  T=8640, F=1056.331111 /
+&RAMP ID='fire_ramp',  T=8700, F=1057.367116 /
+&RAMP ID='fire_ramp',  T=8760, F=1058.396006 /
+&RAMP ID='fire_ramp',  T=8820, F=1059.41788 /
+&RAMP ID='fire_ramp',  T=8880, F=1060.432831 /
+&RAMP ID='fire_ramp',  T=8940, F=1061.440953 /
+&RAMP ID='fire_ramp',  T=9000, F=1062.442338 /
+&RAMP ID='fire_ramp',  T=9060, F=1063.437074 /
+&RAMP ID='fire_ramp',  T=9120, F=1064.425249 /
+&RAMP ID='fire_ramp',  T=9180, F=1065.406951 /
+&RAMP ID='fire_ramp',  T=9240, F=1066.382261 /
+&RAMP ID='fire_ramp',  T=9300, F=1067.351265 /
+&RAMP ID='fire_ramp',  T=9360, F=1068.314041 /
+&RAMP ID='fire_ramp',  T=9420, F=1069.270671 /
+&RAMP ID='fire_ramp',  T=9480, F=1070.221231 /
+&RAMP ID='fire_ramp',  T=9540, F=1071.165799 /
+&RAMP ID='fire_ramp',  T=9600, F=1072.10445 /
+&RAMP ID='fire_ramp',  T=9660, F=1073.037256 /
+&RAMP ID='fire_ramp',  T=9720, F=1073.964292 /
+&RAMP ID='fire_ramp',  T=9780, F=1074.885627 /
+&RAMP ID='fire_ramp',  T=9840, F=1075.801331 /
+&RAMP ID='fire_ramp',  T=9900, F=1076.711472 /
+&RAMP ID='fire_ramp',  T=9960, F=1077.616118 /
+&RAMP ID='fire_ramp',  T=10020, F=1078.515336 /
+&RAMP ID='fire_ramp',  T=10080, F=1079.409188 /
+&RAMP ID='fire_ramp',  T=10140, F=1080.29774 /
+&RAMP ID='fire_ramp',  T=10200, F=1081.181053 /
+&RAMP ID='fire_ramp',  T=10260, F=1082.05919 /
+&RAMP ID='fire_ramp',  T=10320, F=1082.932209 /
+&RAMP ID='fire_ramp',  T=10380, F=1083.800172 /
+&RAMP ID='fire_ramp',  T=10440, F=1084.663135 /
+&RAMP ID='fire_ramp',  T=10500, F=1085.521157 /
+&RAMP ID='fire_ramp',  T=10560, F=1086.374293 /
+&RAMP ID='fire_ramp',  T=10620, F=1087.222598 /
+&RAMP ID='fire_ramp',  T=10680, F=1088.066128 /
+&RAMP ID='fire_ramp',  T=10740, F=1088.904936 /
+&RAMP ID='fire_ramp',  T=10800, F=1089.739073 /
+
+&MATL ID            = 'STUFF'
+      SPECIFIC_HEAT = 1.
+      CONDUCTIVITY_RAMP = 'k_ramp'
+      DENSITY       = 2400.0 /
+
+&RAMP ID='k_ramp', T=   0, F=1.5 /
+&RAMP ID='k_ramp', T= 200, F=0.7 /
+&RAMP ID='k_ramp', T=1000, F=0.5 /
+
+&BNDF QUANTITY='WALL TEMPERATURE', CELL_CENTERED=T/
+&BNDF QUANTITY='NET HEAT FLUX', CELL_CENTERED=T/
+
+&VENT DB='XMIN', SURF_ID='OPEN' /
+&VENT DB='XMAX', SURF_ID='OPEN' /
+&VENT DB='YMIN', SURF_ID='OPEN' /
+&VENT DB='YMAX', SURF_ID='OPEN' /
+&VENT DB='ZMIN', SURF_ID='OPEN' /
+&VENT DB='ZMAX', SURF_ID='OPEN' /
+
+&DUMP DT_DEVC=1.0 /
+
+&SLCF PBZ=0.005, QUANTITY='TEMPERATURE', CELL_CENTERED=T /
+
+&DEVC ID='Center', XYZ=0.0,0.000,0.005, QUANTITY='TEMPERATURE' /
+&DEVC ID='Side',   XYZ=0.1,0.000,0.005, QUANTITY='WALL TEMPERATURE', IOR=1 /
+&DEVC ID='Corner', XYZ=0.1,0.099,0.005, QUANTITY='WALL TEMPERATURE', IOR=1 /
+
+&TAIL /

@@ -128,6 +128,7 @@ INTEGER, PARAMETER :: REALIZABILITY_STOP=8             !< Flag for STATUS_STOP
 INTEGER, PARAMETER :: VERSION_STOP=10                  !< Flag for STATUS_STOP
 INTEGER, PARAMETER :: ODE_STOP=11                      !< Flag for STATUS_STOP
 INTEGER, PARAMETER :: HEARTBEAT_STOP=12                !< Flag for STATUS_STOP
+INTEGER, PARAMETER :: CVODE_SUBSTEP_STOP=13            !< Flag for STATUS_STOP
 
 INTEGER, PARAMETER :: SPHERE_DRAG=1                    !< Flag for LPC\%DRAG_LAW (LPC means LAGRANGIAN_PARTICLE_CLASS)
 INTEGER, PARAMETER :: CYLINDER_DRAG=2                  !< Flag for LPC\%DRAG_LAW
@@ -176,6 +177,7 @@ INTEGER :: RND_SEED=0                      !< User RANDOM_SEED
 
 LOGICAL :: HVAC_DEBUG=.FALSE.               !< Output known hvac values to smokeview
 LOGICAL :: RADIATION=.TRUE.                 !< Perform radiation transport
+LOGICAL :: UPDATE_ALL_ANGLES=.FALSE.        !< Update all radiation angles the next time the solver is called
 LOGICAL :: INCLUDE_PYROLYSIS=.FALSE.        !< Solid phase pyrolysis is included in the simulation
 LOGICAL :: EXCHANGE_RADIATION=.FALSE.       !< Do an MPI radiation exchange at this time step
 LOGICAL :: EXCHANGE_OBST_MASS=.FALSE.       !< Exchange mass loss information for obstructions bordering interpolated meshes
@@ -192,6 +194,7 @@ LOGICAL :: SUPPRESSION=.TRUE.               !< Indicates if gas-phase combustion
 LOGICAL :: ACCUMULATE_WATER=.FALSE.         !< Indicates that integrated liquid outputs are specified
 LOGICAL :: WRITE_XYZ=.FALSE.                !< Indicates that a Plot3D geometry file is specified by user
 LOGICAL :: CHECK_POISSON=.FALSE.            !< Check the accuracy of the Poisson solver
+LOGICAL :: WRITE_PARCSRPCG_MATRIX=.FALSE.   !< If true, write out matrix for UGLMAT HYPRE solver
 LOGICAL :: TWO_D=.FALSE.                    !< Perform a 2-D simulation
 LOGICAL :: SETUP_ONLY=.FALSE.               !< Indicates that the calculation should be stopped before time-stepping
 LOGICAL :: CHECK_MESH_ALIGNMENT=.FALSE.     !< Indicates that the user wants to check the mesh alignment and then stop
@@ -271,7 +274,6 @@ LOGICAL :: REACTING_THIN_OBSTRUCTIONS=.FALSE.       !< Thin obstructions that of
 LOGICAL :: TENSOR_DIFFUSIVITY=.FALSE.               !< If true, use experimental tensor diffusivity model for spec and tmp
 LOGICAL :: OXPYRO_MODEL=.FALSE.                     !< Flag to use oxidative pyrolysis mass transfer model
 LOGICAL :: OUTPUT_WALL_QUANTITIES=.FALSE.           !< Flag to force call to WALL_MODEL
-LOGICAL :: FLUX_LIMITER_MW_CORRECTION=.FALSE.       !< Flag for MW correction ensure consistent equation of state at face
 LOGICAL :: STORE_FIRE_ARRIVAL=.FALSE.               !< Flag for tracking arrival of spreading fire front over a surface
 LOGICAL :: STORE_FIRE_RESIDENCE=.FALSE.             !< Flag for tracking residence time of spreading fire front over a surface
 LOGICAL :: STORE_LS_SPREAD_RATE=.FALSE.             !< Flag for outputting local level set spread rate magnitude
@@ -291,6 +293,9 @@ CHARACTER(FORMULA_LENGTH), DIMENSION(MAX_TERRAIN_IMAGES) :: TERRAIN_IMAGE !< Nam
 CHARACTER(CHID_LENGTH) :: CHID                                            !< Job ID
 CHARACTER(CHID_LENGTH) :: RESTART_CHID                                    !< Job ID for a restarted case
 CHARACTER(FILE_LENGTH) :: RESULTS_DIR                                     !< Custom directory for output
+CHARACTER(FILE_LENGTH) :: BINGEOM_DIR                                     !< Custom directory for writing binary geometry files
+CHARACTER(5) :: DECIMAL_SPECIFIER='POINT'                                 !< Use point or comma for real outputs
+CHARACTER(1) :: SEPARATOR                                                 !< Decimal point or comma
 
 ! Dates, version numbers, revision numbers
 
@@ -302,8 +307,8 @@ CHARACTER(FORMULA_LENGTH) :: COMPILE_DATE='unknown'                       !< Dat
 ! Miscellaneous real constants
 
 REAL(EB) :: CPOPR                              !< Specific heat divided by the Prandtl number (J/kg/K)
-REAL(EB) :: RSC                                !< Reciprocal of the Schmidt number
-REAL(EB) :: RPR                                !< Reciprocal of the Prandtl number
+REAL(EB) :: RSC_T                              !< Reciprocal of the turbulent Schmidt number
+REAL(EB) :: RPR_T                              !< Reciprocal of the turbulent Prandtl number
 REAL(EB) :: TMPA                               !< Ambient temperature (K)
 REAL(EB) :: TMPA4                              !< Ambient temperature to the fourth power (K^4)
 REAL(EB) :: RHOA                               !< Ambient density (kg/m3)
@@ -331,13 +336,13 @@ REAL(EB) :: CFL_MAX=1.0_EB                     !< Upper bound of CFL constraint
 REAL(EB) :: CFL_MIN=0.8_EB                     !< Lower bound of CFL constraint
 REAL(EB) :: VN_MAX=1.0_EB                      !< Upper bound of von Neumann constraint
 REAL(EB) :: VN_MIN=0.8_EB                      !< Lower bound of von Neumann constraint
-REAL(EB) :: PR                                 !< Prandtl number
-REAL(EB) :: SC                                 !< Schmidt number
+REAL(EB) :: PR_T                               !< Turbulent Prandtl number
+REAL(EB) :: SC_T                               !< Turbulent Schmidt number
 REAL(EB) :: GROUND_LEVEL=0._EB                 !< Height of the ground, used for establishing atmospheric profiles (m)
 REAL(EB) :: LIMITING_DT_RATIO=1.E-4_EB         !< Ratio of current to initial time step when code is stopped
 REAL(EB) :: NOISE_VELOCITY=0.005_EB            !< Velocity of random noise vectors (m/s)
 REAL(EB) :: TAU_DEFAULT=1._EB                  !< Default ramp-up time (s)
-REAL(EB) :: TAU_CHEM=1.E-10_EB                 !< Smallest reaction mixing time scale (s)
+REAL(EB) :: TAU_CHEM=1.E-5_EB                  !< Smallest reaction mixing time scale (s)
 REAL(EB) :: TAU_FLAME=1.E10_EB                 !< Largest reaction mixing time scale (s)
 REAL(EB) :: SMOKE_ALBEDO=0.3_EB                !< Parmeter used by Smokeview
 REAL(EB) :: Y_WERNER_WENGLE=11.81_EB           !< Limit of y+ in Werner-Wengle model
@@ -435,6 +440,7 @@ INTEGER :: MAX_PRIORITY=1                                           !< Maximum n
 INTEGER :: N_PASSIVE_SCALARS=0                                      !< Number of passive scalars
 INTEGER :: N_TOTAL_SCALARS=0                                        !< Number of total scalars, tracked and passive
 INTEGER :: N_FIXED_CHEMISTRY_SUBSTEPS=-1                            !< Number of chemistry substeps in combustion routine
+INTEGER :: ZETA_0_RAMP_INDEX=0                                      !< Ramp index for initial unmixed fraction
 
 LOGICAL :: OUTPUT_CHEM_IT=.FALSE.
 LOGICAL :: REAC_SOURCE_CHECK=.FALSE.
@@ -515,6 +521,7 @@ REAL(EB), ALLOCATABLE, DIMENSION(:) :: PRESSURE_ERROR_MAX        !< Max pressure
 INTEGER, ALLOCATABLE, DIMENSION(:,:) :: VELOCITY_ERROR_MAX_LOC   !< Indices of max velocity error
 INTEGER, ALLOCATABLE, DIMENSION(:,:) :: PRESSURE_ERROR_MAX_LOC   !< Indices of max pressure error
 INTEGER :: PRESSURE_ITERATIONS=0                                 !< Counter for pressure iterations
+INTEGER :: MAX_PREDICTOR_PRESSURE_ITERATIONS=-1                  !< Max pressure iterations per pressure solve in predictor
 INTEGER :: MAX_PRESSURE_ITERATIONS=10                            !< Max pressure iterations per pressure solve
 INTEGER :: TOTAL_PRESSURE_ITERATIONS=0                           !< Counter for total pressure iterations
 CHARACTER(LABEL_LENGTH) :: PRES_METHOD='FFT'                     !< Pressure solver method
@@ -558,10 +565,11 @@ REAL(EB) :: ALIGNMENT_TOLERANCE=0.001_EB      !< Maximum ratio of sizes of abutt
 ! Logical units and output file names
 
 INTEGER                              :: LU_ERR=ERROR_UNIT,LU_END=2,LU_GIT=3,LU_SMV=4,LU_INPUT=5,LU_OUTPUT=6,LU_STOP=7,LU_CPU=8,&
-                                        LU_CATF=9
-INTEGER                              :: LU_MASS,LU_HRR,LU_STEPS,LU_NOTREADY,LU_VELOCITY_ERROR,LU_CFL,LU_LINE=-1,LU_CUTCELL
+                                        LU_CATF=9,LU_RDIR=10,LU_GDIR=11,LU_SETCC=12,LU_BINGEOM=13,LU_PARCSRPCG_MATRIX=14
+INTEGER                              :: LU_MASS,LU_HRR,LU_STEPS,LU_NOTREADY,LU_VELOCITY_ERROR,LU_CFL,LU_LINE=-1,LU_CUTCELL, &
+                                        LU_CVODE_SUBSTEPS
 INTEGER                              :: LU_HISTOGRAM,LU_HVAC
-INTEGER                              :: LU_GEOC=-1,LU_TGA,LU_INFO,LU_DEVC_CTRL=-1,LU_RDIR
+INTEGER                              :: LU_GEOC=-1,LU_TGA,LU_INFO,LU_DEVC_CTRL=-1
 INTEGER, ALLOCATABLE, DIMENSION(:)   :: LU_PART,LU_PROF,LU_XYZ,LU_TERRAIN,LU_PL3D,LU_DEVC,LU_STATE,LU_CTRL,LU_CORE,LU_RESTART
 INTEGER, ALLOCATABLE, DIMENSION(:)   :: LU_VEG_OUT,LU_GEOM,LU_CFACE_GEOM
 INTEGER                              :: LU_GEOM_TRAN
@@ -570,12 +578,16 @@ INTEGER, ALLOCATABLE, DIMENSION(:,:) :: LU_SLCF,LU_SLCF_GEOM,LU_BNDF,LU_BNDG,LU_
 INTEGER                              :: DEVC_COLUMN_LIMIT=254,CTRL_COLUMN_LIMIT=254
 
 CHARACTER(FN_LENGTH) :: FN_INPUT='null',FN_STOP='null',FN_CPU,FN_CFL,FN_OUTPUT='null',FN_MASS,FN_HRR,FN_STEPS,FN_SMV,FN_END, &
-                        FN_ERR,FN_NOTREADY,FN_VELOCITY_ERROR,FN_GIT,FN_LINE,FN_HISTOGRAM,FN_CUTCELL,FN_TGA,FN_DEVC_CTRL,FN_HVAC
+                        FN_ERR,FN_NOTREADY,FN_VELOCITY_ERROR,FN_GIT,FN_LINE,FN_HISTOGRAM,FN_CUTCELL,FN_TGA,FN_DEVC_CTRL,FN_HVAC, &
+                        FN_CVODE_SUBSTEPS
 CHARACTER(FN_LENGTH), ALLOCATABLE, DIMENSION(:) :: FN_PART,FN_PROF,FN_XYZ,FN_TERRAIN,FN_PL3D,FN_DEVC,FN_STATE,FN_CTRL,FN_CORE, &
                                                    FN_RESTART,FN_VEG_OUT,FN_GEOM,FN_CFACE_GEOM
 CHARACTER(FN_LENGTH), ALLOCATABLE, DIMENSION(:,:) :: FN_SLCF,FN_SLCF_GEOM,FN_BNDF,FN_BNDG,FN_ISOF,FN_ISOF2,FN_SMOKE3D,FN_RADF
 
 CHARACTER(9) :: FMT_R
+CHARACTER(25) :: REAL_LIST
+CHARACTER( 9) :: CHAR_LIST
+CHARACTER(11) :: INTG_LIST
 LOGICAL :: OUT_FILE_OPENED=.FALSE.
 
 ! Boundary condition arrays
@@ -742,7 +754,7 @@ INTEGER :: TGA_MESH_INDEX=HUGE(INTEGER_ONE) !< Mesh for the special TGA calculat
 INTEGER :: TGA_SURF_INDEX=-100              !< Surface properties to use for special TGA calculation
 INTEGER :: TGA_WALL_INDEX=-100              !< Wall index to use for special TGA calculation
 INTEGER :: TGA_PARTICLE_INDEX=-100          !< Particle index to use for special TGA calculation
-REAL(EB) :: TGA_DT=0.01_EB                  !< Time step (s) to use for special TGA calculation
+REAL(EB) :: TGA_DT=-1._EB                   !< Time step (s) to use for special TGA calculation
 REAL(EB) :: TGA_DUMP=1._EB                  !< Temperature output interval (K), starting at TMPA, to use for special TGA calculation
 REAL(EB) :: TGA_HEATING_RATE=5._EB          !< Heat rate (K/min) to use for special TGA calculation
 REAL(EB) :: TGA_FINAL_TEMPERATURE=800._EB   !< Final Temperature (C) to use for special TGA calculation
@@ -755,8 +767,8 @@ LOGICAL :: IBLANK_SMV=.TRUE.  !< Parameter passed to smokeview (in .smv file) to
 ! External file control
 CHARACTER(250) :: EXTERNAL_FILENAME='null',EXTERNAL_HEARTBEAT_FILENAME='null'
 LOGICAL :: READ_EXTERNAL = .FALSE.,HEARTBEAT_FAIL=.TRUE.
-INTEGER :: LU_EXTERNAL,LU_EXTERNAL_HEARTBEAT,DT_EXTERNAL_HEARTBEAT=0
-REAL(EB) :: DT_EXTERNAL=0._EB, T_EXTERNAL
+INTEGER :: LU_EXTERNAL,LU_EXTERNAL_HEARTBEAT
+REAL(EB) :: DT_EXTERNAL=0._EB, T_EXTERNAL,DT_EXTERNAL_HEARTBEAT=0._EB
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: EXTERNAL_RAMP
 LOGICAL, ALLOCATABLE, DIMENSION(:) :: EXTERNAL_CTRL
 
@@ -879,13 +891,45 @@ END MODULE RADCONS
 MODULE CHEMCONS
 USE PRECISION_PARAMETERS
 
+!> \brief Parameters associated with IGNITION_ZONES
+TYPE IGNITION_ZONE_TYPE
+   REAL(EB) :: X1            !< Lower x bound of Ignition Zone
+   REAL(EB) :: X2            !< Upper x bound of Ignition Zone
+   REAL(EB) :: Y1            !< Lower y bound of Ignition Zone
+   REAL(EB) :: Y2            !< Upper y bound of Ignition Zone
+   REAL(EB) :: Z1            !< Lower z bound of Ignition Zone
+   REAL(EB) :: Z2            !< Upper z bound of Ignition Zone
+   INTEGER :: DEVC_INDEX=0   !< Index of device controlling the status of the zone
+   CHARACTER(LABEL_LENGTH) :: DEVC_ID='null'  !< Name of device controlling the status of the zone
+END TYPE IGNITION_ZONE_TYPE
+
 INTEGER, ALLOCATABLE, DIMENSION(:) :: YP2ZZ
 REAL(EB) :: ODE_MIN_ATOL= -1._EB
 LOGICAL  :: EQUIV_RATIO_CHECK = .FALSE.
-REAL(EB) :: MIN_EQUIV_RATIO=0.0_EB
+REAL(EB) :: MIN_EQUIV_RATIO=0.1_EB
 REAL(EB) :: MAX_EQUIV_RATIO=20.0_EB
 LOGICAL  :: DO_CHEM_LOAD_BALANCE = .FALSE.
+INTEGER  :: MAX_CVODE_SUBSTEPS=100000
+INTEGER  :: CVODE_MAX_TRY=4
+INTEGER  :: CVODE_ORDER=0
 
+! FOR WRITING CVODE SUBSTEPS
+LOGICAL  :: WRITE_CVODE_SUBSTEPS = .FALSE.
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: CVODE_SUBSTEP_DATA
+INTEGER :: TOTAL_SUBSTEPS_TAKEN
+
+! Adiabatic flame temperature calculation
+CHARACTER(LABEL_LENGTH) :: FUEL_ID_FOR_AFT='null'
+INTEGER :: I_FUEL,I_CO2,I_H2O,I_O2 ! Store the index of the species in the ZZ array.
+LOGICAL  :: USE_MIXED_ZN_AFT_TMP = .FALSE.
+
+! Mixing
+REAL(EB) :: ZETA_ARTIFICAL_MIN_LIMIT=0.99_EB
+REAL(EB) :: ZETA_ARTIFICAL_MAX_LIMIT=0.9999_EB
+REAL(EB) :: ZETA_FIRST_STEP_DIV=10._EB
+
+! IGNITION ZONES (mainly for premixed flame)
+INTEGER :: N_IGNITION_ZONES = 0
+TYPE(IGNITION_ZONE_TYPE), DIMENSION(MAX_IGNITION_ZONES) :: IGNITION_ZONES !< Coordinates of ignition zones
 
 END MODULE CHEMCONS
-

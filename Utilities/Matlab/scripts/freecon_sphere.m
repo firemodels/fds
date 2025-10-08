@@ -102,7 +102,7 @@ for j=1:length(res)
 
         % check for steady state
         t = M.data(:,find(strcmp(M.colheaders,'Time')));
-        Q = mean(M.data(round(end/2):end,find(strcmp(M.colheaders,'"Q"'))))*1000;
+        Q = mean(M.data(round(end/2):end,find(strcmp(M.colheaders,'Q'))))*1000;
         alpha = k/(rho*cp);
         nu = mu/rho;
         b = 2./(T(i)+T2);

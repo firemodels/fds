@@ -35,14 +35,14 @@
       MINIMUM_BURNOUT_TIME    = 20.
       MATL_ID(1,1)            = 'GENERIC VEGETATION'
       MATL_ID(2,1)            = 'Soil'
-      MOISTURE_FRACTION(1)    = 0.05
+      MOISTURE_CONTENT(1)    = 0.05
       SURFACE_VOLUME_RATIO(1) = 5710.
       MASS_PER_VOLUME(1)        = 12.24
       THICKNESS(1:2)          = 0.06,0.1 /
 
 &SURF ID                   = 'Generic Foliage'
       MATL_ID              = 'GENERIC VEGETATION'
-      MOISTURE_FRACTION    = 1.0 
+      MOISTURE_CONTENT    = 1.0 
       SURFACE_VOLUME_RATIO = 4000.
       LENGTH               = 0.05
       GEOMETRY             = 'CYLINDRICAL' /

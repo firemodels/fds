@@ -1,0 +1,7 @@
+&HEAD CHID='PVC_2_cm', TITLE='Parallel Panel Test, PVC, Propane, 60 kW' /
+
+&CATF OTHER_FILES='Mesh_2_cm.txt','PVC_Reactions.txt','Common_Materials.txt','Burner.txt','Panels.txt','Output.txt' /
+
+&TIME T_END=900.0 /
+
+&TAIL /

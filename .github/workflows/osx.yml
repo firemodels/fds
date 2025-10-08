@@ -28,17 +28,17 @@ jobs:
     # debug build on osx using gfortran with openmpi
   
     name: osx gnu openmpi
-    runs-on: [macos-latest]
+    runs-on: [macos-14]
     defaults:
       run:
         shell: bash
         
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - name: install openmpi
       run: |
-        brew install open-mpi
-        echo "OMPI_FC=gfortran-14" >> $GITHUB_ENV
+        brew install gcc@15 open-mpi
+        echo "OMPI_FC=gfortran-15" >> $GITHUB_ENV
 
     - name: build fds debug
       run: |

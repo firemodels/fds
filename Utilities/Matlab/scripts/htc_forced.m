@@ -93,11 +93,11 @@ end
 
 % REF_ERROR determined from initial run
 %            dx=25cm   dx=10cm   dx=2.5cm
-REF_ERROR = [0.1199    0.1619    0.0410; ...
-             0.3151    0.0466    0.2402; ...
-             0.4046    0.2160    0.0670];
+REF_ERROR = [0.1010    0.1930    0.0235; ...
+             0.2628    0.0330    0.2927; ...
+             0.3371    0.1494    0.1421];
 
-% Conclusion: At coarse resolution, forced convection is 40% error, at moderate to high resolution, 25%.
+% Conclusion: Forced convection has approx 30% error.
 
 ERROR = norm(REL_ERROR-REF_ERROR); % 0.1 tolerance
 

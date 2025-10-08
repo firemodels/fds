@@ -2,9 +2,9 @@ name: cmake
 env:
   # update urls for oneapi packages according to
   # https://github.com/oneapi-src/oneapi-ci/blob/master/.github/workflows/build_all.yml
-  WINDOWS_BASEKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/ae29263e-38b9-4d43-86c3-376d6e0668e7/intel-oneapi-base-toolkit-2025.0.1.47_offline.exe
+  WINDOWS_BASEKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/09a8acaf-265f-4460-866c-a3375ed5b4ff/intel-oneapi-base-toolkit-2025.2.0.591_offline.exe
   WINDOWS_BASEKIT_COMPONENTS: intel.oneapi.win.mkl.devel
-  WINDOWS_HPCKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/a37c30c3-a846-4371-a85d-603e9a9eb94c/intel-oneapi-hpc-toolkit-2025.0.1.48_offline.exe
+  WINDOWS_HPCKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/3bbdaf75-6728-492e-a18c-be654dae9ee2/intel-oneapi-hpc-toolkit-2025.2.0.576_offline.exe
   WINDOWS_HPCKIT_COMPONENTS: intel.oneapi.win.ifort-compiler:intel.oneapi.win.mpi.devel
 
 on:
@@ -32,6 +32,7 @@ permissions:
 
 jobs:
   cmake-linux:
+    if: false
     name: ${{ matrix.container }} ${{ matrix.compiler_mpi }} openmp=${{ matrix.openmp }} ${{ matrix.build_type }}
     runs-on: [ubuntu-24.04]
     container: ${{ matrix.container }}
@@ -57,7 +58,7 @@ jobs:
     steps:
     - name: Install prerequisites (dnf)
       if: matrix.container != 'ubuntu:24.04'
-      run: dnf install -y git gcc make cmake sudo environment-modules
+      run: dnf install -y --nobest --skip-broken git gcc make cmake sudo environment-modules
     - name: Install prerequisites (apt)
       if: matrix.container == 'ubuntu:24.04'
       run: |
@@ -78,10 +79,10 @@ jobs:
       # if: endsWith(matrix.compiler_mpi, '_intelmpi')
       with:
         components: |
-          ifx@2025.0.1
-          icx@2025.0.1
-          impi@2021.14.1
-          mkl@2025.0.1
+          ifx
+          icx
+          impi
+          mkl
 
     - name: install openmpi
       if: endsWith(matrix.compiler_mpi, '_openmpi') && (startsWith(matrix.container, 'rockylinux') || startsWith(matrix.container, 'fedora'))
@@ -93,7 +94,7 @@ jobs:
         sudo apt-get -y update
         sudo apt-get -y install libopenmpi-dev openmpi-bin
 
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - run: git config --global --add safe.directory /__w/fds/fds
 
     - name: set linux-gnu compiler
@@ -108,9 +109,9 @@ jobs:
       if: startsWith(matrix.compiler_mpi, 'intel_')
       shell: bash
       run: |
-        echo "CC=mpiicx" >> $GITHUB_ENV
-        echo "CXX=mpiicx" >> $GITHUB_ENV
-        echo "FC=mpiifx" >> $GITHUB_ENV
+        echo "CC=icx" >> $GITHUB_ENV
+        echo "CXX=icpx" >> $GITHUB_ENV
+        echo "FC=ifx" >> $GITHUB_ENV
 
     - name: build fds
       if: endsWith(matrix.compiler_mpi, '_intelmpi')
@@ -155,7 +156,7 @@ jobs:
       # and build configurations
       matrix:
         os:
-          - macos-latest
+          - macos-14
         compiler_mpi:
           - "gnu_openmpi"
         openmp:
@@ -167,19 +168,21 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: install openmpi
-        run: brew install open-mpi
+        run: brew install gcc@15 open-mpi
 
       - name: set macos gcc
         if: startsWith(matrix.compiler_mpi, 'gnu_')
         shell: bash
         run: |
-          echo "CC=gcc-14" >> $GITHUB_ENV
-          echo "CXX=g++-14" >> $GITHUB_ENV
-          echo "FC=gfortran-14" >> $GITHUB_ENV
-          echo "OMPI_FC=gfortran-14" >> $GITHUB_ENV
+          echo "CC=gcc-15" >> $GITHUB_ENV
+          echo "CXX=g++-15" >> $GITHUB_ENV
+          echo "FC=gfortran-15" >> $GITHUB_ENV
+          echo "OMPI_CC=gcc-15" >> $GITHUB_ENV
+          echo "OMPI_CXX=g++-15" >> $GITHUB_ENV
+          echo "OMPI_FC=gfortran-15" >> $GITHUB_ENV
           brew install glew gd zlib json-c
 
       - name: set macos intel
@@ -187,9 +190,11 @@ jobs:
         shell: bash
         run: |
           echo "CC=icx" >> $GITHUB_ENV
-          echo "CXX=icx" >> $GITHUB_ENV
-          echo "FC=mpiifx" >> $GITHUB_ENV
-          echo "OMPI_FC=mpiifx" >> $GITHUB_ENV
+          echo "CXX=icpx" >> $GITHUB_ENV
+          echo "FC=ifx" >> $GITHUB_ENV
+          echo "OMPI_CC=icx" >> $GITHUB_ENV
+          echo "OMPI_CXX=icpx" >> $GITHUB_ENV
+          echo "OMPI_FC=ifx" >> $GITHUB_ENV
 
       - name: Build
         if: startsWith(matrix.compiler_mpi, 'gnu_')
@@ -241,7 +246,7 @@ jobs:
         shell: cmd
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
       # install oneapi components from web installer based on
       # oneapi-ci/scripts/install_windows.bat

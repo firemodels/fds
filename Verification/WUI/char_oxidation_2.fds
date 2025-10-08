@@ -27,7 +27,7 @@
 
 &SURF ID                   = 'wet needle surf'
       MATL_ID              = 'pulp'
-      MOISTURE_FRACTION    = 0.2
+      MOISTURE_CONTENT    = 0.2
       THICKNESS            = 0.0005
       LENGTH               = 0.10
       TMP_INNER            = 20.
