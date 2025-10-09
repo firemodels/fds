@@ -65,8 +65,6 @@ scatplot(saved_data, drange, ...
 disp('turb_model...');                    turb_model
 disp('jet_decay...');                     jet_decay
 disp('wall_model...');                    wall_model
-disp('pyrolysis...');                     pyrolysis
-disp('birch_tga...');                     birch_tga
 disp('pulsating...');                     pulsating
 disp('compression_wave...');              compression_wave
 disp('soborot_mass_transport...');        soborot_mass_transport
