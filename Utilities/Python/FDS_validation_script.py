@@ -25,6 +25,7 @@ print("FM_Burner...");                    runpy.run_path("./scripts/FM_Burner.py
 print("Crown_Fires...");                  runpy.run_path("./scripts/Crown_Fires.py", run_name="__main__")
 print("Ranz_Marshall...");                runpy.run_path("./scripts/Ranz_Marshall.py", run_name="__main__")
 print("Phoenix_LNG_Fires...");            runpy.run_path("./scripts/Phoenix_LNG_Fires.py", run_name="__main__")
+print("Sandia_Plumes_TKE...");            runpy.run_path("./scripts/Sandia_Plumes_TKE.py", run_name="__main__")
 
 # # Dataplot and scatplot options
 
@@ -47,7 +48,7 @@ print("Phoenix_LNG_Fires...");            runpy.run_path("./scripts/Phoenix_LNG_
 #                                          pltdir=Manuals_Dir,
 #                                          close_figs=True,
 #                                          verbose=True,
-#                                          plot_range=["4:15"],
+#                                          plot_range=["Sandia Plumes"],
 #                                          ) # see notes below on plot_range
 
 # fdsplotlib.scatplot(saved_data,drange,
@@ -69,6 +70,7 @@ print("McCaffrey_Plume...");              runpy.run_path("./scripts/McCaffrey_Pl
 print("Memorial_Tunnel...");              runpy.run_path("./scripts/Memorial_Tunnel.py", run_name="__main__")
 print("Memorial_Tunnel_2...");            runpy.run_path("./scripts/Memorial_Tunnel_2.py", run_name="__main__")
 print("NIST_NRC_Parallel_Panels...");     runpy.run_path("./scripts/NIST_NRC_Parallel_Panels.py", run_name="__main__")
+print("Sandia_Plumes...");                runpy.run_path("./scripts/Sandia_Plumes.py", run_name="__main__")
 print("Sandia_Pools...");                 runpy.run_path("./scripts/Sandia_Pools.py", run_name="__main__")
 print("Theobald_Hose_Stream...");         runpy.run_path("./scripts/Theobald_Hose_Stream.py", run_name="__main__")
 print("TUS_Facade...");                   runpy.run_path("./scripts/TUS_Facade_contours.py", run_name="__main__")
