@@ -62,7 +62,6 @@ scatplot(saved_data, drange, ...
 
 % Special cases
 
-disp('jet_decay...');                     jet_decay
 disp('wall_model...');                    wall_model
 disp('pulsating...');                     pulsating
 disp('compression_wave...');              compression_wave
