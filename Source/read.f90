@@ -4219,7 +4219,7 @@ SPEC_LOOP: DO N=1,N_SPECIES
          SS_K(N,0) = SS_K(N,1)
          SS_MU(N,0) = SS_MU(N,1)
       ENDIF
-      SS%H_G(I) = SS%H_G(I-1) + 0.5*(SS_CP(N,I-1)+SS_CP(N,I))
+      SS%H_G(I) = SS%H_G(I-1) + 0.5_EB*(SS_CP(N,I-1)+SS_CP(N,I))
       IF (SS%EXPLICIT_G_F) SS%G_F(I) = SS_G_F(N,I)
    ENDDO
 
