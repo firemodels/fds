@@ -30,8 +30,10 @@ fdsplotlib.dataplot(config_filename='../Matlab/FDS_verification_dataplot_inputs.
 
 # Special cases
 
-print("jet_decay...");      subprocess.run(["python","./scripts/jet_decay.py"])
-print("pyrolysis...");      subprocess.run(["python","./scripts/pyrolysis.py"])
-print("turb_model...");     subprocess.run(["python","./scripts/turb_model.py"])
+print("fds_moody_chart...");      subprocess.run(["python","./scripts/fds_moody_chart.py"]) 
+print("jet_decay...");            subprocess.run(["python","./scripts/jet_decay.py"])
+print("law_of_the_wall...");      subprocess.run(["python","./scripts/law_of_the_wall.py"])
+print("pyrolysis...");            subprocess.run(["python","./scripts/pyrolysis.py"])
+print("turb_model...");           subprocess.run(["python","./scripts/turb_model.py"])
 
 print("verification scripts completed successfully!")
