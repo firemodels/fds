@@ -51,7 +51,7 @@ PART_CLASS_LOOP: DO ILPC=1,N_LAGRANGIAN_CLASSES
             DI           = RM%T_MIN + I*DD
             LPC%R_CNF(I) = DI
             LPC%CNF(I)   = EVALUATE_RAMP(DI,LPC%CNF_RAMP_INDEX)
-            LPC%CVF(I)   = LPC%CVF(I-1) + (DI-0.5*DD)**3*(LPC%CNF(I)-LPC%CNF(I-1))
+            LPC%CVF(I)   = LPC%CVF(I-1) + (DI-0.5_EB*DD)**3*(LPC%CNF(I)-LPC%CNF(I-1))
          ENDDO
          LPC%R_CNF = 1.E-6_EB*0.5_EB*LPC%R_CNF ! Convert diameter in microns to radius in meters.
          LPC%CNF   = LPC%CNF/LPC%CNF(NDC)

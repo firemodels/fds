@@ -1240,7 +1240,7 @@ IF (ZZ_FUEL_O2_MASS > TWO_EPSILON_EB) THEN
       B = X
       C = 0.5_EB*Y
       D = 0._EB ! No fuel
-      E = A + 0.5*Z - B - 0.5_EB*C
+      E = A + 0.5_EB*Z - B - 0.5_EB*C
    ENDIF
 
    ! Setup reactants
