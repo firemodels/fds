@@ -12899,7 +12899,6 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
       XB(1:2) = XYZ(1)
       XB(3:4) = XYZ(2)
       XB(5:6) = XYZ(3)
-      IF (SHAPE=='null') SHAPE = 'POINT'
    ENDIF
 
    ! If an offset has been specified, set the SHAPE to LINE.
@@ -12911,10 +12910,6 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
       XB(4) = XB(3) + DY*(N_PARTICLES-1)
       XB(6) = XB(5) + DZ*(N_PARTICLES-1)
    ENDIF
-
-   ! If the INIT region is not a POINT or a LINE, assume it is a BLOCK unless user says otherwise
-
-   IF (SHAPE=='null') SHAPE = 'BLOCK'
 
    ! Create a box around a CONE
 
@@ -13360,7 +13355,7 @@ RAMP_VF_Z_INDEX           = 0
 RAMP_PART                 = 'null'
 RAMP_Q                    = 'null'
 RAMP_TMP_Z                = 'null'
-SHAPE                     = 'null'
+SHAPE                     = 'BLOCK'
 SPEC_ID                   = 'null'
 TEMPERATURE               = -1000._EB
 TREE_HEIGHT               = -1._EB
