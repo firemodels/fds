@@ -2451,13 +2451,13 @@ ENDDO
 LAT_CDF=0._EB
 ! Latitude distribution conditional on Longtitude
 DO I=1,NPT
-   LAT_CDF(I,:)=LAT_CDF(I-1,:)+0.5*(PDF(I,:)+PDF(I-1,:))*DLAT
+   LAT_CDF(I,:)=LAT_CDF(I-1,:)+0.5_EB*(PDF(I,:)+PDF(I-1,:))*DLAT
 ENDDO
 
 ! Marginal longtitude distribution
 LON_CDF=0._EB
 DO I=1,NPT
-   LON_CDF(I)=LON_CDF(I-1)+0.5*(LAT_CDF(NPT,I-1)+LAT_CDF(NPT,I))*DLON
+   LON_CDF(I)=LON_CDF(I-1)+0.5_EB*(LAT_CDF(NPT,I-1)+LAT_CDF(NPT,I))*DLON
 ENDDO
 
 ! Normalize marginal longtitude distribution
