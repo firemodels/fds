@@ -2,6 +2,7 @@
 # FDS Verification Guide, Moody Chart
 
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib import rc
 import os
@@ -376,4 +377,150 @@ for im in range(1):
     plt.savefig(output_file, format='pdf')
     plt.close()
 
+
+# Test of tunnel friction factor
+
+# Case matrix
+# -----------
+#
+# Case A: Vel = 2 m/s, Roughness = 1.E-4 m
+# Case B: Vel = 2 m/s, Roughness = 1.E-1 m
+# Case C: Vel = 10 m/s, Roughness = 1.E-4 m
+# Case D: Vel = 10 m/s, Roughness = 1.E-1 m
+# Case E: Vel = 4 m/s, Roughness = 1.E-2 m
+
+outdir = '../../../out/Moody_Chart/'
+pltdir = '../../Manuals/FDS_User_Guide/SCRIPT_FIGURES/'
+
+chid = 'tunnel_pressure_drop'
+cases = ['a', 'b', 'c', 'd', 'e']
+CASES = ['A', 'B', 'C', 'D', 'E']
+res = ['10', '20']
+markers = ['ko', 'k+']
+lines = ['k--', 'k:']
+
+VEL = [2, 2, 10, 10, 4]
+s = [1.0E-4, 1.0E-1, 1.0E-4, 1.0E-1, 1.0E-2]  # sand grain roughness (m) from input file
+H = [10, 10, 10, 10, 7.2]      # tunnel height (m) from input file
+L = [1600, 1600, 1600, 1600, 1600]    # tunnel length (m)
+pmin = [-1, 0, -20, 0, -10]
+pmax = [6, 18, 120, 460, 60]
+ 
+f_save = np.zeros(len(cases))
+f_fds_save = np.zeros((len(res), len(cases)))
+
+for i in range(len(cases)):
+
+    fig = fdsplotlib.plot_to_fig(x_data=[-1,-1], y_data=[-1,-1],
+                                 x_min=0, x_max=1600, y_min=pmin[i], y_max=pmax[i],
+                                 revision_label=version_string,
+                                 plot_title=f'Case {CASES[i]}',
+                                 x_label='Distance (m)',
+                                 y_label='Gauge Pressure (Pa)')
+
+    x = np.concatenate([np.arange(10, 100, 10), np.arange(100, L[i]+1, 100)])
+
+    for j in range(len(res)):
+
+        filename = f"{outdir}{chid}_{cases[i]}_{res[j]}_devc.csv"
+        M = pd.read_csv(filename, skiprows=1)
+
+        t = M['Time'].values
+        U = M['UBAR'].values
+
+        # compute friction factor (f) from Colebrook equation
+        mu = M['MU'].values[-1]  # dynamic viscosity of AIR
+        rho = M['RHO'].values[-1]  # density of AIR
+        Re = rho * H[i] * VEL[i] / mu
+        f, error, iter = colebrook(Re, s[i]/H[i], 0.001, 1e-9)
+        dpdx_exact = -f/H[i] * 0.5 * rho * VEL[i]**2
+        f_save[i] = f
+
+        # Get all pressure columns (P10 onwards)
+        p_cols = [col for col in M.columns if col.startswith('P')]
+        p_start_idx = M.columns.get_loc('P10')
+        P = M.iloc[-1, p_start_idx:].values
+        fdsplotlib.plot_to_fig(x_data=x, y_data=P, figure_handle=fig, marker_style=markers[j], data_label=f'DEVC Pressure {res[j]}')
+
+        # least squares to get slope (pressure drop)
+        rsub = np.where(x >= 10)[0]
+        xsub = x[rsub]
+        A = np.column_stack([np.ones(len(xsub)), xsub])
+        y = np.linalg.lstsq(A, P[rsub], rcond=None)[0]
+        fdsplotlib.plot_to_fig(x_data=x, y_data=y[0]+x*y[1], figure_handle=fig, marker_style=lines[j], data_label=f'Least squares fit {res[j]}')
+
+        # compute friction factor from DEVC pressure drop
+        dpdx = y[1]  # pressure drop (Pa/m)
+        f_fds = 2*(-dpdx)*H[i]/(rho*U[-1]**2)  # f from FDS
+        f_fds_save[j, i] = f_fds
+
+    fdsplotlib.plot_to_fig(x_data=x, y_data=(x-L[i])*dpdx_exact, figure_handle=fig, marker_style='k-', data_label='Exact pressure drop')
+
+    # add plot title
+
+    plt.text(80, pmin[i]+0.8*(pmax[i]-pmin[i]), f'$U$ = {VEL[i]} m/s, $s$ = {s[i]} m', fontsize=plot_style['Title_Font_Size'])
+    ax = plt.gca()
+    ax.set_xticks([0, 400, 800, 1200, 1600])
+
+    output_file = f"{pltdir}{chid}_{cases[i]}.pdf"
+    plt.savefig(output_file, format='pdf')
+    plt.close()
+
+# compute errors
+
+max_error = np.zeros(len(cases))
+for i in range(len(cases)):
+    err10 = abs((f_save[i] - f_fds_save[0, i]) / f_save[i])
+    err20 = abs((f_save[i] - f_fds_save[1, i]) / f_save[i])
+    max_error[i] = max(err10, err20) * 100
+
+# write friction factors to latex
+
+fid = open(f"{pltdir}tunnel_pressure_drop.tex", 'w')
+fid.write('\\scriptsize\n')
+fid.write('\\caption[Friction factors in tunnels]{Friction factors for {\\ct tunnel\\_pressure\\_drop} cases.}\n')
+fid.write('\\label{tab:tunnel_pressure_drop}\n')
+fid.write('\\centering\n')
+fid.write('\\begin{tabular}{lccccccc}\n')
+fid.write('\\hline\n')
+fid.write('Case    & Velocity (m/s) & Roughness (m) & Hydraulic Dia. (m) & $f$ Colebrook & $f$ FDS 10 & $f$ FDS 20 & Max Rel. Error (\\%)\\\\\\n')
+fid.write('\\hline\n')
+fid.write(f'A      & {VEL[0]} & {s[0]} & {H[0]} & {f_save[0]:.3g} & {f_fds_save[0,0]:.3g} & {f_fds_save[1,0]:.3g} & {max_error[0]:.2g} \\\\\n')
+fid.write(f'B      & {VEL[1]} & {s[1]} & {H[1]} & {f_save[1]:.3g} & {f_fds_save[0,1]:.3g} & {f_fds_save[1,1]:.3g} & {max_error[1]:.2g} \\\\\n')
+fid.write(f'C      & {VEL[2]} & {s[2]} & {H[2]} & {f_save[2]:.3g} & {f_fds_save[0,2]:.3g} & {f_fds_save[1,2]:.3g} & {max_error[2]:.2g} \\\\\n')
+fid.write(f'D      & {VEL[3]} & {s[3]} & {H[3]} & {f_save[3]:.3g} & {f_fds_save[0,3]:.3g} & {f_fds_save[1,3]:.3g} & {max_error[3]:.2g} \\\\\n')
+fid.write(f'E      & {VEL[4]} & {s[4]} & {H[4]} & {f_save[4]:.3g} & {f_fds_save[0,4]:.3g} & {f_fds_save[1,4]:.3g} & {max_error[4]:.2g} \\\\\n')
+fid.write('\\hline\n')
+fid.write('\\end{tabular}\n')
+fid.write('\\normalsize\n')
+fid.close()
+
+
+# Test of pressure drop for a tunnel fire
+
+res = ['10', '20', '40']
+lines = ['k:', 'k--', 'k-']
+labels = ['1 m', '0.5 m', '0.25 m']
+
+fig = fdsplotlib.plot_to_fig(x_data=[-1,-1], y_data=[-1,-1],
+                             x_min=0, x_max=1600, y_min=0, y_max=40,
+                             revision_label=version_string,
+                             plot_title='1600 m Tunnel, 50 MW Fire',
+                             x_label='Distance (m)',
+                             y_label='Gauge Pressure (Pa)')
+
+for j in range(len(res)):
+    filepath = os.path.join(outdir, f'tunnel_fire_{res[j]}_line.csv')
+    M = pd.read_csv(filepath, skiprows=1)
+
+    x = M['p-x'].values
+    p = M['p'].values
+
+    fdsplotlib.plot_to_fig(x_data=x, y_data=p, figure_handle=fig, marker_style=lines[j], data_label=labels[j])
+
+ax = plt.gca()
+ax.set_xticks([0, 400, 800, 1200, 1600])
+
+fig.savefig(pltdir + 'tunnel_fire.pdf', format='pdf')
+plt.close()
 
