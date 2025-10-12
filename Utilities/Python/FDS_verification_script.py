@@ -30,6 +30,7 @@ fdsplotlib.dataplot(config_filename='../Matlab/FDS_verification_dataplot_inputs.
 
 # Special cases
 
+print("blasius...");              subprocess.run(["python","./scripts/blasius.py"]) 
 print("fds_moody_chart...");      subprocess.run(["python","./scripts/fds_moody_chart.py"]) 
 print("heated_channel...");       subprocess.run(["python","./scripts/heated_channel.py"]) 
 print("jet_decay...");            subprocess.run(["python","./scripts/jet_decay.py"])
