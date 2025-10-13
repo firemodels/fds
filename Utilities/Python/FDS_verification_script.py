@@ -35,6 +35,7 @@ print("fds_moody_chart...");      subprocess.run(["python","./scripts/fds_moody_
 print("heated_channel...");       subprocess.run(["python","./scripts/heated_channel.py"]) 
 print("jet_decay...");            subprocess.run(["python","./scripts/jet_decay.py"])
 print("law_of_the_wall...");      subprocess.run(["python","./scripts/law_of_the_wall.py"])
+print("pulsating...");            subprocess.run(["python","./scripts/pulsating.py"])
 print("pyrolysis...");            subprocess.run(["python","./scripts/pyrolysis.py"])
 print("ribbed_channel...");       subprocess.run(["python","./scripts/ribbed_channel.py"])
 print("turb_model...");           subprocess.run(["python","./scripts/turb_model.py"])
