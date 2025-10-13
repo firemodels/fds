@@ -36,6 +36,7 @@ print("heated_channel...");       subprocess.run(["python","./scripts/heated_cha
 print("jet_decay...");            subprocess.run(["python","./scripts/jet_decay.py"])
 print("law_of_the_wall...");      subprocess.run(["python","./scripts/law_of_the_wall.py"])
 print("pyrolysis...");            subprocess.run(["python","./scripts/pyrolysis.py"])
+print("ribbed_channel...");       subprocess.run(["python","./scripts/ribbed_channel.py"])
 print("turb_model...");           subprocess.run(["python","./scripts/turb_model.py"])
 print("yplus...");                subprocess.run(["python","./scripts/yplus.py"])
 
