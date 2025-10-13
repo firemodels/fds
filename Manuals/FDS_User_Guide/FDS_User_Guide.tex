@@ -11248,6 +11248,7 @@ you can specify the logical parameter \ct{DRY} on a \ct{DEVC} line that reports 
       DRY=T /
 \end{lstlisting}
 
+\ct{DRY} can also be specified on an \ct{SLCF} line that reports the \ct{'MASS FRACTION'} or \ct{'VOLUME FRACTION'} of a species as well as an \ct{HVAC} \ct{DUCT QUANTITY LIST} or \ct{NODE QUANTITY LIST}. For \ct{HVAC} line outputs, \ct{DRY} is an array corresponding to each entry on the \ct{QUANTITY LIST}.
 
 \subsection{Aerosol and Soot Concentration}
 \label{info:soot}
@@ -12547,6 +12548,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{DEVC_ID}                & Character     & Sections ~\ref{info:HVACduct}, \ref{info:HVACfan}, \ref{info:HVACfilter} &               &                \\ \hline
 \ct{DIAMETER}                & Real          & Section~\ref{info:HVACduct}                                              &  m            &                \\ \hline
 \ct{DISCHARGE_COEFFICIENT}  & Real          & Section~\ref{info:Leaks}                                                 &               & 1.             \\ \hline
+\ct{DRY}                    & Log. Array    & Section~\ref{info:dry}                                                   &               &                \\ \hline
 \ct{DUCT_ID}                & Char.~Array   & Section~\ref{info:HVACnode}                                              &               &                \\ \hline
 \ct{EFFICIENCY}              & Real Array    & Sections~\ref{info:HVACfilter}, \ref{info:HVACaircoil}                   &               & 1.0            \\ \hline
 \ct{FAN_ID}                 & Character     & Section~\ref{info:HVACduct}                                              &               &                \\ \hline
@@ -13421,6 +13423,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{CHECK_ATOM_BALANCE}                & Logical        & Section~\ref{info:REAC_Diagnostics}          &                   & \ct{T}           \\ \hline
 \ct{CO_YIELD}                           & Real           & Section~\ref{info:simple_chemistry}          & kg/kg             & 0                 \\ \hline
 \ct{CRITICAL_FLAME_TEMPERATURE}        & Real           & Section~\ref{info:extinction}                &   $^\circ$C       & 1427              \\ \hline
+\ct{DRY}                               & Logical ray    & Section~\ref{info:dry}                       &                   &                   \\ \hline
 \ct{E}                                   & Real           & Section~\ref{info:finite}                    &   J/mol           &                   \\ \hline
 \ct{E_LOW_PR}                          & Real           & Section~\ref{info:falloff_reactions}         &   J/mol           &                   \\ \hline
 \ct{EPUMO2}                              & Real           & Section~\ref{info:heat_of_combustion}        &   kJ/kg           & 13100             \\ \hline
@@ -13480,6 +13483,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{AGL_SLICE}        & Real              & Section~\ref{info:complex_terrain}        & m         &                   \\ \hline
 \ct{CELL_CENTERED}    & Logical           & Section~\ref{info:SLCF}                   &           & \ct{F}     \\ \hline
 \ct{DB}                & Character         & Section~\ref{info:SLCF}                   &           &                   \\ \hline
+\ct{DRY}               & Logical           & Section~\ref{info:dry}                   &           &                   \\ \hline
 \ct{ID}                & Character         & Section~\ref{info:SLCF}                   &           &                   \\ \hline
 \ct{MAXIMUM_VALUE}    & Real              & Reference~\cite{Smokeview_Users_Guide}    &           &                   \\ \hline
 \ct{MESH_NUMBER}      & Integer           & Section~\ref{info:SLCF}                   &           &                   \\ \hline
