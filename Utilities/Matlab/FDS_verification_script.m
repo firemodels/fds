@@ -76,8 +76,6 @@ disp('openmp_timing_benchmarks...');      openmp_timing_benchmarks
 disp('rms_cov_corr...');                  rms_cov_corr
 disp('hot_layer_collapse...');            hot_layer_collapse
 disp('radiating_polygon...');             radiating_polygon
-disp('saad_mms_temporal_error...');       saad_mms_temporal_error
-disp('saad_cc_mms_temporal_error...');    saad_cc_mms_temporal_error
 disp('favre_test...');                    favre_test
 disp('scaling_tests...');                 scaling_tests
 disp('hvac_mass_transport...');           hvac_mass_transport
