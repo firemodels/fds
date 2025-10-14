@@ -518,6 +518,31 @@ def plot_to_fig(x_data,y_data,**kwargs):
         bottom = plot_origin[1] / figure_size[1]
         ax = fig.add_axes([left, bottom, ax_w, ax_h])
 
+    # widen paper if legend is outside, keeping axes fixed in physical size
+    if kwargs.get('legend_location') == 'outside':
+        legend_expand = kwargs.get('legend_expand', 1.25)
+        old_size = fig.get_size_inches()
+
+        # Compute current axes rectangle in *inches*
+        bbox = ax.get_position()
+        ax_left_in = bbox.x0 * old_size[0]
+        ax_bottom_in = bbox.y0 * old_size[1]
+        ax_w_in = bbox.width * old_size[0]
+        ax_h_in = bbox.height * old_size[1]
+
+        # Widen the figure canvas
+        new_width = old_size[0] * legend_expand
+        fig.set_size_inches(new_width, old_size[1])
+
+        # Recompute normalized coordinates to keep the axes fixed in size and location
+        left_new = ax_left_in / new_width
+        bottom_new = ax_bottom_in / old_size[1]
+        ax_w_new = ax_w_in / new_width
+        ax_h_new = ax_h_in / old_size[1]
+
+        ax.set_position([left_new, bottom_new, ax_w_new, ax_h_new])
+
+
     # select plot type
     plot_type=kwargs.get('plot_type','linear')
 
@@ -652,12 +677,52 @@ def plot_to_fig(x_data,y_data,**kwargs):
 
     legend_fontsize=kwargs.get('legend_fontsize',default_legend_fontsize)
 
-    if data_label:
-        if kwargs.get('legend_location')=='outside':
-            plt.legend(fontsize=legend_fontsize,bbox_to_anchor=(1,1),loc='upper left',framealpha=legend_framealpha)
+    # --- always get current handles and labels ---
+    handles, labels = ax.get_legend_handles_labels()
+
+    # --- case 1 or 2: creating a new figure ---
+    if not using_existing_figure:
+        # record legend display properties on the Axes
+        if legend_location == 'outside':
+            ax._legend_loc = 'center left'
+            ax._legend_bbox = (1.02, 0.5)
+            ax.figure.subplots_adjust(right=0.8)
         else:
-            # if kwargs.get('show_legend'):
-            plt.legend(fontsize=legend_fontsize,loc=legend_location,framealpha=legend_framealpha)
+            ax._legend_loc = legend_location
+            ax._legend_bbox = None
+
+        ax._legend_fontsize = legend_fontsize
+        ax._legend_framealpha = legend_framealpha
+
+        # if we already have labeled data, draw legend now
+        if labels:
+            ax.legend(handles, labels,
+                      loc=ax._legend_loc,
+                      bbox_to_anchor=ax._legend_bbox,
+                      fontsize=ax._legend_fontsize,
+                      framealpha=ax._legend_framealpha)
+        else:
+            # optionally show empty placeholder (for consistent layout)
+            ax.legend([], [],
+                      loc=ax._legend_loc,
+                      bbox_to_anchor=ax._legend_bbox,
+                      fontsize=ax._legend_fontsize,
+                      frameon=False)
+
+    # --- case 3: existing figure, adding more data ---
+    else:
+        loc = getattr(ax, '_legend_loc', 'best')
+        bbox = getattr(ax, '_legend_bbox', None)
+        fontsize = getattr(ax, '_legend_fontsize', legend_fontsize)
+        framealpha = getattr(ax, '_legend_framealpha', legend_framealpha)
+
+        if labels:
+            ax.legend(handles, labels,
+                      loc=loc,
+                      bbox_to_anchor=bbox,
+                      fontsize=fontsize,
+                      framealpha=framealpha)
+
 
     # plot title
     if kwargs.get('plot_title'):
