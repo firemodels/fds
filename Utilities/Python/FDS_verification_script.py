@@ -42,6 +42,7 @@ print("shunn_mms...");                    subprocess.run(["python","./scripts/sh
 print("soborot_mass_transport...");       subprocess.run(["python","./scripts/soborot_mass_transport.py"])
 print("tree_shapes...");                  subprocess.run(["python","./scripts/tree_shapes.py"])
 print("turb_model...");                   subprocess.run(["python","./scripts/turb_model.py"])
+print("wall_internal_radiation...");      subprocess.run(["python","./scripts/wall_internal_radiation.py"])
 print("yplus...");                        subprocess.run(["python","./scripts/yplus.py"])
 
 print("verification scripts completed successfully!")

@@ -29,7 +29,6 @@ disp('radiation_box...');                  radiation_box
 disp('radiation_plane_layer...');          radiation_plane_layer
 disp('ns2d...');                           ns2d
 disp('vort2d...');                         vort2d
-disp('wall_internal_radiation...');        wall_internal_radiation
 disp('ashrae_7...');                       ashrae_7
 disp('flame_species...');                  flame_species
 disp('cat_propane_depo...');               cat_propane_depo
