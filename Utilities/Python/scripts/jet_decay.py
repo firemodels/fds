@@ -75,7 +75,7 @@ fig = fdsplotlib.plot_to_fig(x_data=[-1,-1], y_data=[-1,-1],
                              legend_expand=1.25, #optional (default 1.25 for legend_location=='outside')
                              legend_fontsize=8,
                              x_label='$x/h$',
-                             y_label='$u_{\\hbox{\\scriptsize max}}/u_0$')
+                             y_label=r'$u_{{\rm \scriptsize max}}/u_0$')
 
 fdsplotlib.plot_to_fig(x_data=x/h, y_data=u_1/u_0, figure_handle=fig, marker_style='k--', data_label='analytical, $m=0.12$')
 fdsplotlib.plot_to_fig(x_data=x/h, y_data=u_2/u_0, figure_handle=fig, marker_style='k-' , data_label='analytical, $m=0.20$')

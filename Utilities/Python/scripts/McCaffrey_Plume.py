@@ -40,10 +40,10 @@ for i, z in enumerate(zq):
 
 # Plot velocity correlation and measurement points
 
-fig1 = fdsplotlib.plot_to_fig(x_data=zq, y_data=vq, data_label='$(z/Q^{2/5})^\\eta$', 
+fig1 = fdsplotlib.plot_to_fig(x_data=zq, y_data=vq, data_label=r'$(z/Q^{2/5})^\eta$', 
                               marker_style='b--',
                               x_min=0.01, x_max=1, y_min=0.5, y_max=3,
-                              x_label='$z/Q^{2/5}$ $(\\hbox{m kW}^{-2/5})$',
+                              x_label=r'$z/Q^{2/5}$ $({\rm m kW}^{-2/5})$',
                               y_label='${V/Q}^{1/5}$ (m s$^{-1}$ kW$^{-1/5}$)',
                               legend_location='lower right',
                               plot_type='loglog')
@@ -57,20 +57,20 @@ for i, c in enumerate(chid):
                                marker_style=mark[i], data_label=f'{Q[i]:.1f} kW')
 
 ax = plt.gca()
-ax.text(0.012,1.2, '$\\eta=1/2$' , fontsize=plot_style['Label_Font_Size'])
-ax.text(0.100,2.3, '$\\eta=0$'   , fontsize=plot_style['Label_Font_Size'])
-ax.text(0.400,1.8, '$\\eta=-1/3$', fontsize=plot_style['Label_Font_Size'])
+ax.text(0.012,1.2, r'$\eta=1/2$' , fontsize=plot_style['Label_Font_Size'])
+ax.text(0.100,2.3, r'$\eta=0$'   , fontsize=plot_style['Label_Font_Size'])
+ax.text(0.400,1.8, r'$\eta=-1/3$', fontsize=plot_style['Label_Font_Size'])
 
 fig1.savefig(os.path.join(pltdir, 'McCaffrey_Velocity_Correlation.pdf'), format='pdf')
 plt.close(fig1)
 
 # Plot temperature correlation and measurement points
 
-fig2 = fdsplotlib.plot_to_fig(x_data=zq, y_data=Tq, data_label='$(z/Q^{2/5})^\\eta$',
+fig2 = fdsplotlib.plot_to_fig(x_data=zq, y_data=Tq, data_label=r'$(z/Q^{2/5})^\eta$',
                               marker_style='r--',
                               x_min=0.008, x_max=1, y_min=100, y_max=1200,
-                              x_label='$z/Q^{2/5}$ $(\\hbox{m kW}^{-2/5})$',
-                              y_label='$\\Delta T \\; (^\\circ$C)',
+                              x_label=r'$z/Q^{2/5}$ $({\rm m kW}^{-2/5})$',
+                              y_label=r'$\Delta T \; (^\circ$C)',
                               legend_location='lower left',
                               plot_type='loglog')
 
@@ -83,9 +83,9 @@ for i, c in enumerate(chid):
                                marker_style=mark[i], data_label=f'{Q[i]:.1f} kW')
 
 ax = plt.gca()
-ax.text(0.012,500, '$\\eta=0$'   , fontsize=plot_style['Label_Font_Size'])
-ax.text(0.060,400, '$\\eta=-1$'  , fontsize=plot_style['Label_Font_Size'])
-ax.text(0.100,150, '$\\eta=-5/3$', fontsize=plot_style['Label_Font_Size'])
+ax.text(0.012,500, r'$\eta=0$'   , fontsize=plot_style['Label_Font_Size'])
+ax.text(0.060,400, r'$\eta=-1$'  , fontsize=plot_style['Label_Font_Size'])
+ax.text(0.100,150, r'$\eta=-5/3$', fontsize=plot_style['Label_Font_Size'])
 
 fig2.savefig(os.path.join(pltdir, 'McCaffrey_Temperature_Correlation.pdf'), format='pdf')
 plt.close(fig2)
@@ -101,11 +101,11 @@ for i, c in enumerate(chid):
     ZS = M.iloc[:, 0].values
     TC = M.iloc[:, 1].values
 
-    fig = fdsplotlib.plot_to_fig(x_data=zq, y_data=Tq, data_label='$(z/Q^{2/5})^\\eta$',
+    fig = fdsplotlib.plot_to_fig(x_data=zq, y_data=Tq, data_label=r'$(z/Q^{2/5})^\eta$',
                                  marker_style='r--',
                                  x_min=0.008, x_max=1, y_min=100, y_max=1200,
-                                 x_label='$z/Q^{2/5}$ $(\\hbox{m kW}^{-2/5})$',
-                                 y_label='$\\Delta T \\; (^\\circ$C)',
+                                 x_label=r'$z/Q^{2/5}$ $({\rm m kW}^{-2/5})$',
+                                 y_label=r'$\Delta T \; (^\circ$C)',
                                  legend_location='lower left',
                                  plot_title=f'McCaffrey Centerline Temperature Data, {Q[i]:.1f} kW',
                                  plot_type='loglog')
@@ -128,7 +128,7 @@ for i, c in enumerate(chid):
         T2 = x[0]*z2 + x[1]
         fdsplotlib.plot_to_fig(x_data=[z1,z2], y_data=[T1,T2], marker_style='g-', figure_handle=fig, data_label='Least Squares Fit')
         ax = plt.gca()
-        ax.text(0.009, 400., '$T_{\\rm surf}$='+f'{T_surf:3.0f} $^\\circ$C', fontsize=plot_style['Label_Font_Size'])
+        ax.text(0.009, 400., r'$T_{\rm surf}$='+f'{T_surf:3.0f}'+r'$^\circ$C', fontsize=plot_style['Label_Font_Size'])
     else:
         T_surf = np.nan
 
@@ -156,8 +156,8 @@ for res in resolution:
                                    marker_style='b--',
                                    x_min=0.01, x_max=1, y_min=0.5, y_max=3,
                                    revision_label=version_string,
-                                   x_label='$z/Q^{2/5}$ $(\\hbox{m kW}^{-2/5})$',
-                                   y_label='$V/Q^{1/5}$ $(\\hbox{m s}^{-1} \\; \\hbox{kW}^{-1/5})$',
+                                   x_label=r'$z/Q^{2/5}$ $({\rm m kW}^{-2/5})$',
+                                   y_label=r'$V/Q^{1/5}$ $({\rm m s}^{-1} \; {\rm kW}^{-1/5})$',
                                    plot_title=f'McCaffrey Centerline Velocity, {res}',
                                    legend_location='lower right',
                                    plot_type='loglog')
@@ -182,12 +182,12 @@ for res in resolution:
 
     # Temperature correlation figures (one for each resolution)
 
-    fig_t = fdsplotlib.plot_to_fig(x_data=zq, y_data=Tq, data_label='$(z/Q^{2/5})^\\eta$',
+    fig_t = fdsplotlib.plot_to_fig(x_data=zq, y_data=Tq, data_label=r'$(z/Q^{2/5})^\eta$',
                                    marker_style='r--',
                                    x_min=0.008, x_max=1, y_min=100, y_max=1200,
                                    revision_label=version_string,
-                                   x_label='$z/Q^{2/5}$ $(\\hbox{m kW}^{-2/5})$',
-                                   y_label='$\\Delta{T}$ ($^\\circ$C)',
+                                   x_label=r'$z/Q^{2/5}$ $({\rm m kW}^{-2/5})$',
+                                   y_label=r'$\Delta{T}$ ($^\circ$C)',
                                    plot_title=f'McCaffrey Centerline Temperature, {res}',
                                    legend_location='lower right',
                                    plot_type='loglog')
