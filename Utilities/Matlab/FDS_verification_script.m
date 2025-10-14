@@ -63,7 +63,6 @@ scatplot(saved_data, drange, ...
 % Special cases
 
 disp('compression_wave...');              compression_wave
-disp('soborot_mass_transport...');        soborot_mass_transport
 disp('plate_view_factor...');             plate_view_factor
 disp('terminal_velocity_convergence...'); terminal_velocity_convergence
 disp('fluid_part...');                    fluid_part
