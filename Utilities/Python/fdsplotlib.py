@@ -461,12 +461,35 @@ def plot_to_fig(x_data,y_data,**kwargs):
     #     print ("%s == %s" %(key, value))
 
     plot_style = get_plot_style("fds")
-    plt.rcParams["font.family"] = plot_style["Font_Name"]
-    plt.rcParams["font.size"] = plot_style["Label_Font_Size"]
+    # plt.rcParams["font.family"] = plot_style["Font_Name"]
+    # plt.rcParams["font.size"] = plot_style["Label_Font_Size"]
     # print(plot_style)
 
-    plt.rcParams['text.usetex'] = True # supports latex math (set per plot below)
-    plt.rcParams["pdf.use14corefonts"] = True # forces matplotlib to write native pdf fonts rather than embed
+    # plt.rcParams['text.usetex'] = False # supports latex math (set per plot below)
+    # plt.rcParams["pdf.use14corefonts"] = True # forces matplotlib to write native pdf fonts rather than embed
+
+    import matplotlib.pyplot as plt
+
+    plt.rcParams.update({
+        "pdf.use14corefonts": True,
+        "text.usetex": False,
+
+        # Text and math in Times New Roman
+        "font.family": "serif",
+        "font.serif": ["Times", "Times New Roman"],
+
+        "mathtext.fontset": "custom",
+        "mathtext.rm": "Times",
+        "mathtext.it": "Times New Roman:italic",
+        "mathtext.bf": "Times:bold",
+        "mathtext.cal": "Times New Roman:italic",
+        "mathtext.tt": "Courier New",
+        "mathtext.default": "it",
+
+        "axes.unicode_minus": False,
+        "pdf.compression": 9,
+    })
+
     import logging
     # Suppress just the 'findfont' warnings from matplotlib's font manager
     logging.getLogger('matplotlib.font_manager').setLevel(logging.ERROR)
