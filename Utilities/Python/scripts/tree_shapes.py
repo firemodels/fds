@@ -1,4 +1,5 @@
 import os
+import sys
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -14,7 +15,7 @@ CHID = 'tree_shapes'
 devc_file = os.path.join(outdir, f'{CHID}_devc.csv')
 if not os.path.exists(devc_file):
     print(f'Error: File {devc_file} does not exist. Skipping case.')
-    exit(1)
+    sys.exit()
 
 # Read device data
 DEVC = pd.read_csv(devc_file, skiprows=1)
