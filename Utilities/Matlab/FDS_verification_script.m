@@ -62,7 +62,6 @@ scatplot(saved_data, drange, ...
 % Special cases
 
 disp('compression_wave...');              compression_wave
-disp('terminal_velocity_convergence...'); terminal_velocity_convergence
 disp('fluid_part...');                    fluid_part
 disp('extinction...');                    extinction
 disp('fan_curve...');                     fan_curve
