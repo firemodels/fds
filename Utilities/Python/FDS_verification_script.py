@@ -40,6 +40,7 @@ print("pyrolysis...");            subprocess.run(["python","./scripts/pyrolysis.
 print("ribbed_channel...");       subprocess.run(["python","./scripts/ribbed_channel.py"])
 print("turb_model...");           subprocess.run(["python","./scripts/turb_model.py"])
 print("yplus...");                subprocess.run(["python","./scripts/yplus.py"])
-print("shunn_mms...");          subprocess.run(["python","./scripts/shunn_mms.py"])
+print("shunn_mms...");            subprocess.run(["python","./scripts/shunn_mms.py"])
+print("tree_shapes...");          subprocess.run(["python","./scripts/tree_shapes.py"])
 
 print("verification scripts completed successfully!")
