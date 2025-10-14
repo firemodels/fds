@@ -461,12 +461,6 @@ def plot_to_fig(x_data,y_data,**kwargs):
     #     print ("%s == %s" %(key, value))
 
     plot_style = get_plot_style("fds")
-    # plt.rcParams["font.family"] = plot_style["Font_Name"]
-    # plt.rcParams["font.size"] = plot_style["Label_Font_Size"]
-    # print(plot_style)
-
-    # plt.rcParams['text.usetex'] = False # supports latex math (set per plot below)
-    # plt.rcParams["pdf.use14corefonts"] = True # forces matplotlib to write native pdf fonts rather than embed
 
     import matplotlib.pyplot as plt
 
