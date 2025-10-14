@@ -62,7 +62,6 @@ scatplot(saved_data, drange, ...
 
 % Special cases
 
-disp('pulsating...');                     pulsating
 disp('compression_wave...');              compression_wave
 disp('soborot_mass_transport...');        soborot_mass_transport
 disp('plate_view_factor...');             plate_view_factor
