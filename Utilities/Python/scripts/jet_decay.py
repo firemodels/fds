@@ -71,10 +71,11 @@ fig = fdsplotlib.plot_to_fig(x_data=[-1,-1], y_data=[-1,-1],
                              x_min=0, x_max=25, y_min=0, y_max=1.2,
                              revision_label=version_string,
                              plot_title='Jet Centerline Velocity Decay',
-                             legend_location='upper right',
+                             legend_location='outside',
+                             legend_expand=1.25, #optional (default 1.25 for legend_location=='outside')
                              legend_fontsize=8,
-                             x_label='$x/h$',
-                             y_label='$u_{\\hbox{\\tiny max}}/u_0$')
+                             x_label=r'$x/h$',
+                             y_label=r'$u_{\rm max}/u_0$')
 
 fdsplotlib.plot_to_fig(x_data=x/h, y_data=u_1/u_0, figure_handle=fig, marker_style='k--', data_label='analytical, $m=0.12$')
 fdsplotlib.plot_to_fig(x_data=x/h, y_data=u_2/u_0, figure_handle=fig, marker_style='k-' , data_label='analytical, $m=0.20$')
