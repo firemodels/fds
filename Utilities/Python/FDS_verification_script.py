@@ -31,6 +31,7 @@ fdsplotlib.dataplot(config_filename='../Matlab/FDS_verification_dataplot_inputs.
 
 # Special cases
 
+print("ashrae_7...");                        subprocess.run(["python","./scripts/ashrae_7.py"])
 print("blasius...");                        subprocess.run(["python","./scripts/blasius.py"])
 print("fan_curve...");                      subprocess.run(["python","./scripts/fan_curve.py"])
 print("fds_moody_chart...");                subprocess.run(["python","./scripts/fds_moody_chart.py"])
