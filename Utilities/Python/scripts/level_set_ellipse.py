@@ -59,19 +59,6 @@ def virtual_wind(phi_s_x: float, phi_s_y: float) -> tuple[float, float]:
     return u_virtual, v_virtual
 
 
-def get_version_string_for_any_case() -> str | None:
-    for slope in slope_angles:
-        for U in U_vals:
-            chid = f'LS_ellipse_{U}ms_{slope:02d}deg'
-            git_path = os.path.join(outdir, f'{chid}_git.txt')
-            if os.path.exists(git_path):
-                try:
-                    return fdsplotlib.get_version_string(git_path)
-                except Exception:
-                    continue
-    return None
-
-
 colors = ['k', 'r', 'b', 'g']
 error_table = None
 
