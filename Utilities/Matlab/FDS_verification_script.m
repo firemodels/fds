@@ -25,7 +25,6 @@ addpath 'scripts'
 
 % Scripts to run prior to dataplot
 
-disp('radiation_box...');                  radiation_box
 disp('radiation_plane_layer...');          radiation_plane_layer
 disp('ns2d...');                           ns2d
 disp('vort2d...');                         vort2d

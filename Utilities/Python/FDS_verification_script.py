@@ -13,6 +13,7 @@ print("Using:", fdsplotlib.__file__)
 # print("ignition_delay...");   subprocess.run(["python","./scripts/cantera_ignition_delay.py"])
 # print("reaction_rates...");   subprocess.run(["python","./scripts/cantera_reaction_rates.py"])
 # print("turbulent_batch_reactor...");   subprocess.run(["python","./scripts/cantera_turbulent_batch_reactor.py"])
+print("radiation_box...");   subprocess.run(["python","./scripts/radiation_box.py"])
 
 # Dataplot and scatplot options
 
