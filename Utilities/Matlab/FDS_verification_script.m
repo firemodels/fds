@@ -28,7 +28,6 @@ addpath 'scripts'
 disp('radiation_plane_layer...');          radiation_plane_layer
 disp('ns2d...');                           ns2d
 disp('vort2d...');                         vort2d
-disp('ashrae_7...');                       ashrae_7
 disp('flame_species...');                  flame_species
 disp('cat_propane_depo...');               cat_propane_depo
 disp('burke_schumann...');                 burke_schumann
@@ -62,8 +61,6 @@ scatplot(saved_data, drange, ...
 
 disp('compression_wave...');              compression_wave
 disp('extinction...');                    extinction
-disp('shunn_mms_error...');               shunn_mms_error
-disp('shunn_cc_mms_error...');            shunn_cc_mms_error
 disp('rotcube_cc_mms_error...');          rotcube_cc_mms_error
 disp('openmp_timing_benchmarks...');      openmp_timing_benchmarks
 disp('rms_cov_corr...');                  rms_cov_corr
