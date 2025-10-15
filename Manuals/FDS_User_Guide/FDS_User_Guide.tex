@@ -11252,6 +11252,7 @@ you can specify the logical parameter \ct{DRY} on a \ct{DEVC} line that reports 
       DRY=T /
 \end{lstlisting}
 
+\ct{DRY} can also be specified on an \ct{SLCF} line that reports the \ct{'MASS FRACTION'} or \ct{'VOLUME FRACTION'} of a species as well as an \ct{HVAC} \ct{DUCT QUANTITY LIST} or \ct{NODE QUANTITY LIST}. For \ct{HVAC} line outputs, \ct{DRY} is an array corresponding to each entry on the \ct{QUANTITY LIST}.
 
 \subsection{Aerosol and Soot Concentration}
 \label{info:soot}
@@ -12552,6 +12553,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{DEVC_ID}                & Character     & Sections ~\ref{info:HVACduct}, \ref{info:HVACfan}, \ref{info:HVACfilter} &               &                \\ \hline
 \ct{DIAMETER}                & Real          & Section~\ref{info:HVACduct}                                              &  m            &                \\ \hline
 \ct{DISCHARGE_COEFFICIENT}  & Real          & Section~\ref{info:Leaks}                                                 &               & 1.             \\ \hline
+\ct{DRY}                    & Log. Array    & Section~\ref{info:dry}                                                   &               &                \\ \hline
 \ct{DUCT_ID}                & Char.~Array   & Section~\ref{info:HVACnode}                                              &               &                \\ \hline
 \ct{EFFICIENCY}              & Real Array    & Sections~\ref{info:HVACfilter}, \ref{info:HVACaircoil}                   &               & 1.0            \\ \hline
 \ct{FAN_ID}                 & Character     & Section~\ref{info:HVACduct}                                              &               &                \\ \hline
@@ -13485,6 +13487,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{AGL_SLICE}        & Real              & Section~\ref{info:complex_terrain}        & m         &                   \\ \hline
 \ct{CELL_CENTERED}    & Logical           & Section~\ref{info:SLCF}                   &           & \ct{F}     \\ \hline
 \ct{DB}                & Character         & Section~\ref{info:SLCF}                   &           &                   \\ \hline
+\ct{DRY}               & Logical           & Section~\ref{info:dry}                   &           &                   \\ \hline
 \ct{ID}                & Character         & Section~\ref{info:SLCF}                   &           &                   \\ \hline
 \ct{MAXIMUM_VALUE}    & Real              & Reference~\cite{Smokeview_Users_Guide}    &           &                   \\ \hline
 \ct{MESH_NUMBER}      & Integer           & Section~\ref{info:SLCF}                   &           &                   \\ \hline
