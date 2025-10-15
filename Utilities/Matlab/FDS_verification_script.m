@@ -33,7 +33,6 @@ disp('cat_propane_depo...');               cat_propane_depo
 disp('burke_schumann...');                 burke_schumann
 disp('convective_cooling_convergence...'); convective_cooling_convergence
 disp('random_walk_soln...');               random_walk_soln
-disp('water_evap_1_const_gamma...');       water_evap_1_const_gamma
 disp('vegetation_absorb...');              vegetation_absorb
 
 % Dataplot and scatplot options

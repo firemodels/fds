@@ -13,7 +13,9 @@ print("Using:", fdsplotlib.__file__)
 # print("ignition_delay...");   subprocess.run(["python","./scripts/cantera_ignition_delay.py"])
 # print("reaction_rates...");   subprocess.run(["python","./scripts/cantera_reaction_rates.py"])
 # print("turbulent_batch_reactor...");   subprocess.run(["python","./scripts/cantera_turbulent_batch_reactor.py"])
-print("radiation_box...");   subprocess.run(["python","./scripts/radiation_box.py"])
+print("ashrae_7...");                   subprocess.run(["python","./scripts/ashrae_7.py"])
+print("radiation_box...");              subprocess.run(["python","./scripts/radiation_box.py"])
+print('water_evap_1_const_gamma...');   subprocess.run(["python","./scripts/water_evap_1_const_gamma.py"])
 
 # Dataplot and scatplot options
 
@@ -31,7 +33,6 @@ fdsplotlib.dataplot(config_filename='../Matlab/FDS_verification_dataplot_inputs.
 
 # Special cases
 
-print("ashrae_7...");                        subprocess.run(["python","./scripts/ashrae_7.py"])
 print("blasius...");                        subprocess.run(["python","./scripts/blasius.py"])
 print("fan_curve...");                      subprocess.run(["python","./scripts/fan_curve.py"])
 print("fds_moody_chart...");                subprocess.run(["python","./scripts/fds_moody_chart.py"])
