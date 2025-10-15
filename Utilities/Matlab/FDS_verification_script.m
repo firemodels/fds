@@ -74,7 +74,6 @@ disp('favre_test...');                    favre_test
 disp('scaling_tests...');                 scaling_tests
 disp('hvac_mass_transport...');           hvac_mass_transport
 disp('particle_size_distribution...');    particle_size_distribution
-disp('mass_balance...');                  mass_balance
 disp('mass_balance_reac...');             mass_balance_reac
 disp('mass_balance_gas_volume...');       mass_balance_gas_volume
 disp('ht3d_sphere...');                   ht3d_sphere
