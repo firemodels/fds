@@ -62,7 +62,6 @@ scatplot(saved_data, drange, ...
 
 disp('compression_wave...');              compression_wave
 disp('extinction...');                    extinction
-disp('fan_curve...');                     fan_curve
 disp('mesh_transformation...');           mesh_transformation
 disp('synthetic_eddy_method...');         synthetic_eddy_method
 disp('shunn_mms_error...');               shunn_mms_error
