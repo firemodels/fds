@@ -87,6 +87,5 @@ disp('natconh...');                       natconh
 disp('natconv...');                       natconv
 disp('freecon_sphere...');                freecon_sphere
 disp('nat_conv_hot_plate...');            nat_conv_hot_plate
-disp('impinging_jet...');                 impinging_jet
 
 display('verification scripts completed successfully!')
