@@ -39,6 +39,7 @@ print("heated_channel...");                 subprocess.run(["python","./scripts/
 print("jet_decay...");                      subprocess.run(["python","./scripts/jet_decay.py"])
 print("law_of_the_wall...");                subprocess.run(["python","./scripts/law_of_the_wall.py"])
 print("level_set_ellipse...");              subprocess.run(["python","./scripts/level_set_ellipse.py"])
+print("mesh_transformation...");            subprocess.run(["python","./scripts/mesh_transformation.py"])
 print("plate_view_factor...");              subprocess.run(["python","./scripts/plate_view_factor.py"])
 print("pulsating...");                      subprocess.run(["python","./scripts/pulsating.py"])
 print("pyrolysis...");                      subprocess.run(["python","./scripts/pyrolysis.py"])
