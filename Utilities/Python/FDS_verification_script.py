@@ -7,9 +7,7 @@ import fdsplotlib
 import importlib
 importlib.reload(fdsplotlib) # use for development (while making changes to fdsplotlib.py)
 print("Using:", fdsplotlib.__file__)
-
 # Scripts to run prior to dataplot
-
 # print("ignition_delay...");   subprocess.run(["python","./scripts/cantera_ignition_delay.py"])
 # print("reaction_rates...");   subprocess.run(["python","./scripts/cantera_reaction_rates.py"])
 # print("turbulent_batch_reactor...");   subprocess.run(["python","./scripts/cantera_turbulent_batch_reactor.py"])
@@ -51,5 +49,6 @@ print("tree_shapes...");                    subprocess.run(["python","./scripts/
 print("turb_model...");                     subprocess.run(["python","./scripts/turb_model.py"])
 print("wall_internal_radiation...");        subprocess.run(["python","./scripts/wall_internal_radiation.py"])
 print("yplus...");                          subprocess.run(["python","./scripts/yplus.py"])
+print('impinging_jet...');                  subprocess.run(["python","./scripts/impinging_jet.py"])
 
 print("verification scripts completed successfully!")
