@@ -48,6 +48,7 @@ print("ribbed_channel...");                 subprocess.run(["python","./scripts/
 print("saad_mms...");                       subprocess.run(["python","./scripts/saad_mms_temporal_error.py"])
 print("shunn_mms...");                      subprocess.run(["python","./scripts/shunn_mms.py"])
 print("soborot_mass_transport...");         subprocess.run(["python","./scripts/soborot_mass_transport.py"])
+print("synthetic_eddy_method...");          subprocess.run(["python","./scripts/synthetic_eddy_method.py"])
 print("terminal_velocity_convergence...");  subprocess.run(["python","./scripts/terminal_velocity_convergence.py"])
 print("tree_shapes...");                    subprocess.run(["python","./scripts/tree_shapes.py"])
 print("turb_model...");                     subprocess.run(["python","./scripts/turb_model.py"])

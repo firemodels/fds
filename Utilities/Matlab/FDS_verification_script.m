@@ -62,7 +62,6 @@ scatplot(saved_data, drange, ...
 
 disp('compression_wave...');              compression_wave
 disp('extinction...');                    extinction
-disp('synthetic_eddy_method...');         synthetic_eddy_method
 disp('shunn_mms_error...');               shunn_mms_error
 disp('shunn_cc_mms_error...');            shunn_cc_mms_error
 disp('rotcube_cc_mms_error...');          rotcube_cc_mms_error
