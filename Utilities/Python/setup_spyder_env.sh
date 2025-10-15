@@ -20,7 +20,7 @@ fi
 curdir=$(pwd)
 
 # Navigate to repo root
-cd "$(dirname "$0")/../../.." || error_exit "Failed to locate repo root"
+cd "$(dirname "${BASH_SOURCE[0]}")/../../.." || error_exit "Failed to locate repo root"
 reporoot=$(pwd)
 
 # Create and activate virtual environment
