@@ -61,7 +61,6 @@ scatplot(saved_data, drange, ...
 % Special cases
 
 disp('compression_wave...');              compression_wave
-disp('fluid_part...');                    fluid_part
 disp('extinction...');                    extinction
 disp('fan_curve...');                     fan_curve
 disp('mesh_transformation...');           mesh_transformation
@@ -91,6 +90,5 @@ disp('natconv...');                       natconv
 disp('freecon_sphere...');                freecon_sphere
 disp('nat_conv_hot_plate...');            nat_conv_hot_plate
 disp('impinging_jet...');                 impinging_jet
-disp('part_drag_profile...');             part_drag_profile
 
 display('verification scripts completed successfully!')
