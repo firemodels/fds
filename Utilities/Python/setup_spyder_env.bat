@@ -1,3 +1,4 @@
+@echo off
 REM Configure spyder IDE for FDS (WINDOWS)
 REM Usage (WINDOWS): 
 REM    1. Install Python 3.11 or below and add its "python.exe" folder to the PATH
@@ -6,7 +7,7 @@ REM    3. call ./setup_spyder_env.bat
 REM    4. spyder   
 
 
-@echo off
+
 setlocal enabledelayedexpansion
 
 REM === Check for python ===
