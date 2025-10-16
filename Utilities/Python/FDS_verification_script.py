@@ -24,17 +24,17 @@ print('water_evap_1_const_gamma...');   runpy.run_path("./scripts/water_evap_1_c
 
 # Statistics output options
 
-# # Run dataplot and scatplot scripts
+# Run dataplot and scatplot scripts
 
-# fdsplotlib.dataplot(config_filename='../Matlab/FDS_verification_dataplot_inputs.csv',
-#                     expdir='../../Verification/',
-#                     cmpdir='../../Verification/',
-#                     pltdir='../../Manuals/',
-#                     close_figs=True,
-#                     verbose=True,
-#                     plot_range=[2,2]) # plot_range[start, end], optionally instead use plot_list['Dataname']
+fdsplotlib.dataplot(config_filename='../Matlab/FDS_verification_dataplot_inputs.csv',
+                    expdir='../../Verification/',
+                    cmpdir='../../Verification/',
+                    pltdir='../../Manuals/',
+                    close_figs=True,
+                    verbose=True,
+                    plot_range=[2,2]) # plot_range[start, end], optionally instead use plot_list['Dataname']
 
-# # Special cases
+# Special cases
 
 print("blasius...");                        runpy.run_path("./scripts/blasius.py", run_name="__main__")
 print("fan_curve...");                      runpy.run_path("./scripts/fan_curve.py", run_name="__main__")
