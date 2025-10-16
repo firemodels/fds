@@ -62,7 +62,6 @@ disp('rms_cov_corr...');                  rms_cov_corr
 disp('hot_layer_collapse...');            hot_layer_collapse
 disp('radiating_polygon...');             radiating_polygon
 disp('favre_test...');                    favre_test
-disp('scaling_tests...');                 scaling_tests
 disp('particle_size_distribution...');    particle_size_distribution
 disp('mass_balance_reac...');             mass_balance_reac
 disp('mass_balance_gas_volume...');       mass_balance_gas_volume
