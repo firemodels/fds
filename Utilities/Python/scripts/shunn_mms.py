@@ -540,7 +540,7 @@ for kk in range(2):
    plt.savefig(plotfile, format='pdf')
    plt.close()
 
-   if(kk==1):
+   if(kk==0):
       # check errors
       if e_r[len(e_r)-1] > 2e-4:
          print('Python Warning: Density in shunn3 CC is out of tolerance. e_r = ',e_r[len(e_r)-1] )
