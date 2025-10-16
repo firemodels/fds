@@ -57,7 +57,6 @@ scatplot(saved_data, drange, ...
 disp('compression_wave...');              compression_wave
 disp('extinction...');                    extinction
 disp('rotcube_cc_mms_error...');          rotcube_cc_mms_error
-disp('openmp_timing_benchmarks...');      openmp_timing_benchmarks
 disp('hot_layer_collapse...');            hot_layer_collapse
 disp('radiating_polygon...');             radiating_polygon
 disp('favre_test...');                    favre_test
