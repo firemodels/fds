@@ -17,6 +17,7 @@ print("Using:", fdsplotlib.__file__)
 print("ashrae_7...");                   runpy.run_path("./scripts/ashrae_7.py", run_name="__main__")
 print('burke_schumann...');             runpy.run_path("./scripts/burke_schumann.py", run_name="__main__")
 print('cat_propane_depo...');           runpy.run_path("./scripts/cat_propane_depo.py", run_name="__main__")
+print('flame_species...');              runpy.run_path("./scripts/flame_species.py", run_name="__main__")
 print("radiation_box...");              runpy.run_path("./scripts/radiation_box.py", run_name="__main__")
 print('water_evap_1_const_gamma...');   runpy.run_path("./scripts/water_evap_1_const_gamma.py", run_name="__main__")
 
