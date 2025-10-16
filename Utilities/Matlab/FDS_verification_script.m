@@ -29,7 +29,6 @@ disp('radiation_plane_layer...');          radiation_plane_layer
 disp('ns2d...');                           ns2d
 disp('vort2d...');                         vort2d
 disp('flame_species...');                  flame_species
-disp('cat_propane_depo...');               cat_propane_depo
 disp('burke_schumann...');                 burke_schumann
 disp('convective_cooling_convergence...'); convective_cooling_convergence
 disp('random_walk_soln...');               random_walk_soln
