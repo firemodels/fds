@@ -502,11 +502,8 @@ def plot_to_fig(x_data,y_data,**kwargs):
     default_markevery = 1
     markerfacecolor = None
     markeredgecolor = 'black'
-    markeredgewidth = 1
     marker = None
-    markersize = 5
     linestyle = '-'
-    linewidth = 1
     color = 'black'
     ###############################
 
@@ -576,10 +573,34 @@ def plot_to_fig(x_data,y_data,**kwargs):
 
     error_fill_color = kwargs.get('error_fill_color',None)
 
+    # adjust sizes if requested
+    linewidth = kwargs.get('linewidth',1)
+    markeredgewidth = kwargs.get('markeredgewidth',1)
+    markersize = kwargs.get('markersize',5)
+    
+    # adjust ticks if required
+    xnumticks = kwargs.get('xnumticks',None)
+    ynumticks = kwargs.get('ynumticks',None)
+    xticks = kwargs.get('xticks',None)
+    yticks = kwargs.get('yticks',None)
+
     # other plot parameters
     markevery = kwargs.get('data_markevery',default_markevery)
     legend_location = kwargs.get('legend_location',default_legend_location)
     legend_framealpha = kwargs.get('legend_framealpha',default_legend_framealpha)
+    
+    # set dashes to default, or user requested
+    # This set is the matplotlib default
+    #if linestyle == '': dashes = (None, None); linewidth = 0;
+    #if linestyle == '-': dashes = (None, None)
+    #if linestyle == '--': dashes = kwargs.get('line_dashes',(6, 6))
+    #if linestyle == '-.': dashes = kwargs.get('line_dashes',(6, 3, 1, 3))
+    
+    # This set is what we were using in Matlab
+    if linestyle == '': dashes = (None, None); linewidth = 0;
+    if linestyle == '-': dashes = (None, None)
+    if linestyle == '--': dashes = kwargs.get('line_dashes',(18.0, 11.1))
+    if linestyle == '-.': dashes = kwargs.get('line_dashes',(12, 7.4, 1, 7.4))
 
     data_label = kwargs.get('data_label',None)
 
@@ -599,7 +620,8 @@ def plot_to_fig(x_data,y_data,**kwargs):
             markersize=markersize,
             linestyle=linestyle,
             linewidth=linewidth,
-            color=color)
+            color=color,
+            dashes=dashes)
 
     if plot_type=='loglog':
         ax.loglog(x_data,y_data,
@@ -612,7 +634,8 @@ def plot_to_fig(x_data,y_data,**kwargs):
             markersize=markersize,
             linestyle=linestyle,
             linewidth=linewidth,
-            color=color)
+            color=color,
+            dashes=dashes)
 
     if plot_type=='semilogx':
         ax.semilogx(x_data,y_data,
@@ -625,7 +648,8 @@ def plot_to_fig(x_data,y_data,**kwargs):
             markersize=markersize,
             linestyle=linestyle,
             linewidth=linewidth,
-            color=color)
+            color=color,
+            dashes=dashes)
 
     if plot_type=='semilogy':
         ax.semilogy(x_data,y_data,
@@ -638,7 +662,8 @@ def plot_to_fig(x_data,y_data,**kwargs):
             markersize=markersize,
             linestyle=linestyle,
             linewidth=linewidth,
-            color=color)
+            color=color,
+            dashes=dashes)
 
     # if y fill range is passed, add it to the plot
     if kwargs.get('y_error_fill_absolute') and not kwargs.get('y_error_fill_relative'):
@@ -762,6 +787,23 @@ def plot_to_fig(x_data,y_data,**kwargs):
 
     ax.set_xlim(xmin,xmax)
     ax.set_ylim(ymin,ymax)
+    
+    # set number of ticks if requested by the user
+    if ynumticks != None:
+        if plot_type in ('loglog', 'semilogx'):
+            ax.set_xticks(np.logspace(xmin, xmax, xnumticks))
+        else:
+            ax.set_xticks(np.linspace(xmin, xmax, xnumticks))
+    if ynumticks != None:
+        if plot_type in ('loglog', 'semilogy'):
+            ax.set_yticks(np.logspace(ymin, ymax, ynumticks))
+        else:
+            ax.set_yticks(np.linspace(ymin, ymax, ynumticks))
+    
+    # set ticks if requested by the user
+    if xticks is not None: ax.set_xticks(xticks)
+    if yticks is not None: ax.set_yticks(yticks)
+    
 
     if plot_type in ('loglog', 'semilogy'):
         apply_global_exponent(ax, axis='y', fontsize=axeslabel_fontsize)
@@ -772,6 +814,8 @@ def plot_to_fig(x_data,y_data,**kwargs):
         add_version_string(ax=ax, version_str=kwargs.get('revision_label'), plot_type=plot_type, font_size=version_fontsize)
 
     # fig.tight_layout() # this should not be needed if figure_size and plot_size are both specified
+    
+    set_ticks_like_matlab(fig)
 
     return fig
 
@@ -1685,3 +1729,12 @@ def statistics_histogram(Measured_Values, Predicted_Values,
 
     print(f"[statistics_histogram] {Scatter_Plot_Title}: p = {pval:.2f}")
     return f"{os.path.basename(Plot_Filename)}_Histogram", pval
+
+def set_ticks_like_matlab(fig):
+    ax = fig.axes[0]
+    ax.tick_params(axis="both", direction="in", top=True, right=True, width=0.5)
+
+    for axis in ['top','bottom','left','right']:
+        ax.spines[axis].set_linewidth(0.5)
+    
+
