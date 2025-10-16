@@ -911,6 +911,7 @@ def get_version_string(filename):
     file1.close()
     return version_str
 
+
 def add_version_string(ax, version_str, plot_type='linear', scale_x=1.00, scale_y=1.02,
                        font_name='Times', font_size=10):
     """
@@ -1301,12 +1302,18 @@ def scatplot(saved_data, drange, **kwargs):
     import numpy as np
     import pandas as pd
     import matplotlib.pyplot as plt
+    import fdsplotlib
 
     Manuals_Dir = kwargs.get("Manuals_Dir", "")
     Scatterplot_Inputs_File = kwargs.get("Scatterplot_Inputs_File", "")
     Stats_Output = kwargs.get("Stats_Output", "Validation")
     Scatterplot_Dir = kwargs.get("Scatterplot_Dir", "")
     verbose = kwargs.get("verbose", True)
+
+    plot_style = get_plot_style("fds")
+    scat_figure_size = (plot_style["Scat_Paper_Width"],plot_style["Scat_Paper_Height"])
+    scat_plot_size = (plot_style["Scat_Plot_Width"],plot_style["Scat_Plot_Height"])
+    scat_plot_origin = (plot_style["Scat_Plot_X"],plot_style["Scat_Plot_Y"])
 
     if not os.path.exists(Scatterplot_Inputs_File):
         raise FileNotFoundError(f"[scatplot] Missing input file: {Scatterplot_Inputs_File}")
@@ -1409,26 +1416,25 @@ def scatplot(saved_data, drange, **kwargs):
         delta = np.exp(log_M_bar - log_E_bar + 0.5 * Sigma_M ** 2 - 0.5 * Sigma_E ** 2)
 
         # --- Scatter Plot ---
-        fig, ax = plt.subplots(figsize=(5, 5))
-        if Plot_Type == "loglog":
-            ax.loglog(Measured_Values, Predicted_Values, "o", color="k", alpha=0.6)
-        else:
-            ax.plot(Measured_Values, Predicted_Values, "o", color="k", alpha=0.6)
+        fig = fdsplotlib.plot_to_fig(x_data=[-1], y_data=[-1],
+                                figure_size=scat_figure_size,
+                                plot_size=scat_plot_size,
+                                plot_origin=scat_plot_origin,
+                                plot_type=Plot_Type,
+                                x_min=Plot_Min, x_max=Plot_Max, y_min=Plot_Min, y_max=Plot_Max,
+                                x_label=row["Ind_Title"],
+                                y_label=row["Dep_Title"])
 
-        ax.plot([Plot_Min, Plot_Max], [Plot_Min, Plot_Max], "k-")
+        fdsplotlib.plot_to_fig(x_data=[Plot_Min, Plot_Max], y_data=[Plot_Min, Plot_Max], line_style="k-", figure_handle=fig)
         if Sigma_E > 0:
-            ax.plot([Plot_Min, Plot_Max], np.array([Plot_Min, Plot_Max]) * (1 + 2 * Sigma_E), "k--")
-            ax.plot([Plot_Min, Plot_Max], np.array([Plot_Min, Plot_Max]) / (1 + 2 * Sigma_E), "k--")
-            ax.plot([Plot_Min, Plot_Max], np.array([Plot_Min, Plot_Max]) * delta, "r-")
-            ax.plot([Plot_Min, Plot_Max], np.array([Plot_Min, Plot_Max]) * delta * (1 + 2 * Sigma_M), "r--")
-            ax.plot([Plot_Min, Plot_Max], np.array([Plot_Min, Plot_Max]) * delta / (1 + 2 * Sigma_M), "r--")
+            fdsplotlib.plot_to_fig(x_data=[Plot_Min, Plot_Max], y_data=np.array([Plot_Min, Plot_Max]) * (1 + 2 * Sigma_E), line_style="k--", figure_handle=fig)
+            fdsplotlib.plot_to_fig(x_data=[Plot_Min, Plot_Max], y_data=np.array([Plot_Min, Plot_Max]) / (1 + 2 * Sigma_E), line_style="k--", figure_handle=fig)
+            fdsplotlib.plot_to_fig(x_data=[Plot_Min, Plot_Max], y_data=np.array([Plot_Min, Plot_Max]) * delta, line_style="r-", figure_handle=fig)
+            fdsplotlib.plot_to_fig(x_data=[Plot_Min, Plot_Max], y_data=np.array([Plot_Min, Plot_Max]) * delta * (1 + 2 * Sigma_M), line_style="r--", figure_handle=fig)
+            fdsplotlib.plot_to_fig(x_data=[Plot_Min, Plot_Max], y_data=np.array([Plot_Min, Plot_Max]) * delta / (1 + 2 * Sigma_M), line_style="r--", figure_handle=fig)
 
-        ax.set_xlim([Plot_Min, Plot_Max])
-        ax.set_ylim([Plot_Min, Plot_Max])
-        ax.set_xlabel(row["Ind_Title"])
-        ax.set_ylabel(row["Dep_Title"])
-        ax.grid(True, which="both", linestyle=":")
-        ax.set_title(Scatter_Plot_Title)
+        # plot data last so it shows on top of stat lines
+        fdsplotlib.plot_to_fig(x_data=Measured_Values, y_data=Predicted_Values, marker_style="ko", figure_handle=fig)
 
         pdf_path = os.path.join(Manuals_Dir, Plot_Filename + ".pdf")
         os.makedirs(os.path.dirname(pdf_path), exist_ok=True)
