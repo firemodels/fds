@@ -17,8 +17,13 @@ def plot_mass_balance(chid, title_text):
     pltdir = '../../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/'
     
     mass_file = os.path.join(ddir, f'{chid}_mass.csv')
-    
-    M = pd.read_csv(mass_file, skiprows=1)  # Skip units row, use column names as header
+
+    try:
+        M = pd.read_csv(mass_file, skiprows=1)  # Skip units row, use column names as header
+    except FileNotFoundError:
+        print(f'Error: File {mass_file} does not exist. Skipping case.')
+        return 0
+
     t = M.iloc[:, 0].values
     m = M['WATER VAPOR'].values
     
