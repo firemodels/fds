@@ -13,8 +13,8 @@ import os
 def plot_mass_balance(chid, title_text):
     
     plot_style = fdsplotlib.get_plot_style('fds')
-    ddir   = '../../../Verification/Species/'
-    pltdir = '../../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/'
+    ddir   = '../../Verification/Species/'
+    pltdir = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/'
     
     mass_file = os.path.join(ddir, f'{chid}_mass.csv')
 
