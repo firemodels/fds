@@ -1490,7 +1490,7 @@ In this case a 128 \si{m^3} box is initially filled with air at 20 \si{\degreeCe
 \subsection{Evaporation with Constant Specific Heat Ratio (\texorpdfstring{\ct{water_evap_1_const_gamma}}{water\_evap\_1\_const\_gamma})}
 \label{water_evap_1_const_gamma}
 
-This test case is a replica of \ct{water_evaporation_1} in Sec.~\ref{water_evaporation_1} using constant specific heat ratio.  A 1 \si{m^3} box is initially filled with dry air at 200 \si{\degreeCelsius} and mono-disperse water droplets totaling 0.01 kg in mass initially at 20 \si{\degreeCelsius}.  In this case, all the water evaporates.  The final gas temperature may be computed from energy conservation.  Pressure change may be computed from the ideal gas law.  Results are shown in Fig.~\ref{water_evap_1_const_gamma_plots}.  Details of the expected results may be found in \ct{water_evap_1_const_gamma.m} in the \ct{Utilities/Matlab/scripts/} directory in the FDS repository \cite{FDS-SMV_repository}.
+This test case is a replica of \ct{water_evaporation_1} in Sec.~\ref{water_evaporation_1} using constant specific heat ratio.  A 1 \si{m^3} box is initially filled with dry air at 200 \si{\degreeCelsius} and mono-disperse water droplets totaling 0.01 kg in mass initially at 20 \si{\degreeCelsius}.  In this case, all the water evaporates.  The final gas temperature may be computed from energy conservation.  Pressure change may be computed from the ideal gas law.  Results are shown in Fig.~\ref{water_evap_1_const_gamma_plots}.  Details of the expected results may be found in \ct{water_evap_1_const_gamma.py} in the \ct{Utilities/Python/scripts/} directory in the FDS repository \cite{FDS-SMV_repository}.
 
 \begin{figure}[ht!]
 \noindent
@@ -7827,6 +7827,7 @@ In this test, a \ct{GEOM} cube is heated from below by a surface at a fixed temp
 \section{Statistical Quantities}
 
 \subsection{RMS, Co-Variance, and Cross-Correlation (\texorpdfstring{\ct{rms\_cov\_corr}}{rms\_cov\_corr})}
+\label{rms_cov_corr}
 
 FDS can output the root mean square (RMS), co-variance, and cross-correlation for both point and line \ct{DEVC} outputs.  To test these outputs a 1 m$^3$ box with open sides and a 10 cm grid size is defined with two inlet vents centered on adjacent faces.  This results in two orthogonal flow streams that collide at the center of the box and exit diagonally.  Within the diagonal portion of the flow, are placed point measurements for the FDS outputs of the u-velocity RMS, the u-velocity/w-velocity co-variance, and the u-velocity/w-velocity cross-correlation.
 
