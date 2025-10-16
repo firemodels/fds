@@ -1,9 +1,13 @@
+REM Configure spyder IDE for FDS (WINDOWS)
+REM Usage (WINDOWS): 
+REM    1. Install Python 3.11 or below and add its "python.exe" folder to the PATH
+REM    2. Open normal Windows Command prompt
+REM    3. call ./setup_spyder_env.bat
+REM    4. spyder   
+
+
 @echo off
-REM Cross-platform setup script for Python 3 environment (Windows version)
-REM Usage: call setup_python3.bat
-
 setlocal enabledelayedexpansion
-
 
 REM === Check for python ===
 where python >nul 2>nul
@@ -20,26 +24,21 @@ for /f "delims=" %%v in ('python -c "import sys; print(sys.version_info[0])"') d
     )
 )
 
-REM === Save current directory ===
+REM === Save current directory and move to .github folder===
 set CURDIR=%cd%
-
-REM === Navigate to repo root ===
-REM NOTE: Assumes script is 3 levels deep. Change if structure changes.
 cd /d "%~dp0..\..\.."
 if errorlevel 1 (
     set ERROR_MSG=Failed to navigate to repo root
     call :ERROR_EXIT
 )
 set REPOROOT=%cd%
-
-REM === Move to .github folder ===
 cd /d "%REPOROOT%\fds\.github"
 if errorlevel 1 (
     set ERROR_MSG=Directory not found: %REPOROOT%\fds\.github
     call :ERROR_EXIT
 )
 
-REM === Create venv if not exists ===
+REM === Create venv if not exists and activate it==
 set VENV_DIR=fds_python_env
 if not exist "%VENV_DIR%" (
     python -m venv "%VENV_DIR%"
@@ -48,14 +47,10 @@ if not exist "%VENV_DIR%" (
         call :ERROR_EXIT
     )
 )
-
-REM === Check if activate.bat exists ===
 if not exist "%VENV_DIR%\Scripts\activate.bat" (
     set ERROR_MSG=Virtual environment activation script not found
     call :ERROR_EXIT
 )
-
-REM === Activate venv ===
 call "%VENV_DIR%\Scripts\activate.bat"
 if errorlevel 1 (
     set ERROR_MSG=Failed to activate virtual environment
@@ -69,8 +64,6 @@ if errorlevel 1 (
     call :ERROR_EXIT
 )
 
-python -m pip install numpy<2
-
 if exist requirements.txt (
     python -m pip install -r requirements.txt
     if errorlevel 1 (
@@ -79,14 +72,13 @@ if exist requirements.txt (
     )
 )
 
-REM === Install Spyder IDE (optional) ===
+REM === Install Spyder IDE ===
 python -m pip install spyder
 if errorlevel 1 (
     set ERROR_MSG=Failed to install Spyder
     call :ERROR_EXIT
 )
 
-REM === Set PYTHONPATH ===
 set PYTHONPATH=%REPOROOT%\fds\Utilities\Python;%PYTHONPATH%
 
 REM === Run test script ===
@@ -102,7 +94,6 @@ if errorlevel 1 (
     call :ERROR_EXIT
 )
 
-REM === Return to original directory ===
 cd /d "%CURDIR%"
 
 echo.
