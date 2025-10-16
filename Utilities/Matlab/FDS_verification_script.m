@@ -27,7 +27,6 @@ addpath 'scripts'
 
 disp('radiation_plane_layer...');          radiation_plane_layer
 disp('ns2d...');                           ns2d
-disp('flame_species...');                  flame_species
 disp('convective_cooling_convergence...'); convective_cooling_convergence
 disp('random_walk_soln...');               random_walk_soln
 disp('vegetation_absorb...');              vegetation_absorb
