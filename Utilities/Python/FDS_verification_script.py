@@ -54,6 +54,7 @@ print("openmp_timing_benchmarks...");       runpy.run_path("./scripts/openmp_tim
 print("plate_view_factor...");              runpy.run_path("./scripts/plate_view_factor.py", run_name="__main__")
 print("pulsating...");                      runpy.run_path("./scripts/pulsating.py", run_name="__main__")
 print("pyrolysis...");                      runpy.run_path("./scripts/pyrolysis.py", run_name="__main__")
+print('radiating_polygon...');              runpy.run_path("./scripts/radiating_polygon.py", run_name="__main__")
 print("ribbed_channel...");                 runpy.run_path("./scripts/ribbed_channel.py", run_name="__main__")
 print("saad_mms...");                       runpy.run_path("./scripts/saad_mms_temporal_error.py", run_name="__main__")
 print("scaling_tests...");                  runpy.run_path("./scripts/scaling_tests.py", run_name="__main__")
