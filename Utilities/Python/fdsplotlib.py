@@ -600,7 +600,7 @@ def plot_to_fig(x_data,y_data,**kwargs):
     if linestyle == '': dashes = (None, None); linewidth = 0;
     if linestyle == '-': dashes = (None, None)
     if linestyle == '--': dashes = kwargs.get('line_dashes',(18.0, 11.1))
-    if linestyle == '-.': dashes = kwargs.get('line_dashes',(12, 7.4, 1, 7.4))
+    if linestyle == '-.': dashes = kwargs.get('line_dashes',(12, 7.4, 3, 7.4))
 
     data_label = kwargs.get('data_label',None)
 
