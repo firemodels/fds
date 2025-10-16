@@ -58,6 +58,7 @@ print("synthetic_eddy_method...");          runpy.run_path("./scripts/synthetic_
 print("terminal_velocity_convergence...");  runpy.run_path("./scripts/terminal_velocity_convergence.py", run_name="__main__")
 print("tree_shapes...");                    runpy.run_path("./scripts/tree_shapes.py", run_name="__main__")
 print("turb_model...");                     runpy.run_path("./scripts/turb_model.py", run_name="__main__")
+print("vort2d...");                         runpy.run_path("./scripts/vort2d.py", run_name="__main__")
 print("wall_internal_radiation...");        runpy.run_path("./scripts/wall_internal_radiation.py", run_name="__main__")
 print("yplus...");                          runpy.run_path("./scripts/yplus.py", run_name="__main__")
 
