@@ -25,7 +25,6 @@ addpath 'scripts'
 
 % Scripts to run prior to dataplot
 
-disp('ns2d...');                           ns2d
 disp('convective_cooling_convergence...'); convective_cooling_convergence
 
 % Dataplot and scatplot options
