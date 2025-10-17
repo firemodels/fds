@@ -8,7 +8,6 @@ import runpy
 import importlib
 importlib.reload(fdsplotlib) # use for development (while making changes to fdsplotlib.py)
 print("Using:", fdsplotlib.__file__)
-
 # Scripts to run prior to dataplot
 
 # print("ignition_delay...");   runpy.run_path("./scripts/cantera_ignition_delay.py", run_name="__main__")
@@ -40,6 +39,7 @@ fdsplotlib.dataplot(config_filename='../Matlab/FDS_verification_dataplot_inputs.
 # Special cases
 
 print("blasius...");                        runpy.run_path("./scripts/blasius.py", run_name="__main__")
+print('extinction...');                     runpy.run_path("./scripts/extinction.py", run_name="__main__")
 print("fan_curve...");                      runpy.run_path("./scripts/fan_curve.py", run_name="__main__")
 print("fds_moody_chart...");                runpy.run_path("./scripts/fds_moody_chart.py", run_name="__main__")
 print("fluid_part...");                     runpy.run_path("./scripts/fluid_part.py", run_name="__main__")
@@ -69,5 +69,6 @@ print("turb_model...");                     runpy.run_path("./scripts/turb_model
 print("vort2d...");                         runpy.run_path("./scripts/vort2d.py", run_name="__main__")
 print("wall_internal_radiation...");        runpy.run_path("./scripts/wall_internal_radiation.py", run_name="__main__")
 print("yplus...");                          runpy.run_path("./scripts/yplus.py", run_name="__main__")
+print('impinging_jet...');                  runpy.run_path("./scripts/impinging_jet.py", run_name="__main__")
 
 print("verification scripts completed successfully!")
