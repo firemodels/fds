@@ -63,7 +63,7 @@ G = 2.0 * np.sqrt(A_r) * ((1 - 2.2*np.sqrt(A_r)) / (1 + 0.2*(H/D_h - 6)*np.sqrt(
 RE = np.linspace(2e3, 5e5, 1000)
 NU = G * 2*np.sqrt(RE) * np.sqrt(1 + 0.005*RE**0.55) * (Pr**0.42)
 
-fig = fdsplotlib.plot_to_fig(x_data=RE, y_data=NU, marker_style='k-', data_label='Martin', linewidth=2,
+fig = fdsplotlib.plot_to_fig(x_data=RE, y_data=NU, marker_style='k-', data_label='Martin',
                              x_min=0.0, x_max=5e5, y_min=0, y_max=600,
                              revision_label=version_string,
                              x_label='Re',
@@ -103,7 +103,7 @@ for j, res in enumerate(res_list):
             print(f'MATLAB Warning (ported): impinging jet error = {E:.3f} at Re_j={Re_tag}, Res={res}')
 
         label = f'FDS {res}' if i == 0 else None
-        fig = fdsplotlib.plot_to_fig(x_data=Re_j, y_data=Nu_fds, data_label=label, figure_handle=fig, marker_style=markers[res], marker_fill_color=(1,1,1,0.0), markeredgewidth=2.0)
+        fig = fdsplotlib.plot_to_fig(x_data=Re_j, y_data=Nu_fds, data_label=label, figure_handle=fig, marker_style=markers[res], marker_fill_color=(1,1,1,0.0))
 
 # Convert exponential to scientific
 fdsplotlib.apply_global_exponent(fig.axes[0], axis='x', fontsize=plot_style['Label_Font_Size'])
@@ -132,7 +132,7 @@ for i, Re_tag in enumerate(Re_str):
         Nu_x = (q_x / (T_j - T_w)) * D_h / k
 
         revlabel = version_string if j == 0 else None
-        fig = fdsplotlib.plot_to_fig(x_data=x, y_data=Nu_x, marker_style=styles[j], data_label=r'$D_{h}/\delta x$ = %d'%(7*(2**j)), linewidth=0.5,
+        fig = fdsplotlib.plot_to_fig(x_data=x, y_data=Nu_x, marker_style=styles[j], data_label=r'$D_{h}/\delta x$ = %d'%(7*(2**j)),
                                      x_min=-0.5, x_max=0.5, y_min=0, y_max=1000, xnumticks=3, ynumticks=6,
                                      revision_label=revlabel, figure_handle=fig, 
                                      x_label='$x$ (m)',
