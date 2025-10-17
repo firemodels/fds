@@ -19,6 +19,7 @@ print('cat_propane_depo...');           runpy.run_path("./scripts/cat_propane_de
 print('flame_species...');              runpy.run_path("./scripts/flame_species.py", run_name="__main__")
 print("radiation_box...");              runpy.run_path("./scripts/radiation_box.py", run_name="__main__")
 print("radiation_plane_layer...");      runpy.run_path("./scripts/radiation_plane_layer.py", run_name="__main__")
+print("random_walk_soln...");           runpy.run_path("./scripts/random_walk_soln.py", run_name="__main__")
 print('rms_cov_corr...');               runpy.run_path("./scripts/rms_cov_corr.py", run_name="__main__")
 print('vegetation_absorb...');          runpy.run_path("./scripts/vegetation_absorb.py", run_name="__main__")
 print('water_evap_1_const_gamma...');   runpy.run_path("./scripts/water_evap_1_const_gamma.py", run_name="__main__")
