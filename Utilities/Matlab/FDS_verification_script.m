@@ -25,7 +25,6 @@ addpath 'scripts'
 
 % Scripts to run prior to dataplot
 
-disp('radiation_plane_layer...');          radiation_plane_layer
 disp('ns2d...');                           ns2d
 disp('convective_cooling_convergence...'); convective_cooling_convergence
 disp('random_walk_soln...');               random_walk_soln
