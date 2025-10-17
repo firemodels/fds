@@ -54,7 +54,6 @@ scatplot(saved_data, drange, ...
 % Special cases
 
 disp('compression_wave...');              compression_wave
-disp('extinction...');                    extinction
 disp('rotcube_cc_mms_error...');          rotcube_cc_mms_error
 disp('hot_layer_collapse...');            hot_layer_collapse
 disp('favre_test...');                    favre_test
@@ -69,6 +68,5 @@ disp('natconh...');                       natconh
 disp('natconv...');                       natconv
 disp('freecon_sphere...');                freecon_sphere
 disp('nat_conv_hot_plate...');            nat_conv_hot_plate
-disp('impinging_jet...');                 impinging_jet
 
 display('verification scripts completed successfully!')

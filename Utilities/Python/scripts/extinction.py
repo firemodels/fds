@@ -1,18 +1,18 @@
-# Extinction Verification
-# Jonathan Hodges
-# 2024-06-17
-# Based on original matlab script:
-#-----------------------
-# C Weinschenk
-# Verification of Extinction Model
-# Fuel: Methane
-# 6/2012
-#-----------------------
+#!/usr/bin/env python3
+"""
+extinction.py
+Converted from MATLAB script extinction.m to Python.
+-----------------------
+C Weinschenk
+Verification of Extinction Model
+Fuel: Methane
+6/2012
+-----------------------
+"""
 import os
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-plt.rcParams["pdf.use14corefonts"] = True
+import fdsplotlib
 
 #-----------------------
 # Initialize species
@@ -38,13 +38,15 @@ y_MW = [28.0134, 16.042460, 31.9988, 44.0095, 18.01528] # [g/mol]
 y_hf = [0.0, -74873, 0.0, -393522, -241826] # [J/mol]
 pres_0 = 1.013253421185575e+05 # initial presure [Pa]
 
-# Plotting params
-Scat_Label_Font_Size = 16
-Key_Font_Size = 12
-default_ticklabel_fontsize = 16
-default_stamp_fontsize = 12
-figsize=(6,6)
-pltdir = '../../../Manuals/FDS_User_Guide/SCRIPT_FIGURES/'
+# -----------------------------
+# Paths and identifiers
+# -----------------------------
+firemodels_dir = os.path.normpath(os.path.join(os.path.dirname(__file__),'..','..','..','..'))
+fds_dir = os.path.normpath(os.path.join(os.path.dirname(__file__),'..','..','..'))
+#outdir = os.path.join(firemodels_dir, 'out','Convection','')
+results_dir = os.path.join(fds_dir, 'Verification','Extinction','')
+pltdir = os.path.join(fds_dir, 'Manuals','FDS_User_Guide','SCRIPT_FIGURES','')
+os.makedirs(pltdir, exist_ok=True)
 
 # Initialize variable arrays
 num_samp = 100         # number of input sets
@@ -234,9 +236,8 @@ for jj in range(0,num_samp):
 #-----------------------
 epsilon = 1e-10
 
-results_dir = '../../../Verification/Extinction/'
-fds_file = [results_dir + 'extinction_1_devc.csv',
-            results_dir + 'extinction_2_devc.csv']
+fds_file = [os.path.join(results_dir, 'extinction_1_devc.csv'),
+            os.path.join(results_dir + 'extinction_2_devc.csv')]
 
 X_ignite=np.zeros((num_samp,2))
 X_fds_ignite=np.zeros((num_samp,2))
@@ -277,8 +278,6 @@ for ifile in inds:
 
     
     # Make the plot
-    fig, ax = plt.subplots(1, 1, figsize=figsize)
-    
     tmpm = 273
     X_simple_o2 = (simple_o2/32)/(simple_o2/32 + (1-simple_o2)/28)
     X_ignite[:,1] = (ignite[:,1]/32)/(ignite[:,1]/32 + (1-ignite[:,1])/28)
@@ -295,30 +294,25 @@ for ifile in inds:
              ignite[jj,0]=extinct_o2[jj,0]
              extinct_o2[jj,0]=0
     
-    ax.plot(simple_temp-tmpm,X_simple_o2,'k',linewidth=1.0,markersize=4, label='Simple Model')
-    ax.scatter(ignite[:,0]-tmpm,X_ignite[:,1],80,marker='s',label='Expected Burning', facecolors='none', edgecolors='r', linewidths=1)
-    ax.scatter(fds_ignite[:,0]-tmpm,X_fds_ignite[:,1],40,color='r',marker='+', label='FDS Burning', linewidths=1)
-    ax.scatter(extinct_o2[:,0]-tmpm,X_extinct_o2[:,1],80,marker='o',label='Expected Extinction', facecolors='none', edgecolors='b', linewidths=1)
-    ax.scatter(fds_ext_o2[:,0]-tmpm,X_fds_ext_o2[:,1],40,color='b',marker='*',label='FDS Extinction', linewidths=1)
-    ax.set_xlim(0, 1700)
-    ax.set_ylim(0, 0.21)
-    ax.set_xticks([0, 500, 1000, 1500])
-    ax.set_yticks([0, 0.02, 0.04, 0.06, 0.08, 0.1, 0.12, 0.14, 0.16, 0.18, 0.20])
-    ax.set_xlabel('Temperature (°C)',fontsize=Scat_Label_Font_Size)
-    ax.set_ylabel('Oxygen Volume Fraction',fontsize=Scat_Label_Font_Size)
-    lh=plt.legend(fontsize=Key_Font_Size, loc=1, framealpha=1)
-    ax.tick_params(labelsize=default_ticklabel_fontsize)
+    git_file = os.path.join(results_dir, 'extinction_1_git.txt')
+    version_string = fdsplotlib.get_version_string(git_file)
+    fig = fdsplotlib.plot_to_fig(x_data=simple_temp-tmpm, y_data=X_simple_o2, marker_style='k-', data_label='Simple Model', linewidth=1,
+                                 x_min=0.0, x_max=1700, y_min=0, y_max=0.21, xticks=[0, 500, 1000, 1500], yticks=np.linspace(0, 0.2, 11),
+                                 revision_label=version_string, figure_handle=None, 
+                                 x_label='Temperature (°C)',
+                                 y_label='Oxygen Volume Fraction',
+                                 figure_size=(6,6), plot_size=(4.5,4.5), plot_origin=(1.125,1.0))
+    fdsplotlib.plot_to_fig(x_data=ignite[:,0]-tmpm, y_data=X_ignite[:,1], marker_style='rs', data_label='Expected Burning', 
+                           marker_fill_color=(1,1,1,0.0), markersize=6, markeredgewidth=0.5, figure_handle=fig)
+    fdsplotlib.plot_to_fig(x_data=fds_ignite[:,0]-tmpm, y_data=X_fds_ignite[:,1], marker_style='r+', data_label='FDS Burning', 
+                           marker_fill_color=(1,1,1,0.0), markersize=4, markeredgewidth=0.5, figure_handle=fig)
+    fdsplotlib.plot_to_fig(x_data=extinct_o2[:,0]-tmpm, y_data=X_extinct_o2[:,1], marker_style='bo', data_label='Expected Extinction', 
+                           marker_fill_color=(1,1,1,0.0), markersize=7, markeredgewidth=0.5, figure_handle=fig)
+    fdsplotlib.plot_to_fig(x_data=fds_ext_o2[:,0]-tmpm, y_data=X_fds_ext_o2[:,1], marker_style='b*', data_label='FDS Extinction', 
+                           markersize=4, markeredgewidth=0.5, figure_handle=fig)
+    fig.axes[0].xaxis.set_tick_params(pad=10)
+    fig.axes[0].yaxis.set_tick_params(pad=10)
+    local_pdf = os.path.join(pltdir, 'extinction_%d.pdf'%(ifile+1))
+    fig.savefig(local_pdf)
     
-    # add Git if file is available
-    git_file = results_dir + 'extinction_1_git.txt'
-    
-    if (os.path.exists(git_file)):
-        file1 = open(git_file,"r")
-        Lines = file1.readlines()
-        version_string = Lines[0].strip()
-        file1.close()
-        ax.text(0.975, 1.01, version_string, fontsize=default_stamp_fontsize, ha='right', transform=ax.transAxes)
-    
-    plt.tight_layout()
-    plt.savefig(pltdir + 'extinction_%d.pdf'%(ifile+1), backend='pdf')
     
