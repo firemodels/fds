@@ -56,7 +56,6 @@ disp('mass_balance_reac...');             mass_balance_reac
 disp('mass_balance_gas_volume...');       mass_balance_gas_volume
 disp('geom_positive_errors...');          geom_positive_errors
 disp('geom_channel_test...');             geom_channel_test
-disp('atmospheric_boundary_layer...');    atmospheric_boundary_layer
 disp('htc_forced...');                    htc_forced
 disp('natconh...');                       natconh
 disp('natconv...');                       natconv
