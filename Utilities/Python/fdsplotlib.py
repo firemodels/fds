@@ -591,17 +591,19 @@ def plot_to_fig(x_data,y_data,**kwargs):
     
     # set dashes to default, or user requested
     # This set is the matplotlib default
-    #if linestyle == '': dashes = (None, None); linewidth = 0;
-    #if linestyle == '-': dashes = (None, None)
-    #if linestyle == '--': dashes = kwargs.get('line_dashes',(6, 6))
-    #if linestyle == '-.': dashes = kwargs.get('line_dashes',(6, 3, 1, 3))
-    
-    # This set is what we were using in Matlab
     if linestyle == '': dashes = (None, None); linewidth = 0;
     if linestyle == '-': dashes = (None, None)
-    if linestyle == '--': dashes = kwargs.get('line_dashes',(18.0, 11.1))
-    if linestyle == '-.': dashes = kwargs.get('line_dashes',(12, 7.4, 3, 7.4))
+    if linestyle == '--': dashes = kwargs.get('line_dashes',(6, 6))
+    if linestyle == '-.': dashes = kwargs.get('line_dashes',(6, 3, 1, 3))
     if linestyle == ':': dashes = kwargs.get('line_dashes',(1, 3))
+    
+    # This set is what we were using in Matlab
+    # if linestyle == '': dashes = (None, None); linewidth = 0;
+    # if linestyle == '-': dashes = (None, None)
+    # if linestyle == '--': dashes = kwargs.get('line_dashes',(10, 6.2))
+    # if linestyle == '-.': dashes = kwargs.get('line_dashes',(12, 7.4, 3, 7.4))
+    # if linestyle == ':': dashes = kwargs.get('line_dashes',(1, 3))
+    
 
     data_label = kwargs.get('data_label',None)
 
