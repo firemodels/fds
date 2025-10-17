@@ -52,6 +52,7 @@ print("level_set_ellipse...");              runpy.run_path("./scripts/level_set_
 print("mesh_transformation...");            runpy.run_path("./scripts/mesh_transformation.py", run_name="__main__")
 print("mass_balance...");                   runpy.run_path("./scripts/mass_balance.py", run_name="__main__")
 print("openmp_timing_benchmarks...");       runpy.run_path("./scripts/openmp_timing_benchmarks.py", run_name="__main__")
+print("particle_size_distribution...");     runpy.run_path("./scripts/particle_size_distribution.py", run_name="__main__")
 print("plate_view_factor...");              runpy.run_path("./scripts/plate_view_factor.py", run_name="__main__")
 print("pulsating...");                      runpy.run_path("./scripts/pulsating.py", run_name="__main__")
 print("pyrolysis...");                      runpy.run_path("./scripts/pyrolysis.py", run_name="__main__")
