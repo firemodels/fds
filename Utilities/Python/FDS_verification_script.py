@@ -44,6 +44,7 @@ print("fan_curve...");                      runpy.run_path("./scripts/fan_curve.
 print("fds_moody_chart...");                runpy.run_path("./scripts/fds_moody_chart.py", run_name="__main__")
 print("fluid_part...");                     runpy.run_path("./scripts/fluid_part.py", run_name="__main__")
 print("heated_channel...");                 runpy.run_path("./scripts/heated_channel.py", run_name="__main__")
+disp('hot_layer_collapse...');              runpy.run_path("./scripts/hot_layer_collapse.py", run_name="__main__")
 print("ht3d_sphere...");                    runpy.run_path("./scripts/ht3d_sphere.py", run_name="__main__")
 print('hvac_mass_transport...');            runpy.run_path("./scripts/hvac_mass_transport.py", run_name="__main__")
 print("jet_decay...");                      runpy.run_path("./scripts/jet_decay.py", run_name="__main__")
