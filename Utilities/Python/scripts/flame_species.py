@@ -63,7 +63,7 @@ data_combined_ml.columns = header_ml
 
 print(data_combined_ml)
 
-output_file_1 = outdir+'methane_flame_lumpedprimitive2.csv'
+output_file_1 = outdir+'methane_flame_lumpedprimitive.csv'
 
 # The MATLAB script uses a hardcoded units line for the final output.
 hardcoded_units = ['s', 'kg', 'kg', 'kg', 'kg', 'kg', 'kg']
@@ -78,7 +78,7 @@ df_out_1 = pd.concat([header_df_1, data_combined_lp]).reset_index(drop=True)
 df_out_1.to_csv(output_file_1, header=False, index=False)
 print(f"Successfully wrote combined data to {output_file_1}")
 
-output_file_2 = outdir+'methane_flame_multilumped2.csv'
+output_file_2 = outdir+'methane_flame_multilumped.csv'
 
 # Create a temporary DataFrame for the two header rows
 header_df_2 = pd.DataFrame([hardcoded_units, header_ml], columns=data_combined_ml.columns)
