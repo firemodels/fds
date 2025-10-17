@@ -58,7 +58,6 @@ disp('extinction...');                    extinction
 disp('rotcube_cc_mms_error...');          rotcube_cc_mms_error
 disp('hot_layer_collapse...');            hot_layer_collapse
 disp('favre_test...');                    favre_test
-disp('particle_size_distribution...');    particle_size_distribution
 disp('mass_balance_reac...');             mass_balance_reac
 disp('mass_balance_gas_volume...');       mass_balance_gas_volume
 disp('geom_positive_errors...');          geom_positive_errors
