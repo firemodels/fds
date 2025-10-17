@@ -27,7 +27,6 @@ addpath 'scripts'
 
 disp('ns2d...');                           ns2d
 disp('convective_cooling_convergence...'); convective_cooling_convergence
-disp('random_walk_soln...');               random_walk_soln
 
 % Dataplot and scatplot options
 
