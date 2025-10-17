@@ -117,7 +117,7 @@ plt.close(fig)
 # Plot 2: Local Nu(x) profiles for each Re case
 # -----------------------------
 styles = ['k-.', 'k--', 'k-']  # coarse, medium, fine
-dashes = [(12, 7.4, 1, 7.4), (18.0, 11.1), (None, None)]
+
 for i, Re_tag in enumerate(Re_str):
     fig = None
     for j, res in enumerate(res_list):
@@ -136,7 +136,7 @@ for i, Re_tag in enumerate(Re_str):
                                      x_min=-0.5, x_max=0.5, y_min=0, y_max=1000, xnumticks=3, ynumticks=6,
                                      revision_label=revlabel, figure_handle=fig, 
                                      x_label='$x$ (m)',
-                                     y_label=r'Nu$_{D_h}$($x$)', line_dashes=dashes[j], legend_location=2)
+                                     y_label=r'Nu$_{D_h}$($x$)', legend_location=2)
 
     fig.axes[0].xaxis.set_tick_params(pad=10)
     local_pdf = os.path.join(pltdir, f'impinging_jet_local_Re_{Re_tag}.pdf')
