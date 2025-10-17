@@ -173,6 +173,16 @@ plt.close()
 datadir = '../../Verification/Complex_Geometry/'
 filename = ['saad_CC_explicit_512_cfl_p25_mms.csv','saad_CC_explicit_512_cfl_p125_mms.csv','saad_CC_explicit_512_cfl_p0625_mms.csv']
 
+skip_case = False
+
+for i in range(len(filename)):
+   name = datadir+filename[i]
+   if not os.path.exists(name):
+      skip_case = True
+      print('Error: File ', filename[i], ' does not exist. Skipping case.')
+
+if skip_case: quit()
+
 M1 = pd.read_csv(datadir+filename[0],skiprows=2,header=None)
 M2 = pd.read_csv(datadir+filename[1],skiprows=2,header=None)
 M3 = pd.read_csv(datadir+filename[2],skiprows=2,header=None)
@@ -238,7 +248,7 @@ fig = fdsplotlib.plot_to_fig(x_data=x, y_data=p_rho, marker_style='b-',
       x_label='$x$ (m)',
       y_label='$p$ order density')
 
-plotname = plotdir + 'saad_CC_temporal_order_rho.pdf'
+plotname = plotdir + 'saad_CC_explicit_temporal_order_rho.pdf'
 plt.savefig(plotname, format='pdf')
 plt.close()
 
@@ -247,7 +257,7 @@ fig = fdsplotlib.plot_to_fig(x_data=x, y_data=p_Z, marker_style='b-',
       x_label='$x$ (m)',
       y_label='$p$ order mixture fraction')
 
-plotname = plotdir + 'saad_CC_temporal_order_Z.pdf'
+plotname = plotdir + 'saad_CC_explicit_temporal_order_Z.pdf'
 plt.savefig(plotname, format='pdf')
 plt.close()
 
@@ -261,7 +271,7 @@ fdsplotlib.plot_to_fig(x_data=x, y_data=rho_3, marker_style='r-',
    figure_handle=fig,
    data_label='Final field')
 
-plotname = plotdir + 'saad_CC_rho.pdf'
+plotname = plotdir + 'saad_CC_explicit_rho.pdf'
 plt.savefig(plotname, format='pdf')
 plt.close()
 
@@ -275,7 +285,7 @@ fdsplotlib.plot_to_fig(x_data=x, y_data=Z_3, marker_style='b-',
    figure_handle=fig,
    data_label='Final field')
 
-plotname = plotdir + 'saad_CC_Z.pdf'
+plotname = plotdir + 'saad_CC_explicit_Z.pdf'
 plt.savefig(plotname, format='pdf')
 plt.close()
 
@@ -289,6 +299,6 @@ fdsplotlib.plot_to_fig(x_data=x, y_data=rho_2-rho_1, marker_style='r-',
    figure_handle=fig,
       data_label = '$\\rho_2$ - $\\rho_1$')
 
-plotname = plotdir + 'saad_CC_rho_diff.pdf'
+plotname = plotdir + 'saad_CC_explicit_rho_diff.pdf'
 plt.savefig(plotname, format='pdf')
 plt.close()

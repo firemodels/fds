@@ -56,6 +56,7 @@ fig = fdsplotlib.plot_to_fig(
     y_max=0.8,
     data_label='ideal',
     revision_label=version_string,
+    plot_title='Initialized bulk density (tree_shapes)',
     x_label=r'Input volume (m$^3$)',
     y_label='Tree crown mass (kg)'
 )

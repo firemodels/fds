@@ -502,11 +502,8 @@ def plot_to_fig(x_data,y_data,**kwargs):
     default_markevery = 1
     markerfacecolor = None
     markeredgecolor = 'black'
-    markeredgewidth = 1
     marker = None
-    markersize = 5
     linestyle = '-'
-    linewidth = 1
     color = 'black'
     ###############################
 
@@ -576,10 +573,37 @@ def plot_to_fig(x_data,y_data,**kwargs):
 
     error_fill_color = kwargs.get('error_fill_color',None)
 
+    # adjust sizes if requested
+    linewidth = kwargs.get('linewidth',1)
+    markeredgewidth = kwargs.get('markeredgewidth',1)
+    markersize = kwargs.get('markersize',5)
+    
+    # adjust ticks if required
+    xnumticks = kwargs.get('xnumticks',None)
+    ynumticks = kwargs.get('ynumticks',None)
+    xticks = kwargs.get('xticks',None)
+    yticks = kwargs.get('yticks',None)
+
     # other plot parameters
     markevery = kwargs.get('data_markevery',default_markevery)
     legend_location = kwargs.get('legend_location',default_legend_location)
     legend_framealpha = kwargs.get('legend_framealpha',default_legend_framealpha)
+    
+    # set dashes to default, or user requested
+    # This set is the matplotlib default
+    if linestyle == '': dashes = (None, None); linewidth = 0;
+    if linestyle == '-': dashes = (None, None)
+    if linestyle == '--': dashes = kwargs.get('line_dashes',(6, 6))
+    if linestyle == '-.': dashes = kwargs.get('line_dashes',(6, 3, 1, 3))
+    if linestyle == ':': dashes = kwargs.get('line_dashes',(1, 3))
+    
+    # This set is what we were using in Matlab
+    # if linestyle == '': dashes = (None, None); linewidth = 0;
+    # if linestyle == '-': dashes = (None, None)
+    # if linestyle == '--': dashes = kwargs.get('line_dashes',(10, 6.2))
+    # if linestyle == '-.': dashes = kwargs.get('line_dashes',(12, 7.4, 3, 7.4))
+    # if linestyle == ':': dashes = kwargs.get('line_dashes',(1, 3))
+    
 
     data_label = kwargs.get('data_label',None)
 
@@ -599,7 +623,8 @@ def plot_to_fig(x_data,y_data,**kwargs):
             markersize=markersize,
             linestyle=linestyle,
             linewidth=linewidth,
-            color=color)
+            color=color,
+            dashes=dashes)
 
     if plot_type=='loglog':
         ax.loglog(x_data,y_data,
@@ -612,7 +637,8 @@ def plot_to_fig(x_data,y_data,**kwargs):
             markersize=markersize,
             linestyle=linestyle,
             linewidth=linewidth,
-            color=color)
+            color=color,
+            dashes=dashes)
 
     if plot_type=='semilogx':
         ax.semilogx(x_data,y_data,
@@ -625,7 +651,8 @@ def plot_to_fig(x_data,y_data,**kwargs):
             markersize=markersize,
             linestyle=linestyle,
             linewidth=linewidth,
-            color=color)
+            color=color,
+            dashes=dashes)
 
     if plot_type=='semilogy':
         ax.semilogy(x_data,y_data,
@@ -638,7 +665,8 @@ def plot_to_fig(x_data,y_data,**kwargs):
             markersize=markersize,
             linestyle=linestyle,
             linewidth=linewidth,
-            color=color)
+            color=color,
+            dashes=dashes)
 
     # if y fill range is passed, add it to the plot
     if kwargs.get('y_error_fill_absolute') and not kwargs.get('y_error_fill_relative'):
@@ -762,6 +790,23 @@ def plot_to_fig(x_data,y_data,**kwargs):
 
     ax.set_xlim(xmin,xmax)
     ax.set_ylim(ymin,ymax)
+    
+    # set number of ticks if requested by the user
+    if ynumticks != None:
+        if plot_type in ('loglog', 'semilogx'):
+            ax.set_xticks(np.logspace(xmin, xmax, xnumticks))
+        else:
+            ax.set_xticks(np.linspace(xmin, xmax, xnumticks))
+    if ynumticks != None:
+        if plot_type in ('loglog', 'semilogy'):
+            ax.set_yticks(np.logspace(ymin, ymax, ynumticks))
+        else:
+            ax.set_yticks(np.linspace(ymin, ymax, ynumticks))
+    
+    # set ticks if requested by the user
+    if xticks is not None: ax.set_xticks(xticks)
+    if yticks is not None: ax.set_yticks(yticks)
+    
 
     if plot_type in ('loglog', 'semilogy'):
         apply_global_exponent(ax, axis='y', fontsize=axeslabel_fontsize)
@@ -772,6 +817,8 @@ def plot_to_fig(x_data,y_data,**kwargs):
         add_version_string(ax=ax, version_str=kwargs.get('revision_label'), plot_type=plot_type, font_size=version_fontsize)
 
     # fig.tight_layout() # this should not be needed if figure_size and plot_size are both specified
+    
+    set_ticks_like_matlab(fig)
 
     return fig
 
@@ -910,6 +957,7 @@ def get_version_string(filename):
     version_str = Lines[0].strip()
     file1.close()
     return version_str
+
 
 def add_version_string(ax, version_str, plot_type='linear', scale_x=1.00, scale_y=1.02,
                        font_name='Times', font_size=10):
@@ -1065,110 +1113,6 @@ def get_plot_style(style="fds"):
         raise ValueError(f"Unknown style '{style}'. Please choose 'fds' or 'paper'.")
 
 
-def define_plot_parameters(C, irow):
-    import numpy as np
-    import re
-
-    class plot_parameters:
-        def __init__(self):
-            self.switch_id            = C.values[irow,C.columns.get_loc('switch_id')]
-            self.Dataname             = C.values[irow,C.columns.get_loc('Dataname')]
-            self.VerStr_Filename      = C.values[irow,C.columns.get_loc('VerStr_Filename')]
-            self.d1_Filename          = C.values[irow,C.columns.get_loc('d1_Filename')]
-            self.d1_Col_Name_Row      = C.values[irow,C.columns.get_loc('d1_Col_Name_Row')]
-            self.d1_Data_Row          = C.values[irow,C.columns.get_loc('d1_Data_Row')]
-            self.d1_Ind_Col_Name      = C.values[irow,C.columns.get_loc('d1_Ind_Col_Name')]
-            self.d1_Dep_Col_Name      = C.values[irow,C.columns.get_loc('d1_Dep_Col_Name')]
-            self.d1_Key               = C.values[irow,C.columns.get_loc('d1_Key')]
-            self.d1_Style             = C.values[irow,C.columns.get_loc('d1_Style')]
-            self.d1_Start             = C.values[irow,C.columns.get_loc('d1_Start')]
-            self.d1_End               = C.values[irow,C.columns.get_loc('d1_End')]
-            self.d1_Tick              = C.values[irow,C.columns.get_loc('d1_Tick')]
-            self.d1_Comp_Start        = C.values[irow,C.columns.get_loc('d1_Comp_Start')]
-            self.d1_Comp_End          = C.values[irow,C.columns.get_loc('d1_Comp_End')]
-            self.d1_Dep_Comp_Start    = C.values[irow,C.columns.get_loc('d1_Dep_Comp_Start')]
-            self.d1_Dep_Comp_End      = C.values[irow,C.columns.get_loc('d1_Dep_Comp_End')]
-            self.d1_Initial_Value     = C.values[irow,C.columns.get_loc('d1_Initial_Value')]
-            self.d2_Filename          = C.values[irow,C.columns.get_loc('d2_Filename')]
-            self.d2_Col_Name_Row      = C.values[irow,C.columns.get_loc('d2_Col_Name_Row')]
-            self.d2_Data_Row          = C.values[irow,C.columns.get_loc('d2_Data_Row')]
-            self.d2_Ind_Col_Name      = C.values[irow,C.columns.get_loc('d2_Ind_Col_Name')]
-            self.d2_Dep_Col_Name      = C.values[irow,C.columns.get_loc('d2_Dep_Col_Name')]
-            self.d2_Key               = C.values[irow,C.columns.get_loc('d2_Key')]
-            self.d2_Style             = C.values[irow,C.columns.get_loc('d2_Style')]
-            self.d2_Start             = C.values[irow,C.columns.get_loc('d2_Start')]
-            self.d2_End               = C.values[irow,C.columns.get_loc('d2_End')]
-            self.d2_Tick              = C.values[irow,C.columns.get_loc('d2_Tick')]
-            self.d2_Comp_Start        = C.values[irow,C.columns.get_loc('d2_Comp_Start')]
-            self.d2_Comp_End          = C.values[irow,C.columns.get_loc('d2_Comp_End')]
-            self.d2_Dep_Comp_Start    = C.values[irow,C.columns.get_loc('d2_Dep_Comp_Start')]
-            self.d2_Dep_Comp_End      = C.values[irow,C.columns.get_loc('d2_Dep_Comp_End')]
-            self.d2_Initial_Value     = C.values[irow,C.columns.get_loc('d2_Initial_Value')]
-            self.Plot_Title           = C.values[irow,C.columns.get_loc('Plot_Title')]
-            self.Ind_Title            = C.values[irow,C.columns.get_loc('Ind_Title')]
-            self.Dep_Title            = C.values[irow,C.columns.get_loc('Dep_Title')]
-            self.Min_Ind              = C.values[irow,C.columns.get_loc('Min_Ind')]
-            self.Max_Ind              = C.values[irow,C.columns.get_loc('Max_Ind')]
-            self.Scale_Ind            = C.values[irow,C.columns.get_loc('Scale_Ind')]
-            self.Min_Dep              = C.values[irow,C.columns.get_loc('Min_Dep')]
-            self.Max_Dep              = C.values[irow,C.columns.get_loc('Max_Dep')]
-            self.Scale_Dep            = C.values[irow,C.columns.get_loc('Scale_Dep')]
-            self.Flip_Axis            = C.values[irow,C.columns.get_loc('Flip_Axis')]
-            self.Title_Position       = C.values[irow,C.columns.get_loc('Title_Position')]
-            self.Key_Position         = C.values[irow,C.columns.get_loc('Key_Position')]
-            self.Legend_XYWidthHeight = C.values[irow,C.columns.get_loc('Legend_XYWidthHeight')]
-            self.Paper_Width_Factor   = C.values[irow,C.columns.get_loc('Paper_Width_Factor')]
-            self.Plot_Type            = C.values[irow,C.columns.get_loc('Plot_Type')]
-            self.Plot_Filename        = C.values[irow,C.columns.get_loc('Plot_Filename')]
-            self.Quantity             = C.values[irow,C.columns.get_loc('Quantity')]
-            self.Metric               = C.values[irow,C.columns.get_loc('Metric')]
-            self.Error_Tolerance      = C.values[irow,C.columns.get_loc('Error_Tolerance')]
-            self.Group_Key_Label      = C.values[irow,C.columns.get_loc('Group_Key_Label')]
-            self.Group_Style          = C.values[irow,C.columns.get_loc('Group_Style')]
-            self.Fill_Color           = C.values[irow,C.columns.get_loc('Fill_Color')]
-            self.Font_Interpreter     = C.values[irow,C.columns.get_loc('Font_Interpreter')]
-
-        def __repr__(self):
-            return str(self.__dict__)
-
-    inst = plot_parameters()
-
-    specials = {
-        "&": r"\&", "%": r"\%", "_": r"\_", "#": r"\#",
-        "$": r"\$", "{": r"\{", "}": r"\}", "^": r"\^{}", "~": r"\~{}",
-    }
-
-    def sanitize(text: str) -> str:
-        parts = re.split(r"(\$.*?\$)", text)
-        sanitized = []
-        for part in parts:
-            if part.startswith("$") and part.endswith("$"):
-                sanitized.append(part)  # math untouched
-            else:
-                s = part
-                for k, v in specials.items():
-                    s = s.replace(k, v)
-                sanitized.append(s)
-        return "".join(sanitized)
-
-    def safe_strip(val):
-        if isinstance(val, str):
-            return val.strip()
-        return ""  # or return val if you prefer to keep None
-
-    # Explicit sanitization of only the human-facing fields
-    inst.Plot_Title      = sanitize(safe_strip(inst.Plot_Title))
-    inst.Ind_Title       = sanitize(safe_strip(inst.Ind_Title))
-    inst.Dep_Title       = sanitize(safe_strip(inst.Dep_Title))
-    inst.Quantity        = sanitize(safe_strip(inst.Quantity))
-    inst.Metric          = sanitize(safe_strip(inst.Metric))
-    inst.Group_Key_Label = sanitize(safe_strip(inst.Group_Key_Label))
-    inst.d1_Key          = sanitize(safe_strip(inst.d1_Key))
-    inst.d2_Key          = sanitize(safe_strip(inst.d2_Key))
-
-    return inst
-
-
 def matlab_legend_to_matplotlib(position):
     """
     Convert a MATLAB legend position string to the corresponding matplotlib location string.
@@ -1201,6 +1145,86 @@ def matlab_legend_to_matplotlib(position):
     return mapping.get(position.strip().lower(), 'best')
 
 
+def define_plot_parameters(D, irow):
+    import numpy as np
+
+    class plot_parameters:
+        def __init__(self):
+            self.switch_id            = D.values[irow,D.columns.get_loc('switch_id')]
+            self.Dataname             = D.values[irow,D.columns.get_loc('Dataname')]
+            self.VerStr_Filename      = D.values[irow,D.columns.get_loc('VerStr_Filename')]
+            self.d1_Filename          = D.values[irow,D.columns.get_loc('d1_Filename')]
+            self.d1_Col_Name_Row      = D.values[irow,D.columns.get_loc('d1_Col_Name_Row')]
+            self.d1_Data_Row          = D.values[irow,D.columns.get_loc('d1_Data_Row')]
+            self.d1_Ind_Col_Name      = D.values[irow,D.columns.get_loc('d1_Ind_Col_Name')]
+            self.d1_Dep_Col_Name      = D.values[irow,D.columns.get_loc('d1_Dep_Col_Name')]
+            self.d1_Key               = D.values[irow,D.columns.get_loc('d1_Key')]
+            self.d1_Style             = D.values[irow,D.columns.get_loc('d1_Style')]
+            self.d1_Start             = D.values[irow,D.columns.get_loc('d1_Start')]
+            self.d1_End               = D.values[irow,D.columns.get_loc('d1_End')]
+            self.d1_Tick              = D.values[irow,D.columns.get_loc('d1_Tick')]
+            self.d1_Comp_Start        = D.values[irow,D.columns.get_loc('d1_Comp_Start')]
+            self.d1_Comp_End          = D.values[irow,D.columns.get_loc('d1_Comp_End')]
+            self.d1_Dep_Comp_Start    = D.values[irow,D.columns.get_loc('d1_Dep_Comp_Start')]
+            self.d1_Dep_Comp_End      = D.values[irow,D.columns.get_loc('d1_Dep_Comp_End')]
+            self.d1_Initial_Value     = D.values[irow,D.columns.get_loc('d1_Initial_Value')]
+            self.d2_Filename          = D.values[irow,D.columns.get_loc('d2_Filename')]
+            self.d2_Col_Name_Row      = D.values[irow,D.columns.get_loc('d2_Col_Name_Row')]
+            self.d2_Data_Row          = D.values[irow,D.columns.get_loc('d2_Data_Row')]
+            self.d2_Ind_Col_Name      = D.values[irow,D.columns.get_loc('d2_Ind_Col_Name')]
+            self.d2_Dep_Col_Name      = D.values[irow,D.columns.get_loc('d2_Dep_Col_Name')]
+            self.d2_Key               = D.values[irow,D.columns.get_loc('d2_Key')]
+            self.d2_Style             = D.values[irow,D.columns.get_loc('d2_Style')]
+            self.d2_Start             = D.values[irow,D.columns.get_loc('d2_Start')]
+            self.d2_End               = D.values[irow,D.columns.get_loc('d2_End')]
+            self.d2_Tick              = D.values[irow,D.columns.get_loc('d2_Tick')]
+            self.d2_Comp_Start        = D.values[irow,D.columns.get_loc('d2_Comp_Start')]
+            self.d2_Comp_End          = D.values[irow,D.columns.get_loc('d2_Comp_End')]
+            self.d2_Dep_Comp_Start    = D.values[irow,D.columns.get_loc('d2_Dep_Comp_Start')]
+            self.d2_Dep_Comp_End      = D.values[irow,D.columns.get_loc('d2_Dep_Comp_End')]
+            self.d2_Initial_Value     = D.values[irow,D.columns.get_loc('d2_Initial_Value')]
+            self.Plot_Title           = D.values[irow,D.columns.get_loc('Plot_Title')]
+            self.Ind_Title            = D.values[irow,D.columns.get_loc('Ind_Title')]
+            self.Dep_Title            = D.values[irow,D.columns.get_loc('Dep_Title')]
+            self.Min_Ind              = D.values[irow,D.columns.get_loc('Min_Ind')]
+            self.Max_Ind              = D.values[irow,D.columns.get_loc('Max_Ind')]
+            self.Scale_Ind            = D.values[irow,D.columns.get_loc('Scale_Ind')]
+            self.Min_Dep              = D.values[irow,D.columns.get_loc('Min_Dep')]
+            self.Max_Dep              = D.values[irow,D.columns.get_loc('Max_Dep')]
+            self.Scale_Dep            = D.values[irow,D.columns.get_loc('Scale_Dep')]
+            self.Flip_Axis            = D.values[irow,D.columns.get_loc('Flip_Axis')]
+            self.Title_Position       = D.values[irow,D.columns.get_loc('Title_Position')]
+            self.Key_Position         = D.values[irow,D.columns.get_loc('Key_Position')]
+            self.Legend_XYWidthHeight = D.values[irow,D.columns.get_loc('Legend_XYWidthHeight')]
+            self.Paper_Width_Factor   = D.values[irow,D.columns.get_loc('Paper_Width_Factor')]
+            self.Plot_Type            = D.values[irow,D.columns.get_loc('Plot_Type')]
+            self.Plot_Filename        = D.values[irow,D.columns.get_loc('Plot_Filename')]
+            self.Quantity             = D.values[irow,D.columns.get_loc('Quantity')]
+            self.Metric               = D.values[irow,D.columns.get_loc('Metric')]
+            self.Error_Tolerance      = D.values[irow,D.columns.get_loc('Error_Tolerance')]
+            self.Group_Key_Label      = D.values[irow,D.columns.get_loc('Group_Key_Label')]
+            self.Group_Style          = D.values[irow,D.columns.get_loc('Group_Style')]
+            self.Fill_Color           = D.values[irow,D.columns.get_loc('Fill_Color')]
+            self.Font_Interpreter     = D.values[irow,D.columns.get_loc('Font_Interpreter')]
+
+        def __repr__(self):
+            return str(self.__dict__)
+
+    d = plot_parameters()
+
+    # Explicit sanitization of only the human-facing fields
+    d.Plot_Title      = sanitize(safe_strip(d.Plot_Title))
+    d.Ind_Title       = sanitize(safe_strip(d.Ind_Title))
+    d.Dep_Title       = sanitize(safe_strip(d.Dep_Title))
+    d.Quantity        = sanitize(safe_strip(d.Quantity))
+    d.Metric          = sanitize(safe_strip(d.Metric))
+    d.Group_Key_Label = sanitize(safe_strip(d.Group_Key_Label))
+    d.d1_Key          = sanitize(safe_strip(d.d1_Key))
+    d.d2_Key          = sanitize(safe_strip(d.d2_Key))
+
+    return d
+
+
 def define_qrow_variables(Q, j):
     """
     Define scatterplot parameters from the Scatterplot_Inputs.csv row j.
@@ -1220,7 +1244,6 @@ def define_qrow_variables(Q, j):
     q : object
         Object with attributes corresponding to scatterplot input fields.
     """
-    import re
 
     class qrow:
         def __init__(self):
@@ -1241,32 +1264,6 @@ def define_qrow_variables(Q, j):
             return str(self.__dict__)
 
     q = qrow()
-
-    # --- Sanitization helpers (same style as define_plot_parameters) ---
-    specials = {
-        "&": r"\&", "%": r"\%", "_": r"\_", "#": r"\#",
-        "$": r"\$", "{": r"\{", "}": r"\}", "^": r"\^{}", "~": r"\~{}",
-    }
-
-    def sanitize(text: str) -> str:
-        if not isinstance(text, str):
-            return text
-        parts = re.split(r"(\$.*?\$)", text)
-        sanitized = []
-        for part in parts:
-            if part.startswith("$") and part.endswith("$"):
-                sanitized.append(part)
-            else:
-                s = part
-                for k, v in specials.items():
-                    s = s.replace(k, v)
-                sanitized.append(s)
-        return "".join(sanitized)
-
-    def safe_strip(val):
-        if isinstance(val, str):
-            return val.strip()
-        return val
 
     # Sanitize only human-readable fields
     q.Scatter_Plot_Title = sanitize(safe_strip(q.Scatter_Plot_Title))
@@ -1310,6 +1307,36 @@ def define_qrow_variables(Q, j):
     return q
 
 
+def sanitize(text: str) -> str:
+    """Escape LaTeX specials outside math mode ($...$)."""
+    if not isinstance(text, str):
+        return text
+
+    specials = {
+        "&": r"\&", "%": r"\%", "_": r"\_", "#": r"\#",
+        "$": r"\$", "{": r"\{", "}": r"\}", "^": r"\^{}", "~": r"\~{}",
+    }
+
+    # Split into math and text segments
+    import re
+    parts = re.split(r"(\$.*?\$)", text)
+    sanitized = []
+    for part in parts:
+        if part.startswith("$") and part.endswith("$"):
+            sanitized.append(part)  # math untouched
+        else:
+            s = part
+            for k, v in specials.items():
+                s = s.replace(k, v)
+            sanitized.append(s)
+    return "".join(sanitized)
+
+
+def safe_strip(val):
+    """Strip whitespace safely from strings; return empty string otherwise."""
+    return val.strip() if isinstance(val, str) else ""
+
+
 def scatplot(saved_data, drange, **kwargs):
     """
     Generate scatter plots and compute validation/verification statistics.
@@ -1322,12 +1349,18 @@ def scatplot(saved_data, drange, **kwargs):
     import numpy as np
     import pandas as pd
     import matplotlib.pyplot as plt
+    import fdsplotlib
 
     Manuals_Dir = kwargs.get("Manuals_Dir", "")
     Scatterplot_Inputs_File = kwargs.get("Scatterplot_Inputs_File", "")
     Stats_Output = kwargs.get("Stats_Output", "Validation")
     Scatterplot_Dir = kwargs.get("Scatterplot_Dir", "")
     verbose = kwargs.get("verbose", True)
+
+    plot_style = get_plot_style("fds")
+    scat_figure_size = (plot_style["Scat_Paper_Width"],plot_style["Scat_Paper_Height"])
+    scat_plot_size = (plot_style["Scat_Plot_Width"],plot_style["Scat_Plot_Height"])
+    scat_plot_origin = (plot_style["Scat_Plot_X"],plot_style["Scat_Plot_Y"])
 
     if not os.path.exists(Scatterplot_Inputs_File):
         raise FileNotFoundError(f"[scatplot] Missing input file: {Scatterplot_Inputs_File}")
@@ -1430,26 +1463,25 @@ def scatplot(saved_data, drange, **kwargs):
         delta = np.exp(log_M_bar - log_E_bar + 0.5 * Sigma_M ** 2 - 0.5 * Sigma_E ** 2)
 
         # --- Scatter Plot ---
-        fig, ax = plt.subplots(figsize=(5, 5))
-        if Plot_Type == "loglog":
-            ax.loglog(Measured_Values, Predicted_Values, "o", color="k", alpha=0.6)
-        else:
-            ax.plot(Measured_Values, Predicted_Values, "o", color="k", alpha=0.6)
+        fig = fdsplotlib.plot_to_fig(x_data=[-1], y_data=[-1],
+                                figure_size=scat_figure_size,
+                                plot_size=scat_plot_size,
+                                plot_origin=scat_plot_origin,
+                                plot_type=Plot_Type,
+                                x_min=Plot_Min, x_max=Plot_Max, y_min=Plot_Min, y_max=Plot_Max,
+                                x_label=row["Ind_Title"],
+                                y_label=row["Dep_Title"])
 
-        ax.plot([Plot_Min, Plot_Max], [Plot_Min, Plot_Max], "k-")
+        fdsplotlib.plot_to_fig(x_data=[Plot_Min, Plot_Max], y_data=[Plot_Min, Plot_Max], line_style="k-", figure_handle=fig)
         if Sigma_E > 0:
-            ax.plot([Plot_Min, Plot_Max], np.array([Plot_Min, Plot_Max]) * (1 + 2 * Sigma_E), "k--")
-            ax.plot([Plot_Min, Plot_Max], np.array([Plot_Min, Plot_Max]) / (1 + 2 * Sigma_E), "k--")
-            ax.plot([Plot_Min, Plot_Max], np.array([Plot_Min, Plot_Max]) * delta, "r-")
-            ax.plot([Plot_Min, Plot_Max], np.array([Plot_Min, Plot_Max]) * delta * (1 + 2 * Sigma_M), "r--")
-            ax.plot([Plot_Min, Plot_Max], np.array([Plot_Min, Plot_Max]) * delta / (1 + 2 * Sigma_M), "r--")
+            fdsplotlib.plot_to_fig(x_data=[Plot_Min, Plot_Max], y_data=np.array([Plot_Min, Plot_Max]) * (1 + 2 * Sigma_E), line_style="k--", figure_handle=fig)
+            fdsplotlib.plot_to_fig(x_data=[Plot_Min, Plot_Max], y_data=np.array([Plot_Min, Plot_Max]) / (1 + 2 * Sigma_E), line_style="k--", figure_handle=fig)
+            fdsplotlib.plot_to_fig(x_data=[Plot_Min, Plot_Max], y_data=np.array([Plot_Min, Plot_Max]) * delta, line_style="r-", figure_handle=fig)
+            fdsplotlib.plot_to_fig(x_data=[Plot_Min, Plot_Max], y_data=np.array([Plot_Min, Plot_Max]) * delta * (1 + 2 * Sigma_M), line_style="r--", figure_handle=fig)
+            fdsplotlib.plot_to_fig(x_data=[Plot_Min, Plot_Max], y_data=np.array([Plot_Min, Plot_Max]) * delta / (1 + 2 * Sigma_M), line_style="r--", figure_handle=fig)
 
-        ax.set_xlim([Plot_Min, Plot_Max])
-        ax.set_ylim([Plot_Min, Plot_Max])
-        ax.set_xlabel(row["Ind_Title"])
-        ax.set_ylabel(row["Dep_Title"])
-        ax.grid(True, which="both", linestyle=":")
-        ax.set_title(Scatter_Plot_Title)
+        # plot data last so it shows on top of stat lines
+        fdsplotlib.plot_to_fig(x_data=Measured_Values, y_data=Predicted_Values, marker_style="ko", figure_handle=fig)
 
         pdf_path = os.path.join(Manuals_Dir, Plot_Filename + ".pdf")
         os.makedirs(os.path.dirname(pdf_path), exist_ok=True)
@@ -1700,3 +1732,12 @@ def statistics_histogram(Measured_Values, Predicted_Values,
 
     print(f"[statistics_histogram] {Scatter_Plot_Title}: p = {pval:.2f}")
     return f"{os.path.basename(Plot_Filename)}_Histogram", pval
+
+def set_ticks_like_matlab(fig):
+    ax = fig.axes[0]
+    ax.tick_params(axis="both", direction="in", top=True, right=True, width=0.5)
+
+    for axis in ['top','bottom','left','right']:
+        ax.spines[axis].set_linewidth(0.5)
+    
+
