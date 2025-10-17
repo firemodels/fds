@@ -1,7 +1,12 @@
 #!/bin/bash
+LATEST=$1
+if [ "$LATEST" != "" ]; then
+  LATEST=_latest
+fi
+
 DOWNLOADFIGURES ()
 {
-  FILE=$1_figures
+  FILE=$1_figures$LATEST
   echo ***Downloading $FILE.tar.gz
   gh release download FDS_TEST -p $FILE.tar.gz -R github.com/firemodels/test_bundles --clobber
   if [ ! -e $FILE.tar.gz ]; then
@@ -31,25 +36,25 @@ FBVG=$BASEDIR/FIGS/FDS_VERG
 FBVAL=$BASEDIR/FIGS/FDS_VALG
 
 # Copy Tech Guide Figures
-if [ -e $BASEDIR/FDS_TG_figures.tar.gz ]; then
+if [ -e $BASEDIR/FDS_TG_figures$LATEST.tar.gz ]; then
   cd $FBTG
-  tar xf $BASEDIR/FDS_TG_figures.tar.gz
+  tar xf $BASEDIR/FDS_TG_figures$LATEST.tar.gz
   cp * $BASEDIR/FDS_Technical_Reference_Guide/SCRIPT_FIGURES/
   echo FDS Technical Guide figures copied to FDS_Technical_Reference_Guide/SCRIPT_FIGURES
 fi
 
 # Copy User's Guide Figures
-if [ -e $BASEDIR/FDS_UG_figures.tar.gz ]; then
+if [ -e $BASEDIR/FDS_UG_figures$LATEST.tar.gz ]; then
   cd $FBUG
-  tar xf $BASEDIR/FDS_UG_figures.tar.gz
+  tar xf $BASEDIR/FDS_UG_figures$LATEST.tar.gz
   cp * $BASEDIR/FDS_User_Guide/SCRIPT_FIGURES/
   echo FDS Users Guide figures copied to FDS_User_Reference_Guide/SCRIPT_FIGURES
 fi
 
 # Copy Verification Guide Figures
-if [ -e $BASEDIR/FDS_VERG_figures.tar.gz ]; then
+if [ -e $BASEDIR/FDS_VERG_figures$LATEST.tar.gz ]; then
   cd $FBVG
-  tar xf $BASEDIR/FDS_VERG_figures.tar.gz
+  tar xf $BASEDIR/FDS_VERG_figures$LATEST.tar.gz
   cp *.pdf $BASEDIR/FDS_Verification_Guide/SCRIPT_FIGURES/.
   cp *.png $BASEDIR/FDS_Verification_Guide/SCRIPT_FIGURES/.
   cp *.tex $BASEDIR/FDS_Verification_Guide/SCRIPT_FIGURES/.
@@ -58,9 +63,9 @@ if [ -e $BASEDIR/FDS_VERG_figures.tar.gz ]; then
 fi
 
 # Copy Validation Guide Figures
-if [ -e $BASEDIR/FDS_VALG_figures.tar.gz ]; then
+if [ -e $BASEDIR/FDS_VALG_figures$LATEST.tar.gz ]; then
   cd $FBVAL
-  tar xf $BASEDIR/FDS_VALG_figures.tar.gz
+  tar xf $BASEDIR/FDS_VALG_figures$LATEST.tar.gz
   cp -R * $BASEDIR/FDS_Validation_Guide/SCRIPT_FIGURES
   echo FDS Validation Guide Figures copied to FDS_Validation_Guide_Reference_Guide/SCRIPT_FIGURES
 fi
