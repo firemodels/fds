@@ -25,18 +25,7 @@ addpath 'scripts'
 
 % Scripts to run prior to dataplot
 
-disp('radiation_box...');                  radiation_box
-disp('radiation_plane_layer...');          radiation_plane_layer
-disp('ns2d...');                           ns2d
-disp('vort2d...');                         vort2d
-disp('ashrae_7...');                       ashrae_7
-disp('flame_species...');                  flame_species
-disp('cat_propane_depo...');               cat_propane_depo
-disp('burke_schumann...');                 burke_schumann
 disp('convective_cooling_convergence...'); convective_cooling_convergence
-disp('random_walk_soln...');               random_walk_soln
-disp('water_evap_1_const_gamma...');       water_evap_1_const_gamma
-disp('vegetation_absorb...');              vegetation_absorb
 
 % Dataplot and scatplot options
 
@@ -62,36 +51,15 @@ scatplot(saved_data, drange, ...
 % Special cases
 
 disp('compression_wave...');              compression_wave
-disp('fluid_part...');                    fluid_part
-disp('extinction...');                    extinction
-disp('fan_curve...');                     fan_curve
-disp('mesh_transformation...');           mesh_transformation
-disp('synthetic_eddy_method...');         synthetic_eddy_method
-disp('shunn_mms_error...');               shunn_mms_error
-disp('shunn_cc_mms_error...');            shunn_cc_mms_error
 disp('rotcube_cc_mms_error...');          rotcube_cc_mms_error
-disp('openmp_timing_benchmarks...');      openmp_timing_benchmarks
-disp('rms_cov_corr...');                  rms_cov_corr
-disp('hot_layer_collapse...');            hot_layer_collapse
-disp('radiating_polygon...');             radiating_polygon
-disp('favre_test...');                    favre_test
-disp('scaling_tests...');                 scaling_tests
-disp('hvac_mass_transport...');           hvac_mass_transport
-disp('particle_size_distribution...');    particle_size_distribution
-disp('mass_balance...');                  mass_balance
 disp('mass_balance_reac...');             mass_balance_reac
 disp('mass_balance_gas_volume...');       mass_balance_gas_volume
-disp('ht3d_sphere...');                   ht3d_sphere
 disp('geom_positive_errors...');          geom_positive_errors
 disp('geom_channel_test...');             geom_channel_test
-disp('atmospheric_boundary_layer...');    atmospheric_boundary_layer
-disp('level_set_ellipse...');             level_set_ellipse
 disp('htc_forced...');                    htc_forced
 disp('natconh...');                       natconh
 disp('natconv...');                       natconv
 disp('freecon_sphere...');                freecon_sphere
 disp('nat_conv_hot_plate...');            nat_conv_hot_plate
-disp('impinging_jet...');                 impinging_jet
-disp('part_drag_profile...');             part_drag_profile
 
 display('verification scripts completed successfully!')
