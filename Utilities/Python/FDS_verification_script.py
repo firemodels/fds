@@ -17,6 +17,7 @@ print("ashrae_7...");                   runpy.run_path("./scripts/ashrae_7.py", 
 print('burke_schumann...');             runpy.run_path("./scripts/burke_schumann.py", run_name="__main__")
 print('cat_propane_depo...');           runpy.run_path("./scripts/cat_propane_depo.py", run_name="__main__")
 print('flame_species...');              runpy.run_path("./scripts/flame_species.py", run_name="__main__")
+print("ns2d...");                       runpy.run_path("./scripts/ns2d.py", run_name="__main__")
 print("radiation_box...");              runpy.run_path("./scripts/radiation_box.py", run_name="__main__")
 print("radiation_plane_layer...");      runpy.run_path("./scripts/radiation_plane_layer.py", run_name="__main__")
 print("random_walk_soln...");           runpy.run_path("./scripts/random_walk_soln.py", run_name="__main__")
