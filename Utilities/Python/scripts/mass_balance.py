@@ -13,8 +13,9 @@ import os
 def plot_mass_balance(chid, title_text):
     
     plot_style = fdsplotlib.get_plot_style('fds')
-    ddir   = '../../Verification/Species/'
-    pltdir = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/'
+    fds_dir = os.path.normpath(os.path.join(os.path.dirname(__file__),'..','..','..'))
+    ddir = os.path.join(fds_dir, 'Verification','Species','')
+    pltdir = os.path.join(fds_dir, 'Manuals','FDS_Verification_Guide','SCRIPT_FIGURES','')
     
     mass_file = os.path.join(ddir, f'{chid}_mass.csv')
 
@@ -47,16 +48,15 @@ def plot_mass_balance(chid, title_text):
     
     # Plot zero reference line first (black solid line, no label)
     fig = fdsplotlib.plot_to_fig(x_data=t, y_data=np.zeros_like(t), marker_style='k-',revision_label=version_string,legend_location='upper right',
-                                 x_label='time (s)', y_label='mass flow (kg/s)',x_min=0, x_max=2000, y_min=-0.005, y_max=0.015)
+                                 x_label='time (s)', y_label='mass flow (kg/s)',x_min=0, x_max=2000, y_min=-0.005, y_max=0.015,
+                                 xnumticks=6, ynumticks=5)
     fdsplotlib.plot_to_fig(x_data=t, y_data=mdot_in, figure_handle=fig, marker_style='r-', data_label='Inlet H2O')
     fdsplotlib.plot_to_fig(x_data=t, y_data=-mdot_out, figure_handle=fig, marker_style='m-', data_label='Outlet H2O')
     fdsplotlib.plot_to_fig(x_data=t, y_data=bal, figure_handle=fig, marker_style='b-', data_label='dm/dt+out-in')
     
     ax    = plt.gca()
     lines = ax.get_lines()
-    lines[2].set_color('#EDB120')         # Orange for outlet (second data line)
-    ax.locator_params(axis='x', nbins=6)  # ~6 ticks on x-axis
-    ax.locator_params(axis='y', nbins=5)  # ~5 ticks on y-axis
+    lines[2].set_color('orange')         # Orange for outlet (second data line)
     fdsplotlib.apply_global_exponent(ax, axis='y')   
     ax.text(100, 18e-3, title_text,fontsize=plot_style['Title_Font_Size'],fontname=plot_style['Font_Name'])
     
