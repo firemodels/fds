@@ -11,7 +11,7 @@ import fdsplotlib
 plot_style = fdsplotlib.get_plot_style('fds')
 
 outdir = '../../Verification/Atmospheric_Effects/'
-pltdir = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/'
+pltdir = '../../Manuals/FDS_User_Guide/SCRIPT_FIGURES/'
 
 git_file = outdir + 'atmospheric_boundary_layer_1_git.txt'
 version_string = fdsplotlib.get_version_string(git_file)
