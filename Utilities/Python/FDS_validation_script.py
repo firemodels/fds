@@ -7,7 +7,6 @@ importlib.reload(fdsplotlib) # use for development (while making changes to fdsp
 
 # Scripts to run prior to dataplot
 
-print("catchpole_spread_rates...");       runpy.run_path("./scripts/catchpole_spread_rates.py", run_name="__main__")
 print("NIST_deposition_gauge...");        runpy.run_path("./scripts/NIST_deposition_gauge.py", run_name="__main__")
 print("flame_height...");                 runpy.run_path("./scripts/flame_height.py", run_name="__main__")
 print("NIST_RSE...");                     runpy.run_path("./scripts/NIST_RSE.py", run_name="__main__")
@@ -63,6 +62,7 @@ print("Sandia_Plumes_TKE...");            runpy.run_path("./scripts/Sandia_Plume
 # Special cases
 print("Beyler_Hood...");                  runpy.run_path("./scripts/Beyler_Hood.py", run_name="__main__")
 print("BRE_LEMTA_Sprays...");             runpy.run_path("./scripts/BRE_LEMTA_Sprays.py", run_name="__main__")
+print("catchpole_spread_rates...");       runpy.run_path("./scripts/catchpole_spread_rates.py", run_name="__main__")
 print("FHWA_Tunnel...");                  runpy.run_path("./scripts/FHWA_Tunnel.py", run_name="__main__")
 print("FM_FPRF_Datacenter...");           runpy.run_path("./scripts/FM_FPRF_Datacenter.py", run_name="__main__")
 print("Heskestad_Flame_Height_2...");     runpy.run_path("./scripts/Heskestad_Flame_Height_2.py", run_name="__main__")
