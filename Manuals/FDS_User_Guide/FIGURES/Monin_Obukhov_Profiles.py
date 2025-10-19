@@ -9,8 +9,6 @@ import fdsplotlib
 
 plot_style = fdsplotlib.get_plot_style('fds')
 
-pltdir = '../../Manuals/FDS_User_Guide/FIGURES/'
-
 rho_0 = 1.2
 g = 9.81
 cp = 1005
@@ -66,7 +64,7 @@ for i in range(3):
     ax1.text(0.05, 0.80, f'$L={L[i]:4.0f}$ m', transform=ax1.transAxes, verticalalignment='top')
     ax1.text(0.05, 0.70, f'$z_0={z_0[i]:5.3f}$ m', transform=ax1.transAxes, verticalalignment='top')
     
-    plt.savefig(pltdir + f'vel_L_{Ls[i]}.pdf', format='pdf')
+    plt.savefig(f'Monin_Obukhov_vel_L_{Ls[i]}.pdf', format='pdf')
     plt.close()
     
     # Figure 2 - Temperature profile
@@ -80,6 +78,6 @@ for i in range(3):
     ax2.text(0.05, 0.80, f'$L={L[i]:4.0f}$ m', transform=ax2.transAxes, verticalalignment='top')
     ax2.text(0.05, 0.70, f'$z_0={z_0[i]:5.3f}$ m', transform=ax2.transAxes, verticalalignment='top')
     
-    plt.savefig(pltdir + f'tmp_L_{Ls[i]}.pdf', format='pdf')
+    plt.savefig(f'Monin_Obukhov_tmp_L_{Ls[i]}.pdf', format='pdf')
     plt.close()
 
