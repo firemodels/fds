@@ -792,7 +792,7 @@ def plot_to_fig(x_data,y_data,**kwargs):
     ax.set_ylim(ymin,ymax)
     
     # set number of ticks if requested by the user
-    if ynumticks != None:
+    if xnumticks != None:
         if plot_type in ('loglog', 'semilogx'):
             ax.set_xticks(np.logspace(xmin, xmax, xnumticks))
         else:
