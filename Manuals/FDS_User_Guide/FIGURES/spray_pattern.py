@@ -7,8 +7,6 @@ import fdsplotlib
 
 plot_style = fdsplotlib.get_plot_style('fds')
 
-pltdir = '../../Manuals/FDS_User_Guide/FIGURES/'
-
 b = [0, 5, 10, 100, 1000]
 mu = np.array([0, 10, 20]) * np.pi / 180
 mu_str = ['0', '10', '20']
@@ -34,6 +32,6 @@ for k in range(len(phi_max)):
         ax.invert_yaxis()
         ax.text(45, 0.1, r'$\mu=$' + str(mu[j]*180/np.pi) + r', $\phi_{\rm max}=$' + str(phi_max[k]*180/np.pi) + ' degrees', fontsize=plot_style['Key_Font_Size'])
 
-        plt.savefig(pltdir + 'spray_pattern_mu_' + mu_str[j] + '_phimax_' + phi_str[k] + '.pdf', format='pdf')
+        plt.savefig('spray_pattern_mu_' + mu_str[j] + '_phimax_' + phi_str[k] + '.pdf', format='pdf')
         plt.close()
 
