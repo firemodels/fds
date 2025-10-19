@@ -29,25 +29,6 @@ clear all
 restoredefaultpath
 addpath 'scripts'
 
-% Scripts that run prior to dataplot
-
-NIST_deposition_gauge
-flame_height
-NIST_RSE
-sippola_aerosol_deposition
-layer_height
-NIST_NRC_Corner_Effects
-%fm_datacenter_scatter
-LNG_Dispersion
-LNG_wind_profiles
-FM_Vertical_Wall_Flames
-umd_line_burner_process
-%Askervein_Hill
-UWO_Wind_Tunnel
-FM_Burner
-Crown_Fires
-ranz_marshall
-Phoenix_LNG_Fires
 
 % Dataplot and scatplot options
 
@@ -74,7 +55,5 @@ scatplot(saved_data, drange, ...
 % Miscellaneous other scripts for special cases
 
 backward_facing_step
-sandia_helium_plume
-sandia_methane_fire
 
 display('validation scripts completed successfully!')

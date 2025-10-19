@@ -1245,7 +1245,7 @@ Figure~\ref{fig_hot_layer} shows the analytical solution (solid lines) plotted t
 \textbf{Max Gould, NIST SURF student}\\
 \textbf{Ragini Acharya, United Technologies Research Center}\\
 
-\noindent In this section we present another case that demonstrates the second-order accuracy of the FDS transport algorithm. We consider the analytically stable flow field consisting of a single vortex advected by a uniform flow, a test case developed by CERFACS\footnote{Centre Europ\'een de Recherche et de Formation Avanc\'ee en Calcul Scientifique} \cite{cerfacs_test}. Maintaining the geometry of the vortex over time provides a good measure of the order of accuracy of the transport scheme.
+\noindent In this section another case is presented case that demonstrates the second-order accuracy of the FDS transport algorithm. Consider the analytically stable flow field consisting of a single vortex advected by a uniform flow, a test case developed by CERFACS\footnote{Centre Europ\'een de Recherche et de Formation Avanc\'ee en Calcul Scientifique} \cite{cerfacs_test}. Maintaining the geometry of the vortex over time provides a good measure of the order of accuracy of the transport scheme.
 
 \begin{figure}[h!]
    \centering
@@ -1287,9 +1287,9 @@ where $\Gamma$ determines its intensity and $R_c$ its characteristic size. The v
 u (x,z) &\equiv& U_{0} + \frac{\partial}{\partial z} \Psi_{0} = U_{0} - \frac{\Gamma \ z}{R_{c}^{2}} \exp \left[ - \frac{x^{2} + z^{2}}{2 \ R_{c}^{2}} \right], \\
 w (x,z) &\equiv& - \frac{\partial}{\partial x} \Psi_{0} = \frac{\Gamma \ x}{R_{c}^{2}} \exp \left[ - \frac{x^{2} + z^{2}}{2 \ R_{c}^{2}} \right],
 \end{eqnarray}
-where $u$ and $w$ refer to velocity in the $x$ and $z$-directions, respectively. For our purposes we need only analyze one component of the velocity field. We will focus our attention on the $u$-component of velocity.
+where $u$ and $w$ refer to velocity in the $x$ and $z$-directions, respectively. It is sufficient to analyze the $u$-component of velocity.
 
-We define the computational domain as a two-dimensional square region, $L=0.3112$~m on a side, with periodic boundary conditions. The domain is discretized for a range of square, two-dimensional meshes of $40^{2}$, $80^{2}$, $160^{2}$, and $320^{2}$ grid cells. For the purposes of this test, we set the flow parameters as
+The computational domain is a two-dimensional square region, $L=0.3112$~m on a side, with periodic boundary conditions. The domain is discretized for a range of square, two-dimensional meshes of $40^{2}$, $80^{2}$, $160^{2}$, and $320^{2}$ grid cells. The flow parameters are
 \[
 \begin{array}{lll}
 U_{0} &&= 35 \ \mathrm{m/s} \\
@@ -1297,23 +1297,22 @@ R_{c} &= L / 20 &= 0.01556 \ \mathrm{m} \\
 \Gamma &= 0.04 \ U_{0} \ R_{c} \ \sqrt{e} &= 0.0359157
 \end{array}
 \]
-The constant flow field and periodic boundary conditions cause the vortex to repeatedly pass through the computational domain. The ``pass-through'' time, $t_{f}$, is defined as the time period required for the stable vortex to return to its original position,
+The constant flow field and periodic boundary conditions cause the vortex to repeatedly pass through the computational domain. The ``pass-through'' time, $t_{\rm f}$, is defined as the time period required for the stable vortex to return to its original position,
 \begin{equation*}
-t_{f} = L / U_{0} \simeq 8.8914 \times 10^{-3} \ \mathrm{s}.
+t_{\rm f} = L / U_{0} \simeq 8.8914 \times 10^{-3} \ \mathrm{s}
 \end{equation*}
-To ensure that the numerical solution converges to the analytical solution, we set the time step, $\dt$, so that the Courant-Friedrichs-Lewy (CFL) number is 0.5.
-
+To ensure that the numerical solution converges to the analytical solution, the time step, $\dt$, is chosen so that the Courant-Friedrichs-Lewy (CFL) number is 0.5.
 
 \begin{figure}[h]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
       \includegraphics[height=2.2in]{SCRIPT_FIGURES/vort2d_80_uzgraph} &
       \includegraphics[height=2.2in]{SCRIPT_FIGURES/vort2d_160_uzgraph}
    \end{tabular*}
-   \caption[Velocity in the \ct{vort2d} test case]{$u$-velocity along the $z$-axis at $x=0$ plotted for each of the vortex's first four loops through the computational domain. (Left) $80^{2}$ grid cell model. (Right) $160^{2}$ grid cell model.}
+   \caption[Velocity in the \ct{vort2d} test case]{$u$-velocity along the $z$-axis at $x=0$ plotted for each of the vortex's first three passes through the computational domain. (Left) $80^{2}$ grid cell model. (Right) $160^{2}$ grid cell model.}
    \label{fig_vort2d_axisvelocity}
 \end{figure}
 
-A plot of $u$-velocity values just along the $z$-axis provides a simple characterization of the vortex geometry. The extent to which this geometry changes over time provides a qualitative measure of the accuracy of the transport algorithm. Figure \ref{fig_vort2d_axisvelocity} displays these plots for two different grid resolutions. Each line represents a plot taken for a different number of flow-through times such that the red lines represent the vortex after it has undergone the most passes through the computational domain while the green lines represent the vortex in the initial phase. The broken black line represents the analytical solution. As the vortex undergoes more passes through the computational domain, its velocity profile diverges further and further from the analytical profile. While divergence still occurs on the finer mesh, the extent to which it diverges after the same number of flow-through times is significantly smaller.
+A plot of $u$-velocity along the $z$-axis provides a simple characterization of the vortex geometry. The extent to which this geometry changes over time provides a qualitative measure of the accuracy of the transport algorithm. Figure~\ref{fig_vort2d_axisvelocity} displays these plots for two different grid resolutions. Each curve represents the state of the vortex at each flow-through time. The black curve represents the analytical solution for which the numerical solution has been initialized. As the vortex undergoes more passes through the computational domain, its velocity profile diverges from the analytical profile. While divergence still occurs on the finer mesh, the extent to which it diverges after the same number of flow-through times is significantly smaller.
 
 \begin{figure}[h!]
    \centering
@@ -1322,7 +1321,7 @@ A plot of $u$-velocity values just along the $z$-axis provides a simple characte
     \label{fig_vort2d_error}
 \end{figure}
 
-The rate with which the simulated profiles converge to the analytical one defines the order of accuracy of the numerical scheme. In Fig.~\ref{fig_vort2d_error} we plot the rms error of the numerical solution as a function of the grid resolution. The three colored curves represent the rms error at three different pass-through times. The broken and solid black lines represent the plot gradient corresponding to first and second order error respectively. While the error increases with each flow-through time, the gradients of the lines are roughly parallel to the solid black line, indicating second-order accuracy of the numerical scheme.
+The rate with which the simulated profiles converge to the analytical one defines the order of accuracy of the numerical scheme. In Fig.~\ref{fig_vort2d_error} the error of the numerical solution is plotted as a function of the grid resolution. The three colored curves represent the error at three different pass-through times. The broken and solid black lines represent the plot gradient corresponding to first and second order error respectively. While the error increases with each flow-through time, the gradients of the lines are roughly parallel to the solid black line, indicating second-order accuracy of the numerical scheme.
 
 To analyze the stability of the vortex at times other than discrete multiples of the pass-through time, consider the time-dependent potential field and its corresponding $u$-velocity component:
 \begin{equation}
@@ -1333,7 +1332,7 @@ To analyze the stability of the vortex at times other than discrete multiples of
 \label{eqn_uvel_timedep}
 u (x,z,t) = U_{0} - \Psi_{0} \ \frac{z}{R_{c}^{2}} \exp \left[\frac{2 \ U_{0} \ x \ t - U_{0}^{2} \ t^{2}}{2 \ R_{c}^{2}} \right].
 \end{equation}
-In Fig.~\ref{fig_vort2d_pointvelocity}, we show the $u$-velocity at a single point, on the lower left fringe of the vortex, for two different mesh resolutions, $80^{2}$ and $160^{2}$. A mesh resolution of $320^{2}$ grid cells produces a plot (not shown) that is, to the eye, a perfect match out to four pass-through times.
+In Fig.~\ref{fig_vort2d_pointvelocity}, the $u$-velocity at a single point on the lower left fringe of the vortex is plotted for two different mesh resolutions, $80^{2}$ and $160^{2}$. A mesh resolution of $320^{2}$ grid cells produces a plot (not shown) that is, to the eye, a perfect match out to four pass-through times.
 
 \begin{figure}[h!]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -1354,7 +1353,7 @@ In Fig.~\ref{fig_vort2d_pointvelocity}, we show the $u$-velocity at a single poi
 
 When multiple infinitely fast reactions are present it is not trivial to correctly partition the limiting reactant and maintain species bounds.  FDS uses a special subcycling algorithm by Kahaner \cite{Kahaner:1989} to maintain boundedness for species when time integrating the ODEs for the chemical reaction step (the method is further discussed in the FDS Tech Guide \cite{FDS_Math_Guide}).  In this section, we examine two test cases designed to verify the time integration method.
 
-The first case, \ct{bound_test_1}, consists of two independent reactions, one with air as the limiting reactant, one with fuel as the limiting reactant.  The stoichiometry of each reaction is the same: $\mathrm{F} + \mathrm{A} \rightarrow 2\,\mathrm{P}$.  The initial volume fractions of determine which species are limiting.  The results are shown in Fig.~\ref{fig:bound_test_1}.  For the first reaction, $X_{\rm F1}$ is initially 0.3 and $X_{\rm A1}$ is initially 0.2.  Therefore, all the A1 is converted to P1, which has a final volume fraction of $X_{\rm P1}=0.4$.  In the second reaction, the initial fuel volume fraction is $X_{\rm F2}=0.1$ (limiting) and the initial air volume fraction is $X_{\rm A2}=0.4$.  As can be see in Fig.~\ref{fig:bound_test_1}, the resulting final values give a product volume fraction of twice the limiting reactant, $X_{\rm P2}=0.2$.
+The first case, \ct{bound_test_1}, consists of two independent reactions, one with air as the limiting reactant, one with fuel as the limiting reactant.  The stoichiometry of each reaction is the same: $\mathrm{F} + \mathrm{A} \rightarrow 2\,\mathrm{P}$.  The initial volume fractions determine which species are limiting.  The results are shown in Fig.~\ref{fig:bound_test_1}.  For the first reaction, $X_{\rm F1}$ is initially 0.3 and $X_{\rm A1}$ is initially 0.2.  Therefore, all the A1 is converted to P1, which has a final volume fraction of $X_{\rm P1}=0.4$.  In the second reaction, the initial fuel volume fraction is $X_{\rm F2}=0.1$ (limiting) and the initial air volume fraction is $X_{\rm A2}=0.4$.  As can be seen in Fig.~\ref{fig:bound_test_1}, the resulting final values give a product volume fraction of twice the limiting reactant, $X_{\rm P2}=0.2$.
 
 \begin{figure}[!ht]
    \centering
@@ -1491,7 +1490,7 @@ In this case a 128 \si{m^3} box is initially filled with air at 20 \si{\degreeCe
 \subsection{Evaporation with Constant Specific Heat Ratio (\texorpdfstring{\ct{water_evap_1_const_gamma}}{water\_evap\_1\_const\_gamma})}
 \label{water_evap_1_const_gamma}
 
-This test case is a replica of \ct{water_evaporation_1} in Sec.~\ref{water_evaporation_1} using constant specific heat ratio.  A 1 \si{m^3} box is initially filled with dry air at 200 \si{\degreeCelsius} and mono-disperse water droplets totaling 0.01 kg in mass initially at 20 \si{\degreeCelsius}.  In this case, all the water evaporates.  The final gas temperature may be computed from energy conservation.  Pressure change may be computed from the ideal gas law.  Results are shown in Fig.~\ref{water_evap_1_const_gamma_plots}.  Details of the expected results may be found in \ct{water_evap_1_const_gamma.m} in the \ct{Utilities/Matlab/scripts/} directory in the FDS repository \cite{FDS-SMV_repository}.
+This test case is a replica of \ct{water_evaporation_1} in Sec.~\ref{water_evaporation_1} using constant specific heat ratio.  A 1 \si{m^3} box is initially filled with dry air at 200 \si{\degreeCelsius} and mono-disperse water droplets totaling 0.01 kg in mass initially at 20 \si{\degreeCelsius}.  In this case, all the water evaporates.  The final gas temperature may be computed from energy conservation.  Pressure change may be computed from the ideal gas law.  Results are shown in Fig.~\ref{water_evap_1_const_gamma_plots}.  Details of the expected results may be found in \ct{water_evap_1_const_gamma.py} in the \ct{Utilities/Python/scripts/} directory in the FDS repository \cite{FDS-SMV_repository}.
 
 \begin{figure}[ht!]
 \noindent
@@ -7828,6 +7827,7 @@ In this test, a \ct{GEOM} cube is heated from below by a surface at a fixed temp
 \section{Statistical Quantities}
 
 \subsection{RMS, Co-Variance, and Cross-Correlation (\texorpdfstring{\ct{rms\_cov\_corr}}{rms\_cov\_corr})}
+\label{rms_cov_corr}
 
 FDS can output the root mean square (RMS), co-variance, and cross-correlation for both point and line \ct{DEVC} outputs.  To test these outputs a 1 m$^3$ box with open sides and a 10 cm grid size is defined with two inlet vents centered on adjacent faces.  This results in two orthogonal flow streams that collide at the center of the box and exit diagonally.  Within the diagonal portion of the flow, are placed point measurements for the FDS outputs of the u-velocity RMS, the u-velocity/w-velocity co-variance, and the u-velocity/w-velocity cross-correlation.
 

@@ -7,7 +7,6 @@ importlib.reload(fdsplotlib) # use for development (while making changes to fdsp
 
 # Scripts to run prior to dataplot
 
-print("catchpole_spread_rates...");       runpy.run_path("./scripts/catchpole_spread_rates.py", run_name="__main__")
 print("NIST_deposition_gauge...");        runpy.run_path("./scripts/NIST_deposition_gauge.py", run_name="__main__")
 print("flame_height...");                 runpy.run_path("./scripts/flame_height.py", run_name="__main__")
 print("NIST_RSE...");                     runpy.run_path("./scripts/NIST_RSE.py", run_name="__main__")
@@ -25,6 +24,7 @@ print("FM_Burner...");                    runpy.run_path("./scripts/FM_Burner.py
 print("Crown_Fires...");                  runpy.run_path("./scripts/Crown_Fires.py", run_name="__main__")
 print("Ranz_Marshall...");                runpy.run_path("./scripts/Ranz_Marshall.py", run_name="__main__")
 print("Phoenix_LNG_Fires...");            runpy.run_path("./scripts/Phoenix_LNG_Fires.py", run_name="__main__")
+print("Sandia_Plumes_TKE...");            runpy.run_path("./scripts/Sandia_Plumes_TKE.py", run_name="__main__")
 
 # # Dataplot and scatplot options
 
@@ -47,7 +47,7 @@ print("Phoenix_LNG_Fires...");            runpy.run_path("./scripts/Phoenix_LNG_
 #                                          pltdir=Manuals_Dir,
 #                                          close_figs=True,
 #                                          verbose=True,
-#                                          plot_range=["4:15"],
+#                                          plot_range=["Sandia Plumes"],
 #                                          ) # see notes below on plot_range
 
 # fdsplotlib.scatplot(saved_data,drange,
@@ -62,6 +62,7 @@ print("Phoenix_LNG_Fires...");            runpy.run_path("./scripts/Phoenix_LNG_
 # Special cases
 print("Beyler_Hood...");                  runpy.run_path("./scripts/Beyler_Hood.py", run_name="__main__")
 print("BRE_LEMTA_Sprays...");             runpy.run_path("./scripts/BRE_LEMTA_Sprays.py", run_name="__main__")
+print("catchpole_spread_rates...");       runpy.run_path("./scripts/catchpole_spread_rates.py", run_name="__main__")
 print("FHWA_Tunnel...");                  runpy.run_path("./scripts/FHWA_Tunnel.py", run_name="__main__")
 print("FM_FPRF_Datacenter...");           runpy.run_path("./scripts/FM_FPRF_Datacenter.py", run_name="__main__")
 print("Heskestad_Flame_Height_2...");     runpy.run_path("./scripts/Heskestad_Flame_Height_2.py", run_name="__main__")
@@ -69,6 +70,7 @@ print("McCaffrey_Plume...");              runpy.run_path("./scripts/McCaffrey_Pl
 print("Memorial_Tunnel...");              runpy.run_path("./scripts/Memorial_Tunnel.py", run_name="__main__")
 print("Memorial_Tunnel_2...");            runpy.run_path("./scripts/Memorial_Tunnel_2.py", run_name="__main__")
 print("NIST_NRC_Parallel_Panels...");     runpy.run_path("./scripts/NIST_NRC_Parallel_Panels.py", run_name="__main__")
+print("Sandia_Plumes...");                runpy.run_path("./scripts/Sandia_Plumes.py", run_name="__main__")
 print("Sandia_Pools...");                 runpy.run_path("./scripts/Sandia_Pools.py", run_name="__main__")
 print("Theobald_Hose_Stream...");         runpy.run_path("./scripts/Theobald_Hose_Stream.py", run_name="__main__")
 print("TUS_Facade...");                   runpy.run_path("./scripts/TUS_Facade_contours.py", run_name="__main__")

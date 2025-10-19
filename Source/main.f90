@@ -1612,15 +1612,19 @@ IF (OBST_CREATED_OR_REMOVED .OR. FORCE_REASSIGN) THEN
             CALL ULMAT_SOLVER_SETUP(NM)
          ENDDO
          CALL STOP_CHECK(1)
-      CASE (UGLMAT_FLAG,GLMAT_FLAG)
-         IF(ALLOCATED(ZONE_SOLVE)) CALL FINISH_GLMAT_SOLVER
-         CALL GLMAT_SOLVER_SETUP(1)
-         CALL STOP_CHECK(1)
-         CALL MESH_EXCHANGE(3) ! Exchange guard cell info for CCVAR(I,J,K,CGSC) -> HS.
-         CALL GLMAT_SOLVER_SETUP(2)
-         CALL MESH_EXCHANGE(3) ! Exchange guard cell info for CCVAR(I,J,K,UNKH) -> HS.
-         CALL GLMAT_SOLVER_SETUP(3)
-         CALL STOP_CHECK(1)
+   CASE (UGLMAT_FLAG,GLMAT_FLAG)
+      IF(ALLOCATED(ZONE_SOLVE)) CALL FINISH_GLMAT_SOLVER
+      CALL GLMAT_SOLVER_SETUP(-1) ! Initialize EWC_TYPE, copy wall types to HS
+      CALL STOP_CHECK(1)
+      CALL MESH_EXCHANGE(3)       ! Exchange guard cell info for IS_WALLT -> HS
+      CALL GLMAT_SOLVER_SETUP(0)  ! Process coarse faces, copy updated wall types to HS
+      CALL MESH_EXCHANGE(3)       ! Re-exchange guard cell info for IS_WALLT -> HS
+      CALL GLMAT_SOLVER_SETUP(1)
+      CALL MESH_EXCHANGE(3)       ! Exchange guard cell info for CCVAR(I,J,K,CGSC) -> HS
+      CALL GLMAT_SOLVER_SETUP(2)
+      CALL MESH_EXCHANGE(3)       ! Exchange guard cell info for CCVAR(I,J,K,UNKH) -> HS
+      CALL GLMAT_SOLVER_SETUP(3)
+      CALL STOP_CHECK(1)
    END SELECT
    OBST_CREATED_OR_REMOVED = .FALSE.
 ENDIF

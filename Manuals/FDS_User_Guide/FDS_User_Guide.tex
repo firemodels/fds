@@ -4621,7 +4621,7 @@ If no input for specific specific heat is provided, then the specific heat of th
 \be
    c_{p,\alpha} = \frac{\gamma}{\gamma-1} \frac{\R}{W_\alpha}
 \ee
-The ratio of specific heats, \ct{GAMMA}, is 1.4 by default and can be changed on the \ct{MISC} line. If you want all the gas specific heats to follow this relation, set \ct{CONSTANT_SPECIFIC_HEAT_RATIO=T} on the \ct{MISC} line. For high molecular weight species, use of the default gamma will result in very low values of the specific heat which can cause issues with the default extinction model. In this case it is recommended that the specific heat be defined. If the FDS is determining the specific heat using this relation, then it is recommended that you check the \ct{CHID.out} and verify that reasonable specific heat values have been created.
+The ratio of specific heats, \ct{GAMMA}, is 1.4 by default and can be changed on the \ct{MISC} line. If you want all the gas specific heats to follow this relation, set \ct{CONSTANT_SPECIFIC_HEAT_RATIO=T} on the \ct{MISC} line. For high molecular weight species, use of the default gamma will result in very low values of the specific heat. This can cause issues with temperature in regions with high fuel mass fractions and can cause issues with the \ct{EXTINCTION 2} extinction model. For high molecular weight species it is recommended that the specific heat be defined. If the FDS is determining the specific heat using \ct{GAMMA}, then it is recommended that you check the \ct{CHID.out} file and verify that reasonable specific heat values have been created.
 
 Note that species used in chemical reactions must either be predefined or have an explicitly defined $h(T_{\rm ref})$. The exception is the species defined as \ct{FUEL} on the \ct{REAC} input as long as a \ct{HEAT_OF_COMBUSTION} is defined or the reaction is a simple chemistry reaction where \ct{EPUMO2} applies. Specifying either \ct{SPECIFIC_HEAT} or \ct{RAMP_CP} is considered to have explicitly defined $h(T_{\rm ref})$. If you still wish to use the default \ct{EPUMO2} or 13,100~kJ/kg, then you will need to explicitly define it on the \ct{REAC} input.
 
@@ -6888,12 +6888,12 @@ Figure~\ref{wind_profiles} displays a few sample wind profiles. Notice that the 
 
 \begin{figure}[p]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \includegraphics[width=3.2in]{FIGURES/vel_L=-100}  &
-      \includegraphics[width=3.2in]{FIGURES/tmp_L=-100}  \\
-      \includegraphics[width=3.2in]{FIGURES/vel_L=100}  &
-      \includegraphics[width=3.2in]{FIGURES/tmp_L=100}  \\
-      \includegraphics[width=3.2in]{FIGURES/vel_L=-350}  &
-      \includegraphics[width=3.2in]{FIGURES/tmp_L=-350}
+      \includegraphics[width=3.2in]{FIGURES/Monin_Obukhov_vel_L_-100}  &
+      \includegraphics[width=3.2in]{FIGURES/Monin_Obukhov_tmp_L_-100}  \\
+      \includegraphics[width=3.2in]{FIGURES/Monin_Obukhov_vel_L_100}  &
+      \includegraphics[width=3.2in]{FIGURES/Monin_Obukhov_tmp_L_100}  \\
+      \includegraphics[width=3.2in]{FIGURES/Monin_Obukhov_vel_L_-350}  &
+      \includegraphics[width=3.2in]{FIGURES/Monin_Obukhov_tmp_L_-350}
    \end{tabular*}
    \caption[Sample vertical wind and temperature profiles]{Sample vertical wind and temperature profiles.}
    \label{wind_profiles}
@@ -11248,6 +11248,7 @@ you can specify the logical parameter \ct{DRY} on a \ct{DEVC} line that reports 
       DRY=T /
 \end{lstlisting}
 
+\ct{DRY} can also be specified on an \ct{SLCF} line that reports the \ct{'MASS FRACTION'} or \ct{'VOLUME FRACTION'} of a species as well as an \ct{HVAC} \ct{DUCT QUANTITY LIST} or \ct{NODE QUANTITY LIST}. For \ct{HVAC} line outputs, \ct{DRY} is an array corresponding to each entry on the \ct{QUANTITY LIST}.
 
 \subsection{Aerosol and Soot Concentration}
 \label{info:soot}
@@ -12547,6 +12548,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{DEVC_ID}                & Character     & Sections ~\ref{info:HVACduct}, \ref{info:HVACfan}, \ref{info:HVACfilter} &               &                \\ \hline
 \ct{DIAMETER}                & Real          & Section~\ref{info:HVACduct}                                              &  m            &                \\ \hline
 \ct{DISCHARGE_COEFFICIENT}  & Real          & Section~\ref{info:Leaks}                                                 &               & 1.             \\ \hline
+\ct{DRY}                    & Log. Array    & Section~\ref{info:dry}                                                   &               &                \\ \hline
 \ct{DUCT_ID}                & Char.~Array   & Section~\ref{info:HVACnode}                                              &               &                \\ \hline
 \ct{EFFICIENCY}              & Real Array    & Sections~\ref{info:HVACfilter}, \ref{info:HVACaircoil}                   &               & 1.0            \\ \hline
 \ct{FAN_ID}                 & Character     & Section~\ref{info:HVACduct}                                              &               &                \\ \hline
@@ -13480,6 +13482,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{AGL_SLICE}        & Real              & Section~\ref{info:complex_terrain}        & m         &                   \\ \hline
 \ct{CELL_CENTERED}    & Logical           & Section~\ref{info:SLCF}                   &           & \ct{F}     \\ \hline
 \ct{DB}                & Character         & Section~\ref{info:SLCF}                   &           &                   \\ \hline
+\ct{DRY}               & Logical           & Section~\ref{info:dry}                   &           &                   \\ \hline
 \ct{ID}                & Character         & Section~\ref{info:SLCF}                   &           &                   \\ \hline
 \ct{MAXIMUM_VALUE}    & Real              & Reference~\cite{Smokeview_Users_Guide}    &           &                   \\ \hline
 \ct{MESH_NUMBER}      & Integer           & Section~\ref{info:SLCF}                   &           &                   \\ \hline
