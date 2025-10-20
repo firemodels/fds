@@ -1470,7 +1470,9 @@ def scatplot(saved_data, drange, **kwargs):
                                 plot_type=Plot_Type,
                                 x_min=Plot_Min, x_max=Plot_Max, y_min=Plot_Min, y_max=Plot_Max,
                                 x_label=row["Ind_Title"],
-                                y_label=row["Dep_Title"])
+                                y_label=row["Dep_Title"],
+                                legend_location='outside',
+                                legend_expand=row["Paper_Width_Factor"])
 
         fdsplotlib.plot_to_fig(x_data=[Plot_Min, Plot_Max], y_data=[Plot_Min, Plot_Max], line_style="k-", figure_handle=fig)
         if Sigma_E > 0:
@@ -1480,8 +1482,42 @@ def scatplot(saved_data, drange, **kwargs):
             fdsplotlib.plot_to_fig(x_data=[Plot_Min, Plot_Max], y_data=np.array([Plot_Min, Plot_Max]) * delta * (1 + 2 * Sigma_M), line_style="r--", figure_handle=fig)
             fdsplotlib.plot_to_fig(x_data=[Plot_Min, Plot_Max], y_data=np.array([Plot_Min, Plot_Max]) * delta / (1 + 2 * Sigma_M), line_style="r--", figure_handle=fig)
 
-        # plot data last so it shows on top of stat lines
-        fdsplotlib.plot_to_fig(x_data=Measured_Values, y_data=Predicted_Values, marker_style="ko", figure_handle=fig)
+        # --- Plot each dataset with its own marker and color ---
+        seen_labels = set()
+
+        for idx in match_idx:
+            style = str(Save_Group_Style[idx]).strip() if Save_Group_Style[idx] else "ko"
+            fill = str(Save_Fill_Color[idx]).strip() if Save_Fill_Color[idx] else "none"
+            label = str(Save_Group_Key_Label[idx]).strip() if Save_Group_Key_Label[idx] else ""
+
+            # Flatten valid points for this dataset
+            mvals = np.array(Save_Measured_Metric[idx], dtype=float).flatten()
+            pvals = np.array(Save_Predicted_Metric[idx], dtype=float).flatten()
+
+            mask = (
+                (mvals >= Plot_Min) & (mvals <= Plot_Max) &
+                (pvals >= Plot_Min) & (pvals <= Plot_Max) &
+                (mvals > 0) & (pvals > 0)
+            )
+            mvals = mvals[mask]
+            pvals = pvals[mask]
+
+            if len(mvals) == 0:
+                continue
+
+            # Only assign a legend label once per experiment
+            data_label = label if label and label not in seen_labels else None
+            if label:
+                seen_labels.add(label)
+
+            fdsplotlib.plot_to_fig(
+                x_data=mvals,
+                y_data=pvals,
+                marker_style=style,
+                marker_facecolor=fill,
+                figure_handle=fig,
+                data_label=data_label,
+            )
 
         pdf_path = os.path.join(Manuals_Dir, Plot_Filename + ".pdf")
         os.makedirs(os.path.dirname(pdf_path), exist_ok=True)
