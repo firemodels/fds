@@ -67,6 +67,7 @@ print("pulsating...");                      runpy.run_path("./scripts/pulsating.
 print("pyrolysis...");                      runpy.run_path("./scripts/pyrolysis.py", run_name="__main__")
 print('radiating_polygon...');              runpy.run_path("./scripts/radiating_polygon.py", run_name="__main__")
 print("ribbed_channel...");                 runpy.run_path("./scripts/ribbed_channel.py", run_name="__main__")
+print('rotcube_cc_mms_error...');           runpy.run_path("./scripts/rotcube_cc_mms_error.py", run_name="__main__")
 print("saad_mms...");                       runpy.run_path("./scripts/saad_mms_temporal_error.py", run_name="__main__")
 print("scaling_tests...");                  runpy.run_path("./scripts/scaling_tests.py", run_name="__main__")
 print("shunn_mms...");                      runpy.run_path("./scripts/shunn_mms.py", run_name="__main__")
