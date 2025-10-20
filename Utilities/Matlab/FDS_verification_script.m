@@ -50,7 +50,6 @@ scatplot(saved_data, drange, ...
 
 % Special cases
 
-disp('compression_wave...');              compression_wave
 disp('rotcube_cc_mms_error...');          rotcube_cc_mms_error
 disp('mass_balance_reac...');             mass_balance_reac
 disp('mass_balance_gas_volume...');       mass_balance_gas_volume
