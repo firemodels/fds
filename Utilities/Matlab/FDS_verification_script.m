@@ -50,7 +50,6 @@ scatplot(saved_data, drange, ...
 
 % Special cases
 
-disp('rotcube_cc_mms_error...');          rotcube_cc_mms_error
 disp('geom_positive_errors...');          geom_positive_errors
 disp('geom_channel_test...');             geom_channel_test
 disp('htc_forced...');                    htc_forced
