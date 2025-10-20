@@ -577,7 +577,7 @@ def plot_to_fig(x_data,y_data,**kwargs):
     linewidth = kwargs.get('linewidth',1)
     markeredgewidth = kwargs.get('markeredgewidth',1)
     markersize = kwargs.get('markersize',5)
-    
+
     # adjust ticks if required
     xnumticks = kwargs.get('xnumticks',None)
     ynumticks = kwargs.get('ynumticks',None)
@@ -588,7 +588,7 @@ def plot_to_fig(x_data,y_data,**kwargs):
     markevery = kwargs.get('data_markevery',default_markevery)
     legend_location = kwargs.get('legend_location',default_legend_location)
     legend_framealpha = kwargs.get('legend_framealpha',default_legend_framealpha)
-    
+
     # set dashes to default, or user requested
     # This set is the matplotlib default
     if linestyle == '': dashes = (None, None); linewidth = 0;
@@ -596,14 +596,14 @@ def plot_to_fig(x_data,y_data,**kwargs):
     if linestyle == '--': dashes = kwargs.get('line_dashes',(6, 6))
     if linestyle == '-.': dashes = kwargs.get('line_dashes',(6, 3, 1, 3))
     if linestyle == ':': dashes = kwargs.get('line_dashes',(1, 3))
-    
+
     # This set is what we were using in Matlab
     # if linestyle == '': dashes = (None, None); linewidth = 0;
     # if linestyle == '-': dashes = (None, None)
     # if linestyle == '--': dashes = kwargs.get('line_dashes',(10, 6.2))
     # if linestyle == '-.': dashes = kwargs.get('line_dashes',(12, 7.4, 3, 7.4))
     # if linestyle == ':': dashes = kwargs.get('line_dashes',(1, 3))
-    
+
 
     data_label = kwargs.get('data_label',None)
 
@@ -695,6 +695,7 @@ def plot_to_fig(x_data,y_data,**kwargs):
 
     xerr = kwargs.get('x_error', None)
     yerr = kwargs.get('y_error', None)
+    err_linewidth=kwargs.get('error_linewidth', 1)
     if xerr is not None or yerr is not None:
         ax.errorbar(
             x_data, y_data,
@@ -704,8 +705,7 @@ def plot_to_fig(x_data,y_data,**kwargs):
             markeredgewidth=markeredgewidth,         # marker edge width
             markerfacecolor=markerfacecolor,         # make marker hollow
             markeredgecolor=color,                   # outline color
-            linestyle=linestyle,
-            linewidth=linewidth,
+            elinewidth=err_linewidth,
             capsize=kwargs.get('error_capsize', 5),  # size of caps at ends
             capthick=linewidth,
         )
@@ -790,7 +790,7 @@ def plot_to_fig(x_data,y_data,**kwargs):
 
     ax.set_xlim(xmin,xmax)
     ax.set_ylim(ymin,ymax)
-    
+
     # set number of ticks if requested by the user
     if xnumticks != None:
         if plot_type in ('loglog', 'semilogx'):
@@ -802,11 +802,11 @@ def plot_to_fig(x_data,y_data,**kwargs):
             ax.set_yticks(np.logspace(ymin, ymax, ynumticks))
         else:
             ax.set_yticks(np.linspace(ymin, ymax, ynumticks))
-    
+
     # set ticks if requested by the user
     if xticks is not None: ax.set_xticks(xticks)
     if yticks is not None: ax.set_yticks(yticks)
-    
+
 
     if plot_type in ('loglog', 'semilogy'):
         apply_global_exponent(ax, axis='y', fontsize=axeslabel_fontsize)
@@ -817,7 +817,7 @@ def plot_to_fig(x_data,y_data,**kwargs):
         add_version_string(ax=ax, version_str=kwargs.get('revision_label'), plot_type=plot_type, font_size=version_fontsize)
 
     # fig.tight_layout() # this should not be needed if figure_size and plot_size are both specified
-    
+
     set_ticks_like_matlab(fig)
 
     return fig
@@ -1739,5 +1739,5 @@ def set_ticks_like_matlab(fig):
 
     for axis in ['top','bottom','left','right']:
         ax.spines[axis].set_linewidth(0.5)
-    
+
 
