@@ -1,6 +1,7 @@
 
 # This script just computes the exact solution of the flat_fire case.
 
+import pandas as pd
 import numpy as np
 
 V_0 = 400
@@ -28,6 +29,7 @@ vexact = g / (2 * K * V_0 * (K * V_0 * tvec + 1)) \
     - g * tvec / 2 \
     - g / (2 * K * V_0)
 
-mat = np.column_stack((tvec, xexact, yexact, uexact, vexact))
-np.savetxt('flat_fire.csv', mat, delimiter=',', fmt=['%.2f', '%.5f', '%.5f', '%.5f', '%.5f'])
+df = pd.DataFrame(np.column_stack((tvec, xexact, yexact, uexact, vexact)), columns=['Time', 'x', 'z', 'u', 'w'])
+
+df.to_csv('flat_fire.csv', float_format='%.5f', index=False)
 
