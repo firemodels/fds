@@ -17,25 +17,40 @@ version_string = fdsplotlib.get_version_string(git_file)
 
 
 def compression_wave_soln(rho0, x, y, a, c, t):
+    x  = np.asarray(x)
+    y  = np.asarray(y)
+    rho0 = np.asarray(rho0)
 
-    b = np.sqrt(-1 + a**2)
-    d = np.sqrt(-1 + c**2)
+    b = np.sqrt(a**2 - 1.0)
+    d = np.sqrt(c**2 - 1.0)
 
-    x0 = 2 * np.arctan(b/a * np.tan(np.arctan((1 + a*np.tan(x/2))/b) - b*t/2) - 1/a)
-    y0 = 2 * np.arctan(d/c * np.tan(np.arctan((1 + c*np.tan(y/2))/d) - d*t/2) - 1/c)
+    x0 = 2*np.arctan( (b/a)*np.tan(np.arctan((1 + a*np.tan(x/2))/b) - (b*t)/2) - 1/a )
+    y0 = 2*np.arctan( (d/c)*np.tan(np.arctan((1 + c*np.tan(y/2))/d) - (d*t)/2) - 1/c )
 
-    Ix0 = np.log(-a**2 - np.cos(2*np.arctan((1 + a*np.tan(x0/2))/b)) + b*np.sin(2*np.arctan((1 + a*np.tan(x0/2))/b)))
-    Iy0 = np.log(-c**2 - np.cos(2*np.arctan((1 + c*np.tan(y0/2))/d)) + d*np.sin(2*np.arctan((1 + c*np.tan(y0/2))/d)))
+    # small positive to avoid exact zeros inside log
+    tiny = np.finfo(float).tiny
 
-    Ix = np.log(-a**2 - np.cos(b*t + 2*np.arctan((1 + a*np.tan(x0/2))/b)) + b*np.sin(b*t + 2*np.arctan((1 + a*np.tan(x0/2))/b)))
-    Iy = np.log(-c**2 - np.cos(d*t + 2*np.arctan((1 + c*np.tan(y0/2))/d)) + d*np.sin(d*t + 2*np.arctan((1 + c*np.tan(y0/2))/d)))
+    def clog(real_expr):
+        # promote to complex; add tiny where exactly zero to avoid log(0)
+        z = real_expr.astype(np.complex128)
+        z = np.where(real_expr == 0, tiny + 0j, z)
+        return np.log(z)
+
+    A0 = 2*np.arctan((1 + a*np.tan(x0/2))/b)
+    C0 = 2*np.arctan((1 + c*np.tan(y0/2))/d)
+
+    Ix0 = clog(-a**2 - np.cos(A0) + b*np.sin(A0))
+    Iy0 = clog(-c**2 - np.cos(C0) + d*np.sin(C0))
+
+    Ix  = clog(-a**2 - np.cos(b*t + A0) + b*np.sin(b*t + A0))
+    Iy  = clog(-c**2 - np.cos(d*t + C0) + d*np.sin(d*t + C0))
 
     q0 = np.log(rho0)
-    q = q0 + Ix - Ix0 + Iy - Iy0
+    q  = q0 + (Ix - Ix0) + (Iy - Iy0)
 
-    rho = np.exp(q)
-
-    return rho
+    rho = np.exp(q)                 # complex in general
+    rho = np.real_if_close(rho, tol=1e6)  # drop ~0 imag parts (e.g., ≤1e-10)
+    return rho.real
 
 
 # central differencing, FL=0

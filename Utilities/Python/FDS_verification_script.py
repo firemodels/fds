@@ -43,6 +43,7 @@ fdsplotlib.dataplot(config_filename='../Matlab/FDS_verification_dataplot_inputs.
 
 print("atmospheric_boundary_layer...");     runpy.run_path("./scripts/atmospheric_boundary_layer.py", run_name="__main__")
 print("blasius...");                        runpy.run_path("./scripts/blasius.py", run_name="__main__")
+print('compression_wave...');               runpy.run_path("./scripts/compression_wave.py", run_name="__main__")
 print('extinction...');                     runpy.run_path("./scripts/extinction.py", run_name="__main__")
 print("fan_curve...");                      runpy.run_path("./scripts/fan_curve.py", run_name="__main__")
 print("favre_test...");                     runpy.run_path("./scripts/favre_test.py", run_name="__main__")
