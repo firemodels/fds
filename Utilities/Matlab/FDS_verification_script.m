@@ -50,7 +50,6 @@ scatplot(saved_data, drange, ...
 
 % Special cases
 
-disp('geom_channel_test...');             geom_channel_test
 disp('htc_forced...');                    htc_forced
 disp('natconh...');                       natconh
 disp('natconv...');                       natconv
