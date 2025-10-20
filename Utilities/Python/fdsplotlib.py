@@ -1406,6 +1406,9 @@ def scatplot(saved_data, drange, **kwargs):
     Output_Histograms = []
 
     for _, row in Q.iterrows():
+        plt.close('all')
+        plt.figure().clear()
+
         Scatter_Plot_Title = row["Scatter_Plot_Title"]
         Plot_Filename = row["Plot_Filename"]
         Plot_Min = float(row["Plot_Min"])
@@ -1523,6 +1526,7 @@ def scatplot(saved_data, drange, **kwargs):
         os.makedirs(os.path.dirname(pdf_path), exist_ok=True)
         fig.savefig(pdf_path)
         plt.close(fig)
+        plt.figure().clear()
 
         # --- Collect statistics for CSV/TeX ---
         group_labels = []
@@ -1763,11 +1767,14 @@ def statistics_histogram(Measured_Values, Predicted_Values,
 
     outpath = os.path.join(Manuals_Dir, f"{Plot_Filename}_Histogram.pdf")
     os.makedirs(os.path.dirname(outpath), exist_ok=True)
+    plt.tight_layout()
     fig.savefig(outpath)
     plt.close(fig)
+    plt.figure().clear()
 
     print(f"[statistics_histogram] {Scatter_Plot_Title}: p = {pval:.2f}")
     return f"{os.path.basename(Plot_Filename)}_Histogram", pval
+
 
 def set_ticks_like_matlab(fig):
     ax = fig.axes[0]
