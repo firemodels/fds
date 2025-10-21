@@ -53,7 +53,6 @@ scatplot(saved_data, drange, ...
 disp('htc_forced...');                    htc_forced
 disp('natconh...');                       natconh
 disp('natconv...');                       natconv
-disp('freecon_sphere...');                freecon_sphere
 disp('nat_conv_hot_plate...');            nat_conv_hot_plate
 
 display('verification scripts completed successfully!')

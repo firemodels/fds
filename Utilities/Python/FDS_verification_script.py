@@ -49,6 +49,7 @@ print("fan_curve...");                      runpy.run_path("./scripts/fan_curve.
 print("favre_test...");                     runpy.run_path("./scripts/favre_test.py", run_name="__main__")
 print("fds_moody_chart...");                runpy.run_path("./scripts/fds_moody_chart.py", run_name="__main__")
 print("fluid_part...");                     runpy.run_path("./scripts/fluid_part.py", run_name="__main__")
+print("freecon_sphere...");                 runpy.run_path("./scripts/freecon_sphere.py", run_name="__main__")
 print("geom_channel_test...");              runpy.run_path("./scripts/geom_channel_test.py", run_name="__main__")
 print("geom_positive_errors...");           runpy.run_path("./scripts/geom_positive_errors.py", run_name="__main__")
 print("heated_channel...");                 runpy.run_path("./scripts/heated_channel.py", run_name="__main__")
