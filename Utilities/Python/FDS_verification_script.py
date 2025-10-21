@@ -84,5 +84,6 @@ print("vort2d...");                         runpy.run_path("./scripts/vort2d.py"
 print("wall_internal_radiation...");        runpy.run_path("./scripts/wall_internal_radiation.py", run_name="__main__")
 print("yplus...");                          runpy.run_path("./scripts/yplus.py", run_name="__main__")
 print('impinging_jet...');                  runpy.run_path("./scripts/impinging_jet.py", run_name="__main__")
+print('htc_forced...');                     runpy.run_path("./scripts/htc_forced.py", run_name="__main__")
 
 print("verification scripts completed successfully!")
