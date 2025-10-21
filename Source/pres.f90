@@ -3769,7 +3769,7 @@ IF(CC_IBM) THEN
    TRN_ME(2)=TRN_ME(1)
    IF (N_MPI_PROCESSES > 1) CALL MPI_ALLREDUCE(TRN_ME(1),TRN_ME(2),1,MPI_INTEGER,MPI_SUM,MPI_COMM_WORLD,IERR)
    IF (TRN_ME(2) > 0) THEN ! Meshes at different refinement levels. Not Unsupported.
-      IF (MY_RANK == 0) WRITE(LU_ERR,*) 'GLMAT Setup Error : Meshes at different refinement levels unsupported.'
+      IF (MY_RANK == 0) WRITE(LU_ERR,*) 'GLMAT Setup Error: Meshes at different refinement levels currently unsupported for &GEOM.'
       SUPPORTED_MESH = .FALSE.
       STOP_STATUS = SETUP_STOP
       RETURN

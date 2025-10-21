@@ -7,14 +7,12 @@ importlib.reload(fdsplotlib) # use for development (while making changes to fdsp
 
 # Scripts to run prior to dataplot
 
-print("catchpole_spread_rates...");       runpy.run_path("./scripts/catchpole_spread_rates.py", run_name="__main__")
 print("NIST_deposition_gauge...");        runpy.run_path("./scripts/NIST_deposition_gauge.py", run_name="__main__")
 print("flame_height...");                 runpy.run_path("./scripts/flame_height.py", run_name="__main__")
 print("NIST_RSE...");                     runpy.run_path("./scripts/NIST_RSE.py", run_name="__main__")
 print("sippola_aerosol_deposition...");   runpy.run_path("./scripts/sippola_aerosol_deposition.py", run_name="__main__")
 print("layer_height...");                 runpy.run_path("./scripts/layer_height.py", run_name="__main__")
 print("NIST_NRC_Corner_Effects...");      runpy.run_path("./scripts/NIST_NRC_Corner_Effects.py", run_name="__main__")
-# print("fm_data_center...");               runpy.run_path("./scripts/fm_data_center.py", run_name="__main__")
 print("LNG_Dispersion...");               runpy.run_path("./scripts/LNG_Dispersion.py", run_name="__main__")
 print("LNG_wind_profiles...");            runpy.run_path("./scripts/LNG_wind_profiles.py", run_name="__main__")
 print("FM_Vertical_Wall_Flames...");      runpy.run_path("./scripts/FM_Vertical_Wall_Flames.py", run_name="__main__")
@@ -61,8 +59,10 @@ print("Sandia_Plumes_TKE...");            runpy.run_path("./scripts/Sandia_Plume
 
 
 # Special cases
+print("Backward_Facing_Step...");         runpy.run_path("./scripts/Backward_Facing_Step.py", run_name="__main__")
 print("Beyler_Hood...");                  runpy.run_path("./scripts/Beyler_Hood.py", run_name="__main__")
 print("BRE_LEMTA_Sprays...");             runpy.run_path("./scripts/BRE_LEMTA_Sprays.py", run_name="__main__")
+print("catchpole_spread_rates...");       runpy.run_path("./scripts/catchpole_spread_rates.py", run_name="__main__")
 print("FHWA_Tunnel...");                  runpy.run_path("./scripts/FHWA_Tunnel.py", run_name="__main__")
 print("FM_FPRF_Datacenter...");           runpy.run_path("./scripts/FM_FPRF_Datacenter.py", run_name="__main__")
 print("Heskestad_Flame_Height_2...");     runpy.run_path("./scripts/Heskestad_Flame_Height_2.py", run_name="__main__")

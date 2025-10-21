@@ -577,7 +577,7 @@ def plot_to_fig(x_data,y_data,**kwargs):
     linewidth = kwargs.get('linewidth',1)
     markeredgewidth = kwargs.get('markeredgewidth',1)
     markersize = kwargs.get('markersize',5)
-    
+
     # adjust ticks if required
     xnumticks = kwargs.get('xnumticks',None)
     ynumticks = kwargs.get('ynumticks',None)
@@ -588,7 +588,7 @@ def plot_to_fig(x_data,y_data,**kwargs):
     markevery = kwargs.get('data_markevery',default_markevery)
     legend_location = kwargs.get('legend_location',default_legend_location)
     legend_framealpha = kwargs.get('legend_framealpha',default_legend_framealpha)
-    
+
     # set dashes to default, or user requested
     # This set is the matplotlib default
     if linestyle == '': dashes = (None, None); linewidth = 0;
@@ -596,14 +596,14 @@ def plot_to_fig(x_data,y_data,**kwargs):
     if linestyle == '--': dashes = kwargs.get('line_dashes',(6, 6))
     if linestyle == '-.': dashes = kwargs.get('line_dashes',(6, 3, 1, 3))
     if linestyle == ':': dashes = kwargs.get('line_dashes',(1, 3))
-    
+
     # This set is what we were using in Matlab
     # if linestyle == '': dashes = (None, None); linewidth = 0;
     # if linestyle == '-': dashes = (None, None)
     # if linestyle == '--': dashes = kwargs.get('line_dashes',(10, 6.2))
     # if linestyle == '-.': dashes = kwargs.get('line_dashes',(12, 7.4, 3, 7.4))
     # if linestyle == ':': dashes = kwargs.get('line_dashes',(1, 3))
-    
+
 
     data_label = kwargs.get('data_label',None)
 
@@ -695,6 +695,7 @@ def plot_to_fig(x_data,y_data,**kwargs):
 
     xerr = kwargs.get('x_error', None)
     yerr = kwargs.get('y_error', None)
+    err_linewidth=kwargs.get('error_linewidth', 1)
     if xerr is not None or yerr is not None:
         ax.errorbar(
             x_data, y_data,
@@ -704,8 +705,7 @@ def plot_to_fig(x_data,y_data,**kwargs):
             markeredgewidth=markeredgewidth,         # marker edge width
             markerfacecolor=markerfacecolor,         # make marker hollow
             markeredgecolor=color,                   # outline color
-            linestyle=linestyle,
-            linewidth=linewidth,
+            elinewidth=err_linewidth,
             capsize=kwargs.get('error_capsize', 5),  # size of caps at ends
             capthick=linewidth,
         )
@@ -790,9 +790,9 @@ def plot_to_fig(x_data,y_data,**kwargs):
 
     ax.set_xlim(xmin,xmax)
     ax.set_ylim(ymin,ymax)
-    
+
     # set number of ticks if requested by the user
-    if ynumticks != None:
+    if xnumticks != None:
         if plot_type in ('loglog', 'semilogx'):
             ax.set_xticks(np.logspace(xmin, xmax, xnumticks))
         else:
@@ -802,11 +802,11 @@ def plot_to_fig(x_data,y_data,**kwargs):
             ax.set_yticks(np.logspace(ymin, ymax, ynumticks))
         else:
             ax.set_yticks(np.linspace(ymin, ymax, ynumticks))
-    
+
     # set ticks if requested by the user
     if xticks is not None: ax.set_xticks(xticks)
     if yticks is not None: ax.set_yticks(yticks)
-    
+
 
     if plot_type in ('loglog', 'semilogy'):
         apply_global_exponent(ax, axis='y', fontsize=axeslabel_fontsize)
@@ -817,7 +817,7 @@ def plot_to_fig(x_data,y_data,**kwargs):
         add_version_string(ax=ax, version_str=kwargs.get('revision_label'), plot_type=plot_type, font_size=version_fontsize)
 
     # fig.tight_layout() # this should not be needed if figure_size and plot_size are both specified
-    
+
     set_ticks_like_matlab(fig)
 
     return fig
@@ -1406,6 +1406,9 @@ def scatplot(saved_data, drange, **kwargs):
     Output_Histograms = []
 
     for _, row in Q.iterrows():
+        plt.close('all')
+        plt.figure().clear()
+
         Scatter_Plot_Title = row["Scatter_Plot_Title"]
         Plot_Filename = row["Plot_Filename"]
         Plot_Min = float(row["Plot_Min"])
@@ -1470,7 +1473,9 @@ def scatplot(saved_data, drange, **kwargs):
                                 plot_type=Plot_Type,
                                 x_min=Plot_Min, x_max=Plot_Max, y_min=Plot_Min, y_max=Plot_Max,
                                 x_label=row["Ind_Title"],
-                                y_label=row["Dep_Title"])
+                                y_label=row["Dep_Title"],
+                                legend_location='outside',
+                                legend_expand=row["Paper_Width_Factor"])
 
         fdsplotlib.plot_to_fig(x_data=[Plot_Min, Plot_Max], y_data=[Plot_Min, Plot_Max], line_style="k-", figure_handle=fig)
         if Sigma_E > 0:
@@ -1480,13 +1485,48 @@ def scatplot(saved_data, drange, **kwargs):
             fdsplotlib.plot_to_fig(x_data=[Plot_Min, Plot_Max], y_data=np.array([Plot_Min, Plot_Max]) * delta * (1 + 2 * Sigma_M), line_style="r--", figure_handle=fig)
             fdsplotlib.plot_to_fig(x_data=[Plot_Min, Plot_Max], y_data=np.array([Plot_Min, Plot_Max]) * delta / (1 + 2 * Sigma_M), line_style="r--", figure_handle=fig)
 
-        # plot data last so it shows on top of stat lines
-        fdsplotlib.plot_to_fig(x_data=Measured_Values, y_data=Predicted_Values, marker_style="ko", figure_handle=fig)
+        # --- Plot each dataset with its own marker and color ---
+        seen_labels = set()
+
+        for idx in match_idx:
+            style = str(Save_Group_Style[idx]).strip() if Save_Group_Style[idx] else "ko"
+            fill = str(Save_Fill_Color[idx]).strip() if Save_Fill_Color[idx] else "none"
+            label = str(Save_Group_Key_Label[idx]).strip() if Save_Group_Key_Label[idx] else ""
+
+            # Flatten valid points for this dataset
+            mvals = np.array(Save_Measured_Metric[idx], dtype=float).flatten()
+            pvals = np.array(Save_Predicted_Metric[idx], dtype=float).flatten()
+
+            mask = (
+                (mvals >= Plot_Min) & (mvals <= Plot_Max) &
+                (pvals >= Plot_Min) & (pvals <= Plot_Max) &
+                (mvals > 0) & (pvals > 0)
+            )
+            mvals = mvals[mask]
+            pvals = pvals[mask]
+
+            if len(mvals) == 0:
+                continue
+
+            # Only assign a legend label once per experiment
+            data_label = label if label and label not in seen_labels else None
+            if label:
+                seen_labels.add(label)
+
+            fdsplotlib.plot_to_fig(
+                x_data=mvals,
+                y_data=pvals,
+                marker_style=style,
+                marker_facecolor=fill,
+                figure_handle=fig,
+                data_label=data_label,
+            )
 
         pdf_path = os.path.join(Manuals_Dir, Plot_Filename + ".pdf")
         os.makedirs(os.path.dirname(pdf_path), exist_ok=True)
         fig.savefig(pdf_path)
         plt.close(fig)
+        plt.figure().clear()
 
         # --- Collect statistics for CSV/TeX ---
         group_labels = []
@@ -1727,11 +1767,14 @@ def statistics_histogram(Measured_Values, Predicted_Values,
 
     outpath = os.path.join(Manuals_Dir, f"{Plot_Filename}_Histogram.pdf")
     os.makedirs(os.path.dirname(outpath), exist_ok=True)
+    plt.tight_layout()
     fig.savefig(outpath)
     plt.close(fig)
+    plt.figure().clear()
 
     print(f"[statistics_histogram] {Scatter_Plot_Title}: p = {pval:.2f}")
     return f"{os.path.basename(Plot_Filename)}_Histogram", pval
+
 
 def set_ticks_like_matlab(fig):
     ax = fig.axes[0]
@@ -1739,5 +1782,5 @@ def set_ticks_like_matlab(fig):
 
     for axis in ['top','bottom','left','right']:
         ax.spines[axis].set_linewidth(0.5)
-    
+
 
