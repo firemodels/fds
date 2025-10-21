@@ -59,6 +59,7 @@ print("Sandia_Plumes_TKE...");            runpy.run_path("./scripts/Sandia_Plume
 
 
 # Special cases
+print("Backwards_Facing_Step...");        runpy.run_path("./scripts/Backward_Facing_Step.py", run_name="__main__")
 print("Beyler_Hood...");                  runpy.run_path("./scripts/Beyler_Hood.py", run_name="__main__")
 print("BRE_LEMTA_Sprays...");             runpy.run_path("./scripts/BRE_LEMTA_Sprays.py", run_name="__main__")
 print("catchpole_spread_rates...");       runpy.run_path("./scripts/catchpole_spread_rates.py", run_name="__main__")
