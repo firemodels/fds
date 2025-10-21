@@ -12,6 +12,7 @@ import math
 import matplotlib.pyplot as plt
 import fdsplotlib
 
+
 def tight_subplot(Nh, Nw, gap=(0.01, 0.01), marg_h=(0.13, 0.08), marg_w=(0.11, 0.019)):
    '''
    Creates a grid of subplot axes with adjustable gaps and margins.
@@ -102,11 +103,11 @@ Cf_exp = D['Cf'].values
 
 error = 0.0005 * np.ones_like(Cf_exp)
 
-fig = fdsplotlib.plot_to_fig(x_data=xoh_cf, y_data=Cf_exp, y_error=error,marker_style='ko--',
+fig = fdsplotlib.plot_to_fig(x_data=xoh_cf, y_data=Cf_exp, y_error=error,marker_style='ko',
       revision_label=version_string,x_min=0,x_max=20,y_min=-0.004,y_max=0.004,
       data_label='J&D',
-      x_label='$x/h$',
-      y_label='$C_f$')
+      x_label=r'$x/h$',
+      y_label=r'$C_f$')
 
 # FDS Data
 h_leg = []
@@ -149,8 +150,8 @@ Cp_exp = Cp_exp[I]
 fig = fdsplotlib.plot_to_fig(x_data=xoh_cp, y_data=Cp_exp, marker_style='ko',
       revision_label=version_string,x_min=0,x_max=20,y_min=-0.1,y_max=0.25,
       data_label='J&D',
-      x_label='$x/h$',
-      y_label='$C_p$')
+      x_label=r'$x/h$',
+      y_label=r'$C_p$')
 
 # FDS Data
 h_leg2 = []
@@ -236,8 +237,13 @@ for i in range(4): # Loop over x_loc: -3, 4, 6, 10
    ax.text(0.01, 3.2, f'$x/h$={x_l}', transform=ax.transData, fontsize=14)
 
    if i == 0:
-      ax.set_ylabel('$z/h$', fontsize=16)
-      ax.set_xlabel('<$u$>/$U_0$', fontsize=16)
+      ax.set_ylabel(r'$z/h$', fontsize=16)
+      ax.set_xlabel(r'$\langle u \rangle/U_0$', fontsize=16)
+      # Add legend only to the first plot in this set
+      legend_labels = ['J&D']
+      for k in fds_key:
+         legend_labels.append(k)
+      ax.legend(legend_labels, loc='best', frameon=False, fontsize=10)
    else:
       ax.set_yticklabels([])
       ax.set_xticklabels([])
@@ -302,8 +308,13 @@ for i in range(4):
    ax.text(0.01, 3.2, f'$x/h$={x_l}', transform=ax.transData, fontsize=14)
 
    if i == 0:
-      ax.set_ylabel('$z/h$', fontsize=16)
-      ax.set_xlabel('<$w$>/$U_0$', fontsize=16)
+      ax.set_ylabel(r'$z/h$', fontsize=16)
+      ax.set_xlabel(r'$\langle w \rangle/U_0$', fontsize=16)
+      # Add legend only to the first plot in this set
+      legend_labels = ['J&D']
+      for k in fds_key:
+         legend_labels.append(k)
+      ax.legend(legend_labels, loc='best', frameon=False, fontsize=10)
    else:
       ax.set_yticklabels([])
       ax.set_xticklabels([])
@@ -369,8 +380,13 @@ for i in range(4):
    ax.text(0.01, 3.2, f'$x/h={x_l}$', transform=ax.transData, fontsize=14)
 
    if i == 0:
-      ax.set_ylabel('$z/h$', fontsize=16)
-      ax.set_xlabel('<$uu$>/$U_0^2$', fontsize=16)
+      ax.set_ylabel(r'$z/h$', fontsize=16)
+      ax.set_xlabel(r'$\langle uu \rangle/U_0^2$', fontsize=16)
+      # Add legend only to the first plot in this set
+      legend_labels = ['J&D']
+      for k in fds_key:
+         legend_labels.append(k)
+      ax.legend(legend_labels, loc='best', frameon=False, fontsize=10)
    else:
       ax.set_yticklabels([])
       ax.set_xticklabels([])
@@ -435,8 +451,13 @@ for i in range(4):
    ax.text(0.01, 3.2, f'$x/h$={x_l}', transform=ax.transData, fontsize=14)
 
    if i == 0:
-      ax.set_ylabel('$z/h$', fontsize=16)
-      ax.set_xlabel('<$ww$>/$U_0^2$', fontsize=16)
+      ax.set_ylabel(r'$z/h$', fontsize=16)
+      ax.set_xlabel(r'$\langle ww \rangle/U_0^2$', fontsize=16)
+      # Add legend only to the first plot in this set
+      legend_labels = ['J&D']
+      for k in fds_key:
+         legend_labels.append(k)
+      ax.legend(legend_labels, loc='best', frameon=False, fontsize=10)
    else:
       ax.set_yticklabels([])
       ax.set_xticklabels([])
@@ -447,7 +468,9 @@ plt.close(fig)
 
 fig, sp1 = tight_subplot(1, 4, gap=(0.01, 0.01), marg_h=(0.142, 0.055), marg_w=(0.108, 0.01))
 fig.suptitle(version_string,x=0.8,y=0.98,fontsize=14)
+
 # --- 7. Wall-normal uw profiles ($\langle uw \rangle$) ---
+
 for i in range(4):
    ax = sp1[i]
    x_l = x_loc[i]
@@ -502,12 +525,13 @@ for i in range(4):
    ax.text(0.01, 3.2, f'$x/h$={x_l}', transform=ax.transData, fontsize=14)
 
    if i == 0:
-      ax.set_ylabel('$z/h$', fontsize=16)
-      ax.set_xlabel('<$uw$/$U_0^2$', fontsize=16)
-      # Add legend only to the first plot in this set (f7)
-      legend_handles = ax.get_lines()[0:1] + h_leg
-      legend_labels = ['J&D'] + fds_key
-      ax.legend(legend_handles, legend_labels, loc='upper right', frameon=False, fontsize=10)
+      ax.set_ylabel(r'$z/h$', fontsize=16)
+      ax.set_xlabel(r'$\langle uw \rangle/U_0^2$', fontsize=16)
+      # Add legend only to the first plot in this set
+      legend_labels = ['J&D']
+      for k in fds_key:
+         legend_labels.append(k)
+      ax.legend(legend_labels, loc='best', frameon=False, fontsize=10)
    else:
       ax.set_yticklabels([])
       ax.set_xticklabels([])
