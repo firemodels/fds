@@ -121,5 +121,3 @@ os.makedirs(pltdir, exist_ok=True)
 out_pdf = os.path.join(pltdir, "nat_conv_hot_plate.pdf")
 plt.savefig(out_pdf, format='pdf')
 plt.close(fig)
-
-plt.show()
