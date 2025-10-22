@@ -1,13 +1,5 @@
-#!/usr/bin/env python3
-# B M Ralph
-# 12-8-2016
-# hvac_mass_transport.py
-#
-# Converted by Floyd
-# 10-14-2025
-#
-# Convergence study for HVAC transient mass transport (mass fraction at
-# downstream duct node).
+
+# Convergence study for HVAC transient mass transport (mass fraction at downstream duct node).
 
 import os
 import numpy as np

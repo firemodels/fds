@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 McDermott
 7-21-11

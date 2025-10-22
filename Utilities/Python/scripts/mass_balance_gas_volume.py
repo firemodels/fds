@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 mass_balance_gas_volume.py
 Validates mass conservation in a gas volume comparing time derivative of mass with net mass flux through boundaries.

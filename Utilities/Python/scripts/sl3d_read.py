@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 #MPachera
 #2022-05-05
 

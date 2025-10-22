@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 McDermott
 2-4-11

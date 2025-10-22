@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # McDermott
 # Oct 2024
 
