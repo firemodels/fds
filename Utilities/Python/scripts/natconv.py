@@ -143,7 +143,7 @@ for j in range(len(res)):
       figure_handle=fig,
          data_label = plotlabel)
 
-plt.savefig('../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/natural_convection_horizontal_vertical_enclosure.pdf', format='pdf')
+plt.savefig('../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/natural_convection_vertical_enclosure.pdf', format='pdf')
 
 # --- Plot 2: Complex geometry cases (rotated grid 18 degrees) ---
 Git_Filename = os.path.join(results_dir, 'natconh_19_16_rot_18_git.txt')
