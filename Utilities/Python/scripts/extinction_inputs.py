@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 
 #generates 100 mesh inputs for Extinction.fds verification case
 # K. Overholt, C. Weinschenk

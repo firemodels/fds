@@ -1,6 +1,3 @@
-#!/usr/bin/python
-#McDermott
-#2025-09-03
 
 import numpy as np
 

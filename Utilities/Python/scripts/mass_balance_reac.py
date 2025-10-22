@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 mass_balance_reac.py
 Validates mass conservation for species with chemical reactions.

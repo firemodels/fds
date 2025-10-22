@@ -1,17 +1,9 @@
-# Overholt
-# 6-13-2012
-# cat_propane_depo.m
-#
-# Concatenates columns from Propane flame deposition FDS cases (/Verification/Aerosols)
-#
-# Converted by Floyd
-# 10-16-2025
 
+# Concatenates columns from Propane flame deposition FDS cases (/Verification/Aerosols)
 
 import pandas as pd
 import numpy as np
 import os
-
 
 outdir = '../../Verification/Aerosols/'
 

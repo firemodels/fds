@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 impinging_jet.py
 Converted from MATLAB script impinging_jet.m to Python.
