@@ -49,6 +49,19 @@ print("Sandia_Plumes_TKE...");            runpy.run_path("./scripts/Sandia_Plume
 #                                          plot_range=["Sandia Plumes"],
 #                                          ) # see notes below on plot_range
 
+# # ----- write saved_data, drange to disk -----
+# import pickle
+
+# # Save
+# with open("saved_data_debug.pkl", "wb") as f:
+#     pickle.dump((saved_data, drange), f)
+
+# # Later...
+# with open("saved_data_debug.pkl", "rb") as f:
+#     saved_data, drange = pickle.load(f)
+# #---------------------------------------------
+
+
 # fdsplotlib.scatplot(saved_data,drange,
 # 				    Manuals_Dir=Manuals_Dir,
 # 				    Scatterplot_Inputs_File=Scatterplot_Inputs_File,
