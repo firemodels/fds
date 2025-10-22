@@ -68,10 +68,10 @@ errvec = np.array(errvec)
 Linf = np.array(Linf)
 
 if errvec[4] > 1e-6:
-    print('Matlab Warning: The velocity in the terminal_velocity* cases is out of tolerance.')
+    print('Warning: The velocity in the terminal_velocity* cases is out of tolerance.')
 
 if Linf[4] > 1e-3:
-    print('Matlab Warning: The position in the terminal_velocity* cases is out of tolerance.')
+    print('Warning: The position in the terminal_velocity* cases is out of tolerance.')
 
 fig = fdsplotlib.plot_to_fig(x_data=dtvec, y_data=errvec, marker_style='k*-', data_label='FDS',
                              x_min=1e-4, x_max=1, y_min=1e-15, y_max=1,

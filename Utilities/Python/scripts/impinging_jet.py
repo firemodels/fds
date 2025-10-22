@@ -100,7 +100,7 @@ for j, res in enumerate(res_list):
         E = abs(Nu_cor - Nu_fds) / abs(Nu_cor)
         E_FDS[i, j] = E
         if E > E_tol:
-            print(f'MATLAB Warning (ported): impinging jet error = {E:.3f} at Re_j={Re_tag}, Res={res}')
+            print(f'Warning: impinging jet error = {E:.3f} at Re_j={Re_tag}, Res={res}')
 
         label = f'FDS {res}' if i == 0 else None
         fig = fdsplotlib.plot_to_fig(x_data=Re_j, y_data=Nu_fds, data_label=label, figure_handle=fig, marker_style=markers[res], marker_fill_color=(1,1,1,0.0))
@@ -143,7 +143,3 @@ for i, Re_tag in enumerate(Re_str):
     fig.savefig(local_pdf)
     plt.close(fig)
 
-print('Completed plots:')
-print(' -', corr_pdf)
-for Re_tag in Re_str:
-    print(' -', os.path.join(pltdir, f'impinging_jet_local_Re_{Re_tag}.pdf'))
