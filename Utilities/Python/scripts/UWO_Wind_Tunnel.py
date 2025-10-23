@@ -1,6 +1,4 @@
-#!/usr/bin/env python3
-# McGrattan
-# 11-21-2018
+
 # UWO_Wind_Tunnel.py
 
 import os
@@ -10,11 +8,9 @@ import pandas as pd
 outdir = '../../../out/UWO_Wind_Tunnel/'
 expdir = '../../../exp/UWO_Wind_Tunnel/'
 
-# headers
 H1 = ['x', 'Cp_mean', 'Cp_rms', 'Cp_min', 'Cp_max']
 H2 = ['1.0', 'NaN', 'NaN', 'NaN', 'NaN']
 
-# read the input file (skip first header line)
 input_file = os.path.join(outdir, 'UWO_inputs.csv')
 C = pd.read_csv(input_file)
 

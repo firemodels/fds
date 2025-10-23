@@ -1,8 +1,4 @@
-#!/usr/bin/env python3
-# McGrattan
-# 2-26-2018
-# umd_line_burner_process.py
-#
+
 # Read and process FDS output files for UMD Line Burner
 
 import os

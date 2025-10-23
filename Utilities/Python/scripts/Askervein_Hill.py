@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # N. Crump 6/11/2021 - 8/5/2021
 # Askervein Hill case file processor (Python version)
 #

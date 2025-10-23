@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 geom_positive_errors.py
 This script catches errors produced during FDS setup of bad geometries cases.

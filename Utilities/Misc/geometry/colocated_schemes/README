@@ -1,9 +1,0 @@
-! Routines to test colocated schemes for Low Mach model time integration.
-! Test cases:
-! 1. taylor_green_vortex.m : Test overall accuracy on structured grids with Nx x Ny cells.
-!    Same parameters as ns2d set of verification cases in FDS_Verification_Guide.pdf.
-!    Performs 2 tests : a) L2 error norm of momentum at T_end over the whole domain.
-!                       b) RMS error of U-Velocity in center point over all time integration steps,
-!                          (same as done in the FDS verification guide).
-!
-! ------------------------------------------------------------------------------------------------ 

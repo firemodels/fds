@@ -25,7 +25,6 @@ addpath 'scripts'
 
 % Scripts to run prior to dataplot
 
-disp('convective_cooling_convergence...'); convective_cooling_convergence
 
 % Dataplot and scatplot options
 
@@ -49,11 +48,5 @@ scatplot(saved_data, drange, ...
          'Scatterplot_Dir', Scatterplot_Dir)
 
 % Special cases
-
-disp('htc_forced...');                    htc_forced
-disp('natconh...');                       natconh
-disp('natconv...');                       natconv
-disp('freecon_sphere...');                freecon_sphere
-disp('nat_conv_hot_plate...');            nat_conv_hot_plate
 
 display('verification scripts completed successfully!')

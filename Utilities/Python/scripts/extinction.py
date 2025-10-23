@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 extinction.py
 Converted from MATLAB script extinction.m to Python.

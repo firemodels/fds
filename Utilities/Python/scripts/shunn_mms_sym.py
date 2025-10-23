@@ -1,4 +1,3 @@
-#!/usr/bin/python
 #McDermott
 #2013-08-20
 
