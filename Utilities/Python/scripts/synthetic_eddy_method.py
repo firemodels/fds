@@ -49,11 +49,11 @@ plt.close()
 
 umean_error = np.linalg.norm(umean - uprof) / u0 / len(umean)
 if umean_error > error_tolerance:
-    print(f'Matlab Warning: sem_flat_leddy_p2.fds umean_error = {umean_error}')
+    print(f'Warning: sem_flat_leddy_p2.fds umean_error = {umean_error}')
 
 urms_error = np.linalg.norm(umean + urms - 1.1*uprof) / u0 / len(umean)
 if urms_error > error_tolerance:
-    print(f'Matlab Warning: sem_flat_leddy_p2.fds urms_error = {urms_error}')
+    print(f'Warning: sem_flat_leddy_p2.fds urms_error = {urms_error}')
 
 
 # Parabolic profile
@@ -90,11 +90,11 @@ plt.close()
 
 umean_error = np.linalg.norm(umean - uprof) / umax / len(umean)
 if umean_error > error_tolerance:
-    print(f'Matlab Warning: sem_par_leddy_p2.fds umean_error = {umean_error}')
+    print(f'Warning: sem_par_leddy_p2.fds umean_error = {umean_error}')
 
 urms_error = np.linalg.norm(umean + urms - 1.1*uprof) / umax / len(umean)
 if urms_error > error_tolerance:
-    print(f'Matlab Warning: sem_par_leddy_p2.fds urms_error = {urms_error}')
+    print(f'Warning: sem_par_leddy_p2.fds urms_error = {urms_error}')
 
 # Atmospheric profile
 
@@ -130,11 +130,11 @@ plt.close()
 
 umean_error = np.linalg.norm(umean - uprof) / u0 / len(umean)
 if umean_error > error_tolerance:
-    print(f'Matlab Warning: sem_atm_leddy_p2.fds umean_error = {umean_error}')
+    print(f'Warning: sem_atm_leddy_p2.fds umean_error = {umean_error}')
 
 urms_error = np.linalg.norm(umean + urms - 1.1*uprof) / u0 / len(umean)
 if urms_error > error_tolerance:
-    print(f'Matlab Warning: sem_atm_leddy_p2.fds urms_error = {urms_error}')
+    print(f'Warning: sem_atm_leddy_p2.fds urms_error = {urms_error}')
 
 # RAMP profile
 
@@ -173,11 +173,11 @@ plt.close()
 
 umean_error = np.linalg.norm(umean - uprof) / u0 / len(umean)
 if umean_error > error_tolerance:
-    print(f'Matlab Warning: sem_ramp_leddy_p2.fds umean_error = {umean_error}')
+    print(f'Warning: sem_ramp_leddy_p2.fds umean_error = {umean_error}')
 
 urms_error = np.linalg.norm(umean + urms - 1.1*uprof) / u0 / len(umean)
 if urms_error > error_tolerance:
-    print(f'Matlab Warning: sem_ramp_leddy_p2.fds urms_error = {urms_error}')
+    print(f'Warning: sem_ramp_leddy_p2.fds urms_error = {urms_error}')
 
 # Monin-Obukhov profile at OPEN inflow boundary VELOCITY
 
@@ -216,12 +216,12 @@ kk = np.where((z_exp < np.max(z_fds)) & (z_exp > np.min(z_fds)))[0]
 u_fds_int = np.interp(z_exp[kk], z_fds, u_fds)
 umean_error = np.linalg.norm(u_exp[kk] - u_fds_int) / u_ref / len(u_fds_int)
 if umean_error > error_tolerance:
-    print(f'Matlab Warning: sem_open_wind.fds umean_error = {umean_error}')
+    print(f'Warning: sem_open_wind.fds umean_error = {umean_error}')
 
 u_fds_rms_int = np.interp(z_exp[kk], z_fds, u_fds_rms)
 urms_error = np.linalg.norm(u_fds_int + u_fds_rms_int - (1+I)*u_exp[kk]) / u_ref / len(u_fds_rms_int)
 if urms_error > error_tolerance:
-    print(f'Matlab Warning: sem_open_wind.fds urms_error = {urms_error}')
+    print(f'Warning: sem_open_wind.fds urms_error = {urms_error}')
 
 # Monin-Obukhov profile at OPEN inflow boundary TEMPERATURE
 
@@ -240,5 +240,5 @@ kk = np.where((z_exp < np.max(z_fds)) & (z_exp > np.min(z_fds)))[0]
 T_fds_int = np.interp(z_exp[kk], z_fds, T_fds)
 Tmean_error = np.linalg.norm(T_exp[kk] - T_fds_int) / T_ref / len(T_fds_int)
 if Tmean_error > error_tolerance:
-    print(f'Matlab Warning: sem_open_wind.fds Tmean_error = {Tmean_error}')
+    print(f'Warning: sem_open_wind.fds Tmean_error = {Tmean_error}')
 

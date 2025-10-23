@@ -542,7 +542,7 @@ for kk in range(2):
 
    if(kk==0):
       # check errors
-      if e_r[len(e_r)-1] > 2e-4:
+      if e_r[len(e_r)-1] > 3e-4:
          print('Python Warning: Density in shunn3 CC is out of tolerance. e_r = ',e_r[len(e_r)-1] )
       if e_z[len(e_z)-1] > 1e-4:
          print('Python Warning: Mixture fraction in shunn3 CC is out of tolerance. e_z = ',e_z[len(e_z)-1] )

@@ -1,9 +1,5 @@
-#!/usr/bin/env python3
-# McGrattan
-# 8/19/2021
-# Phoenix_LNG_Fires.py
-#
-# Reformat heat flux output
+
+# Reformat heat flux output for Phoenix_LNG_Fires
 
 import os
 import numpy as np

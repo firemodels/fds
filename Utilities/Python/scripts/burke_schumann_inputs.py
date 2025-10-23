@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 
 #generates input file text for 15 mixture fraction reactors for Species/burke_schumann.fds verification case
 # C. Weinschenk

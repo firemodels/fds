@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 geom_channel_test.py
 Temporary home for checking AREA integration for geom_channel.fds

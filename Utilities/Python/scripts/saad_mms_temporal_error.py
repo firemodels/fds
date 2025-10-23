@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # McDermott
 # 7-9-2015
 # saad_mms_temporal_error.m

@@ -79,19 +79,158 @@ def expand_ranges(items, df, header_rows=1):
     return sorted(set(result))
 
 
+def _compute_metrics_block(
+    x, Y, metric, initial_value,
+    comp_start, comp_end, dep_comp_start, dep_comp_end,
+    variant_side="d1",
+):
+    """
+    MATLAB dataplot.m metric logic, shape-safe Python equivalent.
+
+    Returns:
+      vals_flat : 1D np.array (metrics for each curve, or concatenated for 'all')
+      titles    : list of curve labels
+      per_curve_series : list of 1D arrays (for Metric='all')
+    """
+    import numpy as np
+
+    # --- normalize inputs ---
+    x = np.asarray(x).reshape(-1)
+    Y = np.asarray(Y)
+    if Y.ndim == 1:
+        Y = Y.reshape(-1, 1)
+    elif Y.ndim > 2:
+        Y = np.squeeze(Y)
+        if Y.ndim == 1:
+            Y = Y.reshape(-1, 1)
+
+    N, ncols = Y.shape
+
+    # --- comparison mask (like MATLAB) ---
+    comp_mask = np.isfinite(x)
+    if np.isfinite(comp_start):
+        comp_mask &= (x >= comp_start)
+    if np.isfinite(comp_end):
+        comp_mask &= (x <= comp_end)
+
+    if np.isfinite(dep_comp_start) or np.isfinite(dep_comp_end):
+        y0 = Y[:, 0]
+        dep_mask = np.isfinite(y0)
+        if np.isfinite(dep_comp_start):
+            dep_mask &= (y0 >= dep_comp_start)
+        if np.isfinite(dep_comp_end):
+            dep_mask &= (y0 <= dep_comp_end)
+        comp_mask &= dep_mask
+
+    if not np.any(comp_mask):
+        return np.array([]), [], []
+
+    x_sel = x[comp_mask]
+    Y_sel = Y[comp_mask, :]
+
+    # --- support patterns like mean_1_2, max_2_1, end_1_2 ---
+    def _parse_stat_xy(m):
+        for base in ("max", "mean", "end"):
+            pref = base + "_"
+            if m.startswith(pref):
+                try:
+                    a, b = m[len(pref):].split("_", 1)
+                    return base, int(a), int(b)
+                except Exception:
+                    pass
+        return m, None, None
+
+    metric_str = str(metric).strip().lower()
+    base, idx_first, idx_second = _parse_stat_xy(metric_str)
+
+    vals = []
+    titles = []
+    per_curve_series = []
+
+    # --- stat_x_y: only compute for the specified first index (MATLAB uses 1-based) ---
+    if idx_first is not None:
+        j = idx_first - 1
+        if j < 0 or j >= ncols:
+            return np.array([]), [], []
+        yj = Y_sel[:, j].reshape(-1)
+
+        if base == "max":
+            out = np.nanmax(yj) - initial_value
+        elif base == "mean":
+            out = abs(np.nanmean(yj) - initial_value)
+        elif base == "end":
+            out = yj[-1] - initial_value
+        else:
+            out = np.nan
+
+        # MATLAB passes tiny value instead of exact zero (survives nonzeros())
+        if out == 0.0:
+            out = 1e-12
+
+        return np.array([out]), [f"curve{idx_first}"], []
+
+    # --- metric='all': return concatenated series for each curve (minus initial) ---
+    if metric_str == "all":
+        for j in range(ncols):
+            yj = Y_sel[:, j].reshape(-1) - initial_value
+            per_curve_series.append(yj)
+            titles.extend([f"curve{j+1}"] * yj.size)
+        vals_flat = np.concatenate(per_curve_series) if per_curve_series else np.array([])
+        return vals_flat, titles, per_curve_series
+
+    # --- scalar per-curve metrics ---
+    for j in range(ncols):
+        yj = Y_sel[:, j].reshape(-1)
+        if metric_str == "max":
+            out = np.nanmax(yj) - initial_value
+        elif metric_str == "min":
+            out = initial_value - np.nanmin(yj)
+        elif metric_str == "maxabs":
+            out = np.nanmax(np.abs(yj - initial_value))
+        elif metric_str == "slope":
+            msk = np.isfinite(x_sel) & np.isfinite(yj)
+            out = np.polyfit(x_sel[msk], yj[msk], 1)[0] if msk.sum() >= 2 else np.nan
+        elif metric_str == "mean":
+            out = abs(np.nanmean(yj) - initial_value)
+        elif metric_str == "threshold":
+            out = np.nanmin(yj) - initial_value
+        elif metric_str == "tolerance":
+            out = np.nanmax(np.abs(yj - initial_value))
+        elif metric_str == "area":
+            out = np.trapz(yj, x_sel) - initial_value
+        elif metric_str == "end":
+            out = yj[-1] - initial_value
+        elif metric_str == "start":
+            out = yj[0]
+        elif metric_str == "ipct":
+            # Not implemented in this port; keep parity-friendly placeholder
+            out = 1e-12
+        else:
+            # Default fallback consistent with MATLAB's behavior path to non-zeros
+            out = 1e-12
+
+        if out == 0.0:
+            out = 1e-12
+
+        vals.append(out)
+        titles.append(f"curve{j+1}")
+
+    return np.asarray(vals, dtype=float).reshape(-1), titles, []
+
+
 def dataplot(config_filename,**kwargs):
 
     import os
     import matplotlib.pyplot as plt
     import pandas as pd
+    import numpy as np
     from matplotlib import rc
-
     import logging
+
     # Suppress just the 'findfont' warnings from matplotlib's font manager
     logging.getLogger('matplotlib.font_manager').setLevel(logging.ERROR)
 
     # defaults
-
     configdir = kwargs.get('configdir','')
     revision = kwargs.get('revision','')
     expdir = kwargs.get('expdir','')
@@ -130,7 +269,29 @@ def dataplot(config_filename,**kwargs):
 
     # read the config file
     df = pd.read_csv(configdir+config_filename, sep=',', engine='python', quotechar='"', na_values=safe_na_values, keep_default_na=False)
+    # Keep a copy with original row numbers intact
+    df["__orig_index__"] = df.index  # 0-based position in CSV (excluding header)
     C = df.where(pd.notnull(df), None)
+
+    # --- Optional filter by Quantity (case-insensitive, supports list or single string) ---
+    quantity_filter = kwargs.get("quantity_filter", None)
+    if quantity_filter:
+        if isinstance(quantity_filter, str):
+            quantity_filter = [quantity_filter]
+
+        # Combine matches across all filters
+        mask = False
+        for q in quantity_filter:
+            mask = mask | C["Quantity"].str.contains(q, case=False, na=False)
+
+        C = C[mask]
+        if C.empty:
+            raise ValueError(f"[dataplot] No rows match Quantity filter(s): {quantity_filter}")
+
+        if verbose:
+            matched_rows = (C["__orig_index__"] + 2).tolist()  # +2: 1 for header, 1 for MATLAB indexing
+            print(f"[dataplot] Filtering by Quantity={quantity_filter}")
+            # print(f"[dataplot] Matched {len(matched_rows)} rows: {matched_rows}")
 
     if plot_range_in is not None:
         if isinstance(plot_range_in, (list, tuple)):
@@ -156,11 +317,6 @@ def dataplot(config_filename,**kwargs):
     for pos, (irow, row) in enumerate(C.iterrows()):
 
         pp = define_plot_parameters(C, pos)  # use position, not label
-
-        # debug dump
-        # print(vars(pp))
-
-        # print(pp.__dict__) # helpful for debug
 
         # ----------------------------------------------------------------------
         # Handle MATLAB dataplot switch_id behavior (d, f, o, g, s)
@@ -192,7 +348,7 @@ def dataplot(config_filename,**kwargs):
 
         # Track drange like MATLAB (1-based CSV lines starting at row 2)
         if not gtest:
-            drange.append(irow + 2)
+            drange.append(int(row["__orig_index__"]) + 2)
 
         # Append metadata only for rows that should appear in scatplot
         if not gtest:
@@ -212,8 +368,7 @@ def dataplot(config_filename,**kwargs):
             Save_Measured_Quantity.append(None)
             Save_Predicted_Quantity.append(None)
 
-
-
+        # -------------- PLOTTING + PRINT (unchanged behavior) -----------------
         if pp.Plot_Filename!=Plot_Filename_Last:
 
             if verbose:
@@ -223,7 +378,6 @@ def dataplot(config_filename,**kwargs):
                 plt.close('all')
 
             # read data from exp file
-            # set header to the row where column names are stored (Python is 0 based)
             E = pd.read_csv(expdir+pp.d1_Filename, header=int(pp.d1_Col_Name_Row-1), sep=',', engine='python', quotechar='"')
             E.columns = E.columns.str.strip()  # <-- Strip whitespace from headers
 
@@ -241,7 +395,6 @@ def dataplot(config_filename,**kwargs):
                 raw_keys = [c.strip() for c in pp.d1_Key.split('|')]
             else:
                 raw_keys = []
-            # Pad or truncate to match col_names
             key_labels = (raw_keys + [None] * len(col_names))[:len(col_names)]
 
             for i, label in enumerate(col_names):
@@ -268,15 +421,12 @@ def dataplot(config_filename,**kwargs):
                         legend_location=matlab_legend_to_matplotlib(pp.Key_Position)
                         )
 
-            # plt.figure(f.number) # make figure current
-            # plt.show()
         else:
             f = f_Last
 
             if pp.d1_Key!=d1_Key_Last:
 
                 # read data from exp file
-                # set header to the row where column names are stored (Python is 0 based)
                 E = pd.read_csv(expdir+pp.d1_Filename, header=int(pp.d1_Col_Name_Row-1), sep=',', engine='python', quotechar='"')
                 E.columns = E.columns.str.strip()  # <-- Strip whitespace from headers
                 start_idx = int(pp.d1_Data_Row - pp.d1_Col_Name_Row - 1)
@@ -295,16 +445,28 @@ def dataplot(config_filename,**kwargs):
                     legend_location=matlab_legend_to_matplotlib(pp.Key_Position)
                     )
 
-        # --- Save measured (experimental) metric using the numeric arrays from get_data ---
-        try:
-            if not gtest:
-                Save_Measured_Metric[-1] = compute_metric(y, pp.Metric, x, pp.d1_Initial_Value)
-                Save_Measured_Quantity[-1] = col_names
-        except Exception as e:
-            print(f"[dataplot] Warning: measured metric failed for {pp.Dataname}: {e}")
+        # --- Save measured (experimental) metric using MATLAB-equivalent logic ---
+        if not gtest:
+            try:
+                vals_meas, qty_meas, _ = _compute_metrics_block(
+                    x=x,
+                    Y=y,
+                    metric=pp.Metric,
+                    initial_value=float(pp.d1_Initial_Value or 0.0),
+                    comp_start=float(pp.d1_Comp_Start or np.nan),
+                    comp_end=float(pp.d1_Comp_End or np.nan),
+                    dep_comp_start=float(pp.d1_Dep_Comp_Start or np.nan),
+                    dep_comp_end=float(pp.d1_Dep_Comp_End or np.nan),
+                    variant_side="d1",
+                )
+                Save_Measured_Metric[-1] = vals_meas
+                Save_Measured_Quantity[-1] = qty_meas
+            except Exception as e:
+                print(f"[dataplot] Error computing measured metric for {pp.Dataname}: {e}")
+                Save_Measured_Metric[-1] = np.array([])
+                Save_Measured_Quantity[-1] = []
 
-
-        # get the model results
+        # ------------------- MODEL (d2) -------------------
         M = pd.read_csv(cmpdir+pp.d2_Filename, header=int(pp.d2_Col_Name_Row-1), sep=',', engine='python', quotechar='"')
         M.columns = M.columns.str.strip()  # <-- Strip whitespace from headers
         start_idx = int(pp.d2_Data_Row - pp.d2_Col_Name_Row - 1)
@@ -345,19 +507,52 @@ def dataplot(config_filename,**kwargs):
                 plot_title=pp.Plot_Title
                 )
 
+        # --- Save predicted (model) metric using MATLAB-equivalent logic ---
+        if not gtest:
+            try:
+                vals_pred, qty_pred, _ = _compute_metrics_block(
+                    x=x,
+                    Y=y,
+                    metric=pp.Metric,
+                    initial_value=float(pp.d2_Initial_Value or 0.0),
+                    comp_start=float(pp.d2_Comp_Start or np.nan),
+                    comp_end=float(pp.d2_Comp_End or np.nan),
+                    dep_comp_start=float(pp.d2_Dep_Comp_Start or np.nan),
+                    dep_comp_end=float(pp.d2_Dep_Comp_End or np.nan),
+                    variant_side="d2",
+                )
 
-        # --- Save predicted (model) metric using the numeric arrays from get_data ---
-        try:
-            if not gtest:
-                Save_Predicted_Metric[-1] = compute_metric(y, pp.Metric, x, pp.d2_Initial_Value)
-                Save_Predicted_Quantity[-1] = col_names
-        except Exception as e:
-            print(f"[dataplot] Warning: predicted metric failed for {pp.Dataname}: {e}")
+                # --- Early consistency & padding for Metric='all' ---
+                if isinstance(pp.Metric, str) and pp.Metric.strip().lower() == 'all':
+                    mvec = np.atleast_1d(Save_Measured_Metric[-1])
+                    pvec = np.atleast_1d(vals_pred)
+                    len_m, len_p = mvec.size, pvec.size
+                    if len_m != len_p:
+                        maxlen = max(len_m, len_p)
+                        if len_m < maxlen:
+                            mvec = np.pad(mvec, (0, maxlen - len_m), constant_values=np.nan)
+                        if len_p < maxlen:
+                            pvec = np.pad(pvec, (0, maxlen - len_p), constant_values=np.nan)
+                        Save_Measured_Metric[-1] = mvec
+                        vals_pred = pvec
+                        print(f"[dataplot] Padded {pp.Dataname} ({pp.Quantity}) from ({len_m},{len_p}) to {maxlen}")
+                else:
+                    len_m = np.size(Save_Measured_Metric[-1])
+                    len_p = np.size(vals_pred)
+                    if len_m != len_p:
+                        print(f"[dataplot] Length mismatch at index {irow+2}: "
+                              f"{pp.Dataname} | {pp.Quantity} | "
+                              f"Measured={len_m}, Predicted={len_p}")
 
+                Save_Predicted_Metric[-1] = vals_pred
+                Save_Predicted_Quantity[-1] = qty_pred
+            except Exception as e:
+                print(f"[dataplot] Error computing predicted metric for {pp.Dataname}: {e}")
+                Save_Predicted_Metric[-1] = np.array([])
+                Save_Predicted_Quantity[-1] = []
 
-
+        # ---------------- save figure (unchanged) ----------------
         plt.figure(f.number) # make figure current
-        # plt.show()
 
         # create plot directory if it does not exist
         isDir = os.path.isdir(pltdir)
@@ -369,10 +564,6 @@ def dataplot(config_filename,**kwargs):
         Plot_Filename_Last = pp.Plot_Filename
         d1_Key_Last = pp.d1_Key
         f_Last = f
-
-        # except:
-        #     print("Error in row {whichrow}, skipping case...".format(whichrow=irow+1))
-        #     continue
 
     # --- MATLAB-compatible output scaffolding for scatplot interface ---
     try:
@@ -395,29 +586,20 @@ def dataplot(config_filename,**kwargs):
         print(f"[dataplot] Error assembling saved_data: {e}")
         saved_data = []
 
+    # --- quick parity audit before returning ---
+    for i, (m, p, name, qty) in enumerate(zip(Save_Measured_Metric,
+                                              Save_Predicted_Metric,
+                                              Save_Dataname,
+                                              Save_Quantity)):
+        len_m = np.size(m) if isinstance(m, np.ndarray) else 0
+        len_p = np.size(p) if isinstance(p, np.ndarray) else 0
+        if len_m != len_p:
+            print(f"[dataplot] Length mismatch at index {i}: "
+                  f"{name} | {qty} | Measured={len_m}, Predicted={len_p}")
+
     print("[dataplot] returning saved_data and drange")
     return saved_data, drange
 
-
-def compute_metric(data, metric_type, x=None, initial_value=0.0):
-    import numpy as np
-    try:
-        if metric_type == 'max':
-            return np.nanmax(data) - initial_value
-        elif metric_type == 'min':
-            return initial_value - np.nanmin(data)
-        elif metric_type == 'maxabs':
-            return np.nanmax(np.abs(data - initial_value))
-        elif metric_type == 'mean':
-            return abs(np.nanmean(data) - initial_value)
-        elif metric_type == 'area' and x is not None:
-            return np.trapz(data, x) - initial_value
-        elif metric_type == 'all':
-            return data - initial_value
-        else:
-            return np.nanmean(data) - initial_value  # default
-    except Exception:
-        return np.nan
 
 
 def get_data(E, spec, start_idx):
@@ -1426,8 +1608,30 @@ def scatplot(saved_data, drange, **kwargs):
             print(f"[scatplot] No dataplot entries for {Scatter_Plot_Title}")
             continue
 
-        Measured_Values = np.array([Save_Measured_Metric[i] for i in match_idx], dtype=float).flatten()
-        Predicted_Values = np.array([Save_Predicted_Metric[i] for i in match_idx], dtype=float).flatten()
+        # Measured_Values = np.array([Save_Measured_Metric[i] for i in match_idx], dtype=float).flatten()
+        # Predicted_Values = np.array([Save_Predicted_Metric[i] for i in match_idx], dtype=float).flatten()
+
+        Measured_Values = np.concatenate(
+            [np.ravel(np.array(Save_Measured_Metric[i], dtype=float)) for i in match_idx]
+        )
+        Predicted_Values = np.concatenate(
+            [np.ravel(np.array(Save_Predicted_Metric[i], dtype=float)) for i in match_idx]
+        )
+
+        # --- Ensure equal-length measured and predicted arrays before masking ---
+        m_len = len(Measured_Values)
+        p_len = len(Predicted_Values)
+        if m_len != p_len:
+            print(f"[scatplot] Skipping '{Scatter_Plot_Title}' "
+                  f"due to length mismatch: measured={m_len}, predicted={p_len}")
+            print(f"   Example Measured sample: {Measured_Values[:5]}")
+            print(f"   Example Predicted sample: {Predicted_Values[:5]}")
+            continue  # skip to next scatterplot, as MATLAB does
+
+        mask = np.isfinite(Measured_Values) & np.isfinite(Predicted_Values)
+        Measured_Values = Measured_Values[mask]
+        Predicted_Values = Predicted_Values[mask]
+
 
         # --- Call histogram BEFORE filtering to match MATLAB (includes zeros/Infs) ---
         try:
@@ -1497,6 +1701,13 @@ def scatplot(saved_data, drange, **kwargs):
             mvals = np.array(Save_Measured_Metric[idx], dtype=float).flatten()
             pvals = np.array(Save_Predicted_Metric[idx], dtype=float).flatten()
 
+            if len(mvals) != len(pvals):
+                print(f"[DEBUG] Mismatch for {Scatter_Plot_Title} @ idx={idx}: "
+                      f"Measured={len(mvals)}, Predicted={len(pvals)}, "
+                      f"Group={Save_Group_Key_Label[idx]}")
+                print(f"   Measured metric sample: {mvals[:5]}")
+                print(f"   Predicted metric sample: {pvals[:5]}")
+
             mask = (
                 (mvals >= Plot_Min) & (mvals <= Plot_Max) &
                 (pvals >= Plot_Min) & (pvals <= Plot_Max) &
@@ -1517,7 +1728,7 @@ def scatplot(saved_data, drange, **kwargs):
                 x_data=mvals,
                 y_data=pvals,
                 marker_style=style,
-                marker_facecolor=fill,
+                marker_fill_color=fill,
                 figure_handle=fig,
                 data_label=data_label,
             )

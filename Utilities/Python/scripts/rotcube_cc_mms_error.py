@@ -278,7 +278,7 @@ for ifile in range(len(files)):
 
 
 # --- 5. Generate Plots and Warnings ---
-print("\n--- Summary of Calculated Errors and Convergence Warnings ---")
+# print("\n--- Summary of Calculated Errors and Convergence Warnings ---")
 
 for ifile in range(len(files)):
    file_entry = files[ifile]
@@ -293,9 +293,9 @@ for ifile in range(len(files)):
       axisval=[1e-2, 1, 1e-7, 1e-1]
 
    p_L2_u = np.log(file_entry['errors']['e_u_2'][:-1] / file_entry['errors']['e_u_2'][1:]) / np.log(dx_values[:-1] / dx_values[1:])
-   print(f"\nConvergence Order (p) for L2 Error u, {file_entry['nameout']}: {p_L2_u}")
+   # print(f"\nConvergence Order (p) for L2 Error u, {file_entry['nameout']}: {p_L2_u}")
    p_L2_z = np.log(file_entry['errors']['e_z_2'][:-1] / file_entry['errors']['e_z_2'][1:]) / np.log(dx_values[:-1] / dx_values[1:])
-   print(f"Convergence Order (p) for L2 Error z, {file_entry['nameout']}: {p_L2_z}")
+   # print(f"Convergence Order (p) for L2 Error z, {file_entry['nameout']}: {p_L2_z}")
 
    fig = fdsplotlib.plot_to_fig(x_data=dx_values, y_data=file_entry['errors']['e_z_2'], marker_style='rs-',plot_type='loglog',
          revision_label=version_string,x_min=axisval[0],x_max=axisval[1],y_min=axisval[2],y_max=axisval[3],
@@ -330,7 +330,7 @@ for ifile in range(len(files)):
    last_H_error = file_entry['errors']['e_H_2'][-1]
 
    if ifile == 1: # OBST case (ifile == 2 in MATLAB)
-      print(f"\n*** Tolerance Check for OBST Case ({file_entry['nameout'].replace('_',' ')}) ***")
+      # print(f"\n*** Tolerance Check for OBST Case ({file_entry['nameout'].replace('_',' ')}) ***")
       if last_z_error > 2e-6:
          print(f"  Warning (Z): {last_z_error:.2e} > 2e-6 tolerance.")
       if last_u_error > 2e-5:
@@ -338,7 +338,7 @@ for ifile in range(len(files)):
       if last_H_error > 1.5e-3:
          print(f"  Warning (H): {last_H_error:.2e} > 1.5e-3 tolerance.")
    elif ifile == 2: # 45deg stm case (ifile == 3 in MATLAB)
-      print(f"\n*** Tolerance Check for 45deg STM Case ({file_entry['nameout'].replace('_',' ')}) ***")
+      # print(f"\n*** Tolerance Check for 45deg STM Case ({file_entry['nameout'].replace('_',' ')}) ***")
       if last_z_error > 6.5e-5:
          print(f"  Warning (Z): {last_z_error:.2e} > 6.5e-5 tolerance.")
       if last_u_error > 8.5e-4:
