@@ -1,8 +1,5 @@
-#!/usr/bin/env python3
-# McGrattan
-# 3-15-2017
+
 # FM_Vertical_Wall_Flames.py
-#
 # Reads the _devc.csv file and writes output in a form appropriate for dataplot
 
 import os

@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 mass_balance.py
 Validates mass conservation comparing time derivative of species mass with inlet/outlet flow rates.

@@ -25,18 +25,18 @@ print("Ranz_Marshall...");                runpy.run_path("./scripts/Ranz_Marshal
 print("Phoenix_LNG_Fires...");            runpy.run_path("./scripts/Phoenix_LNG_Fires.py", run_name="__main__")
 print("Sandia_Plumes_TKE...");            runpy.run_path("./scripts/Sandia_Plumes_TKE.py", run_name="__main__")
 
-# # Dataplot and scatplot options
+# Dataplot and scatplot options
 
-# Dataplot_Inputs_File = '../Matlab/FDS_validation_dataplot_inputs.csv'
-# EXP_Dir = '../../../exp/'
-# OUT_Dir = '../../../out/'
-# Manuals_Dir = '../../Manuals/'
-# Scatterplot_Inputs_File = '../Matlab/FDS_validation_scatterplot_inputs.csv'
+Dataplot_Inputs_File = '../Matlab/FDS_validation_dataplot_inputs.csv'
+EXP_Dir = '../../../exp/'
+OUT_Dir = '../../../out/'
+Manuals_Dir = '../../Manuals/'
+Scatterplot_Inputs_File = '../Matlab/FDS_validation_scatterplot_inputs.csv'
 
-# # Statistics output options
+# Statistics output options
 
-# Stats_Output = 'Validation'
-# Scatterplot_Dir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/'
+Stats_Output = 'Validation'
+Scatterplot_Dir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/'
 
 # # Run dataplot and scatplot scripts
 
@@ -46,7 +46,8 @@ print("Sandia_Plumes_TKE...");            runpy.run_path("./scripts/Sandia_Plume
 #                                          pltdir=Manuals_Dir,
 #                                          close_figs=True,
 #                                          verbose=True,
-#                                          plot_range=["Sandia Plumes"],
+#                                          plot_range=["all"],
+#                                          quantity_filter=["Target Heat Flux"],
 #                                          ) # see notes below on plot_range
 
 # # ----- write saved_data, drange to disk -----
@@ -61,17 +62,17 @@ print("Sandia_Plumes_TKE...");            runpy.run_path("./scripts/Sandia_Plume
 #     saved_data, drange = pickle.load(f)
 # #---------------------------------------------
 
-
 # fdsplotlib.scatplot(saved_data,drange,
-# 				    Manuals_Dir=Manuals_Dir,
-# 				    Scatterplot_Inputs_File=Scatterplot_Inputs_File,
-# 				    Stats_Output=Stats_Output,
-# 				    Scatterplot_Dir=Scatterplot_Dir,
-# 				    verbose=True,
-# 				    )
+#                     Manuals_Dir=Manuals_Dir,
+#                     Scatterplot_Inputs_File=Scatterplot_Inputs_File,
+#                     Stats_Output=Stats_Output,
+#                     Scatterplot_Dir=Scatterplot_Dir,
+#                     verbose=True,
+#                     )
 
 
 # Special cases
+
 print("Backward_Facing_Step...");         runpy.run_path("./scripts/Backward_Facing_Step.py", run_name="__main__")
 print("Beyler_Hood...");                  runpy.run_path("./scripts/Beyler_Hood.py", run_name="__main__")
 print("BRE_LEMTA_Sprays...");             runpy.run_path("./scripts/BRE_LEMTA_Sprays.py", run_name="__main__")

@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 McGrattan
 12-14-2016

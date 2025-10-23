@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 FM_Burner.py
 Python translation of FM_Burner.m (McGrattan, 7-30-2018)
