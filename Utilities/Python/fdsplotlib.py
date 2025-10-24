@@ -385,6 +385,15 @@ def dataplot(config_filename,**kwargs):
             x, col_names = get_data(E, pp.d1_Ind_Col_Name, start_idx)
             y, col_names = get_data(E, pp.d1_Dep_Col_Name, start_idx)
 
+            # --- Apply scaling ---
+            if str(pp.Flip_Axis).strip().lower() == "no":
+                x_plot = x / float(pp.Scale_Ind or 1.0)
+                y_plot = y / float(pp.Scale_Dep or 1.0)
+            else:
+                # Swap roles if Flip_Axis = yes
+                x_plot = y / float(pp.Scale_Dep or 1.0)
+                y_plot = x / float(pp.Scale_Ind or 1.0)
+
             if pp.d1_Style:
                 raw_styles = [c.strip() for c in pp.d1_Style.split('|')]
             else:
@@ -400,7 +409,7 @@ def dataplot(config_filename,**kwargs):
             for i, label in enumerate(col_names):
                 if i==0:
                     # plot the exp data
-                    f = plot_to_fig(x_data=x, y_data=y[:, i],
+                    f = plot_to_fig(x_data=x_plot, y_data=y_plot[:, i],
                         data_label=key_labels[i],
                         x_label=pp.Ind_Title,
                         y_label=pp.Dep_Title,
@@ -410,7 +419,7 @@ def dataplot(config_filename,**kwargs):
                         legend_location=matlab_legend_to_matplotlib(pp.Key_Position)
                         )
                 elif i>0:
-                    f = plot_to_fig(x_data=x, y_data=y[:, i],
+                    f = plot_to_fig(x_data=x_plot, y_data=y_plot[:, i],
                         figure_handle=f,
                         data_label=key_labels[i],
                         x_label=pp.Ind_Title,
@@ -433,8 +442,17 @@ def dataplot(config_filename,**kwargs):
                 x, col_names = get_data(E, pp.d1_Ind_Col_Name, start_idx)
                 y, col_names = get_data(E, pp.d1_Dep_Col_Name, start_idx)
 
+                # --- Apply scaling ---
+                if str(pp.Flip_Axis).strip().lower() == "no":
+                    x_plot = x / float(pp.Scale_Ind or 1.0)
+                    y_plot = y / float(pp.Scale_Dep or 1.0)
+                else:
+                    # Swap roles if Flip_Axis = yes
+                    x_plot = y / float(pp.Scale_Dep or 1.0)
+                    y_plot = x / float(pp.Scale_Ind or 1.0)
+
                 # plot the exp data
-                f = plot_to_fig(x_data=x, y_data=y,
+                f = plot_to_fig(x_data=x_plot, y_data=y_plot,
                     figure_handle=f,
                     data_label=pp.d1_Key,
                     x_label=pp.Ind_Title,
@@ -474,6 +492,14 @@ def dataplot(config_filename,**kwargs):
         x, col_names = get_data(M, pp.d2_Ind_Col_Name, start_idx)
         y, col_names = get_data(M, pp.d2_Dep_Col_Name, start_idx)
 
+        # --- Apply scaling ---
+        if str(pp.Flip_Axis).strip().lower() == "no":
+            x_plot = x / float(pp.Scale_Ind or 1.0)
+            y_plot = y / float(pp.Scale_Dep or 1.0)
+        else:
+            x_plot = y / float(pp.Scale_Dep or 1.0)
+            y_plot = x / float(pp.Scale_Ind or 1.0)
+
         version_string = revision
         if (pp.VerStr_Filename):
             file1 = open(cmpdir+pp.VerStr_Filename,"r")
@@ -494,7 +520,7 @@ def dataplot(config_filename,**kwargs):
         key_labels = (raw_keys + [None] * len(col_names))[:len(col_names)]
 
         for i, label in enumerate(col_names):
-            f = plot_to_fig(x_data=x, y_data=y[:, i],
+            f = plot_to_fig(x_data=x_plot, y_data=y_plot[:, i],
                 revision_label=version_string,
                 figure_handle=f,
                 x_label=pp.Ind_Title,
