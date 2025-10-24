@@ -406,6 +406,11 @@ def dataplot(config_filename,**kwargs):
                 raw_keys = []
             key_labels = (raw_keys + [None] * len(col_names))[:len(col_names)]
 
+            # --- Sanitize plot type ---
+            plot_type = str(pp.Plot_Type or '').strip().lower()
+            if plot_type not in ['linear', 'loglog', 'semilogx', 'semilogy']:
+                plot_type = 'linear'
+
             for i, label in enumerate(col_names):
                 if i==0:
                     # plot the exp data
@@ -416,7 +421,8 @@ def dataplot(config_filename,**kwargs):
                         marker_style=styles[i],
                         x_min=pp.Min_Ind,x_max=pp.Max_Ind,
                         y_min=pp.Min_Dep,y_max=pp.Max_Dep,
-                        legend_location=matlab_legend_to_matplotlib(pp.Key_Position)
+                        legend_location=matlab_legend_to_matplotlib(pp.Key_Position),
+                        plot_type=plot_type,
                         )
                 elif i>0:
                     f = plot_to_fig(x_data=x_plot, y_data=y_plot[:, i],
@@ -427,7 +433,8 @@ def dataplot(config_filename,**kwargs):
                         marker_style=styles[i],
                         x_min=pp.Min_Ind,x_max=pp.Max_Ind,
                         y_min=pp.Min_Dep,y_max=pp.Max_Dep,
-                        legend_location=matlab_legend_to_matplotlib(pp.Key_Position)
+                        legend_location=matlab_legend_to_matplotlib(pp.Key_Position),
+                        plot_type=plot_type,
                         )
 
         else:
@@ -460,7 +467,8 @@ def dataplot(config_filename,**kwargs):
                     marker_style=pp.d1_Style,
                     x_min=pp.Min_Ind,x_max=pp.Max_Ind,
                     y_min=pp.Min_Dep,y_max=pp.Max_Dep,
-                    legend_location=matlab_legend_to_matplotlib(pp.Key_Position)
+                    legend_location=matlab_legend_to_matplotlib(pp.Key_Position),
+                    plot_type=plot_type,
                     )
 
         # --- Save measured (experimental) metric using MATLAB-equivalent logic ---
@@ -530,6 +538,7 @@ def dataplot(config_filename,**kwargs):
                 x_min=pp.Min_Ind,x_max=pp.Max_Ind,
                 y_min=pp.Min_Dep,y_max=pp.Max_Dep,
                 legend_location=matlab_legend_to_matplotlib(pp.Key_Position),
+                plot_type=plot_type,
                 plot_title=pp.Plot_Title
                 )
 
@@ -1251,7 +1260,7 @@ def get_plot_style(style="fds"):
             "Plot_Width": 5.0,
             "Plot_Height": 3.4,
             "Plot_X": 1.2,
-            "Plot_Y": 0.8,
+            "Plot_Y": 0.75,
             "Scat_Plot_Width": 4.75,
             "Scat_Plot_Height": 4.75,
             "Scat_Plot_X": 1.00,
