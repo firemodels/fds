@@ -371,11 +371,15 @@ def dataplot(config_filename,**kwargs):
             Save_Predicted_Quantity.append(None)
 
         # -------------- PLOTTING + PRINT -----------------
-        # Read and prepare the experimental (d1) data, same for both cases
         E = pd.read_csv(expdir + pp.d1_Filename,
-                        header=int(pp.d1_Col_Name_Row - 1),
-                        sep=',', engine='python', quotechar='"')
+                header=int(pp.d1_Col_Name_Row - 1),
+                sep=',', engine='python', quotechar='"',
+                skip_blank_lines=True).dropna(how='all')  # drop fully empty rows
+
+        # Drop trailing NaN rows across all columns (MATLAB csvread behavior)
+        E = E.loc[:E.dropna(how='all').last_valid_index()]
         E.columns = E.columns.str.strip()
+
         start_idx = int(pp.d1_Data_Row - pp.d1_Col_Name_Row - 1)
         x, _ = get_data(E, pp.d1_Ind_Col_Name, start_idx)
         y, _ = get_data(E, pp.d1_Dep_Col_Name, start_idx)
@@ -449,19 +453,48 @@ def dataplot(config_filename,**kwargs):
         # --- Save measured (experimental) metric using MATLAB-equivalent logic ---
         if not gtest:
             try:
-                vals_meas, qty_meas, _ = _compute_metrics_block(
-                    x=x,
-                    Y=y,
-                    metric=pp.Metric,
-                    initial_value=float(pp.d1_Initial_Value or 0.0),
-                    comp_start=float(pp.d1_Comp_Start or np.nan),
-                    comp_end=float(pp.d1_Comp_End or np.nan),
-                    dep_comp_start=float(pp.d1_Dep_Comp_Start or np.nan),
-                    dep_comp_end=float(pp.d1_Dep_Comp_End or np.nan),
-                    variant_side="d1",
-                )
-                Save_Measured_Metric[-1] = vals_meas
-                Save_Measured_Quantity[-1] = qty_meas
+                vals_meas_list = []
+                qty_meas_list = []
+
+                if y.ndim == 2 and x.ndim == 2 and y.shape[1] == x.shape[1]:
+                    for j in range(y.shape[1]):
+                        xj = np.ravel(x[:, j])
+                        yj = np.ravel(y[:, j])
+                        mask = np.isfinite(xj) & np.isfinite(yj)
+                        xj = xj[mask]
+                        yj = yj[mask]
+                        if len(xj) > 0 and len(yj) > 0:
+                            vals_meas, qty_meas, _ = _compute_metrics_block(
+                                x=xj,
+                                Y=yj,
+                                metric=pp.Metric,
+                                initial_value=float(pp.d1_Initial_Value or 0.0),
+                                comp_start=float(pp.d1_Comp_Start or np.nan),
+                                comp_end=float(pp.d1_Comp_End or np.nan),
+                                dep_comp_start=float(pp.d1_Dep_Comp_Start or np.nan),
+                                dep_comp_end=float(pp.d1_Dep_Comp_End or np.nan),
+                                variant_side="d1",
+                            )
+                            vals_meas_list.append(vals_meas)
+                            qty_meas_list.append(qty_meas)
+                else:
+                    vals_meas, qty_meas, _ = _compute_metrics_block(
+                        x=x,
+                        Y=y,
+                        metric=pp.Metric,
+                        initial_value=float(pp.d1_Initial_Value or 0.0),
+                        comp_start=float(pp.d1_Comp_Start or np.nan),
+                        comp_end=float(pp.d1_Comp_End or np.nan),
+                        dep_comp_start=float(pp.d1_Dep_Comp_Start or np.nan),
+                        dep_comp_end=float(pp.d1_Dep_Comp_End or np.nan),
+                        variant_side="d1",
+                    )
+                    vals_meas_list = [vals_meas]
+                    qty_meas_list = [qty_meas]
+
+                Save_Measured_Metric[-1] = np.array(vals_meas_list, dtype=object)
+                Save_Measured_Quantity[-1] = np.array(qty_meas_list, dtype=object)
+
             except Exception as e:
                 print(f"[dataplot] Error computing measured metric for {pp.Dataname}: {e}")
                 Save_Measured_Metric[-1] = np.array([])
@@ -469,9 +502,14 @@ def dataplot(config_filename,**kwargs):
 
         # ------------------- MODEL (d2) -------------------
         M = pd.read_csv(cmpdir + pp.d2_Filename,
-                        header=int(pp.d2_Col_Name_Row - 1),
-                        sep=',', engine='python', quotechar='"')
+                header=int(pp.d2_Col_Name_Row - 1),
+                sep=',', engine='python', quotechar='"',
+                skip_blank_lines=True).dropna(how='all')  # drop fully empty rows
+
+        # Drop trailing NaN rows across all columns (MATLAB csvread behavior)
+        M = M.loc[:M.dropna(how='all').last_valid_index()]
         M.columns = M.columns.str.strip()
+
         start_idx = int(pp.d2_Data_Row - pp.d2_Col_Name_Row - 1)
 
         # --- Define version string ---
@@ -546,23 +584,53 @@ def dataplot(config_filename,**kwargs):
         # --- Save predicted (model) metric using MATLAB-equivalent logic ---
         if not gtest:
             try:
-                vals_pred, qty_pred, _ = _compute_metrics_block(
-                    x=x,
-                    Y=y,
-                    metric=pp.Metric,
-                    initial_value=float(pp.d2_Initial_Value or 0.0),
-                    comp_start=float(pp.d2_Comp_Start or np.nan),
-                    comp_end=float(pp.d2_Comp_End or np.nan),
-                    dep_comp_start=float(pp.d2_Dep_Comp_Start or np.nan),
-                    dep_comp_end=float(pp.d2_Dep_Comp_End or np.nan),
-                    variant_side="d2",
-                )
+                vals_pred_list = []
+                qty_pred_list = []
 
-                # --- Early consistency & padding for Metric='all' ---
+                if y.ndim == 2 and x.ndim == 2 and y.shape[1] == x.shape[1]:
+                    # Multiple paired curves (e.g., z/L jet, 62 kW, 31 kW)
+                    for j in range(y.shape[1]):
+                        xj = np.ravel(x[:, j])
+                        yj = np.ravel(y[:, j])
+                        mask = np.isfinite(xj) & np.isfinite(yj)
+                        xj = xj[mask]
+                        yj = yj[mask]
+                        if len(xj) > 0 and len(yj) > 0:
+                            vals_pred, qty_pred, _ = _compute_metrics_block(
+                                x=xj,
+                                Y=yj,
+                                metric=pp.Metric,
+                                initial_value=float(pp.d2_Initial_Value or 0.0),
+                                comp_start=float(pp.d2_Comp_Start or np.nan),
+                                comp_end=float(pp.d2_Comp_End or np.nan),
+                                dep_comp_start=float(pp.d2_Dep_Comp_Start or np.nan),
+                                dep_comp_end=float(pp.d2_Dep_Comp_End or np.nan),
+                                variant_side="d2",
+                            )
+                            vals_pred_list.append(vals_pred)
+                            qty_pred_list.append(qty_pred)
+                else:
+                    # Single curve (1D)
+                    vals_pred, qty_pred, _ = _compute_metrics_block(
+                        x=x,
+                        Y=y,
+                        metric=pp.Metric,
+                        initial_value=float(pp.d2_Initial_Value or 0.0),
+                        comp_start=float(pp.d2_Comp_Start or np.nan),
+                        comp_end=float(pp.d2_Comp_End or np.nan),
+                        dep_comp_start=float(pp.d2_Dep_Comp_Start or np.nan),
+                        dep_comp_end=float(pp.d2_Dep_Comp_End or np.nan),
+                        variant_side="d2",
+                    )
+                    vals_pred_list = [vals_pred]
+                    qty_pred_list = [qty_pred]
+
+                # --- MATLAB-compatible consistency checks (Metric='all' padding, etc.) ---
+                vals_meas_entry = Save_Measured_Metric[-1]
                 if isinstance(pp.Metric, str) and pp.Metric.strip().lower() == 'all':
-                    mvec = np.atleast_1d(Save_Measured_Metric[-1])
-                    pvec = np.atleast_1d(vals_pred)
-                    len_m, len_p = mvec.size, pvec.size
+                    mvec = np.atleast_1d(vals_meas_entry)
+                    pvec = np.atleast_1d(vals_pred_list)
+                    len_m, len_p = mvec.size, len(pvec)
                     if len_m != len_p:
                         maxlen = max(len_m, len_p)
                         if len_m < maxlen:
@@ -570,18 +638,19 @@ def dataplot(config_filename,**kwargs):
                         if len_p < maxlen:
                             pvec = np.pad(pvec, (0, maxlen - len_p), constant_values=np.nan)
                         Save_Measured_Metric[-1] = mvec
-                        vals_pred = pvec
+                        vals_pred_list = pvec
                         print(f"[dataplot] Padded {pp.Dataname} ({pp.Quantity}) from ({len_m},{len_p}) to {maxlen}")
                 else:
-                    len_m = np.size(Save_Measured_Metric[-1])
-                    len_p = np.size(vals_pred)
+                    len_m = np.size(vals_meas_entry)
+                    len_p = np.size(vals_pred_list)
                     if len_m != len_p:
                         print(f"[dataplot] Length mismatch at index {csv_rownum}: "
                               f"{pp.Dataname} | {pp.Quantity} | "
                               f"Measured={len_m}, Predicted={len_p}")
 
-                Save_Predicted_Metric[-1] = vals_pred
-                Save_Predicted_Quantity[-1] = qty_pred
+                Save_Predicted_Metric[-1] = np.array(vals_pred_list, dtype=object)
+                Save_Predicted_Quantity[-1] = np.array(qty_pred_list, dtype=object)
+
             except Exception as e:
                 print(f"[dataplot] Error computing predicted metric for {pp.Dataname}: {e}")
                 Save_Predicted_Metric[-1] = np.array([])
