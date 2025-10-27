@@ -315,9 +315,10 @@ def dataplot(config_filename,**kwargs):
 
 
     # loop over the rows of the config file
-    for pos, (irow, row) in enumerate(C.iterrows()):
+    for pos, (idx, row) in enumerate(C.iterrows()):
 
-        pp = define_plot_parameters(C, pos)  # use position, not label
+        csv_rownum = int(row["__orig_index__"]) + header_rows + 1
+        pp = define_plot_parameters(C, pos)
 
         # ----------------------------------------------------------------------
         # Handle MATLAB dataplot switch_id behavior (d, f, o, g, s)
@@ -344,7 +345,7 @@ def dataplot(config_filename,**kwargs):
         # If it’s none of the recognized ones, skip safely
         if not (dtest or ftest or gtest or switch_id == 'o'):
             if verbose:
-                print(f"[dataplot] Skipping unrecognized switch_id '{pp.switch_id}' on line {irow+2}")
+                print(f"[dataplot] Skipping unrecognized switch_id '{pp.switch_id}' on line {csv_rownum}")
             continue
 
         # Track drange like MATLAB (1-based CSV lines starting at row 2)
@@ -419,7 +420,6 @@ def dataplot(config_filename,**kwargs):
         # --- Create new figure or reuse last one ---
         if pp.Plot_Filename != Plot_Filename_Last:
             if verbose:
-                csv_rownum = int(row["__orig_index__"]) + header_rows + 1  # true CSV 1-based line
                 print(f"Generating plot {csv_rownum} {pltdir}{pp.Plot_Filename}...")
             if close_figs:
                 plt.close('all')
@@ -576,7 +576,7 @@ def dataplot(config_filename,**kwargs):
                     len_m = np.size(Save_Measured_Metric[-1])
                     len_p = np.size(vals_pred)
                     if len_m != len_p:
-                        print(f"[dataplot] Length mismatch at index {irow+2}: "
+                        print(f"[dataplot] Length mismatch at index {csv_rownum}: "
                               f"{pp.Dataname} | {pp.Quantity} | "
                               f"Measured={len_m}, Predicted={len_p}")
 
