@@ -419,7 +419,8 @@ def dataplot(config_filename,**kwargs):
         # --- Create new figure or reuse last one ---
         if pp.Plot_Filename != Plot_Filename_Last:
             if verbose:
-                print(f"Generating plot {irow + 2} {pltdir}{pp.Plot_Filename}...")
+                csv_rownum = int(row["__orig_index__"]) + header_rows + 1  # true CSV 1-based line
+                print(f"Generating plot {csv_rownum} {pltdir}{pp.Plot_Filename}...")
             if close_figs:
                 plt.close('all')
             first_plot = True
