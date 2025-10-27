@@ -313,6 +313,7 @@ def dataplot(config_filename,**kwargs):
     d1_Key_Last = None
     f_Last = plt.figure()
 
+
     # loop over the rows of the config file
     for pos, (irow, row) in enumerate(C.iterrows()):
 
@@ -368,82 +369,82 @@ def dataplot(config_filename,**kwargs):
             Save_Measured_Quantity.append(None)
             Save_Predicted_Quantity.append(None)
 
-        # -------------- PLOTTING + PRINT (unchanged behavior) -----------------
-        if pp.Plot_Filename!=Plot_Filename_Last:
+        # -------------- PLOTTING + PRINT -----------------
+        # Read and prepare the experimental (d1) data, same for both cases
+        E = pd.read_csv(expdir + pp.d1_Filename,
+                        header=int(pp.d1_Col_Name_Row - 1),
+                        sep=',', engine='python', quotechar='"')
+        E.columns = E.columns.str.strip()
+        start_idx = int(pp.d1_Data_Row - pp.d1_Col_Name_Row - 1)
+        x, _ = get_data(E, pp.d1_Ind_Col_Name, start_idx)
+        y, _ = get_data(E, pp.d1_Dep_Col_Name, start_idx)
 
+        # --- Define flip_axis and scaling for d1 block ---
+        flip_axis = str(pp.Flip_Axis).strip().lower() in ['yes', 'true', '1']
+        x_scale = float(pp.Scale_Ind or 1.0)
+        y_scale = float(pp.Scale_Dep or 1.0)
+
+        # --- Apply scaling cleanly before any flipping ---
+        x_scaled = np.asarray(x) / x_scale
+        y_scaled = np.asarray(y) / y_scale
+
+        # --- Handle multiple X columns (Exp data) ---
+        if x_scaled.ndim == 2 and y_scaled.ndim == 2 and x_scaled.shape[1] == y_scaled.shape[1]:
+            x_plot_list = [x_scaled[:, i] for i in range(x_scaled.shape[1])]
+            y_plot_list = [y_scaled[:, i] for i in range(y_scaled.shape[1])]
+        elif y_scaled.ndim == 2 and y_scaled.shape[1] > 1:
+            x_plot_list = [x_scaled for _ in range(y_scaled.shape[1])]
+            y_plot_list = [y_scaled[:, i] for i in range(y_scaled.shape[1])]
+        else:
+            x_plot_list = [np.ravel(x_scaled)]
+            y_plot_list = [np.ravel(y_scaled)]
+
+        # --- Quick diagnostic ---
+        for xi, yi in zip(x_plot_list, y_plot_list):
+            if len(xi) != len(yi):
+                print(f"[dataplot] Pair length mismatch in {pp.Dataname}: "
+                      f"x={len(xi)}, y={len(yi)}, Flip_Axis={flip_axis}")
+
+        # --- Sanitize plot type ---
+        plot_type = str(pp.Plot_Type or '').strip().lower()
+        if plot_type not in ['linear', 'loglog', 'semilogx', 'semilogy']:
+            plot_type = 'linear'
+
+        # --- Styles and keys ---
+        raw_styles = [c.strip() for c in (pp.d1_Style or '').split('|')] if pp.d1_Style else []
+        styles = (raw_styles + [None] * len(y_plot_list))[:len(y_plot_list)]
+        raw_keys = [c.strip() for c in (pp.d1_Key or '').split('|')] if pp.d1_Key else []
+        key_labels = (raw_keys + [None] * len(y_plot_list))[:len(y_plot_list)]
+
+        # --- Create new figure or reuse last one ---
+        if pp.Plot_Filename != Plot_Filename_Last:
             if verbose:
-                print(f'Generating plot {irow+2} ' + pltdir + pp.Plot_Filename + '...')
-
+                csv_rownum = int(row["__orig_index__"]) + header_rows + 1  # true CSV 1-based line
+                print(f"Generating plot {csv_rownum} {pltdir}{pp.Plot_Filename}...")
             if close_figs:
                 plt.close('all')
-
-            # read data from exp file
-            E = pd.read_csv(expdir+pp.d1_Filename, header=int(pp.d1_Col_Name_Row-1), sep=',', engine='python', quotechar='"')
-            E.columns = E.columns.str.strip()  # <-- Strip whitespace from headers
-
-            start_idx = int(pp.d1_Data_Row - pp.d1_Col_Name_Row - 1)
-            x, col_names = get_data(E, pp.d1_Ind_Col_Name, start_idx)
-            y, col_names = get_data(E, pp.d1_Dep_Col_Name, start_idx)
-
-            if pp.d1_Style:
-                raw_styles = [c.strip() for c in pp.d1_Style.split('|')]
-            else:
-                raw_styles = []
-            styles = (raw_styles + [None] * len(col_names))[:len(col_names)]
-
-            if pp.d1_Key:
-                raw_keys = [c.strip() for c in pp.d1_Key.split('|')]
-            else:
-                raw_keys = []
-            key_labels = (raw_keys + [None] * len(col_names))[:len(col_names)]
-
-            for i, label in enumerate(col_names):
-                if i==0:
-                    # plot the exp data
-                    f = plot_to_fig(x_data=x, y_data=y[:, i],
-                        data_label=key_labels[i],
-                        x_label=pp.Ind_Title,
-                        y_label=pp.Dep_Title,
-                        marker_style=styles[i],
-                        x_min=pp.Min_Ind,x_max=pp.Max_Ind,
-                        y_min=pp.Min_Dep,y_max=pp.Max_Dep,
-                        legend_location=matlab_legend_to_matplotlib(pp.Key_Position)
-                        )
-                elif i>0:
-                    f = plot_to_fig(x_data=x, y_data=y[:, i],
-                        figure_handle=f,
-                        data_label=key_labels[i],
-                        x_label=pp.Ind_Title,
-                        y_label=pp.Dep_Title,
-                        marker_style=styles[i],
-                        x_min=pp.Min_Ind,x_max=pp.Max_Ind,
-                        y_min=pp.Min_Dep,y_max=pp.Max_Dep,
-                        legend_location=matlab_legend_to_matplotlib(pp.Key_Position)
-                        )
-
+            first_plot = True
         else:
             f = f_Last
+            first_plot = False
 
-            if pp.d1_Key!=d1_Key_Last:
-
-                # read data from exp file
-                E = pd.read_csv(expdir+pp.d1_Filename, header=int(pp.d1_Col_Name_Row-1), sep=',', engine='python', quotechar='"')
-                E.columns = E.columns.str.strip()  # <-- Strip whitespace from headers
-                start_idx = int(pp.d1_Data_Row - pp.d1_Col_Name_Row - 1)
-                x, col_names = get_data(E, pp.d1_Ind_Col_Name, start_idx)
-                y, col_names = get_data(E, pp.d1_Dep_Col_Name, start_idx)
-
-                # plot the exp data
-                f = plot_to_fig(x_data=x, y_data=y,
-                    figure_handle=f,
-                    data_label=pp.d1_Key,
-                    x_label=pp.Ind_Title,
-                    y_label=pp.Dep_Title,
-                    marker_style=pp.d1_Style,
-                    x_min=pp.Min_Ind,x_max=pp.Max_Ind,
-                    y_min=pp.Min_Dep,y_max=pp.Max_Dep,
-                    legend_location=matlab_legend_to_matplotlib(pp.Key_Position)
-                    )
+        # --- Plot Exp curves (handles both cases) ---
+        for i, (x_i, y_i) in enumerate(zip(x_plot_list, y_plot_list)):
+            f = plot_to_fig(
+                x_data=y_i if flip_axis else x_i,
+                y_data=x_i if flip_axis else y_i,
+                figure_handle=None if (first_plot and i == 0) else f,
+                data_label=key_labels[i],
+                x_label=pp.Dep_Title if flip_axis else pp.Ind_Title,
+                y_label=pp.Ind_Title if flip_axis else pp.Dep_Title,
+                marker_style=styles[i],
+                x_min=pp.Min_Dep if flip_axis else pp.Min_Ind,
+                x_max=pp.Max_Dep if flip_axis else pp.Max_Ind,
+                y_min=pp.Min_Ind if flip_axis else pp.Min_Dep,
+                y_max=pp.Max_Ind if flip_axis else pp.Max_Dep,
+                legend_location=matlab_legend_to_matplotlib(pp.Key_Position),
+                plot_type=plot_type,
+            )
 
         # --- Save measured (experimental) metric using MATLAB-equivalent logic ---
         if not gtest:
@@ -467,45 +468,80 @@ def dataplot(config_filename,**kwargs):
                 Save_Measured_Quantity[-1] = []
 
         # ------------------- MODEL (d2) -------------------
-        M = pd.read_csv(cmpdir+pp.d2_Filename, header=int(pp.d2_Col_Name_Row-1), sep=',', engine='python', quotechar='"')
-        M.columns = M.columns.str.strip()  # <-- Strip whitespace from headers
+        M = pd.read_csv(cmpdir + pp.d2_Filename,
+                        header=int(pp.d2_Col_Name_Row - 1),
+                        sep=',', engine='python', quotechar='"')
+        M.columns = M.columns.str.strip()
         start_idx = int(pp.d2_Data_Row - pp.d2_Col_Name_Row - 1)
 
-        x, col_names = get_data(M, pp.d2_Ind_Col_Name, start_idx)
-        y, col_names = get_data(M, pp.d2_Dep_Col_Name, start_idx)
-
+        # --- Define version string ---
         version_string = revision
-        if (pp.VerStr_Filename):
-            file1 = open(cmpdir+pp.VerStr_Filename,"r")
-            Lines = file1.readlines()
-            version_string = Lines[0].strip()
-            file1.close()
+        if pp.VerStr_Filename:
+            try:
+                with open(cmpdir + pp.VerStr_Filename, "r") as file1:
+                    Lines = file1.readlines()
+                    if Lines:
+                        version_string = Lines[0].strip()
+            except Exception as e:
+                print(f"[dataplot] Warning: could not read version string from {pp.VerStr_Filename}: {e}")
 
-        if pp.d2_Style:
-            raw_styles = [c.strip() for c in pp.d2_Style.split('|')]
+        # --- Load and scale data ---
+        x, _ = get_data(M, pp.d2_Ind_Col_Name, start_idx)
+        y, _ = get_data(M, pp.d2_Dep_Col_Name, start_idx)
+
+        x_scale = float(pp.Scale_Ind or 1.0)
+        y_scale = float(pp.Scale_Dep or 1.0)
+
+        x_scaled = np.asarray(x) / x_scale
+        y_scaled = np.asarray(y) / y_scale
+
+        # --- Handle multiple X or Y columns (same logic as d1) ---
+        if x_scaled.ndim == 2 and y_scaled.ndim == 2 and x_scaled.shape[1] == y_scaled.shape[1]:
+            x_plot_list = [x_scaled[:, i] for i in range(x_scaled.shape[1])]
+            y_plot_list = [y_scaled[:, i] for i in range(y_scaled.shape[1])]
+        elif y_scaled.ndim == 2 and y_scaled.shape[1] > 1:
+            x_plot_list = [x_scaled for _ in range(y_scaled.shape[1])]
+            y_plot_list = [y_scaled[:, i] for i in range(y_scaled.shape[1])]
         else:
-            raw_styles = []
-        styles = (raw_styles + [None] * len(col_names))[:len(col_names)]
+            x_plot_list = [np.ravel(x_scaled)]
+            y_plot_list = [np.ravel(y_scaled)]
 
-        if pp.d2_Key:
-            raw_keys = [c.strip() for c in pp.d2_Key.split('|')]
-        else:
-            raw_keys = []
-        key_labels = (raw_keys + [None] * len(col_names))[:len(col_names)]
+        # --- Quick diagnostic ---
+        for xi, yi in zip(x_plot_list, y_plot_list):
+            if len(xi) != len(yi):
+                print(f"[dataplot] Pair length mismatch in {pp.Dataname} "
+                      f"(Flip_Axis={flip_axis}): x={len(xi)}, y={len(yi)}")
 
-        for i, label in enumerate(col_names):
-            f = plot_to_fig(x_data=x, y_data=y[:, i],
+        # --- Sanitize plot type ---
+        plot_type = str(pp.Plot_Type or '').strip().lower()
+        if plot_type not in ['linear', 'loglog', 'semilogx', 'semilogy']:
+            plot_type = 'linear'
+
+        # --- Styles and keys ---
+        raw_styles = [c.strip() for c in (pp.d2_Style or '').split('|')] if pp.d2_Style else []
+        styles = (raw_styles + [None] * len(y_plot_list))[:len(y_plot_list)]
+        raw_keys = [c.strip() for c in (pp.d2_Key or '').split('|')] if pp.d2_Key else []
+        key_labels = (raw_keys + [None] * len(y_plot_list))[:len(y_plot_list)]
+
+        # --- Plot model (d2) curves, Flip_Axis-safe ---
+        for i, (x_i, y_i) in enumerate(zip(x_plot_list, y_plot_list)):
+            f = plot_to_fig(
+                x_data=y_i if flip_axis else x_i,
+                y_data=x_i if flip_axis else y_i,
                 revision_label=version_string,
                 figure_handle=f,
-                x_label=pp.Ind_Title,
-                y_label=pp.Dep_Title,
                 data_label=key_labels[i],
                 line_style=styles[i],
-                x_min=pp.Min_Ind,x_max=pp.Max_Ind,
-                y_min=pp.Min_Dep,y_max=pp.Max_Dep,
+                x_label=pp.Dep_Title if flip_axis else pp.Ind_Title,
+                y_label=pp.Ind_Title if flip_axis else pp.Dep_Title,
+                x_min=pp.Min_Dep if flip_axis else pp.Min_Ind,
+                x_max=pp.Max_Dep if flip_axis else pp.Max_Ind,
+                y_min=pp.Min_Ind if flip_axis else pp.Min_Dep,
+                y_max=pp.Max_Ind if flip_axis else pp.Max_Dep,
                 legend_location=matlab_legend_to_matplotlib(pp.Key_Position),
-                plot_title=pp.Plot_Title
-                )
+                plot_type=plot_type,
+                plot_title=pp.Plot_Title,
+            )
 
         # --- Save predicted (model) metric using MATLAB-equivalent logic ---
         if not gtest:
@@ -555,9 +591,7 @@ def dataplot(config_filename,**kwargs):
         plt.figure(f.number) # make figure current
 
         # create plot directory if it does not exist
-        isDir = os.path.isdir(pltdir)
-        if not isDir:
-            os.mkdir(pltdir)
+        os.makedirs(pltdir, exist_ok=True)
 
         plt.savefig(pltdir + pp.Plot_Filename + '.pdf', backend='pdf')
 
@@ -1224,8 +1258,8 @@ def get_plot_style(style="fds"):
             "Plot_Units": "inches",
             "Plot_Width": 5.0,
             "Plot_Height": 3.4,
-            "Plot_X": 1.2,
-            "Plot_Y": 0.8,
+            "Plot_X": 1.15,
+            "Plot_Y": 0.75,
             "Scat_Plot_Width": 4.75,
             "Scat_Plot_Height": 4.75,
             "Scat_Plot_X": 1.00,
