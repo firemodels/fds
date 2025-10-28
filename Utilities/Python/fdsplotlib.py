@@ -334,12 +334,11 @@ def dataplot(config_filename,**kwargs):
 
     # Detect fast_mode: skip expensive DataFrame access when processing all rows
     plot_list_lower = [p.lower() for p in plot_list] if plot_list else []
-    fast_mode = (
-        (plot_range_in and isinstance(plot_range_in, list) and any(str(p).lower() == "all" for p in plot_range_in))
-        or ("all" in plot_list_lower)
-    )
-    if fast_mode and verbose:
-        print("[dataplot] Running in fast_mode (bypassing define_plot_parameters and Dataname scans)")
+
+    # Toggle stays, but defaults to fast everywhere
+    fast_mode = bool(kwargs.get('fast_mode', True))
+    if verbose:
+        print(f"[dataplot] {'Running in fast_mode (lightweight define_plot_parameters)' if fast_mode else 'Running in full mode'}")
 
     for pos, row in enumerate(C.itertuples(index=False, name=None)):
 
