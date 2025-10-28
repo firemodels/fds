@@ -230,6 +230,16 @@ def dataplot(config_filename,**kwargs):
     # Suppress just the 'findfont' warnings from matplotlib's font manager
     logging.getLogger('matplotlib.font_manager').setLevel(logging.ERROR)
 
+    # --- Simple in-memory CSV cache to avoid redundant I/O ---
+    _csv_cache = {}
+
+    def read_csv_cached(path, **kwargs):
+        """Read CSV once per path; return cached DataFrame copy."""
+        if path not in _csv_cache:
+            _csv_cache[path] = pd.read_csv(path, **kwargs)
+        # return a shallow copy so downstream dropna/trim doesn’t mutate cache
+        return _csv_cache[path].copy()
+
     # defaults
     configdir = kwargs.get('configdir','')
     revision = kwargs.get('revision','')
@@ -309,72 +319,85 @@ def dataplot(config_filename,**kwargs):
         # Only filter by plot_list if no plot_range was passed
         C = C[C['Dataname'].str.lower().isin([p.lower() for p in plot_list])]
 
-    Plot_Filename_Last = None
-    d1_Key_Last = None
+    # --- Determine if any 'o' lines exist (only once) ---
+    otest_active = any( str(C.iloc[j]['switch_id']).strip().lower() == 'o' for j in range(len(C)) )
+
     f_Last = plt.figure()
 
-
     # loop over the rows of the config file
-    for pos, (idx, row) in enumerate(C.iterrows()):
 
-        csv_rownum = int(row["__orig_index__"]) + header_rows + 1
-        pp = define_plot_parameters(C, pos)
+    # Cache the position of __orig_index__ for speed and clarity
+    col_orig_idx = C.columns.get_loc("__orig_index__")
 
-        # ----------------------------------------------------------------------
-        # Handle MATLAB dataplot switch_id behavior (d, f, o, g, s)
-        # ----------------------------------------------------------------------
-        switch_id = str(pp.switch_id).strip().lower()
+    # Cache column positions once for speed
+    col_idx = {col: i for i, col in enumerate(C.columns)}
 
-        # Skip 's' outright
+    # Detect fast_mode: skip expensive DataFrame access when processing all rows
+    plot_list_lower = [p.lower() for p in plot_list] if plot_list else []
+    fast_mode = (
+        (plot_range_in and isinstance(plot_range_in, list) and any(str(p).lower() == "all" for p in plot_range_in))
+        or ("all" in plot_list_lower)
+    )
+    if fast_mode and verbose:
+        print("[dataplot] Running in fast_mode (bypassing define_plot_parameters and Dataname scans)")
+
+    for pos, row in enumerate(C.itertuples(index=False, name=None)):
+
+        csv_rownum = int(row[col_orig_idx]) + header_rows + 1
+        pp = define_plot_parameters(C, pos, lightweight=fast_mode)
+
+        # --- Inline simple attribute access for speed ---
+        switch_id      = pp.switch_id
+        Dataname       = pp.Dataname
+        d1_file        = pp.d1_Filename
+        d2_file        = pp.d2_Filename
+        plot_filename  = pp.Plot_Filename
+        quantity       = pp.Quantity
+        metric         = pp.Metric
+        flip_axis_flag = str(pp.Flip_Axis or '').strip().lower() in ['yes', 'true', '1']
+
+        # --- Handle MATLAB dataplot switch_id behavior (d, f, o, g, s) ---
         if switch_id == 's':
             continue
-
-        # If ANY 'o' lines exist in the filtered config C, process only those
-        otest_active = any( str(C.iloc[j]['switch_id']).strip().lower() == 'o' for j in range(len(C)) )
 
         if otest_active and switch_id != 'o':
             continue
 
-        # 'g' lines: generate plots but EXCLUDE from scatplot stats & drange
         gtest = (switch_id == 'g')
-
-        # 'd' default, 'f' follow-on (your filename reuse already mimics “hold on”)
         dtest = (switch_id == 'd')
         ftest = (switch_id == 'f')
 
-        # If it’s none of the recognized ones, skip safely
         if not (dtest or ftest or gtest or switch_id == 'o'):
             if verbose:
-                print(f"[dataplot] Skipping unrecognized switch_id '{pp.switch_id}' on line {csv_rownum}")
+                print(f"[dataplot] Skipping unrecognized switch_id '{switch_id}' on line {csv_rownum}")
             continue
 
-        # Track drange like MATLAB (1-based CSV lines starting at row 2)
+        # Track drange (MATLAB-style 1-based CSV row index)
         if not gtest:
-            drange.append(int(row["__orig_index__"]) + 2)
+            drange.append(int(row[col_orig_idx]) + 2)
 
         # Append metadata only for rows that should appear in scatplot
         if not gtest:
-            Save_Dataname.append(pp.Dataname)
-            Save_Plot_Filename.append(pp.Plot_Filename)
+            Save_Dataname.append(Dataname)
+            Save_Plot_Filename.append(plot_filename)
             Save_Dep_Title.append(pp.Dep_Title)
             Save_Error_Tolerance.append(pp.Error_Tolerance)
-            Save_Metric_Type.append(pp.Metric)
+            Save_Metric_Type.append(metric)
             Save_Group_Key_Label.append(pp.Group_Key_Label)
-            Save_Quantity.append(pp.Quantity)
+            Save_Quantity.append(quantity)
             Save_Group_Style.append(pp.Group_Style)
             Save_Fill_Color.append(pp.Fill_Color)
 
-            # Placeholders (we will overwrite for this row below)
             Save_Measured_Metric.append(np.nan)
             Save_Predicted_Metric.append(np.nan)
             Save_Measured_Quantity.append(None)
             Save_Predicted_Quantity.append(None)
 
         # -------------- PLOTTING + PRINT -----------------
-        E = pd.read_csv(expdir + pp.d1_Filename,
+        E = read_csv_cached(expdir + pp.d1_Filename,
                 header=int(pp.d1_Col_Name_Row - 1),
                 sep=',', engine='python', quotechar='"',
-                skip_blank_lines=True).dropna(how='all')  # drop fully empty rows
+                skip_blank_lines=True).dropna(how='all')
 
         # Drop trailing NaN rows across all columns (MATLAB csvread behavior)
         E = E.loc[:E.dropna(how='all').last_valid_index()]
@@ -505,10 +528,10 @@ def dataplot(config_filename,**kwargs):
                 Save_Measured_Quantity[-1] = []
 
         # ------------------- MODEL (d2) -------------------
-        M = pd.read_csv(cmpdir + pp.d2_Filename,
+        M = read_csv_cached(cmpdir + pp.d2_Filename,
                 header=int(pp.d2_Col_Name_Row - 1),
                 sep=',', engine='python', quotechar='"',
-                skip_blank_lines=True).dropna(how='all')  # drop fully empty rows
+                skip_blank_lines=True).dropna(how='all')
 
         # Drop trailing NaN rows across all columns (MATLAB csvread behavior)
         M = M.loc[:M.dropna(how='all').last_valid_index()]
@@ -668,8 +691,6 @@ def dataplot(config_filename,**kwargs):
 
         plt.savefig(pltdir + pp.Plot_Filename + '.pdf', backend='pdf')
 
-        Plot_Filename_Last = pp.Plot_Filename
-        d1_Key_Last = pp.d1_Key
         f_Last = f
 
     # --- MATLAB-compatible output scaffolding for scatplot interface ---
@@ -1434,10 +1455,100 @@ def matlab_legend_to_matplotlib(position):
     return mapping.get(position.strip().lower(), 'best')
 
 
-def define_plot_parameters(D, irow):
+def define_plot_parameters(D, irow, lightweight=False):
     import numpy as np
 
     class plot_parameters:
+        def __init__(self):
+            pass
+
+        def __repr__(self):
+            return str(self.__dict__)
+
+    # --- FAST PATH ----------------------------------------------------------
+    if lightweight:
+        col_idx = {col: i for i, col in enumerate(D.columns)}
+        row = D.iloc[irow].values
+
+        def get(col, default=None):
+            idx = col_idx.get(col)
+            return row[idx] if idx is not None else default
+
+        d = plot_parameters()
+
+        # Core identifiers
+        d.switch_id       = get('switch_id')
+        d.Dataname        = get('Dataname')
+        d.VerStr_Filename = get('VerStr_Filename')
+        d.Plot_Filename   = get('Plot_Filename')
+        d.Plot_Title      = get('Plot_Title')
+        d.Quantity        = get('Quantity')
+        d.Metric          = get('Metric')
+        d.Error_Tolerance = get('Error_Tolerance')
+
+        # File and column info
+        d.d1_Filename       = get('d1_Filename')
+        d.d1_Col_Name_Row   = get('d1_Col_Name_Row', 1)
+        d.d1_Data_Row       = get('d1_Data_Row', 2)
+        d.d1_Ind_Col_Name   = get('d1_Ind_Col_Name')
+        d.d1_Dep_Col_Name   = get('d1_Dep_Col_Name')
+        d.d1_Key            = get('d1_Key', '')
+        d.d1_Style          = get('d1_Style', '')
+        d.d1_Comp_Start     = get('d1_Comp_Start', np.nan)
+        d.d1_Comp_End       = get('d1_Comp_End', np.nan)
+        d.d1_Dep_Comp_Start = get('d1_Dep_Comp_Start', np.nan)
+        d.d1_Dep_Comp_End   = get('d1_Dep_Comp_End', np.nan)
+        d.d1_Initial_Value  = get('d1_Initial_Value', 0.0)
+
+        d.d2_Filename       = get('d2_Filename')
+        d.d2_Col_Name_Row   = get('d2_Col_Name_Row', 1)
+        d.d2_Data_Row       = get('d2_Data_Row', 2)
+        d.d2_Ind_Col_Name   = get('d2_Ind_Col_Name')
+        d.d2_Dep_Col_Name   = get('d2_Dep_Col_Name')
+        d.d2_Key            = get('d2_Key', '')
+        d.d2_Style          = get('d2_Style', '')
+        d.d2_Comp_Start     = get('d2_Comp_Start', np.nan)
+        d.d2_Comp_End       = get('d2_Comp_End', np.nan)
+        d.d2_Dep_Comp_Start = get('d2_Dep_Comp_Start', np.nan)
+        d.d2_Dep_Comp_End   = get('d2_Dep_Comp_End', np.nan)
+        d.d2_Initial_Value  = get('d2_Initial_Value', 0.0)
+
+        # Plot formatting
+        d.Ind_Title        = get('Ind_Title', '')
+        d.Dep_Title        = get('Dep_Title', '')
+        d.Min_Ind          = get('Min_Ind')
+        d.Max_Ind          = get('Max_Ind')
+        d.Min_Dep          = get('Min_Dep')
+        d.Max_Dep          = get('Max_Dep')
+        d.Scale_Ind        = get('Scale_Ind', 1.0)
+        d.Scale_Dep        = get('Scale_Dep', 1.0)
+        d.Flip_Axis        = get('Flip_Axis', '')
+        d.Plot_Type        = get('Plot_Type', 'linear')
+        d.Key_Position     = get('Key_Position', 'best')
+        d.Title_Position   = get('Title_Position', '')
+        d.Legend_XYWidthHeight = get('Legend_XYWidthHeight', '')
+        d.Paper_Width_Factor   = get('Paper_Width_Factor', 1.0)
+
+        # Grouping / style info
+        d.Group_Key_Label  = get('Group_Key_Label')
+        d.Group_Style      = get('Group_Style')
+        d.Fill_Color       = get('Fill_Color')
+        d.Font_Interpreter = get('Font_Interpreter')
+
+        # --- sanitization for human-facing strings ---
+        d.Plot_Title      = sanitize(safe_strip(d.Plot_Title))
+        d.Ind_Title       = sanitize(safe_strip(d.Ind_Title))
+        d.Dep_Title       = sanitize(safe_strip(d.Dep_Title))
+        d.Quantity        = sanitize(safe_strip(d.Quantity))
+        d.Metric          = sanitize(safe_strip(d.Metric))
+        d.Group_Key_Label = sanitize(safe_strip(d.Group_Key_Label))
+        d.d1_Key          = sanitize(safe_strip(d.d1_Key))
+        d.d2_Key          = sanitize(safe_strip(d.d2_Key))
+
+        return d
+
+    # --- FULL PATH ----------------------------------------------------------
+    class plot_parameters_full(plot_parameters):
         def __init__(self):
             self.switch_id            = D.values[irow,D.columns.get_loc('switch_id')]
             self.Dataname             = D.values[irow,D.columns.get_loc('Dataname')]
@@ -1496,12 +1607,9 @@ def define_plot_parameters(D, irow):
             self.Fill_Color           = D.values[irow,D.columns.get_loc('Fill_Color')]
             self.Font_Interpreter     = D.values[irow,D.columns.get_loc('Font_Interpreter')]
 
-        def __repr__(self):
-            return str(self.__dict__)
+    d = plot_parameters_full()
 
-    d = plot_parameters()
-
-    # Explicit sanitization of only the human-facing fields
+    # --- sanitization block (unchanged) ---
     d.Plot_Title      = sanitize(safe_strip(d.Plot_Title))
     d.Ind_Title       = sanitize(safe_strip(d.Ind_Title))
     d.Dep_Title       = sanitize(safe_strip(d.Dep_Title))
