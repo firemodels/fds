@@ -346,30 +346,20 @@ def dataplot(config_filename,**kwargs):
         csv_rownum = int(row[col_orig_idx]) + header_rows + 1
         pp = define_plot_parameters(C, pos, lightweight=fast_mode)
 
-        # --- Inline simple attribute access for speed ---
-        switch_id      = pp.switch_id
-        Dataname       = pp.Dataname
-        d1_file        = pp.d1_Filename
-        d2_file        = pp.d2_Filename
-        plot_filename  = pp.Plot_Filename
-        quantity       = pp.Quantity
-        metric         = pp.Metric
-        flip_axis_flag = str(pp.Flip_Axis or '').strip().lower() in ['yes', 'true', '1']
-
         # --- Handle MATLAB dataplot switch_id behavior (d, f, o, g, s) ---
-        if switch_id == 's':
+        if pp.switch_id == 's':
             continue
 
-        if otest_active and switch_id != 'o':
+        if otest_active and pp.switch_id != 'o':
             continue
 
-        gtest = (switch_id == 'g')
-        dtest = (switch_id == 'd')
-        ftest = (switch_id == 'f')
+        gtest = (pp.switch_id == 'g')
+        dtest = (pp.switch_id == 'd')
+        ftest = (pp.switch_id == 'f')
 
-        if not (dtest or ftest or gtest or switch_id == 'o'):
+        if not (dtest or ftest or gtest or pp.switch_id == 'o'):
             if verbose:
-                print(f"[dataplot] Skipping unrecognized switch_id '{switch_id}' on line {csv_rownum}")
+                print(f"[dataplot] Skipping unrecognized switch_id '{pp.switch_id}' on line {csv_rownum}")
             continue
 
         # Track drange (MATLAB-style 1-based CSV row index)
@@ -378,13 +368,13 @@ def dataplot(config_filename,**kwargs):
 
         # Append metadata only for rows that should appear in scatplot
         if not gtest:
-            Save_Dataname.append(Dataname)
-            Save_Plot_Filename.append(plot_filename)
+            Save_Dataname.append(pp.Dataname)
+            Save_Plot_Filename.append(pp.Plot_Filename)
             Save_Dep_Title.append(pp.Dep_Title)
             Save_Error_Tolerance.append(pp.Error_Tolerance)
-            Save_Metric_Type.append(metric)
+            Save_Metric_Type.append(pp.Metric)
             Save_Group_Key_Label.append(pp.Group_Key_Label)
-            Save_Quantity.append(quantity)
+            Save_Quantity.append(pp.Quantity)
             Save_Group_Style.append(pp.Group_Style)
             Save_Fill_Color.append(pp.Fill_Color)
 
