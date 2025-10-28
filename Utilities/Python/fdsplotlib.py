@@ -422,15 +422,19 @@ def dataplot(config_filename,**kwargs):
         key_labels = (raw_keys + [None] * len(y_plot_list))[:len(y_plot_list)]
 
         # --- Create new figure or reuse last one ---
-        if pp.Plot_Filename != Plot_Filename_Last:
+        if dtest:
             if verbose:
                 print(f"Generating plot {csv_rownum} {pltdir}{pp.Plot_Filename}...")
             if close_figs:
                 plt.close('all')
             first_plot = True
-        else:
+        elif ftest:
             f = f_Last
             first_plot = False
+        else:
+            if verbose:
+                print(f"[dataplot] Skipping unrecognized switch_id '{pp.switch_id}' on line {csv_rownum}")
+            continue
 
         # --- Plot Exp curves (handles both cases) ---
         for i, (x_i, y_i) in enumerate(zip(x_plot_list, y_plot_list)):
