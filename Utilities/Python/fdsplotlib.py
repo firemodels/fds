@@ -703,16 +703,24 @@ def dataplot(config_filename,**kwargs):
         print(f"[dataplot] Error assembling saved_data: {e}")
         saved_data = []
 
-    # --- quick parity audit before returning ---
-    for i, (m, p, name, qty) in enumerate(zip(Save_Measured_Metric,
-                                              Save_Predicted_Metric,
-                                              Save_Dataname,
-                                              Save_Quantity)):
+    # --- MATLAB-compatible parity audit before returning ---
+    for i, (m, p, name, qty) in enumerate(zip(
+        Save_Measured_Metric,
+        Save_Predicted_Metric,
+        Save_Dataname,
+        Save_Quantity
+    )):
         len_m = np.size(m) if isinstance(m, np.ndarray) else 0
         len_p = np.size(p) if isinstance(p, np.ndarray) else 0
+
+        # Get original CSV row number (1-based)
+        csv_rownum = drange[i] if i < len(drange) else "?"
+
         if len_m != len_p:
-            print(f"[dataplot] Length mismatch at index {i}: "
-                  f"{name} | {qty} | Measured={len_m}, Predicted={len_p}")
+            print(
+                f"[dataplot] Length mismatch at CSV row {csv_rownum}: "
+                f"{name} | {qty} | Measured={len_m}, Predicted={len_p}"
+            )
 
     print("[dataplot] returning saved_data and drange")
     return saved_data, drange
