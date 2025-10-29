@@ -89,8 +89,8 @@ def _compute_metrics_block(
 
     Returns:
       vals_flat : 1D np.array (metrics for each curve, or concatenated for 'all')
-      titles    : list of curve labels
-      per_curve_series : list of 1D arrays (for Metric='all')
+      titles    : list of metric labels
+      per_curve_series : list of per-curve metric arrays (for Metric='all')
     """
     import numpy as np
 
@@ -163,18 +163,19 @@ def _compute_metrics_block(
         else:
             out = np.nan
 
-        # MATLAB passes tiny value instead of exact zero (survives nonzeros())
         if out == 0.0:
             out = 1e-12
 
         return np.array([out]), [f"curve{idx_first}"], []
 
-    # --- metric='all': return concatenated series for each curve (minus initial) ---
+    # --- metric='all': return all finite Y values (one per data point) ---
     if metric_str == "all":
         for j in range(ncols):
-            yj = Y_sel[:, j].reshape(-1) - initial_value
+            yj = Y_sel[:, j].reshape(-1)
+            mask = np.isfinite(yj)
+            yj = yj[mask] - initial_value
             per_curve_series.append(yj)
-            titles.extend([f"curve{j+1}"] * yj.size)
+            titles.extend([f"point{k+1}_curve{j+1}" for k in range(len(yj))])
         vals_flat = np.concatenate(per_curve_series) if per_curve_series else np.array([])
         return vals_flat, titles, per_curve_series
 
@@ -203,10 +204,8 @@ def _compute_metrics_block(
         elif metric_str == "start":
             out = yj[0]
         elif metric_str == "ipct":
-            # Not implemented in this port; keep parity-friendly placeholder
-            out = 1e-12
+            out = 1e-12  # placeholder for parity
         else:
-            # Default fallback consistent with MATLAB's behavior path to non-zeros
             out = 1e-12
 
         if out == 0.0:
@@ -643,28 +642,33 @@ def dataplot(config_filename,**kwargs):
 
                 # --- MATLAB-compatible consistency checks (Metric='all' padding, etc.) ---
                 vals_meas_entry = Save_Measured_Metric[-1]
-                if isinstance(pp.Metric, str) and pp.Metric.strip().lower() == 'all':
-                    mvec = np.atleast_1d(vals_meas_entry)
-                    pvec = np.atleast_1d(vals_pred_list)
-                    len_m, len_p = mvec.size, len(pvec)
+                metric_str = str(pp.Metric or '').strip().lower()
+
+                # Always flatten any nested list-of-arrays first
+                flat_pred = np.concatenate([
+                    np.atleast_1d(v) for v in vals_pred_list if v is not None and np.size(v) > 0
+                ]) if any(np.size(v) > 0 for v in vals_pred_list) else np.array([])
+
+                flat_meas = np.atleast_1d(vals_meas_entry).ravel()
+
+                if metric_str == 'all':
+                    len_m, len_p = flat_meas.size, flat_pred.size
                     if len_m != len_p:
                         maxlen = max(len_m, len_p)
                         if len_m < maxlen:
-                            mvec = np.pad(mvec, (0, maxlen - len_m), constant_values=np.nan)
+                            flat_meas = np.pad(flat_meas, (0, maxlen - len_m), constant_values=np.nan)
                         if len_p < maxlen:
-                            pvec = np.pad(pvec, (0, maxlen - len_p), constant_values=np.nan)
-                        Save_Measured_Metric[-1] = mvec
-                        vals_pred_list = pvec
+                            flat_pred = np.pad(flat_pred, (0, maxlen - len_p), constant_values=np.nan)
+                        Save_Measured_Metric[-1] = flat_meas
                         print(f"[dataplot] Padded {pp.Dataname} ({pp.Quantity}) from ({len_m},{len_p}) to {maxlen}")
                 else:
-                    len_m = np.size(vals_meas_entry)
-                    len_p = np.size(vals_pred_list)
+                    len_m = flat_meas.size
+                    len_p = flat_pred.size
                     if len_m != len_p:
-                        print(f"[dataplot] Length mismatch at index {csv_rownum}: "
-                              f"{pp.Dataname} | {pp.Quantity} | "
-                              f"Measured={len_m}, Predicted={len_p}")
+                        print(f"[dataplot] Length mismatch at CSV row {csv_rownum}: "
+                              f"{pp.Dataname} | {pp.Quantity} | Measured={len_m}, Predicted={len_p}")
 
-                Save_Predicted_Metric[-1] = np.array(vals_pred_list, dtype=object)
+                Save_Predicted_Metric[-1] = flat_pred
                 Save_Predicted_Quantity[-1] = np.array(qty_pred_list, dtype=object)
 
             except Exception as e:
