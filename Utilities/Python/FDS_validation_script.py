@@ -70,6 +70,9 @@ Scatterplot_Dir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlot
 #                     verbose=True,
 #                     )
 
+# Create table of git statistics for FDS Validation Guide
+
+print("validation_git_stats...");         runpy.run_path("./scripts/validation_git_stats.py", run_name="__main__")
 
 # Special cases
 

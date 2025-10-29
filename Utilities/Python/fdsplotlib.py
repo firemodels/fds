@@ -89,8 +89,8 @@ def _compute_metrics_block(
 
     Returns:
       vals_flat : 1D np.array (metrics for each curve, or concatenated for 'all')
-      titles    : list of curve labels
-      per_curve_series : list of 1D arrays (for Metric='all')
+      titles    : list of metric labels
+      per_curve_series : list of per-curve metric arrays (for Metric='all')
     """
     import numpy as np
 
@@ -163,18 +163,19 @@ def _compute_metrics_block(
         else:
             out = np.nan
 
-        # MATLAB passes tiny value instead of exact zero (survives nonzeros())
         if out == 0.0:
             out = 1e-12
 
         return np.array([out]), [f"curve{idx_first}"], []
 
-    # --- metric='all': return concatenated series for each curve (minus initial) ---
+    # --- metric='all': return all finite Y values (one per data point) ---
     if metric_str == "all":
         for j in range(ncols):
-            yj = Y_sel[:, j].reshape(-1) - initial_value
+            yj = Y_sel[:, j].reshape(-1)
+            mask = np.isfinite(yj)
+            yj = yj[mask] - initial_value
             per_curve_series.append(yj)
-            titles.extend([f"curve{j+1}"] * yj.size)
+            titles.extend([f"point{k+1}_curve{j+1}" for k in range(len(yj))])
         vals_flat = np.concatenate(per_curve_series) if per_curve_series else np.array([])
         return vals_flat, titles, per_curve_series
 
@@ -203,10 +204,8 @@ def _compute_metrics_block(
         elif metric_str == "start":
             out = yj[0]
         elif metric_str == "ipct":
-            # Not implemented in this port; keep parity-friendly placeholder
-            out = 1e-12
+            out = 1e-12  # placeholder for parity
         else:
-            # Default fallback consistent with MATLAB's behavior path to non-zeros
             out = 1e-12
 
         if out == 0.0:
@@ -229,6 +228,16 @@ def dataplot(config_filename,**kwargs):
 
     # Suppress just the 'findfont' warnings from matplotlib's font manager
     logging.getLogger('matplotlib.font_manager').setLevel(logging.ERROR)
+
+    # --- Simple in-memory CSV cache to avoid redundant I/O ---
+    _csv_cache = {}
+
+    def read_csv_cached(path, **kwargs):
+        """Read CSV once per path; return cached DataFrame copy."""
+        if path not in _csv_cache:
+            _csv_cache[path] = pd.read_csv(path, **kwargs)
+        # return a shallow copy so downstream dropna/trim doesn’t mutate cache
+        return _csv_cache[path].copy()
 
     # defaults
     configdir = kwargs.get('configdir','')
@@ -309,47 +318,51 @@ def dataplot(config_filename,**kwargs):
         # Only filter by plot_list if no plot_range was passed
         C = C[C['Dataname'].str.lower().isin([p.lower() for p in plot_list])]
 
-    Plot_Filename_Last = None
-    d1_Key_Last = None
+    # --- Determine if any 'o' lines exist (only once) ---
+    otest_active = any( str(C.iloc[j]['switch_id']).strip().lower() == 'o' for j in range(len(C)) )
+
     f_Last = plt.figure()
 
-
     # loop over the rows of the config file
-    for pos, (irow, row) in enumerate(C.iterrows()):
 
-        pp = define_plot_parameters(C, pos)  # use position, not label
+    # Cache the position of __orig_index__ for speed and clarity
+    col_orig_idx = C.columns.get_loc("__orig_index__")
 
-        # ----------------------------------------------------------------------
-        # Handle MATLAB dataplot switch_id behavior (d, f, o, g, s)
-        # ----------------------------------------------------------------------
-        switch_id = str(pp.switch_id).strip().lower()
+    # Cache column positions once for speed
+    col_idx = {col: i for i, col in enumerate(C.columns)}
 
-        # Skip 's' outright
-        if switch_id == 's':
+    # Detect fast_mode: skip expensive DataFrame access when processing all rows
+    plot_list_lower = [p.lower() for p in plot_list] if plot_list else []
+
+    # Toggle stays, but defaults to fast everywhere
+    fast_mode = bool(kwargs.get('fast_mode', True))
+    if verbose:
+        print(f"[dataplot] {'Running in fast_mode (lightweight define_plot_parameters)' if fast_mode else 'Running in full mode'}")
+
+    for pos, row in enumerate(C.itertuples(index=False, name=None)):
+
+        csv_rownum = int(row[col_orig_idx]) + header_rows + 1
+        pp = define_plot_parameters(C, pos, lightweight=fast_mode)
+
+        # --- Handle MATLAB dataplot switch_id behavior (d, f, o, g, s) ---
+        if pp.switch_id == 's':
             continue
 
-        # If ANY 'o' lines exist in the filtered config C, process only those
-        otest_active = any( str(C.iloc[j]['switch_id']).strip().lower() == 'o' for j in range(len(C)) )
-
-        if otest_active and switch_id != 'o':
+        if otest_active and pp.switch_id != 'o':
             continue
 
-        # 'g' lines: generate plots but EXCLUDE from scatplot stats & drange
-        gtest = (switch_id == 'g')
+        gtest = (pp.switch_id == 'g')
+        dtest = (pp.switch_id == 'd')
+        ftest = (pp.switch_id == 'f')
 
-        # 'd' default, 'f' follow-on (your filename reuse already mimics “hold on”)
-        dtest = (switch_id == 'd')
-        ftest = (switch_id == 'f')
-
-        # If it’s none of the recognized ones, skip safely
-        if not (dtest or ftest or gtest or switch_id == 'o'):
+        if not (dtest or ftest or gtest or pp.switch_id == 'o'):
             if verbose:
-                print(f"[dataplot] Skipping unrecognized switch_id '{pp.switch_id}' on line {irow+2}")
+                print(f"[dataplot] Skipping unrecognized switch_id '{pp.switch_id}' on line {csv_rownum}")
             continue
 
-        # Track drange like MATLAB (1-based CSV lines starting at row 2)
+        # Track drange (MATLAB-style 1-based CSV row index)
         if not gtest:
-            drange.append(int(row["__orig_index__"]) + 2)
+            drange.append(int(row[col_orig_idx]) + 2)
 
         # Append metadata only for rows that should appear in scatplot
         if not gtest:
@@ -363,18 +376,21 @@ def dataplot(config_filename,**kwargs):
             Save_Group_Style.append(pp.Group_Style)
             Save_Fill_Color.append(pp.Fill_Color)
 
-            # Placeholders (we will overwrite for this row below)
             Save_Measured_Metric.append(np.nan)
             Save_Predicted_Metric.append(np.nan)
             Save_Measured_Quantity.append(None)
             Save_Predicted_Quantity.append(None)
 
         # -------------- PLOTTING + PRINT -----------------
-        # Read and prepare the experimental (d1) data, same for both cases
-        E = pd.read_csv(expdir + pp.d1_Filename,
-                        header=int(pp.d1_Col_Name_Row - 1),
-                        sep=',', engine='python', quotechar='"')
+        E = read_csv_cached(expdir + pp.d1_Filename,
+                header=int(pp.d1_Col_Name_Row - 1),
+                sep=',', engine='python', quotechar='"',
+                skip_blank_lines=True).dropna(how='all')
+
+        # Drop trailing NaN rows across all columns (MATLAB csvread behavior)
+        E = E.loc[:E.dropna(how='all').last_valid_index()]
         E.columns = E.columns.str.strip()
+
         start_idx = int(pp.d1_Data_Row - pp.d1_Col_Name_Row - 1)
         x, _ = get_data(E, pp.d1_Ind_Col_Name, start_idx)
         y, _ = get_data(E, pp.d1_Dep_Col_Name, start_idx)
@@ -417,16 +433,19 @@ def dataplot(config_filename,**kwargs):
         key_labels = (raw_keys + [None] * len(y_plot_list))[:len(y_plot_list)]
 
         # --- Create new figure or reuse last one ---
-        if pp.Plot_Filename != Plot_Filename_Last:
+        if dtest:
             if verbose:
-                csv_rownum = int(row["__orig_index__"]) + header_rows + 1  # true CSV 1-based line
                 print(f"Generating plot {csv_rownum} {pltdir}{pp.Plot_Filename}...")
             if close_figs:
                 plt.close('all')
             first_plot = True
-        else:
+        elif ftest:
             f = f_Last
             first_plot = False
+        else:
+            if verbose:
+                print(f"[dataplot] Skipping unrecognized switch_id '{pp.switch_id}' on line {csv_rownum}")
+            continue
 
         # --- Plot Exp curves (handles both cases) ---
         for i, (x_i, y_i) in enumerate(zip(x_plot_list, y_plot_list)):
@@ -449,29 +468,63 @@ def dataplot(config_filename,**kwargs):
         # --- Save measured (experimental) metric using MATLAB-equivalent logic ---
         if not gtest:
             try:
-                vals_meas, qty_meas, _ = _compute_metrics_block(
-                    x=x,
-                    Y=y,
-                    metric=pp.Metric,
-                    initial_value=float(pp.d1_Initial_Value or 0.0),
-                    comp_start=float(pp.d1_Comp_Start or np.nan),
-                    comp_end=float(pp.d1_Comp_End or np.nan),
-                    dep_comp_start=float(pp.d1_Dep_Comp_Start or np.nan),
-                    dep_comp_end=float(pp.d1_Dep_Comp_End or np.nan),
-                    variant_side="d1",
-                )
-                Save_Measured_Metric[-1] = vals_meas
-                Save_Measured_Quantity[-1] = qty_meas
+                vals_meas_list = []
+                qty_meas_list = []
+
+                if y.ndim == 2 and x.ndim == 2 and y.shape[1] == x.shape[1]:
+                    for j in range(y.shape[1]):
+                        xj = np.ravel(x[:, j])
+                        yj = np.ravel(y[:, j])
+                        mask = np.isfinite(xj) & np.isfinite(yj)
+                        xj = xj[mask]
+                        yj = yj[mask]
+                        if len(xj) > 0 and len(yj) > 0:
+                            vals_meas, qty_meas, _ = _compute_metrics_block(
+                                x=xj,
+                                Y=yj,
+                                metric=pp.Metric,
+                                initial_value=float(pp.d1_Initial_Value or 0.0),
+                                comp_start=float(pp.d1_Comp_Start or np.nan),
+                                comp_end=float(pp.d1_Comp_End or np.nan),
+                                dep_comp_start=float(pp.d1_Dep_Comp_Start or np.nan),
+                                dep_comp_end=float(pp.d1_Dep_Comp_End or np.nan),
+                                variant_side="d1",
+                            )
+                            vals_meas_list.append(vals_meas)
+                            qty_meas_list.append(qty_meas)
+                else:
+                    vals_meas, qty_meas, _ = _compute_metrics_block(
+                        x=x,
+                        Y=y,
+                        metric=pp.Metric,
+                        initial_value=float(pp.d1_Initial_Value or 0.0),
+                        comp_start=float(pp.d1_Comp_Start or np.nan),
+                        comp_end=float(pp.d1_Comp_End or np.nan),
+                        dep_comp_start=float(pp.d1_Dep_Comp_Start or np.nan),
+                        dep_comp_end=float(pp.d1_Dep_Comp_End or np.nan),
+                        variant_side="d1",
+                    )
+                    vals_meas_list = [vals_meas]
+                    qty_meas_list = [qty_meas]
+
+                Save_Measured_Metric[-1] = np.array(vals_meas_list, dtype=object)
+                Save_Measured_Quantity[-1] = np.array(qty_meas_list, dtype=object)
+
             except Exception as e:
                 print(f"[dataplot] Error computing measured metric for {pp.Dataname}: {e}")
                 Save_Measured_Metric[-1] = np.array([])
                 Save_Measured_Quantity[-1] = []
 
         # ------------------- MODEL (d2) -------------------
-        M = pd.read_csv(cmpdir + pp.d2_Filename,
-                        header=int(pp.d2_Col_Name_Row - 1),
-                        sep=',', engine='python', quotechar='"')
+        M = read_csv_cached(cmpdir + pp.d2_Filename,
+                header=int(pp.d2_Col_Name_Row - 1),
+                sep=',', engine='python', quotechar='"',
+                skip_blank_lines=True).dropna(how='all')
+
+        # Drop trailing NaN rows across all columns (MATLAB csvread behavior)
+        M = M.loc[:M.dropna(how='all').last_valid_index()]
         M.columns = M.columns.str.strip()
+
         start_idx = int(pp.d2_Data_Row - pp.d2_Col_Name_Row - 1)
 
         # --- Define version string ---
@@ -546,42 +599,78 @@ def dataplot(config_filename,**kwargs):
         # --- Save predicted (model) metric using MATLAB-equivalent logic ---
         if not gtest:
             try:
-                vals_pred, qty_pred, _ = _compute_metrics_block(
-                    x=x,
-                    Y=y,
-                    metric=pp.Metric,
-                    initial_value=float(pp.d2_Initial_Value or 0.0),
-                    comp_start=float(pp.d2_Comp_Start or np.nan),
-                    comp_end=float(pp.d2_Comp_End or np.nan),
-                    dep_comp_start=float(pp.d2_Dep_Comp_Start or np.nan),
-                    dep_comp_end=float(pp.d2_Dep_Comp_End or np.nan),
-                    variant_side="d2",
-                )
+                vals_pred_list = []
+                qty_pred_list = []
 
-                # --- Early consistency & padding for Metric='all' ---
-                if isinstance(pp.Metric, str) and pp.Metric.strip().lower() == 'all':
-                    mvec = np.atleast_1d(Save_Measured_Metric[-1])
-                    pvec = np.atleast_1d(vals_pred)
-                    len_m, len_p = mvec.size, pvec.size
+                if y.ndim == 2 and x.ndim == 2 and y.shape[1] == x.shape[1]:
+                    # Multiple paired curves (e.g., z/L jet, 62 kW, 31 kW)
+                    for j in range(y.shape[1]):
+                        xj = np.ravel(x[:, j])
+                        yj = np.ravel(y[:, j])
+                        mask = np.isfinite(xj) & np.isfinite(yj)
+                        xj = xj[mask]
+                        yj = yj[mask]
+                        if len(xj) > 0 and len(yj) > 0:
+                            vals_pred, qty_pred, _ = _compute_metrics_block(
+                                x=xj,
+                                Y=yj,
+                                metric=pp.Metric,
+                                initial_value=float(pp.d2_Initial_Value or 0.0),
+                                comp_start=float(pp.d2_Comp_Start or np.nan),
+                                comp_end=float(pp.d2_Comp_End or np.nan),
+                                dep_comp_start=float(pp.d2_Dep_Comp_Start or np.nan),
+                                dep_comp_end=float(pp.d2_Dep_Comp_End or np.nan),
+                                variant_side="d2",
+                            )
+                            vals_pred_list.append(vals_pred)
+                            qty_pred_list.append(qty_pred)
+                else:
+                    # Single curve (1D)
+                    vals_pred, qty_pred, _ = _compute_metrics_block(
+                        x=x,
+                        Y=y,
+                        metric=pp.Metric,
+                        initial_value=float(pp.d2_Initial_Value or 0.0),
+                        comp_start=float(pp.d2_Comp_Start or np.nan),
+                        comp_end=float(pp.d2_Comp_End or np.nan),
+                        dep_comp_start=float(pp.d2_Dep_Comp_Start or np.nan),
+                        dep_comp_end=float(pp.d2_Dep_Comp_End or np.nan),
+                        variant_side="d2",
+                    )
+                    vals_pred_list = [vals_pred]
+                    qty_pred_list = [qty_pred]
+
+                # --- MATLAB-compatible consistency checks (Metric='all' padding, etc.) ---
+                vals_meas_entry = Save_Measured_Metric[-1]
+                metric_str = str(pp.Metric or '').strip().lower()
+
+                # Always flatten any nested list-of-arrays first
+                flat_pred = np.concatenate([
+                    np.atleast_1d(v) for v in vals_pred_list if v is not None and np.size(v) > 0
+                ]) if any(np.size(v) > 0 for v in vals_pred_list) else np.array([])
+
+                flat_meas = np.atleast_1d(vals_meas_entry).ravel()
+
+                if metric_str == 'all':
+                    len_m, len_p = flat_meas.size, flat_pred.size
                     if len_m != len_p:
                         maxlen = max(len_m, len_p)
                         if len_m < maxlen:
-                            mvec = np.pad(mvec, (0, maxlen - len_m), constant_values=np.nan)
+                            flat_meas = np.pad(flat_meas, (0, maxlen - len_m), constant_values=np.nan)
                         if len_p < maxlen:
-                            pvec = np.pad(pvec, (0, maxlen - len_p), constant_values=np.nan)
-                        Save_Measured_Metric[-1] = mvec
-                        vals_pred = pvec
+                            flat_pred = np.pad(flat_pred, (0, maxlen - len_p), constant_values=np.nan)
+                        Save_Measured_Metric[-1] = flat_meas
                         print(f"[dataplot] Padded {pp.Dataname} ({pp.Quantity}) from ({len_m},{len_p}) to {maxlen}")
                 else:
-                    len_m = np.size(Save_Measured_Metric[-1])
-                    len_p = np.size(vals_pred)
+                    len_m = flat_meas.size
+                    len_p = flat_pred.size
                     if len_m != len_p:
-                        print(f"[dataplot] Length mismatch at index {irow+2}: "
-                              f"{pp.Dataname} | {pp.Quantity} | "
-                              f"Measured={len_m}, Predicted={len_p}")
+                        print(f"[dataplot] Length mismatch at CSV row {csv_rownum}: "
+                              f"{pp.Dataname} | {pp.Quantity} | Measured={len_m}, Predicted={len_p}")
 
-                Save_Predicted_Metric[-1] = vals_pred
-                Save_Predicted_Quantity[-1] = qty_pred
+                Save_Predicted_Metric[-1] = flat_pred
+                Save_Predicted_Quantity[-1] = np.array(qty_pred_list, dtype=object)
+
             except Exception as e:
                 print(f"[dataplot] Error computing predicted metric for {pp.Dataname}: {e}")
                 Save_Predicted_Metric[-1] = np.array([])
@@ -595,8 +684,6 @@ def dataplot(config_filename,**kwargs):
 
         plt.savefig(pltdir + pp.Plot_Filename + '.pdf', backend='pdf')
 
-        Plot_Filename_Last = pp.Plot_Filename
-        d1_Key_Last = pp.d1_Key
         f_Last = f
 
     # --- MATLAB-compatible output scaffolding for scatplot interface ---
@@ -620,16 +707,24 @@ def dataplot(config_filename,**kwargs):
         print(f"[dataplot] Error assembling saved_data: {e}")
         saved_data = []
 
-    # --- quick parity audit before returning ---
-    for i, (m, p, name, qty) in enumerate(zip(Save_Measured_Metric,
-                                              Save_Predicted_Metric,
-                                              Save_Dataname,
-                                              Save_Quantity)):
+    # --- MATLAB-compatible parity audit before returning ---
+    for i, (m, p, name, qty) in enumerate(zip(
+        Save_Measured_Metric,
+        Save_Predicted_Metric,
+        Save_Dataname,
+        Save_Quantity
+    )):
         len_m = np.size(m) if isinstance(m, np.ndarray) else 0
         len_p = np.size(p) if isinstance(p, np.ndarray) else 0
+
+        # Get original CSV row number (1-based)
+        csv_rownum = drange[i] if i < len(drange) else "?"
+
         if len_m != len_p:
-            print(f"[dataplot] Length mismatch at index {i}: "
-                  f"{name} | {qty} | Measured={len_m}, Predicted={len_p}")
+            print(
+                f"[dataplot] Length mismatch at CSV row {csv_rownum}: "
+                f"{name} | {qty} | Measured={len_m}, Predicted={len_p}"
+            )
 
     print("[dataplot] returning saved_data and drange")
     return saved_data, drange
@@ -1361,10 +1456,100 @@ def matlab_legend_to_matplotlib(position):
     return mapping.get(position.strip().lower(), 'best')
 
 
-def define_plot_parameters(D, irow):
+def define_plot_parameters(D, irow, lightweight=False):
     import numpy as np
 
     class plot_parameters:
+        def __init__(self):
+            pass
+
+        def __repr__(self):
+            return str(self.__dict__)
+
+    # --- FAST PATH ----------------------------------------------------------
+    if lightweight:
+        col_idx = {col: i for i, col in enumerate(D.columns)}
+        row = D.iloc[irow].values
+
+        def get(col, default=None):
+            idx = col_idx.get(col)
+            return row[idx] if idx is not None else default
+
+        d = plot_parameters()
+
+        # Core identifiers
+        d.switch_id       = get('switch_id')
+        d.Dataname        = get('Dataname')
+        d.VerStr_Filename = get('VerStr_Filename')
+        d.Plot_Filename   = get('Plot_Filename')
+        d.Plot_Title      = get('Plot_Title')
+        d.Quantity        = get('Quantity')
+        d.Metric          = get('Metric')
+        d.Error_Tolerance = get('Error_Tolerance')
+
+        # File and column info
+        d.d1_Filename       = get('d1_Filename')
+        d.d1_Col_Name_Row   = get('d1_Col_Name_Row', 1)
+        d.d1_Data_Row       = get('d1_Data_Row', 2)
+        d.d1_Ind_Col_Name   = get('d1_Ind_Col_Name')
+        d.d1_Dep_Col_Name   = get('d1_Dep_Col_Name')
+        d.d1_Key            = get('d1_Key', '')
+        d.d1_Style          = get('d1_Style', '')
+        d.d1_Comp_Start     = get('d1_Comp_Start', np.nan)
+        d.d1_Comp_End       = get('d1_Comp_End', np.nan)
+        d.d1_Dep_Comp_Start = get('d1_Dep_Comp_Start', np.nan)
+        d.d1_Dep_Comp_End   = get('d1_Dep_Comp_End', np.nan)
+        d.d1_Initial_Value  = get('d1_Initial_Value', 0.0)
+
+        d.d2_Filename       = get('d2_Filename')
+        d.d2_Col_Name_Row   = get('d2_Col_Name_Row', 1)
+        d.d2_Data_Row       = get('d2_Data_Row', 2)
+        d.d2_Ind_Col_Name   = get('d2_Ind_Col_Name')
+        d.d2_Dep_Col_Name   = get('d2_Dep_Col_Name')
+        d.d2_Key            = get('d2_Key', '')
+        d.d2_Style          = get('d2_Style', '')
+        d.d2_Comp_Start     = get('d2_Comp_Start', np.nan)
+        d.d2_Comp_End       = get('d2_Comp_End', np.nan)
+        d.d2_Dep_Comp_Start = get('d2_Dep_Comp_Start', np.nan)
+        d.d2_Dep_Comp_End   = get('d2_Dep_Comp_End', np.nan)
+        d.d2_Initial_Value  = get('d2_Initial_Value', 0.0)
+
+        # Plot formatting
+        d.Ind_Title        = get('Ind_Title', '')
+        d.Dep_Title        = get('Dep_Title', '')
+        d.Min_Ind          = get('Min_Ind')
+        d.Max_Ind          = get('Max_Ind')
+        d.Min_Dep          = get('Min_Dep')
+        d.Max_Dep          = get('Max_Dep')
+        d.Scale_Ind        = get('Scale_Ind', 1.0)
+        d.Scale_Dep        = get('Scale_Dep', 1.0)
+        d.Flip_Axis        = get('Flip_Axis', '')
+        d.Plot_Type        = get('Plot_Type', 'linear')
+        d.Key_Position     = get('Key_Position', 'best')
+        d.Title_Position   = get('Title_Position', '')
+        d.Legend_XYWidthHeight = get('Legend_XYWidthHeight', '')
+        d.Paper_Width_Factor   = get('Paper_Width_Factor', 1.0)
+
+        # Grouping / style info
+        d.Group_Key_Label  = get('Group_Key_Label')
+        d.Group_Style      = get('Group_Style')
+        d.Fill_Color       = get('Fill_Color')
+        d.Font_Interpreter = get('Font_Interpreter')
+
+        # --- sanitization for human-facing strings ---
+        d.Plot_Title      = sanitize(safe_strip(d.Plot_Title))
+        d.Ind_Title       = sanitize(safe_strip(d.Ind_Title))
+        d.Dep_Title       = sanitize(safe_strip(d.Dep_Title))
+        d.Quantity        = sanitize(safe_strip(d.Quantity))
+        d.Metric          = sanitize(safe_strip(d.Metric))
+        d.Group_Key_Label = sanitize(safe_strip(d.Group_Key_Label))
+        d.d1_Key          = sanitize(safe_strip(d.d1_Key))
+        d.d2_Key          = sanitize(safe_strip(d.d2_Key))
+
+        return d
+
+    # --- FULL PATH ----------------------------------------------------------
+    class plot_parameters_full(plot_parameters):
         def __init__(self):
             self.switch_id            = D.values[irow,D.columns.get_loc('switch_id')]
             self.Dataname             = D.values[irow,D.columns.get_loc('Dataname')]
@@ -1423,12 +1608,9 @@ def define_plot_parameters(D, irow):
             self.Fill_Color           = D.values[irow,D.columns.get_loc('Fill_Color')]
             self.Font_Interpreter     = D.values[irow,D.columns.get_loc('Font_Interpreter')]
 
-        def __repr__(self):
-            return str(self.__dict__)
+    d = plot_parameters_full()
 
-    d = plot_parameters()
-
-    # Explicit sanitization of only the human-facing fields
+    # --- sanitization block (unchanged) ---
     d.Plot_Title      = sanitize(safe_strip(d.Plot_Title))
     d.Ind_Title       = sanitize(safe_strip(d.Ind_Title))
     d.Dep_Title       = sanitize(safe_strip(d.Dep_Title))

@@ -7461,6 +7461,12 @@ READ_MATL_LOOP: DO N=1,N_MATL
             PEAK_REACTION_RATE = 2._EB*ML%HEATING_RATE(NR)/ML%PYROLYSIS_RANGE(NR)
          ENDIF
          ML%E(NR) = EXP(1._EB)*PEAK_REACTION_RATE*R0*ML%TMP_REF(NR)**2/ML%HEATING_RATE(NR)
+         ! 0.0001 HUGE_EB is used so the reaction rate is not overflowed when multiplied by RHO.
+         IF (LOG(0.0001_EB*HUGE_EB)*R0*ML%TMP_REF(NR) < ML%E(NR)) THEN
+            WRITE(MESSAGE,'(3A,E10.3)') 'ERROR(269): MATL ',TRIM(ML%ID),' The specified pyrolysis parameters result in A >',&
+               0.0001_EB*HUGE_EB
+            CALL SHUTDOWN(MESSAGE) ; RETURN
+         ENDIF
          ML%A(NR) = EXP(1._EB)*PEAK_REACTION_RATE*EXP(ML%E(NR)/(R0*ML%TMP_REF(NR)))
       ENDIF
 

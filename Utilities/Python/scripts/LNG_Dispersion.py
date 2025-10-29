@@ -43,8 +43,8 @@ H2 = ['x','X_CH4']
 
 for j in range(13):
     # Read devc and exp data (skip header lines to match MATLAB importdata)
-    M = pd.read_csv(os.path.join(outdir, f"{labels[j]}_devc.csv"), skiprows=2)
-    E = pd.read_csv(os.path.join(expdir, f"{labels[j]}_exp.csv"), skiprows=2)
+    M = pd.read_csv(os.path.join(outdir, f"{labels[j]}_devc.csv"), skiprows=1)
+    E = pd.read_csv(os.path.join(expdir, f"{labels[j]}_exp.csv"), skiprows=1)
     
     # Prepare output file
     with open(os.path.join(outdir, f"{labels[j]}.csv"), 'w') as fid:
