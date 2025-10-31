@@ -126,4 +126,3 @@ with open(output_filename, 'w') as fid:
     )
     fid.write(line_10)
 
-print(f"Calculation complete. Results written to: {output_filename}")
