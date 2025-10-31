@@ -77,6 +77,5 @@ def plot_mass_balance(chid, title_text):
 
 if __name__ == '__main__':
     """Main execution block"""
-    print("Running mass balance gas volume verification plot...")
     error = plot_mass_balance('mass_balance_gas_volume', '')
-    print("Mass balance gas volume verification completed successfully!")
+
