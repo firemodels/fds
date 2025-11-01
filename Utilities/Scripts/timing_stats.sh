@@ -40,10 +40,16 @@ outfile=$fdsbase.out
 cpufile=${fdsbase}_cpu.csv
 cd $dir
 if ! [ -e $outfile ]; then
-  exit
+  outfile=${fdsbase}_cat.out
+  if ! [ -e $outfile ]; then
+    exit
+  fi
 fi
 if ! [ -e $cpufile ]; then
-  exit
+  cpufile=${fdsbase}_cat_cpu.csv
+  if ! [ -e $cpufile ]; then
+    exit
+  fi
 fi
    # Grep for wall clock time
    WALL_CLOCK_TIME_VALUE=`grep -H "Total Elapsed Wall Clock Time (s):" "$outfile" | awk -F' ' '{print $(NF)}'`
