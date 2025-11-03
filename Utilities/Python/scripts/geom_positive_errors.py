@@ -65,9 +65,5 @@ def check_positive_errors():
 
 if __name__ == '__main__':
     """Main execution block"""
-    print("Running geometry positive errors verification...")
     success = check_positive_errors()
-    if success:
-        print("Geometry positive errors verification completed successfully!")
-    else:
-        print("Geometry positive errors verification completed with errors.")
+

@@ -84,7 +84,6 @@ def plot_mass_balance(chid, title_text):
 if __name__ == '__main__':
     """Main execution block"""
     
-    print("Running mass balance verification plots...")
     error1 = plot_mass_balance('mass_flux_wall_yindex','Primitive Species Mass Balance')
     error2 = plot_mass_balance('mass_flux_wall_zindex','Lumped Species Mass Balance')
-    print("Mass balance verification completed successfully!")
+

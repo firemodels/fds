@@ -59,16 +59,11 @@ outdata[:,1] = urms
 outdata[:,2] = uwcov
 outdata[:,3] = uwcorr
 
-print(header)
-print(outdata)
-
 with open(datadir+'rms_cov_corr.csv','w') as fid:
    fid.write(f"{header}\n")
    string_with_separator = np.array2string(outdata[0,:], separator=', ')[1:-1] # [1:-1] removes brackets
-   print(string_with_separator)
    fid.write(f"{string_with_separator}\n")
    string_with_separator = np.array2string(outdata[1,:], separator=', ')[1:-1] # [1:-1] removes brackets
-   print(string_with_separator)
    fid.write(f"{string_with_separator}\n")
 
 

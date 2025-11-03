@@ -1,4 +1,6 @@
 
+# For each experiment, make a contour plot of the extent of a single temperature contour at each time during the experiment
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -20,8 +22,6 @@ test = ['IFAB-07', 'IFAB-08', 'IFAB-09', 'IFAB-10', 'IFAB-11', 'IFAB-13', 'IFAB-
 test2 = ['Test 7', 'Test 8', 'Test 9', 'Test 10', 'Test 11', 'Test 13', 'Test 14', 'Test 15', 'Test 19', 'Test 22', 'Test 24']
 single_level = [50]
 setpoint = [10000, 400, 399, 338, 240, 322, 390, 420, 360, 10000, 10000]
-
-# For each experiment, make a contour plot of the extent of a single temperature contour at each time during the experiment
 
 for k in range(11):  # Experiments
 

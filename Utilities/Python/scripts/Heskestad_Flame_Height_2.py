@@ -1,4 +1,6 @@
 
+# Plot results of the Heskestad_Flame_Height cases against various experimental correlations
+
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd

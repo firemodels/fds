@@ -50,9 +50,5 @@ def check_geom_channel():
 
 if __name__ == '__main__':
     """Main execution block"""
-    print("Running geom channel test verification...")
     success = check_geom_channel()
-    if success:
-        print("Geom channel test verification completed successfully!")
-    else:
-        print("Geom channel test verification completed with errors.")
+
