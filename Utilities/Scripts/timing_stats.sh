@@ -1,7 +1,7 @@
 #!/bin/bash
 # this script assumes it is being run in Verification
 is_benchmark="no"
-while getopts 'Ad:po:t' OPTION
+while getopts 'Ad:p:o:tT:' OPTION
 do
 case $OPTION  in
   A)
@@ -17,6 +17,9 @@ case $OPTION  in
    dummy="$OPTARG"
    ;;
   t)
+   dummy=1
+   ;;
+  T)
    dummy=1
    ;;
 esac
@@ -59,20 +62,30 @@ fi
    CPU_TIME=`cat "$cpufile" | awk '{if(NR>1)print}' | awk -F',' '{print $(NF)}'`
    for j in $CPU_TIME
    do
-      jafter=`echo ${j} | sed -e 's/[eE]+*/\\*10\\^/'`
-      jafter=`echo "$jafter" | bc`
-      TOTAL_CPU_TIME=`echo "$TOTAL_CPU_TIME+$jafter" | bc`
+      jafter=`echo ${j} | sed 's/\([0-9.]\+\)[eE][+]\?\([0-9-]\+\)/\1*10^\2/g'`
+      jafter=`echo "$jafter" | bc -l `
+      TOTAL_CPU_TIME=`echo "$TOTAL_CPU_TIME+$jafter" | bc `
    done
+   TOTAL_CPU_TIME=$(echo "$TIMING_CPU_TIME" | sed 's/0*$//; s/\.$//')
+   if [ "$TOTAL_CPU_TIME" == "" ]; then
+     TOTAL_CPU_TIME=0.0
+   fi
+   CPU_TIME=$TOTAL_CPU_TIME
 
    # Grep for number of cells in each dimension
-   X_CELLS=`grep -H "Cells in the X" $outfile | awk -F' ' '{print $NF}'`
+   X_CELLS="`grep -H "Cells in the X" $outfile | awk -F' ' '{print $NF}'`"
+   set -- $X_CELLS
+   let numx=$#
    Y_CELLS=`grep -H "Cells in the Y" $outfile | awk -F' ' '{print $NF}'`
    Z_CELLS=`grep -H "Cells in the Z" $outfile | awk -F' ' '{print $NF}'`
-
    # Sum over the number of cells (for multi-mesh cases)
-   for j in $X_CELLS
-   do
-      let NUM_TOTAL_CELLS+=`echo "$X_CELLS * $Y_CELLS * $Z_CELLS" | bc`
+   NUM_TOTAL_CELLS=0
+   for i in $(seq 1 $numx);do
+       XI=`echo $X_CELLS | awk -v var="$i" '{print $var}'`
+       YI=`echo $Y_CELLS | awk -v var="$i" '{print $var}'`
+       ZI=`echo $Z_CELLS | awk -v var="$i" '{print $var}'`
+       sumxyz=`echo "$XI * $YI * $ZI" | bc`
+       NUM_TOTAL_CELLS=`echo "$NUM_TOTAL_CELLS + $sumxyz" | bc`
    done
 
    # Grep for number of time steps
