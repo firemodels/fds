@@ -160,7 +160,6 @@ header1_expected = ['Mixture_Fraction', 'Temperature', 'Fuel', 'Ox', 'Prod']
 # Create DataFrame for easy CSV writing with header
 df_expected = pd.DataFrame(burke_expected, columns=header1_expected)
 df_expected.to_csv(base_dir+'burke_schumann_expected.csv', index=False)
-print(f"Written expected data to burke_schumann_expected.csv")
 
 # 2. Write FDS Data
 burke_FDS = np.zeros((len(mix_frac[0, :]), 5)) # 15 rows, 5 columns
@@ -177,4 +176,3 @@ header1_FDS = ['Mixture_Fraction', 'FDS_Temperature', 'FDS_Fuel', 'FDS_Ox', 'FDS
 # Create DataFrame for easy CSV writing with header
 df_FDS = pd.DataFrame(burke_FDS, columns=header1_FDS)
 df_FDS.to_csv(base_dir+'burke_schumann_FDS.csv', index=False)
-print(f"Written FDS data to burke_schumann_FDS.csv")

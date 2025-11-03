@@ -76,11 +76,10 @@ def plot_mass_balance(chid, title_text, mass_id, devc_id, y_min=None, y_max=None
 
 if __name__ == '__main__':
     """Main execution block"""    
-    print("Running mass balance reac verification plots...")
     error1 = plot_mass_balance('mass_balance_reac', 'Propane Mass Balance', 'PROPANE', 'C3H8',y_min=-0.15,y_max=0.1,ynumticks=6)
     error2 = plot_mass_balance('mass_balance_reac', 'Oxygen Mass Balance', 'OXYGEN', 'O2',y_min=-2,y_max=1.5,ynumticks=8)
     error3 = plot_mass_balance('mass_balance_reac', 'Nitrogen Mass Balance', 'NITROGEN', 'N2',y_min=-6,y_max=4,ynumticks=6)
     error4 = plot_mass_balance('mass_balance_reac', 'Carbon Dioxide Mass Balance', 'CARBON DIOXIDE', 'CO2',y_min=-0.4,y_max=0.4,ynumticks=5)
     error5 = plot_mass_balance('mass_balance_reac', 'Water Vapor Mass Balance', 'WATER VAPOR', 'H2O',y_min=-0.2,y_max=0.2,ynumticks=5)
     error6 = plot_mass_balance('mass_balance_reac', 'Soot Mass Balance', 'SOOT', 'Soot',y_min=-0.002,y_max=0.002,ynumticks=5)
-    print("Mass balance reac verification completed successfully!")
+

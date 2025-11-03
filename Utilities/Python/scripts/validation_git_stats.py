@@ -36,13 +36,13 @@ def MAKEGITENTRY(case_name):
         # Get git date
         gitdate = ''
         try:
-            result = subprocess.run( ['git show -s --format=%aD', gitrevshort], capture_output=True, text=True)
+            result = subprocess.run( ['git', 'show', '-s', '--format=%aD', gitrevshort], capture_output=True, text=True)
             if result.returncode == 0 and result.stdout.strip():
                 date_parts = result.stdout.strip().split()
                 if len(date_parts) >= 5:
                     gitdate = f"{date_parts[2]} {date_parts[1]}, {date_parts[3]}"
         except Exception:
-            gitdate = ''
+            gitdate = 'Unknown'
 
         # Escape underscores for LaTeX
         dir_escaped = case_name.replace('_', '\\_')

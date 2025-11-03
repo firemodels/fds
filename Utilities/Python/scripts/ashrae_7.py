@@ -77,4 +77,3 @@ with open(texname, 'w') as fid:
    fid.write('\\end{tabular}\n')
    fid.write('\\end{center}\n')
 
-print(f"\n? Successfully generated LaTeX table in {texname}")

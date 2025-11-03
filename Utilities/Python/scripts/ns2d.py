@@ -84,4 +84,3 @@ with open(datadir+'ns2d_nupt1_error.csv', 'w') as fid12:
    for j in range(4):
       fid12.write(f"{dx[j]:8.3f}, {dx[j]**2:8.3f}, {rms[j, 1]:8.4f}\n")
 
-print("Processing complete. Exact solution files and RMS error summary files created.")
