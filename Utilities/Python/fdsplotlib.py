@@ -417,10 +417,10 @@ def dataplot(config_filename, **kwargs):
                 x_data=y_i if flip_axis else x_i,
                 y_data=x_i if flip_axis else y_i,
                 figure_handle=None if (first_plot and i == 0) else f,
-                data_label=d1_key_labels[i],      # <-- use d1 labels
+                data_label=d1_key_labels[i],
                 x_label=pp.Dep_Title if flip_axis else pp.Ind_Title,
                 y_label=pp.Ind_Title if flip_axis else pp.Dep_Title,
-                marker_style=d1_styles[i],        # <-- use d1 styles
+                marker_style=d1_styles[i],
                 x_min=pp.Min_Dep if flip_axis else pp.Min_Ind,
                 x_max=pp.Max_Dep if flip_axis else pp.Max_Ind,
                 y_min=pp.Min_Ind if flip_axis else pp.Min_Dep,
@@ -527,8 +527,8 @@ def dataplot(config_filename, **kwargs):
                 y_data=x_i if flip_axis else y_i,
                 revision_label=version_string,
                 figure_handle=f,                  # keep same figure
-                data_label=d2_key_labels[i],      # <-- use d2 labels (e.g., "FDS (...)")
-                line_style=d2_styles[i],          # <-- use d2 styles
+                data_label=d2_key_labels[i],
+                line_style=d2_styles[i],
                 x_label=pp.Dep_Title if flip_axis else pp.Ind_Title,
                 y_label=pp.Ind_Title if flip_axis else pp.Dep_Title,
                 x_min=pp.Min_Dep if flip_axis else pp.Min_Ind,
