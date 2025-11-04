@@ -807,6 +807,7 @@ SUBROUTINE CVODE_SERIAL(CC,ZZ_0, TMP_IN, TMP_UNMIX, PR_IN, ZETA0, TAU_MIX, CELL_
                         TMP_OUT, CHEM_TIME, WRITE_SUBSTEPS, CVODE_CALL_OPTION)
 USE PHYSICAL_FUNCTIONS, ONLY : MOLAR_CONC_TO_MASS_FRAC, CALC_EQUIV_RATIO, GET_ENTHALPY, GET_MOLECULAR_WEIGHT
 USE COMP_FUNCTIONS, ONLY: GET_FILE_NUMBER
+USE CHEMCONS, ONLY: CVODE_WARNING_CELLS,CVODE_ERR_CODE_MIN,CVODE_ERR_CODE_MAX
 USE GLOBAL_CONSTANTS
 USE FCVODE_MOD                 ! FORTRAN INTERFACE TO CVODE
 USE FSUNDIALS_CONTEXT_MOD      ! FORTRAN INTERFACE TO SUNCONTEXT
@@ -1015,15 +1016,18 @@ IF (IERR_C /= 0) THEN
    ENDIF
 
    IF (IERR_C .NE. CV_SUCCESS) THEN
-      IF (IERR_C == CV_TOO_MUCH_WORK) THEN
-         WRITE(LU_ERR,'(A, 2E18.8, I8, A)')" WARN: CVODE took all internal substeps. CUR_CFD_TIME, DT, MAXTRY=", CUR_CFD_TIME, &
-                     (TEND-TCUR), MAXTRY, ". If the warning persists, reduce the timestep."
-      ELSE
-         WRITE(LU_ERR,'(A, I4, A, 2E18.8, A)')" WARN: CVODE didn't finish ODE solution with message code:", IERR_C, &
-                        " and CUR_CFD_TIME, DT=", CUR_CFD_TIME, (TEND-TCUR), ". If the warning persists, reduce the timestep."
+      IF(IERR_C>=CVODE_ERR_CODE_MIN .AND. IERR_C<=CVODE_ERR_CODE_MAX) THEN
+         CVODE_WARNING_CELLS(IERR_C) = CVODE_WARNING_CELLS(IERR_C) + 1
       ENDIF   
-
       IF (DEBUG) THEN
+         IF (IERR_C == CV_TOO_MUCH_WORK) THEN
+            WRITE(LU_ERR,'(A, 2E18.8, I8, A)')" WARN: CVODE took all internal substeps. CUR_CFD_TIME, DT, MAXTRY=", CUR_CFD_TIME, &
+                        (TEND-TCUR), MAXTRY, ". If the warning persists, reduce the timestep."
+         ELSE
+            WRITE(LU_ERR,'(A, I4, A, 2E18.8, A)')" WARN: CVODE didn't finish ODE solution with message code:", IERR_C, &
+                           " and CUR_CFD_TIME, DT=", CUR_CFD_TIME, (TEND-TCUR), ". If the warning persists, reduce the timestep."
+         ENDIF
+
          CALL MOLAR_CONC_TO_MASS_FRAC(CC(1:N_TRACKED_SPECIES), ZZ(1:N_TRACKED_SPECIES))
          CALL CALC_EQUIV_RATIO(ZZ(1:N_TRACKED_SPECIES), EQUIV)
          DO NS = 1, N_TRACKED_SPECIES
