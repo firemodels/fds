@@ -223,8 +223,8 @@ def dataplot(config_filename, **kwargs):
     import matplotlib.pyplot as plt
     import pandas as pd
     import numpy as np
-    import logging
     from matplotlib import rc
+    import logging
 
     logging.getLogger('matplotlib.font_manager').setLevel(logging.ERROR)
 
