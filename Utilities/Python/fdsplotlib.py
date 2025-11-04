@@ -352,12 +352,10 @@ def dataplot(config_filename, **kwargs):
             Save_Predicted_Quantity.append(None)
 
         # ---------------------- LOAD EXP ----------------------
-        E = read_csv_cached(
-            expdir + pp.d1_Filename,
-            header=int(pp.d1_Col_Name_Row - 1),
-            sep=',', engine='python', quotechar='"',
-            skip_blank_lines=True
-        ).dropna(how='all')
+        E = read_csv_cached(expdir + pp.d1_Filename,
+                            header=int(pp.d1_Col_Name_Row - 1),
+                            sep=',', engine='python', quotechar='"',
+                            skip_blank_lines=True).dropna(how='all')
         E = E.loc[:E.dropna(how='all').last_valid_index()]
         E.columns = E.columns.str.strip()
         start_idx = int(pp.d1_Data_Row - pp.d1_Col_Name_Row - 1)
@@ -472,12 +470,10 @@ def dataplot(config_filename, **kwargs):
                 Save_Measured_Quantity[-1] = []
 
         # ---------------------- LOAD MODEL ----------------------
-        M = read_csv_cached(
-            cmpdir + pp.d2_Filename,
-            header=int(pp.d2_Col_Name_Row - 1),
-            sep=',', engine='python', quotechar='"',
-            skip_blank_lines=True
-        ).dropna(how='all')
+        M = read_csv_cached(cmpdir + pp.d2_Filename,
+                            header=int(pp.d2_Col_Name_Row - 1),
+                            sep=',', engine='python', quotechar='"',
+                            skip_blank_lines=True).dropna(how='all')
         M = M.loc[:M.dropna(how='all').last_valid_index()]
         M.columns = M.columns.str.strip()
         start_idx = int(pp.d2_Data_Row - pp.d2_Col_Name_Row - 1)
@@ -547,12 +543,10 @@ def dataplot(config_filename, **kwargs):
                 meas_list, pred_list, qty_pred_list = [], [], []
 
                 # Load experimental again for alignment (safe; cached)
-                E = read_csv_cached(
-                    expdir + pp.d1_Filename,
-                    header=int(pp.d1_Col_Name_Row - 1),
-                    sep=',', engine='python', quotechar='"',
-                    skip_blank_lines=True
-                ).dropna(how='all')
+                E = read_csv_cached(expdir + pp.d1_Filename,
+                                    header=int(pp.d1_Col_Name_Row - 1),
+                                    sep=',', engine='python', quotechar='"',
+                                    skip_blank_lines=True).dropna(how='all')
                 E.columns = E.columns.str.strip()
                 start_idx_exp = int(pp.d1_Data_Row - pp.d1_Col_Name_Row - 1)
                 x_exp, _ = get_data(E, pp.d1_Ind_Col_Name, start_idx_exp)
