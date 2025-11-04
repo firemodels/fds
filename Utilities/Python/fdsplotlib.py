@@ -268,8 +268,14 @@ def dataplot(config_filename, **kwargs):
     }
     safe_na_values = default_na
 
-    df = pd.read_csv(configdir + config_filename, sep=',', engine='python',
-                     quotechar='"', na_values=safe_na_values, keep_default_na=False)
+    df = pd.read_csv(
+        configdir + config_filename,
+        sep=',',
+        engine='python',
+        quotechar='"',
+        na_values=safe_na_values,
+        keep_default_na=False
+    )
     df["__orig_index__"] = df.index
     C = df.where(pd.notnull(df), None)
 
@@ -355,6 +361,7 @@ def dataplot(config_filename, **kwargs):
         start_idx = int(pp.d1_Data_Row - pp.d1_Col_Name_Row - 1)
         x, _ = get_data(E, pp.d1_Ind_Col_Name, start_idx)
         y, _ = get_data(E, pp.d1_Dep_Col_Name, start_idx)
+
         flip_axis = str(pp.Flip_Axis).strip().lower() in ['yes', 'true', '1']
         x_scale = float(pp.Scale_Ind or 1.0)
         y_scale = float(pp.Scale_Dep or 1.0)
@@ -396,15 +403,22 @@ def dataplot(config_filename, **kwargs):
         else:
             continue
 
+        # --- Styles and keys (EXP d1) ---
+        d1_raw_styles = [c.strip() for c in (pp.d1_Style or '').split('|')] if pp.d1_Style else []
+        d1_styles = (d1_raw_styles + [None] * len(y_plot_list))[:len(y_plot_list)]
+        d1_raw_keys = [c.strip() for c in (pp.d1_Key or '').split('|')] if pp.d1_Key else []
+        d1_key_labels = (d1_raw_keys + [None] * len(y_plot_list))[:len(y_plot_list)]
+
+        # --- Plot Exp curves ---
         for i, (x_i, y_i) in enumerate(zip(x_plot_list, y_plot_list)):
             f = plot_to_fig(
                 x_data=y_i if flip_axis else x_i,
                 y_data=x_i if flip_axis else y_i,
                 figure_handle=None if (first_plot and i == 0) else f,
-                data_label=key_labels[i],
+                data_label=d1_key_labels[i],
                 x_label=pp.Dep_Title if flip_axis else pp.Ind_Title,
                 y_label=pp.Ind_Title if flip_axis else pp.Dep_Title,
-                marker_style=styles[i],
+                marker_style=d1_styles[i],
                 x_min=pp.Min_Dep if flip_axis else pp.Min_Ind,
                 x_max=pp.Max_Dep if flip_axis else pp.Max_Ind,
                 y_min=pp.Min_Ind if flip_axis else pp.Min_Dep,
@@ -420,7 +434,8 @@ def dataplot(config_filename, **kwargs):
                 qty_meas_list = []
                 if y.ndim == 2 and x.ndim == 2 and y.shape[1] == x.shape[1]:
                     for j in range(y.shape[1]):
-                        xj = np.ravel(x[:, j]); yj = np.ravel(y[:, j])
+                        xj = np.ravel(x[:, j])
+                        yj = np.ravel(y[:, j])
                         mask = np.isfinite(xj) & np.isfinite(yj)
                         xj, yj = xj[mask], yj[mask]
                         if len(xj) > 0 and len(yj) > 0:
@@ -451,7 +466,8 @@ def dataplot(config_filename, **kwargs):
                 Save_Measured_Quantity[-1] = np.array(qty_meas_list, dtype=object)
             except Exception as e:
                 print(f"[dataplot] Error computing measured metric for {pp.Dataname}: {e}")
-                Save_Measured_Metric[-1] = np.array([]); Save_Measured_Quantity[-1] = []
+                Save_Measured_Metric[-1] = np.array([])
+                Save_Measured_Quantity[-1] = []
 
         # ---------------------- LOAD MODEL ----------------------
         M = read_csv_cached(cmpdir + pp.d2_Filename,
@@ -461,18 +477,24 @@ def dataplot(config_filename, **kwargs):
         M = M.loc[:M.dropna(how='all').last_valid_index()]
         M.columns = M.columns.str.strip()
         start_idx = int(pp.d2_Data_Row - pp.d2_Col_Name_Row - 1)
+
         version_string = revision
         if pp.VerStr_Filename:
             try:
                 with open(cmpdir + pp.VerStr_Filename, "r") as fver:
                     Lines = fver.readlines()
-                    if Lines: version_string = Lines[0].strip()
+                    if Lines:
+                        version_string = Lines[0].strip()
             except Exception as e:
                 print(f"[dataplot] Warning: could not read version string: {e}")
+
         x, _ = get_data(M, pp.d2_Ind_Col_Name, start_idx)
         y, _ = get_data(M, pp.d2_Dep_Col_Name, start_idx)
-        x_scale = float(pp.Scale_Ind or 1.0); y_scale = float(pp.Scale_Dep or 1.0)
-        x_scaled = np.asarray(x) / x_scale; y_scaled = np.asarray(y) / y_scale
+
+        x_scale = float(pp.Scale_Ind or 1.0)
+        y_scale = float(pp.Scale_Dep or 1.0)
+        x_scaled = np.asarray(x) / x_scale
+        y_scaled = np.asarray(y) / y_scale
 
         if x_scaled.ndim == 2 and y_scaled.ndim == 2 and x_scaled.shape[1] == y_scaled.shape[1]:
             x_plot_list = [x_scaled[:, i] for i in range(x_scaled.shape[1])]
@@ -481,11 +503,38 @@ def dataplot(config_filename, **kwargs):
             x_plot_list = [x_scaled for _ in range(y_scaled.shape[1])]
             y_plot_list = [y_scaled[:, i] for i in range(y_scaled.shape[1])]
         else:
-            x_plot_list = [np.ravel(x_scaled)]; y_plot_list = [np.ravel(y_scaled)]
+            x_plot_list = [np.ravel(x_scaled)]
+            y_plot_list = [np.ravel(y_scaled)]
 
         for xi, yi in zip(x_plot_list, y_plot_list):
             if len(xi) != len(yi):
                 print(f"[dataplot] Pair length mismatch in {pp.Dataname}: x={len(xi)}, y={len(yi)}")
+
+        # --- Styles and keys (MODEL d2) ---
+        d2_raw_styles = [c.strip() for c in (pp.d2_Style or '').split('|')] if pp.d2_Style else []
+        d2_styles = (d2_raw_styles + [None] * len(y_plot_list))[:len(y_plot_list)]
+        d2_raw_keys = [c.strip() for c in (pp.d2_Key or '').split('|')] if pp.d2_Key else []
+        d2_key_labels = (d2_raw_keys + [None] * len(y_plot_list))[:len(y_plot_list)]
+
+        # --- Plot model curves ---
+        for i, (x_i, y_i) in enumerate(zip(x_plot_list, y_plot_list)):
+            f = plot_to_fig(
+                x_data=y_i if flip_axis else x_i,
+                y_data=x_i if flip_axis else y_i,
+                revision_label=version_string,
+                figure_handle=f,                  # keep same figure
+                data_label=d2_key_labels[i],
+                line_style=d2_styles[i],
+                x_label=pp.Dep_Title if flip_axis else pp.Ind_Title,
+                y_label=pp.Ind_Title if flip_axis else pp.Dep_Title,
+                x_min=pp.Min_Dep if flip_axis else pp.Min_Ind,
+                x_max=pp.Max_Dep if flip_axis else pp.Max_Ind,
+                y_min=pp.Min_Ind if flip_axis else pp.Min_Dep,
+                y_max=pp.Max_Ind if flip_axis else pp.Max_Dep,
+                legend_location=matlab_legend_to_matplotlib(pp.Key_Position),
+                plot_type=plot_type,
+                plot_title=pp.Plot_Title,
+            )
 
         # --- Interpolated, metric-aware model logic ---
         if not gtest:
@@ -493,7 +542,7 @@ def dataplot(config_filename, **kwargs):
                 metric_str = str(pp.Metric or '').strip().lower()
                 meas_list, pred_list, qty_pred_list = [], [], []
 
-                # --- Load experimental data for alignment ---
+                # Load experimental again for alignment (safe; cached)
                 E = read_csv_cached(expdir + pp.d1_Filename,
                                     header=int(pp.d1_Col_Name_Row - 1),
                                     sep=',', engine='python', quotechar='"',
@@ -503,7 +552,7 @@ def dataplot(config_filename, **kwargs):
                 x_exp, _ = get_data(E, pp.d1_Ind_Col_Name, start_idx_exp)
                 y_exp, _ = get_data(E, pp.d1_Dep_Col_Name, start_idx_exp)
 
-                # Normalize shapes
+                # Normalize shapes to 2D (col-major semantics)
                 x_exp = np.atleast_2d(x_exp)
                 y_exp = np.atleast_2d(y_exp)
                 x_mod = np.atleast_2d(x)
@@ -512,6 +561,7 @@ def dataplot(config_filename, **kwargs):
                 ncols = min(y_exp.shape[1], y_mod.shape[1])
 
                 for j in range(ncols):
+                    # Cull NaNs per series keeping pairs aligned
                     xj_e = np.ravel(x_exp[:, j] if x_exp.shape[1] > 1 else x_exp)
                     yj_e = np.ravel(y_exp[:, j])
                     m_e = np.isfinite(xj_e) & np.isfinite(yj_e)
@@ -523,7 +573,7 @@ def dataplot(config_filename, **kwargs):
                     xj_m, yj_m = xj_m[m_m], yj_m[m_m]
 
                     if metric_str == 'all':
-                        # interpolate model→exp grid
+                        # align by interpolating model to exp x
                         if xj_m.size < 2 or xj_e.size == 0:
                             continue
                         yj_m_i = np.interp(xj_e, xj_m, yj_m, left=np.nan, right=np.nan)
@@ -533,38 +583,52 @@ def dataplot(config_filename, **kwargs):
                         x_use = xj_e[mask_pair]
                         y_exp_use = yj_e[mask_pair]
                         y_mod_use = yj_m_i[mask_pair]
+                        # compute both on the same x grid
+                        v_meas, _, _ = _compute_metrics_block(
+                            x=x_use, Y=y_exp_use, metric=metric_str,
+                            initial_value=float(pp.d1_Initial_Value or 0.0),
+                            comp_start=float(pp.d1_Comp_Start or np.nan),
+                            comp_end=float(pp.d1_Comp_End or np.nan),
+                            dep_comp_start=float(pp.d1_Dep_Comp_Start or np.nan),
+                            dep_comp_end=float(pp.d1_Dep_Comp_End or np.nan),
+                            variant_side="d1",
+                        )
+                        v_pred, qty_pred, _ = _compute_metrics_block(
+                            x=x_use, Y=y_mod_use, metric=metric_str,
+                            initial_value=float(pp.d2_Initial_Value or 0.0),
+                            comp_start=float(pp.d2_Comp_Start or np.nan),
+                            comp_end=float(pp.d2_Comp_End or np.nan),
+                            dep_comp_start=float(pp.d2_Dep_Comp_Start or np.nan),
+                            dep_comp_end=float(pp.d2_Dep_Comp_End or np.nan),
+                            variant_side="d2",
+                        )
                     else:
-                        # no interpolation; operate independently
-                        x_use, y_exp_use, y_mod_use = xj_e, yj_e, yj_m
-
-                    if y_exp_use.size == 0 or y_mod_use.size == 0:
-                        continue
-
-                    v_meas, _, _ = _compute_metrics_block(
-                        x=x_use, Y=y_exp_use, metric=metric_str,
-                        initial_value=float(pp.d1_Initial_Value or 0.0),
-                        comp_start=float(pp.d1_Comp_Start or np.nan),
-                        comp_end=float(pp.d1_Comp_End or np.nan),
-                        dep_comp_start=float(pp.d1_Dep_Comp_Start or np.nan),
-                        dep_comp_end=float(pp.d1_Dep_Comp_End or np.nan),
-                        variant_side="d1",
-                    )
-                    v_pred, qty_pred, _ = _compute_metrics_block(
-                        x=x_use if metric_str == 'all' else xj_m,
-                        Y=y_mod_use, metric=metric_str,
-                        initial_value=float(pp.d2_Initial_Value or 0.0),
-                        comp_start=float(pp.d2_Comp_Start or np.nan),
-                        comp_end=float(pp.d2_Comp_End or np.nan),
-                        dep_comp_start=float(pp.d2_Dep_Comp_Start or np.nan),
-                        dep_comp_end=float(pp.d2_Dep_Comp_End or np.nan),
-                        variant_side="d2",
-                    )
+                        # aggregate metrics: NO interpolation; operate independently
+                        if yj_e.size == 0 or yj_m.size == 0:
+                            continue
+                        v_meas, _, _ = _compute_metrics_block(
+                            x=xj_e, Y=yj_e, metric=metric_str,
+                            initial_value=float(pp.d1_Initial_Value or 0.0),
+                            comp_start=float(pp.d1_Comp_Start or np.nan),
+                            comp_end=float(pp.d1_Comp_End or np.nan),
+                            dep_comp_start=float(pp.d1_Dep_Comp_Start or np.nan),
+                            dep_comp_end=float(pp.d1_Dep_Comp_End or np.nan),
+                            variant_side="d1",
+                        )
+                        v_pred, qty_pred, _ = _compute_metrics_block(
+                            x=xj_m, Y=yj_m, metric=metric_str,
+                            initial_value=float(pp.d2_Initial_Value or 0.0),
+                            comp_start=float(pp.d2_Comp_Start or np.nan),
+                            comp_end=float(pp.d2_Comp_End or np.nan),
+                            dep_comp_start=float(pp.d2_Dep_Comp_Start or np.nan),
+                            dep_comp_end=float(pp.d2_Dep_Comp_End or np.nan),
+                            variant_side="d2",
+                        )
 
                     meas_list.append(np.atleast_1d(v_meas))
                     pred_list.append(np.atleast_1d(v_pred))
                     qty_pred_list.append(qty_pred)
 
-                # flatten appropriately
                 flat_meas = np.concatenate(meas_list) if meas_list else np.array([])
                 flat_pred = np.concatenate(pred_list) if pred_list else np.array([])
 
