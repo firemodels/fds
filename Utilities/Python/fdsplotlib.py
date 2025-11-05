@@ -391,7 +391,7 @@ def dataplot(config_filename, **kwargs):
         raw_keys = [c.strip() for c in (pp.d1_Key or '').split('|')] if pp.d1_Key else []
         key_labels = (raw_keys + [None] * len(y_plot_list))[:len(y_plot_list)]
 
-        if dtest:
+        if dtest or gtest:
             if verbose:
                 print(f"Generating plot {csv_rownum} {pltdir}{pp.Plot_Filename}...")
             if close_figs:
