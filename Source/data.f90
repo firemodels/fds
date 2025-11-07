@@ -2452,7 +2452,7 @@ INTEGER :: B
 LOGICAL,INTENT(OUT) :: FUEL
 TYPE (THERMO_DATA_TYPE), POINTER :: TD
 
-!Default to water properteis
+! Default to water properties
 
 IF (SPEC_INDEX < 0) THEN
    FUEL = .FALSE.
