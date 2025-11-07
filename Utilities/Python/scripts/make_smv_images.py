@@ -39,7 +39,7 @@ for i in range(len(folder)):
     print(case[i])
     os.chdir(outdir + folder[i])
     if os_name == "Linux":
-        subprocess.run(['xvfb-run',smokeview_path,'-runscript',case[i]], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run(['xvfb-run','-a',smokeview_path,'-runscript',case[i]], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     else:
         subprocess.run([smokeview_path,'-runscript',case[i]], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     os.chdir(original_dir)
