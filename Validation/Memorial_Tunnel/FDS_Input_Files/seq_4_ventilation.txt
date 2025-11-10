@@ -2,6 +2,18 @@
 &SURF ID='North Vent', VOLUME_FLOW=-1.0, RAMP_V='RAMP_NORTH', COLOR='BLUE' /
 &SURF ID='South Vent', VOLUME_FLOW=-1.0, RAMP_V='RAMP_SOUTH', COLOR='BLUE' /
 
-&VENT XB= 22, 26.0,-3.6,-3.6,0.2,0.6, SURF_ID='South Vent',  MULT_ID='vent' /
-&MULT ID='vent', DX=8.0, I_UPPER=99 /
+&VENT XB= 22, 26.0,-3.6,-3.6,0.2,0.6, SURF_ID='South Vent',  MULT_ID='south_vents_1' /
+&VENT XB= 22, 26.0,-3.6,-3.6,0.2,0.6, SURF_ID='South Vent',  MULT_ID='south_vents_2' /
+&VENT XB= 22, 26.0,-3.6,-3.6,0.2,0.6, SURF_ID='South Vent',  MULT_ID='south_vents_3' /
+&VENT XB= 22, 26.0,-3.6,-3.6,0.2,0.6, SURF_ID='South Vent',  MULT_ID='south_vents_4' /
+&VENT XB= 22, 26.0,-3.6,-3.6,0.2,0.6, SURF_ID='South Vent',  MULT_ID='south_vents_5' /
+&VENT XB= 22, 26.0,-3.6,-3.6,0.2,0.6, SURF_ID='South Vent',  MULT_ID='south_vents_6' /
+&VENT XB= 22, 26.0,-3.6,-3.6,0.2,0.6, SURF_ID='South Vent',  MULT_ID='south_vents_7' /
+&MULT ID='south_vents_1', DX=8.0, I_LOWER= 0, I_UPPER=36 /
+&MULT ID='south_vents_2', DX=8.0, I_LOWER=38, I_UPPER=49 /
+&MULT ID='south_vents_3', DX=8.0, I_LOWER=51, I_UPPER=59 /
+&MULT ID='south_vents_4', DX=8.0, I_LOWER=61, I_UPPER=65 /
+&MULT ID='south_vents_5', DX=8.0, I_LOWER=67, I_UPPER=71 /
+&MULT ID='south_vents_6', DX=8.0, I_LOWER=73, I_UPPER=75 /
+&MULT ID='south_vents_7', DX=8.0, I_LOWER=77, I_UPPER=99 /
 
