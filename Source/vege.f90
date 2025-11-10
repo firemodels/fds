@@ -430,9 +430,9 @@ DO JJG=1,JBAR
                U_Z(2) = 0.5_EB*(U(IIG-1,JJG,KWIND)+U(IIG,JJG,KWIND))
                V_Z(1) = 0.5_EB*(V(IIG,JJG-1,KWIND-1)+V(IIG,JJG,KWIND-1))
                V_Z(2) = 0.5_EB*(V(IIG,JJG-1,KWIND)+V(IIG,JJG,KWIND))
-               ! If wind comes from first grid cell assume zero wind at ground level
+               ! If wind comes from first grid cell assume plug flow near ground level
                IF (KWIND==1) THEN
-                  U_Z(1) = 0._EB; V_Z(1) = 0._EB; ZWIND(1) = 0._EB
+                  U_Z(1) = U_Z(2); V_Z(1) = V_Z(2); ZWIND(1) = Z_LS(IIG,JJG)
                ENDIF
                U_LS(IIG,JJG) = U_Z(1) + (REF_WIND_HEIGHT-ZWIND(1))/(ZWIND(2)-ZWIND(1))*(U_Z(2)-U_Z(1))
                V_LS(IIG,JJG) = V_Z(1) + (REF_WIND_HEIGHT-ZWIND(1))/(ZWIND(2)-ZWIND(1))*(V_Z(2)-V_Z(1))

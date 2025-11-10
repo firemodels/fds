@@ -1816,7 +1816,7 @@ LOGICAL, INTENT(IN) :: APPLY_TO_ESTIMATED_VARIABLES
 REAL(EB) :: MUA,TSI,WGT,T_NOW,RAMP_T,OMW,MU_WALL,RHO_WALL,SLIP_COEF,VEL_T, &
             UUP(2),UUM(2),DXX(2),MU_DUIDXJ(-2:2),DUIDXJ(-2:2),PROFILE_FACTOR,VEL_GAS,VEL_GHOST, &
             MU_DUIDXJ_USE(2),DUIDXJ_USE(2),VEL_EDDY,U_TAU,Y_PLUS,U_NORM,U_WIND_LOC,V_WIND_LOC,W_WIND_LOC,&
-            DRAG_FACTOR,HT_SCALE_FACTOR,VEG_HT
+            DRAG_FACTOR,HT_SCALE_FACTOR,VEG_HT,VEL_MF
 INTEGER :: NOM(2),IIO(2),JJO(2),KKO(2),IE,II,JJ,KK,IEC,IOR,IWM,IWP,ICMM,ICMP,ICPM,ICPP,ICD,ICDO,IVL,I_SGN, &
            VELOCITY_BC_INDEX,IIGM,JJGM,KKGM,IIGP,JJGP,KKGP,SURF_INDEXM,SURF_INDEXP,ITMP,ICD_SGN,ICDO_SGN, &
            BOUNDARY_TYPE_M,BOUNDARY_TYPE_P,IS,IS2,IWPI,IWMI,VENT_INDEX
@@ -2293,20 +2293,31 @@ EDGE_LOOP: DO IE=1,EDGE_COUNT(NM)
                END SELECT
 
             ELSE
-
                PROFILE_FACTOR = 1._EB
-               IF (ABS(SF%T_IGN-T_BEGIN)<=SPACING(SF%T_IGN) .AND. SF%RAMP(TIME_VELO)%INDEX>=1) THEN
-                  TSI = T
-               ELSE
-                  TSI=T-SF%T_IGN
+               IF (ABS(SF%VEL) > 0._EB) THEN
+                  IF (ABS(SF%T_IGN-T_BEGIN)<=SPACING(SF%T_IGN) .AND. SF%RAMP(TIME_VELO)%INDEX>=1) THEN
+                     TSI = T
+                  ELSE
+                     TSI=T-SF%T_IGN
+                  ENDIF
+                  RAMP_T = EVALUATE_RAMP(TSI,SF%RAMP(TIME_VELO)%INDEX,TAU=SF%RAMP(TIME_VELO)%TAU)
+                  IF (SF%VEL < 0._EB) THEN
+                     IF (SF%RAMP(VELO_PROF_Z)%INDEX>0) PROFILE_FACTOR = EVALUATE_RAMP(ZC(KK),SF%RAMP(VELO_PROF_Z)%INDEX)
+                     IF (IEC==1 .OR. (IEC==2 .AND. ICD==2)) VEL_T = RAMP_T*(PROFILE_FACTOR*(SF%VEL_T(2) + VEL_EDDY))
+                     IF (IEC==3 .OR. (IEC==2 .AND. ICD==1)) VEL_T = RAMP_T*(PROFILE_FACTOR*(SF%VEL_T(1) + VEL_EDDY))
+                  ELSE
+                     IF (SF%PROFILE/=0) PROFILE_FACTOR = ABS(0.5_EB*(WCM_B1%U_NORMAL_0+WCP_B1%U_NORMAL_0)/SF%VEL)
+                     IF (SF%RAMP(VELO_PROF_Z)%INDEX>0) PROFILE_FACTOR = EVALUATE_RAMP(ZC(KK),SF%RAMP(VELO_PROF_Z)%INDEX)
+                     IF (IEC==1 .OR. (IEC==2 .AND. ICD==2)) VEL_T = RAMP_T*PROFILE_FACTOR*VEL_EDDY
+                     IF (IEC==3 .OR. (IEC==2 .AND. ICD==1)) VEL_T = RAMP_T*PROFILE_FACTOR*VEL_EDDY
+                  ENDIF
+               ELSE ! Mass flux BC
+                  VEL_MF = 0.5_EB*(WCM_B1%U_NORMAL_S+WCP_B1%U_NORMAL_S)
+                  IF (VEL_MF < 0._EB) THEN
+                     IF (IEC==1 .OR. (IEC==2 .AND. ICD==2)) VEL_T = -SF%VEL_T(2)*VEL_MF
+                     IF (IEC==3 .OR. (IEC==2 .AND. ICD==1)) VEL_T = -SF%VEL_T(1)*VEL_MF
+                  ENDIF
                ENDIF
-               IF (SF%PROFILE/=0 .AND. SF%VEL>TWO_EPSILON_EB) &
-                  PROFILE_FACTOR = ABS(0.5_EB*(WCM_B1%U_NORMAL_0+WCP_B1%U_NORMAL_0)/SF%VEL)
-               IF (SF%RAMP(VELO_PROF_Z)%INDEX>0) PROFILE_FACTOR = EVALUATE_RAMP(ZC(KK),SF%RAMP(VELO_PROF_Z)%INDEX)
-               RAMP_T = EVALUATE_RAMP(TSI,SF%RAMP(TIME_VELO)%INDEX,TAU=SF%RAMP(TIME_VELO)%TAU)
-               IF (IEC==1 .OR. (IEC==2 .AND. ICD==2)) VEL_T = RAMP_T*(PROFILE_FACTOR*(SF%VEL_T(2) + VEL_EDDY))
-               IF (IEC==3 .OR. (IEC==2 .AND. ICD==1)) VEL_T = RAMP_T*(PROFILE_FACTOR*(SF%VEL_T(1) + VEL_EDDY))
-
             ENDIF
 
             ! Choose the appropriate boundary condition to apply
