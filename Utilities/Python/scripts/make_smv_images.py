@@ -36,7 +36,7 @@ else:
     smokeview_path = shutil.which(shell_command)
 
 for i in range(len(folder)):
-    print(case[i])
+    print('generating smokeview image ' + case[i])
     os.chdir(outdir + folder[i])
     if os_name == "Linux":
         subprocess.run(['xvfb-run','-a',smokeview_path,'-runscript',case[i]], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
