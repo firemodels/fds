@@ -3542,7 +3542,7 @@ Most real supply vents are covered with some sort of grill or louvers which act 
 \begin{lstlisting}
 &SURF ID='LOUVER', VEL=-2.0, VEL_T=3.0,0.0, TAU_V=5., COLOR='GREEN' /
 \end{lstlisting}
-is a boundary condition for a louvered vent that pushes air into the space with a normal velocity of 2~m/s and a tangential velocity of 3~m/s in the first of the two tangential directions. Note that the negative sign of the normal component of velocity indicates that the fluid is injected into the computational domain. The tangential velocity of 3~m/s indicates that the flow is in the positive $y$ direction. Both the normal and tangential velocity components are ramped up with either \ct{TAU_V} or \ct{RAMP_V}, as shown in Fig.~\ref{fig:tangential_velocity}.
+is a boundary condition for a louvered vent that pushes air into the space with a normal velocity of 2~m/s and a tangential velocity of 3~m/s in the first of the two tangential directions. Note that the negative sign of the normal component of velocity indicates that the fluid is injected into the computational domain. The tangential velocity of 3~m/s indicates that the flow is in the positive $y$ direction. Both the normal and tangential velocity components are ramped up with either \ct{TAU_V} or \ct{RAMP_V}, as shown in Fig.~\ref{fig:tangential_velocity}. If the boundary condition is specified with \ct{MASS_FLUX}, then \ct{VEL_T} should be specified assuming a wall normal velocity of 1~m/s. FDS will then scale the input values for \ct{VEL_T} based on the current wall velocity given by the species mass fractions, mass flux, and wall temperature.
 
 \begin{figure}[ht!]
 \begin{center}
