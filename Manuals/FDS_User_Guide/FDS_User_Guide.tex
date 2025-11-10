@@ -3542,7 +3542,7 @@ Most real supply vents are covered with some sort of grill or louvers which act 
 \begin{lstlisting}
 &SURF ID='LOUVER', VEL=-2.0, VEL_T=3.0,0.0, TAU_V=5., COLOR='GREEN' /
 \end{lstlisting}
-is a boundary condition for a louvered vent that pushes air into the space with a normal velocity of 2~m/s and a tangential velocity of 3~m/s in the first of the two tangential directions. Note that the negative sign of the normal component of velocity indicates that the fluid is injected into the computational domain. The tangential velocity of 3~m/s indicates that the flow is in the positive $y$ direction. Both the normal and tangential velocity components are ramped up with either \ct{TAU_V} or \ct{RAMP_V}, as shown in Fig.~\ref{fig:tangential_velocity}.
+is a boundary condition for a louvered vent that pushes air into the space with a normal velocity of 2~m/s and a tangential velocity of 3~m/s in the first of the two tangential directions. Note that the negative sign of the normal component of velocity indicates that the fluid is injected into the computational domain. The tangential velocity of 3~m/s indicates that the flow is in the positive $y$ direction. Both the normal and tangential velocity components are ramped up with either \ct{TAU_V} or \ct{RAMP_V}, as shown in Fig.~\ref{fig:tangential_velocity}. If the boundary condition is specified with \ct{MASS_FLUX}, then \ct{VEL_T} should be specified assuming a wall normal velocity of 1~m/s. FDS will then scale the input values for \ct{VEL_T} based on the current wall velocity given by the species mass fractions, mass flux, and wall temperature.
 
 \begin{figure}[ht!]
 \begin{center}
@@ -9140,7 +9140,8 @@ Scheme                              & \ct{FLUX_LIMITER} \\
 Central differencing                & \ct{'CENTRAL'}  \\
 Godunov                             & \ct{'GODUNOV'}  \\
 Superbee (VLES, SVLES default)      & \ct{'SUPERBEE'}  \\
-CHARM (DNS, LES default)            & \ct{'CHARM'}  \\
+CHARM (DNS, LES default)            & \ct{'CHARM'}  \\ 
+\hline
 \end{tabular}
 \end{table}
 
@@ -9171,9 +9172,9 @@ One other consideration related to high temperatures is that FDS uses tabulated 
 
 The density of the gas has a natural lower bound of zero, but if the density in a cell decreases to nearly zero, the temperature would then increase to an extremely high value due to the equation of state. Thus, by default, the density is kept within the following range:
 \be
-   \min \left( 0.1 \, \rho_\infty , \frac{2 \, p_\infty \, W_{\min}}{\R \, T_{\max}} \right) < \rho <  \frac{2 \, p_\infty \, W_{\max}}{\R \, T_{\min}}
+   0.01 \; \mbox{kg/m$^3$} < \rho < 100 \; \mbox{kg/m$^3$}
 \ee
-where $W_{\min}$ and $W_{\max}$ are the minimum and maximum values of the molecular weight of the tracked gas species in units of g/mol, and $\R$ is the universal gas constant, 8314.5~J/(kmol$\cdot$K). $T_{\min}$ and $T_{\max}$ are described above. To override the limits of density, specify \ct{MINIMUM_DENSITY} and/or \ct{MAXIMUM_DENSITY} on the \ct{CLIP} line in units of kg/m$^3$.
+To override the limits of density, specify \ct{MINIMUM_DENSITY} and/or \ct{MAXIMUM_DENSITY} on the \ct{CLIP} line in units of kg/m$^3$.
 
 Clipping of density and mass fractions violates mass conservation, so it is preferable to avoid clipping if possible.  As discussed in Sec.~\ref{info:Stability_Constraints}, the time step is set to adhere to the CFL constraints of the flow field.  The proper \ct{DT} combined with flux limiters generally avoids the need for clipping.  Beyond this, FDS then employs a mass redistribution scheme, as discussed in FDS Technical Guide~\cite{FDS_Math_Guide}.  If this fails, there is yet one more attempt to avoid clipping---the time step is decreased by 10~\% ($\dt_{\mathrm{new}} = 0.9 \,\dt$) and the scalar transport equations are reiterated.  This process is carried out a maximum of \ct{CLIP_DT_RESTRICTIONS_MAX} times; the default is 5.  In some very extreme circumstances, this loop can drive the time step into numerical instability range ($\dt/\dt_{\mathrm{init}} < \mbox{\ct{LIMITING_DT_RATIO}}$).  You can control the max number of time step restrictions by setting the parameter \ct{CLIP_DT_RESTRICTIONS_MAX} on the \ct{CLIP} line (set to 0 to bypass the algorithm altogether). The number of restrictions (if any) is noted in the \ct{CHID.out} file for a given time step.
 
