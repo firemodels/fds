@@ -39,8 +39,8 @@ for i in range(len(folder)):
     print('generating smokeview image ' + case[i])
     os.chdir(outdir + folder[i])
     if os_name == "Linux":
-        subprocess.run(['xvfb-run','-a',smokeview_path,'-runscript',case[i]], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run(['xvfb-run','-w 10 -s "-fp /usr/share/X11/fonts/misc -screen 0 1280x1024x24" -a',smokeview_path,'-bindir ../../../smv/Build/for_bundle -runscript',case[i]], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     else:
-        subprocess.run([smokeview_path,'-runscript',case[i]], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run([smokeview_path,'-bindir ../../../smv/Build/for_bundle -runscript',case[i]], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     os.chdir(original_dir)
 
