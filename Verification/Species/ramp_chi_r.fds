@@ -45,30 +45,3 @@
 &DEVC XB=-1,1,-1,1,0,2, QUANTITY='CHI_R', SPATIAL_STATISTIC='MAX', ID='chi_r_max' /
 
 &TAIL /
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
