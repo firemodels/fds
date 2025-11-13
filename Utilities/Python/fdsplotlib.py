@@ -1728,9 +1728,9 @@ def scatplot(saved_data, drange, **kwargs):
         Output_File = os.path.join(Scatterplot_Dir, "verification_scatterplot_output.csv")
         Histogram_Tex_Output = os.path.join(Scatterplot_Dir, "verification_histograms.tex")
     else:
-        Statistics_Tex_Output = os.path.join(Scatterplot_Dir, f"ScatterPlot_Tables_{Stats_Output}.tex")
-        Output_File = os.path.join(Scatterplot_Dir, f"ScatterPlot_Stats_{Stats_Output}.csv")
-        Histogram_Tex_Output = os.path.join(Scatterplot_Dir, f"ScatterPlot_Histograms_{Stats_Output}.tex")
+        Statistics_Tex_Output = os.path.join(Scatterplot_Dir, f"Scatterplot_Tables_{Stats_Output}.tex")
+        Output_File = os.path.join(Scatterplot_Dir, f"Scatterplot_Stats_{Stats_Output}.csv")
+        Histogram_Tex_Output = os.path.join(Scatterplot_Dir, f"Scatterplot_Histograms_{Stats_Output}.tex")
 
     # --- Unpack saved_data (dataplot output) ---
     (
@@ -2265,7 +2265,7 @@ def statistics_output(
                     end = "&" if (j % 2) == 0 else "\\\\"
                     fid.write(
                         f"\\includegraphics[height=2.2in]"
-                        f"{{SCRIPT_FIGURES/ScatterPlots/{Output_Histograms[j]}}} {end}\n"
+                        f"{{SCRIPT_FIGURES/Scatterplots/{Output_Histograms[j]}}} {end}\n"
                     )
                 fid.write("\\end{tabular*}\n")
                 fid.write(f"\\label{{Histogram_{i + 1}}}\n")
@@ -2295,7 +2295,7 @@ def histogram_output(Histogram_Tex_Output, Output_Histograms):
             for j in range(i * 8, min((i + 1) * 8, n)):
                 end = "&" if j % 2 == 0 else "\\\\"
                 fid.write(f"\\includegraphics[height=2.2in]"
-                          f"{{SCRIPT_FIGURES/ScatterPlots/{Output_Histograms[j]}}} {end}\n")
+                          f"{{SCRIPT_FIGURES/Scatterplots/{Output_Histograms[j]}}} {end}\n")
 
             fid.write("\\end{tabular*}\n")
             fid.write(f"\\label{{Histogram_{i + 1}}}\n")
