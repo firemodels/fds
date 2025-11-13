@@ -7,7 +7,7 @@ import glob
 
 outdir = '../../../out/'
 valdir = '../../Validation/'
-resdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/'
+resdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Scatterplots/'
 
 def MAKEGITENTRY(case_name):
 
