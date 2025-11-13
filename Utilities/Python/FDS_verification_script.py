@@ -28,17 +28,45 @@ print('water_evap_1_const_gamma...');            runpy.run_path("./scripts/water
 
 # Dataplot and scatplot options
 
+Dataplot_Inputs_File = '../Matlab/FDS_verification_dataplot_inputs.csv';
+Working_Dir = '../../Verification/';
+Manuals_Dir = '../../Manuals/';
+Scatterplot_Inputs_File = '../Matlab/FDS_verification_scatterplot_inputs.csv';
+
 # Statistics output options
 
-# Run dataplot and scatplot scripts
+Stats_Output = 'Verification'
+Scatterplot_Dir = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/ScatterPlots/'
 
-fdsplotlib.dataplot(config_filename='../Matlab/FDS_verification_dataplot_inputs.csv',
-                    expdir='../../Verification/',
-                    cmpdir='../../Verification/',
-                    pltdir='../../Manuals/',
-                    close_figs=True,
-                    verbose=True,
-                    plot_range=[2,2]) # plot_range[start, end], optionally instead use plot_list['Dataname']
+# # Run dataplot and scatplot scripts
+
+# saved_data, drange = fdsplotlib.dataplot(config_filename=Dataplot_Inputs_File,
+#                                          expdir=Working_Dir,
+#                                          cmpdir=Working_Dir,
+#                                          pltdir=Manuals_Dir,
+#                                          close_figs=True,
+#                                          verbose=True,
+#                                          plot_range=["all"]) # plot_range[start, end], optionally instead use plot_list['Dataname']
+
+# # ----- write saved_data, drange to disk -----
+# import pickle
+
+# # Save
+# with open("saved_data_verification.pkl", "wb") as f:
+#     pickle.dump((saved_data, drange), f)
+
+# # Later...
+# with open("saved_data_verification.pkl", "rb") as f:
+#     saved_data, drange = pickle.load(f)
+# #---------------------------------------------
+
+# fdsplotlib.scatplot(saved_data,drange,
+#                     Manuals_Dir=Manuals_Dir,
+#                     Scatterplot_Inputs_File=Scatterplot_Inputs_File,
+#                     Stats_Output=Stats_Output,
+#                     Scatterplot_Dir=Scatterplot_Dir,
+#                     verbose=True,
+#                     )
 
 # Special cases
 
