@@ -2145,7 +2145,10 @@ def statistics_output(
                 for r in rows:
 
                     case = str(r[2])
-                    section = f"\\ref{{{case}}}"
+                    if str(r[13])[:14]=='FDS_User_Guide':
+                        section = f"\\ref{{{'UG-'+case}}}"
+                    else:
+                        section = f"\\ref{{{case}}}"
 
                     # One row per datapoint; no splitting, no combining
                     exp_q  = _escape(r[4])
