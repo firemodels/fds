@@ -36,7 +36,7 @@ Scatterplot_Inputs_File = '../Matlab/FDS_validation_scatterplot_inputs.csv'
 # Statistics output options
 
 Stats_Output = 'Validation'
-Scatterplot_Dir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/'
+Scatterplot_Dir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Scatterplots/'
 
 # Run dataplot and scatplot scripts
 
