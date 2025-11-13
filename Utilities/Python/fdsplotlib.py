@@ -462,8 +462,13 @@ def dataplot(config_filename, **kwargs):
                     )
                     vals_meas_list = [vals_meas]
                     qty_meas_list = [qty_meas]
+
+                # Replace placeholder "curve#" labels with actual dependent column name
+                qty_label = str(pp.d1_Dep_Col_Name).strip() or "Unknown"
+
                 Save_Measured_Metric[-1] = np.array(vals_meas_list, dtype=object)
-                Save_Measured_Quantity[-1] = np.array(qty_meas_list, dtype=object)
+                Save_Measured_Quantity[-1] = np.array([qty_label] * len(vals_meas_list), dtype=object)
+
             except Exception as e:
                 print(f"[dataplot] Error computing measured metric for {pp.Dataname}: {e}")
                 Save_Measured_Metric[-1] = np.array([])
@@ -635,15 +640,20 @@ def dataplot(config_filename, **kwargs):
                 nmin = min(flat_meas.size, flat_pred.size)
                 if nmin == 0:
                     print(f"[dataplot] Warning: no valid data pairs for {pp.Dataname}")
-                elif flat_meas.size != flat_pred.size:
-                    print(f"[dataplot] Truncated unequal vectors for {pp.Dataname}: "
-                          f"Measured={flat_meas.size}, Predicted={flat_pred.size} → {nmin}")
-                    flat_meas = flat_meas[:nmin]
-                    flat_pred = flat_pred[:nmin]
+                else:
+                    if flat_meas.size != flat_pred.size:
+                        print(f"[dataplot] Truncated unequal vectors for {pp.Dataname}: "
+                              f"Measured={flat_meas.size}, Predicted={flat_pred.size} → {nmin}")
+                        # Truncate both sides to maintain one-to-one correspondence
+                        flat_meas = flat_meas[:nmin]
+                        flat_pred = flat_pred[:nmin]
 
-                Save_Measured_Metric[-1] = flat_meas
-                Save_Predicted_Metric[-1] = flat_pred
-                Save_Predicted_Quantity[-1] = np.array(qty_pred_list, dtype=object)
+                    # Save truncated paired arrays (but don’t overwrite earlier measured data)
+                    Save_Measured_Metric[-1] = flat_meas
+                    Save_Predicted_Metric[-1] = flat_pred
+
+                    qty_label = str(pp.d2_Dep_Col_Name).strip() or "Unknown"
+                    Save_Predicted_Quantity[-1] = np.array([qty_label] * len(flat_pred), dtype=object)
 
             except Exception as e:
                 print(f"[dataplot] Error computing predicted metric for {pp.Dataname}: {e}")
@@ -1743,9 +1753,34 @@ def scatplot(saved_data, drange, **kwargs):
     if verbose:
         print(f"[scatplot] Loaded {len(Q)} scatterplot definitions")
 
-    output_stats = [["Quantity", "Number of Datasets", "Number of Points",
-                     "Sigma_Experiment", "Sigma_Model", "Bias"]]
     Output_Histograms = []
+
+    if Stats_Output.lower() == "verification":
+        output_stats = [[
+            "Dataplot Line Number",
+            "Verification Group",
+            "Case Name",
+            "Type of Metric",
+            "Expected Quantity",
+            "Expected Value",
+            "Predicted Quantity",
+            "Predicted Value",
+            "Dependent Variable",
+            "Type of Error",
+            "Error",
+            "Error Tolerance",
+            "Within Specified Error Tolerance",
+            "Plot Filename",
+        ]]
+    else:  # validation
+        output_stats = [[
+            "Quantity",
+            "Number of Datasets",
+            "Number of Points",
+            "Sigma_Experiment",
+            "Sigma_Model",
+            "Bias",
+        ]]
 
     for _, row in Q.iterrows():
         plt.close('all')
@@ -1755,8 +1790,13 @@ def scatplot(saved_data, drange, **kwargs):
         Plot_Filename = row["Plot_Filename"]
         Plot_Min = float(row["Plot_Min"])
         Plot_Max = float(row["Plot_Max"])
-        Sigma_E_input = float(row["Sigma_E"])
         Plot_Type = str(row["Plot_Type"]).strip().lower()
+
+        # --- MATLAB parity: Sigma_E only required for Validation ---
+        if Stats_Output.lower() == "validation":
+            Sigma_E_input = float(row["Sigma_E"]) if "Sigma_E" in row and not pd.isna(row["Sigma_E"]) else 0.0
+        else:
+            Sigma_E_input = 0.0
 
         if verbose:
             print(f"[scatplot] Processing {Scatter_Plot_Title}")
@@ -1768,15 +1808,100 @@ def scatplot(saved_data, drange, **kwargs):
             print(f"[scatplot] No dataplot entries for {Scatter_Plot_Title}")
             continue
 
-        # Measured_Values = np.array([Save_Measured_Metric[i] for i in match_idx], dtype=float).flatten()
-        # Predicted_Values = np.array([Save_Predicted_Metric[i] for i in match_idx], dtype=float).flatten()
+        # --- Split logic: Verification vs Validation ---
+        # --- VERIFICATION branch ---
+        if Stats_Output.lower() == "verification":
 
-        Measured_Values = np.concatenate(
-            [np.ravel(np.array(Save_Measured_Metric[i], dtype=float)) for i in match_idx]
-        )
-        Predicted_Values = np.concatenate(
-            [np.ravel(np.array(Save_Predicted_Metric[i], dtype=float)) for i in match_idx]
-        )
+            # Loop through each dataplot entry that matches this scatterplot
+            for idx in match_idx:
+
+                # --- Extract measured/predicted numeric values ---
+                mvals = np.array(Save_Measured_Metric[idx], dtype=float).flatten()
+                pvals = np.array(Save_Predicted_Metric[idx], dtype=float).flatten()
+
+                # Keep only finite pairs
+                mask = np.isfinite(mvals) & np.isfinite(pvals)
+                mvals = mvals[mask]
+                pvals = pvals[mask]
+
+                # --- Extract quantity labels (MATLAB behavior: pipe = multiple quantities) ---
+                def _split_pipe_list(x):
+                    """
+                    MATLAB dataplot uses '|' to separate multiple quantity labels.
+                    Convert "a|b|c" → ["a", "b", "c"] exactly.
+                    """
+                    if x is None:
+                        return [""]
+
+                    # Try to extract a single string out of an object/array
+                    try:
+                        s = str(np.ravel(np.array(x, dtype=object))[0])
+                    except Exception:
+                        s = str(x)
+
+                    # Properly split on pipes and strip whitespace
+                    return [item.strip() for item in s.split("|")]
+
+                meas_labels = _split_pipe_list(Save_Measured_Quantity[idx])
+                pred_labels = _split_pipe_list(Save_Predicted_Quantity[idx])
+
+                # Assign label by index (MATLAB style)
+                def _label_at(k, labels):
+                    if len(labels) == 0:
+                        return ""
+                    if len(labels) == 1:
+                        return labels[0]
+                    if k < len(labels):
+                        return labels[k]
+                    return labels[-1]  # MATLAB tolerance fallback
+
+                # Case metadata
+                case_name = Save_Dataname[idx]
+                group     = Save_Group_Key_Label[idx]
+                metric    = Save_Metric_Type[idx]
+                depvar    = Save_Dep_Title[idx]
+                err_tol   = float(Save_Error_Tolerance[idx] or 0.0)
+                err_type  = str(Save_Quantity[idx] or "")
+                plot_file = Save_Plot_Filename[idx]
+
+                # --- Generate one row per point ---
+                for k in range(min(len(mvals), len(pvals))):
+
+                    m = float(mvals[k])
+                    p = float(pvals[k])
+                    mq = _label_at(k, meas_labels)
+                    pq = _label_at(k, pred_labels)
+
+                    # Compute error (Relative or Absolute)
+                    if err_type.lower().startswith("relative"):
+                        err = abs((p - m) / m) if m != 0 else np.nan
+                    else:
+                        err = abs(p - m)
+
+                    within = "Yes" if (np.isfinite(err) and err <= err_tol) else "Out of Tolerance"
+
+                    # Order MUST match MATLAB exactly
+                    output_stats.append([
+                        idx + 1,           # Dataplot line number
+                        group,             # Verification group
+                        case_name,         # Case name (string)
+                        metric,            # Metric type (e.g. "end")
+                        mq,                # Expected quantity label (MATLAB: one per row)
+                        m,                 # Expected value
+                        pq,                # Predicted quantity label
+                        p,                 # Predicted value
+                        depvar,            # Dependent variable title
+                        err_type,          # Type of Error (Relative or Absolute)
+                        f"{err:1.2e}",     # Error
+                        f"{err_tol:1.2e}", # Error Tolerance
+                        within,            # Within Spec?
+                        plot_file,         # Plot filename
+                    ])
+
+            continue  # Move to next scatterplot definition
+
+        Measured_Values = np.concatenate(  [np.ravel(np.array(Save_Measured_Metric[i], dtype=float)) for i in match_idx]  )
+        Predicted_Values = np.concatenate(  [np.ravel(np.array(Save_Predicted_Metric[i], dtype=float)) for i in match_idx]  )
 
         # --- Ensure equal-length measured and predicted arrays before masking ---
         m_len = len(Measured_Values)
@@ -1944,54 +2069,165 @@ def statistics_output(
     Output_Histograms=None,
 ):
     """
-    Replicates MATLAB statistics_output.m for Validation/Verification
-    using pandas only (no csv module import).
+    Python translation of MATLAB statistics_output.m
 
-    Produces:
-      - validation_scatterplot_output.csv  (MATLAB-style quoting)
-      - validation_statistics.tex
-      - validation_histograms.tex
+    - For 'Verification': writes CSV + verification_statistics.tex
+    - For 'Validation' : writes CSV + validation_statistics.tex + histograms
     """
+
     import os
     import pandas as pd
     import numpy as np
 
-    if Stats_Output.lower() == "none":
+    if Stats_Output is None or str(Stats_Output).lower() == "none":
         print("[statistics_output] Skipping (Stats_Output=None)")
         return
 
-    os.makedirs(os.path.dirname(Output_File), exist_ok=True)
+    # Ensure output directory exists
+    out_dir = os.path.dirname(Output_File)
+    if out_dir:
+        os.makedirs(out_dir, exist_ok=True)
 
-    # -------- Build DataFrame from output_stats --------
+    # ------------------------------------------------------------------
+    # VERIFICATION BRANCH  (Stats_Output == 'Verification')
+    # ------------------------------------------------------------------
+    if str(Stats_Output).lower() == "verification":
+
+        # --- 1) Write CSV exactly from output_stats (header + rows) ---
+        header = output_stats[0]
+        rows   = output_stats[1:]
+        df_csv = pd.DataFrame(rows, columns=header)
+        df_csv.to_csv(Output_File, index=False)
+        print(f"[statistics_output] Wrote verification CSV: {Output_File}")
+
+        # --- 2) Write LaTeX table (MATLAB-style verification_statistics.tex) ---
+        # --- Write LaTeX verification table (MATLAB-faithful) ---
+        if Statistics_Tex_Output:
+
+            def _escape(s):
+                return (str(s)
+                        .replace('\\', '\\textbackslash{}')
+                        .replace('_', '\\_')
+                        .replace('%', '\\%')
+                        .replace('&', '\\&')
+                        .replace('#', '\\#')
+                        .replace('{', '\\{')
+                        .replace('}', '\\}'))
+
+            def _safe_float(x):
+                try:
+                    return float(x)
+                except:
+                    return None
+
+            header = output_stats[0]
+            rows = output_stats[1:]
+
+            # ! DO NOT SORT — MATLAB preserves dataplot order
+            # rows = sorted(rows, key=lambda r: str(r[2]).lower())
+
+            with open(Statistics_Tex_Output, "w") as fid:
+
+                fid.write("\\scriptsize\n")
+                fid.write("\\begin{longtable}{|p{2.5in}|l|p{1in}|l|p{1in}|l|l|l|l|l|}\n")
+                fid.write("\\hline\n")
+                fid.write("Case Name & Section & Expected & Expected & Predicted & Predicted & "
+                          "Type of & Error & Error & Within \\\\\n")
+                fid.write(" & & Quantity & Value & Quantity & Value & Error &  & Tolerance & Tol. "
+                          "\\\\ \\hline \\hline\n")
+                fid.write("\\endfirsthead\n\\hline\n")
+                fid.write("Case Name & Section & Expected & Expected & Predicted & Predicted & "
+                          "Type of & Error & Error & Within \\\\\n")
+                fid.write(" & & Quantity & Value & Quantity & Value & Error &  & Tolerance & Tol. "
+                          "\\\\ \\hline \\hline\n")
+                fid.write("\\endhead\n\\hline\n\\endfoot\n\\hline\n\\endlastfoot\n")
+
+                for r in rows:
+
+                    case = str(r[2])
+                    section = f"\\ref{{{case}}}"
+
+                    # One row per datapoint; no splitting, no combining
+                    exp_q  = _escape(r[4])
+                    pred_q = _escape(r[6])
+
+                    exp_val_f = _safe_float(r[5])
+                    pred_val_f = _safe_float(r[7])
+                    err_val_f = _safe_float(r[10])
+                    tol_f = _safe_float(r[11])
+
+                    exp_val  = f"{exp_val_f:1.2e}" if exp_val_f is not None else _escape(r[5])
+                    pred_val = f"{pred_val_f:1.2e}" if pred_val_f is not None else _escape(r[7])
+                    err_val  = f"{err_val_f:1.2e}" if err_val_f is not None else _escape(r[10])
+                    tol_val  = f"{tol_f:1.2e}"     if tol_f is not None else _escape(r[11])
+
+                    err_type = str(r[9]).replace(" Error", "")
+                    within   = _escape(r[12])
+
+                    fid.write(
+                        f"{_escape(case)} & {section} & "
+                        f"{exp_q} & {exp_val} & "
+                        f"{pred_q} & {pred_val} & "
+                        f"{err_type} & {err_val} & "
+                        f"{tol_val} & {within} \\\\\n"
+                    )
+
+                fid.write("\\end{longtable}\n\\normalsize\n")
+
+            print(f"[statistics_output] Wrote LaTeX Verification table: {Statistics_Tex_Output}")
+
+        return  # Done with verification branch
+
+    # ------------------------------------------------------------------
+    # VALIDATION BRANCH  (unchanged in spirit from your version)
+    # ------------------------------------------------------------------
+    # Build DataFrame from output_stats
     df = pd.DataFrame(output_stats[1:], columns=output_stats[0])
 
     # Ensure correct types for the two numeric count columns
-    df["Number of Datasets"] = pd.to_numeric(df["Number of Datasets"], errors="coerce").fillna(0).astype(int)
-    df["Number of Points"]   = pd.to_numeric(df["Number of Points"],   errors="coerce").fillna(0).astype(int)
+    if "Number of Datasets" in df.columns:
+        df["Number of Datasets"] = pd.to_numeric(
+            df["Number of Datasets"], errors="coerce"
+        ).fillna(0).astype(int)
 
-    # Format last three numeric-looking columns as strings w/ 2 decimals (no quotes here)
+    if "Number of Points" in df.columns:
+        df["Number of Points"] = pd.to_numeric(
+            df["Number of Points"], errors="coerce"
+        ).fillna(0).astype(int)
+
+    # Format last three numeric-looking columns as strings w/ 2 decimals
     for col in ["Sigma_Experiment", "Sigma_Model", "Bias"]:
-        df[col] = pd.to_numeric(df[col], errors="coerce").map(lambda x: f"{x:0.2f}")
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce").map(
+                lambda x: f"{x:0.2f}" if np.isfinite(x) else ""
+            )
 
-    # -------- Write CSV exactly like MATLAB --------
-    # quoting=2 == csv.QUOTE_NONNUMERIC: quotes strings (Quantity + the 3 we just made strings), leaves ints unquoted.
-    df.to_csv(Output_File, index=False, quoting=2)
+    # Write CSV
+    df.to_csv(Output_File, index=False)
     print(f"[statistics_output] Wrote CSV: {Output_File}")
 
     # -------- LaTeX Validation Table --------
-    if Stats_Output.lower() == "validation" and Statistics_Tex_Output:
+    if str(Stats_Output).lower() == "validation" and Statistics_Tex_Output:
         with open(Statistics_Tex_Output, "w") as fid:
             fid.write("\\begin{longtable}[c]{|l|c|c|c|c|c|c|}\n")
-            fid.write("\\caption[Summary statistics]{Summary statistics for all quantities of interest}\n")
+            fid.write(
+                "\\caption[Summary statistics]{Summary statistics for all quantities of interest}\n"
+            )
             fid.write("\\label{summary_stats}\n")
             fid.write("\\\\ \\hline\n")
-            fid.write("Quantity & Section   & Datasets  & Points    & "
-                      "$\\widetilde{\\sigma}_{\\rm E}$ & $\\widetilde{\\sigma}_{\\rm M}$ & Bias "
-                      "\\\\ \\hline \\hline\n")
+            fid.write(
+                "Quantity & Section   & Datasets  & Points    & "
+                "$\\widetilde{\\sigma}_{\\rm E}$ & "
+                "$\\widetilde{\\sigma}_{\\rm M}$ & Bias "
+                "\\\\ \\hline \\hline\n"
+            )
             fid.write("\\endfirsthead\n\\hline\n")
-            fid.write("Quantity & Section   & Datasets  & Points    & "
-                      "$\\widetilde{\\sigma}_{\\rm E}$ & $\\widetilde{\\sigma}_{\\rm M}$ & Bias "
-                      "\\\\ \\hline \\hline\n")
+            fid.write(
+                "Quantity & Section   & Datasets  & Points    & "
+                "$\\widetilde{\\sigma}_{\\rm E}$ & "
+                "$\\widetilde{\\sigma}_{\\rm M}$ & Bias "
+                "\\\\ \\hline \\hline\n"
+            )
             fid.write("\\endhead\n")
 
             for _, r in df.iterrows():
@@ -2001,33 +2237,40 @@ def statistics_output(
                         continue
                     quantity = str(r["Quantity"])
                     section = f"\\ref{{{quantity}}}"
-                    fid.write(f"{quantity} & {section} & {int(r['Number of Datasets'])} & "
-                              f"{int(r['Number of Points'])} & {sigma_e:0.2f} & "
-                              f"{float(r['Sigma_Model']):0.2f} & {float(r['Bias']):0.2f} "
-                              "\\\\ \\hline\n")
+                    fid.write(
+                        f"{quantity} & {section} & "
+                        f"{int(r['Number of Datasets'])} & "
+                        f"{int(r['Number of Points'])} & "
+                        f"{float(r['Sigma_Experiment']):0.2f} & "
+                        f"{float(r['Sigma_Model']):0.2f} & "
+                        f"{float(r['Bias']):0.2f} "
+                        "\\\\ \\hline\n"
+                    )
                 except Exception as e:
                     print(f"[statistics_output] Skipped row due to error: {e}")
 
             fid.write("\\end{longtable}\n")
+
         print(f"[statistics_output] Wrote LaTeX Validation table: {Statistics_Tex_Output}")
 
     # -------- Histogram LaTeX --------
-    if Stats_Output.lower() == "validation" and Output_Histograms:
+    if str(Stats_Output).lower() == "validation" and Output_Histograms:
         with open(Histogram_Tex_Output, "w") as fid:
             n = len(Output_Histograms)
-            pages = int(np.ceil(n / 8))
+            pages = int(np.ceil(n / 8.0))
             for i in range(pages):
                 fid.write("\\begin{figure}[p]\n")
                 fid.write("\\begin{tabular*}{\\textwidth}{l@{\\extracolsep{\\fill}}r}\n")
                 for j in range(i * 8, min((i + 1) * 8, n)):
-                    end = "&" if j % 2 == 0 else "\\\\"
-                    fid.write(f"\\includegraphics[height=2.2in]"
-                              f"{{SCRIPT_FIGURES/ScatterPlots/{Output_Histograms[j]}}} {end}\n")
+                    end = "&" if (j % 2) == 0 else "\\\\"
+                    fid.write(
+                        f"\\includegraphics[height=2.2in]"
+                        f"{{SCRIPT_FIGURES/ScatterPlots/{Output_Histograms[j]}}} {end}\n"
+                    )
                 fid.write("\\end{tabular*}\n")
                 fid.write(f"\\label{{Histogram_{i + 1}}}\n")
                 fid.write("\\end{figure}\n\n")
         print(f"[statistics_output] Wrote LaTeX histograms: {Histogram_Tex_Output}")
-
 
 
 def histogram_output(Histogram_Tex_Output, Output_Histograms):

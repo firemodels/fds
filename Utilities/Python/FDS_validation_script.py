@@ -47,18 +47,17 @@ Scatterplot_Dir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlot
 #                                          close_figs=True,
 #                                          verbose=True,
 #                                          plot_range=["all"],
-#                                          quantity_filter=["Target Heat Flux"],
 #                                          ) # see notes below on plot_range
 
 # # ----- write saved_data, drange to disk -----
 # import pickle
 
 # # Save
-# with open("saved_data_debug.pkl", "wb") as f:
+# with open("saved_data_validation.pkl", "wb") as f:
 #     pickle.dump((saved_data, drange), f)
 
 # # Later...
-# with open("saved_data_debug.pkl", "rb") as f:
+# with open("saved_data_validation.pkl", "rb") as f:
 #     saved_data, drange = pickle.load(f)
 # #---------------------------------------------
 
