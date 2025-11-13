@@ -38,36 +38,36 @@ Scatterplot_Inputs_File = '../Matlab/FDS_validation_scatterplot_inputs.csv'
 Stats_Output = 'Validation'
 Scatterplot_Dir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/'
 
-# # Run dataplot and scatplot scripts
+# Run dataplot and scatplot scripts
 
-# saved_data, drange = fdsplotlib.dataplot(config_filename=Dataplot_Inputs_File,
-#                                          expdir=EXP_Dir,
-#                                          cmpdir=OUT_Dir,
-#                                          pltdir=Manuals_Dir,
-#                                          close_figs=True,
-#                                          verbose=True,
-#                                          plot_range=["all"],
-#                                          ) # see notes below on plot_range
+saved_data, drange = fdsplotlib.dataplot(config_filename=Dataplot_Inputs_File,
+                                         expdir=EXP_Dir,
+                                         cmpdir=OUT_Dir,
+                                         pltdir=Manuals_Dir,
+                                         close_figs=True,
+                                         verbose=True,
+                                         plot_range=["all"],
+                                         ) # see notes below on plot_range
 
-# # ----- write saved_data, drange to disk -----
-# import pickle
+# ----- write saved_data, drange to disk -----
+import pickle
 
-# # Save
-# with open("saved_data_validation.pkl", "wb") as f:
-#     pickle.dump((saved_data, drange), f)
+# Save
+with open("saved_data_validation.pkl", "wb") as f:
+    pickle.dump((saved_data, drange), f)
 
-# # Later...
-# with open("saved_data_validation.pkl", "rb") as f:
-#     saved_data, drange = pickle.load(f)
-# #---------------------------------------------
+# Later...
+with open("saved_data_validation.pkl", "rb") as f:
+    saved_data, drange = pickle.load(f)
+#---------------------------------------------
 
-# fdsplotlib.scatplot(saved_data,drange,
-#                     Manuals_Dir=Manuals_Dir,
-#                     Scatterplot_Inputs_File=Scatterplot_Inputs_File,
-#                     Stats_Output=Stats_Output,
-#                     Scatterplot_Dir=Scatterplot_Dir,
-#                     verbose=True,
-#                     )
+fdsplotlib.scatplot(saved_data,drange,
+                    Manuals_Dir=Manuals_Dir,
+                    Scatterplot_Inputs_File=Scatterplot_Inputs_File,
+                    Stats_Output=Stats_Output,
+                    Scatterplot_Dir=Scatterplot_Dir,
+                    verbose=True,
+                    )
 
 # Create table of git statistics for FDS Validation Guide
 
