@@ -55,11 +55,6 @@ if [ -d "$VENV_DIR" ]; then
         read -p "Do you want to reinstall everything? (y/N): " choice
         case "$choice" in
             [yY]|[yY][eE][sS])
-                # Deactivate if active
-                if [ "$VIRTUAL_ENV" = "$(pwd)/$VENV_DIR" ]; then
-                    echo "Deactivating current virtual environment..."
-                    deactivate
-                fi
                 echo "Removing old environment..."
                 rm -rf "$VENV_DIR" || error_exit "Failed to remove existing virtual environment"
                 echo "Creating new virtual environment..."
