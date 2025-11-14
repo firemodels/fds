@@ -9,6 +9,8 @@ KEYBOARD
  O
 RENDERONCE
  obst_multi
+LOADSMV
+ obst_single.smv
 KEYBOARD
  q
 RENDERONCE
