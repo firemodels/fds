@@ -24,4 +24,3 @@ This case tests conservation of mass and energy.
 &DEVC XB=0,1,0,1,0,1, QUANTITY='ENTHALPY',SPATIAL_STATISTIC='VOLUME INTEGRAL', ID='h_gas', RELATIVE=.TRUE. /
 
 &TAIL /
-
