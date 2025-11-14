@@ -1798,8 +1798,8 @@ def scatplot(saved_data, drange, **kwargs):
         else:
             Sigma_E_input = 0.0
 
-        if verbose:
-            print(f"[scatplot] Processing {Scatter_Plot_Title}")
+        #if verbose:
+        #    print(f"[scatplot] Processing {Scatter_Plot_Title}")
 
         # Match dataplot entries
         match_idx = [i for i, q in enumerate(Save_Quantity)
