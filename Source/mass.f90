@@ -98,6 +98,7 @@ SPECIES_LOOP: DO N=1,N_TOTAL_SCALARS
       IC  = CELL_INDEX(II,JJ,KK)
 
       IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY .AND. .NOT.CELL(IC)%SOLID .AND. .NOT.CELL(IC)%EXTERIOR) THEN
+         ! thin obstruction
          SELECT CASE(IOR)
             CASE( 1); FX(IIG-1,JJG,KKG,N) = 0._EB
             CASE(-1); FX(IIG,JJG,KKG,N)   = 0._EB
@@ -107,14 +108,16 @@ SPECIES_LOOP: DO N=1,N_TOTAL_SCALARS
             CASE(-3); FZ(IIG,JJG,KKG,N)   = 0._EB
          END SELECT
       ELSE
-         SELECT CASE(IOR)
-            CASE( 1); FX(IIG-1,JJG,KKG,N) = B1%RHO_F*B1%ZZ_F(N)
-            CASE(-1); FX(IIG,JJG,KKG,N)   = B1%RHO_F*B1%ZZ_F(N)
-            CASE( 2); FY(IIG,JJG-1,KKG,N) = B1%RHO_F*B1%ZZ_F(N)
-            CASE(-2); FY(IIG,JJG,KKG,N)   = B1%RHO_F*B1%ZZ_F(N)
-            CASE( 3); FZ(IIG,JJG,KKG-1,N) = B1%RHO_F*B1%ZZ_F(N)
-            CASE(-3); FZ(IIG,JJG,KKG,N)   = B1%RHO_F*B1%ZZ_F(N)
-         END SELECT
+         IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) THEN
+            SELECT CASE(IOR)
+               CASE( 1); FX(IIG-1,JJG,KKG,N) = B1%RHO_F*B1%ZZ_F(N)
+               CASE(-1); FX(IIG,JJG,KKG,N)   = B1%RHO_F*B1%ZZ_F(N)
+               CASE( 2); FY(IIG,JJG-1,KKG,N) = B1%RHO_F*B1%ZZ_F(N)
+               CASE(-2); FY(IIG,JJG,KKG,N)   = B1%RHO_F*B1%ZZ_F(N)
+               CASE( 3); FZ(IIG,JJG,KKG-1,N) = B1%RHO_F*B1%ZZ_F(N)
+               CASE(-3); FZ(IIG,JJG,KKG,N)   = B1%RHO_F*B1%ZZ_F(N)
+            END SELECT
+         ENDIF
       ENDIF
 
       ! Overwrite first off-wall advective flux if flow is away from the wall and if the face is not also a wall cell
