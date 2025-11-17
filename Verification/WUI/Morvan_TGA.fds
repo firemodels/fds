@@ -1,6 +1,6 @@
 &HEAD CHID='Morvan_TGA', TITLE='TGA analysis of Morvan 2004 data' /
 
-&MESH IJK=5,5,5, XB=-1.2,3.6,-1.2,1.2,0.0,9.6
+&MESH IJK=5,5,5, XB=-1.2,3.6,-1.2,1.2,0.0,9.6 /
 
 &TIME T_END=1. /
 

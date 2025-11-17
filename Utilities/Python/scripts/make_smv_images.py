@@ -20,6 +20,7 @@ if os_name == "Linux":
     if shutil.which("xvfb-run") is None:
         raise FileNotFoundError("xvfb-run is not installed. Please install xvfb package.")
 
+bindir = '../../../smv/Build/for_bundle'
 outdir = '../../Verification/'
 original_dir = os.getcwd()
 
@@ -39,8 +40,15 @@ for i in range(len(folder)):
     print('generating smokeview image ' + case[i])
     os.chdir(outdir + folder[i])
     if os_name == "Linux":
-        subprocess.run(['xvfb-run','-w 10 -s "-fp /usr/share/X11/fonts/misc -screen 0 1280x1024x24" -a',smokeview_path,'-bindir ../../../smv/Build/for_bundle -runscript',case[i]], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        try:
+            subprocess.run(['xvfb-run','-w','10','-s','-fp /usr/share/X11/fonts/misc -screen 0 1280x1024x24','-a',smokeview_path,
+                       '-bindir',bindir,'-runscript', case[i] ], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        except subprocess.CalledProcessError as e:
+            print(f"Smokeview failed with return code {e.returncode}")
+        except FileNotFoundError:
+            print(f"Smokeview executable not found: {smokeview_path}")
     else:
-        subprocess.run([smokeview_path,'-bindir ../../../smv/Build/for_bundle -runscript',case[i]], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run([smokeview_path,'-bindir',bindir,'-runscript',case[i]], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
     os.chdir(original_dir)
 
