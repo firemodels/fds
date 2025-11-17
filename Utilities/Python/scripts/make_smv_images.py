@@ -1,6 +1,7 @@
 
 # Make Smokeview images for the FDS Manuals.
-# The script uses the command "smokeview" unless you provide an optional name.
+# The script gets the smokeview executable appropriate for your OS from the smv repository 
+# unless you provide an optional full path to the executable as an argument.
 
 import pandas as pd
 import os
@@ -10,9 +11,9 @@ import platform
 import argparse
 
 parser = argparse.ArgumentParser(description="A script to generate Smokeview images")
-parser.add_argument("message", nargs="?", default="smokeview", help="Optional smokeview name")
+parser.add_argument("message", nargs="?", default="null", help="Optional smokeview path")
 args = parser.parse_args()
-shell_command = args.message
+smokeview_path = args.message
 
 os_name = platform.system()
 
@@ -21,6 +22,7 @@ if os_name == "Linux":
         raise FileNotFoundError("xvfb-run is not installed. Please install xvfb package.")
 
 bindir = '../../../smv/Build/for_bundle'
+smvdir = '../../../smv/Build/smokeview/'
 outdir = '../../Verification/'
 original_dir = os.getcwd()
 
@@ -29,12 +31,14 @@ df = pd.read_csv(outdir + 'scripts/FDS_Pictures.csv', header=None)
 folder = df[0].values
 case = df[1].values
 
-if os_name == "Linux":
-    result = subprocess.run(["bash", "-i", "-c", f"alias {shell_command} 2>/dev/null | sed -E \"s/alias {shell_command}='(.*)'/\\1/\""],
-                            capture_output=True, text=True)
-    smokeview_path=result.stdout.strip()
-else:
-    smokeview_path = shutil.which(shell_command)
+if smokeview_path != "null":
+    print("Using "+smokeview_path)
+elif os_name == "Linux":
+    smokeview_path = smvdir + 'intel_linux_64/smokeview_linux_64'
+elif os_name == "Darwin":
+    smokeview_path = smvdir + 'gnu_osx_64/smokeview_osx_64'
+elif os_name == "Windows":
+    smokeview_path = smvdir + 'intel_win_64/smokeview_win_64'
 
 for i in range(len(folder)):
     print('generating smokeview image ' + case[i])
