@@ -12,14 +12,14 @@ dT = dt Q_abs / (m c_p)
 By setting dt = 0.01 s, m = 0.01 kg and c_p = 1.0 kJ/kg, the numerical
 value of dT should be equal to the time averaged Q_abs.
 
---------------------FDS Data-----------------------------
-&HEAD CHID='droplet_absorption_cyl',TITLE='Cylindrical droplet absorption test case' /
 
-&MESH IJK=3,1,3, XB=0.0,3.0,-.5,0.5,0.0,3.0 CYLINDRICAL = .TRUE. /
+&HEAD CHID='droplet_absorption_cyl', TITLE='Cylindrical droplet absorption test case' /
 
-&TIME T_END=.01 DT = 0.00001 /
+&MESH IJK=3,1,3, XB=0.0,3.0,0.0,0.01,0.0,3.0, CYLINDRICAL=T /
 
-&MISC GVEC=0,0,0, Y_CO2_INFTY=0.,HUMIDITY=0./
+&TIME T_END=.01, DT=0.00001 /
+
+&MISC GVEC=0,0,0, Y_CO2_INFTY=0., HUMIDITY=0. /
 
 &DUMP NFRAMES=100 /
 
@@ -34,7 +34,7 @@ value of dT should be equal to the time averaged Q_abs.
       TMP_FRONT = 1000.
       TAU_T = 0.0 /
 
-&SPEC ID='NITROGEN',CONDUCTIVITY=0.000001,BACKGROUND=.TRUE./
+&SPEC ID='NITROGEN', CONDUCTIVITY=0.000001, BACKGROUND=.TRUE./
 
 &SPEC ID='WATER VAPOR'
       VAPORIZATION_TEMPERATURE = 1000.
@@ -53,12 +53,12 @@ value of dT should be equal to the time averaged Q_abs.
 
 &INIT N_PARTICLES = 100
       XB = 1,2,-0.5,0.5,1,2
-      MASS_PER_VOLUME = .01
-      PART_ID = 'drops' /
+      MASS_PER_VOLUME = .66667
+      PART_ID = 'drops' /  m''' = m/V = 0.01 kg / (0.5*(x2**2-x1**2)*(y2-y1)*(z2-z1)) m3
 
-
-&DEVC QUANTITY='PARTICLE RADIATION LOSS', ID='Absorption', SPATIAL_STATISTIC='VOLUME INTEGRAL', XB=0,3,-.5,.5,0,3 /
-&DEVC QUANTITY='ADT', PART_ID='drops', ID='ADT', SPATIAL_STATISTIC='VOLUME MEAN', XB=1,2,-.5,.5,1,2 /
+&DEVC QUANTITY='PARTICLE RADIATION LOSS', ID='Absorption', SPATIAL_STATISTIC='VOLUME INTEGRAL', XB=0,3,0.0,0.01,0,3, 
+      CONVERSION_FACTOR=1.5915e-3 /  Integrate over the wedge, not the entire cylinder. 1.5915e-3 = delta_theta/2*pi
+&DEVC QUANTITY='ADT', PART_ID='drops', ID='ADT', SPATIAL_STATISTIC='VOLUME MEAN', XB=1,2,0.0,0.01,1,2 /
 
 &TAIL /
 

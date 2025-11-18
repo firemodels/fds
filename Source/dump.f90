@@ -6741,6 +6741,12 @@ DEVICE_LOOP: DO N=1,N_DEVC
                            IF (ICF>0) VOL = VOL*CUT_FACE(ICF)%ALPHA_CF
                         ENDIF
 
+                        IF (CYLINDRICAL) THEN
+                           VOL = TWOPI*VOL/DY(J)
+                        ELSEIF (TWO_D) THEN
+                           VOL = VOL/DY(J)
+                        ENDIF
+
                         VALUE = GAS_PHASE_OUTPUT(T,DT,NM,I,J,K,DV%QUANTITY_INDEX(1),0,DV%Y_INDEX,DV%Z_INDEX,DV%ELEM_INDEX,&
                                                  DV%PART_CLASS_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,DV%PROP_INDEX,DV%REAC_INDEX,&
                                                  DV%MATL_INDEX)
