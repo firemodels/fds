@@ -43,16 +43,17 @@ elif os_name == "Windows":
 for i in range(len(folder)):
     print('generating smokeview image ' + case[i])
     os.chdir(outdir + folder[i])
-    if os_name == "Linux":
-        try:
+    try:
+        if os_name == "Linux":
             subprocess.run(['xvfb-run','-w','10','-s','-fp /usr/share/X11/fonts/misc -screen 0 1280x1024x24','-a',smokeview_path,
-                       '-bindir',bindir,'-runscript', case[i] ], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        except subprocess.CalledProcessError as e:
-            print(f"Smokeview failed with return code {e.returncode}")
-        except FileNotFoundError:
-            print(f"Smokeview executable not found: {smokeview_path}")
-    else:
-        subprocess.run([smokeview_path,'-bindir',bindir,'-runscript',case[i]], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                    '-bindir',bindir,'-runscript', case[i] ], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        else:
+            subprocess.run([smokeview_path,'-bindir',bindir,'-runscript',case[i]], 
+                           check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except subprocess.CalledProcessError as e:
+        print(f"Error: Smokeview failed with return code {e.returncode}")
+    except FileNotFoundError:
+        print(f"Error: Smokeview executable not found: {smokeview_path}")
 
     os.chdir(original_dir)
 
