@@ -3999,7 +3999,7 @@ Mixing with detailed chemistry is implemented using the Eddy Dissipation Concept
 
 This implementation has been validated against results obtained using Cantera~\cite{cantera:2023}. Note that Cantera does not provide a direct method to solve the coupled mixing-chemistry ODE system as done here in FDS; therefore, in Cantera an operator splitting approach was employed, where mixing and chemistry are handled sequentially. Specifically, within each CFD timestep (0.1 s), substeps for chemistry calculations in Cantera are kept sufficiently small (0.0001 s) to resolve the fast dynamics. All comparisons are carried out using the GRI-Mech 3.0 chemical mechanism~\cite{gri3:1999}.
 
-Figure~\ref{fig:edc_mixing_cvode_onecfdstep_vary_zeta0} presents comparisons of temperature and OH mass fraction between FDS and Cantera within a single CFD timestep for five constant-volume ignition delay cases, with varying initial unmixed fractions \(\zeta_0 = 1.0, 0.75, 0.5, 0.25, 0.0\).
+Figures~\ref{fig:edc_mixing_cvode_onecfdstep_vary_zeta0_1} and~\ref{fig:edc_mixing_cvode_onecfdstep_vary_zeta0_2} presents comparisons of temperature and OH mass fraction between FDS and Cantera within a single CFD timestep for five constant-volume ignition delay cases, with varying initial unmixed fractions \(\zeta_0 = 1.0, 0.75, 0.5, 0.25, 0.0\).
 
 Figure~\ref{fig:edc_mixing_cvode_multicfdstep_vary_zeta0} shows similar comparisons over multiple CFD timesteps for the same ignition delay cases and initial unmixed fractions. These results also verify that elemental mass is conserved throughout the entire process.
 
@@ -4007,20 +4007,28 @@ Finally, Figure~\ref{fig:edc_mixing_cvode_onecfdstep_vary_taumix} compares tempe
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_Zeta1p0_TMP} &
-\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_Zeta1p0_OH} \\
-\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_Zeta0p75_TMP} &
-\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_Zeta0p75_OH} \\
-\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_Zeta0p5_TMP} &
-\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_Zeta0p5_OH} \\
-\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_Zeta0p25_TMP} &
-\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_Zeta0p25_OH} \\
-\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_Zeta0p0_TMP} &
-\includegraphics[height=1.6in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_Zeta0p0_OH} 
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_Zeta1p0_TMP} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_Zeta1p0_OH} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_Zeta0p75_TMP} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_Zeta0p75_OH} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_Zeta0p5_TMP} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_Zeta0p5_OH} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_Zeta0p25_TMP} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_Zeta0p25_OH}
 \end{tabular*}
 \caption[Results of the \ct{edc\_mixing\_cvode} test cases]{Comparison of CVODE substeps for a single CFD step of 0.1 s, showing the effect of varying the initial unmixed fraction between FDS and Cantera. The simulation uses the Methane GRI mechanism with an equivalence ratio of 0.6, a mixing time of 0.01 s, and an initial temperature of 1200 K.}
-\label{fig:edc_mixing_cvode_onecfdstep_vary_zeta0}
+\label{fig:edc_mixing_cvode_onecfdstep_vary_zeta0_1}
 \end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_Zeta0p0_TMP} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/EDC_OneCFDStep_Methane_grimech30_Zeta0p0_OH}
+\end{tabular*}
+\caption[Results of the \ct{edc\_mixing\_cvode} test cases]{Continued from Figure~\ref{fig:edc_mixing_cvode_onecfdstep_vary_zeta0_1}.}
+\label{fig:edc_mixing_cvode_onecfdstep_vary_zeta0_2}
+\end{figure}
+
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{lcr}
