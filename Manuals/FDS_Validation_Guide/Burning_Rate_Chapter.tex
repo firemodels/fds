@@ -2988,14 +2988,17 @@ With over 300 cases in this study, it can be difficult to evaluate the quality o
 \label{USFS_Catchpole_parameter_summary}
 \end{figure}
 
-Additionally, neither Fig.~\ref{USFS_Catchpole_parameter_summary} nor the summary scatter plot in Fig.~\ref{RoS_Summary} include information on the cases for which FDS fails to reproduce a spreading fire. All cases tested have a reported spread rate from the experiments, so instances where FDS does not produce sustained fire spread are indicative of limitations in the current model representation. In order to guide future development efforts, Fig.~\ref{USFS_Catchpole_no_spread} attempts to summarize the model performance over the parameter space by showing lines that connect each set of parameters for a given test. Gray lines in the background correspond to successful spread predictions, while colored lines in the foreground are those for which FDS does not sustain fire spread. This highlights problematic areas of the test matrix, such as zero wind speed cases with low values of packing ratio.
+Additionally, neither Fig.~\ref{USFS_Catchpole_parameter_summary} nor the summary scatter plot in Fig.~\ref{RoS_Summary} include information on the cases for which FDS fails to reproduce a spreading fire. All cases tested have a reported spread rate from the experiments, so instances where FDS does not produce sustained fire spread are indicative of limitations in the current model representation. In order to guide future development efforts, Fig.~\ref{USFS_Catchpole_no_spread} attempts to summarize the model performance over the full parameter space. Gray points in the background correspond to successful spread predictions, while colored points in the foreground are those for which FDS does not sustain fire spread. This highlights problematic areas of the test matrix, such as zero wind speed cases with low values of packing ratio.
 
 \begin{figure}[ht]
 \centering
-\begin{tabular}{c}
-\includegraphics[height=3.5in]{SCRIPT_FIGURES/USFS_Catchpole/Catchpole_no_spread}
-\end{tabular}
-\caption[USFS/Catchpole, conditions leading to failed spread predictions]{Parameter combinations for all USFS/Catchpole cases, each connected by a single line. Parameters of surface-to-volume ratio (s), packing ratio (beta), moisture content (M) and wind speed (U) are normalized between 0 (minimum value) and 1 (maximum value). Gray lines in the background are cases where FDS successfully predicts spread, and colored lines in the foreground represent failed (no spread) predictions. Failed prediction lines are colored according to the beta value for a given test in order to help distinguish trends.}
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/USFS_Catchpole/Catchpole_no_spread_MF} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/USFS_Catchpole/Catchpole_no_spread_PPMC} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/USFS_Catchpole/Catchpole_no_spread_EXSC} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/USFS_Catchpole/Catchpole_no_spread_EX} \\
+\end{tabular*}
+\caption[USFS/Catchpole, conditions leading to failed spread predictions]{Parameter combinations for all USFS/Catchpole cases. Gray points in the background are cases where FDS successfully predicts spread, and colored points in the foreground represent failed (no spread) predictions. Both the point size and color are scaled according to the packing ratio (beta) value for a given test.}
 \label{USFS_Catchpole_no_spread}
 \end{figure}
 
