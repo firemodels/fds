@@ -91,39 +91,61 @@ for dvar in dep_variables:
 
 # plot no-spread conditions
 
-fig_file = os.path.join(fig_path, "Catchpole_no_spread.pdf")
-# Dummy call to establish figure
-fig = fdsplotlib.plot_to_fig(x_data=[-1,-1], y_data=[-1,-1],
-                                x_label='Parameter',y_label='Normalized value',
-                                x_min=0,x_max=3,y_min=0,y_max=1,ynumticks=2,
-                                revision_label=version_string)
-ax = plt.gca()
+go_mask    = tests['category'] == 'spread'
+nogo_mask  = tests['category'] == 'no spread'
 
-# Normalize by max and min
-tests_normalized = tests
-tests_normalized[list(dep_variables.keys())] = tests[list(dep_variables.keys())].apply(
-    lambda x: (x - x.min()) / (x.max() - x.min()))
+# Create scatter plot for each fuel type
+for i, fuel in enumerate(fuel_labels):
+    fuel_name = fuel_names[i]
+    fig_file = os.path.join(fig_path, f"Catchpole_no_spread_{fuel}.pdf")
+    
+    # Filter for this fuel type
+    if fuel == 'EX':
+        fuel_mask = tests['Test'].str.startswith(fuel) & (~tests['Test'].str.startswith('EXSC'))
+    else:
+        fuel_mask = tests['Test'].str.startswith(fuel)
+    
+    # Get data for this fuel type
+    fuel_go_data = tests[go_mask & fuel_mask]
+    fuel_nogo_data = tests[nogo_mask & fuel_mask]
+    
+    s_value = fuel_go_data['s'].iloc[0]
+    # Create figure
+    fig = fdsplotlib.plot_to_fig(x_data=[-1,1], y_data=[0,0],
+                                    marker_style='k--',
+                                    x_label='Moisture Content, M (-)',
+                                    y_label='Wind Speed, U (m/s)',
+                                    x_min=0,
+                                    x_max=0.3,
+                                    y_min=-0.2,
+                                    y_max=3.5,
+                                    revision_label=version_string,
+                                    plot_title=rf'{fuel_name}, {s_value:.0f} m$^{{-1}}$')
+    ax = plt.gca()
+    
+    # Fixed scale for beta (0 to 0.1)
+    beta_min_fixed = 0.0
+    beta_max_fixed = 0.1
+    
+    # Plot spread cases (background, gray, sized by beta)
+    if len(fuel_go_data) > 0:
+        sizes_go = (fuel_go_data['beta'] - beta_min_fixed) / (beta_max_fixed - beta_min_fixed) * 100 + 20
+        ax.scatter(fuel_go_data['M'], fuel_go_data['U'], 
+                  s=sizes_go, c='gray', alpha=0.3, edgecolors='none')
+    
+    # Plot no-spread cases (foreground, colored by beta, sized by beta)
+    if len(fuel_nogo_data) > 0:
+        cmap = plt.cm.plasma
+        norm = mpl.colors.Normalize(vmin=beta_min_fixed, vmax=beta_max_fixed)
+        sizes_nogo = (fuel_nogo_data['beta'] - beta_min_fixed) / (beta_max_fixed - beta_min_fixed) * 100 + 20
+        scatter = ax.scatter(fuel_nogo_data['M'], fuel_nogo_data['U'], 
+                  s=sizes_nogo, c=fuel_nogo_data['beta'], cmap=cmap, norm=norm,
+                  alpha=0.8, edgecolors='black', linewidths=0.5)
+        
+        # Add colorbar
+        cbar = plt.colorbar(scatter, ax=ax)
+        cbar.set_label('Packing Ratio, beta (-)', rotation=90, labelpad=15, fontsize=plot_style['Label_Font_Size'])
+        cbar.ax.tick_params(labelsize=plot_style['Label_Font_Size'])
 
-go_mask    = tests_normalized['category'] == 'spread'
-nogo_mask  = tests_normalized['category'] == 'no spread'
-
-pd.plotting.parallel_coordinates(tests_normalized[go_mask], 'category', 
-                                 cols=['s','beta','M','U'],
-                                 color=[(0.,0.,0.,.04)],
-                                 ax=ax,
-                                 ls='-')
-ax.get_legend().remove()  # Hide the parallel_coordinates legend
-
-color_var = 'beta'   # or 'beta', 'M', 'U'
-cmap = plt.cm.plasma 
-norm = mpl.colors.Normalize(vmin=tests[color_var].min(),
-                     vmax=tests[color_var].max())
-colors = cmap(norm(tests[color_var]))
-
-for idx, (i, row) in enumerate(tests_normalized[nogo_mask].iterrows()):
-    x_vals = ['s','beta','M','U'] 
-    y_vals = [row['s'], row['beta'], row['M'], row['U']]
-    ax.plot(x_vals, y_vals, color=colors[i], linestyle='-')
-
-plt.savefig(fig_file)
-plt.close()
+    plt.savefig(fig_file)
+    plt.close()
