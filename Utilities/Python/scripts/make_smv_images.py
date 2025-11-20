@@ -71,7 +71,7 @@ for i in range(len(folder)):
     os.chdir(outdir + folder[i])
     try:
         if os_name == "Linux":
-            subprocess.run(['xvfb-run','-w','10','-s','-fp /usr/share/X11/fonts/misc -screen 0 1280x1024x24','-a',smokeview_path,
+            subprocess.run(['xvfb-run','-w','2','-s','-fp /usr/share/X11/fonts/misc -screen 0 1280x1024x24','-a',smokeview_path,
                     '-bindir',bindir,'-runscript', case[i] ], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         else:
             subprocess.run([smokeview_path,'-bindir',bindir,'-runscript',case[i]], 
@@ -100,7 +100,7 @@ for directory in directories:
 
         try:
             results = compare_images(directory+png_file.name, refdir+png_file.name)
-            if results['similarity_percentage'] < 90:
+            if results['similarity_percentage'] < 98:
                 print('Warning: ',png_file.name,f"{results['similarity_percentage']:.2f}%")
         except FileNotFoundError as e:
             print(f"Error: Could not find image file - {e}")
