@@ -728,6 +728,7 @@ def plot_to_fig(x_data,y_data,**kwargs):
     plot_style = get_plot_style("fds")
 
     import matplotlib.pyplot as plt
+    import matplotlib.ticker as ticker
 
     plt.rcParams.update({
         "pdf.use14corefonts": True,
@@ -765,6 +766,7 @@ def plot_to_fig(x_data,y_data,**kwargs):
     default_legend_location = 'best'
     default_legend_framealpha = 1
     default_markevery = 1
+    detault_nticks = 6
     markerfacecolor = None
     markeredgecolor = 'black'
     marker = None
@@ -1056,13 +1058,40 @@ def plot_to_fig(x_data,y_data,**kwargs):
     ax.set_xlim(xmin,xmax)
     ax.set_ylim(ymin,ymax)
 
+    # --- Tick handling AFTER limits are set ---
+    if ax.get_xscale() == 'linear':
+        # ----- LINEAR AXIS -----
+        if xticks is None and xnumticks is None:
+            ax.xaxis.set_major_locator(ticker.MaxNLocator(nbins=detault_nticks, min_n_ticks=4))
+            sf = ticker.ScalarFormatter(useMathText=True)
+            sf.set_powerlimits((-3, 4))
+            ax.xaxis.set_major_formatter(sf)
+
+    elif ax.get_xscale() == 'log':
+        # ----- LOG AXIS -----
+        # Do not touch scalar formatters – LogFormatter is correct.
+        ax.xaxis.set_major_locator(ticker.LogLocator(base=10))
+        ax.xaxis.set_major_formatter(ticker.LogFormatterSciNotation(base=10))
+
+    # Same for y-axis
+    if ax.get_yscale() == 'linear':
+        if yticks is None and ynumticks is None:
+            ax.yaxis.set_major_locator(ticker.MaxNLocator(nbins=detault_nticks, min_n_ticks=4))
+            sf = ticker.ScalarFormatter(useMathText=True)
+            sf.set_powerlimits((-3, 4))
+            ax.yaxis.set_major_formatter(sf)
+
+    elif ax.get_yscale() == 'log':
+        ax.yaxis.set_major_locator(ticker.LogLocator(base=10))
+        ax.yaxis.set_major_formatter(ticker.LogFormatterSciNotation(base=10))
+
     # set number of ticks if requested by the user
-    if xnumticks != None:
+    if xnumticks is not None:
         if plot_type in ('loglog', 'semilogx'):
             ax.set_xticks(np.logspace(xmin, xmax, xnumticks))
         else:
             ax.set_xticks(np.linspace(xmin, xmax, xnumticks))
-    if ynumticks != None:
+    if ynumticks is not None:
         if plot_type in ('loglog', 'semilogy'):
             ax.set_yticks(np.logspace(ymin, ymax, ynumticks))
         else:
@@ -1072,11 +1101,11 @@ def plot_to_fig(x_data,y_data,**kwargs):
     if xticks is not None: ax.set_xticks(xticks)
     if yticks is not None: ax.set_yticks(yticks)
 
-
-    if plot_type in ('loglog', 'semilogy'):
-        apply_global_exponent(ax, axis='y', fontsize=axeslabel_fontsize)
-    if plot_type in ('loglog', 'semilogx'):
-        apply_global_exponent(ax, axis='x', fontsize=axeslabel_fontsize)
+    # # apply exponent for log axes
+    # if plot_type in ('loglog', 'semilogy'):
+    #     apply_global_exponent(ax, axis='y', fontsize=axeslabel_fontsize)
+    # if plot_type in ('loglog', 'semilogx'):
+    #     apply_global_exponent(ax, axis='x', fontsize=axeslabel_fontsize)
 
     if kwargs.get('revision_label'):
         add_version_string(ax=ax, version_str=kwargs.get('revision_label'), plot_type=plot_type, font_size=version_fontsize)
