@@ -6,11 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os, sys
 import pandas as pd
-from matplotlib.ticker import ScalarFormatter
-
-# Suppress RankWarning specifically
-import warnings
-warnings.simplefilter('ignore', np.RankWarning)
+import matplotlib as mpl
 
 filedir = os.path.dirname(__file__)
 firemodels = os.path.join(filedir,'..','..','..','..')
@@ -59,12 +55,13 @@ for ti,test in tests.iterrows():
     
 # Create summary plots
 
-dep_variables={"s":"Surface-to-Volume Ratio (1/m)",
-               "beta":"Packing Ratio (-)",
-               "U":"Wind Speed (m/s)",
-               "M":"FMC (-)"}
+dep_variables={"s":"Surface-to-Volume Ratio, s (1/m)",
+               "beta":"Packing Ratio, beta (-)",
+               "U":"Wind Speed, U (m/s)",
+               "M":"Moisture Content, M (-)"}
 
-fuel_labels=["MF","EXSC","PPMC","EX"]
+fuel_labels=["MF","PPMC","EXSC","EX"]
+fuel_names=["Pine sticks","Pine needles","Coarse excelsior","Regular excelsior"]
 colors = ['b','g','r','c','m','y','k'] # matlab defauls
 
 for dvar in dep_variables:
@@ -74,7 +71,7 @@ for dvar in dep_variables:
     [xmin,xmax] = [0.8*tests[dvar].min(),1.1*tests[dvar].max()]
     fig = fdsplotlib.plot_to_fig(x_data=[xmin, xmax], y_data=[0.8,0.8],
                                  plot_type='semilogy', marker_style='k--',
-                                 x_min=xmin, x_max=xmax, y_min=3e-3, y_max=1.1e1,
+                                 x_min=xmin, x_max=xmax, y_min=0.1, y_max=15,
                                  x_label=dep_variables[dvar], y_label=r"$\mathrm{R_{FDS}/R_{Exp}}$",
                                  revision_label=version_string)
 
@@ -87,7 +84,7 @@ for dvar in dep_variables:
             filtered_data = tests[
                 (tests['Test'].str.startswith(fuel))&(~tests['Test'].str.startswith('EXSC'))]
         fdsplotlib.plot_to_fig(x_data=filtered_data[dvar], y_data=filtered_data['R_FDS']/filtered_data['R'],
-                               data_label=fuel, marker_style=colors[i]+'o', figure_handle=fig)
+                               data_label=fuel_names[i], marker_style=colors[i]+'o', figure_handle=fig)
 
     plt.savefig(fig_file)
     plt.close(fig)
@@ -107,14 +104,26 @@ tests_normalized = tests
 tests_normalized[list(dep_variables.keys())] = tests[list(dep_variables.keys())].apply(
     lambda x: (x - x.min()) / (x.max() - x.min()))
 
-pd.plotting.parallel_coordinates(tests_normalized, 'category', 
+go_mask    = tests_normalized['category'] == 'spread'
+nogo_mask  = tests_normalized['category'] == 'no spread'
+
+pd.plotting.parallel_coordinates(tests_normalized[go_mask], 'category', 
                                  cols=['s','beta','M','U'],
-                                 color=[(1.,0.,0.,1), (0.,0.,0.,.2)],
+                                 color=[(0.,0.,0.,.04)],
                                  ax=ax,
                                  ls='-')
+ax.get_legend().remove()  # Hide the parallel_coordinates legend
 
-ax.legend(loc="upper center", framealpha=1,frameon=True)
+color_var = 'beta'   # or 'beta', 'M', 'U'
+cmap = plt.cm.plasma 
+norm = mpl.colors.Normalize(vmin=tests[color_var].min(),
+                     vmax=tests[color_var].max())
+colors = cmap(norm(tests[color_var]))
+
+for idx, (i, row) in enumerate(tests_normalized[nogo_mask].iterrows()):
+    x_vals = ['s','beta','M','U'] 
+    y_vals = [row['s'], row['beta'], row['M'], row['U']]
+    ax.plot(x_vals, y_vals, color=colors[i], linestyle='-')
 
 plt.savefig(fig_file)
 plt.close()
-

@@ -2298,7 +2298,7 @@ For each case, we perform simulations with three different fuel models---one usi
 \subsection{USFS/Catchpole Experiments}
 \label{USFS_Catchpole_Plots}
 
-Figures~\ref{USFS_Catchpole_008} through \ref{USFS_Catchpole_354} present the results of 354 simulations of the USFS/Catchpole experiments. A brief description is given in Sec.~\ref{USFS_Catchpole_Description}. The paper by Catchpole et al.~\cite{Catchpole:CST1998} reports a single rate of spread for each experiment, which is depicted in the figures as a straight black line. The rate of spread of the simulations was calculated by fitting the best line through the data points over a time interval between 10~\% and 90~\% of the observed transit time of the real fire over the 8~m fuel bed. The red dashed line is the best fit line from which the rate of spread is taken.
+Figures~\ref{USFS_Catchpole_008} through \ref{USFS_Catchpole_354} present the results of 354 simulations of the USFS/Catchpole experiments. A brief description is given in Sec.~\ref{USFS_Catchpole_Description}. The paper by Catchpole et al.~\cite{Catchpole:CST1998} reports a single rate of spread for each experiment, which is depicted in the figures as a straight black line. The rate of spread of the simulations was calculated by fitting the best line through the fire position versus time over an interval between 2~m and 7~m from the ignition line, to avoid any edge effects on the 8~m fuel bed. Cases are terminated when the fire extinguishes, so some cases where FDS does not sustain fire spread have few or no observations over this interval.
 
 \newpage
 
@@ -2973,9 +2973,31 @@ Figures~\ref{USFS_Catchpole_008} through \ref{USFS_Catchpole_354} present the re
 \label{USFS_Catchpole_354}
 \end{figure}
 
+\clearpage
 
+With over 300 cases in this study, it can be difficult to evaluate the quality of the FDS predictions as they pertain to the different experimental parameters evaluated. Across the four types of fuel, the input parameters modified were particle surface-to-volume ratio (s), packing ratio (beta), fuel moisture content (M), and wind speed (U). The ratio of the FDS predicted spread rates to the observed spread rates are shown as a function of each of these parameters in Fig.~\ref{USFS_Catchpole_parameter_summary}.
 
+\begin{figure}[ht]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/USFS_Catchpole/Catchpole_R_v_s} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/USFS_Catchpole/Catchpole_R_v_beta} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/USFS_Catchpole/Catchpole_R_v_M} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/USFS_Catchpole/Catchpole_R_v_U} \\
+\end{tabular*}
+\caption[USFS/Catchpole, effect of test parameters on spread rate prediction.]{Ratio of FDS to observed spread rate as a function of test matrix parameters for USFS/Catchpole cases. For context, dashed lines represent the region of plus/minus 20~\% error in predicted spread.}
+\label{USFS_Catchpole_parameter_summary}
+\end{figure}
 
+Additionally, neither Fig.~\ref{USFS_Catchpole_parameter_summary} nor the summary scatter plot in Fig.~\ref{RoS_Summary} include information on the cases for which FDS fails to reproduce a spreading fire. All cases tested have a reported spread rate from the experiments, so instances where FDS does not produce sustained fire spread are indicative of limitations in the current model representation. In order to guide future development efforts, Fig.~\ref{USFS_Catchpole_no_spread} attempts to summarize the model performance over the parameter space by showing lines that connect each set of parameters for a given test. Gray lines in the background correspond to successful spread predictions, while colored lines in the foreground are those for which FDS does not sustain fire spread. This highlights problematic areas of the test matrix, such as zero wind speed cases with low values of packing ratio.
+
+\begin{figure}[ht]
+\centering
+\begin{tabular}{c}
+\includegraphics[height=3.5in]{SCRIPT_FIGURES/USFS_Catchpole/Catchpole_no_spread}
+\end{tabular}
+\caption[USFS/Catchpole, conditions leading to failed spread predictions]{Parameter combinations for all USFS/Catchpole cases, each connected by a single line. Parameters of surface-to-volume ratio (s), packing ratio (beta), moisture content (M) and wind speed (U) are normalized between 0 (minimum value) and 1 (maximum value). Gray lines in the background are cases where FDS successfully predicts spread, and colored lines in the foreground represent failed (no spread) predictions. Failed prediction lines are colored according to the beta value for a given test in order to help distinguish trends.}
+\label{USFS_Catchpole_no_spread}
+\end{figure}
 
 \clearpage
 
