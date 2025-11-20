@@ -424,7 +424,9 @@ def dataplot(config_filename, **kwargs):
                 y_min=pp.Min_Ind if flip_axis else pp.Min_Dep,
                 y_max=pp.Max_Ind if flip_axis else pp.Max_Dep,
                 legend_location=matlab_legend_to_matplotlib(pp.Key_Position),
+                legend_expand=pp.Paper_Width_Factor,
                 plot_type=plot_type,
+                plot_title=pp.Plot_Title,
             )
 
         # --- Save measured (experimental) ---
@@ -530,15 +532,6 @@ def dataplot(config_filename, **kwargs):
                 figure_handle=f,                  # keep same figure
                 data_label=d2_key_labels[i],
                 line_style=d2_styles[i],
-                x_label=pp.Dep_Title if flip_axis else pp.Ind_Title,
-                y_label=pp.Ind_Title if flip_axis else pp.Dep_Title,
-                x_min=pp.Min_Dep if flip_axis else pp.Min_Ind,
-                x_max=pp.Max_Dep if flip_axis else pp.Max_Ind,
-                y_min=pp.Min_Ind if flip_axis else pp.Min_Dep,
-                y_max=pp.Max_Ind if flip_axis else pp.Max_Dep,
-                legend_location=matlab_legend_to_matplotlib(pp.Key_Position),
-                plot_type=plot_type,
-                plot_title=pp.Plot_Title,
             )
 
         # --- Interpolated, metric-aware model logic ---
@@ -800,7 +793,7 @@ def plot_to_fig(x_data,y_data,**kwargs):
         ax = fig.add_axes([left, bottom, ax_w, ax_h])
 
     # widen paper if legend is outside, keeping axes fixed in physical size
-    if kwargs.get('legend_location') == 'outside':
+    if (kwargs.get('legend_location') == 'outside') and (not using_existing_figure):
         legend_expand = kwargs.get('legend_expand', 1.25)
         old_size = fig.get_size_inches()
 
@@ -1339,14 +1332,13 @@ def get_plot_style(style="fds"):
 
 def matlab_legend_to_matplotlib(position):
     """
-    Convert a MATLAB legend position string to the corresponding matplotlib location string.
-
-    Parameters:
-        position (str): MATLAB-style legend position (e.g., 'northeast', 'southwestoutside')
-
-    Returns:
-        str: Matplotlib-compatible legend location (e.g., 'upper right')
+    Convert a MATLAB legend position string to a matplotlib-compatible location.
     """
+    if not isinstance(position, str):
+        return 'best'
+
+    pos = position.strip().lower()
+
     mapping = {
         'north': 'upper center',
         'south': 'lower center',
@@ -1356,17 +1348,15 @@ def matlab_legend_to_matplotlib(position):
         'southeast': 'lower right',
         'southwest': 'lower left',
         'northwest': 'upper left',
-        'northeastoutside': 'center left',    # rough equivalent
-        'northwestoutside': 'center right',
-        'southeastoutside': 'center left',
-        'southwestoutside': 'center right',
+
+        # outside positions (MATLAB → Matplotlib approximations)
+        'eastoutside': 'outside',
+
         'best': 'best'
     }
 
-    if not isinstance(position, str):
-        return 'best'
+    return mapping.get(pos, 'best')
 
-    return mapping.get(position.strip().lower(), 'best')
 
 
 def define_plot_parameters(D, irow, lightweight=False):

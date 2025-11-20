@@ -154,7 +154,8 @@ def energy_decay(chid, N):
                              x_min=0, x_max=0.7, y_min=0, y_max=0.07,
                              revision_label=version_string,
                              x_label='Time (s)',
-                             y_label='Kinetic Energy (m$^2$/s$^2$)')
+                             y_label='Kinetic Energy (m$^2$/s$^2$)',
+                             legend_location='upper right')
 
     if chid == 'csmag_32':
         M = pd.read_csv(outdir + 'mu0_32_devc.csv', skiprows=2, header=None).values
