@@ -3078,7 +3078,7 @@ The solid phase reaction represented by Fig.~\ref{pyrolysis} is fairly simple---
 \label{pyrolysis_2}
 \end{figure}
 
-The plot in Fig.~\ref{pyrolysis_2} contains two sets of curves. The solid curves represent the solution of the set of equations computed using a Matlab ODE solver, and the underlying dashed curves are a ``fit'' of the Matlab solution using FDS. The \ct{MATL} line for the solid material contains the following three parameters that define its decomposition:
+The plot in Fig.~\ref{pyrolysis_2} contains two sets of curves. The solid curves represent the solution of the set of equations computed using a numerical ODE solver, and the underlying dashed curves are a ``fit'' of the solution using FDS. The \ct{MATL} line for the solid material contains the following three parameters that define its decomposition:
 \begin{lstlisting}
 &MATL ID                    = '...'
       ...
@@ -3086,7 +3086,7 @@ The plot in Fig.~\ref{pyrolysis_2} contains two sets of curves. The solid curves
       PYROLYSIS_RANGE       = 100.
       HEATING_RATE          = 5.   /
 \end{lstlisting}
-The \ct{REFERENCE_TEMPERATURE} is the temperature in $^\circ$C where the mass loss rate is at its peak. The \ct{HEATING_RATE} is the linear temperature rise ($^\circ$C/min) used in the TGA experiment, which is represented here by the Matlab solution. The \ct{PYROLYSIS_RANGE} is the approximate ``width'' of the second red hump in Fig.~\ref{pyrolysis_2}, fit by inspection. That is, the value of 100~$^\circ$C was chosen by trial and error. This is typically how one would choose kinetic parameters in FDS to match a given TGA curve.
+The \ct{REFERENCE_TEMPERATURE} is the temperature in $^\circ$C where the mass loss rate is at its peak. The \ct{HEATING_RATE} is the linear temperature rise ($^\circ$C/min) used in the TGA experiment, which is represented here by the numerical solution. The \ct{PYROLYSIS_RANGE} is the approximate ``width'' of the second red hump in Fig.~\ref{pyrolysis_2}, fit by inspection. That is, the value of 100~$^\circ$C was chosen by trial and error. This is typically how one would choose kinetic parameters in FDS to match a given TGA curve.
 
 
 
@@ -3324,7 +3324,7 @@ Note that the 3-D heat conduction equation is solved via 1-D segments in all thr
 
 \subsection{Delamination of layers}
 \label{info:surf_delamination}
-Delamination (fall-off) of material layers can occur e.g. in glued materials, such as Cross-Laminated Timber (CLT). Two different criteria can be used to enforce a delamination of \ct{SURF} layers: \ct{DELAMINATION\_TMP(NL)} sets the temperature criterion; if the last cell of the layer \ct{NL} exceeds this temperature, all layers from the first to \ct{NL}'th (of this particular wall cell) will be removed. Their mass will simply disappear from the computation, and the following layer will befome the surface of the wall. Similarly, specifying \ct{DELAMINATION\_DENSITY(NL)} will remove the layers 1 to \ct{NL} if the density of the \ct{NL}th layer's last cell decreases below the threshold.
+Delamination (fall-off) of material layers can occur e.g. in glued materials, such as Cross-Laminated Timber (CLT). Two different criteria can be used to enforce a delamination of \ct{SURF} layers: \ct{DELAMINATION_TMP(NL)} sets the temperature criterion; if the last cell of the layer \ct{NL} exceeds this temperature, all layers from the first to \ct{NL}'th (of this particular wall cell) will be removed. Their mass will simply disappear from the computation, and the following layer will befome the surface of the wall. Similarly, specifying \ct{DELAMINATION_DENSITY(NL)} will remove the layers 1 to \ct{NL} if the density of the \ct{NL}th layer's last cell decreases below the threshold.
 
 \newpage
 
