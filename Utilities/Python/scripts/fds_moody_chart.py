@@ -308,32 +308,38 @@ outdir = '../../Verification/Complex_Geometry/'
 vmethod = ['_stm']
 
 for im in range(1):
-    
+
     mth = vmethod[im]
-    
+
     # plot convergence for Poiseuille flow aligned case theta=0 (mu = 0.025)
 
     f = np.zeros(4)
     Re = np.zeros(4)
     f2 = np.zeros(4)
     Re2 = np.zeros(4)
-    
+
     f[0], Re[0] = friction_factor_calc(dpdx, L, outdir + 'geom_poiseuille_N10a_theta0' + mth + '_devc.csv')
     f[1], Re[1] = friction_factor_calc(dpdx, L, outdir + 'geom_poiseuille_N20a_theta0' + mth + '_devc.csv')
     f[2], Re[2] = friction_factor_calc(dpdx, L, outdir + 'geom_poiseuille_N40a_theta0' + mth + '_devc.csv')
     f[3], Re[3] = friction_factor_calc(dpdx, L, outdir + 'geom_poiseuille_N80a_theta0' + mth + '_devc.csv')
-    
+
     f2[0], Re2[0] = friction_factor_calc(dpdx, L, outdir + 'geom_poiseuille_N10nah_theta0' + mth + '_devc.csv')
     f2[1], Re2[1] = friction_factor_calc(dpdx, L, outdir + 'geom_poiseuille_N20nah_theta0' + mth + '_devc.csv')
     f2[2], Re2[2] = friction_factor_calc(dpdx, L, outdir + 'geom_poiseuille_N40nah_theta0' + mth + '_devc.csv')
     f2[3], Re2[3] = friction_factor_calc(dpdx, L, outdir + 'geom_poiseuille_N80nah_theta0' + mth + '_devc.csv')
-    
+
     dz = L / N
     error = np.abs(f - 24.0 / Re)
     error2 = np.abs(f2 - 24.0 / Re2)
-    
+
+    if error[len(error)-1] > 1.e-4:
+         print('Python Warning: Error in geom_poiseuille_N80a_theta0 is out of tolerance. e_f = ',error[len(error)-1])
+
+    if error2[len(error2)-1] > 1.e-4:
+         print('Python Warning: Error in geom_poiseuille_N80nah_theta0 is out of tolerance. e_f = ',error2[len(error2)-1])
+
     fig = fdsplotlib.plot_to_fig(x_data=dz, y_data=error, marker_style='b*-', data_label='FDS, $h=0$',
-                                 x_min=0.01, x_max=0.2, y_min=5e-5, y_max=0.01,
+                                 x_min=0.01, x_max=0.2, y_min=1e-5, y_max=0.01,
                                  plot_type='loglog',
                                  revision_label=version_string,
                                  x_label=r'Grid Spacing, $\delta z$ (m)',
@@ -342,29 +348,32 @@ for im in range(1):
     fdsplotlib.plot_to_fig(x_data=dz, y_data=error2,   figure_handle=fig, marker_style='rx-', data_label=r'$h=\delta z/3$')
     fdsplotlib.plot_to_fig(x_data=dz, y_data=0.12*dz,  figure_handle=fig, marker_style='k--', data_label=r'$O(\delta z)$')
     fdsplotlib.plot_to_fig(x_data=dz, y_data=0.4*dz**2,figure_handle=fig, marker_style='k-' , data_label=r'$O(\delta z^2)$')
-    
+
     output_file = pltdir + 'geom_poiseuille_convergence_theta0a' + mth + '.pdf'
     plt.savefig(output_file, format='pdf')
     plt.close()
-    
+
     # plot convergence for Poiseuille flow not aligned case theta=0 (mu = 0.025)
-    
+
     f = np.zeros(4)
     Re = np.zeros(4)
     f2 = None
     Re2 = None
     H = []
-    
+
     f[0], Re[0] = friction_factor_calc(dpdx, L, outdir + 'geom_poiseuille_N10na_theta0' + mth + '_devc.csv')
     f[1], Re[1] = friction_factor_calc(dpdx, L, outdir + 'geom_poiseuille_N20na_theta0' + mth + '_devc.csv')
     f[2], Re[2] = friction_factor_calc(dpdx, L, outdir + 'geom_poiseuille_N40na_theta0' + mth + '_devc.csv')
     f[3], Re[3] = friction_factor_calc(dpdx, L, outdir + 'geom_poiseuille_N80na_theta0' + mth + '_devc.csv')
-    
+
     dz = L / N
     error = np.abs(f - 24.0 / Re)
-    
+
+    if error[len(error)-1] > 1.e-4:
+         print('Python Warning: Error in geom_poiseuille_N80na_theta0 is out of tolerance. e_f = ',error[len(error)-1])
+
     fig = fdsplotlib.plot_to_fig(x_data=dz, y_data=error, marker_style='b*-', data_label=r'FDS, $h=\delta z_{10}/11$',
-                                 x_min=0.01, x_max=0.2, y_min=5e-5, y_max=0.01,
+                                 x_min=0.01, x_max=0.2, y_min=1e-5, y_max=0.01,
                                  plot_type='loglog',
                                  revision_label=version_string,
                                  x_label=r'Grid Spacing, $\delta z$ (m)',
@@ -372,7 +381,7 @@ for im in range(1):
 
     fdsplotlib.plot_to_fig(x_data=dz, y_data=0.05*dz,  figure_handle=fig, marker_style='k--', data_label=r'$O(\delta z)$')
     fdsplotlib.plot_to_fig(x_data=dz, y_data=0.4*dz**2,figure_handle=fig, marker_style='k-' , data_label=r'$O(\delta z^2)$')
-    
+
     output_file = pltdir + 'geom_poiseuille_convergence_theta0na' + mth + '.pdf'
     plt.savefig(output_file, format='pdf')
     plt.close()
@@ -405,7 +414,7 @@ H = [10, 10, 10, 10, 7.2]      # tunnel height (m) from input file
 L = [1600, 1600, 1600, 1600, 1600]    # tunnel length (m)
 pmin = [-1, 0, -20, 0, -10]
 pmax = [6, 18, 120, 460, 60]
- 
+
 f_save = np.zeros(len(cases))
 f_fds_save = np.zeros((len(res), len(cases)))
 
