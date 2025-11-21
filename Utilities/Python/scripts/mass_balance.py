@@ -59,8 +59,7 @@ def plot_mass_balance(chid, title_text):
     legend = ax.get_legend()
     if legend:
         legend.legend_handles[1].set_color('orange')  # Second legend entry (Outlet H2O)
-    
-    fdsplotlib.apply_global_exponent(ax, axis='y')   
+
     ax.text(100, 18e-3, title_text,fontsize=plot_style['Title_Font_Size'],fontname=plot_style['Font_Name'])
     
     # Compute mean error for t > 1000 s

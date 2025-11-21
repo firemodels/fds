@@ -104,7 +104,8 @@ for slope in slope_angles:
                 plot_title=f'Level set spread rate (LS_ellipse_*ms_{slope:02d}deg)',
                 x_label='x (m)',
                 y_label='y (m)',
-                data_label=f'FDS {U} m/s'
+                data_label=f'FDS {U} m/s',
+                legend_location='lower right',
             )
         else:
             fdsplotlib.plot_to_fig(x_data=x_pts,
