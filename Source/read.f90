@@ -12346,7 +12346,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
                ENDIF
 
                IF (SURF_ID=='OPEN')                            VT%TYPE_INDICATOR =  2
-               IF (SURF_ID=='MIRROR' .OR. SURF_ID=='PERIODIC') VT%TYPE_INDICATOR = -2
+               IF (SURF_ID=='MIRROR' .OR. SURF_ID=='PERIODIC' .OR. SURF_ID=='PERIODIC FLOW ONLY') VT%TYPE_INDICATOR = -2
                IF ((DB/='null' .OR. MB/='null' .OR.  PBX>-1.E5_EB .OR. PBY>-1.E5_EB .OR. PBZ>-1.E5_EB) &
                     .AND. SURF_ID=='OPEN') VT%TYPE_INDICATOR=-2
                IF (SURF_ID=='PERIODIC FLOW ONLY') VT%SURF_INDEX = PERIODIC_FLOW_ONLY_SURF_INDEX
