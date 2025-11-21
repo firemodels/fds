@@ -160,7 +160,8 @@ for res in resolution:
                                    y_label=r'$V/Q^{1/5}$ $({\rm m s}^{-1} \; {\rm kW}^{-1/5})$',
                                    plot_title=f'McCaffrey Centerline Velocity, {res}',
                                    legend_location='lower right',
-                                   plot_type='loglog')
+                                   plot_type='loglog',
+                                   yticks = [0.6, 1, 2, 3])
 
     for i, c in enumerate(chid):
         fname = os.path.join(datadir, f'{c}_line.csv')
@@ -175,7 +176,7 @@ for res in resolution:
                 v = M.iloc[:, 1].values
             zq_fds = z / (Q[i]**(2.0/5.0))
             vq_fds = v / (Q[i]**(1.0/5.0))
-            fdsplotlib.plot_to_fig(x_data=zq_fds, y_data=vq_fds, 
+            fdsplotlib.plot_to_fig(x_data=zq_fds, y_data=vq_fds,
                                           data_label=f'{Q[i]} kW', marker_style=mark[i], figure_handle=fig_v)
     fig_v.savefig(os.path.join(pltdir, f'McCaffrey_Velocity_Correlation_{res}.pdf'))
     plt.close(fig_v)
@@ -189,7 +190,7 @@ for res in resolution:
                                    x_label=r'$z/Q^{2/5}$ $({\rm m kW}^{-2/5})$',
                                    y_label=r'$\Delta{T}$ ($^\circ$C)',
                                    plot_title=f'McCaffrey Centerline Temperature, {res}',
-                                   legend_location='lower right',
+                                   legend_location='lower left',
                                    plot_type='loglog')
 
     for i, c in enumerate(chid):
@@ -203,7 +204,7 @@ for res in resolution:
                 z = M.iloc[:, 0].values
                 T = M.iloc[:, 2].values + 273.15 if M.shape[1] > 2 else M.iloc[:, 1].values + 273.15
             zq_fds = z / (Q[i]**(2.0/5.0))
-            fdsplotlib.plot_to_fig(x_data=zq_fds, y_data=T-T0, 
+            fdsplotlib.plot_to_fig(x_data=zq_fds, y_data=T-T0,
                                           data_label=f'{Q[i]} kW', marker_style=mark[i], figure_handle=fig_t)
     fig_t.savefig(os.path.join(pltdir, f'McCaffrey_Temperature_Correlation_{res}.pdf'))
     plt.close(fig_t)
