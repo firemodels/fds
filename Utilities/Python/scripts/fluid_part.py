@@ -469,13 +469,14 @@ for i in range(len(chid)):
     STIME, XP, YP, ZP, QP = read_prt5(ddir + chid[i] + '_1.prt5', 'real*4')
 
     if j[i] == 1:
-        fdsplotlib.plot_to_fig(x_data=XP[-1, :], y_data=QP[-1, :, 0, 0]/QP[-1, :, 0, 1], figure_handle=fig, marker_style='bo', data_label='FDS part')
+        fdsplotlib.plot_to_fig(x_data=XP[-1, :], y_data=QP[-1, :, 0, 0]/QP[-1, :, 0, 1], figure_handle=fig, marker_style='bo')
         v = np.abs(c_d * a_p * 0.5*rho_g*(XP[-1, :]**2) - QP[-1, :, 0, 0]/QP[-1, :, 0, 1])
     elif j[i] == 2:
-        fdsplotlib.plot_to_fig(x_data=YP[-1, :], y_data=QP[-1, :, 0, 0]/QP[-1, :, 0, 1], figure_handle=fig, marker_style='ro', data_label='FDS part')
+        fdsplotlib.plot_to_fig(x_data=YP[-1, :], y_data=QP[-1, :, 0, 0]/QP[-1, :, 0, 1], figure_handle=fig, marker_style='ro')
         v = np.abs(c_d * a_p * 0.5*rho_g*(YP[-1, :]**2) - QP[-1, :, 0, 0]/QP[-1, :, 0, 1])
     elif j[i] == 3:
-        fdsplotlib.plot_to_fig(x_data=ZP[-1, :], y_data=QP[-1, :, 0, 0]/QP[-1, :, 0, 1], figure_handle=fig, marker_style='go', data_label='FDS part')
+        fds_key_label = 'FDS part' if i==2 else None
+        fdsplotlib.plot_to_fig(x_data=ZP[-1, :], y_data=QP[-1, :, 0, 0]/QP[-1, :, 0, 1], figure_handle=fig, marker_style='go', data_label=fds_key_label)
         v = np.abs(c_d * a_p * 0.5*rho_g*(ZP[-1, :]**2) - QP[-1, :, 0, 0]/QP[-1, :, 0, 1])
 
     err = np.linalg.norm(v)/len(v)

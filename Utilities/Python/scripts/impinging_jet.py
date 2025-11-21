@@ -104,9 +104,6 @@ for j, res in enumerate(res_list):
         label = f'FDS {res}' if i == 0 else None
         fig = fdsplotlib.plot_to_fig(x_data=Re_j, y_data=Nu_fds, data_label=label, figure_handle=fig, marker_style=markers[res], marker_fill_color=(1,1,1,0.0))
 
-# Convert exponential to scientific
-fdsplotlib.apply_global_exponent(fig.axes[0], axis='x', fontsize=plot_style['Label_Font_Size'])
-
 # Save figure
 corr_pdf = os.path.join(pltdir, 'impinging_jet_correlation.pdf')
 fig.savefig(corr_pdf)

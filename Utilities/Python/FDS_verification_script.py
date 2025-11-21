@@ -28,10 +28,10 @@ print('water_evap_1_const_gamma...');            runpy.run_path("./scripts/water
 
 # Dataplot and scatplot options
 
-Dataplot_Inputs_File = '../Matlab/FDS_verification_dataplot_inputs.csv';
+Dataplot_Inputs_File = 'FDS_verification_dataplot_inputs.csv';
 Working_Dir = '../../Verification/';
 Manuals_Dir = '../../Manuals/';
-Scatterplot_Inputs_File = '../Matlab/FDS_verification_scatterplot_inputs.csv';
+Scatterplot_Inputs_File = 'FDS_verification_scatterplot_inputs.csv';
 
 # Statistics output options
 

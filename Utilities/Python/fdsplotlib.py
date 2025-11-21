@@ -424,7 +424,9 @@ def dataplot(config_filename, **kwargs):
                 y_min=pp.Min_Ind if flip_axis else pp.Min_Dep,
                 y_max=pp.Max_Ind if flip_axis else pp.Max_Dep,
                 legend_location=matlab_legend_to_matplotlib(pp.Key_Position),
+                legend_expand=pp.Paper_Width_Factor,
                 plot_type=plot_type,
+                plot_title=pp.Plot_Title,
             )
 
         # --- Save measured (experimental) ---
@@ -530,15 +532,6 @@ def dataplot(config_filename, **kwargs):
                 figure_handle=f,                  # keep same figure
                 data_label=d2_key_labels[i],
                 line_style=d2_styles[i],
-                x_label=pp.Dep_Title if flip_axis else pp.Ind_Title,
-                y_label=pp.Ind_Title if flip_axis else pp.Dep_Title,
-                x_min=pp.Min_Dep if flip_axis else pp.Min_Ind,
-                x_max=pp.Max_Dep if flip_axis else pp.Max_Ind,
-                y_min=pp.Min_Ind if flip_axis else pp.Min_Dep,
-                y_max=pp.Max_Ind if flip_axis else pp.Max_Dep,
-                legend_location=matlab_legend_to_matplotlib(pp.Key_Position),
-                plot_type=plot_type,
-                plot_title=pp.Plot_Title,
             )
 
         # --- Interpolated, metric-aware model logic ---
@@ -728,6 +721,7 @@ def plot_to_fig(x_data,y_data,**kwargs):
     plot_style = get_plot_style("fds")
 
     import matplotlib.pyplot as plt
+    import matplotlib.ticker as ticker
 
     plt.rcParams.update({
         "pdf.use14corefonts": True,
@@ -765,6 +759,7 @@ def plot_to_fig(x_data,y_data,**kwargs):
     default_legend_location = 'best'
     default_legend_framealpha = 1
     default_markevery = 1
+    detault_nticks = 6
     markerfacecolor = None
     markeredgecolor = 'black'
     marker = None
@@ -798,7 +793,7 @@ def plot_to_fig(x_data,y_data,**kwargs):
         ax = fig.add_axes([left, bottom, ax_w, ax_h])
 
     # widen paper if legend is outside, keeping axes fixed in physical size
-    if kwargs.get('legend_location') == 'outside':
+    if (kwargs.get('legend_location') == 'outside') and (not using_existing_figure):
         legend_expand = kwargs.get('legend_expand', 1.25)
         old_size = fig.get_size_inches()
 
@@ -1056,13 +1051,40 @@ def plot_to_fig(x_data,y_data,**kwargs):
     ax.set_xlim(xmin,xmax)
     ax.set_ylim(ymin,ymax)
 
+    # --- Tick handling AFTER limits are set ---
+    if ax.get_xscale() == 'linear':
+        # ----- LINEAR AXIS -----
+        if xticks is None and xnumticks is None:
+            ax.xaxis.set_major_locator(ticker.MaxNLocator(nbins=detault_nticks, min_n_ticks=4))
+            sf = ticker.ScalarFormatter(useMathText=True)
+            sf.set_powerlimits((-3, 4))
+            ax.xaxis.set_major_formatter(sf)
+
+    elif ax.get_xscale() == 'log':
+        # ----- LOG AXIS -----
+        # Do not touch scalar formatters – LogFormatter is correct.
+        ax.xaxis.set_major_locator(ticker.LogLocator(base=10))
+        ax.xaxis.set_major_formatter(ticker.LogFormatterSciNotation(base=10))
+
+    # Same for y-axis
+    if ax.get_yscale() == 'linear':
+        if yticks is None and ynumticks is None:
+            ax.yaxis.set_major_locator(ticker.MaxNLocator(nbins=detault_nticks, min_n_ticks=4))
+            sf = ticker.ScalarFormatter(useMathText=True)
+            sf.set_powerlimits((-3, 4))
+            ax.yaxis.set_major_formatter(sf)
+
+    elif ax.get_yscale() == 'log':
+        ax.yaxis.set_major_locator(ticker.LogLocator(base=10))
+        ax.yaxis.set_major_formatter(ticker.LogFormatterSciNotation(base=10))
+
     # set number of ticks if requested by the user
-    if xnumticks != None:
+    if xnumticks is not None:
         if plot_type in ('loglog', 'semilogx'):
             ax.set_xticks(np.logspace(xmin, xmax, xnumticks))
         else:
             ax.set_xticks(np.linspace(xmin, xmax, xnumticks))
-    if ynumticks != None:
+    if ynumticks is not None:
         if plot_type in ('loglog', 'semilogy'):
             ax.set_yticks(np.logspace(ymin, ymax, ynumticks))
         else:
@@ -1072,12 +1094,6 @@ def plot_to_fig(x_data,y_data,**kwargs):
     if xticks is not None: ax.set_xticks(xticks)
     if yticks is not None: ax.set_yticks(yticks)
 
-
-    if plot_type in ('loglog', 'semilogy'):
-        apply_global_exponent(ax, axis='y', fontsize=axeslabel_fontsize)
-    if plot_type in ('loglog', 'semilogx'):
-        apply_global_exponent(ax, axis='x', fontsize=axeslabel_fontsize)
-
     if kwargs.get('revision_label'):
         add_version_string(ax=ax, version_str=kwargs.get('revision_label'), plot_type=plot_type, font_size=version_fontsize)
 
@@ -1086,70 +1102,6 @@ def plot_to_fig(x_data,y_data,**kwargs):
     set_ticks_like_matlab(fig)
 
     return fig
-
-
-def apply_global_exponent(ax, axis='y', fontsize=10, minor_subs=None):
-    import numpy as np
-    from matplotlib.ticker import FuncFormatter, LogLocator
-
-    if axis == 'y':
-        ticks = ax.get_yticks()
-        axis_obj = ax.yaxis
-        lims = ax.get_ylim()
-    else:
-        ticks = ax.get_xticks()
-        axis_obj = ax.xaxis
-        lims = ax.get_xlim()
-
-    # Keep only positive finite ticks (for log axes)
-    ticks = np.array([t for t in ticks if t > 0 and np.isfinite(t)])
-    if ticks.size == 0:
-        return
-
-    # Choose representative exponent
-    exp = int(np.floor(np.log10(np.median(ticks))))
-    scale = 10.0**exp
-
-    # Major formatter: fixed-point decimals
-    def fmt(val, pos):
-        v = val / scale
-        return "{:g}".format(v)
-
-    axis_obj.set_major_formatter(FuncFormatter(fmt))
-    axis_obj.get_offset_text().set_visible(False)
-
-    # Decide what to do with minor tick labels
-    span_decades = np.log10(lims[1]) - np.log10(max(lims[0], 1e-300))
-
-    # Default subs = 2, 4, 6, 8
-    if minor_subs is None:
-        minor_subs = [2, 4, 6, 8]
-
-    if span_decades <= 1.1:  # only ~1 decade
-        axis_obj.set_minor_locator(LogLocator(base=10.0, subs=minor_subs, numticks=10))
-        axis_obj.set_minor_formatter(FuncFormatter(lambda val, pos: "{:g}".format(val/scale)))
-    else:
-        ax.tick_params(axis=axis, which='minor', labelleft=False, labelbottom=False)
-
-    # Force tick labels NOT to go through TeX
-    if axis == 'y':
-        for label in ax.get_yticklabels() + ax.get_yticklabels(minor=True):
-            label.set_usetex(False)
-    else:
-        for label in ax.get_xticklabels() + ax.get_xticklabels(minor=True):
-            label.set_usetex(False)
-
-    # Place the ×10^exp text at the axis end
-    if exp != 0:
-        if axis == 'y':
-            ax.text(0, 1.01, rf"$\times 10^{{{exp}}}$",
-                    transform=ax.transAxes,
-                    ha='left', va='bottom', fontsize=fontsize)
-        else:
-            ax.text(1.0, -0.1, rf"$\times 10^{{{exp}}}$",
-                    transform=ax.transAxes,
-                    ha='right', va='top', fontsize=fontsize)
-
 
 
 def parse_matlab_style(style):
@@ -1380,14 +1332,13 @@ def get_plot_style(style="fds"):
 
 def matlab_legend_to_matplotlib(position):
     """
-    Convert a MATLAB legend position string to the corresponding matplotlib location string.
-
-    Parameters:
-        position (str): MATLAB-style legend position (e.g., 'northeast', 'southwestoutside')
-
-    Returns:
-        str: Matplotlib-compatible legend location (e.g., 'upper right')
+    Convert a MATLAB legend position string to a matplotlib-compatible location.
     """
+    if not isinstance(position, str):
+        return 'best'
+
+    pos = position.strip().lower()
+
     mapping = {
         'north': 'upper center',
         'south': 'lower center',
@@ -1397,17 +1348,15 @@ def matlab_legend_to_matplotlib(position):
         'southeast': 'lower right',
         'southwest': 'lower left',
         'northwest': 'upper left',
-        'northeastoutside': 'center left',    # rough equivalent
-        'northwestoutside': 'center right',
-        'southeastoutside': 'center left',
-        'southwestoutside': 'center right',
+
+        # outside positions (MATLAB → Matplotlib approximations)
+        'eastoutside': 'outside',
+
         'best': 'best'
     }
 
-    if not isinstance(position, str):
-        return 'best'
+    return mapping.get(pos, 'best')
 
-    return mapping.get(position.strip().lower(), 'best')
 
 
 def define_plot_parameters(D, irow, lightweight=False):

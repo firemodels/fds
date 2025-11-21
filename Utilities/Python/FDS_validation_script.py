@@ -27,11 +27,11 @@ print("Sandia_Plumes_TKE...");            runpy.run_path("./scripts/Sandia_Plume
 
 # Dataplot and scatplot options
 
-Dataplot_Inputs_File = '../Matlab/FDS_validation_dataplot_inputs.csv'
+Dataplot_Inputs_File = 'FDS_validation_dataplot_inputs.csv'
 EXP_Dir = '../../../exp/'
 OUT_Dir = '../../../out/'
 Manuals_Dir = '../../Manuals/'
-Scatterplot_Inputs_File = '../Matlab/FDS_validation_scatterplot_inputs.csv'
+Scatterplot_Inputs_File = 'FDS_validation_scatterplot_inputs.csv'
 
 # Statistics output options
 

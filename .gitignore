@@ -45,6 +45,7 @@ Manuals/*/*Guide.pdf
 *.sf
 *.bf
 *.s3d
+*.s3dd
 *.q
 *.sz
 *.smv

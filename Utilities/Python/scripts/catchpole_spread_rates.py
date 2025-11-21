@@ -6,11 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os, sys
 import pandas as pd
-from matplotlib.ticker import ScalarFormatter
-
-# Suppress RankWarning specifically
-import warnings
-warnings.simplefilter('ignore', np.RankWarning)
+import matplotlib as mpl
 
 filedir = os.path.dirname(__file__)
 firemodels = os.path.join(filedir,'..','..','..','..')
@@ -59,12 +55,13 @@ for ti,test in tests.iterrows():
     
 # Create summary plots
 
-dep_variables={"s":"Surface-to-Volume Ratio (1/m)",
-               "beta":"Packing Ratio (-)",
-               "U":"Wind Speed (m/s)",
-               "M":"FMC (-)"}
+dep_variables={"s":"Surface-to-Volume Ratio, s (1/m)",
+               "beta":"Packing Ratio, beta (-)",
+               "U":"Wind Speed, U (m/s)",
+               "M":"Moisture Content, M (-)"}
 
-fuel_labels=["MF","EXSC","PPMC","EX"]
+fuel_labels=["MF","PPMC","EXSC","EX"]
+fuel_names=["Pine sticks","Pine needles","Coarse excelsior","Regular excelsior"]
 colors = ['b','g','r','c','m','y','k'] # matlab defauls
 
 for dvar in dep_variables:
@@ -74,7 +71,7 @@ for dvar in dep_variables:
     [xmin,xmax] = [0.8*tests[dvar].min(),1.1*tests[dvar].max()]
     fig = fdsplotlib.plot_to_fig(x_data=[xmin, xmax], y_data=[0.8,0.8],
                                  plot_type='semilogy', marker_style='k--',
-                                 x_min=xmin, x_max=xmax, y_min=3e-3, y_max=1.1e1,
+                                 x_min=xmin, x_max=xmax, y_min=0.1, y_max=15,
                                  x_label=dep_variables[dvar], y_label=r"$\mathrm{R_{FDS}/R_{Exp}}$",
                                  revision_label=version_string)
 
@@ -87,34 +84,68 @@ for dvar in dep_variables:
             filtered_data = tests[
                 (tests['Test'].str.startswith(fuel))&(~tests['Test'].str.startswith('EXSC'))]
         fdsplotlib.plot_to_fig(x_data=filtered_data[dvar], y_data=filtered_data['R_FDS']/filtered_data['R'],
-                               data_label=fuel, marker_style=colors[i]+'o', figure_handle=fig)
+                               data_label=fuel_names[i], marker_style=colors[i]+'o', figure_handle=fig)
 
     plt.savefig(fig_file)
     plt.close(fig)
 
 # plot no-spread conditions
 
-fig_file = os.path.join(fig_path, "Catchpole_no_spread.pdf")
-# Dummy call to establish figure
-fig = fdsplotlib.plot_to_fig(x_data=[-1,-1], y_data=[-1,-1],
-                                x_label='Parameter',y_label='Normalized value',
-                                x_min=0,x_max=3,y_min=0,y_max=1,ynumticks=2,
-                                revision_label=version_string)
-ax = plt.gca()
+go_mask    = tests['category'] == 'spread'
+nogo_mask  = tests['category'] == 'no spread'
 
-# Normalize by max and min
-tests_normalized = tests
-tests_normalized[list(dep_variables.keys())] = tests[list(dep_variables.keys())].apply(
-    lambda x: (x - x.min()) / (x.max() - x.min()))
+# Create scatter plot for each fuel type
+for i, fuel in enumerate(fuel_labels):
+    fuel_name = fuel_names[i]
+    fig_file = os.path.join(fig_path, f"Catchpole_no_spread_{fuel}.pdf")
+    
+    # Filter for this fuel type
+    if fuel == 'EX':
+        fuel_mask = tests['Test'].str.startswith(fuel) & (~tests['Test'].str.startswith('EXSC'))
+    else:
+        fuel_mask = tests['Test'].str.startswith(fuel)
+    
+    # Get data for this fuel type
+    fuel_go_data = tests[go_mask & fuel_mask]
+    fuel_nogo_data = tests[nogo_mask & fuel_mask]
+    
+    s_value = fuel_go_data['s'].iloc[0]
+    # Create figure
+    fig = fdsplotlib.plot_to_fig(x_data=[-1,1], y_data=[0,0],
+                                    marker_style='k--',
+                                    x_label='Moisture Content, M (-)',
+                                    y_label='Wind Speed, U (m/s)',
+                                    x_min=0,
+                                    x_max=0.3,
+                                    y_min=-0.2,
+                                    y_max=3.5,
+                                    revision_label=version_string,
+                                    plot_title=rf'{fuel_name}, {s_value:.0f} m$^{{-1}}$')
+    ax = plt.gca()
+    
+    # Fixed scale for beta (0 to 0.1)
+    beta_min_fixed = 0.0
+    beta_max_fixed = 0.1
+    
+    # Plot spread cases (background, gray, sized by beta)
+    if len(fuel_go_data) > 0:
+        sizes_go = (fuel_go_data['beta'] - beta_min_fixed) / (beta_max_fixed - beta_min_fixed) * 100 + 20
+        ax.scatter(fuel_go_data['M'], fuel_go_data['U'], 
+                  s=sizes_go, c='gray', alpha=0.3, edgecolors='none')
+    
+    # Plot no-spread cases (foreground, colored by beta, sized by beta)
+    if len(fuel_nogo_data) > 0:
+        cmap = plt.cm.plasma
+        norm = mpl.colors.Normalize(vmin=beta_min_fixed, vmax=beta_max_fixed)
+        sizes_nogo = (fuel_nogo_data['beta'] - beta_min_fixed) / (beta_max_fixed - beta_min_fixed) * 100 + 20
+        scatter = ax.scatter(fuel_nogo_data['M'], fuel_nogo_data['U'], 
+                  s=sizes_nogo, c=fuel_nogo_data['beta'], cmap=cmap, norm=norm,
+                  alpha=0.8, edgecolors='black', linewidths=0.5)
+        
+        # Add colorbar
+        cbar = plt.colorbar(scatter, ax=ax)
+        cbar.set_label('Packing Ratio, beta (-)', rotation=90, labelpad=15, fontsize=plot_style['Label_Font_Size'])
+        cbar.ax.tick_params(labelsize=plot_style['Label_Font_Size'])
 
-pd.plotting.parallel_coordinates(tests_normalized, 'category', 
-                                 cols=['s','beta','M','U'],
-                                 color=[(1.,0.,0.,1), (0.,0.,0.,.2)],
-                                 ax=ax,
-                                 ls='-')
-
-ax.legend(loc="upper center", framealpha=1,frameon=True)
-
-plt.savefig(fig_file)
-plt.close()
-
+    plt.savefig(fig_file)
+    plt.close()

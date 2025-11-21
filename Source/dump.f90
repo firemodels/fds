@@ -7902,6 +7902,12 @@ DEVICE_LOOP: DO N=1,N_DEVC
                            IF (ICF>0) VOL = VOL*CUT_FACE(ICF)%ALPHA_CF
                         ENDIF
 
+                        IF (CYLINDRICAL) THEN
+                           VOL = TWOPI*VOL/DY(J)
+                        ELSEIF (TWO_D) THEN
+                           VOL = VOL/DY(J)
+                        ENDIF
+
                         VALUE = GAS_PHASE_OUTPUT(T,DT,NM,I,J,K,DV%QUANTITY_INDEX(1),0,DV%Y_INDEX,DV%Z_INDEX,DV%ELEM_INDEX,&
                                                  DV%PART_CLASS_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,DV%PROP_INDEX,DV%REAC_INDEX,&
                                                  DV%MATL_INDEX)
@@ -9747,19 +9753,6 @@ IND_SELECT: SELECT CASE(IND)
       GAS_PHASE_OUTPUT_RES = U_LS(II,JJ)
    CASE(553) ! V_LS
       GAS_PHASE_OUTPUT_RES = V_LS(II,JJ)
-
-   CASE(560) ! BFX
-      GAS_PHASE_OUTPUT_RES = BFX(II,JJ,KK)
-   CASE(561) ! BFY
-      GAS_PHASE_OUTPUT_RES = BFY(II,JJ,KK)
-   CASE(562) ! BFZ
-      GAS_PHASE_OUTPUT_RES = BFZ(II,JJ,KK)
-   CASE(563) ! BFX MINUS
-      GAS_PHASE_OUTPUT_RES = BFX(MAX(0,II-1),JJ,KK)
-   CASE(564) ! BFY MINUS
-      GAS_PHASE_OUTPUT_RES = BFY(II,MAX(0,JJ-1),KK)
-   CASE(565) ! BFZ MINUS
-      GAS_PHASE_OUTPUT_RES = BFZ(II,JJ,MAX(0,KK-1))
 
  END SELECT IND_SELECT
 

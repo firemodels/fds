@@ -1,3 +1,0 @@
-Scatter_Plot_Title,Ind_Title,Dep_Title,Plot_Min,Plot_Max,Title_Position,Key_Position,Paper_Width_Factor,Sigma_2_E,Weight_Data,Plot_Type,Plot_Filename
-Relative Error,Expected Value,Predicted Value,-1.00E+06,1.00E+06,0.03 0.95,SouthEast,1,-1,no,linear,FDS_Verification_Guide/SCRIPT_FIGURES/Scatterplots/Relative_Error
-Absolute Error,Expected Value,Predicted Value,-1.00E+06,1.00E+06,0.03 0.95,SouthEast,1,-1,no,linear,FDS_Verification_Guide/SCRIPT_FIGURES/Scatterplots/Absolute_Error
