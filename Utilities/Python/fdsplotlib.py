@@ -528,8 +528,8 @@ def dataplot(config_filename, **kwargs):
             f = plot_to_fig(
                 x_data=y_i if flip_axis else x_i,
                 y_data=x_i if flip_axis else y_i,
-                revision_label=version_string,
-                figure_handle=f,                  # keep same figure
+                revision_label=version_string if dtest else None,
+                figure_handle=f,
                 data_label=d2_key_labels[i],
                 line_style=d2_styles[i],
             )
@@ -857,14 +857,6 @@ def plot_to_fig(x_data,y_data,**kwargs):
     if linestyle == '-.': dashes = kwargs.get('line_dashes',(6, 3, 1, 3))
     if linestyle == ':': dashes = kwargs.get('line_dashes',(1, 3))
 
-    # This set is what we were using in Matlab
-    # if linestyle == '': dashes = (None, None); linewidth = 0;
-    # if linestyle == '-': dashes = (None, None)
-    # if linestyle == '--': dashes = kwargs.get('line_dashes',(10, 6.2))
-    # if linestyle == '-.': dashes = kwargs.get('line_dashes',(12, 7.4, 3, 7.4))
-    # if linestyle == ':': dashes = kwargs.get('line_dashes',(1, 3))
-
-
     data_label = kwargs.get('data_label',None)
 
     # trap any data_labels set to blank (old matlab convention)
@@ -1014,6 +1006,88 @@ def plot_to_fig(x_data,y_data,**kwargs):
                       fontsize=ax._legend_fontsize,
                       frameon=False)
 
+        # plot title
+        if kwargs.get('plot_title'):
+            if kwargs.get('title_fontsize'):
+                title_fontsize=kwargs.get('title_fontsize')
+            else:
+                title_fontsize=default_title_fontsize
+
+            plt.text(0.05, 0.95, kwargs.get('plot_title'),
+            transform=plt.gca().transAxes,
+            fontsize=title_fontsize,
+            verticalalignment='top',
+            horizontalalignment='left')
+
+        # set axes and tick properties
+        xmin=kwargs.get('x_min')
+        xmax=kwargs.get('x_max')
+        ymin=kwargs.get('y_min')
+        ymax=kwargs.get('y_max')
+
+        ax.set_xlim(xmin,xmax)
+        ax.set_ylim(ymin,ymax)
+
+        # ------------------------------------------------------------
+        # TICK HANDLING (clean, deterministic)
+        # ------------------------------------------------------------
+
+        scale_x = ax.get_xscale()
+        scale_y = ax.get_yscale()
+
+        # -------------------------------
+        # X-axis ticks
+        # -------------------------------
+        if xticks is not None:
+            # USER EXPLICIT OVERRIDE
+            ax.set_xticks(xticks)
+            ax.xaxis.set_major_formatter(ticker.FormatStrFormatter('%g'))
+
+        elif xnumticks is not None:
+            # USER requests a number of ticks
+            if scale_x == "log":
+                ax.set_xticks(np.logspace(np.log10(xmin), np.log10(xmax), xnumticks))
+            else:
+                ax.set_xticks(np.linspace(xmin, xmax, xnumticks))
+
+        else:
+            # DEFAULT behavior
+            if scale_x == "log":
+                ax.xaxis.set_major_locator(ticker.LogLocator(base=10))
+                ax.xaxis.set_major_formatter(ticker.LogFormatterSciNotation(base=10))
+            else:
+                ax.xaxis.set_major_locator(ticker.MaxNLocator(nbins=detault_nticks, min_n_ticks=4))
+                sf = ticker.ScalarFormatter(useMathText=True)
+                sf.set_powerlimits((-3, 4))
+                ax.xaxis.set_major_formatter(sf)
+
+        # -------------------------------
+        # Y-axis ticks
+        # -------------------------------
+        if yticks is not None:
+            # USER EXPLICIT OVERRIDE
+            ax.set_yticks(yticks)
+            ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%g'))
+
+        elif ynumticks is not None:
+            # USER requests a number of ticks
+            if scale_y == "log":
+                ax.set_yticks(np.logspace(np.log10(ymin), np.log10(ymax), ynumticks))
+            else:
+                ax.set_yticks(np.linspace(ymin, ymax, ynumticks))
+
+        else:
+            # DEFAULT behavior
+            if scale_y == "log":
+                ax.yaxis.set_major_locator(ticker.LogLocator(base=10))
+                ax.yaxis.set_major_formatter(ticker.LogFormatterSciNotation(base=10))
+            else:
+                ax.yaxis.set_major_locator(ticker.MaxNLocator(nbins=detault_nticks, min_n_ticks=4))
+                sf = ticker.ScalarFormatter(useMathText=True)
+                sf.set_powerlimits((-3, 4))
+                ax.yaxis.set_major_formatter(sf)
+
+
     # --- case 3: existing figure, adding more data ---
     else:
         loc = getattr(ax, '_legend_loc', 'best')
@@ -1027,72 +1101,6 @@ def plot_to_fig(x_data,y_data,**kwargs):
                       bbox_to_anchor=bbox,
                       fontsize=fontsize,
                       framealpha=framealpha)
-
-
-    # plot title
-    if kwargs.get('plot_title'):
-        if kwargs.get('title_fontsize'):
-            title_fontsize=kwargs.get('title_fontsize')
-        else:
-            title_fontsize=default_title_fontsize
-
-        plt.text(0.05, 0.95, kwargs.get('plot_title'),
-        transform=plt.gca().transAxes,
-        fontsize=title_fontsize,
-        verticalalignment='top',
-        horizontalalignment='left')
-
-    # set axes and tick properties
-    xmin=kwargs.get('x_min')
-    xmax=kwargs.get('x_max')
-    ymin=kwargs.get('y_min')
-    ymax=kwargs.get('y_max')
-
-    ax.set_xlim(xmin,xmax)
-    ax.set_ylim(ymin,ymax)
-
-    # --- Tick handling AFTER limits are set ---
-    if ax.get_xscale() == 'linear':
-        # ----- LINEAR AXIS -----
-        if xticks is None and xnumticks is None:
-            ax.xaxis.set_major_locator(ticker.MaxNLocator(nbins=detault_nticks, min_n_ticks=4))
-            sf = ticker.ScalarFormatter(useMathText=True)
-            sf.set_powerlimits((-3, 4))
-            ax.xaxis.set_major_formatter(sf)
-
-    elif ax.get_xscale() == 'log':
-        # ----- LOG AXIS -----
-        # Do not touch scalar formatters – LogFormatter is correct.
-        ax.xaxis.set_major_locator(ticker.LogLocator(base=10))
-        ax.xaxis.set_major_formatter(ticker.LogFormatterSciNotation(base=10))
-
-    # Same for y-axis
-    if ax.get_yscale() == 'linear':
-        if yticks is None and ynumticks is None:
-            ax.yaxis.set_major_locator(ticker.MaxNLocator(nbins=detault_nticks, min_n_ticks=4))
-            sf = ticker.ScalarFormatter(useMathText=True)
-            sf.set_powerlimits((-3, 4))
-            ax.yaxis.set_major_formatter(sf)
-
-    elif ax.get_yscale() == 'log':
-        ax.yaxis.set_major_locator(ticker.LogLocator(base=10))
-        ax.yaxis.set_major_formatter(ticker.LogFormatterSciNotation(base=10))
-
-    # set number of ticks if requested by the user
-    if xnumticks is not None:
-        if plot_type in ('loglog', 'semilogx'):
-            ax.set_xticks(np.logspace(xmin, xmax, xnumticks))
-        else:
-            ax.set_xticks(np.linspace(xmin, xmax, xnumticks))
-    if ynumticks is not None:
-        if plot_type in ('loglog', 'semilogy'):
-            ax.set_yticks(np.logspace(ymin, ymax, ynumticks))
-        else:
-            ax.set_yticks(np.linspace(ymin, ymax, ynumticks))
-
-    # set ticks if requested by the user
-    if xticks is not None: ax.set_xticks(xticks)
-    if yticks is not None: ax.set_yticks(yticks)
 
     if kwargs.get('revision_label'):
         add_version_string(ax=ax, version_str=kwargs.get('revision_label'), plot_type=plot_type, font_size=version_fontsize)
