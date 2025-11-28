@@ -1,5 +1,5 @@
 @echo off
 
-call %SVNROOT%\fds\Utilities\Scripts\getopts.bat %*
+call %SVNROOT%\bot\Bundlebot\nightly\getopts.bat %*
 
 echo 3 > %dir%\%infile%.stop

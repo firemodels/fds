@@ -1,5 +1,5 @@
 @echo off
 
-call %SVNROOT%\fds\Utilities\Scripts\getopts.bat %*
+call %SVNROOT%\bot\Bundlebot\nightly\getopts.bat %*
 
 if exist %dir%\%infile%.stop erase %dir%\%infile%.stop
