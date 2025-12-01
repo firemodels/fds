@@ -1,5 +1,5 @@
 #!/bin/bash
-SUNDIALS_LIB_TAG=v6.7.0
+SUNDIALS_LIB_TAG=v7.5.0
 
 CONFMAKE=$1
 CLEAN_SUNDIALS=$2
@@ -15,10 +15,10 @@ fi
 
 echo "Checking for sundials library..."
 
-if [ -d "$FIREMODELS/libs/sundials" ]; then
+if [ -d "$FIREMODELS/libs/sundials/$SUNDIALS_LIB_TAG" ]; then
   echo "Sundials library exists.  Skipping sundials build."
   # List all directories under $FIREMODELS/libs/sundials
-  sundials_lib_dir=$(ls -d $FIREMODELS/libs/sundials/*/)
+  sundials_lib_dir=$(ls -d $FIREMODELS/libs/sundials/$SUNDIALS_LIB_TAG/)
   # Extract the version part (removes the leading path)
   SUNDIALS_VERSION=$(basename $sundials_lib_dir)
   export SUNDIALS_HOME=$FIREMODELS/libs/sundials/$SUNDIALS_VERSION
