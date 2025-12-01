@@ -60,11 +60,11 @@ case = df[1].values
 if smokeview_path != "null":
     print("Using "+smokeview_path)
 elif os_name == "Linux":
-    smokeview_path = smvdir + 'intel_linux_64/smokeview_linux_64'
+    smokeview_path = smvdir + 'intel_linux/smokeview_linux'
 elif os_name == "Darwin":
-    smokeview_path = smvdir + 'gnu_osx_64/smokeview_osx_64'
+    smokeview_path = smvdir + 'gnu_osx/smokeview_osx'
 elif os_name == "Windows":
-    smokeview_path = smvdir + 'intel_win_64/smokeview_win_64'
+    smokeview_path = smvdir + 'intel_win/smokeview_win'
 
 for i in range(len(folder)):
     print('generating smokeview image ' + case[i])

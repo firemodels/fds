@@ -2,7 +2,7 @@
 
 &TIME T_END=1.5 /
 
-&MISC TMPA=0 / 
+&MISC TMPA=-263.15 /
 
 &MESH IJK=90,30,30, XB=0.0,0.3,-0.1524, 0.1524,-0.1524, 0.1524, MULT_ID='mesh' /
 &MULT ID='mesh', DX=0.3, I_UPPER=2 /
