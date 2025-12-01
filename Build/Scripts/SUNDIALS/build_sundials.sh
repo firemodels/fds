@@ -15,7 +15,7 @@ fi
 
 echo "Checking for sundials library..."
 
-if [ -d "$FIREMODELS/libs/sundials" ]; then
+if [ -d "$FIREMODELS/libs/sundials/$SUNDIALS_LIB_TAG" ]; then
   echo "Sundials library exists.  Skipping sundials build."
   # List all directories under $FIREMODELS/libs/sundials
   sundials_lib_dir=$(ls -d $FIREMODELS/libs/sundials/*/)
@@ -46,14 +46,7 @@ if [ -d "$FIREMODELS/sundials" ]; then
     git checkout $SUNDIALS_LIB_TAG
   else
     echo "Your SUNDIALS repository is not up to date with the required tag: $SUNDIALS_LIB_TAG."
-    echo "Fetching SUNDIALS repository to make it up-to-date..."
-    git fetch --all --tags
-    if [[ "$(git tag -l $SUNDIALS_LIB_TAG)" == $SUNDIALS_LIB_TAG ]]; then
-      git checkout $SUNDIALS_LIB_TAG
-    else
-      echo "The FDS build requires SUNDIALS version $SUNDIALS_LIB_TAG. Please update your SUNDIALS repository."
-      exit 1
-    fi
+    echo "The FDS build requires SUNDIALS version $SUNDIALS_LIB_TAG. Please update your SUNDIALS repository."
   fi 
   mkdir $FIREMODELS/sundials/BUILDDIR
   cd $FIREMODELS/sundials/BUILDDIR
