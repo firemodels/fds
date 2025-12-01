@@ -11,7 +11,7 @@
 
 VPATH = ../Source
 
-# 3rd part library versions
+# 3rd party library versions
 HYPRE_VERSION=v3.0.0
 SUNDIALS_VERSION=v6.7.0
 
