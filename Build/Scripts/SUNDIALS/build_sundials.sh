@@ -1,5 +1,5 @@
 #!/bin/bash
-SUNDIALS_LIB_TAG=v6.7.0
+SUNDIALS_LIB_TAG=v7.5.0
 
 CONFMAKE=$1
 CLEAN_SUNDIALS=$2
@@ -46,8 +46,14 @@ if [ -d "$FIREMODELS/sundials" ]; then
     git checkout $SUNDIALS_LIB_TAG
   else
     echo "Your SUNDIALS repository is not up to date with the required tag: $SUNDIALS_LIB_TAG."
-    echo "The FDS build requires SUNDIALS version $SUNDIALS_LIB_TAG. Please update your SUNDIALS repository."
-    exit 1
+    echo "Fetching SUNDIALS repository to make it up-to-date..."
+    git fetch --all --tags
+    if [[ "$(git tag -l $SUNDIALS_LIB_TAG)" == $SUNDIALS_LIB_TAG ]]; then
+      git checkout $SUNDIALS_LIB_TAG
+    else
+      echo "The FDS build requires SUNDIALS version $SUNDIALS_LIB_TAG. Please update your SUNDIALS repository."
+      exit 1
+    fi
   fi 
   mkdir $FIREMODELS/sundials/BUILDDIR
   cd $FIREMODELS/sundials/BUILDDIR
