@@ -79,7 +79,6 @@ if "%FOUND_TAG%" == "%LIB_TAG%" (
     git checkout %LIB_TAG%
 ) else (
     echo Your SUNDIALS repository is not up to date with the required tag: %LIB_TAG%.
-    echo Fetching SUNDIALS repository to make it up-to-date...
     echo The FDS build requires SUNDIALS version %LIB_TAG%. Please update your SUNDIALS repository.
     pause
     exit /b 1
