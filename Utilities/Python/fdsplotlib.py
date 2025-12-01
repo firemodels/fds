@@ -1448,14 +1448,14 @@ def define_plot_parameters(D, irow, lightweight=False):
         d.Font_Interpreter = get('Font_Interpreter')
 
         # --- sanitization for human-facing strings ---
-        d.Plot_Title      = sanitize(safe_strip(d.Plot_Title))
-        d.Ind_Title       = sanitize(safe_strip(d.Ind_Title))
-        d.Dep_Title       = sanitize(safe_strip(d.Dep_Title))
-        d.Quantity        = sanitize(safe_strip(d.Quantity))
-        d.Metric          = sanitize(safe_strip(d.Metric))
-        d.Group_Key_Label = sanitize(safe_strip(d.Group_Key_Label))
-        d.d1_Key          = sanitize(safe_strip(d.d1_Key))
-        d.d2_Key          = sanitize(safe_strip(d.d2_Key))
+        d.Plot_Title      = safe_strip(d.Plot_Title)
+        d.Ind_Title       = safe_strip(d.Ind_Title)
+        d.Dep_Title       = safe_strip(d.Dep_Title)
+        d.Quantity        = safe_strip(d.Quantity)
+        d.Metric          = safe_strip(d.Metric)
+        d.Group_Key_Label = safe_strip(d.Group_Key_Label)
+        d.d1_Key          = safe_strip(d.d1_Key)
+        d.d2_Key          = safe_strip(d.d2_Key)
 
         return d
 
@@ -1522,14 +1522,14 @@ def define_plot_parameters(D, irow, lightweight=False):
     d = plot_parameters_full()
 
     # --- sanitization block (unchanged) ---
-    d.Plot_Title      = sanitize(safe_strip(d.Plot_Title))
-    d.Ind_Title       = sanitize(safe_strip(d.Ind_Title))
-    d.Dep_Title       = sanitize(safe_strip(d.Dep_Title))
-    d.Quantity        = sanitize(safe_strip(d.Quantity))
-    d.Metric          = sanitize(safe_strip(d.Metric))
-    d.Group_Key_Label = sanitize(safe_strip(d.Group_Key_Label))
-    d.d1_Key          = sanitize(safe_strip(d.d1_Key))
-    d.d2_Key          = sanitize(safe_strip(d.d2_Key))
+    d.Plot_Title      = safe_strip(d.Plot_Title)
+    d.Ind_Title       = safe_strip(d.Ind_Title)
+    d.Dep_Title       = safe_strip(d.Dep_Title)
+    d.Quantity        = safe_strip(d.Quantity)
+    d.Metric          = safe_strip(d.Metric)
+    d.Group_Key_Label = safe_strip(d.Group_Key_Label)
+    d.d1_Key          = safe_strip(d.d1_Key)
+    d.d2_Key          = safe_strip(d.d2Key)
 
     return d
 

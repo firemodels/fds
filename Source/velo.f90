@@ -1815,7 +1815,7 @@ INTEGER, INTENT(IN) :: NM
 LOGICAL, INTENT(IN) :: APPLY_TO_ESTIMATED_VARIABLES
 REAL(EB) :: MUA,TSI,WGT,T_NOW,RAMP_T,OMW,MU_WALL,RHO_WALL,SLIP_COEF,VEL_T, &
             UUP(2),UUM(2),DXX(2),MU_DUIDXJ(-2:2),DUIDXJ(-2:2),PROFILE_FACTOR,VEL_GAS,VEL_GHOST, &
-            MU_DUIDXJ_USE(2),DUIDXJ_USE(2),VEL_EDDY,U_TAU,Y_PLUS,U_NORM,U_WIND_LOC,V_WIND_LOC,W_WIND_LOC,&
+            MU_DUIDXJ_USE(2),DUIDXJ_USE(2),VEL_EDDY,U_TAU,Y_PLUS,U_NORM, &
             DRAG_FACTOR,HT_SCALE_FACTOR,VEG_HT,VEL_MF
 INTEGER :: NOM(2),IIO(2),JJO(2),KKO(2),IE,II,JJ,KK,IEC,IOR,IWM,IWP,ICMM,ICMP,ICPM,ICPP,ICD,ICDO,IVL,I_SGN, &
            VELOCITY_BC_INDEX,IIGM,JJGM,KKGM,IIGP,JJGP,KKGP,SURF_INDEXM,SURF_INDEXP,ITMP,ICD_SGN,ICDO_SGN, &
@@ -2035,60 +2035,33 @@ EDGE_LOOP: DO IE=1,EDGE_COUNT(NM)
 
          VEL_EDDY = 0._EB
          SYNTHETIC_EDDY_IF_1: IF (SYNTHETIC_EDDY_METHOD) THEN
-            U_WIND_LOC = 0._EB
-            V_WIND_LOC = 0._EB
-            W_WIND_LOC = 0._EB
             IS_SELECT_1: SELECT CASE(IS) ! unsigned vent orientation
                CASE(1) ! yz plane
                   SELECT CASE(IEC) ! edge orientation
                      CASE(2)
-                        IF (OPEN_WIND_BOUNDARY) THEN
-                           U_WIND_LOC = 0.5_EB*(U_WIND(KK)+U_WIND(KK+1))
-                           W_WIND_LOC = 0.5_EB*(W_WIND(KK)+W_WIND(KK+1))
-                        ENDIF
-                        IF (ICD==1) VEL_EDDY = 0.5_EB*(VT%U_EDDY(JJ,KK)+VT%U_EDDY(JJ,KK+1)) + U_WIND_LOC
-                        IF (ICD==2) VEL_EDDY = 0.5_EB*(VT%W_EDDY(JJ,KK)+VT%W_EDDY(JJ,KK+1)) + W_WIND_LOC
+                        IF (ICD==1) VEL_EDDY = 0.5_EB*(VT%U_EDDY(JJ,KK)+VT%U_EDDY(JJ,KK+1))
+                        IF (ICD==2) VEL_EDDY = 0.5_EB*(VT%W_EDDY(JJ,KK)+VT%W_EDDY(JJ,KK+1))
                      CASE(3)
-                        IF (OPEN_WIND_BOUNDARY) THEN
-                           V_WIND_LOC = V_WIND(KK)
-                           U_WIND_LOC = U_WIND(KK)
-                        ENDIF
-                        IF (ICD==1) VEL_EDDY = 0.5_EB*(VT%V_EDDY(JJ,KK)+VT%V_EDDY(JJ+1,KK)) + V_WIND_LOC
-                        IF (ICD==2) VEL_EDDY = 0.5_EB*(VT%U_EDDY(JJ,KK)+VT%U_EDDY(JJ+1,KK)) + U_WIND_LOC
+                        IF (ICD==1) VEL_EDDY = 0.5_EB*(VT%V_EDDY(JJ,KK)+VT%V_EDDY(JJ+1,KK))
+                        IF (ICD==2) VEL_EDDY = 0.5_EB*(VT%U_EDDY(JJ,KK)+VT%U_EDDY(JJ+1,KK))
                   END SELECT
                CASE(2) ! zx plane
                   SELECT CASE(IEC)
                      CASE(3)
-                        IF (OPEN_WIND_BOUNDARY) THEN
-                           V_WIND_LOC = V_WIND(KK)
-                           U_WIND_LOC = U_WIND(KK)
-                        ENDIF
-                        IF (ICD==1) VEL_EDDY = 0.5_EB*(VT%V_EDDY(II,KK)+VT%V_EDDY(II+1,KK)) + V_WIND_LOC
-                        IF (ICD==2) VEL_EDDY = 0.5_EB*(VT%U_EDDY(II,KK)+VT%U_EDDY(II+1,KK)) + U_WIND_LOC
+                        IF (ICD==1) VEL_EDDY = 0.5_EB*(VT%V_EDDY(II,KK)+VT%V_EDDY(II+1,KK))
+                        IF (ICD==2) VEL_EDDY = 0.5_EB*(VT%U_EDDY(II,KK)+VT%U_EDDY(II+1,KK))
                      CASE(1)
-                        IF (OPEN_WIND_BOUNDARY) THEN
-                           W_WIND_LOC = 0.5_EB*(W_WIND(KK)+W_WIND(KK+1))
-                           V_WIND_LOC = 0.5_EB*(V_WIND(KK)+V_WIND(KK+1))
-                        ENDIF
-                        IF (ICD==1) VEL_EDDY = 0.5_EB*(VT%W_EDDY(II,KK)+VT%W_EDDY(II,KK+1)) + W_WIND_LOC
-                        IF (ICD==2) VEL_EDDY = 0.5_EB*(VT%V_EDDY(II,KK)+VT%V_EDDY(II,KK+1)) + V_WIND_LOC
+                        IF (ICD==1) VEL_EDDY = 0.5_EB*(VT%W_EDDY(II,KK)+VT%W_EDDY(II,KK+1))
+                        IF (ICD==2) VEL_EDDY = 0.5_EB*(VT%V_EDDY(II,KK)+VT%V_EDDY(II,KK+1))
                   END SELECT
                CASE(3) ! xy plane
                   SELECT CASE(IEC)
                      CASE(1)
-                        IF (OPEN_WIND_BOUNDARY) THEN
-                           W_WIND_LOC = W_WIND(KK)
-                           V_WIND_LOC = V_WIND(KK)
-                        ENDIF
-                        IF (ICD==1) VEL_EDDY = 0.5_EB*(VT%W_EDDY(II,JJ)+VT%W_EDDY(II,JJ+1)) + W_WIND_LOC
-                        IF (ICD==2) VEL_EDDY = 0.5_EB*(VT%V_EDDY(II,JJ)+VT%V_EDDY(II,JJ+1)) + V_WIND_LOC
+                        IF (ICD==1) VEL_EDDY = 0.5_EB*(VT%W_EDDY(II,JJ)+VT%W_EDDY(II,JJ+1))
+                        IF (ICD==2) VEL_EDDY = 0.5_EB*(VT%V_EDDY(II,JJ)+VT%V_EDDY(II,JJ+1))
                      CASE(2)
-                        IF (OPEN_WIND_BOUNDARY) THEN
-                           U_WIND_LOC = U_WIND(KK)
-                           W_WIND_LOC = W_WIND(KK)
-                        ENDIF
-                        IF (ICD==1) VEL_EDDY = 0.5_EB*(VT%U_EDDY(II,JJ)+VT%U_EDDY(II+1,JJ)) + U_WIND_LOC
-                        IF (ICD==2) VEL_EDDY = 0.5_EB*(VT%W_EDDY(II,JJ)+VT%W_EDDY(II+1,JJ)) + W_WIND_LOC
+                        IF (ICD==1) VEL_EDDY = 0.5_EB*(VT%U_EDDY(II,JJ)+VT%U_EDDY(II+1,JJ))
+                        IF (ICD==2) VEL_EDDY = 0.5_EB*(VT%W_EDDY(II,JJ)+VT%W_EDDY(II+1,JJ))
                   END SELECT
             END SELECT IS_SELECT_1
          ENDIF SYNTHETIC_EDDY_IF_1
@@ -2096,7 +2069,7 @@ EDGE_LOOP: DO IE=1,EDGE_COUNT(NM)
          ! OPEN boundary conditions, both varieties, with and without a wind
 
          OPEN_AND_WIND_BC: IF ((IWM==0 .OR. WALL(IWM)%BOUNDARY_TYPE==OPEN_BOUNDARY) .AND. &
-                               (IWP==0 .OR. WALL(IWP)%BOUNDARY_TYPE==OPEN_BOUNDARY) .AND. .NOT.SYNTHETIC_EDDY_METHOD) THEN
+                               (IWP==0 .OR. WALL(IWP)%BOUNDARY_TYPE==OPEN_BOUNDARY)       ) THEN
 
             VENT_INDEX = MAX(WCM%VENT_INDEX,WCP%VENT_INDEX)
             VT => VENTS(VENT_INDEX)
@@ -2154,20 +2127,20 @@ EDGE_LOOP: DO IE=1,EDGE_COUNT(NM)
 
                SELECT CASE(IEC)
                   CASE(1)
-                     IF (JJ==0    .AND. IOR== 2) WW(II,0,KK)    = W_WIND(KK)
-                     IF (JJ==JBAR .AND. IOR==-2) WW(II,JBP1,KK) = W_WIND(KK)
-                     IF (KK==0    .AND. IOR== 3) VV(II,JJ,0)    = V_WIND(KK)
-                     IF (KK==KBAR .AND. IOR==-3) VV(II,JJ,KBP1) = V_WIND(KK)
+                     IF (JJ==0    .AND. IOR== 2) WW(II,0,KK)    = W_WIND(KK) + VEL_EDDY
+                     IF (JJ==JBAR .AND. IOR==-2) WW(II,JBP1,KK) = W_WIND(KK) + VEL_EDDY
+                     IF (KK==0    .AND. IOR== 3) VV(II,JJ,0)    = V_WIND(KK) + VEL_EDDY
+                     IF (KK==KBAR .AND. IOR==-3) VV(II,JJ,KBP1) = V_WIND(KK) + VEL_EDDY
                   CASE(2)
-                     IF (II==0    .AND. IOR== 1) WW(0,JJ,KK)    = W_WIND(KK)
-                     IF (II==IBAR .AND. IOR==-1) WW(IBP1,JJ,KK) = W_WIND(KK)
-                     IF (KK==0    .AND. IOR== 3) UU(II,JJ,0)    = U_WIND(KK)
-                     IF (KK==KBAR .AND. IOR==-3) UU(II,JJ,KBP1) = U_WIND(KK)
+                     IF (II==0    .AND. IOR== 1) WW(0,JJ,KK)    = W_WIND(KK) + VEL_EDDY
+                     IF (II==IBAR .AND. IOR==-1) WW(IBP1,JJ,KK) = W_WIND(KK) + VEL_EDDY
+                     IF (KK==0    .AND. IOR== 3) UU(II,JJ,0)    = U_WIND(KK) + VEL_EDDY
+                     IF (KK==KBAR .AND. IOR==-3) UU(II,JJ,KBP1) = U_WIND(KK) + VEL_EDDY
                   CASE(3)
-                     IF (II==0    .AND. IOR== 1) VV(0,JJ,KK)    = V_WIND(KK)
-                     IF (II==IBAR .AND. IOR==-1) VV(IBP1,JJ,KK) = V_WIND(KK)
-                     IF (JJ==0    .AND. IOR== 2) UU(II,0,KK)    = U_WIND(KK)
-                     IF (JJ==JBAR .AND. IOR==-2) UU(II,JBP1,KK) = U_WIND(KK)
+                     IF (II==0    .AND. IOR== 1) VV(0,JJ,KK)    = V_WIND(KK) + VEL_EDDY
+                     IF (II==IBAR .AND. IOR==-1) VV(IBP1,JJ,KK) = V_WIND(KK) + VEL_EDDY
+                     IF (JJ==0    .AND. IOR== 2) UU(II,0,KK)    = U_WIND(KK) + VEL_EDDY
+                     IF (JJ==JBAR .AND. IOR==-2) UU(II,JBP1,KK) = U_WIND(KK) + VEL_EDDY
                END SELECT
 
             ENDIF WIND_NO_WIND_IF
@@ -2293,8 +2266,9 @@ EDGE_LOOP: DO IE=1,EDGE_COUNT(NM)
                END SELECT
 
             ELSE
+
                PROFILE_FACTOR = 1._EB
-               IF (ABS(SF%VEL) > 0._EB) THEN
+               IF (ABS(SF%VEL)>0._EB) THEN
                   IF (ABS(SF%T_IGN-T_BEGIN)<=SPACING(SF%T_IGN) .AND. SF%RAMP(TIME_VELO)%INDEX>=1) THEN
                      TSI = T
                   ELSE
@@ -2318,6 +2292,7 @@ EDGE_LOOP: DO IE=1,EDGE_COUNT(NM)
                      IF (IEC==3 .OR. (IEC==2 .AND. ICD==1)) VEL_T = -SF%VEL_T(1)*VEL_MF
                   ENDIF
                ENDIF
+
             ENDIF
 
             ! Choose the appropriate boundary condition to apply
