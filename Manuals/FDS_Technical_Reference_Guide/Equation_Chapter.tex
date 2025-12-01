@@ -149,9 +149,6 @@ The mass density is obtained from $\rho = \sum (\rho Z)_\alpha$.  The summation 
 \be \dod{\rho}{t} + \nabla\!\cdot (\rho \bu)  =  \dm_{\rm b}'''  \label{mass} \ee
 because $\sum Z_\alpha=1$ and $\sum \dm_\alpha''' = 0$ and $\sum \dm_{\rm b,\alpha}'''=\dm_{\rm b}'''$, by definition, and because it is assumed that $\sum \rho D_\alpha \nabla Z_\alpha = 0$. This last assertion is not true, in general.  The diffusive flux for the most abundant local species is corrected to enforce the constraint.
 
-
-
-
 \paragraph{Enforcing Realizability} ~\\
 
 \noindent Realizability of species mass fractions requires $Y_\alpha \ge 0$ for all $\alpha$ and $\sum Y_\alpha = 1$.  Note that this is more restrictive than the boundedness constraint, which simply requires $0 \le Y_\alpha \le 1$.
@@ -159,6 +156,10 @@ because $\sum Z_\alpha=1$ and $\sum \dm_\alpha''' = 0$ and $\sum \dm_{\rm b,\alp
 If $(\rho Y)_\alpha$ obeys boundedness, $(\rho Y)_\alpha \ge 0$, and we solve $N_s$ species equations obtaining the density via $\rho = \sum_{\alpha=1}^{N_s} (\rho Y)_\alpha$, then mass fractions obtained by $Y_\alpha = (\rho Y)_\alpha/\rho$ are \emph{guaranteed to be realizable} (for $\rho>0$).  Thus, we have reduced the realizability problem to the ``easier'' problem of boundedness for $(\rho Y)_\alpha$. Details of the scalar boundedness correction are discussed in Appendix \ref{app_boundedness}.
 
 With this approach we must take care to ensure $\sum \rho D_\alpha \nabla Z_\alpha = 0$.  Our strategy is to absorb any errors in diffusive transport into the most abundant species \emph{locally}.  That is, for a given cell face we set $\rho D_m \nabla Z_m = -\sum_{\alpha\ne m} \rho D_\alpha \nabla Z_\alpha$, where $m$ is the most abundant species adjacent to that face.  Note that since FDS is typically used as an LES code mass transport by molecular diffusion may be two or three orders of magnitude less than turbulent transport, which uses the same turbulent diffusion coefficient for all species. Therefore, the errors in summation of the diffusive fluxes tend to be small.
+
+\paragraph{Enforcing the Equation of State} ~\\
+
+\noindent Given the strategy of solving $N_s$ transport equations and obtaining $\rho = \sum_{\alpha=1}^{N_s} (\rho Y)_\alpha$ to enforce realizability, we must take care to ensure that we maintain the equation of state at cell faces after flux limited interpolation.  In Sec.~\ref{sec_flux_limiters}, we describe a correction scheme that enforces the equation of state at cell faces and thus maintains isothermal flows for multi-component mixtures with variable molecular weights.
 
 \section{Low Mach Number Approximation}
 
