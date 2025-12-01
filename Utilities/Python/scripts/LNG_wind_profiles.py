@@ -9,7 +9,7 @@ Atmospheric Boundary Layer profiles, based on M-O theory as described in
 
 import pandas as pd
 import numpy as np
-from fdsplotlib import plot_to_fig
+from fdsplotlib import plot_to_fig, get_version_string
 from matplotlib import pyplot as plt
 import os
 
@@ -47,6 +47,7 @@ for i in range(len(test)):
     # Read CSVs and force numeric conversion
     M_path = f"{expdir}{test[i]}_profile.csv"
     S_path = f"{outdir}{test[i]}_line.csv"
+    version_string = get_version_string(f"{outdir}{test[i]}_git.txt")
 
     M = pd.read_csv(M_path, skiprows=2)
     S = pd.read_csv(S_path, skiprows=2)
@@ -74,7 +75,8 @@ for i in range(len(test)):
     # Plot velocity
     fig_u = plot_to_fig(x_data=M.iloc[:,1].values, y_data=M.iloc[:,0].values, figure_handle=None, marker_style='ko',
                         x_label='Velocity (m/s)', y_label='Height (m)', plot_title=f'{test[i]} Velocity',
-                        x_min=0,x_max=15,y_min=0,y_max=30, data_label='Measured', legend_location='lower right')
+                        x_min=0,x_max=15,y_min=0,y_max=30, data_label='Measured', legend_location='lower right',
+                        revision_label=version_string)
     plot_to_fig(x_data=u, y_data=z, figure_handle=fig_u, marker_style='k-', data_label='M-O Theory')
     plot_to_fig(x_data=S.iloc[:,1].values, y_data=S.iloc[:,0].values, figure_handle=fig_u, marker_style='k--', data_label='Simulated')
 
@@ -87,7 +89,8 @@ for i in range(len(test)):
     x_max = col2_first_valid + 5
     fig_T = plot_to_fig(x_data=M.iloc[:,2].values, y_data=M.iloc[:,0].values, figure_handle=None, marker_style='ko',
                         x_label='Temperature (°C)', y_label='Height (m)', plot_title=f'{test[i]} Temperature',
-                        x_min=x_min, x_max=x_max, y_min=0, y_max=30, data_label='Measured', legend_location='lower right')
+                        x_min=x_min, x_max=x_max, y_min=0, y_max=30, data_label='Measured', legend_location='lower right',
+                        revision_label=version_string)
     plot_to_fig(x_data=T-273.15, y_data=z, figure_handle=fig_T, marker_style='k-', data_label='M-O Theory')
     plot_to_fig(x_data=S.iloc[:,2].values, y_data=S.iloc[:,0].values, figure_handle=fig_T, marker_style='k--', data_label='Simulated')
 
