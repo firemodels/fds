@@ -72,9 +72,9 @@ else  # Default to GNU compilers
     select_compiler_from_system COMP_FC mpifort
 fi
 
-echo "Thirdparty libs C Compiler COMP_CC=$COMP_CC"
-echo "Thirdparty libs C++ compiler COMP_CXX=$COMP_CXX"
-echo "Firemodels and Thirdparty libs Fortran compiler COMP_FC=$COMP_FC"
+echo "Third party libs C Compiler COMP_CC=$COMP_CC"
+echo "Third party libs C++ compiler COMP_CXX=$COMP_CXX"
+echo "Firemodels and third party libs Fortran compiler COMP_FC=$COMP_FC"
 
 export COMP_CC=$COMP_CC
 export COMP_CXX=$COMP_CXX
