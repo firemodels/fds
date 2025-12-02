@@ -12,6 +12,7 @@ cmake_args=(
   -DEXAMPLES_ENABLE_F2003=OFF
   -DENABLE_OPENMP=OFF
   -DCMAKE_INSTALL_LIBDIR="lib"
+  -DSUNDIALS_LOGGING_LEVEL=0
 )
 
 # Add OSX deployment target if building for macOS
