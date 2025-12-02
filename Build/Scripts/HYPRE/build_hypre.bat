@@ -1,5 +1,5 @@
 @echo off
-set LIB_TAG=v2.33.0
+set LIB_TAG=v3.0.0
 
 ::*** library and tag name are the same
 

@@ -148,7 +148,7 @@ if(USE_HYPRE)
         include(FetchContent)
         # As we are not using the system hypre, we need to choose the version we
         # want
-        set(HYPRE_GIT_VERSION "2.32.0" )
+        set(HYPRE_GIT_VERSION "3.0.0" )
         FetchContent_Declare(
             HYPRE
             GIT_REPOSITORY https://github.com/hypre-space/hypre.git
@@ -186,7 +186,7 @@ if(USE_SUNDIALS)
         include(FetchContent)
         # As we are not using the system sundials, we need to choose the version
         # we want
-        set(SUNDIALS_GIT_VERSION "6.7.0")
+        set(SUNDIALS_GIT_VERSION "7.5.0")
         FetchContent_Declare(
             SUNDIALS
             GIT_REPOSITORY https://github.com/LLNL/sundials.git
