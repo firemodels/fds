@@ -47,6 +47,7 @@ if [ -d "$FIREMODELS/sundials" ]; then
   else
     echo "Your SUNDIALS repository is not up to date with the required tag: $SUNDIALS_LIB_TAG."
     echo "The FDS build requires SUNDIALS version $SUNDIALS_LIB_TAG. Please update your SUNDIALS repository."
+    exit 1
   fi 
   mkdir $FIREMODELS/sundials/BUILDDIR
   cd $FIREMODELS/sundials/BUILDDIR
