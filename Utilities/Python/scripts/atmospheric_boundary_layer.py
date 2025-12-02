@@ -13,13 +13,16 @@ plot_style = fdsplotlib.get_plot_style('fds')
 outdir = '../../Verification/Atmospheric_Effects/'
 pltdir = '../../Manuals/FDS_User_Guide/SCRIPT_FIGURES/'
 
-git_file = outdir + 'atmospheric_boundary_layer_1_git.txt'
-version_string = fdsplotlib.get_version_string(git_file)
+# git_file = outdir + 'atmospheric_boundary_layer_1_git.txt'
+# version_string = fdsplotlib.get_version_string(git_file)
 
 basein  = outdir + 'atmospheric_boundary_layer'
 baseout = pltdir + 'atmospheric_boundary_layer'
 
 for i in range(1, 5):  # Loop from 1 to 4 (inclusive)
+
+    git_file = outdir + f'atmospheric_boundary_layer_{i}_git.txt'
+    version_string = fdsplotlib.get_version_string(git_file)
 
     datafile = basein + '_' + str(i)
     outfile = baseout + '_' + str(i)
@@ -52,6 +55,7 @@ for i in range(1, 5):  # Loop from 1 to 4 (inclusive)
     theta_star = u_star**2 * theta_0 / (g * kappa * L)
 
     z = np.array([z_0[i], 10*z_0[i], 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 50, 100])
+    z = np.sort(z)
 
     # Create figure 1 for velocity
 
@@ -63,7 +67,7 @@ for i in range(1, 5):  # Loop from 1 to 4 (inclusive)
         psi_m = -5*z/L
         psi_h = psi_m
 
-    u = (u_star/kappa) * (np.log(z/z_0[i]) - psi_m)
+    u = (u_star/kappa) * np.maximum(np.log(z/z_0[i]) - psi_m, 0.)
     theta = theta_0 + (theta_star/kappa) * (np.log(z/z_0[i]) - psi_h)
     T = theta * (p_0 / (p_0 - rho_0*g*(z - z_0[i])))**(-0.285)
 
@@ -75,7 +79,9 @@ for i in range(1, 5):  # Loop from 1 to 4 (inclusive)
 
     fig = fdsplotlib.plot_to_fig(x_data=M2.iloc[:, 1].values, y_data=M2.iloc[:, 0].values, marker_style='k-', data_label='FDS',
                                  x_label='Velocity (m/s)', y_label='Height (m)',
-                                 x_min=0, x_max=u_high[i], y_min=0, y_max=100)
+                                 x_min=0, x_max=u_high[i], y_min=0, y_max=100,
+                                 revision_label=version_string,
+                                 legend_location='lower right')
 
     fdsplotlib.plot_to_fig(x_data=u, y_data=z, figure_handle=fig, marker_style='ko', data_label='M-O Theory')
 
@@ -100,7 +106,9 @@ for i in range(1, 5):  # Loop from 1 to 4 (inclusive)
 
     fig = fdsplotlib.plot_to_fig(x_data=M2.iloc[:,2].values, y_data=M2.iloc[:,0].values, marker_style='k-', data_label='FDS',
                                  x_label='Temperature (°C)', y_label='Height (m)', 
-                                 x_min=T_low[i], x_max=T_high[i], y_min=0, y_max=100)
+                                 x_min=T_low[i], x_max=T_high[i], y_min=0, y_max=100,
+                                 revision_label=version_string,
+                                 legend_location='lower left')
 
     fdsplotlib.plot_to_fig(x_data=T - 273.15, y_data=z, figure_handle=fig, marker_style='ko', data_label='M-O Theory')
 
