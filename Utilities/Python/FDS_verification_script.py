@@ -10,9 +10,6 @@ importlib.reload(fdsplotlib) # use for development (while making changes to fdsp
 print("Using:", fdsplotlib.__file__)
 # Scripts to run prior to dataplot
 
-# print("ignition_delay...");   runpy.run_path("./scripts/cantera_ignition_delay.py", run_name="__main__")
-# print("reaction_rates...");   runpy.run_path("./scripts/cantera_reaction_rates.py", run_name="__main__")
-# print("turbulent_batch_reactor...");   runpy.run_path("./scripts/cantera_turbulent_batch_reactor.py", run_name="__main__")
 print("ashrae_7...");                            runpy.run_path("./scripts/ashrae_7.py", run_name="__main__")
 print('burke_schumann...');                      runpy.run_path("./scripts/burke_schumann.py", run_name="__main__")
 print('cat_propane_depo...');                    runpy.run_path("./scripts/cat_propane_depo.py", run_name="__main__")

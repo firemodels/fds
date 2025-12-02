@@ -11,9 +11,8 @@
 
 VPATH = ../Source
 
-# 3rd part library versions
-HYPRE_VERSION=v2.33.0
-SUNDIALS_VERSION=v6.7.0
+HYPRE_VERSION=v3.0.0
+SUNDIALS_VERSION=v7.5.0
 HDF5_VERSION=v1.14.5
 
 ifeq ($(shell echo "check_quotes"),"check_quotes")
@@ -115,8 +114,8 @@ endif # MKLROOT test
 ifdef SUNDIALS_HOME # This assumes the SUNDIALS library is available.
    FFLAGS_SUNDIALS = -DWITH_SUNDIALS ${SUNDIALS_INFO} -I"${SUNDIALS_HOME}/fortran"
    FFLAGS_SUNDIALS_WIN = -DWITH_SUNDIALS ${SUNDIALS_INFO} /I"${SUNDIALS_HOME}\fortran"
-   LFLAGS_SUNDIALS = ${SUNDIALS_HOME}/lib/libsundials_fcvode_mod.a ${SUNDIALS_HOME}/lib/libsundials_fnvecserial_mod.a ${SUNDIALS_HOME}/lib/libsundials_cvode.a
-   LFLAGS_SUNDIALS_WIN = ${SUNDIALS_HOME}\lib\sundials_fcvode_mod.lib ${SUNDIALS_HOME}\lib\sundials_fnvecserial_mod.lib ${SUNDIALS_HOME}\lib\sundials_cvode.lib
+   LFLAGS_SUNDIALS = ${SUNDIALS_HOME}/lib/libsundials_fcvode_mod.a ${SUNDIALS_HOME}/lib/libsundials_fnvecserial_mod.a ${SUNDIALS_HOME}/lib/libsundials_cvode.a ${SUNDIALS_HOME}/lib/libsundials_fcore_mod.a ${SUNDIALS_HOME}/lib/libsundials_core.a
+   LFLAGS_SUNDIALS_WIN = ${SUNDIALS_HOME}\lib\sundials_fcvode_mod_static.lib ${SUNDIALS_HOME}\lib\sundials_fnvecserial_mod_static.lib ${SUNDIALS_HOME}\lib\sundials_cvode_static.lib ${SUNDIALS_HOME}\lib\sundials_fcore_mod.lib ${SUNDIALS_HOME}\lib\sundials_core_static.lib /link  /NODEFAULTLIB:MSVCRTD /NODEFAULTLIB:libcmtd.lib
 endif
 
 ifdef HYPRE_HOME # This assumes the HYPRE library is available.

@@ -1,5 +1,5 @@
 #!/bin/bash
-HYPRE_LIB_TAG=v2.33.0
+HYPRE_LIB_TAG=v3.0.0
 
 CONFMAKE=$1
 CLEAN_HYPRE=$2
@@ -14,10 +14,10 @@ fi
 
 echo "Checking for hypre library..."
 
-if [ -d "$FIREMODELS/libs/hypre" ]; then
+if [ -d "$FIREMODELS/libs/hypre/$HYPRE_LIB_TAG" ]; then
   echo "Hypre library exists.  Skipping hypre build."
   # List all directories under $FIREMODELS/libs/hypre
-  hypre_lib_dir=$(ls -d $FIREMODELS/libs/hypre/*/)
+  hypre_lib_dir=$(ls -d $FIREMODELS/libs/hypre/$HYPRE_LIB_TAG/)
   # Extract the version part (removes the leading path)
   HYPRE_VERSION=$(basename $hypre_lib_dir)
   export HYPRE_HOME=$FIREMODELS/libs/hypre/$HYPRE_VERSION
