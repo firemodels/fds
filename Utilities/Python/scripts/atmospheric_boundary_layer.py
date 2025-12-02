@@ -84,13 +84,20 @@ for i in range(1, 5):  # Loop from 1 to 4 (inclusive)
 
     ax1 = fig.axes[0]
 
-    ax1.text(0.05, 0.90, f'Case {i}', transform=ax1.transAxes)
-    ax1.text(0.05, 0.80, f'$F={fvec[i]:.3f}' + r'\; \mathrm{Pa/m}$', transform=ax1.transAxes)
-    ax1.text(0.05, 0.70, f'$s={s[i]:.2f}' + r'\; \mathrm{m}$', transform=ax1.transAxes)
-    ax1.text(0.05, 0.60, f'$\\dot{{q}}_{{\\rm c}}\\prime \\prime={qdot[i]/1000:.3f}' + r'\; \mathrm{kW/m}^2$', transform=ax1.transAxes)
-    ax1.text(0.05, 0.50, f'$u({z_r:.0f}' + r'\; \mathrm{m})=' + f'{u_r:.1f}' + r'\; \mathrm{m/s}$', transform=ax1.transAxes)
-    ax1.text(0.05, 0.40, f'$L={L:.0f}$ m', transform=ax1.transAxes)
-    ax1.text(0.05, 0.30, f'$z_0={z_0[i]:.3f}$ m', transform=ax1.transAxes)
+    common_text_args = {
+        "transform": ax1.transAxes,
+        "fontfamily": "serif",
+        "fontsize": plot_style["Key_Font_Size"],
+        "usetex": True,
+    }
+
+    ax1.text(0.05, 0.90, f'Case {i}', **common_text_args)
+    ax1.text(0.05, 0.80, f'$F={fvec[i]:.3f}' + r'\; \mathrm{Pa/m}$', **common_text_args)
+    ax1.text(0.05, 0.70, f'$s={s[i]:.2f}' + r'\; \mathrm{m}$', **common_text_args)
+    ax1.text(0.05, 0.60, f'$\\dot{{q}}_{{\\rm c}}^{{\\prime\\prime}}={qdot[i]/1000:.3f}' + r'\; \mathrm{kW/m}^2$', **common_text_args)
+    ax1.text(0.05, 0.50, f'$u({z_r:.0f}' + r'\; \mathrm{m})=' + f'{u_r:.1f}' + r'\; \mathrm{m/s}$', **common_text_args)
+    ax1.text(0.05, 0.40, f'$L={L:.0f}$ m', **common_text_args)
+    ax1.text(0.05, 0.30, f'$z_0={z_0[i]:.3f}$ m', **common_text_args)
 
     plt.savefig(outfile + '_vel.pdf', format='pdf')
     plt.close()
@@ -111,8 +118,15 @@ for i in range(1, 5):  # Loop from 1 to 4 (inclusive)
 
     ax2 = fig.axes[0]
 
-    ax2.text(0.05, 0.90, f'Case {i}', transform=ax2.transAxes)
-    ax2.text(0.05, 0.80, f'$T({z_r:.0f}' + r'\; \mathrm{m})=' + f'{T_r-273:.1f}' + r'\;^\circ$C', transform=ax2.transAxes)
+    common_text_args = {
+        "transform": ax2.transAxes,
+        "fontfamily": "serif",
+        "fontsize": plot_style["Key_Font_Size"],
+        "usetex": True,
+    }
+
+    ax2.text(0.05, 0.90, f'Case {i}', **common_text_args)
+    ax2.text(0.05, 0.80, f'$T({z_r:.0f}' + r'\; \mathrm{m})=' + f'{T_r-273:.1f}' + r'\;^\circ$C', **common_text_args)
 
     plt.savefig(outfile + '_tmp.pdf', format='pdf')
     plt.close()
