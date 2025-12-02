@@ -1,3 +1,7 @@
+"""
+This script calculates ignition delays of different chamical mechanisms using Cantera.
+This script creates the cantera_ignition_delay.csv file under Verification/Chemistry folder.
+"""
 import numpy as np
 import time
 import os

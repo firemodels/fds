@@ -1,9 +1,6 @@
 """
-McDermott
-21 May 2024
-
-Turbulent Batch Reactor (TBR) model
-Constant-pressure, adiabatic kinetics simulation.
+Turbulent batch reactor script using Cantera to validate the FDS turbulence batch reactor model implementation.
+This script creates the <caseName>_soln.csv file under Verification/Chemistry folder.
 """
 
 import sys
