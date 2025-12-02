@@ -157,7 +157,7 @@ if(USE_HYPRE OR USE_HYPRE_NVIDIA OR USE_HYPRE_AMDGPU OR USE_HYPRE_INTELGPU)
         include(FetchContent)
         # As we are not using the system hypre, we need to choose the version we
         # want
-        set(HYPRE_GIT_VERSION "v2.32.0-24-63331f19c" )
+        set(HYPRE_GIT_VERSION "3.0.0" )
         FetchContent_Declare(
             HYPRE
             GIT_REPOSITORY https://github.com/hypre-space/hypre.git
@@ -216,7 +216,7 @@ if(USE_SUNDIALS)
         include(FetchContent)
         # As we are not using the system sundials, we need to choose the version
         # we want
-        set(SUNDIALS_GIT_VERSION "6.7.0")
+        set(SUNDIALS_GIT_VERSION "7.5.0")
         FetchContent_Declare(
             SUNDIALS
             GIT_REPOSITORY https://github.com/LLNL/sundials.git

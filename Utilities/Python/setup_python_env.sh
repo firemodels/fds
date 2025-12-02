@@ -24,15 +24,17 @@ function error_exit {
 
 
 # Check Python version > 3.7
-PYTHON_VERSION=$(python3 -c 'import sys; print("{}.{}".format(sys.version_info.major, sys.version_info.minor))')
-REQUIRED_VERSION=3.7
-if (( $(echo "$PYTHON_VERSION < $REQUIRED_VERSION" | bc -l) )); then
-    echo "Python 3.7 or higher is required. Found $PYTHON_VERSION."
+major=$(python3 -c 'import sys; print(sys.version_info.major)')
+minor=$(python3 -c 'import sys; print(sys.version_info.minor)')
+
+if (( major < 3 || (major == 3 && minor < 7) )); then
+    echo "Python 3.7 or higher is required. Found $major.$minor."
     echo "Stopping python environment setup."
     return
 else
-    echo "Python version is OK: $PYTHON_VERSION"
+    echo "Python version is OK: $major.$minor"
 fi
+
 
 # Save current directory to return later
 curdir=$(pwd)
