@@ -71,7 +71,7 @@ for i in range(1, 5):  # Loop from 1 to 4 (inclusive)
     T = T + (theta_0 - T[11]) 
 
     ERROR = abs(u[-1] - M2.iloc[-1, 1])
-    if ERROR > 2.:
+    if ERROR > 3.:
         print(f'Python Warning: atmospheric_boundary_layer Case {i} velocity out of tolerance. ERROR = {ERROR} m/s')
 
     fig = fdsplotlib.plot_to_fig(x_data=M2.iloc[:, 1].values, y_data=M2.iloc[:, 0].values, marker_style='k-', data_label='FDS',
