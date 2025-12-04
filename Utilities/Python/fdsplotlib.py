@@ -722,26 +722,77 @@ def plot_to_fig(x_data,y_data,**kwargs):
 
     import matplotlib.pyplot as plt
     import matplotlib.ticker as ticker
+    import platform
 
-    plt.rcParams.update({
-        "pdf.use14corefonts": True,
-        "text.usetex": False,
+    def configure_fds_fonts():
+        system = platform.system()
 
-        # Text and math in Times New Roman
-        "font.family": "serif",
-        "font.serif": ["Times", "Times New Roman"],
+        if system == "Linux":
+            # Linux: use Nimbus Roman as primary serif, with Times ahead of Times New Roman in the fallback chain
+            primary_serif = "Nimbus Roman"
+            serif_list = [
+                "Nimbus Roman",   # primary on Linux
+                "Times",
+                "Times New Roman",
+                "serif",
+            ]
+        else:
+            # macOS ("Darwin") and Windows: prefer Times, then Times New Roman
+            primary_serif = "Times"
+            serif_list = [
+                "Times",          # first choice
+                "Times New Roman",
+                "Nimbus Roman",
+                "serif",
+            ]
 
-        "mathtext.fontset": "custom",
-        "mathtext.rm": "Times",
-        "mathtext.it": "Times New Roman:italic",
-        "mathtext.bf": "Times:bold",
-        "mathtext.cal": "Times New Roman:italic",
-        "mathtext.tt": "Courier New",
-        "mathtext.default": "it",
+        plt.rcParams.update({
+            # Core-14 fonts for small PDFs (Times-Roman in output)
+            "pdf.use14corefonts": True,
+            "text.usetex": False,
 
-        "axes.unicode_minus": False,
-        "pdf.compression": 9,
-    })
+            # Make serif the default everywhere
+            "font.family": "serif",
+            "font.serif": serif_list,
+
+            # If something explicitly requests 'sans-serif', try to keep it Times-like too
+            "font.sans-serif": serif_list,
+
+            # Math text: follow the same primary serif
+            "mathtext.fontset": "custom",
+            "mathtext.rm": primary_serif,
+            "mathtext.it": f"{primary_serif}:italic",
+            "mathtext.bf": f"{primary_serif}:bold",
+            "mathtext.cal": f"{primary_serif}:italic",
+            "mathtext.tt": "Courier",
+            "mathtext.default": "rm",
+
+            "axes.unicode_minus": False,
+            "pdf.compression": 9,
+        })
+
+
+    configure_fds_fonts()
+
+    # plt.rcParams.update({
+    #     "pdf.use14corefonts": True,
+    #     "text.usetex": False,
+
+    #     # Text and math in Times New Roman
+    #     "font.family": "serif",
+    #     "font.serif": ["Times", "Times New Roman"],
+
+    #     "mathtext.fontset": "custom",
+    #     "mathtext.rm": "Times",
+    #     "mathtext.it": "Times New Roman:italic",
+    #     "mathtext.bf": "Times:bold",
+    #     "mathtext.cal": "Times New Roman:italic",
+    #     "mathtext.tt": "Courier New",
+    #     "mathtext.default": "it",
+
+    #     "axes.unicode_minus": False,
+    #     "pdf.compression": 9,
+    # })
 
     import logging
     # Suppress just the 'findfont' warnings from matplotlib's font manager
