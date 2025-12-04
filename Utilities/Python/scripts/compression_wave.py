@@ -123,12 +123,13 @@ fig = fdsplotlib.plot_to_fig(x_data=t_FL4_128, y_data=rho_FL4_128, marker_style=
                              x_min=0, x_max=12.5, y_min=0, y_max=8,
                              revision_label=version_string,
                              x_label='Time (s)',
-                             y_label='Density (kg/m$^3$)')
+                             y_label=r'Density (kg/m$^3$)',
+                             usetex=True)
 
-fdsplotlib.plot_to_fig(x_data=t_FL4_16, y_data=rho_fds_FL4_16, marker_style='c--', data_label='FDS $N=16$', figure_handle=fig)
-fdsplotlib.plot_to_fig(x_data=t_FL4_32, y_data=rho_fds_FL4_32, marker_style='g--', data_label='FDS $N=32$', figure_handle=fig)
-fdsplotlib.plot_to_fig(x_data=t_FL4_64, y_data=rho_fds_FL4_64, marker_style='b--', data_label='FDS $N=64$', figure_handle=fig)
-fdsplotlib.plot_to_fig(x_data=t_FL4_128,y_data=rho_fds_FL4_128,marker_style='r--', data_label='FDS $N=128$',figure_handle=fig)
+fdsplotlib.plot_to_fig(x_data=t_FL4_16, y_data=rho_fds_FL4_16, marker_style='c--', data_label=r'FDS $N=16$', figure_handle=fig)
+fdsplotlib.plot_to_fig(x_data=t_FL4_32, y_data=rho_fds_FL4_32, marker_style='g--', data_label=r'FDS $N=32$', figure_handle=fig)
+fdsplotlib.plot_to_fig(x_data=t_FL4_64, y_data=rho_fds_FL4_64, marker_style='b--', data_label=r'FDS $N=64$', figure_handle=fig)
+fdsplotlib.plot_to_fig(x_data=t_FL4_128,y_data=rho_fds_FL4_128,marker_style='r--', data_label=r'FDS $N=128$',figure_handle=fig)
 
 plt.savefig(os.path.join(pltdir, 'compression_wave_time_series.pdf'), format='pdf')
 plt.close()
@@ -140,14 +141,15 @@ e_FL0 = np.array([error_FL0_16, error_FL0_32, error_FL0_64, error_FL0_128])
 e_FL2 = np.array([error_FL2_16, error_FL2_32, error_FL2_64, error_FL2_128])
 e_FL4 = np.array([error_FL4_16, error_FL4_32, error_FL4_64, error_FL4_128])
 
-fig = fdsplotlib.plot_to_fig(x_data=h, y_data=0.1*h, marker_style='k--', data_label=r'$O(\delta x)$',
+fig = fdsplotlib.plot_to_fig(x_data=h, y_data=0.1*h, marker_style='k--', data_label=r'${\cal O}(\delta x)$',
                              x_min=1e-2, x_max=1, y_min=1e-4, y_max=1e-1,
                              plot_type='loglog',
                              revision_label=version_string,
                              x_label='Grid Spacing (m)',
-                             y_label='L$_2$ Error (kg/m$^3$)')
+                             y_label=r'L2 Error (kg/m$^3$)',
+                             usetex=True)
 
-fdsplotlib.plot_to_fig(x_data=h, y_data=0.1*h**2, marker_style='k-', data_label=r'$O(\delta x^2)$', figure_handle=fig)
+fdsplotlib.plot_to_fig(x_data=h, y_data=0.1*h**2, marker_style='k-', data_label=r'${\cal O}(\delta x^2)$', figure_handle=fig)
 fdsplotlib.plot_to_fig(x_data=h, y_data=e_FL0, marker_style='b*-', data_label='Central', figure_handle=fig)
 fdsplotlib.plot_to_fig(x_data=h, y_data=e_FL2, marker_style='ro-', data_label='Superbee', figure_handle=fig)
 fdsplotlib.plot_to_fig(x_data=h, y_data=e_FL4, marker_style='g^-', data_label='CHARM', figure_handle=fig)
