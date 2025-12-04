@@ -1126,7 +1126,7 @@ def plot_to_fig(x_data,y_data,**kwargs):
                 ax.xaxis.set_major_formatter(ticker.LogFormatterSciNotation(base=10))
             else:
                 ax.xaxis.set_major_locator(ticker.MaxNLocator(nbins=detault_nticks, min_n_ticks=4))
-                sf = ticker.ScalarFormatter(useMathText=True)
+                sf = ticker.ScalarFormatter()
                 sf.set_powerlimits((-3, 4))
                 ax.xaxis.set_major_formatter(sf)
 
@@ -1152,7 +1152,7 @@ def plot_to_fig(x_data,y_data,**kwargs):
                 ax.yaxis.set_major_formatter(ticker.LogFormatterSciNotation(base=10))
             else:
                 ax.yaxis.set_major_locator(ticker.MaxNLocator(nbins=detault_nticks, min_n_ticks=4))
-                sf = ticker.ScalarFormatter(useMathText=True)
+                sf = ticker.ScalarFormatter()
                 sf.set_powerlimits((-3, 4))
                 ax.yaxis.set_major_formatter(sf)
 
