@@ -708,44 +708,39 @@ def get_data(E, spec, start_idx):
     return y, col_names
 
 
-def configure_fds_fonts():
+def configure_fds_fonts(**kwargs):
     import matplotlib.pyplot as plt
     import platform
 
     system = platform.system()
+    use_tex = kwargs.get('usetex', False)
 
     if system == "Linux":
-        # Linux: use Nimbus Roman as primary serif, with Times ahead of Times New Roman in the fallback chain
         primary_serif = "Nimbus Roman"
         serif_list = [
-            "Nimbus Roman",   # primary on Linux
+            "Nimbus Roman",
             "Times",
             "Times New Roman",
             "serif",
         ]
     else:
-        # macOS ("Darwin") and Windows: prefer Times, then Times New Roman
         primary_serif = "Times"
         serif_list = [
-            "Times",          # first choice
+            "Times",
             "Times New Roman",
             "Nimbus Roman",
             "serif",
         ]
 
     plt.rcParams.update({
-        # Core-14 fonts for small PDFs (Times-Roman in output)
         "pdf.use14corefonts": True,
-        "text.usetex": False,
+        "text.usetex": use_tex,
 
-        # Make serif the default everywhere
         "font.family": "serif",
         "font.serif": serif_list,
-
-        # If something explicitly requests 'sans-serif', try to keep it Times-like too
         "font.sans-serif": serif_list,
 
-        # Math text: follow the same primary serif
+        # Mathtext still matters when text.usetex=False
         "mathtext.fontset": "custom",
         "mathtext.rm": primary_serif,
         "mathtext.it": f"{primary_serif}:italic",
@@ -757,6 +752,13 @@ def configure_fds_fonts():
         "axes.unicode_minus": False,
         "pdf.compression": 9,
     })
+
+    # Only for usetex=True, insert packages that Times-ify math
+    if use_tex:
+        plt.rcParams["text.latex.preamble"] = r"""
+            \usepackage{newtxtext}
+            \usepackage{newtxmath}
+            """
 
 
 def plot_to_fig(x_data,y_data,**kwargs):
@@ -773,8 +775,6 @@ def plot_to_fig(x_data,y_data,**kwargs):
     import matplotlib.ticker as ticker
 
     plot_style = get_plot_style("fds")
-
-    configure_fds_fonts()
 
     # plt.rcParams.update({
     #     "pdf.use14corefonts": True,
@@ -828,17 +828,33 @@ def plot_to_fig(x_data,y_data,**kwargs):
     # if figure handle is passed, append to current figure, else generate a new figure
     if kwargs.get('figure_handle'):
         fig = kwargs.get('figure_handle')
+
         if fig.axes:
             ax = fig.axes[0]
         else:
-            # Ensure we have at least one axes
             ax = fig.add_subplot(111)
+
         plt.figure(fig.number)
         using_existing_figure = True
+
+        # ---- restore original usetex for this figure ----
+        use_tex = getattr(fig, "_fds_usetex", False)
+        plt.rcParams["text.usetex"] = use_tex
+
     else:
         fig = plt.figure(figsize=figure_size)
         using_existing_figure = False
-        # Convert to fractions of the figure size:
+
+        # Take usetex from kwargs, default to False
+        use_tex = kwargs.get('usetex', False)
+
+        # ---- apply font settings before any text is drawn ----
+        configure_fds_fonts(usetex=use_tex)
+
+        # ---- record the choice on the figure for later calls ----
+        fig._fds_usetex = use_tex
+
+        # Create axes
         ax_w = plot_size[0] / figure_size[0]
         ax_h = plot_size[1] / figure_size[1]
         left   = plot_origin[0] / figure_size[0]
