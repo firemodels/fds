@@ -708,6 +708,77 @@ def get_data(E, spec, start_idx):
     return y, col_names
 
 
+def configure_fds_fonts(**kwargs):
+    import matplotlib.pyplot as plt
+    import platform
+
+    use_tex = kwargs.get('usetex', False)
+    system  = platform.system()
+
+    # OS-dependent serif stack
+    if system == "Linux":
+        primary_serif = "Nimbus Roman"
+        serif_list = [
+            "Nimbus Roman",
+            "Times",
+            "Times New Roman",
+            "serif",
+        ]
+    else:
+        primary_serif = "Times"
+        serif_list = [
+            "Times",
+            "Times New Roman",
+            "Nimbus Roman",
+            "serif",
+        ]
+
+    # ------------------------------------------------------------
+    # Core default config (applies to BOTH branches)
+    # ------------------------------------------------------------
+    rc = {
+        "pdf.use14corefonts": True,        # use Base-14 when possible
+        "text.usetex": use_tex,            # route text through TeX or not
+
+        "font.family": "serif",
+        "font.serif": serif_list,
+        "font.sans-serif": serif_list,
+
+        "axes.unicode_minus": False,
+        "pdf.compression": 9,
+    }
+
+    # ------------------------------------------------------------
+    # Branch A: NON-TeX Mode  (usetex=False)
+    # Use mathtext for math, STIX for math glyphs
+    # Keep Times/Nimbus for normal text
+    # Very small PDFs
+    # ------------------------------------------------------------
+    if not use_tex:
+        rc.update({
+            "mathtext.fontset": "stix",
+            "mathtext.default": "it",    # italic math by default
+        })
+
+    # ------------------------------------------------------------
+    # Branch B: Full TeX rendering  (usetex=True)
+    #   - Times for body
+    #   - newtxtext/newtxmath to Times-ify math
+    #   - Disable STIX mathtext completely
+    # ------------------------------------------------------------
+    else:
+        rc.update({
+            "mathtext.fontset": "cm",     # or "custom" — anything NOT stix
+            "mathtext.default": "rm",     # don't auto-italic mathtext in TeX mode
+            "text.latex.preamble": r"""
+                \usepackage{newtxtext}
+                \usepackage{newtxmath}
+            """,
+        })
+
+    plt.rcParams.update(rc)
+
+
 def plot_to_fig(x_data,y_data,**kwargs):
     """
     Create a simple x,y plot and return the fig handle
@@ -718,30 +789,30 @@ def plot_to_fig(x_data,y_data,**kwargs):
     # for key, value in kwargs.items():
     #     print ("%s == %s" %(key, value))
 
-    plot_style = get_plot_style("fds")
-
     import matplotlib.pyplot as plt
     import matplotlib.ticker as ticker
 
-    plt.rcParams.update({
-        "pdf.use14corefonts": True,
-        "text.usetex": False,
+    plot_style = get_plot_style("fds")
 
-        # Text and math in Times New Roman
-        "font.family": "serif",
-        "font.serif": ["Times", "Times New Roman"],
+    # plt.rcParams.update({
+    #     "pdf.use14corefonts": True,
+    #     "text.usetex": False,
 
-        "mathtext.fontset": "custom",
-        "mathtext.rm": "Times",
-        "mathtext.it": "Times New Roman:italic",
-        "mathtext.bf": "Times:bold",
-        "mathtext.cal": "Times New Roman:italic",
-        "mathtext.tt": "Courier New",
-        "mathtext.default": "it",
+    #     # Text and math in Times New Roman
+    #     "font.family": "serif",
+    #     "font.serif": ["Times", "Times New Roman"],
 
-        "axes.unicode_minus": False,
-        "pdf.compression": 9,
-    })
+    #     "mathtext.fontset": "custom",
+    #     "mathtext.rm": "Times",
+    #     "mathtext.it": "Times New Roman:italic",
+    #     "mathtext.bf": "Times:bold",
+    #     "mathtext.cal": "Times New Roman:italic",
+    #     "mathtext.tt": "Courier New",
+    #     "mathtext.default": "it",
+
+    #     "axes.unicode_minus": False,
+    #     "pdf.compression": 9,
+    # })
 
     import logging
     # Suppress just the 'findfont' warnings from matplotlib's font manager
@@ -775,17 +846,33 @@ def plot_to_fig(x_data,y_data,**kwargs):
     # if figure handle is passed, append to current figure, else generate a new figure
     if kwargs.get('figure_handle'):
         fig = kwargs.get('figure_handle')
+
         if fig.axes:
             ax = fig.axes[0]
         else:
-            # Ensure we have at least one axes
             ax = fig.add_subplot(111)
+
         plt.figure(fig.number)
         using_existing_figure = True
+
+        # ---- restore original usetex for this figure ----
+        use_tex = getattr(fig, "_fds_usetex", False)
+        plt.rcParams["text.usetex"] = use_tex
+
     else:
         fig = plt.figure(figsize=figure_size)
         using_existing_figure = False
-        # Convert to fractions of the figure size:
+
+        # Take usetex from kwargs, default to False
+        use_tex = kwargs.get('usetex', False)
+
+        # ---- apply font settings before any text is drawn ----
+        configure_fds_fonts(usetex=use_tex)
+
+        # ---- record the choice on the figure for later calls ----
+        fig._fds_usetex = use_tex
+
+        # Create axes
         ax_w = plot_size[0] / figure_size[0]
         ax_h = plot_size[1] / figure_size[1]
         left   = plot_origin[0] / figure_size[0]
@@ -968,6 +1055,7 @@ def plot_to_fig(x_data,y_data,**kwargs):
     plt.setp( ax.yaxis.get_majorticklabels(), rotation=0, fontsize=ticklabel_fontsize )
 
     axeslabel_fontsize=kwargs.get('axeslabel_fontsize',default_axeslabel_fontsize)
+
     if not using_existing_figure:
         plt.xlabel(kwargs.get('x_label'), fontsize=axeslabel_fontsize)
         plt.ylabel(kwargs.get('y_label'), fontsize=axeslabel_fontsize)
@@ -1057,7 +1145,7 @@ def plot_to_fig(x_data,y_data,**kwargs):
                 ax.xaxis.set_major_formatter(ticker.LogFormatterSciNotation(base=10))
             else:
                 ax.xaxis.set_major_locator(ticker.MaxNLocator(nbins=detault_nticks, min_n_ticks=4))
-                sf = ticker.ScalarFormatter(useMathText=True)
+                sf = ticker.ScalarFormatter()
                 sf.set_powerlimits((-3, 4))
                 ax.xaxis.set_major_formatter(sf)
 
@@ -1083,7 +1171,7 @@ def plot_to_fig(x_data,y_data,**kwargs):
                 ax.yaxis.set_major_formatter(ticker.LogFormatterSciNotation(base=10))
             else:
                 ax.yaxis.set_major_locator(ticker.MaxNLocator(nbins=detault_nticks, min_n_ticks=4))
-                sf = ticker.ScalarFormatter(useMathText=True)
+                sf = ticker.ScalarFormatter()
                 sf.set_powerlimits((-3, 4))
                 ax.yaxis.set_major_formatter(sf)
 
