@@ -712,9 +712,10 @@ def configure_fds_fonts(**kwargs):
     import matplotlib.pyplot as plt
     import platform
 
-    system = platform.system()
     use_tex = kwargs.get('usetex', False)
+    system  = platform.system()
 
+    # OS-dependent serif stack
     if system == "Linux":
         primary_serif = "Nimbus Roman"
         serif_list = [
@@ -732,33 +733,50 @@ def configure_fds_fonts(**kwargs):
             "serif",
         ]
 
-    plt.rcParams.update({
-        "pdf.use14corefonts": True,
-        "text.usetex": use_tex,
+    # ------------------------------------------------------------
+    # Core default config (applies to BOTH branches)
+    # ------------------------------------------------------------
+    rc = {
+        "pdf.use14corefonts": True,        # use Base-14 when possible
+        "text.usetex": use_tex,            # route text through TeX or not
 
         "font.family": "serif",
         "font.serif": serif_list,
         "font.sans-serif": serif_list,
 
-        # Mathtext still matters when text.usetex=False
-        "mathtext.fontset": "custom",
-        "mathtext.rm": primary_serif,
-        "mathtext.it": f"{primary_serif}:italic",
-        "mathtext.bf": f"{primary_serif}:bold",
-        "mathtext.cal": f"{primary_serif}:italic",
-        "mathtext.tt": "Courier",
-        "mathtext.default": "rm",
-
         "axes.unicode_minus": False,
         "pdf.compression": 9,
-    })
+    }
 
-    # Only for usetex=True, insert packages that Times-ify math
-    if use_tex:
-        plt.rcParams["text.latex.preamble"] = r"""
-            \usepackage{newtxtext}
-            \usepackage{newtxmath}
-            """
+    # ------------------------------------------------------------
+    # Branch A: NON-TeX Mode  (usetex=False)
+    # Use mathtext for math, STIX for math glyphs
+    # Keep Times/Nimbus for normal text
+    # Very small PDFs
+    # ------------------------------------------------------------
+    if not use_tex:
+        rc.update({
+            "mathtext.fontset": "stix",
+            "mathtext.default": "it",    # italic math by default
+        })
+
+    # ------------------------------------------------------------
+    # Branch B: Full TeX rendering  (usetex=True)
+    #   - Times for body
+    #   - newtxtext/newtxmath to Times-ify math
+    #   - Disable STIX mathtext completely
+    # ------------------------------------------------------------
+    else:
+        rc.update({
+            "mathtext.fontset": "cm",     # or "custom" — anything NOT stix
+            "mathtext.default": "rm",     # don't auto-italic mathtext in TeX mode
+            "text.latex.preamble": r"""
+                \usepackage{newtxtext}
+                \usepackage{newtxmath}
+            """,
+        })
+
+    plt.rcParams.update(rc)
 
 
 def plot_to_fig(x_data,y_data,**kwargs):
@@ -1037,6 +1055,7 @@ def plot_to_fig(x_data,y_data,**kwargs):
     plt.setp( ax.yaxis.get_majorticklabels(), rotation=0, fontsize=ticklabel_fontsize )
 
     axeslabel_fontsize=kwargs.get('axeslabel_fontsize',default_axeslabel_fontsize)
+
     if not using_existing_figure:
         plt.xlabel(kwargs.get('x_label'), fontsize=axeslabel_fontsize)
         plt.ylabel(kwargs.get('y_label'), fontsize=axeslabel_fontsize)
