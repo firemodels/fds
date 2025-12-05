@@ -29,8 +29,8 @@ fig = fdsplotlib.plot_to_fig([0,50],[0,50],
                              plot_origin=(plot_style['Scat_Plot_X'],plot_style['Scat_Plot_Y']),
                              legend_location='upper left',
                              revision_label=version_string,
-                             x_label='Measured Heat Flux (kW/m$^2$)',
-                             y_label='Predicted Heat Flux (kW/m$^2$)'
+                             x_label='Measured Heat Flux (kW/m²)',
+                             y_label='Predicted Heat Flux (kW/m²)'
                              )
 
 for i in range(4):

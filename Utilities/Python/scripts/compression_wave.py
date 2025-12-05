@@ -123,8 +123,7 @@ fig = fdsplotlib.plot_to_fig(x_data=t_FL4_128, y_data=rho_FL4_128, marker_style=
                              x_min=0, x_max=12.5, y_min=0, y_max=8,
                              revision_label=version_string,
                              x_label='Time (s)',
-                             y_label=r'Density (kg/m$^3$)',
-                             usetex=True)
+                             y_label='Density (kg/m³)')
 
 fdsplotlib.plot_to_fig(x_data=t_FL4_16, y_data=rho_fds_FL4_16, marker_style='c--', data_label=r'FDS $N=16$', figure_handle=fig)
 fdsplotlib.plot_to_fig(x_data=t_FL4_32, y_data=rho_fds_FL4_32, marker_style='g--', data_label=r'FDS $N=32$', figure_handle=fig)
@@ -146,8 +145,7 @@ fig = fdsplotlib.plot_to_fig(x_data=h, y_data=0.1*h, marker_style='k--', data_la
                              plot_type='loglog',
                              revision_label=version_string,
                              x_label='Grid Spacing (m)',
-                             y_label=r'L2 Error (kg/m$^3$)',
-                             usetex=True)
+                             y_label='L2 Error (kg/m³)')
 
 fdsplotlib.plot_to_fig(x_data=h, y_data=0.1*h**2, marker_style='k-', data_label=r'${\cal O}(\delta x^2)$', figure_handle=fig)
 fdsplotlib.plot_to_fig(x_data=h, y_data=e_FL0, marker_style='b*-', data_label='Central', figure_handle=fig)

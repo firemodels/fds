@@ -28,7 +28,7 @@ with open(filename, 'wt') as fid:
     fid.write('\\begin{tabular}{|c|c|c|c|c|c|c|} \\hline\n')
     fid.write('$\\tau$ & $S(\\tau)$ & \\multicolumn{2}{|c|}{FDS (I=20,J=20)} &\n')
     fid.write('\\multicolumn{2}{|c|}{FDS (I=20,J=1)} & FDS (I=150) \\\\ \\cline{3-7}\n')
-    fid.write(' & (kW/m$^2$) & 1 band & 6 bands & 1 band & 6 bands & 1 band \\\\ \\hline\\hline\n')
+    fid.write(' & (kW/m²) & 1 band & 6 bands & 1 band & 6 bands & 1 band \\\\ \\hline\\hline\n')
     
     for i in range(6):
         fid.write(f'{kappa[i]} & {exact[i]:9.4f} & ')

@@ -83,7 +83,7 @@ for i in [1, 2, 3, 5, 8, 9, 10]:
 fig = fdsplotlib.plot_to_fig(x_data=[-1,-1], y_data=[-1,-1],
                              x_min=0, x_max=150, y_min=0, y_max=250,
                              revision_label=version_string,
-                             x_label='Heat Flux (kW/m$^2$)',
+                             x_label='Heat Flux (kW/m²)',
                              y_label='Height (cm)')
 
 qdot = {}
@@ -136,7 +136,7 @@ M1 = importdata(outdir + 'Marinite_60_kW_1_cm_devc.csv', ',', 2)
 fig = fdsplotlib.plot_to_fig(x_data=[-1,-1], y_data=[-1,-1],
                              x_min=0, x_max=80, y_min=0, y_max=180,
                              revision_label=version_string,
-                             x_label='Heat Flux (kW/m$^2$)',
+                             x_label='Heat Flux (kW/m²)',
                              y_label='Height (cm)')
 
 # Plot experimental data

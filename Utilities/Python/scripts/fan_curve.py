@@ -30,7 +30,7 @@ for dp_val in range(-1000, 1001, 200):
 
 fig = fdsplotlib.plot_to_fig(x_data=[vdot1,vdot1], y_data=[-1000,1000], marker_style='r-', data_label='constant volume',
                              x_min=-10, x_max=20, y_min=-1000, y_max=1000,
-                             x_label='Volume Flow Rate (m$^3$/s)',
+                             x_label='Volume Flow Rate (m³/s)',
                              y_label='Static Pressure (Pa)')
 
 fdsplotlib.plot_to_fig(x_data=vdot, y_data=dp, marker_style='k-', data_label='quadratic', figure_handle=fig)
