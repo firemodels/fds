@@ -118,7 +118,7 @@ fig = fdsplotlib.plot_to_fig(x_data=t_FL2_128, y_data=rho_FL2_128, marker_style=
                              x_min=0, x_max=12.5, y_min=0, y_max=2,
                              revision_label=version_string,
                              x_label='Time (s)',
-                             y_label='Density (kg/m$^3$)')
+                             y_label='Density (kg/m³)')
 
 fdsplotlib.plot_to_fig(x_data=t_FL2_16, y_data=rho_fds_FL2_16, marker_style='c--', data_label='FDS $N=16$', figure_handle=fig)
 fdsplotlib.plot_to_fig(x_data=t_FL2_32, y_data=rho_fds_FL2_32, marker_style='g--', data_label='FDS $N=32$', figure_handle=fig)
@@ -137,7 +137,7 @@ fig = fdsplotlib.plot_to_fig(x_data=h, y_data=0.1*h, marker_style='k--', data_la
                              plot_type='loglog',
                              revision_label=version_string,
                              x_label='Grid Spacing (m)',
-                             y_label='L$_2$ Error (kg/m$^3$)')
+                             y_label='L2 Error (kg/m³)')
 
 e_FL2 = np.array([error_FL2_16, error_FL2_32, error_FL2_64, error_FL2_128])
 e_FL4 = np.array([error_FL4_16, error_FL4_32, error_FL4_64, error_FL4_128])

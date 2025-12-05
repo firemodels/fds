@@ -57,7 +57,7 @@ fig = fdsplotlib.plot_to_fig(x_data=z, y_data=flux, marker_style='k-',
       revision_label=version_string,x_min=0,x_max=1,y_min=20,y_max=160,
       plot_title = 'Radiative Flux from a Hot Square Plate',
       data_label='Exact',
-      y_label='Radiative Heat Flux (kW/m$^2$)',
+      y_label='Radiative Heat Flux (kW/m²)',
       x_label='Distance from Plate (m)',
       legend_location='lower left')
 
