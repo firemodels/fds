@@ -154,7 +154,7 @@ def energy_decay(chid, N):
                              x_min=0, x_max=0.7, y_min=0, y_max=0.07,
                              revision_label=version_string,
                              x_label='Time (s)',
-                             y_label='Kinetic Energy (m$^2$/s$^2$)',
+                             y_label='Kinetic Energy (m²/s²)',
                              legend_location='upper right')
 
     if chid == 'csmag_32':
@@ -198,7 +198,7 @@ def plotspec(chid, N):
                                  revision_label=version_string,
                                  plot_type='loglog',
                                  x_label='$k$ (1/m)',
-                                 y_label='$E(k)$ (m$^3$/s$^2$)')
+                                 y_label='$E(k)$ (m³/s²)')
 
     L = 9*2*np.pi/100  # box length (m)
     k0 = 2*np.pi/L

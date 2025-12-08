@@ -63,7 +63,7 @@ fig = fdsplotlib.plot_to_fig(x_data=[0,0], y_data=[0,0],
                              revision_label=version_string,
                              plot_title=r'Radiative Heat Flux (plate_view_factor)',
                              x_label='Number of Radiation Angles',
-                             y_label='Heat Flux (kW/m$^2$)')
+                             y_label='Heat Flux (kW/m²)')
 
 fdsplotlib.plot_to_fig(x_data=NRA, y_data=Exact_Flux_2D*np.ones(3), marker_style='r-', figure_handle=fig)
 fdsplotlib.plot_to_fig(x_data=NRA, y_data=Flux_2D                 , marker_style='ro', data_label='FDS 2D', figure_handle=fig)

@@ -340,7 +340,7 @@ fig = fdsplotlib.plot_to_fig(x_data=[3,3,9,15,15], y_data=[169.4,164.7,292.6,372
                              x_min=0, x_max=16, y_min=0, y_max=400,
                              revision_label=version_string,
                              x_label='Number of Fans',
-                             y_label='Volume Flow (m$^3$/s)')
+                             y_label='Volume Flow (m³/s)')
 fdsplotlib.plot_to_fig(x_data=M.data[mod_time_index,0]/300, y_data=M.data[mod_time_index,1], 
                        marker_style='ko-', marker_fill_color='none', data_label='FDS', figure_handle=fig)
 
