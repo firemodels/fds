@@ -37,10 +37,10 @@ for i in range(1, 5):  # Loop from 1 to 4 (inclusive)
     p_0 = 100000
     qdot = {1: 50, 2: -50, 3: 25, 4: -25}
     z_0 = {1: 0.25, 2: 0.25, 3: 0.125, 4: 0.125}
-    T_low = {1: 15, 2: 15, 3: 15, 4: 15}
-    T_high = {1: 25, 2: 25, 3: 25, 4: 25}
-    u_high = {1: 20, 2: 20, 3: 10, 4: 15}
-    fvec = {1: 0.01, 2: 0.01, 3: 0.002, 4: 0.005}
+    T_low = {1: 12, 2: 15, 3: 12, 4: 15}
+    T_high = {1: 22, 2: 25, 3: 22, 4: 25}
+    u_high = {1: 25, 2: 25, 3: 25, 4: 25}
+    fvec = {1: 0.004, 2: 0.004, 3: 0.002, 4: 0.004}
     s = {1: 8.15, 2: 8.15, 3: 4.075, 4: 4.075}
 
     theta_0 = T_r
@@ -51,7 +51,7 @@ for i in range(1, 5):  # Loop from 1 to 4 (inclusive)
     L = -u_star**3 * theta_0 * rho_0 * cp / (g * kappa * qdot[i])
     theta_star = u_star**2 * theta_0 / (g * kappa * L)
 
-    z = np.array([z_0[i], 10*z_0[i], 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 50, 100])
+    z = np.array([10*z_0[i], 1, 2, 5, 10, 20, 40, 60, 80, 100, 150, 200, 250, 300, 350, 400])
     z = np.sort(z)
 
     # Create figure 1 for velocity
@@ -68,7 +68,7 @@ for i in range(1, 5):  # Loop from 1 to 4 (inclusive)
     theta = theta_0 + (theta_star/kappa) * (np.log(z/z_0[i]) - psi_h)
     T = theta * (p_0 / (p_0 - rho_0*g*(z - z_0[i])))**(-0.285)
 
-    T = T + (theta_0 - T[11]) 
+    T = T + (theta_0 - T[4]) 
 
     ERROR = abs(u[-1] - M2.iloc[-1, 1])
     if ERROR > 3.:
@@ -76,7 +76,7 @@ for i in range(1, 5):  # Loop from 1 to 4 (inclusive)
 
     fig = fdsplotlib.plot_to_fig(x_data=M2.iloc[:, 1].values, y_data=M2.iloc[:, 0].values, marker_style='k-', data_label='FDS',
                                  x_label='Velocity (m/s)', y_label='Height (m)',
-                                 x_min=0, x_max=u_high[i], y_min=0, y_max=100,
+                                 x_min=0, x_max=u_high[i], y_min=0, y_max=400,
                                  revision_label=version_string,
                                  legend_location='lower right')
 
@@ -110,7 +110,7 @@ for i in range(1, 5):  # Loop from 1 to 4 (inclusive)
 
     fig = fdsplotlib.plot_to_fig(x_data=M2.iloc[:,2].values, y_data=M2.iloc[:,0].values, marker_style='k-', data_label='FDS',
                                  x_label='Temperature (°C)', y_label='Height (m)', 
-                                 x_min=T_low[i], x_max=T_high[i], y_min=0, y_max=100,
+                                 x_min=T_low[i], x_max=T_high[i], y_min=0, y_max=400,
                                  revision_label=version_string,
                                  legend_location='lower left')
 
