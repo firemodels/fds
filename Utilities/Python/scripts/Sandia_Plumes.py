@@ -70,7 +70,7 @@ fig = fdsplotlib.plot_to_fig(x_data=f, y_data=pave[k-1].real, marker_style='k-',
                              plot_title='Sandia Methane Pool Fire, Test 17',
                              plot_type='loglog',
                              x_label='Frequency (Hz)',
-                             y_label='Autospectral Density (m$^2$/s)')
+                             y_label='Autospectral Density (m²/s)')
 
 # Find peak frequency
 k_fds = np.where(pave[k-1].real == np.max(pave[k-1].real))[0]

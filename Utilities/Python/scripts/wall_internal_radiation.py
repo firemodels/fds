@@ -21,7 +21,7 @@ else:
         fid.write('\\begin{center}\n')
         fid.write('\\begin{tabular}{|c|c|c|} \\hline\n')
         fid.write('$\\tau$      & $S(\\tau)$   & FDS \\\\\n')
-        fid.write('            & (kW/m$^2$)  & (kW/m$^2$) \\\\ \\hline\\hline\n')
+        fid.write('            & (kW/m²)  & (kW/m²) \\\\ \\hline\\hline\n')
         fid.write(f'0.01        & 2.897       & {-flux[0]:6.3f} \\\\\n')
         fid.write(f'0.1         & 24.94       & {-flux[1]:5.2f} \\\\\n')
         fid.write(f'0.5         & 82.95       & {-flux[2]:5.2f} \\\\\n')
