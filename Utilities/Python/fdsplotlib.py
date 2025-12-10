@@ -398,6 +398,8 @@ def dataplot(config_filename, **kwargs):
                 plt.close('all')
             first_plot = True
         elif ftest:
+            if verbose:
+                print(f"Generating plot {csv_rownum} {pltdir}{pp.Plot_Filename}...")
             f = f_Last
             first_plot = False
         else:
