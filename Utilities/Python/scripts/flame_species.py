@@ -25,15 +25,10 @@ filename = [
     'methane_flame_lumped_ox_devc.csv',
 ]
 
-skip_case = False
-
 for i in range(len(filename)):
    name = outdir+filename[i]
    if not os.path.exists(name):
-      skip_case = True
       print('Error: File ', filename[i], ' does not exist. Skipping case.')
-
-if skip_case: quit()
 
 h_mf_p = pd.read_csv(outdir+filename[0],skiprows=1,nrows=1,header=None)
 h_mf_p_2 = pd.read_csv(outdir+filename[1],skiprows=1,nrows=1,header=None)
