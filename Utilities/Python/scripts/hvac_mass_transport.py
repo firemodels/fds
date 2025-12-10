@@ -33,15 +33,10 @@ t_end = 2.0
 u = 1.0
 L = 1.0
 
-skip_case = False
-
 for i in range(len(filename)):
    name = datadir+filename[i]
    if not os.path.exists(name):
-      skip_case = True
       print('Error: File ', filename[i], ' does not exist. Skipping case.')
-
-if skip_case: quit()
 
 # --- Analytical Solution ---
 

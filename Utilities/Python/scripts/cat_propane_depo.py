@@ -26,15 +26,10 @@ wall_columns = [
     'depo_turbulent'
 ]
 
-skip_case = False
-
 for i in range(len(wall_files)):
    name = outdir+wall_files[i]
    if not os.path.exists(name):
-      skip_case = True
       print('Error: File ', wall_files[i], ' does not exist. Skipping case.')
-
-if skip_case: quit()
 
 # Read data from the wall deposition files
 wall_data = {}
@@ -91,10 +86,7 @@ gas_columns = [
 for i in range(len(gas_files)):
    name = outdir+gas_files[i]
    if not os.path.exists(name):
-      skip_case = True
       print('Error: File ', gas_files[i], ' does not exist. Skipping case.')
-
-if skip_case: quit()
 
 # Read data from the gas mass files
 gas_data = {}

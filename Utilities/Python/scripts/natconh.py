@@ -68,24 +68,18 @@ Ra_Limit_3 = 3.10508e6
 
 # Check for files
 
-skip_case = False
 for i in range(len(casename)):
    for j in range(len(res)):
       devc_filepath = os.path.join(results_dir, f"{casename[i]}_{res[j]}_devc.csv")
       if not os.path.exists(devc_filepath):
-         skip_case = True
          print('Error: File ', devc_filepath, ' does not exist. Skipping case.')
       line_filepath = os.path.join(results_dir, f"{casename[i]}_{res[j]}_line.csv")
       if not os.path.exists(line_filepath):
-         skip_case = True
          print('Error: File ', line_filepath, ' does not exist. Skipping case.')
    for j in range(len(res_cg)):
       devc_filepath = os.path.join(results_dir, f"{casename[i]}_{res_cg[j]}_rot_18_devc.csv")
       if not os.path.exists(devc_filepath):
-         skip_case = True
          print('Error: File ', devc_filepath, ' does not exist. Skipping case.')
-
-if skip_case: quit()
 
 r0 = []
 r1 = []
