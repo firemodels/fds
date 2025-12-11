@@ -20,10 +20,10 @@ $QFDS -d Aerosols propane_flame_deposition_thermophoretic.fds
 $QFDS -d Aerosols propane_flame_deposition_turbulent.fds
 $QFDS -d Aerosols soot_oxidation_wall.fds
 
-$QFDS -p 16 -d Atmospheric_Effects atmospheric_boundary_layer_1.fds
-$QFDS -p 16 -d Atmospheric_Effects atmospheric_boundary_layer_2.fds
-$QFDS -p 16 -d Atmospheric_Effects atmospheric_boundary_layer_3.fds
-$QFDS -p 16 -d Atmospheric_Effects atmospheric_boundary_layer_4.fds
+$QFDS -p 36 -d Atmospheric_Effects atmospheric_boundary_layer_1.fds
+$QFDS -p 36 -d Atmospheric_Effects atmospheric_boundary_layer_2.fds
+$QFDS -p 36 -d Atmospheric_Effects atmospheric_boundary_layer_3.fds
+$QFDS -p 36 -d Atmospheric_Effects atmospheric_boundary_layer_4.fds
 $QFDS -d Atmospheric_Effects lee_waves.fds
 $QFDS -d Atmospheric_Effects stack_effect.fds
 $QFDS -d Atmospheric_Effects lapse_rate.fds
@@ -901,6 +901,8 @@ $QFDS -d WUI part_drag_prof_wx.fds
 $QFDS -d WUI part_drag_prof_wy.fds
 $QFDS -d WUI part_drag_prof_wz.fds
 $QFDS -d WUI part_drag_stretched.fds
+$QFDS -d WUI part_spec_prof.fds
+$QFDS -d WUI part_temp_prof.fds
 $QFDS -d WUI pine_needles.fds
 $QFDS -d WUI radiation_gas-veg_consistency_gas.fds
 $QFDS -d WUI radiation_gas-veg_consistency_veg.fds
