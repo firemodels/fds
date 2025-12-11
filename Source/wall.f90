@@ -391,10 +391,13 @@ TYPE(BOUNDARY_PROP1_TYPE), POINTER :: B1,B1M,B1P
 TYPE(BOUNDARY_COORD_TYPE), POINTER :: BC
 TYPE(SURFACE_TYPE), POINTER :: SF
 TYPE(LAGRANGIAN_PARTICLE_TYPE), POINTER, OPTIONAL :: LP
+TYPE(LAGRANGIAN_PARTICLE_CLASS_TYPE), POINTER :: LPC
 TYPE(THIN_WALL_TYPE), POINTER, OPTIONAL :: TW
-REAL(EB) :: TSI,RAMP_FACTOR,UBAR,VBAR,WBAR
+REAL(EB) :: TSI,RAMP_FACTOR,UBAR,VBAR,WBAR,TLW(0:1,0:1,0:1)
+INTEGER :: N,TLW_IND(1:3)
 
 IF (PRESENT(WALL_INDEX)) THEN
+
    IF (ABS(SF%T_IGN-T_BEGIN)<=SPACING(SF%T_IGN) .AND. SF%RAMP(TIME_VELO)%INDEX>=1) THEN
       TSI = T
    ELSE
@@ -415,16 +418,6 @@ IF (PRESENT(WALL_INDEX)) THEN
          VBAR = 0.5_EB*(VV(BC%IIG,BC%JJG,BC%KKG)+VV(BC%IIG,BC%JJG-1,BC%KKG)) - SF%VEL_T(2)*RAMP_FACTOR
          B1%U_TANG = SQRT(UBAR**2+VBAR**2)
    END SELECT
-ELSEIF (PRESENT(PARTICLE_INDEX)) THEN
-   UBAR = 0.5_EB*(UU(BC%IIG,BC%JJG,BC%KKG)+UU(BC%IIG-1,BC%JJG,BC%KKG)) - LP%U
-   VBAR = 0.5_EB*(VV(BC%IIG,BC%JJG,BC%KKG)+VV(BC%IIG,BC%JJG-1,BC%KKG)) - LP%V
-   WBAR = 0.5_EB*(WW(BC%IIG,BC%JJG,BC%KKG)+WW(BC%IIG,BC%JJG,BC%KKG-1)) - LP%W
-   B1%U_TANG = SQRT(UBAR**2+VBAR**2+WBAR**2)
-ENDIF
-
-! Set near-wall gas temperature, B1%TMP_G, and incoming radiation, B1%Q_RAD_IN
-
-IF (PRESENT(WALL_INDEX) .OR. PRESENT(PARTICLE_INDEX)) THEN
 
    IF (SF%TMP_GAS_FRONT > 0._EB) THEN
       B1%TMP_G = TMPA + EVALUATE_RAMP(T-T_BEGIN,SF%RAMP(TIME_TGF)%INDEX)*(SF%TMP_GAS_FRONT-TMPA)
@@ -434,6 +427,37 @@ IF (PRESENT(WALL_INDEX) .OR. PRESENT(PARTICLE_INDEX)) THEN
    ENDIF
    B1%RHO_G = RHOP(BC%IIG,BC%JJG,BC%KKG)
    B1%ZZ_G(1:N_TRACKED_SPECIES) = ZZP(BC%IIG,BC%JJG,BC%KKG,1:N_TRACKED_SPECIES)
+
+ELSEIF (PRESENT(PARTICLE_INDEX)) THEN
+   
+   LPC => LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)
+   IF (SF%TMP_GAS_FRONT > 0._EB) THEN
+      B1%TMP_G = TMPA + EVALUATE_RAMP(T-T_BEGIN,SF%RAMP(TIME_TGF)%INDEX)*(SF%TMP_GAS_FRONT-TMPA)
+      B1%Q_RAD_IN = B1%EMISSIVITY*SIGMA*B1%TMP_G**4
+   ENDIF
+   
+   IF (.NOT. LPC%SUBGRID_INTERPOLATION) THEN
+   
+      IF (SF%TMP_GAS_FRONT < 0._EB) B1%TMP_G =  TMP(BC%IIG,BC%JJG,BC%KKG)
+      B1%RHO_G = RHOP(BC%IIG,BC%JJG,BC%KKG)
+      B1%ZZ_G(1:N_TRACKED_SPECIES) = ZZP(BC%IIG,BC%JJG,BC%KKG,1:N_TRACKED_SPECIES)
+      UBAR = 0.5_EB*(UU(BC%IIG,BC%JJG,BC%KKG)+UU(BC%IIG-1,BC%JJG,BC%KKG)) - LP%U
+      VBAR = 0.5_EB*(VV(BC%IIG,BC%JJG,BC%KKG)+VV(BC%IIG,BC%JJG-1,BC%KKG)) - LP%V
+      WBAR = 0.5_EB*(WW(BC%IIG,BC%JJG,BC%KKG)+WW(BC%IIG,BC%JJG,BC%KKG-1)) - LP%W
+      B1%U_TANG = SQRT(UBAR**2+VBAR**2+WBAR**2)
+   
+   ELSE ! Do gradient based interpolation for the near-surface quantities. B1%U_TANG interpolation is in part.f90
+
+      ! Get reusable interpolation coefficients
+      CALL GET_TRILINEAR_WEIGHTS(BC%IIG,BC%JJG,BC%KKG,BC%X,BC%Y,BC%Z,TLW_IND,TLW)
+      IF (SF%TMP_GAS_FRONT < 0._EB) B1%TMP_G = & 
+         SCALAR_TO_POINT(TLW_IND,TLW,TMP)
+      B1%RHO_G = SCALAR_TO_POINT(TLW_IND,TLW,RHOP)      
+      DO N=1,N_TRACKED_SPECIES
+         B1%ZZ_G(N) = SCALAR_TO_POINT(TLW_IND,TLW,ZZP(:,:,:,N))
+      ENDDO
+
+   ENDIF
 
 ELSEIF (PRESENT(THIN_WALL_INDEX)) THEN
 
@@ -460,6 +484,98 @@ ELSEIF (PRESENT(THIN_WALL_INDEX)) THEN
 ENDIF
 
 END SUBROUTINE NEAR_SURFACE_GAS_VARIABLES
+
+
+REAL(EB) FUNCTION SCALAR_TO_POINT(TLW_IND,TLW,FIELD)
+
+INTEGER, INTENT(IN) :: TLW_IND(1:3)
+REAL(EB), INTENT(IN) :: TLW(0:1,0:1,0:1)
+REAL(EB), INTENT(IN), DIMENSION(-1:IBP1+1,-1:JBP1+1,-1:KBP1+1) :: FIELD
+INTEGER :: II,JJ,KK
+
+SCALAR_TO_POINT = 0._EB
+DO KK=0,1
+   DO JJ=0,1
+      DO II=0,1
+         SCALAR_TO_POINT = SCALAR_TO_POINT + &
+            TLW(II,JJ,KK) * FIELD(TLW_IND(IAXIS)+II, TLW_IND(JAXIS)+JJ, TLW_IND(KAXIS)+KK)
+      ENDDO
+   ENDDO
+ENDDO
+
+END FUNCTION SCALAR_TO_POINT
+
+!> \brief Get trilinear interpolation weights for cell-centered quantities
+!> \param IIG particle x cell index
+!> \param JJG particle y cell index
+!> \param KKG particle z cell index
+!> \param P_X particle x coordinate
+!> \param P_Y particle y coordinate
+!> \param P_Z particle z coordinate
+!> \param TLW_IND(AXIS,1:2) Output: upper and lower cell indices for interpolation
+!> \param TLW(0:1,0:1,0:1) Output: trilinear weights for the 8 cells
+SUBROUTINE GET_TRILINEAR_WEIGHTS(IIG,JJG,KKG,P_X,P_Y,P_Z,TLW_IND,TLW)
+
+INTEGER, INTENT(IN) :: IIG,JJG,KKG
+REAL(EB), INTENT(IN) :: P_X,P_Y,P_Z
+INTEGER, INTENT(OUT) :: TLW_IND(1:3)
+REAL(EB), INTENT(OUT) :: TLW(0:1,0:1,0:1)
+REAL(EB) :: P,PP,R,RR,S,SS,TLW_SUM
+LOGICAL :: VALID_MASK(0:1,0:1,0:1)
+INTEGER :: II,JJ,KK
+
+! Determine which cell centers to use based on particle location relative to cell center
+TLW_IND(IAXIS) = IIG; TLW_IND(JAXIS) = JJG; TLW_IND(KAXIS) = KKG
+! Particle is below cell center
+IF (P_X < XC(IIG)) TLW_IND(IAXIS) = IIG - 1
+IF (P_Y < YC(JJG)) TLW_IND(JAXIS) = JJG - 1
+IF (P_Z < ZC(KKG)) TLW_IND(KAXIS) = KKG - 1
+
+! Compute normalized coordinates within the interpolation box
+P = (P_X - XC(TLW_IND(IAXIS))) / MAX(TWO_EPSILON_EB, XC(TLW_IND(IAXIS)+1) - XC(TLW_IND(IAXIS)))
+R = (P_Y - YC(TLW_IND(JAXIS))) / MAX(TWO_EPSILON_EB, YC(TLW_IND(JAXIS)+1) - YC(TLW_IND(JAXIS)))
+S = (P_Z - ZC(TLW_IND(KAXIS))) / MAX(TWO_EPSILON_EB, ZC(TLW_IND(KAXIS)+1) - ZC(TLW_IND(KAXIS)))
+
+P = MIN(1._EB, MAX(0._EB, P))
+R = MIN(1._EB, MAX(0._EB, R))
+S = MIN(1._EB, MAX(0._EB, S))
+
+PP = 1._EB - P
+RR = 1._EB - R
+SS = 1._EB - S
+
+! Compute trilinear weights
+TLW(0,0,0) = PP * RR * SS
+TLW(1,0,0) = P  * RR * SS
+TLW(0,1,0) = PP * R  * SS
+TLW(0,0,1) = PP * RR * S
+TLW(1,1,0) = P  * R  * SS
+TLW(1,0,1) = P  * RR * S
+TLW(0,1,1) = PP * R  * S
+TLW(1,1,1) = P  * R  * S
+
+! Determine if any cells should be excluded (solid)
+VALID_MASK = .TRUE.
+DO KK=0,1
+   DO JJ=0,1
+      DO II=0,1
+         IF (CELL(CELL_INDEX(TLW_IND(IAXIS)+II,TLW_IND(JAXIS)+JJ,TLW_IND(KAXIS)+KK))%SOLID) &
+            VALID_MASK(II,JJ,KK) = .FALSE.
+      ENDDO
+   ENDDO
+ENDDO
+TLW_SUM = SUM(TLW, MASK=VALID_MASK)
+IF (TLW_SUM > TWO_EPSILON_EB) THEN
+   ! Zero out solids
+   WHERE (.NOT. VALID_MASK) TLW = 0._EB
+   ! Renormalize
+   WHERE (VALID_MASK) TLW = TLW / TLW_SUM
+ELSE
+   TLW = 0._EB
+ENDIF
+
+
+END SUBROUTINE GET_TRILINEAR_WEIGHTS
 
 
 !> \brief Calculate the surface temperature TMP_F
@@ -2855,7 +2971,7 @@ REAL(EB), PARAMETER :: M_DOT_ERROR_TOL=1.E-6_EB, CHAR_DENSITY_THRESHOLD=5._EB ! 
 ! Get surface oxygen mass fraction
 
 IF (O2_INDEX>0) THEN
-   ZZ_GET(1:N_TRACKED_SPECIES) = MAX(0._EB,ZZ(BC%IIG,BC%JJG,BC%KKG,1:N_TRACKED_SPECIES))
+   ZZ_GET(1:N_TRACKED_SPECIES) = MAX(0._EB,B1%ZZ_G(1:N_TRACKED_SPECIES))
    CALL GET_MASS_FRACTION(ZZ_GET,O2_INDEX,Y_O2_F)
 ELSE
    Y_O2_F = 0._EB
@@ -3345,7 +3461,7 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Loop over all materials in the cell (alpha subsc
             ! Estimate surface oxygen concentration from mass transport
             TMP_FILM = (TMP_F+TMP(IIG,JJG,KKG))/2._EB
             ! Get oxygen mass fraction
-            ZZ_GET(1:N_TRACKED_SPECIES) = MAX(0._EB,ZZ(IIG,JJG,KKG,1:N_TRACKED_SPECIES))
+            ZZ_GET(1:N_TRACKED_SPECIES) = MAX(0._EB,B1%ZZ_G(1:N_TRACKED_SPECIES))
             CALL GET_MASS_FRACTION(ZZ_GET,O2_INDEX,Y_O2)
             CALL GET_SPECIFIC_HEAT(ZZ_GET,CP_FILM,TMP_FILM)
             ! Mass transfer coefficient
