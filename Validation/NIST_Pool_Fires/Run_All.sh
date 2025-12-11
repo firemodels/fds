@@ -11,6 +11,9 @@ $QFDS $DEBUG -p 24  $QUEUE -d $INDIR NIST_Acetone_Prescribed_0p5cm.fds
 $QFDS $DEBUG -p 12  $QUEUE -d $INDIR NIST_Ethanol_Prescribed_2cm.fds
 $QFDS $DEBUG -p 12  $QUEUE -d $INDIR NIST_Ethanol_Prescribed_1cm.fds
 $QFDS $DEBUG -p 24  $QUEUE -d $INDIR NIST_Ethanol_Prescribed_0p5cm.fds
+$QFDS $DEBUG -p 16  $QUEUE -d $INDIR NIST_Heptane_Prescribed_2cm.fds
+$QFDS $DEBUG -p 16  $QUEUE -d $INDIR NIST_Heptane_Prescribed_1cm.fds
+$QFDS $DEBUG -p 32  $QUEUE -d $INDIR NIST_Heptane_Prescribed_0p5cm.fds
 $QFDS $DEBUG -p 16  $QUEUE -d $INDIR NIST_Methanol_Prescribed_2cm.fds
 $QFDS $DEBUG -p 16  $QUEUE -d $INDIR NIST_Methanol_Prescribed_1cm.fds
 $QFDS $DEBUG -p 32  $QUEUE -d $INDIR NIST_Methanol_Prescribed_0p5cm.fds
@@ -23,6 +26,9 @@ $QFDS $DEBUG -p 24  $QUEUE -d $INDIR NIST_Propane_20kW_Prescribed_0p5cm.fds
 $QFDS $DEBUG -p 24  $QUEUE -d $INDIR NIST_Propane_34kW_Prescribed_2cm.fds
 $QFDS $DEBUG -p 24  $QUEUE -d $INDIR NIST_Propane_34kW_Prescribed_1cm.fds
 $QFDS $DEBUG -p 24  $QUEUE -d $INDIR NIST_Propane_34kW_Prescribed_0p5cm.fds
+$QFDS $DEBUG -p 28  $QUEUE -d $INDIR NIST_Propane_50kW_Prescribed_2cm.fds
+$QFDS $DEBUG -p 28  $QUEUE -d $INDIR NIST_Propane_50kW_Prescribed_1cm.fds
+$QFDS $DEBUG -p 28  $QUEUE -d $INDIR NIST_Propane_50kW_Prescribed_0p5cm.fds
  
 $QFDS $DEBUG -p 108 $QUEUE -d $INDIR NIST_Methanol_1m_pan_1cm_grid.fds
 $QFDS $DEBUG -p 24  $QUEUE -d $INDIR NIST_Methanol_1m_pan_2cm_grid.fds

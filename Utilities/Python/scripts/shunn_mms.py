@@ -25,15 +25,10 @@ filename = ['shunn3_256_cfl_1_mms.csv',
    'shunn3_256_cfl_p125_mms.csv',
    'shunn3_256_cfl_p0625_mms.csv']
 
-skip_case = False
-
 for i in range(len(filename)):
    name = datadir+filename[i]
    if not os.path.exists(name):
-      skip_case = True
       print('Error: File ', filename[i], ' does not exist. Skipping case.')
-
-if skip_case: quit()
 
 M1 = pd.read_csv(datadir+filename[2],skiprows=2,header=None)
 M2 = pd.read_csv(datadir+filename[3],skiprows=2,header=None)
@@ -197,15 +192,10 @@ filename = ['shunn3_FavreZ_32_devc.csv','shunn3_FavreZ_64_devc.csv']
 git_file = datadir+'shunn3_FavreZ_32_git.txt'
 version_string = fdsplotlib.get_version_string(git_file)
 
-skip_case = False
-
 for i in range(len(filename)):
    name = datadir+filename[i]
    if not os.path.exists(name):
-      skip_case = True
       print('Error: File ', filename[i], ' does not exist. Skipping case.')
-
-if skip_case: quit()
 
 fig = fdsplotlib.plot_to_fig(x_data=[0,T], y_data=[FavreZ_mms,FavreZ_mms], marker_style='k-',
       revision_label=version_string,x_min=0,x_max=T,y_min=0,y_max=0.2,
@@ -295,15 +285,10 @@ dx = L/nx
 datadir = '../../Verification/Scalar_Analytical_Solution/';
 filename = ['shunn3_32_mms.csv','shunn3_64_mms.csv','shunn3_128_mms.csv','shunn3_256_mms.csv','shunn3_512_mms.csv']
 
-skip_case = False
-
 for i in range(len(filename)):
    name = datadir+filename[i]
    if not os.path.exists(name):
-      skip_case = True
       print('Error: File ', filename[i], ' does not exist. Skipping case.')
-
-if skip_case: quit()
 
 e_r = np.zeros(len(filename))
 e_z = np.zeros(len(filename))
@@ -434,16 +419,11 @@ filename = [['shunn3_32_cc_exp_chm_mms.csv','shunn3_64_cc_exp_chm_mms.csv','shun
 gitname = ['shunn3_256_cc_exp_chm_git.txt','shunn3_256_cc_exp_gdv_git.txt']
 plotname=[ 'shunn_cc_exp_chm_mms_convergence.pdf', 'shunn_cc_exp_gdv_mms_convergence.pdf']
 
-skip_case = False
-
 for i in range(2):
    for j in range(len(filename[i])):
       name = datadir+filename[i][j]
       if not os.path.exists(name):
-         skip_case = True
          print('Error: File ', filename[i][j], ' does not exist. Skipping case.')
-
-if skip_case: quit()
 
 for kk in range(2):
    for n in range(len(filename[kk])):

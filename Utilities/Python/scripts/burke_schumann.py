@@ -15,13 +15,8 @@ import os
 base_dir = '../../Verification/Species/'
 input_file_name = 'burke_schumann_devc.csv'
 
-skip_case = False
-
 if not os.path.exists(base_dir+input_file_name):
-      skip_case = True
       print('Error: File ', input_file_name, ' does not exist. Skipping case.')
-
-if skip_case: quit()
 
 df = pd.read_csv(base_dir+input_file_name, skiprows=2, header=None)
 

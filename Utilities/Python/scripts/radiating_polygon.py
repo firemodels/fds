@@ -15,15 +15,10 @@ datadir = '../../Verification/Radiation/'
 plotdir = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/'
 filename = ['radiating_polygon_square_20_line.csv','radiating_polygon_square_40_line.csv','radiating_polygon_square_80_line.csv']
 
-skip_case = False
-
 for i in range(len(filename)):
    name = datadir+filename[i]
    if not os.path.exists(name):
-      skip_case = True
       print('Error: File ', filename[i], ' does not exist. Skipping case.')
-
-if skip_case: quit()
 
 flux_20 = pd.read_csv(datadir+filename[0],skiprows=2,header=None)
 flux_40 = pd.read_csv(datadir+filename[1],skiprows=2,header=None)
