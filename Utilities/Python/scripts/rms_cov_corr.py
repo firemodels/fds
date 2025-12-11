@@ -16,13 +16,8 @@ datadir = '../../Verification/Controls/'
 plotdir = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/'
 filename = datadir + 'rms_cov_corr_devc.csv'
 
-skip_case = False
-
 if not os.path.exists(filename):
-   skip_case = True
    print('Error: File ', filename, ' does not exist. Skipping case.')
-
-if skip_case: quit()
 
 df = pd.read_csv(filename, skiprows=2, header=None)
 

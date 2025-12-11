@@ -20,14 +20,9 @@ plotdir = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/'
 filename = 'hot_layer_360_devc.csv'
 git_file = datadir+ 'hot_layer_360_git.txt'
 
-skip_case = False
-
 name = datadir+filename
 if not os.path.exists(name):
-   skip_case = True
    print('Error: File ', filename, ' does not exist. Skipping case.')
-
-if skip_case: quit()
 
 error_tolerance = 0.01
 

@@ -23,16 +23,11 @@ outfile = [['ns2d_8_exact.csv','ns2d_8_nupt1_exact.csv'],
    ['ns2d_32_exact.csv','ns2d_32_nupt1_exact.csv'],
    ['ns2d_64_exact.csv','ns2d_64_nupt1_exact.csv']]
 
-skip_case = False
-
 for i in range(len(infile)):
    for j in range(len(infile[i])):
       name = datadir+infile[i][j]
       if not os.path.exists(name):
-         skip_case = True
          print('Error: File ', infile[i][j], ' does not exist. Skipping case.')
-
-if skip_case: quit()
 
 nu = [0.0, 0.1]
 pi = math.pi

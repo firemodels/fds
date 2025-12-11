@@ -74,14 +74,12 @@ fds_key = ['$h/\\delta x$=5','$h/\\delta x$=10','$h/\\delta x$=20']
 exp_file = os.path.join(expdir, 'backward_facing_step_data.csv')
 if not os.path.exists(exp_file):
    print(f'Error: File {exp_file} does not exist. Skipping case.')
-   quit()
 
 data_files = []
 for n in nx:
    dat_file = os.path.join(datdir, f'backward_facing_step_{n}_line.csv')
    if not os.path.exists(dat_file):
       print(f'Error: File {dat_file} does not exist. Skipping case.')
-      quit()
    data_files.append(dat_file)
 
 # --- Read Experimental and FDS Data ---

@@ -30,15 +30,10 @@ datadir = '../../Verification/Scalar_Analytical_Solution/';
 plotdir = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/';
 filename = ['saad_512_cfl_1_mms.csv','saad_512_cfl_p5_mms.csv','saad_512_cfl_p25_mms.csv','saad_512_cfl_p125_mms.csv','saad_512_cfl_p0625_mms.csv']
 
-skip_case = False
-
 for i in range(len(filename)):
    name = datadir+filename[i]
    if not os.path.exists(name):
-      skip_case = True
       print('Error: File ', filename[i], ' does not exist. Skipping case.')
-
-if skip_case: quit()
 
 # Gather FDS results
 
@@ -172,15 +167,10 @@ plt.close()
 datadir = '../../Verification/Complex_Geometry/'
 filename = ['saad_CC_explicit_512_cfl_p25_mms.csv','saad_CC_explicit_512_cfl_p125_mms.csv','saad_CC_explicit_512_cfl_p0625_mms.csv']
 
-skip_case = False
-
 for i in range(len(filename)):
    name = datadir+filename[i]
    if not os.path.exists(name):
-      skip_case = True
       print('Error: File ', filename[i], ' does not exist. Skipping case.')
-
-if skip_case: quit()
 
 M1 = pd.read_csv(datadir+filename[0],skiprows=2,header=None)
 M2 = pd.read_csv(datadir+filename[1],skiprows=2,header=None)

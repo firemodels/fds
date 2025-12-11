@@ -92,7 +92,6 @@ jfile_str = ['stm', 'obs']
 
 # List of dictionaries to replace MATLAB struct 'file'
 files = []
-skip_case = False
 
 for ifile in range(ifile_s - 1, ifile_f): # indices 0, 1, 2
    jfile_s = 0
@@ -120,12 +119,9 @@ for ifile in range(ifile_s - 1, ifile_f): # indices 0, 1, 2
       # Check existence and populate files list
       for name in file_entry['name']:
          if not os.path.exists(os.path.join(datadir, name)):
-            skip_case = True
             print(f"[WARN] File {os.path.join(datadir, name)} does not exist. Skipping case.")
 
       files.append(file_entry)
-
-if skip_case: quit()
 
 # --- 4. Compute errors from *_mms.csv files ---
 for ifile in range(len(files)):
