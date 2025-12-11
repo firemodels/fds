@@ -1126,6 +1126,21 @@ def plot_to_fig(x_data,y_data,**kwargs):
     if isinstance(data_label, str) and data_label.lower() == 'blank':
         data_label = None
 
+    # ------------------------------------------------------------------
+    # PRE-PATCH FOR LOG AXES — PREVENTS log(0) WARNINGS
+    # ------------------------------------------------------------------
+    xmin = kwargs.get('x_min')
+    xmax = kwargs.get('x_max')
+    ymin = kwargs.get('y_min')
+    ymax = kwargs.get('y_max')
+
+    if plot_type in ('loglog', 'semilogx', 'semilogy'):
+        eps = 1e-12
+        if xmin is not None and xmin <= 0: xmin = eps
+        if ymin is not None and ymin <= 0: ymin = eps
+        if xmin is not None and xmax is not None: ax.set_xlim(xmin, xmax)
+        if ymin is not None and ymax is not None: ax.set_ylim(ymin, ymax)
+
     # generate the main x,y plot
     if plot_type=='linear':
         ax.plot(x_data,y_data,
@@ -1225,13 +1240,11 @@ def plot_to_fig(x_data,y_data,**kwargs):
             capthick=linewidth,
         )
 
-
     ticklabel_fontsize=kwargs.get('ticklabel_fontsize',default_ticklabel_fontsize)
     plt.setp( ax.xaxis.get_majorticklabels(), rotation=0, fontsize=ticklabel_fontsize )
     plt.setp( ax.yaxis.get_majorticklabels(), rotation=0, fontsize=ticklabel_fontsize )
 
     axeslabel_fontsize=kwargs.get('axeslabel_fontsize',default_axeslabel_fontsize)
-
     if not using_existing_figure:
         plt.xlabel(kwargs.get('x_label'), fontsize=axeslabel_fontsize)
         plt.ylabel(kwargs.get('y_label'), fontsize=axeslabel_fontsize)
@@ -2141,7 +2154,7 @@ def scatplot(saved_data, drange, **kwargs):
 
         # --- Call histogram BEFORE filtering to match MATLAB (includes zeros/Infs) ---
         try:
-            hist_file, pval = statistics_histogram(
+            hist_file = statistics_histogram(
                 Measured_Values, Predicted_Values,
                 Plot_Filename, Manuals_Dir, Scatter_Plot_Title
             )
@@ -2164,16 +2177,23 @@ def scatplot(saved_data, drange, **kwargs):
             print(f"[scatplot] Skipping {Scatter_Plot_Title} (no valid data)")
             continue
 
-        # --- Compute statistics ---
+        # --- Compute statistics (MATLAB logic restored) ---
         weight = np.ones_like(Measured_Values)
         log_E_bar = np.sum(np.log(Measured_Values) * weight) / np.sum(weight)
         log_M_bar = np.sum(np.log(Predicted_Values) * weight) / np.sum(weight)
         u2 = np.sum((((np.log(Predicted_Values) - np.log(Measured_Values))
                       - (log_M_bar - log_E_bar)) ** 2) * weight) / (np.sum(weight) - 1)
         u = np.sqrt(u2)
-        Sigma_E = min(u / np.sqrt(2), Sigma_E_input / 100.0)
-        Sigma_M = np.sqrt(max(0.0, u ** 2 - Sigma_E ** 2))
-        delta = np.exp(log_M_bar - log_E_bar + 0.5 * Sigma_M ** 2 - 0.5 * Sigma_E ** 2)
+
+        # Restore MATLAB logic:
+        # If no Sigma_E is supplied, experimental sigma = u/sqrt(2)
+        if Sigma_E_input > 0:
+            Sigma_E = Sigma_E_input / 100.0
+        else:
+            Sigma_E = u / np.sqrt(2)
+
+        Sigma_M = np.sqrt(max(0.0, u**2 - Sigma_E**2))
+        delta = np.exp(log_M_bar - log_E_bar + 0.5 * Sigma_M**2 - 0.5 * Sigma_E**2)
 
         # --- Scatter Plot ---
         fig = fdsplotlib.plot_to_fig(x_data=[-1], y_data=[-1],
@@ -2188,12 +2208,21 @@ def scatplot(saved_data, drange, **kwargs):
                                 legend_expand=row["Paper_Width_Factor"])
 
         fdsplotlib.plot_to_fig(x_data=[Plot_Min, Plot_Max], y_data=[Plot_Min, Plot_Max], line_style="k-", figure_handle=fig)
-        if Sigma_E > 0:
-            fdsplotlib.plot_to_fig(x_data=[Plot_Min, Plot_Max], y_data=np.array([Plot_Min, Plot_Max]) * (1 + 2 * Sigma_E), line_style="k--", figure_handle=fig)
-            fdsplotlib.plot_to_fig(x_data=[Plot_Min, Plot_Max], y_data=np.array([Plot_Min, Plot_Max]) / (1 + 2 * Sigma_E), line_style="k--", figure_handle=fig)
-            fdsplotlib.plot_to_fig(x_data=[Plot_Min, Plot_Max], y_data=np.array([Plot_Min, Plot_Max]) * delta, line_style="r-", figure_handle=fig)
-            fdsplotlib.plot_to_fig(x_data=[Plot_Min, Plot_Max], y_data=np.array([Plot_Min, Plot_Max]) * delta * (1 + 2 * Sigma_M), line_style="r--", figure_handle=fig)
-            fdsplotlib.plot_to_fig(x_data=[Plot_Min, Plot_Max], y_data=np.array([Plot_Min, Plot_Max]) * delta / (1 + 2 * Sigma_M), line_style="r--", figure_handle=fig)
+        fdsplotlib.plot_to_fig(x_data=[Plot_Min, Plot_Max], y_data=np.array([Plot_Min, Plot_Max]) * (1 + 2 * Sigma_E), line_style="k--", figure_handle=fig)
+        fdsplotlib.plot_to_fig(x_data=[Plot_Min, Plot_Max], y_data=np.array([Plot_Min, Plot_Max]) / (1 + 2 * Sigma_E), line_style="k--", figure_handle=fig)
+        fdsplotlib.plot_to_fig(x_data=[Plot_Min, Plot_Max], y_data=np.array([Plot_Min, Plot_Max]) * delta, line_style="r-", figure_handle=fig)
+        fdsplotlib.plot_to_fig(x_data=[Plot_Min, Plot_Max], y_data=np.array([Plot_Min, Plot_Max]) * delta * (1 + 2 * Sigma_M), line_style="r--", figure_handle=fig)
+        fdsplotlib.plot_to_fig(x_data=[Plot_Min, Plot_Max], y_data=np.array([Plot_Min, Plot_Max]) * delta / (1 + 2 * Sigma_M), line_style="r--", figure_handle=fig)
+
+        # --- Add statistics annotation ---
+        ax = fig.gca()
+        xnorm = 0.03   # 3% from left
+        ynorm = 0.97   # 3% from top
+        dy = 0.05      # vertical spacing in normalized units
+        ax.text(xnorm, ynorm,f"{Scatter_Plot_Title}",fontsize=plot_style["Scat_Title_Font_Size"],ha="left", va="top",transform=ax.transAxes)
+        ax.text(xnorm, ynorm - dy,f"Exp. Rel. Std. Dev.: {Sigma_E:.2f}",fontsize=plot_style["Scat_Label_Font_Size"],ha="left", va="top",transform=ax.transAxes)
+        ax.text(xnorm, ynorm - 2*dy,f"Model Rel. Std. Dev.: {Sigma_M:.2f}",fontsize=plot_style["Scat_Label_Font_Size"],ha="left", va="top",transform=ax.transAxes)
+        ax.text(xnorm, ynorm - 3*dy,f"Model Bias Factor: {delta:.2f}",fontsize=plot_style["Scat_Label_Font_Size"],ha="left", va="top",transform=ax.transAxes)
 
         # --- Plot each dataset with its own marker and color ---
         seen_labels = set()
@@ -2528,30 +2557,6 @@ def histogram_output(Histogram_Tex_Output, Output_Histograms):
     print(f"[histogram_output] Wrote LaTeX histogram file: {Histogram_Tex_Output}")
 
 
-def spiegel_test(x):
-    """Exact translation of MATLAB spiegel_test.m with Inf/NaN handling identical to MATLAB."""
-    import numpy as np
-    from math import sqrt, erf
-
-    x = np.asarray(x, dtype=float)
-
-    # MATLAB arithmetic allows Inf and NaN to propagate but doesn't remove them
-    xm = np.nanmean(x)
-    xs = np.nanstd(x, ddof=0)
-    xz = (x - xm) / xs
-    xz2 = xz ** 2
-
-    # MATLAB behavior: Inf * 0 -> NaN, which is ignored by sum()
-    with np.errstate(invalid='ignore', divide='ignore'):
-        term = xz2 * np.log(xz2)
-
-    N = np.nansum(term)
-    n = np.sum(np.isfinite(xz2))  # count finite entries only
-    ts = (N - 0.73 * n) / (0.8969 * sqrt(n))
-    pval = 1 - abs(erf(ts / sqrt(2)))  # 2-sided
-    return pval
-
-
 def statistics_histogram(Measured_Values, Predicted_Values,
                          Plot_Filename, Manuals_Dir, Scatter_Plot_Title,
                          Figure_Visibility='off', Paper_Width=5.0,
@@ -2565,13 +2570,6 @@ def statistics_histogram(Measured_Values, Predicted_Values,
     # --- Compute ln(M/E) exactly as MATLAB
     with np.errstate(divide='ignore', invalid='ignore'):
         ln_M_E = np.log(Predicted_Values) - np.log(Measured_Values)
-
-    # Normality test before filtering — this is the key
-    if len(ln_M_E) >= 4:
-        pval = spiegel_test(ln_M_E)
-    else:
-        print(f"[statistics_histogram] Not enough data for {Scatter_Plot_Title}")
-        return None, None
 
     # MATLAB's hist() ignores NaN/Inf implicitly
     valid = np.isfinite(ln_M_E)
@@ -2600,8 +2598,6 @@ def statistics_histogram(Measured_Values, Predicted_Values,
     ax.set_xticks(xcenters)
     ax.set_xticklabels([str(i) for i in range(1, len(xcenters) + 1)])
     ax.text(0.03, 0.90, Scatter_Plot_Title, transform=ax.transAxes)
-    ax.text(0.03, 0.82, "Normality Test", transform=ax.transAxes)
-    ax.text(0.03, 0.74, f"p-value = {pval:.2f}", transform=ax.transAxes)
 
     outpath = os.path.join(Manuals_Dir, f"{Plot_Filename}_Histogram.pdf")
     os.makedirs(os.path.dirname(outpath), exist_ok=True)
@@ -2610,8 +2606,7 @@ def statistics_histogram(Measured_Values, Predicted_Values,
     plt.close(fig)
     plt.figure().clear()
 
-    print(f"[statistics_histogram] {Scatter_Plot_Title}: p = {pval:.2f}")
-    return f"{os.path.basename(Plot_Filename)}_Histogram", pval
+    return f"{os.path.basename(Plot_Filename)}_Histogram"
 
 
 def set_ticks_like_matlab(fig):
