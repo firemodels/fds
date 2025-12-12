@@ -95,6 +95,7 @@ print("McCaffrey_Plume...");              safe_run("./scripts/McCaffrey_Plume.py
 print("Memorial_Tunnel...");              safe_run("./scripts/Memorial_Tunnel.py")
 print("Memorial_Tunnel_2...");            safe_run("./scripts/Memorial_Tunnel_2.py")
 print("NIST_NRC_Parallel_Panels...");     safe_run("./scripts/NIST_NRC_Parallel_Panels.py")
+print("NIST_Pool_Fires...");              safe_run("./scripts/NIST_Pool_Fires.py")
 print("Sandia_Plumes...");                safe_run("./scripts/Sandia_Plumes.py")
 print("Sandia_Pools...");                 safe_run("./scripts/Sandia_Pools.py")
 print("Theobald_Hose_Stream...");         safe_run("./scripts/Theobald_Hose_Stream.py")
