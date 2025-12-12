@@ -20,7 +20,7 @@ chids = ['NIST_Acetone_Prescribed_0p5cm',
 
 fuel = ['Acetone','Ethanol','Heptane','Methane','Methanol','Propane 20 kW','Propane 34 kW','Propane 50 kW']
 label = ['Acetone','Ethanol','Heptane','Methane','Methanol','Propane_20','Propane_34','Propane_50']
-ideal = [2.45,2.41,-1,2.48,2.49,2.22,2.39,2.39]
+ideal = [2.45,2.41,2.8,2.48,2.49,2.22,2.39,2.39] # Heptane value based on theory, not measurement.
 i = -1
 
 for chid in chids:
@@ -58,5 +58,9 @@ for chid in chids:
                                  plot_title=fuel[i])
     fdsplotlib.plot_to_fig([ideal[i],ideal[i]],[0,100000], marker_style='k--', figure_handle=fig)
     
+    if i==2:
+       ax = plt.gca()
+       ax.text(0.3, 3000, 'Not measured; theory only')
+
     fig.savefig(pltdir + label[i] + '_frequency_spectrum.pdf', format='pdf')
 
