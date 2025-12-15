@@ -846,7 +846,7 @@ def dataplot(config_filename, **kwargs):
         len_m = np.size(m) if isinstance(m, np.ndarray) else 0
         len_p = np.size(p) if isinstance(p, np.ndarray) else 0
         csv_rownum = drange[i] if i < len(drange) else "?"
-        if len_m != len_p:
+        if len_m != len_p and qty != "0":
             print(f"[dataplot] Length mismatch at CSV row {csv_rownum}: {name} | {qty} | Measured={len_m}, Predicted={len_p}")
 
     print("[dataplot] returning saved_data and drange")
