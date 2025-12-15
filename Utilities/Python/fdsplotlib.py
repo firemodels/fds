@@ -610,21 +610,23 @@ def dataplot(config_filename, **kwargs):
 
                     flat_meas = np.atleast_1d(v_meas)
                     flat_pred = np.atleast_1d(v_pred)
-                    nmin = min(flat_meas.size, flat_pred.size)
-                    if nmin == 0:
-                        print(f"[dataplot] Warning: no valid data pairs for {pp.Dataname}")
-                    else:
-                        if flat_meas.size != flat_pred.size:
-                            print(f"[dataplot] Truncated unequal vectors for {pp.Dataname}: "
-                                  f"Measured={flat_meas.size}, Predicted={flat_pred.size} → {nmin}")
-                            flat_meas = flat_meas[:nmin]
-                            flat_pred = flat_pred[:nmin]
 
-                        Save_Measured_Metric[-1] = flat_meas
-                        Save_Predicted_Metric[-1] = flat_pred
+                    if pp.Quantity != "0":
+                        nmin = min(flat_meas.size, flat_pred.size)
+                        if nmin == 0:
+                            print(f"[dataplot] Warning: no valid data pairs for {pp.Dataname}")
+                        else:
+                            if flat_meas.size != flat_pred.size:
+                                print(f"[dataplot] Truncated unequal vectors for {pp.Dataname}: "
+                                      f"Measured={flat_meas.size}, Predicted={flat_pred.size} → {nmin}")
+                                flat_meas = flat_meas[:nmin]
+                                flat_pred = flat_pred[:nmin]
 
-                        qty_label = str(pp.d2_Dep_Col_Name).strip() or "Unknown"
-                        Save_Predicted_Quantity[-1] = np.array([qty_label] * len(flat_pred), dtype=object)
+                            Save_Measured_Metric[-1] = flat_meas
+                            Save_Predicted_Metric[-1] = flat_pred
+
+                            qty_label = str(pp.d2_Dep_Col_Name).strip() or "Unknown"
+                            Save_Predicted_Quantity[-1] = np.array([qty_label] * len(flat_pred), dtype=object)
 
                     plt.figure(f.number)
                     os.makedirs(pltdir, exist_ok=True)
@@ -706,21 +708,22 @@ def dataplot(config_filename, **kwargs):
                                 flat_meas = np.atleast_1d(v_meas)
                                 flat_pred = np.atleast_1d(v_pred)
 
-                    nmin = min(flat_meas.size, flat_pred.size)
-                    if nmin == 0:
-                        print(f"[dataplot] Warning: no valid data pairs for {pp.Dataname}")
-                    else:
-                        if flat_meas.size != flat_pred.size:
-                            print(f"[dataplot] Truncated unequal vectors for {pp.Dataname}: "
-                                  f"Measured={flat_meas.size}, Predicted={flat_pred.size} → {nmin}")
-                            flat_meas = flat_meas[:nmin]
-                            flat_pred = flat_pred[:nmin]
+                    if pp.Quantity != "0":
+                        nmin = min(flat_meas.size, flat_pred.size)
+                        if nmin == 0:
+                            print(f"[dataplot] Warning: no valid data pairs for {pp.Dataname}")
+                        else:
+                            if flat_meas.size != flat_pred.size:
+                                print(f"[dataplot] Truncated unequal vectors for {pp.Dataname}: "
+                                      f"Measured={flat_meas.size}, Predicted={flat_pred.size} → {nmin}")
+                                flat_meas = flat_meas[:nmin]
+                                flat_pred = flat_pred[:nmin]
 
-                        Save_Measured_Metric[-1] = flat_meas
-                        Save_Predicted_Metric[-1] = flat_pred
+                            Save_Measured_Metric[-1] = flat_meas
+                            Save_Predicted_Metric[-1] = flat_pred
 
-                        qty_label = str(pp.d2_Dep_Col_Name).strip() or "Unknown"
-                        Save_Predicted_Quantity[-1] = np.array([qty_label] * len(flat_pred), dtype=object)
+                            qty_label = str(pp.d2_Dep_Col_Name).strip() or "Unknown"
+                            Save_Predicted_Quantity[-1] = np.array([qty_label] * len(flat_pred), dtype=object)
 
                     plt.figure(f.number)
                     os.makedirs(pltdir, exist_ok=True)
@@ -805,23 +808,24 @@ def dataplot(config_filename, **kwargs):
                 flat_meas = np.concatenate(meas_list) if meas_list else np.array([])
                 flat_pred = np.concatenate(pred_list) if pred_list else np.array([])
 
-                nmin = min(flat_meas.size, flat_pred.size)
-                if nmin == 0:
-                    print(f"[dataplot] Warning: no valid data pairs for {pp.Dataname}")
-                else:
-                    if flat_meas.size != flat_pred.size:
-                        print(f"[dataplot] Truncated unequal vectors for {pp.Dataname}: "
-                              f"Measured={flat_meas.size}, Predicted={flat_pred.size} → {nmin}")
-                        # Truncate both sides to maintain one-to-one correspondence
-                        flat_meas = flat_meas[:nmin]
-                        flat_pred = flat_pred[:nmin]
+                if pp.Quantity != "0":
+                    nmin = min(flat_meas.size, flat_pred.size)
+                    if nmin == 0:
+                        print(f"[dataplot] Warning: no valid data pairs for {pp.Dataname}")
+                    else:
+                        if flat_meas.size != flat_pred.size :
+                            print(f"[dataplot] Truncated unequal vectors for {pp.Dataname}: "
+                                  f"Measured={flat_meas.size}, Predicted={flat_pred.size} → {nmin}")
+                            # Truncate both sides to maintain one-to-one correspondence
+                            flat_meas = flat_meas[:nmin]
+                            flat_pred = flat_pred[:nmin]
 
-                    # Save truncated paired arrays
-                    Save_Measured_Metric[-1] = flat_meas
-                    Save_Predicted_Metric[-1] = flat_pred
+                        # Save truncated paired arrays
+                        Save_Measured_Metric[-1] = flat_meas
+                        Save_Predicted_Metric[-1] = flat_pred
 
-                    qty_label = str(pp.d2_Dep_Col_Name).strip() or "Unknown"
-                    Save_Predicted_Quantity[-1] = np.array([qty_label] * len(flat_pred), dtype=object)
+                        qty_label = str(pp.d2_Dep_Col_Name).strip() or "Unknown"
+                        Save_Predicted_Quantity[-1] = np.array([qty_label] * len(flat_pred), dtype=object)
 
             except Exception as e:
                 print(f"[dataplot] Error computing predicted metric for {pp.Dataname}: {e}")
