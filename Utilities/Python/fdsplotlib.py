@@ -129,7 +129,9 @@ def _compute_metrics_block(
     Y_sel = Y[comp_mask, :]
 
     # --- support patterns like mean_1_2, max_2_1, end_1_2 ---
+    # NOTE: we deliberately DO NOT parse "all_*_*" here.
     def _parse_stat_xy(m):
+        m = m.lower().strip()
         for base in ("max", "mean", "end"):
             pref = base + "_"
             if m.startswith(pref):
@@ -147,11 +149,20 @@ def _compute_metrics_block(
     titles = []
     per_curve_series = []
 
-    # --- stat_x_y: only compute for the specified first index (MATLAB uses 1-based) ---
+    # --- stat_x_y: use first index for EXP, second index for MODEL ---
+    # Example: "mean_2_3"
+    #   EXP side (variant_side='d1') → column 2
+    #   MODEL side (variant_side='d2') → column 3
     if idx_first is not None:
-        j = idx_first - 1
+        if variant_side == "d2" and idx_second is not None:
+            idx_use = idx_second
+        else:
+            idx_use = idx_first
+
+        j = idx_use - 1  # 1-based → 0-based
         if j < 0 or j >= ncols:
             return np.array([]), [], []
+
         yj = Y_sel[:, j].reshape(-1)
 
         if base == "max":
@@ -166,7 +177,7 @@ def _compute_metrics_block(
         if out == 0.0:
             out = 1e-12
 
-        return np.array([out]), [f"curve{idx_first}"], []
+        return np.array([out]), [f"curve{idx_use}"], []
 
     # --- metric='all': return all finite Y values (one per data point) ---
     if metric_str == "all":
@@ -434,6 +445,11 @@ def dataplot(config_filename, **kwargs):
         # --- Save measured (experimental) ---
         if not gtest:
             try:
+                metric_raw = str(pp.Metric or '').strip()
+                metric_str = metric_raw.lower()
+                # For 'all_2_3', treat EXP metric as 'all' (per-column) here.
+                metric_for_exp_block = "all" if metric_str.startswith("all") else metric_raw
+
                 vals_meas_list = []
                 qty_meas_list = []
                 if y.ndim == 2 and x.ndim == 2 and y.shape[1] == x.shape[1]:
@@ -444,7 +460,7 @@ def dataplot(config_filename, **kwargs):
                         xj, yj = xj[mask], yj[mask]
                         if len(xj) > 0 and len(yj) > 0:
                             vals_meas, qty_meas, _ = _compute_metrics_block(
-                                x=xj, Y=yj, metric=pp.Metric,
+                                x=xj, Y=yj, metric=metric_for_exp_block,
                                 initial_value=float(pp.d1_Initial_Value or 0.0),
                                 comp_start=float(pp.d1_Comp_Start or np.nan),
                                 comp_end=float(pp.d1_Comp_End or np.nan),
@@ -456,7 +472,7 @@ def dataplot(config_filename, **kwargs):
                             qty_meas_list.append(qty_meas)
                 else:
                     vals_meas, qty_meas, _ = _compute_metrics_block(
-                        x=x, Y=y, metric=pp.Metric,
+                        x=x, Y=y, metric=metric_for_exp_block,
                         initial_value=float(pp.d1_Initial_Value or 0.0),
                         comp_start=float(pp.d1_Comp_Start or np.nan),
                         comp_end=float(pp.d1_Comp_End or np.nan),
@@ -539,8 +555,24 @@ def dataplot(config_filename, **kwargs):
         # --- Interpolated, metric-aware model logic ---
         if not gtest:
             try:
-                metric_str = str(pp.Metric or '').strip().lower()
+                metric_raw = str(pp.Metric or '').strip()
+                metric_str = metric_raw.lower()
                 meas_list, pred_list, qty_pred_list = [], [], []
+
+                # Local parser for stat_x_y patterns (max_2_3, mean_1_4, end_3_2)
+                def _parse_stat_xy_local(m):
+                    m = m.lower().strip()
+                    for base in ("max", "mean", "end"):
+                        pref = base + "_"
+                        if m.startswith(pref):
+                            try:
+                                a, b = m[len(pref):].split("_", 1)
+                                return base, int(a), int(b)
+                            except Exception:
+                                pass
+                    return m, None, None
+
+                base_stat, idx_first_stat, idx_second_stat = _parse_stat_xy_local(metric_str)
 
                 # Load experimental again for alignment (safe; cached)
                 E = read_csv_cached(expdir + pp.d1_Filename,
@@ -549,14 +581,158 @@ def dataplot(config_filename, **kwargs):
                                     skip_blank_lines=True).dropna(how='all')
                 E.columns = E.columns.str.strip()
                 start_idx_exp = int(pp.d1_Data_Row - pp.d1_Col_Name_Row - 1)
-                x_exp, _ = get_data(E, pp.d1_Ind_Col_Name, start_idx_exp)
-                y_exp, _ = get_data(E, pp.d1_Dep_Col_Name, start_idx_exp)
+                x_exp_raw, _ = get_data(E, pp.d1_Ind_Col_Name, start_idx_exp)
+                y_exp_raw, _ = get_data(E, pp.d1_Dep_Col_Name, start_idx_exp)
+
+                x_mod_raw = x
+                y_mod_raw = y
+
+                # --- CASE 1: stat pair metrics (max_2_3, mean_2_3, end_2_3) ---
+                if base_stat in ("max", "mean", "end") and idx_first_stat is not None:
+                    v_meas, _, _ = _compute_metrics_block(
+                        x=x_exp_raw, Y=y_exp_raw, metric=metric_raw,
+                        initial_value=float(pp.d1_Initial_Value or 0.0),
+                        comp_start=float(pp.d1_Comp_Start or np.nan),
+                        comp_end=float(pp.d1_Comp_End or np.nan),
+                        dep_comp_start=float(pp.d1_Dep_Comp_Start or np.nan),
+                        dep_comp_end=float(pp.d1_Dep_Comp_End or np.nan),
+                        variant_side="d1",
+                    )
+                    v_pred, qty_pred, _ = _compute_metrics_block(
+                        x=x_mod_raw, Y=y_mod_raw, metric=metric_raw,
+                        initial_value=float(pp.d2_Initial_Value or 0.0),
+                        comp_start=float(pp.d2_Comp_Start or np.nan),
+                        comp_end=float(pp.d2_Comp_End or np.nan),
+                        dep_comp_start=float(pp.d2_Dep_Comp_Start or np.nan),
+                        dep_comp_end=float(pp.d2_Dep_Comp_End or np.nan),
+                        variant_side="d2",
+                    )
+
+                    flat_meas = np.atleast_1d(v_meas)
+                    flat_pred = np.atleast_1d(v_pred)
+
+                    if pp.Quantity != "0":
+                        nmin = min(flat_meas.size, flat_pred.size)
+                        if nmin == 0:
+                            print(f"[dataplot] Warning: no valid data pairs for {pp.Dataname}")
+                        else:
+                            if flat_meas.size != flat_pred.size:
+                                print(f"[dataplot] Truncated unequal vectors for {pp.Dataname}: "
+                                      f"Measured={flat_meas.size}, Predicted={flat_pred.size} → {nmin}")
+                                flat_meas = flat_meas[:nmin]
+                                flat_pred = flat_pred[:nmin]
+
+                            Save_Measured_Metric[-1] = flat_meas
+                            Save_Predicted_Metric[-1] = flat_pred
+
+                            qty_label = str(pp.d2_Dep_Col_Name).strip() or "Unknown"
+                            Save_Predicted_Quantity[-1] = np.array([qty_label] * len(flat_pred), dtype=object)
+
+                    plt.figure(f.number)
+                    os.makedirs(pltdir, exist_ok=True)
+                    plt.savefig(pltdir + pp.Plot_Filename + '.pdf', backend='pdf')
+                    f_Last = f
+                    continue  # move to next config row
+
+                # --- CASE 2: "all" with explicit pairing (all_2_3) ---
+                is_all_pair = False
+                idx_first_all = idx_second_all = None
+                if metric_str.startswith("all_"):
+                    try:
+                        rest = metric_str[len("all_"):]
+                        a, b = rest.split("_", 1)
+                        idx_first_all = int(a)
+                        idx_second_all = int(b)
+                        is_all_pair = True
+                    except Exception:
+                        is_all_pair = False
 
                 # Normalize shapes to 2D (col-major semantics)
-                x_exp = np.atleast_2d(x_exp)
-                y_exp = np.atleast_2d(y_exp)
-                x_mod = np.atleast_2d(x)
-                y_mod = np.atleast_2d(y)
+                x_exp = np.atleast_2d(x_exp_raw)
+                y_exp = np.atleast_2d(y_exp_raw)
+                x_mod = np.atleast_2d(x_mod_raw)
+                y_mod = np.atleast_2d(y_mod_raw)
+
+                # Special "all_2_3" handling: one EXP column vs one MODEL column
+                if is_all_pair and idx_first_all is not None and idx_second_all is not None:
+                    j_e = idx_first_all - 1
+                    j_m = idx_second_all - 1
+                    if j_e < 0 or j_m < 0 or j_e >= y_exp.shape[1] or j_m >= y_mod.shape[1]:
+                        print(f"[dataplot] all-pair index out of range for {pp.Dataname}")
+                        flat_meas = np.array([])
+                        flat_pred = np.array([])
+                    else:
+                        xj_e = np.ravel(x_exp[:, j_e] if x_exp.shape[1] > 1 else x_exp)
+                        yj_e = np.ravel(y_exp[:, j_e])
+                        m_e = np.isfinite(xj_e) & np.isfinite(yj_e)
+                        xj_e, yj_e = xj_e[m_e], yj_e[m_e]
+
+                        xj_m = np.ravel(x_mod[:, j_m] if x_mod.shape[1] > 1 else x_mod)
+                        yj_m = np.ravel(y_mod[:, j_m])
+                        m_m = np.isfinite(xj_m) & np.isfinite(yj_m)
+                        xj_m, yj_m = xj_m[m_m], yj_m[m_m]
+
+                        if xj_m.size < 2 or xj_e.size == 0:
+                            flat_meas = np.array([])
+                            flat_pred = np.array([])
+                        else:
+                            yj_m_i = np.interp(xj_e, xj_m, yj_m, left=np.nan, right=np.nan)
+                            mask_pair = np.isfinite(yj_m_i) & np.isfinite(yj_e)
+                            if not np.any(mask_pair):
+                                flat_meas = np.array([])
+                                flat_pred = np.array([])
+                            else:
+                                x_use = xj_e[mask_pair]
+                                y_exp_use = yj_e[mask_pair]
+                                y_mod_use = yj_m_i[mask_pair]
+
+                                v_meas, _, _ = _compute_metrics_block(
+                                    x=x_use, Y=y_exp_use, metric="all",
+                                    initial_value=float(pp.d1_Initial_Value or 0.0),
+                                    comp_start=float(pp.d1_Comp_Start or np.nan),
+                                    comp_end=float(pp.d1_Comp_End or np.nan),
+                                    dep_comp_start=float(pp.d1_Dep_Comp_Start or np.nan),
+                                    dep_comp_end=float(pp.d1_Dep_Comp_End or np.nan),
+                                    variant_side="d1",
+                                )
+                                v_pred, qty_pred, _ = _compute_metrics_block(
+                                    x=x_use, Y=y_mod_use, metric="all",
+                                    initial_value=float(pp.d2_Initial_Value or 0.0),
+                                    comp_start=float(pp.d2_Comp_Start or np.nan),
+                                    comp_end=float(pp.d2_Comp_End or np.nan),
+                                    dep_comp_start=float(pp.d2_Dep_Comp_Start or np.nan),
+                                    dep_comp_end=float(pp.d2_Dep_Comp_End or np.nan),
+                                    variant_side="d2",
+                                )
+
+                                flat_meas = np.atleast_1d(v_meas)
+                                flat_pred = np.atleast_1d(v_pred)
+
+                    if pp.Quantity != "0":
+                        nmin = min(flat_meas.size, flat_pred.size)
+                        if nmin == 0:
+                            print(f"[dataplot] Warning: no valid data pairs for {pp.Dataname}")
+                        else:
+                            if flat_meas.size != flat_pred.size:
+                                print(f"[dataplot] Truncated unequal vectors for {pp.Dataname}: "
+                                      f"Measured={flat_meas.size}, Predicted={flat_pred.size} → {nmin}")
+                                flat_meas = flat_meas[:nmin]
+                                flat_pred = flat_pred[:nmin]
+
+                            Save_Measured_Metric[-1] = flat_meas
+                            Save_Predicted_Metric[-1] = flat_pred
+
+                            qty_label = str(pp.d2_Dep_Col_Name).strip() or "Unknown"
+                            Save_Predicted_Quantity[-1] = np.array([qty_label] * len(flat_pred), dtype=object)
+
+                    plt.figure(f.number)
+                    os.makedirs(pltdir, exist_ok=True)
+                    plt.savefig(pltdir + pp.Plot_Filename + '.pdf', backend='pdf')
+                    f_Last = f
+                    continue  # move to next config row
+
+                # --- CASE 3: general metrics (including plain 'all') ---
+                metric_for_block = "all" if metric_str.startswith("all") else metric_raw
 
                 ncols = min(y_exp.shape[1], y_mod.shape[1])
 
@@ -572,7 +748,7 @@ def dataplot(config_filename, **kwargs):
                     m_m = np.isfinite(xj_m) & np.isfinite(yj_m)
                     xj_m, yj_m = xj_m[m_m], yj_m[m_m]
 
-                    if metric_str == 'all':
+                    if metric_for_block == 'all':
                         # align by interpolating model to exp x
                         if xj_m.size < 2 or xj_e.size == 0:
                             continue
@@ -585,7 +761,7 @@ def dataplot(config_filename, **kwargs):
                         y_mod_use = yj_m_i[mask_pair]
                         # compute both on the same x grid
                         v_meas, _, _ = _compute_metrics_block(
-                            x=x_use, Y=y_exp_use, metric=metric_str,
+                            x=x_use, Y=y_exp_use, metric="all",
                             initial_value=float(pp.d1_Initial_Value or 0.0),
                             comp_start=float(pp.d1_Comp_Start or np.nan),
                             comp_end=float(pp.d1_Comp_End or np.nan),
@@ -594,7 +770,7 @@ def dataplot(config_filename, **kwargs):
                             variant_side="d1",
                         )
                         v_pred, qty_pred, _ = _compute_metrics_block(
-                            x=x_use, Y=y_mod_use, metric=metric_str,
+                            x=x_use, Y=y_mod_use, metric="all",
                             initial_value=float(pp.d2_Initial_Value or 0.0),
                             comp_start=float(pp.d2_Comp_Start or np.nan),
                             comp_end=float(pp.d2_Comp_End or np.nan),
@@ -607,7 +783,7 @@ def dataplot(config_filename, **kwargs):
                         if yj_e.size == 0 or yj_m.size == 0:
                             continue
                         v_meas, _, _ = _compute_metrics_block(
-                            x=xj_e, Y=yj_e, metric=metric_str,
+                            x=xj_e, Y=yj_e, metric=metric_for_block,
                             initial_value=float(pp.d1_Initial_Value or 0.0),
                             comp_start=float(pp.d1_Comp_Start or np.nan),
                             comp_end=float(pp.d1_Comp_End or np.nan),
@@ -616,7 +792,7 @@ def dataplot(config_filename, **kwargs):
                             variant_side="d1",
                         )
                         v_pred, qty_pred, _ = _compute_metrics_block(
-                            x=xj_m, Y=yj_m, metric=metric_str,
+                            x=xj_m, Y=yj_m, metric=metric_for_block,
                             initial_value=float(pp.d2_Initial_Value or 0.0),
                             comp_start=float(pp.d2_Comp_Start or np.nan),
                             comp_end=float(pp.d2_Comp_End or np.nan),
@@ -632,23 +808,24 @@ def dataplot(config_filename, **kwargs):
                 flat_meas = np.concatenate(meas_list) if meas_list else np.array([])
                 flat_pred = np.concatenate(pred_list) if pred_list else np.array([])
 
-                nmin = min(flat_meas.size, flat_pred.size)
-                if nmin == 0:
-                    print(f"[dataplot] Warning: no valid data pairs for {pp.Dataname}")
-                else:
-                    if flat_meas.size != flat_pred.size:
-                        print(f"[dataplot] Truncated unequal vectors for {pp.Dataname}: "
-                              f"Measured={flat_meas.size}, Predicted={flat_pred.size} → {nmin}")
-                        # Truncate both sides to maintain one-to-one correspondence
-                        flat_meas = flat_meas[:nmin]
-                        flat_pred = flat_pred[:nmin]
+                if pp.Quantity != "0":
+                    nmin = min(flat_meas.size, flat_pred.size)
+                    if nmin == 0:
+                        print(f"[dataplot] Warning: no valid data pairs for {pp.Dataname}")
+                    else:
+                        if flat_meas.size != flat_pred.size :
+                            print(f"[dataplot] Truncated unequal vectors for {pp.Dataname}: "
+                                  f"Measured={flat_meas.size}, Predicted={flat_pred.size} → {nmin}")
+                            # Truncate both sides to maintain one-to-one correspondence
+                            flat_meas = flat_meas[:nmin]
+                            flat_pred = flat_pred[:nmin]
 
-                    # Save truncated paired arrays (but don’t overwrite earlier measured data)
-                    Save_Measured_Metric[-1] = flat_meas
-                    Save_Predicted_Metric[-1] = flat_pred
+                        # Save truncated paired arrays
+                        Save_Measured_Metric[-1] = flat_meas
+                        Save_Predicted_Metric[-1] = flat_pred
 
-                    qty_label = str(pp.d2_Dep_Col_Name).strip() or "Unknown"
-                    Save_Predicted_Quantity[-1] = np.array([qty_label] * len(flat_pred), dtype=object)
+                        qty_label = str(pp.d2_Dep_Col_Name).strip() or "Unknown"
+                        Save_Predicted_Quantity[-1] = np.array([qty_label] * len(flat_pred), dtype=object)
 
             except Exception as e:
                 print(f"[dataplot] Error computing predicted metric for {pp.Dataname}: {e}")
@@ -673,11 +850,12 @@ def dataplot(config_filename, **kwargs):
         len_m = np.size(m) if isinstance(m, np.ndarray) else 0
         len_p = np.size(p) if isinstance(p, np.ndarray) else 0
         csv_rownum = drange[i] if i < len(drange) else "?"
-        if len_m != len_p:
+        if len_m != len_p and qty != "0":
             print(f"[dataplot] Length mismatch at CSV row {csv_rownum}: {name} | {qty} | Measured={len_m}, Predicted={len_p}")
 
     print("[dataplot] returning saved_data and drange")
     return saved_data, drange
+
 
 
 def get_data(E, spec, start_idx):
@@ -952,6 +1130,21 @@ def plot_to_fig(x_data,y_data,**kwargs):
     if isinstance(data_label, str) and data_label.lower() == 'blank':
         data_label = None
 
+    # ------------------------------------------------------------------
+    # PRE-PATCH FOR LOG AXES — PREVENTS log(0) WARNINGS
+    # ------------------------------------------------------------------
+    xmin = kwargs.get('x_min')
+    xmax = kwargs.get('x_max')
+    ymin = kwargs.get('y_min')
+    ymax = kwargs.get('y_max')
+
+    if plot_type in ('loglog', 'semilogx', 'semilogy'):
+        eps = 1e-12
+        if xmin is not None and xmin <= 0: xmin = eps
+        if ymin is not None and ymin <= 0: ymin = eps
+        if xmin is not None and xmax is not None: ax.set_xlim(xmin, xmax)
+        if ymin is not None and ymax is not None: ax.set_ylim(ymin, ymax)
+
     # generate the main x,y plot
     if plot_type=='linear':
         ax.plot(x_data,y_data,
@@ -1051,13 +1244,11 @@ def plot_to_fig(x_data,y_data,**kwargs):
             capthick=linewidth,
         )
 
-
     ticklabel_fontsize=kwargs.get('ticklabel_fontsize',default_ticklabel_fontsize)
     plt.setp( ax.xaxis.get_majorticklabels(), rotation=0, fontsize=ticklabel_fontsize )
     plt.setp( ax.yaxis.get_majorticklabels(), rotation=0, fontsize=ticklabel_fontsize )
 
     axeslabel_fontsize=kwargs.get('axeslabel_fontsize',default_axeslabel_fontsize)
-
     if not using_existing_figure:
         plt.xlabel(kwargs.get('x_label'), fontsize=axeslabel_fontsize)
         plt.ylabel(kwargs.get('y_label'), fontsize=axeslabel_fontsize)
@@ -1967,7 +2158,7 @@ def scatplot(saved_data, drange, **kwargs):
 
         # --- Call histogram BEFORE filtering to match MATLAB (includes zeros/Infs) ---
         try:
-            hist_file, pval = statistics_histogram(
+            hist_file = statistics_histogram(
                 Measured_Values, Predicted_Values,
                 Plot_Filename, Manuals_Dir, Scatter_Plot_Title
             )
@@ -1990,16 +2181,23 @@ def scatplot(saved_data, drange, **kwargs):
             print(f"[scatplot] Skipping {Scatter_Plot_Title} (no valid data)")
             continue
 
-        # --- Compute statistics ---
+        # --- Compute statistics (MATLAB logic restored) ---
         weight = np.ones_like(Measured_Values)
         log_E_bar = np.sum(np.log(Measured_Values) * weight) / np.sum(weight)
         log_M_bar = np.sum(np.log(Predicted_Values) * weight) / np.sum(weight)
         u2 = np.sum((((np.log(Predicted_Values) - np.log(Measured_Values))
                       - (log_M_bar - log_E_bar)) ** 2) * weight) / (np.sum(weight) - 1)
         u = np.sqrt(u2)
-        Sigma_E = min(u / np.sqrt(2), Sigma_E_input / 100.0)
-        Sigma_M = np.sqrt(max(0.0, u ** 2 - Sigma_E ** 2))
-        delta = np.exp(log_M_bar - log_E_bar + 0.5 * Sigma_M ** 2 - 0.5 * Sigma_E ** 2)
+
+        # Restore MATLAB logic:
+        # If no Sigma_E is supplied, experimental sigma = u/sqrt(2)
+        if Sigma_E_input > 0:
+            Sigma_E = Sigma_E_input / 100.0
+        else:
+            Sigma_E = u / np.sqrt(2)
+
+        Sigma_M = np.sqrt(max(0.0, u**2 - Sigma_E**2))
+        delta = np.exp(log_M_bar - log_E_bar + 0.5 * Sigma_M**2 - 0.5 * Sigma_E**2)
 
         # --- Scatter Plot ---
         fig = fdsplotlib.plot_to_fig(x_data=[-1], y_data=[-1],
@@ -2014,12 +2212,21 @@ def scatplot(saved_data, drange, **kwargs):
                                 legend_expand=row["Paper_Width_Factor"])
 
         fdsplotlib.plot_to_fig(x_data=[Plot_Min, Plot_Max], y_data=[Plot_Min, Plot_Max], line_style="k-", figure_handle=fig)
-        if Sigma_E > 0:
-            fdsplotlib.plot_to_fig(x_data=[Plot_Min, Plot_Max], y_data=np.array([Plot_Min, Plot_Max]) * (1 + 2 * Sigma_E), line_style="k--", figure_handle=fig)
-            fdsplotlib.plot_to_fig(x_data=[Plot_Min, Plot_Max], y_data=np.array([Plot_Min, Plot_Max]) / (1 + 2 * Sigma_E), line_style="k--", figure_handle=fig)
-            fdsplotlib.plot_to_fig(x_data=[Plot_Min, Plot_Max], y_data=np.array([Plot_Min, Plot_Max]) * delta, line_style="r-", figure_handle=fig)
-            fdsplotlib.plot_to_fig(x_data=[Plot_Min, Plot_Max], y_data=np.array([Plot_Min, Plot_Max]) * delta * (1 + 2 * Sigma_M), line_style="r--", figure_handle=fig)
-            fdsplotlib.plot_to_fig(x_data=[Plot_Min, Plot_Max], y_data=np.array([Plot_Min, Plot_Max]) * delta / (1 + 2 * Sigma_M), line_style="r--", figure_handle=fig)
+        fdsplotlib.plot_to_fig(x_data=[Plot_Min, Plot_Max], y_data=np.array([Plot_Min, Plot_Max]) * (1 + 2 * Sigma_E), line_style="k--", figure_handle=fig)
+        fdsplotlib.plot_to_fig(x_data=[Plot_Min, Plot_Max], y_data=np.array([Plot_Min, Plot_Max]) / (1 + 2 * Sigma_E), line_style="k--", figure_handle=fig)
+        fdsplotlib.plot_to_fig(x_data=[Plot_Min, Plot_Max], y_data=np.array([Plot_Min, Plot_Max]) * delta, line_style="r-", figure_handle=fig)
+        fdsplotlib.plot_to_fig(x_data=[Plot_Min, Plot_Max], y_data=np.array([Plot_Min, Plot_Max]) * delta * (1 + 2 * Sigma_M), line_style="r--", figure_handle=fig)
+        fdsplotlib.plot_to_fig(x_data=[Plot_Min, Plot_Max], y_data=np.array([Plot_Min, Plot_Max]) * delta / (1 + 2 * Sigma_M), line_style="r--", figure_handle=fig)
+
+        # --- Add statistics annotation ---
+        ax = fig.gca()
+        xnorm = 0.03   # 3% from left
+        ynorm = 0.97   # 3% from top
+        dy = 0.05      # vertical spacing in normalized units
+        ax.text(xnorm, ynorm,f"{Scatter_Plot_Title}",fontsize=plot_style["Scat_Title_Font_Size"],ha="left", va="top",transform=ax.transAxes)
+        ax.text(xnorm, ynorm - dy,f"Exp. Rel. Std. Dev.: {Sigma_E:.2f}",fontsize=plot_style["Scat_Label_Font_Size"],ha="left", va="top",transform=ax.transAxes)
+        ax.text(xnorm, ynorm - 2*dy,f"Model Rel. Std. Dev.: {Sigma_M:.2f}",fontsize=plot_style["Scat_Label_Font_Size"],ha="left", va="top",transform=ax.transAxes)
+        ax.text(xnorm, ynorm - 3*dy,f"Model Bias Factor: {delta:.2f}",fontsize=plot_style["Scat_Label_Font_Size"],ha="left", va="top",transform=ax.transAxes)
 
         # --- Plot each dataset with its own marker and color ---
         seen_labels = set()
@@ -2354,30 +2561,6 @@ def histogram_output(Histogram_Tex_Output, Output_Histograms):
     print(f"[histogram_output] Wrote LaTeX histogram file: {Histogram_Tex_Output}")
 
 
-def spiegel_test(x):
-    """Exact translation of MATLAB spiegel_test.m with Inf/NaN handling identical to MATLAB."""
-    import numpy as np
-    from math import sqrt, erf
-
-    x = np.asarray(x, dtype=float)
-
-    # MATLAB arithmetic allows Inf and NaN to propagate but doesn't remove them
-    xm = np.nanmean(x)
-    xs = np.nanstd(x, ddof=0)
-    xz = (x - xm) / xs
-    xz2 = xz ** 2
-
-    # MATLAB behavior: Inf * 0 -> NaN, which is ignored by sum()
-    with np.errstate(invalid='ignore', divide='ignore'):
-        term = xz2 * np.log(xz2)
-
-    N = np.nansum(term)
-    n = np.sum(np.isfinite(xz2))  # count finite entries only
-    ts = (N - 0.73 * n) / (0.8969 * sqrt(n))
-    pval = 1 - abs(erf(ts / sqrt(2)))  # 2-sided
-    return pval
-
-
 def statistics_histogram(Measured_Values, Predicted_Values,
                          Plot_Filename, Manuals_Dir, Scatter_Plot_Title,
                          Figure_Visibility='off', Paper_Width=5.0,
@@ -2391,13 +2574,6 @@ def statistics_histogram(Measured_Values, Predicted_Values,
     # --- Compute ln(M/E) exactly as MATLAB
     with np.errstate(divide='ignore', invalid='ignore'):
         ln_M_E = np.log(Predicted_Values) - np.log(Measured_Values)
-
-    # Normality test before filtering — this is the key
-    if len(ln_M_E) >= 4:
-        pval = spiegel_test(ln_M_E)
-    else:
-        print(f"[statistics_histogram] Not enough data for {Scatter_Plot_Title}")
-        return None, None
 
     # MATLAB's hist() ignores NaN/Inf implicitly
     valid = np.isfinite(ln_M_E)
@@ -2426,8 +2602,6 @@ def statistics_histogram(Measured_Values, Predicted_Values,
     ax.set_xticks(xcenters)
     ax.set_xticklabels([str(i) for i in range(1, len(xcenters) + 1)])
     ax.text(0.03, 0.90, Scatter_Plot_Title, transform=ax.transAxes)
-    ax.text(0.03, 0.82, "Normality Test", transform=ax.transAxes)
-    ax.text(0.03, 0.74, f"p-value = {pval:.2f}", transform=ax.transAxes)
 
     outpath = os.path.join(Manuals_Dir, f"{Plot_Filename}_Histogram.pdf")
     os.makedirs(os.path.dirname(outpath), exist_ok=True)
@@ -2436,8 +2610,7 @@ def statistics_histogram(Measured_Values, Predicted_Values,
     plt.close(fig)
     plt.figure().clear()
 
-    print(f"[statistics_histogram] {Scatter_Plot_Title}: p = {pval:.2f}")
-    return f"{os.path.basename(Plot_Filename)}_Histogram", pval
+    return f"{os.path.basename(Plot_Filename)}_Histogram"
 
 
 def set_ticks_like_matlab(fig):
