@@ -5,6 +5,7 @@ import fdsplotlib
 import importlib
 import runpy
 importlib.reload(fdsplotlib) # use for development (while making changes to fdsplotlib.py)
+print("Using:", fdsplotlib.__file__)
 
 # If there is an error in one of the sub-scripts, print the message but do not stop the main script.
 
