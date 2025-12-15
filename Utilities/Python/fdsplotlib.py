@@ -2022,7 +2022,7 @@ def scatplot(saved_data, drange, **kwargs):
 
     for _, row in Q.iterrows():
         plt.close('all')
-        plt.figure().clear()
+        plt.clf()
 
         Scatter_Plot_Title = row["Scatter_Plot_Title"]
         Plot_Filename = row["Plot_Filename"]
@@ -2030,14 +2030,14 @@ def scatplot(saved_data, drange, **kwargs):
         Plot_Max = float(row["Plot_Max"])
         Plot_Type = str(row["Plot_Type"]).strip().lower()
 
-        # --- MATLAB parity: Sigma_E only required for Validation ---
+        # --- Sigma_E only required for Validation ---
         if Stats_Output.lower() == "validation":
             Sigma_E_input = float(row["Sigma_E"]) if "Sigma_E" in row and not pd.isna(row["Sigma_E"]) else 0.0
         else:
             Sigma_E_input = 0.0
 
-        #if verbose:
-        #    print(f"[scatplot] Processing {Scatter_Plot_Title}")
+        if verbose:
+           print(f"[scatplot] Processing {Scatter_Plot_Title}")
 
         # Match dataplot entries
         match_idx = [i for i, q in enumerate(Save_Quantity)
@@ -2276,7 +2276,7 @@ def scatplot(saved_data, drange, **kwargs):
         os.makedirs(os.path.dirname(pdf_path), exist_ok=True)
         fig.savefig(pdf_path)
         plt.close(fig)
-        plt.figure().clear()
+        plt.clf()
 
         # --- Collect statistics for CSV/TeX ---
         group_labels = []
@@ -2608,7 +2608,7 @@ def statistics_histogram(Measured_Values, Predicted_Values,
     plt.tight_layout()
     fig.savefig(outpath)
     plt.close(fig)
-    plt.figure().clear()
+    plt.clf()
 
     return f"{os.path.basename(Plot_Filename)}_Histogram"
 
