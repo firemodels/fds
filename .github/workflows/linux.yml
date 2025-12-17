@@ -34,9 +34,9 @@ jobs:
     - uses: rscohn2/setup-oneapi@v0
       with:
         components: |
-          ifx@2025.2.0
-          impi@2021.16.0
-          mkl@2025.2.0
+          ifx@2025.3.0
+          impi@2021.17.1
+          mkl@2025.3.0
         prune: false       
          
     - uses: actions/checkout@v6
