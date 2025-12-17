@@ -278,21 +278,7 @@ For further details about model uncertainty and the meaning of these statistics,
 \section{Normality Tests}
 \label{normality_tests}
 
-The histograms on the following pages display the distribution of the quantity $\ln(M/E)$, where $M$ is a random variable representing the \underline{M}odel prediction and $E$ is a random variable representing the \underline{E}xperimental measurement. Recall from Chapter~\ref{Error_Chapter} that $\ln(M/E)$ is assumed to be normally distributed. To test this assumption for each of the quantities of interest listed in Table~\ref{summary_stats}, Spiegelhalter's normality test has been applied~\cite{Spiegelhalter:Biometrika1983}. This test examines a set of values, $x_1,...,x_n$ whose mean and standard deviation are computed as follows:
-\be
-   \bar{x} = \sum_{i=1}^n x_i  \quad ; \quad \sigma^2 = \frac{1}{n-1}  \sum_{i=1}^n \left( x_i - \bar{x} \right)^2
-\ee
-Spiegelhalter tests the null hypothesis that the sample $x_i$ is taken from a normally distributed population. The test statistic, $S$, is defined:
-\be
-   S = \frac{N-0.73 \, n}{0.9 \, \sqrt{n}}  \quad ; \quad N=\sum_{i=1}^n Z_i^2 \, \ln \, Z_i^2  \quad ; \quad Z_i = \frac{x_i - \bar{x}}{\sigma}
-\ee
-Under the null hypothesis, the test statistic is normally distributed with mean 0 and standard deviation of 1. If the $p$-value
-\be
-   p = 1 - \left| \erf \left( \frac{S}{\sqrt{2}} \right) \right|
-\ee
-is less than 0.05, the null hypothesis is rejected.
-
-The flaw in most normality tests is that they tend to reject the assumption of normality when the number of samples is relatively large. As can be seen in some of the histograms on the following pages, some fairly ``normal'' looking distributions fail while decidedly non-normal distributions pass. For this reason, the $p$-value is less important than the qualitative appearance of the histogram. If the histogram exhibits the typical bell-shaped curve, this adds confidence to the statistical treatment of the data. If the histogram is not bell-shaped, this might cast doubt on the statistical treatment for that particular quantity.
+The histograms on the following pages display the distribution of the quantity $\ln(M/E)$, where $M$ is a random variable representing the \underline{M}odel predictions and $E$ is a random variable representing the \underline{E}xperimental measurements for each of the quantities of interest listed in Table~\ref{summary_stats}. Recall from Chapter~\ref{Error_Chapter} that $\ln(M/E)$ is assumed to be normally distributed. Formally testing the assumption of normality is difficult because most normality tests tend to reject the assumption of normality when the number of samples is relatively large. As can be seen in some of the histograms on the following pages, some fairly ``normal'' looking distributions fail normality tests while decidedly non-normal distributions pass. Rather than relying on a formal statistical test, it is better to simply judge if a histogram conforms to the typical bell-shaped curve, and if so this adds confidence to the statistical treatment of the data. If the histogram is not bell-shaped, this might cast doubt on the statistical treatment for that particular quantity.
 
 \IfFileExists{SCRIPT_FIGURES/Scatterplots/validation_histograms.tex}{\input{SCRIPT_FIGURES/Scatterplots/validation_histograms.tex}}{\typeout{Error: Missing file SCRIPT_FIGURES/Scatterplots/validation_histograms.tex}}
 

@@ -5645,10 +5645,12 @@ Internally, CVODE assigns default values to several key parameters, as listed be
 \item \ct{MIN_EQUIV_RATIO}=0.0
 \item \ct{MAX_EQUIV_RATIO}=20.0
 \item \ct{DO_CHEM_LOAD_BALANCE}=T
+\item \ct{CVODE_ORDER}=0
 \end{itemize}
 The parameter \ct{FINITE_RATE_MIN_TEMP} defines the minimum temperature (in $^\circ$C) above which chemistry calculation will be performed. CVODE allows specification of relative and absolute tolerances at the species level using the \ct{ODE_REL_ERROR} and \ct{ODE_ABS_ERROR} parameters in the \ct{SPEC} input line. These tolerances can also be set globally in the \ct{COMB} input line, with species-level settings taking precedence. Currently, CVODE does not allow relative tolerance at the species level. The minimum concentration of a species is determined as the product of \ct{ODE_REL_ERROR} and \ct{ZZ_MIN_GLOBAL}. Concentrations below this threshold are treated as zero.
 
-Additional optional parameters include \ct{EQUIV_RATIO_CHECK}, \ct{MIN_EQUIV_RATIO}, and \ct{MAX_EQUIV_RATIO}. When \ct{EQUIV_RATIO_CHECK} is enabled (set to true), the chemistry calculation is performed only for those cells for which equivalence ratio is within the specified \ct{MIN_EQUIV_RATIO} and \ct{MAX_EQUIV_RATIO} limits, reducing computational time. Enabling \ct{DO_CHEM_LOAD_BALANCE} significantly accelerates chemistry calculations by distributing the computational load evenly across all MPI processes.
+Additional optional parameters include \ct{EQUIV_RATIO_CHECK}, \ct{MIN_EQUIV_RATIO}, and \ct{MAX_EQUIV_RATIO}. When \ct{EQUIV_RATIO_CHECK} is enabled (set to true), the chemistry calculation is performed only for those cells for which equivalence ratio is within the specified \ct{MIN_EQUIV_RATIO} and \ct{MAX_EQUIV_RATIO} limits, reducing computational time. Enabling \ct{DO_CHEM_LOAD_BALANCE} significantly accelerates chemistry calculations by distributing the computational load evenly across all MPI processes. The parameter \ct{CVODE_ORDER} controls the order of discretization when solving the ODE system. By default (0), CVODE dynamically selects an order between 1 and 5. For very stiff problems, the user may specify a lower order (1 or 2) to improve stability, at the cost of slower performance because CVODE will take much smaller internal substeps.
+
 User can modify the default values of any or all of these parameters as needed using the following line in the FDS input file:
 \begin{lstlisting}
 &COMB
@@ -10571,14 +10573,14 @@ Figure~\ref{fig:thermocouple_time_constant} shows the results of a simple test c
 \label{info:bidir_probe}
 \label{bi_dir}
 
-The output quantity \ct{BI-DIRECTIONAL PROBE} is the velocity of a modeled bi-directional probe. A bi-directional probe uses the following equation:
+The output quantity \ct{BI-DIRECTIONAL PROBE} is the velocity of a modeled bi-directional probe. A bi-directional probe uses the following equation~\cite{McCaffrey:1976}:
 \be
 C \sqrt{\frac{2 \Delta P}{\rho}}
 \label{BDP}
 \ee
 where $C$ is a calibration constant (default value is 0.93), $\Delta P$ is the pressure difference across the probe, and $\rho$ is the gas density at the probe. In a typical experiment, the gas density is computed assuming standard pressure (101325 Pa), the molecular weight of air (28.8 g/mol), and the temperature as measured by a thermocouple near the probe.
 
-Bi-directional probes have biases due to both the Reynolds number (based on the probe diameter) of the flow and the angle of the flow with respect to the probe axis~\cite{McCaffrey:1976}. At low Reynolds number a probe will measure a higher effective velocity. As the angle of the flow vector with the axis increases, the effective velocity at first increases up to an angle of 30$^\circ$ due to a low pressure region forming downstream of the probe, and then decreases reaching no measured flow at an angle of 90$^\circ$. This model accounts for these sensitivities and the impact of density differences from varied molecular weight at the probe. The orientation of the probe can be specified with either \ct{IOR} or \ct{ORIENTATION} on \ct{DEVC}. A probe with \ct{IOR}=-1 would have a positive velocity output when the flow is in the -x direction. Parameters for the probe can be specified with a \ct{PROP_ID} on the \ct {DEVC}. The calibration constant (default of 0.93) and the probe diameter (default of 0.0254 m) can be set respectively with \ct{CALIBRATION_CONSTANT} and \ct{PROBE_DIAMETER} on \ct{PROP}. If the probe temperature is an aspirated thermocouple or other measurement not sensitive to the radiative environment, then set \ct{TC=F} on \ct{PROP}. Thermocouple specific properties for a bi-directional probe, see Section~\ref{info:THERMOCOUPLE}, should be set with the same \ct{PROP} as for the probe.
+Bi-directional probes have biases due to both the Reynolds number (based on the probe diameter) of the flow and the angle of the flow with respect to the probe axis~\cite{McCaffrey:1976}. At low Reynolds number a probe will measure a higher effective velocity. As the angle of the flow vector with the axis increases, the effective velocity at first increases up to an angle of 30$^\circ$ due to a low pressure region forming downstream of the probe, and then decreases reaching no measured flow at an angle of 90$^\circ$. This model accounts for these sensitivities and the impact of density differences from varied molecular weight at the probe. The orientation of the probe can be specified with either \ct{IOR} or \ct{ORIENTATION} on \ct{DEVC}. A probe with \ct{IOR}=-1 would have a positive velocity output when the flow is in the -x direction. Parameters for the probe can be specified with a \ct{PROP_ID} on the \ct {DEVC}. The calibration constant (default of 0.93) and the probe diameter (default of 0.0254 m) can be set respectively with \ct{CALIBRATION_CONSTANT} and \ct{PROBE_DIAMETER} on \ct{PROP}. If the probe temperature is an aspirated thermocouple or other measurement not sensitive to the radiative environment, then set \ct{TC=F} on \ct{PROP}. Thermocouple specific properties for a bi-directional probe, see Section~\ref{info:THERMOCOUPLE}, should be set with the same \ct{PROP} as for the probe. If a dynamic calibration constant based on the Reynolds number calibration in McCaffrey~\cite{McCaffrey:1976} was used set \ct{CALIBRATION_CONSTANT=-1}.
 
 Figure~\ref{bi_dir_fig} shows the results of a bi-directional probe with varying angle to a 1~m/s flow and varying flow speed.
 \begin{figure}[ht]
@@ -11970,7 +11972,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 
 % ignore namelist/keyword combinations
 % ignorenamelistkw: /BNDF/DEBUG
-% ignorenamelistkw: /COMB/CVODE_ORDER, /COMB/FUEL_ID_FOR_AFT, /COMB/USE_MIXED_ZN_AFT_TMP
+% ignorenamelistkw: /COMB/FUEL_ID_FOR_AFT, /COMB/USE_MIXED_ZN_AFT_TMP
 % ignorenamelistkw: /DEVC/ELEM_ID, /DEVC/STATISTICS
 % ignorenamelistkw: /DUMP/MMS_TIMER, /DUMP/TURB_INIT_CLOCK, /DUMP/GET_CUTCELLS_VERBOSE, /DUMP/WRITE_CVODE_SUBSTEPS
 % ignorenamelistkw: /HVAC/DEBUG
@@ -12112,6 +12114,7 @@ Keyword             & Type     & Description                      & Units       
 \endhead
 \ct{CHECK_REALIZABILITY}                         & Logical    & Section~\ref{info:chem_integration}          &           & \ct{F}              \\ \hline
 \ct{COMPUTE_ADIABATIC_FLAME_TEMPERATURE}         & Logical    & Section~\ref{info:extinction}                &           & \ct{F}              \\ \hline
+\ct{CVODE_ORDER}                                 & Integer    & Section~\ref{info:chem_integration}          &           & 0                   \\ \hline
 \ct{DO_CHEM_LOAD_BALANCE}                        & Logical    & Section~\ref{info:chem_integration}          &           & \ct{F}              \\ \hline
 \ct{EQUIV_RATIO_CHECK}                           & Logical    & Section~\ref{info:chem_integration}          &           & \ct{T}              \\ \hline
 \ct{EXTINCTION_MODEL}                            & Character  & Section~\ref{info:extinction}                &           &                     \\ \hline

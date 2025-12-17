@@ -2,15 +2,19 @@
 
 import subprocess
 import fdsplotlib
+import matplotlib.pyplot as plt
 import importlib
 import runpy
 importlib.reload(fdsplotlib) # use for development (while making changes to fdsplotlib.py)
+print("Using:", fdsplotlib.__file__)
 
 # If there is an error in one of the sub-scripts, print the message but do not stop the main script.
 
 def safe_run(script_path):
     try:
         runpy.run_path(script_path, run_name="__main__")
+        plt.clf()         # Clear the current figure (if any)
+        plt.close('all')  # Close all open figure windows
     except Exception as exc:
         print(f"Error in {script_path}: {exc}")
 
@@ -95,6 +99,7 @@ print("McCaffrey_Plume...");              safe_run("./scripts/McCaffrey_Plume.py
 print("Memorial_Tunnel...");              safe_run("./scripts/Memorial_Tunnel.py")
 print("Memorial_Tunnel_2...");            safe_run("./scripts/Memorial_Tunnel_2.py")
 print("NIST_NRC_Parallel_Panels...");     safe_run("./scripts/NIST_NRC_Parallel_Panels.py")
+print("NIST_Pool_Fires...");              safe_run("./scripts/NIST_Pool_Fires.py")
 print("Sandia_Plumes...");                safe_run("./scripts/Sandia_Plumes.py")
 print("Sandia_Pools...");                 safe_run("./scripts/Sandia_Pools.py")
 print("Theobald_Hose_Stream...");         safe_run("./scripts/Theobald_Hose_Stream.py")
