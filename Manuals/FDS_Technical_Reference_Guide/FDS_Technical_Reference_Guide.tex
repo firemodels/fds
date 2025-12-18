@@ -24,10 +24,13 @@
     \includeonly{Introduction_Chapter, Equation_Chapter, Mass_Chapter, Momentum_Chapter, Combustion_Chapter, Radiation_Chapter, Solid_Chapter, Aerosol_Chapter, Particle_Chapter, Device_Chapter, HVAC_Chapter, Wildland_Chapter, Appendices}
 \fi
 
+\addbibresource{../Bibliography/FDS_refs.bib}
+\addbibresource{../Bibliography/FDS_general.bib}
+\addbibresource{../Bibliography/FDS_mathcomp.bib}
+
 \begin{document}
 
 
-\bibliographystyle{unsrt}
 \pagestyle{empty}
 
 
@@ -189,7 +192,7 @@ The following individuals and organizations played a role in the development of 
 \fi
 \include{Wildland_Chapter}
 
-\bibliography{../Bibliography/FDS_refs,../Bibliography/FDS_general,../Bibliography/FDS_mathcomp}
+\printbibliography[heading=bibintoc,title={References}]
 
 \appendix
 
