@@ -20,9 +20,13 @@
 
 \externaldocument[UG-]{FDS_User_Guide}
 
+\addbibresource{../Bibliography/FDS_refs.bib}
+\addbibresource{../Bibliography/FDS_general.bib}
+\addbibresource{../Bibliography/FDS_mathcomp.bib}
+
+
 \begin{document}
 
-\bibliographystyle{unsrt}
 \pagestyle{empty}
 
 
@@ -554,7 +558,7 @@ that is, comments within the source code itself.  Plus, they must compile the co
 In this chapter we present test cases aimed at exercising the advective, pressure, and viscous terms, as well as the time integration for non-reacting flows.
 
 
-\section{Analytical Solution to the Navier-Stokes Equation (\texorpdfstring{\ct{ns2d}}{ns2d})}
+\section{Analytical Solution to the Navier-Stokes Equation (\ct{ns2d})}
 \label{ns2d}
 \label{ns2d_64_nupt1}
 
@@ -3932,7 +3936,7 @@ Six additional constant volume ignition delay cases are configured using the fol
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_1200_1p4_TMP} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_grimech30_1200_1p4_OH}
 \end{tabular*}
-\caption[Results of the \ct{ignition_delay} test cases]{Comparison of temperature and OH mass fraction for \ct{Methane_grimech30} mechanism at an equivalence ratio of 1.4.}
+\caption[Results of the \ct{ignition_delay} test cases]{Comparison of temperature and OH mass fraction for \ct{Methane-grimech30} mechanism at an equivalence ratio of 1.4.}
 \label{fig:ign_delay_Methane_grimech30_phi_1.4}
 \end{figure}
 
@@ -3942,7 +3946,7 @@ Six additional constant volume ignition delay cases are configured using the fol
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_TianfengLu_1100_1p0_TMP} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_TianfengLu_1100_1p0_OH}
 \end{tabular*}
-\caption[Results of the \ct{ignition_delay} test cases]{Comparison of temperature and OH mass fraction for Methane_TianfengLu mechanism at an equivalence ratio of 1.0.}
+\caption[Results of the \ct{ignition_delay} test cases]{Comparison of temperature and OH mass fraction for Methane-TianfengLu mechanism at an equivalence ratio of 1.}
 \label{fig:ign_delay_Methane_TianfengLu_phi_1.0}
 \end{figure}
 
@@ -3951,7 +3955,7 @@ Six additional constant volume ignition delay cases are configured using the fol
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_Smooke_1100_1p0_TMP} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Methane_Smooke_1100_1p0_OH}
 \end{tabular*}
-\caption[Results of the \ct{ignition_delay} test cases]{Comparison of temperature and OH mass fraction for Methane_Smooke mechanism at an equivalence ratio of 1.0.}
+\caption[Results of the \ct{ignition_delay} test cases]{Comparison of temperature and OH mass fraction for Methane-Smooke mechanism at an equivalence ratio of 1.0.}
 \label{fig:ign_delay_Methane_Smooke_phi_1.0}
 \end{figure}
 
@@ -3960,7 +3964,7 @@ Six additional constant volume ignition delay cases are configured using the fol
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Ethylene_TianfengLu_1100_1p0_TMP} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Ethylene_TianfengLu_1100_1p0_OH}
 \end{tabular*}
-\caption[Results of the \ct{ignition_delay} test cases]{Comparison of temperature and OH mass fraction for Ethylene_TianfengLu mechanism at an equivalence ratio of 1.0.}
+\caption[Results of the \ct{ignition_delay} test cases]{Comparison of temperature and OH mass fraction for Ethylene-TianfengLu mechanism at an equivalence ratio of 1.0.}
 \label{fig:ign_delay_Ethylene_TianfengLu_phi_1.0}
 \end{figure}
 
@@ -3969,7 +3973,7 @@ Six additional constant volume ignition delay cases are configured using the fol
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Propane_USC_1100_1p0_TMP} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Propane_USC_1100_1p0_OH}
 \end{tabular*}
-\caption[Results of the \ct{ignition_delay} test cases]{Comparison of temperature and OH mass fraction for Propane_USC mechanism at an equivalence ratio of 1.0.}
+\caption[Results of the \ct{ignition_delay} test cases]{Comparison of temperature and OH mass fraction for Propane-USC mechanism at an equivalence ratio of 1.0.}
 \label{fig:ign_delay_Propane_USC_phi_1.0}
 \end{figure}
 
@@ -3978,7 +3982,7 @@ Six additional constant volume ignition delay cases are configured using the fol
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Propane_Z66_1100_1p0_TMP} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_Propane_Z66_1100_1p0_OH}
 \end{tabular*}
-\caption[Results of the \ct{ignition_delay} test cases]{Comparison of temperature and OH mass fraction for Propane_Z66 mechanism at an equivalence ratio of 1.0.}
+\caption[Results of the \ct{ignition_delay} test cases]{Comparison of temperature and OH mass fraction for Propane-Z66 mechanism at an equivalence ratio of 1.0.}
 \label{fig:ign_delay_Propane_Z66_phi_1.0}
 \end{figure}
 
@@ -3987,7 +3991,7 @@ Six additional constant volume ignition delay cases are configured using the fol
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_nHeptane_Chalmers_1100_1p0_TMP} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/ign_delay_nHeptane_Chalmers_1100_1p0_OH}
 \end{tabular*}
-\caption[Results of the \ct{ignition_delay} test cases]{Comparison of temperature and OH mass fraction for nHeptane_Chalmers mechanism at an equivalence ratio of 1.0.}
+\caption[Results of the \ct{ignition_delay} test cases]{Comparison of temperature and OH mass fraction for nHeptane-Chalmers mechanism at an equivalence ratio of 1.0.}
 \label{fig:ign_delay_nHeptane_Chalmers_phi_1.0}
 \end{figure}
 
@@ -4074,10 +4078,10 @@ Finally, Figure~\ref{fig:edc_mixing_cvode_onecfdstep_vary_taumix} compares tempe
 
 Fire simulations can become computationally expensive due to combustion calculations, especially when detailed chemistry is involved. Often, in parallel simulations, combustion is concentrated in only a few MPI processes, while other MPI processes remain idle, waiting for the combustion-related tasks to finish. To address this, FDS incorporates a load-balancing algorithm that evenly distributes the combustion workload across all MPI processes. This can significantly speed up the detailed chemistry simulations, with performance improvements ranging from 2 to 6 times, depending on the configuration.
 
-Three cases are considered to verify the load-balancing algorithm: the first uses a detailed chemical mechanism (Methane_Smooke, see Section ~\ref{ignition_delay}); the second uses two-step Arrhenius reactions; and the third involves two-step fast chemistry reactions. In all cases, gaseous fuel (methane or propane) is injected from the burner. To account for combustion in both regular cells and Immersed Boundary Cut-Cells, a sphere is placed above the burner, allowing the flame to propagate around it.
+Three cases are considered to verify the load-balancing algorithm: the first uses a detailed chemical mechanism (Methane-Smooke, see Section ~\ref{ignition_delay}); the second uses two-step Arrhenius reactions; and the third involves two-step fast chemistry reactions. In all cases, gaseous fuel (methane or propane) is injected from the burner. To account for combustion in both regular cells and Immersed Boundary Cut-Cells, a sphere is placed above the burner, allowing the flame to propagate around it.
 
 
-Figure \ref{fig:comb_load_bal_methane_smooke} shows the load-balancing test for the Methane_Smoke detailed chemical mechanism using Sundials CVODE solver. In this configuration, there are 24 meshes, corresponding to 24 MPI processes. The top-left plot shows that without load balancing, each MPI process spends varying amounts of time on chemistry calculations. In contrast, with load balancing, the time spent on chemistry calculations is distributed evenly across all processes. In the no-load-balancing case, MPI process 6 spends the most time on chemistry, causing other processes to wait in the MPI communication queue, as shown in the top-right plot. With load balancing, communication time is also more evenly distributed. The overall simulation speedup with load balancing is approximately 2.2x, as depicted in the bottom-left plot. Finally, the bottom-right plot demonstrates that the results are identical with and without load balancing by comparing the wall temperatures at three locations.
+Figure \ref{fig:comb_load_bal_methane_smooke} shows the load-balancing test for the Methane-Smooke detailed chemical mechanism using Sundials CVODE solver. In this configuration, there are 24 meshes, corresponding to 24 MPI processes. The top-left plot shows that without load balancing, each MPI process spends varying amounts of time on chemistry calculations. In contrast, with load balancing, the time spent on chemistry calculations is distributed evenly across all processes. In the no-load-balancing case, MPI process 6 spends the most time on chemistry, causing other processes to wait in the MPI communication queue, as shown in the top-right plot. With load balancing, communication time is also more evenly distributed. The overall simulation speedup with load balancing is approximately 2.2x, as depicted in the bottom-left plot. Finally, the bottom-right plot demonstrates that the results are identical with and without load balancing by comparing the wall temperatures at three locations.
 
 Figure \ref{fig:comb_load_bal_2step_Arrhenius} presents a similar load-balancing test for two-step Propane Arrhenius reactions using the FDS-RK2 ODE solver. In this configuration, there are 6 meshes, corresponding to 6 MPI processes. The load-balancing results show similar trends as observed with the detailed chemical mechanism. However, the time spent on combustion (FIRE) is significantly lower compared to the detailed chemistry case (20\% vs. 65\%). As a result, even with combustion load balancing, other processes dominate the total simulation time, limiting the speedup to just 1.2x.
 
@@ -4085,7 +4089,7 @@ Figure \ref{fig:comb_load_bal_2step_fast} shows a load-balancing test for two-st
 
 Overall, combustion load balancing provides significant speedup for detailed chemistry cases. For small multi-step Arrhenius reactions, the speedup may be limited depending on the stiffness of the reactions. For fast chemistry, combustion load balancing is generally not beneficial.
 
-Figure \ref{fig:EDC_load_bal_methane_smooke} shows the load-balancing test for the Methane_Smoke detailed chemical mechanism with mixing.  
+Figure \ref{fig:EDC_load_bal_methane_smooke} shows the load-balancing test for the Methane-Smooke detailed chemical mechanism with mixing.  
 
 
 \begin{figure}[p]
@@ -4095,7 +4099,7 @@ Figure \ref{fig:EDC_load_bal_methane_smooke} shows the load-balancing test for t
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Methane_Smooke_TOT} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/comb_load_bal_Methane_Smooke_DEVC}
 \end{tabular*}
-\caption[Results of the \ct{comb_load_balance} test cases]{Combustion load balance case using Methane_Smooke detailed chemical mechanism.}
+\caption[Results of the \ct{comb_load_balance} test cases]{Combustion load balance case using Methane-Smooke detailed chemical mechanism.}
 \label{fig:comb_load_bal_methane_smooke}
 \end{figure}
 
@@ -4128,7 +4132,7 @@ Figure \ref{fig:EDC_load_bal_methane_smooke} shows the load-balancing test for t
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/EDC_load_bal_Methane_Smooke_TOT} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/EDC_load_bal_Methane_Smooke_DEVC}
 \end{tabular*}
-\caption[Results of the \ct{comb_load_balance} test cases]{Combustion load balance case for mixing with detailed chemistry using Methane_Smooke detailed chemical mechanism. The initial unmixed fraction is 0.98.}
+\caption[Results of the \ct{comb_load_balance} test cases]{Combustion load balance case for mixing with detailed chemistry using Methane-Smooke detailed chemical mechanism. The initial unmixed fraction is 0.98.}
 \label{fig:EDC_load_bal_methane_smooke}
 \end{figure}
 
@@ -4367,7 +4371,7 @@ The calculation of FED for a moving particle representing an occupant is tested 
 \label{fig:FED_moving}
 \end{figure}
 
-\section{Smoke Detector Model (\texorpdfstring{\ct{smoke_detector}}{smoke_detector}) }
+\section{Smoke Detector Model (\ct{smoke_detector})}
 \label{smoke_detector}
 
 The calculations described in this section check the smoke detector algorithm that computes the smoke obscuration in the sensing chamber of a detector. For this example, the initial soot mass fraction in a 1~m$^3$ box is set as 100~mg/kg via the \ct{INIT} line. A vent on the left side injects soot at a velocity of 0.25~m/s and a mass fraction of 100~mg/kg, and the soot exhausts on the right side of the box via an open vent. By default, if a species is defined as an aerosol by setting \ct{AEROSOL=.TRUE.} on the \ct{SPEC} line, then all of the aerosol deposition mechanisms (gravitational, thermophoretic, and turbulent) will act upon that species. For this example, all deposition mechanisms are disabled by using the follows inputs on the \ct{MISC} line:
@@ -4405,7 +4409,7 @@ Fig.~\ref{fig:smoke_detector} shows a comparison of the analytical and simulated
 
 
 \section{Aerosol Behavior}
-\subsection{Gravitational Settling and Deposition of Aerosols\\(\texorpdfstring{\ct{aerosol_gravitational_deposition}}{aerosol_gravitational_deposition})}
+\subsection{Gravitational Settling and Deposition of Aerosols (\ct{aerosol_gravitational_deposition})}
     \label{aerosol_gravitational_deposition}
 
 This verification test consists of two test cases. The second case, \ct{aerosol_gravitational_deposition_2}, reverses the z-component of gravity. The case consists of a box 10~cm on side with adiabatic, free-slip side walls. The box is filled with two gas species each having a molecular weight of 28.8~g/mol, a viscosity of 0.00002~\si{kg/(m.s}, a thermal conductivity of 0.025~\si{W/(m.K}, and specific heat of 1~\si{kJ/(kg.K}, and zero diffusivity. One of the gas species is defined as an aerosol with a diameter of 10~$\mu$m, a solid phase density of 2000~kg/m$^3$, and a solid phase conductivity of 1~\si{W/(m.K}. The initial mass fraction of the aerosol is 0.00001. \ct{STRATIFICATION}, \ct{NOISE}, and all aerosol behaviors except for \ct{GRAVITATIONAL_SETTLING} and \ct{GRAVITATIONAL_DEPOSITION} are turned off. Since the box has a constant density over its height, a uniform settling rate over time is expected.
@@ -4422,7 +4426,7 @@ This verification test consists of two test cases. The second case, \ct{aerosol_
 \label{fig:gravitational_deposition}
 \end{figure}
 
-\subsection{Thermophoretic Settling and Deposition of Aerosols\\(\texorpdfstring{\ct{aerosol_thermophoretic_deposition}}{aerosol_thermophoretic_deposition})}
+\subsection{Thermophoretic Settling and Deposition of Aerosols (\ct{aerosol_thermophoretic_deposition})}
     \label{aerosol_thermophoretic_deposition}
 
 This verification test consists of two test cases. The second case, \ct{aerosol_thermophoretic_deposition_2}, reverses the temperature gradient. The case consists of a box 1~cm on a side with adiabatic, free-slip side walls and a 100 K temperature gradient over the height of the box. The box is filled with two gas species each having a molecular weight of 28.8~g/mol, a viscosity of $2\times10^{-5}$~\si{kg/(m.s)}, a thermal conductivity of 0.025~\si{W/(m.K)}, and specific heat of 1~\si{kJ/(kg.K)}, and zero diffusivity. One of the gas species is defined as an aerosol with a diameter of 1~$\mu$m, a solid phase density of 2000~\si{kg/m^3}, and a solid phase conductivity of 1~\si{W/(m.K)}. The initial mass fraction of the aerosol is $1\times10^{-5}$. The gas temperature is initialized to its steady-state temperature gradient. \ct{STRATIFICATION}, \ct{NOISE}, and all aerosol behaviors except for \ct{THERMOPHORETIC_SETTLING} and \ct{THERMOPHORETIC_DEPOSITION} are turned off. Thermophoretic settling rates are weakly dependent on the gas density. Since there is a temperature gradient, the settling rates are not uniform over the height of the box. Unlike the gravitational settling case, this means over long enough time periods the overall settling rate is not linear in time; however, for a short time period a near linear settling rate is expected and can be determined analytically.
@@ -4448,7 +4452,7 @@ where $K_{\rm th}$ is a coefficient dependent on the particle size and solid con
 \label{fig:thermophoretic_deposition}
 \end{figure}
 
-\subsection{Turbulent Deposition of Aerosols (\texorpdfstring{\ct{aerosol_turbulent_deposition}}{aerosol_turbulent_deposition})}
+\subsection{Turbulent Deposition of Aerosols (\ct{aerosol_turbulent_deposition})}
     \label{aerosol_turbulent_deposition}
 
 This verification test consists of three tunnel like geometries 10~cm on side with adiabatic, free-slip walls. One end of the tunnel is \ct{OPEN} and the other end has a constant inlet velocity of 0.001 m/s, 0.1 m/s, or 1 m/s. The tunnels are filled with two gas species each having a molecular weight of 28.8~g/mol, a viscosity of $2\times10^{-5}$~\si{kg/(m.s)}, a thermal conductivity of 0.025~\si{W/(m.K)}, and specific heat of 1~\si{kJ/(kg.K)}, and zero diffusivity. One of the gas species is defined as an aerosol with a diameter of 100~$\mu$m, a solid phase density of 2000~\si{kg/m^3}, and a solid phase conductivity of 1~\si{W/(m.K}. The initial mass fraction of the aerosol is $1\times10^{-5}$. \ct{STRATIFICATION}, \ct{NOISE}, and all aerosol behaviors except for \ct{TURBULENT_DEPOSITION} are turned off. Turbulent deposition is computed using a correlation based open the wall friction velocity and the wall dimensionless stopping distance. The correlation has three parts, and the selected velocities test each part. Since the inlet condition is a constant velocity with a constant aerosol mass fraction, the first wall cell after the inlet will see a uniform settling rate over time.
@@ -4464,7 +4468,7 @@ This verification test consists of three tunnel like geometries 10~cm on side wi
     \label{fig:turbulent_deposition}
 \end{figure}
 
-\subsection{Mass Conservation of Depositing Aerosols (\texorpdfstring{\ct{propane_flame_deposition}}{propane_flame_deposition})}
+\subsection{Mass Conservation of Depositing Aerosols (\ct{propane_flame_deposition})}
 \label{propane_flame_deposition}
 
 The calculations described in this section check the conservation of mass for the aerosol deposition algorithms. The example involves a reaction that invokes the aerosol deposition model in FDS (i.e., soot deposition). For this example, the fuel will be propane with a peak heat release rate of 100~kW and a 5~\% soot yield. For a 100~kW propane fire (\ct{HEAT_OF_COMBUSTION} of 44,715~kJ/kg), the associated burning rate is 2.236~g/s. A \ct{RAMP} is used to specify a burning rate from a propane burner that ramps up linearly to 2.236~g/s from 0~s to 1~s, remains steady at 2.236~g/s from 1~s to 4~s, then linearly decreases to 0~g/s from 4~s to 5~s. The total fuel mass released is 8.944~g of propane. Therefore, the resulting mass of soot should be equal to 0.447~g, or 5~\% of the total amount of fuel. For a case with no aerosol deposition, we would expect the mass of soot in the gas phase to be equal to 0.447~g. For a case with aerosol deposition, we would expect some fraction of soot to exist in the gas phase and the remainder of soot to be deposited on the wall. The sum of soot in the gas phase and deposited soot should be 0.447~g.
@@ -4482,7 +4486,7 @@ Figure~\ref{fig:deposition_mass} shows the time evolution of soot in the gas pha
     \label{fig:deposition_mass}
 \end{figure}
 
-\subsection{Agglomeration of Aerosols (\texorpdfstring{\ct{aerosol_agglomeration}}{aerosol_agglomeration})}
+\subsection{Agglomeration of Aerosols (\ct{aerosol_agglomeration})}
     \label{aerosol_agglomeration}
 
 This verification case consists of two test cases.
@@ -4512,7 +4516,7 @@ In the second case three pairs of small (3~mm by 3~mm) vents are placed on oppos
 \end{figure}
 
 
-\subsection{Scrubbing of Aerosols (\texorpdfstring{\ct{aerosol_scrubbing}}{aerosol_scrubbing})}
+\subsection{Scrubbing of Aerosols (\ct{aerosol_scrubbing})}
 \label{aerosol_scrubbing}
 
 This verification case tests the scrubbing of aerosols by droplet. The case consists of a box that is 0.4~m on a side with 4 cells in each direction. The box is initially filled with pure water vapor with a soot mass fraction of 0.0001. The soot has a mean diameter of 1~$\mu$m. The calculation is initialized with a 100~$\mu$m droplet in every cell with an initial downward velocity of 0.1~m/s. Gravity and drag is disabled so the drops do not change velocity. The drops are given an initial weight so that the total projected area is 25~\% of the cell area. Since every cell always has a single drop of the same diameter and velocity, the result is a constant decay of the soot mass fraction with a decay constant of 0.0000666. After 5000~s, the case should predict a 28~\% drop in soot mass fraction.
@@ -4527,7 +4531,7 @@ This verification case tests the scrubbing of aerosols by droplet. The case cons
 \end{figure}
 
 
-\subsection{Oxidation of Soot on Surfaces (\texorpdfstring{\ct{soot_oxidation_wall}}{soot_oxidation_wall})}
+\subsection{Oxidation of Soot on Surfaces (\ct{soot_oxidation_wall})}
 \label{soot_oxidation_wall}
 
 This verification case checks the routine for oxidizing soot on a surface. The calculation fills a 1~m$^3$ box with 0.1~g of soot with a mean diameter of 100 microns; the large diameter was selected so the soot would quickly settle to the floor. The case lets the soot settle for 10 s. This is followed by a one-second ramp that heats the floor from 20~$^\circ$C to 1000~$^\circ$C. This results in rapid oxidation of the soot. Once all the soot is oxidized, there should have been a heat release of  3.28~kJ, and the production of 0.37~g of CO$_2$.
@@ -4544,7 +4548,7 @@ This verification case checks the routine for oxidizing soot on a surface. The c
 \end{figure}
 
 \section{Condensation}
-\subsection{Condensation and Evaporation in the Gas Phase\\(\texorpdfstring{\ct{condensation_1} and \ct{condensation_2}}{condensation_1 and condensation_2})}
+\subsection{Condensation and Evaporation in the Gas Phase (\ct{condensation_1} and \ct{condensation_2})}
     \label{condensation_evaporation}
 This pair of verification cases test the condensation and evaporation of water vapor. Both cases use 1~m$^3$ box. Case \ct{condensation_1} has an initial temperature of 200~$^\circ$C and contains an initial mass fraction of condensed water vapor of 0.01~kg/kg. At equilibrium all the condensed vapor will evaporate resulting in a temperature drop of 27~$^\circ$C and a pressure drop of 5800~Pa. Case \ct{condensation_2} has an initial temperature of -100~$^\circ$C and contains an initial mass fraction of water vapor of 0.01~kg/kg. At equilibrium 99.9~\% of the vapor will condense resulting in a temperature rise of 36~$^\circ$C and a pressure rise of 21,000~Pa.
 
@@ -4560,7 +4564,7 @@ This pair of verification cases test the condensation and evaporation of water v
     \label{fig:condensation_gas}
 \end{figure}
 
-\subsection{Condensation and Evaporation in the Solid Phase\\(\texorpdfstring{\ct{wall_cond}}{wall_cond})}
+\subsection{Condensation and Evaporation in the Solid Phase (\ct{wall_cond})}
     \label{wall_condensation_evaporation}
 This verification cases tests the condensation and evaporation of water vapor onto and from solid surfaces. The case uses 1~m$^3$ box. The case has an initial temperature of 100~$^\circ$C and contains an initial mass fraction of water vapor of 0.05~kg/kg. The walls are 1~mm thick with a density of 1000~kg/m$^3$, a specific heat of 1~\si{kJ/(kg.K)}, and a conductivity of 100~\si{W/(m.K)}. At equilibrium the wall and gas temperature will be equal at 32~$^\circ$C and the pressure drop will be -20000~Pa. Note that \ct{NUCLEATION_SITES} on \ct{MISC} was set to zero to turn off condensation in the gas phase.
 
@@ -4575,7 +4579,7 @@ This verification cases tests the condensation and evaporation of water vapor on
 \end{figure}
 
 
-\subsection{Radiation for Condensed Phase (\texorpdfstring{\ct{condensation_3}} {condensation_3})}
+\subsection{Radiation for Condensed Phase (\ct{condensation_3})}
 \label{condensation_radiation}
 This verification case tests that the radiation absorption of condensed vapor is equivalent to the absorption of an equivalent set of Lagrangian particles. The case contains two 1~m$^3$ boxes filled with dry air at 0~$^\circ$C. One box is initialized with an 0.001 mass fraction of condensed water vapor with a droplet size of 1 micron. The other box is filled with one particle per cell with the same diameter and total mass of droplets. One wall of each box is set to 1000~$^\circ$C. The radiative heat flux on the opposite face should be the same in both cases.
 
@@ -4615,7 +4619,7 @@ devices.
 
 
 
-\section{Heat Conduction Through a Solid Slab (\texorpdfstring{\ct{heat_conduction}}{heat_conduction})}
+\section{Heat Conduction Through a Solid Slab (\ct{heat_conduction})}
 \label{heat_conduction_a}
 \label{heat_conduction_b}
 \label{heat_conduction_c}
@@ -4649,7 +4653,7 @@ D     &  10.0     & 10000        &  1            &  10           & 0.1     \\ \h
 	\label{heat_conduction}
 \end{figure}
 
-\section{Heat Conduction Through a Solid Slab Part 2 (\texorpdfstring{\ct{back_wall}}{back_wall})}
+\section{Heat Conduction Through a Solid Slab Part 2 (\ct{back_wall})}
 \label{back_wall}
 
 A slab of thickness $L=0.01$~m with a conductivity of 10~\si{W/(m.K)} is exposed to a backside temperature of $T_g=200$~\si{\degree C}.
@@ -4665,7 +4669,7 @@ This case test that both sets of conditions are applied.
 	\label{fig:back_wall}
 \end{figure}
 
-\section{Temperature-Dependent Thermal Properties (\texorpdfstring{\ct{heat_conduction_kc}}{heat_conduction_kc})}
+\section{Temperature-Dependent Thermal Properties (\ct{heat_conduction_kc})}
 \label{heat_conduction_kc}
 
 This example demonstrates the 1-D heat conduction in Cartesian, cylindrical, and spherical geometries with temperature-dependent thermal properties.
@@ -4710,7 +4714,7 @@ lines are FDS results and the circles are the HEATING results. An example input 
 \end{figure}
 
 
-\section{Convective Cooling (\texorpdfstring{\ct{convective_cooling}}{convective_cooling})}
+\section{Convective Cooling (\ct{convective_cooling})}
 \label{convective_cooling}
 
 This example tests the convective cooling algorithm. A 1~m thick solid slab that is initially at 1000~\si{\degree C} is suddenly exposed to air at 0~\si{\degree C}. The back of the slab is insulated. Its density is 1000~\si{kg/m^3}, its specific heat is 0.001~kJ/(kg$\cdot$K), its conductivity is 1~W/(m$\cdot$K), and its emissivity is zero, meaning there is no radiative loss from the surface. The convective heat transfer coefficient is 1~W/(m$^2\cdot$K). The predicted and exact temperature values at the back side of the slab are displayed in Fig.~\ref{convective_cooling_fig}.
@@ -4733,7 +4737,7 @@ To test the second-order accuracy of the solid phase conduction algorithm, this 
 
 
 
-\section{Simple Thermocouple Model (\texorpdfstring{\ct{thermocouples}}{thermocouples})}
+\section{Simple Thermocouple Model (\ct{thermocouples})}
 \label{thermocouples}
 
 This example tests the simple thermocouple model in FDS. It consists of a box whose walls and gas temperatures are fixed at 500~\si{\degree C}. Inside the box are three thermocouples with bead diameters of 1~mm, 2~mm, and 3~mm. Also included in the box are three ``targets'' -- small solid objects whose surfaces are assumed to be composed of small spheres of the same diameter as the thermocouples. Figure~\ref{thermocouples_fig} compares the temperature rise of the objects. The thermocouple model is not compared with an analytical solutions. This is simply a comparison of the thermally thin thermocouple calculation with the thermally thick ``target'' calculation. Small differences in temperature are due to slightly different flow conditions in different regions of the box and numerical error due to node spacing and time step size.
@@ -4747,7 +4751,7 @@ This example tests the simple thermocouple model in FDS. It consists of a box wh
 
 
 
-\section{Heat Conduction through Insulated Steel (\texorpdfstring{\ct{insulated_steel_x}}{insulated_steel_x})}
+\section{Heat Conduction through Insulated Steel (\ct{insulated_steel_x})}
 \label{insulated_steel_pipe}
 \label{insulated_steel_plate}
 
@@ -4778,7 +4782,7 @@ where $T_{s,i}$ is the surface temperature corresponding to radial coordinates 1
 
 
 
-\section{Heat Conduction across Mesh Boundaries (\texorpdfstring{\ct{back_wall_test}}{back_wall_test})}
+\section{Heat Conduction across Mesh Boundaries (\ct{back_wall_test})}
 \label{back_wall_test}
 
 In this example, a hollow cube whose walls are either zero, one, or two cells thick contains a solid cube centered inside with a fixed temperature of 500~$^\circ$C. The objective of the test is to ensure that the heat conduction through the steel and across the mesh boundaries is computed properly when each wall has a specified \ct{THICKNESS} of 5~cm. In the left hand plot of Fig.~\ref{back_wall_test_fig}, the net radiative heat flux to the interior surface of the box matches the net radiative heat flux from the external surface in steady state. In the right hand plot, the external surface temperature of two sides of the box are compared. One side is a zero cell thick obstruction; the other side is a two cell thick obstruction. Since the sides all have a specified \ct{THICKNESS} of 0.5~cm, the fact that the obstruction is either zero, one, or two cells thick should not matter and the temperatures should match exactly.
@@ -4794,7 +4798,7 @@ In this example, a hollow cube whose walls are either zero, one, or two cells th
 \end{figure}
 
 
-\section{Heat Conduction through Immersed Boundaries (\texorpdfstring{\ct{back_wall_test_2}}{back_wall_test_2})}
+\section{Heat Conduction through Immersed Boundaries (\ct{back_wall_test_2})}
 \label{back_wall_test_2}
 
 A 0.8~m by 0.8~m plate with surface temperature 1000~$^\circ$C and emissivity of 1 exposes a parallel plate separated by 0.15~m. The exposed plate is 1~cm thick, with a conductivity of 25~W/(m$\cdot$K), density 1000~kg/m$^3$, specific heat 0.1~kJ/(kg$\cdot$K), emissivity 1, and a convective heat transfer coefficient of 0. Three different configurations are considered: (1) the plates are all defined as traditional FDS \ct{OBST}ructions, (2) the plates are defined as immersed boundary (\ct{GEOM}) obstructions, and (3) the same plates as in (2) are rotated 45$^\circ$. Figure~\ref{back_wall_test_2_fig} displays the front and back surface temperatures for all three cases, compared to the exact solution where the analytically determined heat flux, Eq.~(\ref{plate_view_factor_eq}), is imposed directly on the front plate surface. The error in all three cases is due mainly to the error in the radiation transport calculation on grids with 2.5~cm cells.
@@ -4812,7 +4816,7 @@ A 0.8~m by 0.8~m plate with surface temperature 1000~$^\circ$C and emissivity of
 
 
 
-\section{Specified Heat Flux Boundary Conditions (\texorpdfstring{\ct{adiabatic_xxx_flux}}{adiabatic_xxx_flux})}
+\section{Specified Heat Flux Boundary Conditions (\ct{adiabatic_xxx_flux})}
 \label{adiabatic_con_flux}
 \label{adiabatic_net_flux}
 
@@ -4848,7 +4852,7 @@ as shown in the right hand plots of Fig.~\ref{adiabatic_flux}.
 This section presents test cases for solid phase heat diffusion (conduction) in 3-D.  This feature is not yet connected to the 1-D pyrolysis heat transfer code discussed in the previous sections.  Currently, the purpose of the HT3D functionality is to couple FDS with structural fire calculations.
 
 
-\subsection{Energy Conservation in a 3-D Solid (\texorpdfstring{\ct{ht3d_energy_conservation}}{ht3d_energy_conservation})}
+\subsection{Energy Conservation in a 3-D Solid (\ct{ht3d_energy_conservation})}
 \label{ht3d_energy_conservation}
 
 A 0.8~m by 0.8~m by 2~cm thick metal plate is exposed to a hot radiating surface for 10~s. Figure \ref{fig:ht3d_energy_conservation} displays the increased internal enthalpy versus the net heat flux integrated over the surface and integrated over time.
@@ -4905,7 +4909,7 @@ The right plot in Fig.~\ref{fig:ht3d_energy_conservation_8} displays the heat lo
 
 \FloatBarrier
 
-\subsection{Heat Transfer to an I-Beam (\texorpdfstring{\ct{ht3d_beam_heating}}{ht3d_beam_heating})}
+\subsection{Heat Transfer to an I-Beam (\ct{ht3d_beam_heating})}
 \label{ht3d_beam_heating}
 
 An aluminum I-beam $L=1.76$~m long and $d=0.58$~m deep (i.e.~in height), with flanges that are $b_{\rm f}=0.22$~m wide and $t_{\rm f}=0.005$~m thick and a web that is $t_{\rm w}=0.006$~m thick, is heated within a sealed compartment with volume $V_{\rm c}=0.8$~m$^3$, initial temperature $T_{\rm g,0}=1073.15$~K, pressure $p_0=101.325$~kPa, molecular weight $W=0.028$~kg/mol, specific heat $c_{\rm g}=1$~kJ/(kg$\cdot$K), and density $\rho_{\rm g}=p_0 W/(RT_{\rm g,0})\approx0.318$~kg/m$^3$. $R\approx0.008314$~kJ/(mol$\cdot$K) is the universal gas constant. The aluminum has a density $\rho_{\rm a}=2700$~kg/m$^3$, specific heat $c_{\rm a}=0.9$~kJ/(kg$\cdot$K), and initial temperature $T_{\rm a,0}=293.15$~K. Initially, the gas and aluminum have internal energies given by:
@@ -4931,7 +4935,7 @@ In a second case, the I-beam is coated with a 1~cm thick layer of thermal insula
 \FloatBarrier
 
 
-\subsection{Mass Conservation in a 3-D Solid (\texorpdfstring{\ct{ht3d_mass_conservation}}{ht3d_mass_conservation})}
+\subsection{Mass Conservation in a 3-D Solid (\ct{ht3d_mass_conservation})}
 \label{ht3d_mass_conservation}
 
 Three abutting solids, one of which is thin, have a density of $\rho_{\rm s}=400$~kg/m$^3$, moisture mass fraction $Y_{\rm m}=0.05$, and total volume $V=0.0106$~m$^3$. When exposed to hot plates of 1000~$^\circ$C, it is expected that $\rho_{\rm s} Y_{\rm m} V=0.212$~kg should be evaporated. The left plot of Fig.~\ref{fig:ht3d_mass_conservation} displays the evaporated mass as a function of time.
@@ -4948,7 +4952,7 @@ In this case, the moisture is not explicitly modeled; that is, ``wet wood'' unde
 \FloatBarrier
 
 
-\subsection{Continuous Heat Flux Boundary (\texorpdfstring{\ct{ht3d_slab}}{ht3d_slab})}
+\subsection{Continuous Heat Flux Boundary (\ct{ht3d_slab})}
 \label{ht3d_slab}
 
 In this test case, we utilize the non-steady state conduction solution provided in Carslaw and Jaeger \cite{Carslaw:1} for a semi-infinite slab exposed to a constant ambient temperature, $T_\infty$, with a constant convective heat transfer coefficient, $h$, and no radiation (see also Drysdale \cite{Drysdale:1}, Eq.~(2.25)).  The initial temperature of the slab, $T_0$, is set to \SI{1000}{\degreeCelsius}. The thermal properties of the slab, $k=1$ \si{W/(m.K)}, $\rho=1000$ \si{kg/m^3}, and $c=0.001$ \si{kJ/(kg.K)}, are set to give a thermal diffusivity, $\alpha$, of 0.001 \si{m^2/s}. The analytical solution for this problem for the solid temperature, $T(x,t)$, is given by
@@ -4971,7 +4975,7 @@ The main purpose of this verification case is to check the accuracy of the conti
 
 \FloatBarrier
 
-\subsection{3-D Heat Diffusion in a Steel I-Beam (\texorpdfstring{\ct{ht3d_ibeam}}{ht3d_ibeam})}
+\subsection{3-D Heat Diffusion in a Steel I-Beam (\ct{ht3d_ibeam})}
 \label{ht3d_ibeam}
 
 The purpose of this test case is to compare FDS HT3D with a well-established commercial finite-element model (ANSYS) for a reasonably practical problem.  We consider a steel I-beam cross-section $0.4 \;\si{m}$ on each side.  The flanges are $6 \;\si{cm}$ thick and the web is $4 \;\si{cm}$ thick.  The grid resolution for both FEM and FDS models is $\Delta x = 1 \;\si{cm}$.  The thermal properties of the steel are taken to be constant: $k=45 \;\si{W/(m.K)}$, $\rho=7850 \;\si{kg/m^3}$, and $c = 0.60 \;\si{kJ/(kg.K)}$.  The boundary conditions are adiabatic except for a hot patch on the front half of the bottom flange maintained at $800 \;\si{\degreeCelsius}$.  The initial temperature of the steel is $20 \;\si{\degreeCelsius}$ and the case is run for 3600 s.  Note that the FEM model is run with a time step comparable to the explicit stability criterion ($\Delta t \approx 1.7 \;\si{s}$) in order to yield time accurate results for comparison with FDS.
@@ -5002,7 +5006,7 @@ Figure \ref{fig:ht3d_ibeam_contours} shows a comparison between the surface temp
 
 \FloatBarrier
 
-\subsection{3-D Heat Diffusion in Thin Steel Plates (\texorpdfstring{\ct{ht3d_network}}{ht3d_network})}
+\subsection{3-D Heat Diffusion in Thin Steel Plates (\ct{ht3d_network})}
 \label{ht3d_network}
 
 This case tests the 3-D solid phase solver for a network of thin steel plates. Consider the image in Fig.~\ref{fig:ht3d_network} which shows a collection of connected steel plates that are 20~cm wide and 1~cm thick. Two hot panels heat up the single plate to the left and the heat is conducted through the network of plates. Besides the left-most plate, all other plates are perfectly insulated. The plot on the right simply demonstrates that the temperature of the outer two of the four right-most extremities are the same, verifying that the distribution of heat is symmetric given a symmetric arrangement of plates.
@@ -5022,7 +5026,7 @@ This case tests the 3-D solid phase solver for a network of thin steel plates. C
 \FloatBarrier
 
 
-\subsection{3-D Heat Diffusion in a Sphere (\texorpdfstring{\ct{ht3d_sphere}}{ht3d_sphere})}
+\subsection{3-D Heat Diffusion in a Sphere (\ct{ht3d_sphere})}
 \label{sec:ht3d_sphere}
 \label{ht3d_sphere_96}
 \label{ht3d_sphere_48}
@@ -5053,7 +5057,7 @@ The simulation is run for 180~s. Shown in Fig.~\ref{fig:ht3d_sphere_time} is a c
 
 \FloatBarrier
 
-\subsection{3-D Heat Conduction in a Layered Solid (\texorpdfstring{\ct{ht3d_pile}}{ht1d_pile})}
+\subsection{3-D Heat Conduction in a Layered Solid (\ct{ht3d_pile})}
 \label{ht1d_pile}
 \label{ht3d_pile}
 
@@ -5206,7 +5210,7 @@ A 1~m by 2~m rectangular metal plate ($k=50$~W/(m~K), $\rho=7850$~kg/m$^3$, $c=0
 
 This chapter includes tests of the routines that calculate the thermal decomposition of materials. Solid surfaces can consist of multiple layers, and each layer can consist of multiple material components. Each material component may undergo several competing reactions, and each of these reactions may produce some other solid component (residue), gaseous fuel, and/or water vapor.
 
-\section{Conservation of Pyrolyzed Mass (\texorpdfstring{\ct{surf_mass_conservation}}{surf_mass_conservation})}
+\section{Conservation of Pyrolyzed Mass (\ct{surf_mass_conservation})}
 
 The calculations described in this section check the conservation of mass produced by the pyrolysis algorithm. In the tests, four independent modeling options are varied:
 \begin{enumerate}
@@ -5331,7 +5335,7 @@ Figure~\ref{surf_mass_two_species} shows the results of three test cases involvi
 
 \clearpage
 
-\subsection{Rate of Solid Particle Decomposition (\texorpdfstring{\ct{part_baking_soda}}{part_baking_soda})}
+\subsection{Rate of Solid Particle Decomposition (\ct{part_baking_soda})}
 \label{sec:solid_particle_decomposition}
 \label{part_baking_soda}
 
@@ -5418,7 +5422,7 @@ We consider the contracting volume model applied to a spherical baking soda (NaH
 \label{fig:part_baking_soda}
 \end{figure}
 
-\section{Conservation of Pyrolyzed Energy (\texorpdfstring{\ct{matl_e_cons}}{matl_e_cons})}
+\section{Conservation of Pyrolyzed Energy (\ct{matl_e_cons})}
 \label{matl_e_cons}
 
 Nine simple test cases are created to verify the process of ensuring the \ct{MATL} reactions conserve energy. Each case is a cube 1~m on a side with 4 grid cells in each dimension. One or more materials and gas species are defined. All materials are defined with a density of 1~\si{kg/m^3}. All species are defined with a molecular weight of 1000~\si{g/mol}. This is done for convenience as it means that the heat of formation in \si{kJ/mol} is the same numerical values as the enthalpy in \si{kJ/kg}. For each material that is defined, a single wall cell \ct{VENT} is defined with a \ct{SURF} such that the wall cell contains 1~kg of material. The \ct{WALL ENTHALPY} is output for each wall cell. The cases are explained below with results shown in Figs.~\ref{fig:matl_e_cons1} and ~\ref{fig:matl_e_cons2}.
@@ -5487,7 +5491,7 @@ Case 9 takes case 1 and produces a particle of a second material with the same s
    \label{fig:matl_e_cons2}
 \end{figure}
 
-\section{Burning Rate of a Small Object (\texorpdfstring{\ct{cell_burn_away}}{cell_burn_away})}
+\section{Burning Rate of a Small Object (\ct{cell_burn_away})}
 \label{cell_burn_away}
 
 In FDS, it is assumed that heat conduction and pyrolysis within solids are functions of depth only. This can be problematic in cases where entire solid obstructions burn away. In this example, a single grid cell, 4~cm on a side, is made up of a material with density $\rho_{\rm s}=50$~\si{kg/m^3} and constant reaction rate, $r_{\rm s}=0.05$~s$^{-1}$. The burning rate of the single grid cell, $\dm$, is given by:
@@ -5509,7 +5513,7 @@ Figure~\ref{cell_burn_away_fig} displays the computed and analytical burning rat
 
 \section{Evaporation of a Liquid Surface}
 
-\subsection{Mass Conservation (\texorpdfstring{\ct{surf_mass_vent_liquid}}{surf_mass_vent_liquid})}
+\subsection{Mass Conservation (\ct{surf_mass_vent_liquid})}
 \label{surf_mass_vent_liquid_fuel}
 \label{surf_mass_vent_liquid_fuel_nonconforming}
 
@@ -5526,7 +5530,7 @@ To test the liquid fuel evaporation model, a 1~cm deep pool of heptane is expose
 
 \FloatBarrier
 
-\subsection{Evaporation Rate (\texorpdfstring{\ct{water_pool}}{water_pool})}
+\subsection{Evaporation Rate (\ct{water_pool})}
 \label{water_pool}
 
 In this example, air with an $\rm{RH}=25$~\% relative humidity and temperature $T_{\rm a}=305$~K flows with velocity $U=0.15$~m/s over an $L=1.2$~m long, $W=1$~m wide pool of water with a surface temperature of $T_{\rm s}=293$~K. The evaporation rate of water is given by the following relation:
@@ -5573,7 +5577,7 @@ Figure~\ref{water_pool_fig} compares the FDS predicted versus the theoretical ev
 \FloatBarrier
 
 
-\section{Change in Surface Emissivity (\texorpdfstring{\ct{emissivity}}{emissivity})}
+\section{Change in Surface Emissivity (\ct{emissivity})}
 
 For thermally thick materials, the surface emissivity is computed as a mass-weighted sum of the individual values of the emissivity in the first condensed phase grid cell. In this verification test, the initial material, having emissivity of 1.0, is converted to another material, having emissivity of 0.0, at a constant rate of 0.1~s$^{-1}$. As a result, the surface emissivity should change linearly from 1.0 to 0.0 in 10~s (Fig.~\ref{emissivity}).
 
@@ -7875,7 +7879,7 @@ For line devices (\ct{POINTS=...}) used together with \ct{SPATIAL_STATISTIC='INT
 \end{figure}
 
 
-\bibliography{../Bibliography/FDS_refs,../Bibliography/FDS_general,../Bibliography/FDS_mathcomp}
+\printbibliography[heading=bibintoc,title={References}]
 
 
 \appendix
