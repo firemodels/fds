@@ -436,7 +436,7 @@ ELSEIF (PRESENT(PARTICLE_INDEX)) THEN
       B1%Q_RAD_IN = B1%EMISSIVITY*SIGMA*B1%TMP_G**4
    ENDIF
    
-   IF (.NOT. LPC%SUBGRID_INTERPOLATION) THEN
+   IF (.NOT.SF%THERMAL_BC_INDEX==THERMALLY_THICK) THEN
    
       IF (SF%TMP_GAS_FRONT < 0._EB) B1%TMP_G =  TMP(BC%IIG,BC%JJG,BC%KKG)
       B1%RHO_G = RHOP(BC%IIG,BC%JJG,BC%KKG)
@@ -446,7 +446,7 @@ ELSEIF (PRESENT(PARTICLE_INDEX)) THEN
       WBAR = 0.5_EB*(WW(BC%IIG,BC%JJG,BC%KKG)+WW(BC%IIG,BC%JJG,BC%KKG-1)) - LP%W
       B1%U_TANG = SQRT(UBAR**2+VBAR**2+WBAR**2)
    
-   ELSE ! Do gradient based interpolation for the near-surface quantities. B1%U_TANG interpolation is in part.f90
+   ELSE ! For thermally thick particles, interpolate near-surface quantities. B1%U_TANG interpolation is in part.f90
 
       ! Get reusable interpolation coefficients
       CALL GET_TRILINEAR_WEIGHTS(BC%IIG,BC%JJG,BC%KKG,BC%X,BC%Y,BC%Z,TLW_IND,TLW)

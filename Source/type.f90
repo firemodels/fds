@@ -162,7 +162,6 @@ TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
    LOGICAL :: INCLUDE_BOUNDARY_ONE_D_TYPE=.FALSE.    !< This particle requires in-depth 1-D conduction/reaction arrays
    LOGICAL :: INCLUDE_BOUNDARY_RADIA_TYPE=.FALSE.    !< This particle requires angular-specific radiation intensities
    LOGICAL :: DEBUG=.FALSE.                          !< Flag indicating if known quantities are output for smokeviewe debugging
-   LOGICAL :: SUBGRID_INTERPOLATION=.TRUE.           !< Flag indicating if gas quantities should be interpolated for particles
 
    TYPE(STORAGE_TYPE) :: PARTICLE_STORAGE            !< Storage space for a single particle that is saved during a RESTART
 
