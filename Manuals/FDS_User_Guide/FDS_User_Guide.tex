@@ -18,9 +18,12 @@
 {\input{../Bibliography/gitrevision}}
 {\newcommand{\gitrevision}{unknown}}
 
+\addbibresource{../Bibliography/FDS_refs.bib}
+\addbibresource{../Bibliography/FDS_general.bib}
+\addbibresource{../Bibliography/FDS_mathcomp.bib}
+
 \begin{document}
 
-\bibliographystyle{unsrt}
 \pagestyle{empty}
 
 
@@ -2291,11 +2294,6 @@ The impinging jet model is an extension of the user-specified $h$ that allows yo
 &SURF ID='WALL', HEAT_TRANSFER_MODEL='IMPINGING JET', XYZ=0,0,1, HEAT_TRANSFER_COEFFICIENT=50, HEAT_TRANSFER_COEFFICIENT_SIGMA=0.5 /
 \end{lstlisting}
 
-\subsubsection{Specifying the Heat Flux at a Solid Surface}
-\label{info:net_and_convective_heat_flux}
-
-Instead of altering the convective heat transfer coefficient, a fixed heat flux may be specified directly.  Two methods are available to do this.  The first is to specify a \ct{NET_HEAT_FLUX} in units of \unit{kW/m^2}.  When this is specified FDS will compute the surface temperature required to ensure that the combined radiative and convective heat flux from the surface is equal to the \ct{NET_HEAT_FLUX}. The second method is to specify the \ct{CONVECTIVE_HEAT_FLUX}, in units of \unit{kW/m^2}. The radiative flux is then determined based on the \ct{EMISSIVITY} on the \ct{SURF} line and the wall temperature needed to get the desired \ct{CONVECTIVE_HEAT_FLUX}. Setting the \ct{EMISSIVITY} to zero will result in there being only a convective heat flux from a surface.  If \ct{NET_HEAT_FLUX} or \ct{CONVECTIVE_HEAT_FLUX} is positive, the wall heats up the surrounding gases. If \ct{NET_HEAT_FLUX} or \ct{CONVECTIVE_HEAT_FLUX} is negative, the wall cools the surrounding gases. You cannot specify \ct{TMP_FRONT} with \ct{NET_HEAT_FLUX} since \ct{NET_HEAT_FLUX} combines radiative and convective flux, and FDS must compute the wall temperature to get the desired flux. Specifying \ct{TMP_FRONT} and \ct{CONVECTIVE_HEAT_FLUX} will result in FDS using the gas temperature adjacent to a wall cell to set the convection heat transfer coefficient to achieve the desired \ct{CONVECTIVE_HEAT_FLUX} for that wall cell. If a droplet lands surface with a specified heat flux, no heat transfer will be predicted between the droplet and the surface. This is because the high heat transfer rates associated with droplets can lead to nonsensical wall temperatures when trying to enforce the specific flux which are then likely to result in runtime errors or numerical instabilities.
-
 \subsubsection{Logarithmic Law of the Wall}
 
 Near-wall treatments, such as wall models or wall functions, aim to mimic the sudden change from molecular to turbulent transport close to the walls using algebraic formulations without the need of resolving the otherwise computationally expensive region of the near-wall flow-field. The main theory follows dimensional analysis based on the idea that shear at the wall is constant. Accordingly, the non-dimensional velocity $u^+$ is calculated using a wall function \cite{FDS_Tech_Guide}.
@@ -2314,6 +2312,14 @@ If a surface is emitting (``blowing'') or removing (``sucking'') gas, the flow n
       h_{\rm blowing} = \underbrace{\left[\frac{\Phi_h}{{\exp}(\Phi_h)-1}\right]}_{{\mbox{\scriptsize \tt BLOWING CORRECTION}}} h \quad ; \quad \Phi_h = \frac{\dot{m}'' c_p}{h}
 \end{equation}
 where $h$ is the unadjusted heat transfer coefficient, $\dot{m}''$ is the mass flow rate per unit area (positive for blowing), and $c_p$ is the specific heat of the gas.,
+
+
+\subsubsection{Specifying the Heat Flux at a Solid Surface}
+\label{info:net_and_convective_heat_flux}
+
+Instead of altering the convective heat transfer coefficient, a fixed heat flux may be specified directly.  Two methods are available to do this.  The first is to specify a \ct{NET_HEAT_FLUX} in units of \unit{kW/m^2}.  When this is specified FDS will compute the surface temperature required to ensure that the combined radiative and convective heat flux from the surface is equal to the \ct{NET_HEAT_FLUX}. The second method is to specify the \ct{CONVECTIVE_HEAT_FLUX}, in units of \unit{kW/m^2}. The radiative flux is then determined based on the \ct{EMISSIVITY} on the \ct{SURF} line and the wall temperature needed to get the desired \ct{CONVECTIVE_HEAT_FLUX}. Setting the \ct{EMISSIVITY} to zero will result in there being only a convective heat flux from a surface.  If \ct{NET_HEAT_FLUX} or \ct{CONVECTIVE_HEAT_FLUX} is positive, the wall heats up the surrounding gases. If \ct{NET_HEAT_FLUX} or \ct{CONVECTIVE_HEAT_FLUX} is negative, the wall cools the surrounding gases. You cannot specify \ct{TMP_FRONT} with \ct{NET_HEAT_FLUX} since \ct{NET_HEAT_FLUX} combines radiative and convective flux, and FDS must compute the wall temperature to get the desired flux. Specifying \ct{TMP_FRONT} and \ct{CONVECTIVE_HEAT_FLUX} will result in FDS using the gas temperature adjacent to a wall cell to set the convection heat transfer coefficient to achieve the desired \ct{CONVECTIVE_HEAT_FLUX} for that wall cell. If a droplet lands surface with a specified heat flux, no heat transfer will be predicted between the droplet and the surface. This is because the high heat transfer rates associated with droplets can lead to nonsensical wall temperatures when trying to enforce the specific flux which are then likely to result in runtime errors or numerical instabilities.
+
+The \ct{SURF} parameters \ct{NET_HEAT_FLUX} and \ct{CONVECTIVE_HEAT_FLUX} will not work with a \ct{MATL_ID}.  When 1D heat conduction into the solid is considered, you can specify an \ct{EXTERNAL_FLUX} as discussed in Sec.~\ref{info:simulating_the_cone_calorimeter}, which \emph{supplements} the net surface heat flux.  But in certain situations (usually for verification tests), you may want to directly control the incident radiative heat flux to the surface.  To do this, you can use \ct{EXTERNAL_FLUX} and add \ct{SKIP_INRAD=T} on the \ct{SURF} line.  The incoming radiation to the surface is then \emph{replaced} by the specified \ct{EXTERNAL_FLUX}.
 
 \subsection{Adiabatic Surfaces}
 \label{info:adiabatic}
@@ -3302,9 +3308,8 @@ Note that the 3-D heat conduction equation is solved via 1-D segments in all thr
 \paragraph{Case 11} (\ct{box_burn_away11}) The ``box'' in this case consists of 0.4~m by 0.4~m by 1~cm plates forming a collection of 10~cm cubical compartments. There are 15 plates in all, each with a density of 20~kg/m$^3$. The total mass is 0.48~kg.
 
 \begin{figure}[!ht]
-\begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.0in]{SCRIPT_FIGURES/box_burn_away11} &
-\end{tabular*}
+\centering
+\includegraphics[width=3.0in]{SCRIPT_FIGURES/box_burn_away11}
 \caption[Results of the \ct{box_burn_away11} test case]{Output of \ct{box_burn_away11} test case.}
 \label{box_burn_away_11}
 \end{figure}
@@ -3335,6 +3340,7 @@ Delamination (fall-off) of material layers can occur e.g. in glued materials, su
 The \ct{SURF} and \ct{MATL} lines describing the pyrolysis of real materials consist of a combination of empirical and fundamental properties, often originating from different sources. How do you know that the various property values and the associated thermo-physical model in FDS constitute an appropriate description of the solid? For a full-scale simulation, it is hard to untangle the uncertainties associated with the gas and solid phase routines. However, you can perform a simple check of any set of solid phase model by essentially turning off the gas phase.  In the following sections, guidance is provided on how to perform a quick simulation of the cone calorimeter and bench-scale measurements like thermal gravimetric analysis (TGA), differential scanning calorimetry (DSC), and micro-combustion calorimetry (MCC).
 
 \subsection{Simulating the Cone Calorimeter}
+\label{info:simulating_the_cone_calorimeter}
 
 This section describes how to set up a simple model of the cone calorimeter or similar apparatus. This is not a full 3-D simulation of the apparatus, but rather a 1-D simulation of the solid phase degradation under an imposed external heat flux. While a full 3-D simulation of the cone heater and sample holder can be created in FDS, such a simulation would take some time to complete and would not disentangle issues with the solid phase model from uncertainties in the gas phase. It is worthwhile to perform a quick simulation like the one described here to test the solid phase model only.
 \begin{enumerate}
@@ -13742,6 +13748,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{RGB(3)}                                              & Integer Array   & Section~\ref{info:colors}                 &                     & \small 255,204,102      \\ \hline
 \ct{ROUGHNESS}                                           & Real            & Section~\ref{info:WALL_MODEL}             & m                   & 0.                      \\ \hline
 \ct{SHAPE_FACTOR}                                       & Real            & Section~\ref{info:boundary_fuel_model}    &                     & 0.25                    \\ \hline
+\ct{SKIP_INRAD}                                         & Logical         & Section~\ref{info:net_and_convective_heat_flux} &               & \ct{F}                  \\ \hline
 \ct{SPEC_ID}                                            & Character       & Section~\ref{info:MASS_FLUX}              &                     &                         \\ \hline
 \ct{SPREAD_RATE}                                        & Real            & Section~\ref{info:spread}                 & m/s                 &                         \\ \hline
 \ct{STRETCH_FACTOR(:)}                                  & Real Array      & Section~\ref{info:solid_phase_stability}  &                     & 2.                      \\ \hline
@@ -15314,7 +15321,7 @@ File extension  & Short Description   & Reference    \\ \hline \hline
 %\backmatter
 \nopart %To Fix TOC in PDF output.
 
-\bibliography{../Bibliography/FDS_refs,../Bibliography/FDS_general,../Bibliography/FDS_mathcomp}
+\printbibliography[heading=bibintoc,title={References}]
 
 
 \appendix

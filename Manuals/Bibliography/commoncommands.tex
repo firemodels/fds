@@ -63,6 +63,7 @@
 \usepackage[section]{placeins}
 \usepackage{scrextend}
 \usepackage{needspace}
+\usepackage[backend=biber, style=numeric, sorting=none, backref=true]{biblatex}
 
 \newcommand{\nopart}{\expandafter\def\csname Parent-1\endcsname{}} % To fix table of contents in pdf.
 \newcommand{\ct}[1]{\lstinline{#1}}
@@ -103,7 +104,6 @@
         citecolor=linkred,     % citation number colors
         linkcolor=linknavy,    % \ref{...} and \pageref{...}
         pdfproducer={pdflatex},
-        pagebackref,
         pdfpagemode=UseNone,
         bookmarksopen=true,
         plainpages=false,
