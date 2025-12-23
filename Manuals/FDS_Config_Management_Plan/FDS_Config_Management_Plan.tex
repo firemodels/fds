@@ -18,9 +18,13 @@
 {\input{../Bibliography/gitrevision}}
 {\newcommand{\gitrevision}{unknown} }
 
+\addbibresource{../Bibliography/FDS_refs.bib}
+\addbibresource{../Bibliography/FDS_general.bib}
+\addbibresource{../Bibliography/FDS_mathcomp.bib}
+
+
 \begin{document}
 
-\bibliographystyle{unsrt}
 \pagestyle{empty}
 
 \begin{minipage}[t][9in][s]{6.5in}
@@ -547,7 +551,7 @@ No specific training is identified for use of this plan.  Details of training re
 \backmatter
 \nopart
 
-\bibliography{../Bibliography/FDS_refs,../Bibliography/FDS_general,../Bibliography/FDS_mathcomp}
+\printbibliography[heading=bibintoc,title={References}]
 
 \printindex
 

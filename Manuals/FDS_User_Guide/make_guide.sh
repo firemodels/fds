@@ -11,7 +11,7 @@ gitrevision=`git describe --abbrev=7 --long --dirty`
 echo "\\newcommand{\\gitrevision}{$gitrevision}" > ../Bibliography/gitrevision.tex
 
 pdflatex -interaction nonstopmode FDS_User_Guide &> FDS_User_Guide.err
-bibtex FDS_User_Guide &> FDS_User_Guide.err
+biber FDS_User_Guide &> FDS_User_Guide.err
 pdflatex -interaction nonstopmode FDS_User_Guide &> FDS_User_Guide.err
 pdflatex -interaction nonstopmode FDS_User_Guide &> FDS_User_Guide.err
 pdflatex -interaction nonstopmode FDS_User_Guide &> FDS_User_Guide.err
