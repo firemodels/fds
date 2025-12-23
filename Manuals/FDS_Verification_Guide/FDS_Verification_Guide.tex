@@ -6224,6 +6224,18 @@ The results are shown in the right hand plot of Fig.~\ref{vegetation_drag_fig} f
 \end{figure}
 
 
+\subsubsection{Particle Drag Near Surfaces}
+\label{sec:particle_drag_near_surfaces}
+
+This test series examines the drag force experienced by a static particle near a wall.  We specify a linear velocity field and apply the no slip condition at the surface.  By specifying \ct{NEAR_WALL_PARTICLE_INTERPOLATION=T} on the \ct{MISC} line, the particle velocity used to apply the drag force is linearly interpolated from the wall to the center of first off-wall cell.  Hence, the drag force is quadratic.  Each direction and momentum component is exercised in the \ct{Verification/WUI/part_drag_prof_*} series.  The results are shown in Fig.~\ref{fig:part_drag_profile}.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/part_drag_profile}
+\caption[The \ct{WUI/part_drag_prof} test cases]{Wall-resolved particle drag force profiles.}
+\label{fig:part_drag_profile}
+\end{figure}
+
 
 \subsection{Mesh Screen in a Duct (\texorpdfstring{\ct{screen_drag}}{screen_drag})}
 \label{screen_drag_1}
@@ -7375,13 +7387,13 @@ to split a sphere in latitudinal (north/south) and longitudinal (east/west) dire
 \begin{tabular}{cc}
  \includegraphics[width=3.in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_sphere3a.png}&
  \includegraphics[width=3.in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_sphere3b.png}\\
- N_LAT=3,N_LONG=6&N_LAT=6,N_LONG=12\\
+ N\_LAT=3,N\_LONG=6&N\_LAT=6,N\_LONG=12\\
  \includegraphics[width=3.in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_sphere3c.png}&
  \includegraphics[width=3.in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_sphere3d.png}\\
- N_LAT=12,N_LONG=24&N_LAT=24,N_LONG=48\\
+ N\_LAT=12,N\_LONG=24&N\_LAT=24,N\_LONG=48\\
  \includegraphics[width=3.in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_sphere3e.png}&
  \includegraphics[width=3.in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_sphere3f.png}\\
- N_LAT=48,N_LONG=96&N_LAT=96,N_LONG=192\\
+ N\_LAT=48,N\_LONG=96&N\_LAT=96,N\_LONG=192\\
   \end{tabular}
 \end{center}
 \caption[Latitude/longitude sphere discretization]{Latitude/longitude sphere discretization.  Spheres are split in longitudinal (east/west) and latitudinal (north/south) directions using the \ct{N_LAT}\ and \ct{N_LONG} keywords. Cases: \ct{geom_sphere3a.fds,...,geom_sphere3f.fds}}
