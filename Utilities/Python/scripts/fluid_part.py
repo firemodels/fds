@@ -456,7 +456,8 @@ f_x = c_d * a_p * 0.5*rho_g*(u_z**2)  # drag experienced by a single particle
 fig = fdsplotlib.plot_to_fig(x_data=z, y_data=-f_x, line_style='k-', data_label='exact',
                              x_min=0, x_max=10, y_min=-0.01, y_max=0,
                              revision_label=version_string,
-                             x_label='Position (m)', y_label='Drag Force (N)')
+                             x_label='Position (m)', y_label='Drag Force (N)',
+                             legend_location='lower left')
 
 ddir = '../../Verification/WUI/'
 chid = ['part_drag_prof_ux', 'part_drag_prof_uy', 'part_drag_prof_uz',
@@ -468,16 +469,26 @@ for i in range(len(chid)):
 
     STIME, XP, YP, ZP, QP = read_prt5(ddir + chid[i] + '_1.prt5', 'real*4')
 
+    N = 100
+
     if j[i] == 1:
-        fdsplotlib.plot_to_fig(x_data=XP[-1, :], y_data=QP[-1, :, 0, 0]/QP[-1, :, 0, 1], figure_handle=fig, marker_style='bo')
-        v = np.abs(c_d * a_p * 0.5*rho_g*(XP[-1, :]**2) - QP[-1, :, 0, 0]/QP[-1, :, 0, 1])
+        npts = XP.shape[1]
+        idx = np.linspace(0, npts - 1, N).astype(int)
+        fds_key_label = 'FDS part $x$' if i==0 else None
+        fdsplotlib.plot_to_fig(x_data=XP[-1, idx], y_data=QP[-1, idx, 0, 0]/QP[-1, idx, 0, 1], figure_handle=fig, marker_style='bo', data_label=fds_key_label)
+        v = np.abs(c_d * a_p * 0.5*rho_g*(XP[-1, idx]**2) - QP[-1, idx, 0, 0]/QP[-1, idx, 0, 1])
     elif j[i] == 2:
-        fdsplotlib.plot_to_fig(x_data=YP[-1, :], y_data=QP[-1, :, 0, 0]/QP[-1, :, 0, 1], figure_handle=fig, marker_style='ro')
-        v = np.abs(c_d * a_p * 0.5*rho_g*(YP[-1, :]**2) - QP[-1, :, 0, 0]/QP[-1, :, 0, 1])
+        npts = YP.shape[1]
+        idy = np.linspace(0, npts - 1, N).astype(int)
+        fds_key_label = 'FDS part $y$' if i==1 else None
+        fdsplotlib.plot_to_fig(x_data=YP[-1, idy], y_data=QP[-1, idy, 0, 0]/QP[-1, idy, 0, 1], figure_handle=fig, marker_style='ro', data_label=fds_key_label)
+        v = np.abs(c_d * a_p * 0.5*rho_g*(YP[-1, idy]**2) - QP[-1, idy, 0, 0]/QP[-1, idy, 0, 1])
     elif j[i] == 3:
-        fds_key_label = 'FDS part' if i==2 else None
-        fdsplotlib.plot_to_fig(x_data=ZP[-1, :], y_data=QP[-1, :, 0, 0]/QP[-1, :, 0, 1], figure_handle=fig, marker_style='go', data_label=fds_key_label)
-        v = np.abs(c_d * a_p * 0.5*rho_g*(ZP[-1, :]**2) - QP[-1, :, 0, 0]/QP[-1, :, 0, 1])
+        npts = ZP.shape[1]
+        idz = np.linspace(0, npts - 1, N).astype(int)
+        fds_key_label = 'FDS part $z$' if i==2 else None
+        fdsplotlib.plot_to_fig(x_data=ZP[-1, idz], y_data=QP[-1, idz, 0, 0]/QP[-1, idz, 0, 1], figure_handle=fig, marker_style='go', data_label=fds_key_label)
+        v = np.abs(c_d * a_p * 0.5*rho_g*(ZP[-1, idz]**2) - QP[-1, idz, 0, 0]/QP[-1, idz, 0, 1])
 
     err = np.linalg.norm(v)/len(v)
     #if err > 1e-4:
