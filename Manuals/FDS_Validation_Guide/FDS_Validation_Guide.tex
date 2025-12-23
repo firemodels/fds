@@ -22,9 +22,13 @@
 
 %\includeonly{Experiment_Chapter,HGL_Chapter,Velocity_Chapter}
 
+\addbibresource{../Bibliography/FDS_refs.bib}
+\addbibresource{../Bibliography/FDS_general.bib}
+\addbibresource{../Bibliography/FDS_mathcomp.bib}
+
+
 \begin{document}
 
-\bibliographystyle{unsrt}
 \pagestyle{empty}
 
 \begin{minipage}[t][9in][s]{6.5in}
@@ -293,6 +297,6 @@ Table~\ref{validation_git_stats} shows the Git repository statistics for all of 
 \IfFileExists{SCRIPT_FIGURES/Scatterplots/validation_git_stats.tex}{\input{SCRIPT_FIGURES/Scatterplots/validation_git_stats.tex}}{\typeout{Error: Missing file SCRIPT_FIGURES/Scatterplots/validation_git_stats.tex}}
 
 
-\bibliography{../Bibliography/FDS_refs,../Bibliography/FDS_general,../Bibliography/FDS_mathcomp}
+\printbibliography[heading=bibintoc,title={References}]
 
 \end{document}

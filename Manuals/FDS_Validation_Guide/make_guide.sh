@@ -20,7 +20,7 @@ gitrevision=`git describe --abbrev=7 --long --dirty`
 echo "\\newcommand{\\gitrevision}{$gitrevision}" > ../Bibliography/gitrevision.tex
 
 pdflatex -interaction nonstopmode FDS_Validation_Guide &> FDS_Validation_Guide.err
-bibtex FDS_Validation_Guide &> FDS_Validation_Guide.err
+biber FDS_Validation_Guide &> FDS_Validation_Guide.err
 pdflatex -interaction nonstopmode FDS_Validation_Guide &> FDS_Validation_Guide.err
 pdflatex -interaction nonstopmode FDS_Validation_Guide &> FDS_Validation_Guide.err
 pdflatex -interaction nonstopmode FDS_Validation_Guide &> FDS_Validation_Guide.err
