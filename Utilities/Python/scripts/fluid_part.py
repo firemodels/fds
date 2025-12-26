@@ -509,8 +509,11 @@ ddir = '../../Verification/WUI/'
 chid = 'part_temp_prof'
 
 STIME, XP, YP, ZP, QP = read_prt5(ddir + chid + '_1.prt5', 'real*4')
-z_fds = ZP[-1, :].flatten()
-T_g_fds = QP[-1, :, 0, 0].flatten()
+N = 200
+npts = ZP.shape[1]
+idz = np.linspace(0, npts - 1, N).astype(int)
+z_fds = ZP[-1, idz].flatten()
+T_g_fds = QP[-1, idz, 0, 0].flatten()
 fig = fdsplotlib.plot_to_fig(x_data=z_fds, y_data=T_g_fds, marker_style='bo',
                             x_min=0, x_max=10, y_min=0, y_max=1000,
                             data_label='FDS',revision_label=version_string,
@@ -538,8 +541,11 @@ ddir = '../../Verification/WUI/'
 chid = 'part_spec_prof'
 
 STIME, XP, YP, ZP, QP = read_prt5(ddir + chid + '_1.prt5', 'real*4')
-z_fds = ZP[-1, :].flatten()
-Y_O2_fds = QP[-1, :, 0, 0].flatten()/QP[-1, :, 0, 1].flatten()
+N = 200
+npts = ZP.shape[1]
+idz = np.linspace(0, npts - 1, N).astype(int)
+z_fds = ZP[-1, idz].flatten()
+Y_O2_fds = QP[-1, idz, 0, 0].flatten()/QP[-1, idz, 0, 1].flatten()
 fig = fdsplotlib.plot_to_fig(x_data=z_fds, y_data=Y_O2_fds, marker_style='bo',
                             x_min=0, x_max=10, y_min=0, y_max=0.23,
                             data_label='FDS',revision_label=version_string,

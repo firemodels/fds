@@ -40,7 +40,6 @@
       SURF_ID        = 'Blade of Grass'
       QUANTITIES     = 'GAS DENSITY','GAS DENSITY'
       QUANTITIES_SPEC_ID = 'OXYGEN'
-      SUBGRID_INTERPOLATION = T
       STATIC         = .TRUE. /
 
 &INIT PART_ID              = 'Blade of Grass'

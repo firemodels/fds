@@ -44,7 +44,6 @@
       COLOR          = 'FOREST GREEN'
       SURF_ID        = 'Blade of Grass'
       QUANTITIES     = 'PARTICLE TEMPERATURE','CONVECTIVE HEAT FLUX'
-      SUBGRID_INTERPOLATION = T
       STATIC         = .TRUE. /
 
 &INIT PART_ID              = 'Blade of Grass'
