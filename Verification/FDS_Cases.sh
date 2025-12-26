@@ -901,6 +901,8 @@ $QFDS -d WUI part_drag_prof_wx.fds
 $QFDS -d WUI part_drag_prof_wy.fds
 $QFDS -d WUI part_drag_prof_wz.fds
 $QFDS -d WUI part_drag_stretched.fds
+$QFDS -d WUI part_spec_prof.fds
+$QFDS -d WUI part_temp_prof.fds
 $QFDS -d WUI pine_needles.fds
 $QFDS -d WUI radiation_gas-veg_consistency_gas.fds
 $QFDS -d WUI radiation_gas-veg_consistency_veg.fds
