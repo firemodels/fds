@@ -14895,7 +14895,7 @@ MESH_LOOP: DO NM=1,NMESHES
       ENDDO
    ENDDO
 
-   ! Throw an error if there is an OBSTstruction that can be created or removed and that intersects another OBSTstruction
+   ! Throw an error if there is an OBSTstruction that can be created or removed that intersects another OBSTstruction that cannot
 
    OBST_LOOP: DO OBST_INDEX=1,N_OBST
       OB => OBSTRUCTION(OBST_INDEX)
@@ -14906,8 +14906,9 @@ MESH_LOOP: DO NM=1,NMESHES
             IF (OB%I2<=OB2%I1 .OR. OB%I1>=OB2%I2 .OR. &
                 OB%J2<=OB2%J1 .OR. OB%J1>=OB2%J2 .OR. &
                 OB%K2<=OB2%K1 .OR. OB%K1>=OB2%K2) CYCLE OBST_LOOP_2
-               WRITE(MESSAGE,'(4A)')  'ERROR(615): OBST ',TRIM(OB%ID),' cannot overlap OBST ',TRIM(OB2%ID)
-               CALL SHUTDOWN(MESSAGE) ; RETURN
+            IF (OB%REMOVABLE .EQV. OB2%REMOVABLE) CYCLE OBST_LOOP_2  ! If both obstructions can be removed, that is OK.
+            WRITE(MESSAGE,'(4A)')  'ERROR(615): OBST ',TRIM(OB%ID),' cannot overlap OBST ',TRIM(OB2%ID)
+            CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDDO OBST_LOOP_2
       ENDIF
    ENDDO OBST_LOOP
