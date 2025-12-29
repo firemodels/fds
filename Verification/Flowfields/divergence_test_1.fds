@@ -5,7 +5,10 @@
 &TRNY ID='trny', CC=0.5, PC=0.3 /
 &TRNZ ID='trnz', CC=0.7, PC=0.4 /
 
-&MISC STRATIFICATION=.FALSE., Y_CO2_INFTY=0.,HUMIDITY=0./ 
+&MISC STRATIFICATION=.FALSE., Y_CO2_INFTY=0.,HUMIDITY=0./
+
+! exercise UGLMAT with mesh stretching
+&PRES SOLVER='UGLMAT'/
 
 &TIME T_END=10. / 
 
