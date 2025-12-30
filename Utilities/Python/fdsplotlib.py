@@ -2040,8 +2040,11 @@ def scatplot(saved_data, drange, **kwargs):
            print(f"[scatplot] Processing {Scatter_Plot_Title}")
 
         # Match dataplot entries
-        match_idx = [i for i, q in enumerate(Save_Quantity)
-                     if Scatter_Plot_Title.strip().lower() in str(q).lower()]
+        match_idx = [
+            i for i, q in enumerate(Save_Quantity)
+            if str(q).strip().lower() == Scatter_Plot_Title.strip().lower()
+        ]
+
         if not match_idx:
             print(f"[scatplot] No dataplot entries for {Scatter_Plot_Title}")
             continue
