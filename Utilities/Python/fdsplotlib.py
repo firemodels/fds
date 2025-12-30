@@ -374,10 +374,9 @@ def dataplot(config_filename, **kwargs):
         y, _ = get_data(E, pp.d1_Dep_Col_Name, start_idx)
 
         flip_axis = str(pp.Flip_Axis).strip().lower() in ['yes', 'true', '1']
-        x_scale = float(pp.Scale_Ind or 1.0)
-        y_scale = float(pp.Scale_Dep or 1.0)
-        x_scaled = np.asarray(x) / x_scale
-        y_scaled = np.asarray(y) / y_scale
+
+        x_scaled = np.asarray(x)
+        y_scaled = np.asarray(y)
 
         # ------------------------------------------------------------
         # Apply d1_Start / d1_End to PLOTTED DATA (not just stats)
@@ -397,6 +396,11 @@ def dataplot(config_filename, **kwargs):
             else:
                 x_scaled = np.where(mask, x_scaled, np.nan)
                 y_scaled = np.where(mask, y_scaled, np.nan)
+
+        x_scale = float(pp.Scale_Ind or 1.0)
+        y_scale = float(pp.Scale_Dep or 1.0)
+        x_scaled = x_scaled / x_scale
+        y_scaled = y_scaled / y_scale
 
         if x_scaled.ndim == 2 and y_scaled.ndim == 2 and x_scaled.shape[1] == y_scaled.shape[1]:
             x_plot_list = [x_scaled[:, i] for i in range(x_scaled.shape[1])]
@@ -535,10 +539,8 @@ def dataplot(config_filename, **kwargs):
         x, _ = get_data(M, pp.d2_Ind_Col_Name, start_idx)
         y, _ = get_data(M, pp.d2_Dep_Col_Name, start_idx)
 
-        x_scale = float(pp.Scale_Ind or 1.0)
-        y_scale = float(pp.Scale_Dep or 1.0)
-        x_scaled = np.asarray(x) / x_scale
-        y_scaled = np.asarray(y) / y_scale
+        x_scaled = np.asarray(x)
+        y_scaled = np.asarray(y)
 
         # ------------------------------------------------------------
         # Apply d2_Start / d2_End to PLOTTED DATA (model curves)
@@ -558,6 +560,11 @@ def dataplot(config_filename, **kwargs):
             else:
                 x_scaled = np.where(mask, x_scaled, np.nan)
                 y_scaled = np.where(mask, y_scaled, np.nan)
+
+        x_scale = float(pp.Scale_Ind or 1.0)
+        y_scale = float(pp.Scale_Dep or 1.0)
+        x_scaled = x_scaled / x_scale
+        y_scaled = y_scaled / y_scale
 
         if x_scaled.ndim == 2 and y_scaled.ndim == 2 and x_scaled.shape[1] == y_scaled.shape[1]:
             x_plot_list = [x_scaled[:, i] for i in range(x_scaled.shape[1])]
