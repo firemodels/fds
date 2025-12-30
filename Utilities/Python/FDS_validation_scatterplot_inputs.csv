@@ -38,5 +38,5 @@ Flame Tilt,Measured Flame Tilt (deg),Predicted Flame Tilt (deg),1,90,0.03 0.95,E
 Plume Height,Empirical Plume Height (m),Predicted Plume Height (m),10,1000,0.03 0.96,,1,-1,no,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/Scatterplots/FDS_Plume_Height
 Rate of Spread,Measured Rate of Spread (m/s),Predicted Rate of Spread (m/s),0.001,3,0.03 0.96,EastOutside,1.6,10,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/Scatterplots/FDS_Rate_of_Spread
 Condensation,Measured Heat Flux (kW/m²),Predicted Heat Flux (kW/m²),0,12,0.03 0.96,EastOutside,1.5,12,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/Scatterplots/FDS_Condensation
-Aerosol Deposition,Measured Mass (mg),Predicted Mass (mg),0,0.15,0.03 0.96,EastOutside,1.5,12,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/Scatterplots/FDS_Aerosol_Deposition
+Aerosol Deposition,Measured Mass (mg),Predicted Mass (mg),0,0.15,0.03 0.96,EastOutside,1.3,12,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/Scatterplots/FDS_Aerosol_Deposition
 Evaporation Rate,Measured Rate (dD²/dt),Predicted Rate (dD²/dt),1.00E-09,1.00E-07,0.03 0.95,EastOutside,1.3,-1,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/Scatterplots/FDS_Evaporation_Rate
