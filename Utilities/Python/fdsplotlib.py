@@ -2222,10 +2222,12 @@ def scatplot(saved_data, drange, **kwargs):
         log_M_bar = np.sum(np.log(Predicted_Values) * weight) / np.sum(weight)
 
         # Weighted variance
-        u2 = np.sum(
-            (((np.log(Predicted_Values) - np.log(Measured_Values))
-              - (log_M_bar - log_E_bar)) ** 2) * weight
-        ) / (np.sum(weight) - 1)
+        denom = np.sum(weight) - 1
+        if denom > 0:
+            u2 = np.sum(((np.log(Predicted_Values) - np.log(Measured_Values)
+                          - (log_M_bar - log_E_bar)) ** 2) * weight) / denom
+        else:
+            u2 = 0.0
 
         u = np.sqrt(u2)
 
@@ -2632,8 +2634,12 @@ def statistics_histogram(Measured_Values, Predicted_Values,
     ix = np.arange(x_lim[0], x_lim[1], 1e-3)
     mu = np.mean(ln_M_E)
     sd = np.std(ln_M_E, ddof=0)
-    iy = (1 / (sd * np.sqrt(2 * np.pi))) * np.exp(-(ix - mu) ** 2 / (2 * sd ** 2))
-    ax.plot(ix, iy * np.trapz(n, xcenters), 'k', linewidth=2)
+    if sd == 0:
+        # Degenerate distribution: all mass at mu
+        ax.axvline(mu, color='k', linewidth=2)
+    else:
+        iy = (1 / (sd * np.sqrt(2 * np.pi))) * np.exp(-(ix - mu) ** 2 / (2 * sd ** 2))
+        ax.plot(ix, iy * np.trapz(n, xcenters), 'k', linewidth=2)
 
     ax.set_xlim(x_lim)
     y0, y1 = ax.get_ylim()
