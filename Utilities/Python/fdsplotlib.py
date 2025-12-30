@@ -379,6 +379,25 @@ def dataplot(config_filename, **kwargs):
         x_scaled = np.asarray(x) / x_scale
         y_scaled = np.asarray(y) / y_scale
 
+        # ------------------------------------------------------------
+        # Apply d1_Start / d1_End to PLOTTED DATA (not just stats)
+        # ------------------------------------------------------------
+        if pp.d1_Start is not None or pp.d1_End is not None:
+            x0 = float(pp.d1_Start) if pp.d1_Start is not None else -np.inf
+            x1 = float(pp.d1_End)   if pp.d1_End   is not None else  np.inf
+
+            mask = (x_scaled >= x0) & (x_scaled <= x1)
+
+            # Preserve shape for multi-column data
+            if x_scaled.ndim == 2:
+                for j in range(x_scaled.shape[1]):
+                    mj = mask[:, j]
+                    x_scaled[:, j] = np.where(mj, x_scaled[:, j], np.nan)
+                    y_scaled[:, j] = np.where(mj, y_scaled[:, j], np.nan)
+            else:
+                x_scaled = np.where(mask, x_scaled, np.nan)
+                y_scaled = np.where(mask, y_scaled, np.nan)
+
         if x_scaled.ndim == 2 and y_scaled.ndim == 2 and x_scaled.shape[1] == y_scaled.shape[1]:
             x_plot_list = [x_scaled[:, i] for i in range(x_scaled.shape[1])]
             y_plot_list = [y_scaled[:, i] for i in range(y_scaled.shape[1])]
@@ -520,6 +539,25 @@ def dataplot(config_filename, **kwargs):
         y_scale = float(pp.Scale_Dep or 1.0)
         x_scaled = np.asarray(x) / x_scale
         y_scaled = np.asarray(y) / y_scale
+
+        # ------------------------------------------------------------
+        # Apply d2_Start / d2_End to PLOTTED DATA (model curves)
+        # ------------------------------------------------------------
+        if pp.d2_Start is not None or pp.d2_End is not None:
+            x0 = float(pp.d2_Start) if pp.d2_Start is not None else -np.inf
+            x1 = float(pp.d2_End)   if pp.d2_End   is not None else  np.inf
+
+            mask = (x_scaled >= x0) & (x_scaled <= x1)
+
+            # Preserve shape for multi-column data
+            if x_scaled.ndim == 2:
+                for j in range(x_scaled.shape[1]):
+                    mj = mask[:, j]
+                    x_scaled[:, j] = np.where(mj, x_scaled[:, j], np.nan)
+                    y_scaled[:, j] = np.where(mj, y_scaled[:, j], np.nan)
+            else:
+                x_scaled = np.where(mask, x_scaled, np.nan)
+                y_scaled = np.where(mask, y_scaled, np.nan)
 
         if x_scaled.ndim == 2 and y_scaled.ndim == 2 and x_scaled.shape[1] == y_scaled.shape[1]:
             x_plot_list = [x_scaled[:, i] for i in range(x_scaled.shape[1])]
@@ -1687,6 +1725,9 @@ def define_plot_parameters(D, irow, lightweight=False):
         d.d1_Dep_Col_Name   = get('d1_Dep_Col_Name')
         d.d1_Key            = get('d1_Key', '')
         d.d1_Style          = get('d1_Style', '')
+        d.d1_Start          = get('d1_Start', None)
+        d.d1_End            = get('d1_End', None)
+        d.d1_Tick           = get('d1_Tick', None)
         d.d1_Comp_Start     = get('d1_Comp_Start', np.nan)
         d.d1_Comp_End       = get('d1_Comp_End', np.nan)
         d.d1_Dep_Comp_Start = get('d1_Dep_Comp_Start', np.nan)
@@ -1700,6 +1741,9 @@ def define_plot_parameters(D, irow, lightweight=False):
         d.d2_Dep_Col_Name   = get('d2_Dep_Col_Name')
         d.d2_Key            = get('d2_Key', '')
         d.d2_Style          = get('d2_Style', '')
+        d.d2_Start          = get('d2_Start', None)
+        d.d2_End            = get('d2_End', None)
+        d.d2_Tick           = get('d2_Tick', None)
         d.d2_Comp_Start     = get('d2_Comp_Start', np.nan)
         d.d2_Comp_End       = get('d2_Comp_End', np.nan)
         d.d2_Dep_Comp_Start = get('d2_Dep_Comp_Start', np.nan)
