@@ -375,8 +375,8 @@ def dataplot(config_filename, **kwargs):
 
         flip_axis = str(pp.Flip_Axis).strip().lower() in ['yes', 'true', '1']
 
-        x_scaled = np.asarray(x)
-        y_scaled = np.asarray(y)
+        x_scaled = np.asarray(x, dtype=float).copy()
+        y_scaled = np.asarray(y, dtype=float).copy()
 
         # ------------------------------------------------------------
         # Apply d1_Start / d1_End to PLOTTED DATA (not just stats)
@@ -539,8 +539,8 @@ def dataplot(config_filename, **kwargs):
         x, _ = get_data(M, pp.d2_Ind_Col_Name, start_idx)
         y, _ = get_data(M, pp.d2_Dep_Col_Name, start_idx)
 
-        x_scaled = np.asarray(x)
-        y_scaled = np.asarray(y)
+        x_scaled = np.asarray(x, dtype=float).copy()
+        y_scaled = np.asarray(y, dtype=float).copy()
 
         # ------------------------------------------------------------
         # Apply d2_Start / d2_End to PLOTTED DATA (model curves)
