@@ -471,7 +471,6 @@ Radiative Fraction                            & 0.33                            
 \label{MMA_Gas_Properties}
 \end{table}
 
-
 Figure~\ref{NIST_PMMA} displays the results of measurements performed at NIST and FDS simulations of pyrolyzing black PMMA in the TGA (10~K/min), MCC (60~K/min) and DSC (10~K/min). Figure~\ref{NIST_PMMA_Cone} displays results of the Gasification Apparatus (50~kW/m$^2$) and Cone Calorimeter (25~kW/m$^2$).
 
 \begin{figure}[!h]
@@ -530,7 +529,7 @@ Char Specific Heat          & kJ/kg/K       & $0.82+0.00011 \, T$     & Same as 
 Char Emissivity             &               & 0.86                    & Same as Polymer         & Same as Polymer          \\ \hline
 Char Abs.~Coef.             & m$^{-1}$      & 2500                    & Opaque                  & Same as Polymer          \\ \hline
 Pre-Exp.~Factor             & s$^{-1}$      & $1.00\times 10^{14}$    & $1.70\times 10^{20}$    & $8.60\times 10^{12}$     \\ \hline
-Activation Energy           & J/mol       & $2.19\times 10^5$       & $3.01\times 10^5$       & $1.88\times 10^5$        \\ \hline
+Activation Energy           & J/mol       & $2.19\times 10^5$         & $3.01\times 10^5$       & $1.88\times 10^5$        \\ \hline
 Heat of Reaction            & kJ/kg         & 460                     & 689                     & 846                      \\ \hline
 Heat of Combustion          & kJ/kg         & 28750                   & 29900                   & 24450                    \\ \hline
 Residue Fraction            &               & 0.023                   & 0.043                   & 0.015                    \\ \hline
@@ -1392,13 +1391,14 @@ Figure~\ref{UMD_SBI_HRR} displays the measured and predicted HRR for upward spre
 
 \clearpage
 
-\section{Scaling Pyrolysis (SPyro)}\label{sec_Scaling Pyrolysis}
+\section{Scaling Pyrolysis (SPyro)}
+\label{sec_Scaling Pyrolysis}
 
-FDS has a scaling-based pyrolysis model (SPyro) which dynamically scales a reference heat release rate per unit area curve based on the energy absorbed on the surface. This section evaluates the performance of FDS in scaling the burning rate using this model. Each heat flux shown in the figures in this section is a validation heat transfer level (i.e., the reference heat flux is not shown). Validation statistics are calculated based on the peak HRRPUA.
+FDS has a simplified pyrolysis model called SPyro that takes a measured heat release rate curve and scales it based on the energy absorbed on the surface. The performance of this algorithm is evaluated in this section by comparing measured and predicted peak heat release rates.
 
 \subsection{Aalto Woods Experiments}\label{sec_Aalto_Woods_Materials}
 
-Table ~\ref{Properties_Aalto_Woods_All} lists the relevant parameters for modeling the cone calorimeter experiments for this study. Note that the published properties from the test report are simplified in this analysis. Each multiphase properties is represented as single bulk value.In addition, the temperature-dependent thermal conductivity and specific capacity are fixed at an average value. The ignition temperatures were calculated based on times to ignition at the lower heat fluxes using the other properties. The results of the simulations are shown below.
+Table~\ref{Properties_Aalto_Woods_All} lists the relevant parameters for modeling the cone calorimeter experiments. The properties from the test report are simplified. Each multiphase property is represented as a single bulk value. In addition, the temperature-dependent thermal conductivity and specific heat are fixed at an average value. The ignition temperatures were calculated based on times to ignition at the lower heat fluxes using the other properties. The results of the simulations are shown below.
 
 \begin{table}[!h]
 \caption[Properties of Aalto Woods]{Properties of Aalto Woods~\cite{Rinta-Paavola:2023}.}
@@ -1431,7 +1431,7 @@ Spruce Flaming                                    & 20.0 & 408 & 0.06 & 0.91 & 0
 
 \subsection{FAA Polymers Experiments}\label{sec_FAA_Polymers_Materials}
 
-Table ~\ref{Properties_FAA_Polymers_All} lists the relevant parameters for modeling the cone calorimeter experiments for this study.
+Table~\ref{Properties_FAA_Polymers_All} lists the relevant parameters for modeling the cone calorimeter experiments for this study.
 Note that the published properties from the test report are simplified in this analysis. Each multiphase properties is represented as single bulk value. In addition, the temperature-dependent thermal conductivity and specific capacity are fixed at an average value.
 The ignition temperatures were calculated based on times to ignition at the lower heat fluxes using the other properties.
 The results of the simulations are shown on the following pages.
@@ -1505,7 +1505,7 @@ PVC                                               & 3.0, 6.0, 9.0  & 1430 & 0.17
 
 \subsection{FPL Wood Experiments}\label{sec_FPL_Woods_Materials}
 
-Table ~\ref{Properties_FPL_Materials_All} lists the relevant parameters for modeling the cone calorimeter experiments for this study.
+Table~\ref{Properties_FPL_Materials_All} lists the relevant parameters for modeling the cone calorimeter experiments for this study.
 Note that the test reports in this study did not provide thermal properties.
 Fixed values of specific heat capacity, 1.0 $\mathrm{\left(kJ/(kg\cdot K\right)}$, thermal conductivity, 0.4 $\mathrm{\left(W/m\cdot K\right)}$, and emissivity, 1.0, are used to calculate an effective ignition temperature.
 The results of the simulations are shown on the following pages.
@@ -1552,10 +1552,7 @@ Waferboard                                        & 13.0 & 712 & 425 & 13.3 & 0.
 
 \subsection{FSRI/NIJ Experiments}\label{sec_FSRI_NIJ_Materials}
 
-Table ~\ref{Properties_FSRI_Materials_Others}, Table ~\ref{Properties_FSRI_Materials_Polymers}, and Table ~\ref{Properties_FSRI_Materials_Wood-Based} lists the relevant parameters for modeling the cone calorimeter experiments for this study.
-Note that the published properties from the test report are simplified in this analysis. Each multiphase properties is represented as single bulk value.
-In addition, the temperature-dependent thermal conductivity and specific capacity are fixed at an average value.
-The ignition temperatures were calculated based on times to ignition at the lower heat fluxes using the other properties.
+Tables~\ref{Properties_FSRI_Materials_Others} through \ref{Properties_FSRI_Materials_Wood-Based} list the parameters for modeling the cone calorimeter experiments. The properties from the test report are simplified in this analysis. Each multiphase properties is represented as single bulk value. In addition, the temperature-dependent thermal conductivity and specific capacity are fixed at an average value. The ignition temperatures were calculated based on times to ignition at the lower heat fluxes using the other properties.
 
 \begin{table}[!h]
 \caption[Properties of FSRI Materials, other materials]{Properties of FSRI Materials, other materials ~\cite{McKinnon:FSRI2023_Data}.}
@@ -1841,19 +1838,15 @@ Wood Stud                                         & 46.2 & 379  & 0.10 & 1.47 & 
 
 \subsection{JH Experiments}\label{sec_JH_Materials}
 
-Table ~\ref{Properties_JH_Materials_All} lists the relevant parameters for modeling the cone calorimeter experiments for this study.
-Note that the published properties from the test report are simplified in this analysis. Each multiphase properties is represented as single bulk value.
-In addition, the temperature-dependent thermal conductivity and specific capacity are fixed at an average value.
-The ignition temperatures were calculated based on times to ignition at the lower heat fluxes using the other properties.
-The results of the simulations are shown on the following pages.
+Table~\ref{Properties_JH_Materials_All} lists the relevant parameters for modeling the cone calorimeter experiments. The published properties from the test report are simplified in this analysis. Each multi-phase property is represented as a single bulk value. In addition, the temperature-dependent thermal conductivity and specific heat are fixed at an average value. The ignition temperatures are calculated based on the time to ignition at the lower heat fluxes using the other properties. The results of the simulations are shown on the following pages.
 
 \begin{table}[!h]
 \caption[Properties of JH Materials]{Properties of JH Materials~\cite{Luo:FRA2019,Lattimer:NIJ19}.}
 \centering
 \begin{tabular}{|l|c|c|c|c|c|c|c|c|}
 \hline
-            & \centering$\Delta$& \centering$\rho$& \centering$k$& \centering$c_{p}$& \centering$\varepsilon$& \centering$T_{\mathrm{ign}}^{a}$&\centering$\Delta H_{c}$& $Y_{s}$ \\
-Material    & \centering$\mathrm{\left(mm\right)}$ & \centering$\mathrm{\left(\frac{kg}{m^{3}}\right)}$ & \centering$\mathrm{\left(\frac{W}{m\cdot K}\right)}$ & \centering$\mathrm{\left(\frac{kJ}{(kg\cdot K}\right)}$ & \centering$\mathrm{( - )}$ &  \centering($\mathrm{^{\circ}C}$)   & \centering$\left(\mathrm{\frac{MJ}{kg}}\right)$ & $\mathrm{\left(\frac{g}{g}\right)}$ \\ \hline
+            & $\Delta$  & $\rho$       & $k$        & $c_{p}$     & $\varepsilon$ & $T_{\rm{ign}}^{a}$ & $\Delta H_{\rm c}$ & $Y_{\rm s}$ \\
+Material    & (mm)      & (kg/m$^3$)   & (W/(m K))  & (kJ/(kg K)) &               & ($^\circ$C)        & (MJ/kg)            & (g/g)       \\ \hline
 \hline
 Acrylic                                           & 4.5  & 1178 & 0.24 & 0.62 & 0.88 & 387 & 24.9 & 0.033 \\\hline
 Black PMMA                                        & 9.2  & 1154 & 0.12 & 1.52 & 0.95 & 374 & 23.3 & 0.006 \\\hline
@@ -1886,7 +1879,7 @@ White Spruce                                      & 37.2 & 430  & 0.24 & 1.10 & 
 \includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/JH_CPS_Plywood_Facesheet_cone_12p7.pdf} &
 \includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/JH_FRP_cone_12p7.pdf} \\
 \includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/JH_MDF_cone_19p2.pdf} &
-\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/JH_OSB_cone_16p1.pdf} \\
+\includegraphics[height=2.10in]{SCRIPT_FIGURES/Scaling_Pyrolysis/JH_OSB_cone_16p1.pdf} 
 \end{tabular*}
 \caption[HRRPUA of JH Materials using scaling model]
 {JH materials - Comparison of predicted and measured heat release rate per unit area using scaling-based approach for cone calorimeter experiments.}
@@ -1913,18 +1906,15 @@ White Spruce                                      & 37.2 & 430  & 0.24 & 1.10 & 
 
 \subsection{RISE Experiments}\label{sec_RISE_Materials}
 
-Table ~\ref{Properties_RISE_Materials_Mixtures1}, Table ~\ref{Properties_RISE_Materials_Mixtures2}, Table ~\ref{Properties_RISE_Materials_Others}, Table ~\ref{Properties_RISE_Materials_Polymers}, and Table ~\ref{Properties_RISE_Materials_Wood-Based} lists the relevant parameters for modeling the cone calorimeter experiments for this study.
-Note that the test reports in this study did not provide thermal properties.
-Fixed values of specific heat capacity, 1.0 $\mathrm{\left(kJ/(kg\cdot K\right)}$, thermal conductivity, 0.4 $\mathrm{\left(W/m\cdot K\right)}$, and emissivity, 1.0, are used to calculate an effective ignition temperature.
-The results of the simulations are shown on the following pages.
+Tables~\ref{Properties_RISE_Materials_Mixtures1} through \ref{Properties_RISE_Materials_Wood-Based} list the parameters for modeling the cone calorimeter experiments. Note that the test reports in this study did not provide thermal properties. Fixed values of specific heat capacity, 1.0~kJ/(kg~K), thermal conductivity, 0.4~W/(m~K), and emissivity, 1, are used to calculate an effective ignition temperature. The results of the simulations are shown on the following pages.
 
 \begin{table}[!h]
 \caption[Properties of RISE Materials, mixture materials]{Properties of RISE Materials, mixture materials ~\cite{RISE:Fire_Database}.}
 \centering
 \begin{tabular}{|l|c|c|c|c|c|p{3.7cm}|}
 \hline
-            & \centering$\Delta$& \centering$\rho$& \centering$T_{\mathrm{ign}}^{a}$&\centering$\Delta H_{c}$&\centering$Y_{s}^{b}$ & Test \# \\
-Material$^{c}$    & \centering$\mathrm{\left(mm\right)}$ & \centering$\mathrm{\left(\frac{kg}{m^{3}}\right)}$ &  \centering($\mathrm{^{\circ}C}$)   & \centering$\left(\mathrm{\frac{MJ}{kg}}\right)$ & \centering$\mathrm{\left(\frac{g}{g}\right)}$ & $\mathrm{( - )}$  \\ \hline
+                & $\Delta$  & $\rho$     & $T_{\rm{ign}}^{a}$ & $\Delta H_{\rm c}$  & $Y_{\rm s}^{b}$ & Test    \\
+Material$^{c}$  & (mm)      & (kg/m$^3$) & ($^\circ$C)        & (MJ/kg)             & (g/g)           & Number  \\ \hline
 \hline
 80 Wool 20 Nylon, Glue, Plywood                   & 22.0 & 576  & 275 & 14.3 & 0.050 & 1821-1829, 2206-2208 \\\hline
 Carpet, Glue, Aluminum Plate                      & 5.0  & 1293 & 300 & 17.7 & 0.050 & 1673-1678, 2178-2180 \\\hline
@@ -1933,7 +1923,7 @@ Fabric Vandalize Protected, Foam                  & 42.0 & 88   & 366 & 13.0 & 0
 Fabric, Foam                                      & 28.0 & 164  & 514 & 19.2 & 0.050 & 1658, 1659, 1661, 1662, 1664-1666, 1668, 1669, 2222-2224, 2409-2411 \\\hline
 Fabric, Protection Layer, Foam                    & 32.0 & 124  & 348 & 14.8 & 0.050 & 1744-1749, 1751, 1753, 1754, 2216-2218, 2392-2395, 2401, 2402 \\\hline
 FR EPS, Calcium Silicate Board                    & 25.0 & 37   & 547 & 25.4 & 0.190 & 137-145 \\\hline
-HPL Melamine, Polyester Film                      & 13.4 & 1638 & 195 & 3.2  & 0.050 & 1716-1718, 1720-1725, 2343-2345 \\\hline
+HPL$^d$ Melamine, Polyester Film                  & 13.4 & 1638 & 195 & 3.2  & 0.050 & 1716-1718, 1720-1725, 2343-2345 \\\hline
 Melamine, Calcium Silicate                        & 12.5 & 1055 & 572 & 8.5  & 0.003 & 133-136 \\\hline
 PE, XLPE                                          & 40.0 & 372  & 590 & 25.8 & 0.050 & 493-495 \\\hline
 Polyolefin, EPR                                   & 18.1 & 278  & 547 & 19.9 & 0.050 & 414-416 \\\hline
@@ -1953,6 +1943,7 @@ Pur Rigid, Plastic Faced Steel Sheet              & 79.0 & 170 & 497 & 10.2 & 0.
 \noindent{\footnotesize $^a$ $T_{\mathrm{ign}}$ is calculated based on measured times to ignition. Assumed values used for thermal properties when not measured.}\\
 \noindent{\footnotesize $^b$ $Y_{s}$ fixed at 0.05 when measurements were not available.}\\
 \noindent{\footnotesize $^c$ Comma separation indicates layers of material.}\\
+\noindent{\footnotesize $^d$ High-Pressure Laminate.}\\
 
 \clearpage
 
@@ -1961,8 +1952,8 @@ Pur Rigid, Plastic Faced Steel Sheet              & 79.0 & 170 & 497 & 10.2 & 0.
 \centering
 \begin{tabular}{|l|c|c|c|c|c|p{3.7cm}|}
 \hline
-            & \centering$\Delta$& \centering$\rho$& \centering$T_{\mathrm{ign}}^{a}$&\centering$\Delta H_{c}$&\centering$Y_{s}^{b}$ & Test \# \\
-Material$^{c}$    & \centering$\mathrm{\left(mm\right)}$ & \centering$\mathrm{\left(\frac{kg}{m^{3}}\right)}$ &  \centering($\mathrm{^{\circ}C}$)   & \centering$\left(\mathrm{\frac{MJ}{kg}}\right)$ & \centering$\mathrm{\left(\frac{g}{g}\right)}$ & $\mathrm{( - )}$  \\ \hline
+                & $\Delta$ & $\rho$     & $T_{\rm{ign}}^{a}$  & $\Delta H_{\rm c}$  & $Y_{\rm s}^{b}$ & Test    \\
+Material$^{c}$  & (mm)     & (kg/m$^3$) & ($^\circ$C)         & (MJ/kg)             & (g/g)           & Number  \\ \hline
 \hline
 PVC, EPR                                          & 32.5 & 170 & 508 & 13.9 & 0.050 & 411-413 \\\hline
 PVC, XLPE                                         & 17.7 & 405 & 341 & 22.4 & 0.050 & 467-469 \\\hline
@@ -2073,14 +2064,14 @@ Zhpolyolefin, XLPE                                & 27.0 & 412 & 527 & 27.3 & 0.
 
 
 \begin{table}[!h]
-\caption[Properties of RISE Materials, other materials]{Properties of RISE Materials, other materials ~\cite{RISE:Fire_Database}.}
+\caption[Properties of RISE and other materials]{Properties of RISE and other materials~\cite{RISE:Fire_Database}.}
 \centering
 \begin{tabular}{|p{4.5cm}|c|c|c|c|c|p{3.5cm}|}
 \hline
-            & \centering$\Delta$& \centering$\rho$& \centering$T_{\mathrm{ign}}^{a}$&\centering$\Delta H_{c}$&\centering$Y_{s}^{b}$ & Test \# \\
-Material    & \centering$\mathrm{\left(mm\right)}$ & \centering$\mathrm{\left(\frac{kg}{m^{3}}\right)}$ &  \centering($\mathrm{^{\circ}C}$)   & \centering$\left(\mathrm{\frac{MJ}{kg}}\right)$ & \centering$\mathrm{\left(\frac{g}{g}\right)}$ & $\mathrm{( - )}$  \\ \hline
+            & $\Delta$  & $\rho$     & $T_{\rm{ign}}^{a}$  & $\Delta H_{\rm c}$ & $Y_{\rm s}^{b}$ & Test   \\
+Material    & (mm)      & (kg/m$^3$) & ($^\circ$C)         & (MJ/kg)            & (g/g)           & Number \\ \hline
 \hline
-Aluminium Honey Comb Coated With HPL              & 22.7 & 514 & 537 & 17.3 & 0.050 & 1785-1793, 2362-2364 \\\hline
+Aluminium Honey Comb Coated With HPL$^c$          & 22.7 & 514 & 537 & 17.3 & 0.050 & 1785-1793, 2362-2364 \\\hline
 HPL Compact                                       & 4.0 & 1610 & 500 & 13.8 & 0.050 & 1695-1699, 1701-1705, 2184-2186 \\\hline
 Wool Fabric Mixed Fabric                          & 0.5 & 910 & 409 & 19.3 & 0.050 & 1776-1784, 2193-2195, 2356-2361 \\\hline
 \end{tabular}
@@ -2089,6 +2080,7 @@ Wool Fabric Mixed Fabric                          & 0.5 & 910 & 409 & 19.3 & 0.0
 \vspace{-0.4cm}
 \noindent{\footnotesize $^a$ $T_{\mathrm{ign}}$ is calculated based on measured times to ignition. Assumed values used for thermal properties when not measured.}\\
 \noindent{\footnotesize $^b$ $Y_{s}$ fixed at 0.05 when measurements were not available.}\\
+\noindent{\footnotesize $^c$ High-Pressure Laminate.}\\
 
 
 \begin{figure}[p]
@@ -2109,8 +2101,8 @@ Wool Fabric Mixed Fabric                          & 0.5 & 910 & 409 & 19.3 & 0.0
 \centering
 \begin{tabular}{|p{5cm}|c|c|c|c|c|p{3.5cm}|}
 \hline
-            & \centering$\Delta$& \centering$\rho$& \centering$T_{\mathrm{ign}}^{a}$&\centering$\Delta H_{c}$&\centering$Y_{s}^{b}$ & Test \# \\
-Material$^{c}$    & \centering$\mathrm{\left(mm\right)}$ & \centering$\mathrm{\left(\frac{kg}{m^{3}}\right)}$ &  \centering($\mathrm{^{\circ}C}$)   & \centering$\left(\mathrm{\frac{MJ}{kg}}\right)$ & \centering$\mathrm{\left(\frac{g}{g}\right)}$ & $\mathrm{( - )}$  \\ \hline
+                & $\Delta$   & $\rho$     & $T_{\rm{ign}}^{a}$  & $\Delta H_{\rm c}$  & $Y_{\rm s}^{b}$ & Test    \\
+Material$^{c}$  & (mm)       & (kg/m$^3$) & ($^\circ$C)         & (MJ/kg)             & (g/g)           & Number  \\ \hline
 \hline
 FR Polycarbonate                                  & 16.0 & 175 & 584 & 21.5 & 0.080 & 240, 244, 248, 251 \\\hline
 Paint GFK Polyester With Gelcoat Laminated        & 4.8 & 2022 & 355 & 10.5 & 0.050 & 1726-1734, 2336-2338 \\\hline
@@ -2205,22 +2197,19 @@ Spruce                                            & 10.0 & 450 & 297 & 12.5 & 0.
 
 \clearpage
 
-\section{Compartment Fires}\label{sec_Compartment_Fires}
+\section{Compartment Fires}
+\label{sec_Compartment_Fires}
 
-This section evaluates the performance of FDS in predicting the growth of a fire in an enclosure for well characterized materials.
-Measurements and predictions of HRR in each test configuration are compared.
+This section evaluates the performance of FDS in predicting the growth of a fire in an enclosure for well characterized materials. Measurements and predictions of HRR in each test configuration are compared.
 
-In the U.S., the NFPA 286 room-corner test is the common standard large scale test used to measure the contribution of interior finish materials on fire growth and regulate the use of interior finish in certain building occupancies.
-The room is 2.4 m wide by 3.6 m long by 2.4 m high, and has a doorway 2 m (79.5 in) in height and 0.78 m (37.5 in) in width.
-The lining materials are installed on ceiling and walls. A propane gas burner measuring 0.3 m x 0.3 m is placed in one of the back corners, in contact with the walls.
-The HRR for the burner is 40 kW for 5 minutes, and then 160 kW for 10 minutes.
+In the U.S., the NFPA 286 room-corner test is the common standard large scale test used to measure the contribution of interior finish materials on fire growth and regulate the use of interior finish in certain building occupancies. The room is 2.4~m wide by 3.6~m long by 2.4~m high, and has a doorway 2~m in height and 0.78~m in width. The lining materials are installed on ceiling and walls. A propane gas burner measuring 0.3~m by 0.3~m is placed in one of the back corners, in contact with the walls. The HRR for the burner is 40~kW for 5~min, and 160~kW for 10~min.
 
 Many of these cases are in the NFPA 286/ISO 9705 room-corner configuration (or a modification thereof).
 
-\subsection{JH/FRA Reduced Scale Compartment Experiments}\label{sec_JH_FRA_Scaled_Compartments}
+\subsection{JH/FRA Reduced Scale Compartment Experiments}
+\label{sec_JH_FRA_Scaled_Compartments}
 
-The Federal Railroad Administration (FRA) in the U.S. sponsored a series of small to intermediate-scale enclosure experiments to evaluate the impact of modern materials on HRRs in fully-developed railcar fires.
-The following pages compare FDS predictions of room-corner testing of scaled compartments.
+The Federal Railroad Administration (FRA) in the U.S. sponsored a series of small to intermediate-scale enclosure experiments to evaluate the impact of modern materials on HRRs in fully-developed railcar fires. The following pages compare FDS predictions of room-corner testing of scaled compartments.
 
 \begin{figure}[h!]
 \centering
