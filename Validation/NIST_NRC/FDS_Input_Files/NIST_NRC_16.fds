@@ -32,7 +32,7 @@
 &OBST XB=11.85,11.85, 3.02, 4.02, 0.0, 0.1, SURF_ID='STEEL SHEET' /
 
 &PART ID='heptane droplets',SPEC_ID='N-HEPTANE',
-      DIAMETER=1000.,
+      DIAMETER=100.,
       SAMPLING_FACTOR=1 /
 
 &PROP ID='nozzle', PART_ID='heptane droplets', FLOW_RATE=4.549, FLOW_RAMP='FIRE_RAMP',
