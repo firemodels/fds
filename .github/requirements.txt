@@ -14,3 +14,6 @@ pyfdstools
 
 # Local utility packages (imports fdsplotlib)
 -e ../Utilities/Python
+
+# Bibliography tools
+git+https://github.com/dlesbre/bibtex-autocomplete.git@v1.4.3
