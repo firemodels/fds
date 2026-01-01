@@ -1,7 +1,7 @@
 &HEAD CHID='NIST_NRC_02',TITLE='NIST/NRC Test 2' /
 
-&MESH IJK=54,35,40, XB=0.0,5.425,0.0,3.52,0.0,3.82, MULT_ID='mesh' /
-&MULT ID='mesh', DX=5.425, DY=3.52, I_UPPER=3, J_UPPER=1 /
+&MESH IJK=43,24,40, XB=0.0,4.34,0.0,2.35,0.0,3.82, MULT_ID='mesh' /
+&MULT ID='mesh', DX=4.34, DY=2.35, I_UPPER=4, J_UPPER=2 /
 
 &TIME T_END=900. /
 
@@ -32,11 +32,11 @@
 &OBST XB=11.85,11.85, 3.02, 4.02, 0.0, 0.1, SURF_ID='STEEL SHEET' /
 
 &PART ID='heptane droplets',SPEC_ID='N-HEPTANE',
-      DIAMETER=1000.,
+      DIAMETER=100.,
       SAMPLING_FACTOR=1 /
 
 &PROP ID='nozzle', PART_ID='heptane droplets', FLOW_RATE=2.354, FLOW_RAMP='FIRE_RAMP',
-      PARTICLE_VELOCITY=10., SPRAY_ANGLE=40.,45.    /
+      PARTICLE_VELOCITY=10., SPRAY_ANGLE=20.,30.    /
 &RAMP ID='FIRE_RAMP',T=   0.,F=0.0 /
 &RAMP ID='FIRE_RAMP',T= 180.,F=1.0 /
 &RAMP ID='FIRE_RAMP',T= 625.,F=1.0 /
@@ -195,7 +195,7 @@
       MATL_ID   = 'MARINITE'
       COLOR     = 'BEIGE'
       BACKING   = 'EXPOSED'
-      THICKNESS = 0.0254 /
+      THICKNESS = 0.0254,LEAK_PATH=0,1 /
 
 &SURF ID             = 'GYPSUM BOARD'
       FYI            = 'Compartment floor'

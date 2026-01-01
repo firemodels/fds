@@ -22,7 +22,7 @@ label  = ['Ethane','Ethylene','Propane','Isopentane']
 git_file =  os.path.join(outdir, f'ethane_pool_cat_git.txt')
 version_string = fdsplotlib.get_version_string(git_file)
 
-fig = fdsplotlib.plot_to_fig([0,50],[0,50],
+fig = fdsplotlib.plot_to_fig([0,50],[0,50], marker_style='k-',
                              x_min=0, x_max=50, y_min=0, y_max=50,
                              figure_size=(plot_style['Scat_Paper_Width'],plot_style['Scat_Paper_Height']),
                              plot_size=(plot_style['Scat_Plot_Width'],plot_style['Scat_Plot_Height']),

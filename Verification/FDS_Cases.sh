@@ -433,6 +433,7 @@ $QFDS -p 4 -d Pressure_Solver dancing_eddies_ulmat.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_ulmat_hypre.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_uglmat.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_uglmat_hypre.fds
+$QFDS -p 4 -d Pressure_Solver dancing_eddies_uglmat_refine.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_tight.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_tight_no_precon.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_default.fds
@@ -441,6 +442,7 @@ $QFDS -p 8 -d Pressure_Solver duct_flow_ulmat.fds
 $QFDS -p 8 -d Pressure_Solver duct_flow_ulmat_hypre.fds
 $QFDS -p 8 -d Pressure_Solver duct_flow_uglmat.fds
 $QFDS -p 8 -d Pressure_Solver duct_flow_uglmat_hypre.fds
+$QFDS -p 8 -d Pressure_Solver duct_flow_uglmat_refine.fds
 $QFDS -p 5 -d Pressure_Solver hallways.fds
 $QFDS -p 8 -d Pressure_Solver tunnel_demo.fds
 $QFDS -p 8 -d Pressure_Solver tunnel_demo_glmat.fds
@@ -901,6 +903,8 @@ $QFDS -d WUI part_drag_prof_wx.fds
 $QFDS -d WUI part_drag_prof_wy.fds
 $QFDS -d WUI part_drag_prof_wz.fds
 $QFDS -d WUI part_drag_stretched.fds
+$QFDS -d WUI part_spec_prof.fds
+$QFDS -d WUI part_temp_prof.fds
 $QFDS -d WUI pine_needles.fds
 $QFDS -d WUI radiation_gas-veg_consistency_gas.fds
 $QFDS -d WUI radiation_gas-veg_consistency_veg.fds

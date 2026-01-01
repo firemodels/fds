@@ -155,7 +155,7 @@ The terms $\hat{\bar{v}}$ and $\hat{\bar{w}}$ are defined similarly.  The model 
 \subsection{Vreman's Model}
 \label{sec:vreman}
 
-Vreman's eddy viscosity model \cite{vreman:2004} is given by
+Vreman's eddy viscosity model \cite{Vreman:2004} is given by
 \begin{equation}
 \label{eqn_mu_vreman}
 \mu_{\rm t} = \rho \, c \, \sqrt{ \frac{B_\beta}{\alpha_{ij}\alpha_{ij}} }
@@ -165,7 +165,7 @@ where
 B_\beta     &= \beta_{11}\beta_{22} - \beta_{12}^2 + \beta_{11}\beta_{33} - \beta_{13}^2 + \beta_{22}\beta_{33} - \beta_{23}^2 \quad ; \quad \beta_{ij} = \Delta_m^2 \alpha_{mi} \alpha_{mj} \label{eq:vreman_beta}\\
 \alpha_{ij} &= \frac{\partial u_j}{\partial x_i}
 \end{align}
-The notation is selected to exactly match Vreman's paper \cite{vreman:2004}.  The model considers a possible anisotropy in the filter width in direction $m$; contraction on $m$ is implied in Eq.~(\ref{eq:vreman_beta}).  The basic idea behind Vreman's model is to expand the velocity field in a Taylor series and to test filter this field analytically, thus avoiding the expensive explicit test filtering operations necessary in the dynamic model.  Therefore, this model is inexpensive.  Unlike constant coefficient Smagorinsky, however, Vreman's model is convergent, making it applicable to highly resolved LES calculations.
+The notation is selected to exactly match Vreman's paper \cite{Vreman:2004}.  The model considers a possible anisotropy in the filter width in direction $m$; contraction on $m$ is implied in Eq.~(\ref{eq:vreman_beta}).  The basic idea behind Vreman's model is to expand the velocity field in a Taylor series and to test filter this field analytically, thus avoiding the expensive explicit test filtering operations necessary in the dynamic model.  Therefore, this model is inexpensive.  Unlike constant coefficient Smagorinsky, however, Vreman's model is convergent, making it applicable to highly resolved LES calculations.
 
 The model constant may be related to the Smagorinsky constant, $c \approx 2.5 \, C_{\rm s}^2$.  Since Vreman's model is most applicable to high resolution cases, we base the coefficient off of $C_{\rm s} = 0.17$, which yields accurate results for highly resolved decaying isotropic turbulence (see the FDS Verification Guide \cite{FDS_Verification_Guide}).  The default Vreman constant is therefore set to $c = 0.07$.
 

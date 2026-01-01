@@ -374,10 +374,33 @@ def dataplot(config_filename, **kwargs):
         y, _ = get_data(E, pp.d1_Dep_Col_Name, start_idx)
 
         flip_axis = str(pp.Flip_Axis).strip().lower() in ['yes', 'true', '1']
+
+        x_scaled = np.asarray(x, dtype=float).copy()
+        y_scaled = np.asarray(y, dtype=float).copy()
+
+        # ------------------------------------------------------------
+        # Apply d1_Start / d1_End to PLOTTED DATA (not just stats)
+        # ------------------------------------------------------------
+        if pp.d1_Start is not None or pp.d1_End is not None:
+            x0 = float(pp.d1_Start) if pp.d1_Start is not None else -np.inf
+            x1 = float(pp.d1_End)   if pp.d1_End   is not None else  np.inf
+
+            mask = (x_scaled >= x0) & (x_scaled <= x1)
+
+            # Preserve shape for multi-column data
+            if x_scaled.ndim == 2:
+                for j in range(x_scaled.shape[1]):
+                    mj = mask[:, j]
+                    x_scaled[:, j] = np.where(mj, x_scaled[:, j], np.nan)
+                    y_scaled[:, j] = np.where(mj, y_scaled[:, j], np.nan)
+            else:
+                x_scaled = np.where(mask, x_scaled, np.nan)
+                y_scaled = np.where(mask, y_scaled, np.nan)
+
         x_scale = float(pp.Scale_Ind or 1.0)
         y_scale = float(pp.Scale_Dep or 1.0)
-        x_scaled = np.asarray(x) / x_scale
-        y_scaled = np.asarray(y) / y_scale
+        x_scaled = x_scaled / x_scale
+        y_scaled = y_scaled / y_scale
 
         if x_scaled.ndim == 2 and y_scaled.ndim == 2 and x_scaled.shape[1] == y_scaled.shape[1]:
             x_plot_list = [x_scaled[:, i] for i in range(x_scaled.shape[1])]
@@ -516,10 +539,32 @@ def dataplot(config_filename, **kwargs):
         x, _ = get_data(M, pp.d2_Ind_Col_Name, start_idx)
         y, _ = get_data(M, pp.d2_Dep_Col_Name, start_idx)
 
+        x_scaled = np.asarray(x, dtype=float).copy()
+        y_scaled = np.asarray(y, dtype=float).copy()
+
+        # ------------------------------------------------------------
+        # Apply d2_Start / d2_End to PLOTTED DATA (model curves)
+        # ------------------------------------------------------------
+        if pp.d2_Start is not None or pp.d2_End is not None:
+            x0 = float(pp.d2_Start) if pp.d2_Start is not None else -np.inf
+            x1 = float(pp.d2_End)   if pp.d2_End   is not None else  np.inf
+
+            mask = (x_scaled >= x0) & (x_scaled <= x1)
+
+            # Preserve shape for multi-column data
+            if x_scaled.ndim == 2:
+                for j in range(x_scaled.shape[1]):
+                    mj = mask[:, j]
+                    x_scaled[:, j] = np.where(mj, x_scaled[:, j], np.nan)
+                    y_scaled[:, j] = np.where(mj, y_scaled[:, j], np.nan)
+            else:
+                x_scaled = np.where(mask, x_scaled, np.nan)
+                y_scaled = np.where(mask, y_scaled, np.nan)
+
         x_scale = float(pp.Scale_Ind or 1.0)
         y_scale = float(pp.Scale_Dep or 1.0)
-        x_scaled = np.asarray(x) / x_scale
-        y_scaled = np.asarray(y) / y_scale
+        x_scaled = x_scaled / x_scale
+        y_scaled = y_scaled / y_scale
 
         if x_scaled.ndim == 2 and y_scaled.ndim == 2 and x_scaled.shape[1] == y_scaled.shape[1]:
             x_plot_list = [x_scaled[:, i] for i in range(x_scaled.shape[1])]
@@ -610,21 +655,23 @@ def dataplot(config_filename, **kwargs):
 
                     flat_meas = np.atleast_1d(v_meas)
                     flat_pred = np.atleast_1d(v_pred)
-                    nmin = min(flat_meas.size, flat_pred.size)
-                    if nmin == 0:
-                        print(f"[dataplot] Warning: no valid data pairs for {pp.Dataname}")
-                    else:
-                        if flat_meas.size != flat_pred.size:
-                            print(f"[dataplot] Truncated unequal vectors for {pp.Dataname}: "
-                                  f"Measured={flat_meas.size}, Predicted={flat_pred.size} → {nmin}")
-                            flat_meas = flat_meas[:nmin]
-                            flat_pred = flat_pred[:nmin]
 
-                        Save_Measured_Metric[-1] = flat_meas
-                        Save_Predicted_Metric[-1] = flat_pred
+                    if pp.Quantity != "0":
+                        nmin = min(flat_meas.size, flat_pred.size)
+                        if nmin == 0:
+                            print(f"[dataplot] Warning: no valid data pairs for {pp.Dataname}")
+                        else:
+                            if flat_meas.size != flat_pred.size:
+                                print(f"[dataplot] Truncated unequal vectors for {pp.Dataname}: "
+                                      f"Measured={flat_meas.size}, Predicted={flat_pred.size} → {nmin}")
+                                flat_meas = flat_meas[:nmin]
+                                flat_pred = flat_pred[:nmin]
 
-                        qty_label = str(pp.d2_Dep_Col_Name).strip() or "Unknown"
-                        Save_Predicted_Quantity[-1] = np.array([qty_label] * len(flat_pred), dtype=object)
+                            Save_Measured_Metric[-1] = flat_meas
+                            Save_Predicted_Metric[-1] = flat_pred
+
+                            qty_label = str(pp.d2_Dep_Col_Name).strip() or "Unknown"
+                            Save_Predicted_Quantity[-1] = np.array([qty_label] * len(flat_pred), dtype=object)
 
                     plt.figure(f.number)
                     os.makedirs(pltdir, exist_ok=True)
@@ -706,21 +753,22 @@ def dataplot(config_filename, **kwargs):
                                 flat_meas = np.atleast_1d(v_meas)
                                 flat_pred = np.atleast_1d(v_pred)
 
-                    nmin = min(flat_meas.size, flat_pred.size)
-                    if nmin == 0:
-                        print(f"[dataplot] Warning: no valid data pairs for {pp.Dataname}")
-                    else:
-                        if flat_meas.size != flat_pred.size:
-                            print(f"[dataplot] Truncated unequal vectors for {pp.Dataname}: "
-                                  f"Measured={flat_meas.size}, Predicted={flat_pred.size} → {nmin}")
-                            flat_meas = flat_meas[:nmin]
-                            flat_pred = flat_pred[:nmin]
+                    if pp.Quantity != "0":
+                        nmin = min(flat_meas.size, flat_pred.size)
+                        if nmin == 0:
+                            print(f"[dataplot] Warning: no valid data pairs for {pp.Dataname}")
+                        else:
+                            if flat_meas.size != flat_pred.size:
+                                print(f"[dataplot] Truncated unequal vectors for {pp.Dataname}: "
+                                      f"Measured={flat_meas.size}, Predicted={flat_pred.size} → {nmin}")
+                                flat_meas = flat_meas[:nmin]
+                                flat_pred = flat_pred[:nmin]
 
-                        Save_Measured_Metric[-1] = flat_meas
-                        Save_Predicted_Metric[-1] = flat_pred
+                            Save_Measured_Metric[-1] = flat_meas
+                            Save_Predicted_Metric[-1] = flat_pred
 
-                        qty_label = str(pp.d2_Dep_Col_Name).strip() or "Unknown"
-                        Save_Predicted_Quantity[-1] = np.array([qty_label] * len(flat_pred), dtype=object)
+                            qty_label = str(pp.d2_Dep_Col_Name).strip() or "Unknown"
+                            Save_Predicted_Quantity[-1] = np.array([qty_label] * len(flat_pred), dtype=object)
 
                     plt.figure(f.number)
                     os.makedirs(pltdir, exist_ok=True)
@@ -805,23 +853,24 @@ def dataplot(config_filename, **kwargs):
                 flat_meas = np.concatenate(meas_list) if meas_list else np.array([])
                 flat_pred = np.concatenate(pred_list) if pred_list else np.array([])
 
-                nmin = min(flat_meas.size, flat_pred.size)
-                if nmin == 0:
-                    print(f"[dataplot] Warning: no valid data pairs for {pp.Dataname}")
-                else:
-                    if flat_meas.size != flat_pred.size:
-                        print(f"[dataplot] Truncated unequal vectors for {pp.Dataname}: "
-                              f"Measured={flat_meas.size}, Predicted={flat_pred.size} → {nmin}")
-                        # Truncate both sides to maintain one-to-one correspondence
-                        flat_meas = flat_meas[:nmin]
-                        flat_pred = flat_pred[:nmin]
+                if pp.Quantity != "0":
+                    nmin = min(flat_meas.size, flat_pred.size)
+                    if nmin == 0:
+                        print(f"[dataplot] Warning: no valid data pairs for {pp.Dataname}")
+                    else:
+                        if flat_meas.size != flat_pred.size :
+                            print(f"[dataplot] Truncated unequal vectors for {pp.Dataname}: "
+                                  f"Measured={flat_meas.size}, Predicted={flat_pred.size} → {nmin}")
+                            # Truncate both sides to maintain one-to-one correspondence
+                            flat_meas = flat_meas[:nmin]
+                            flat_pred = flat_pred[:nmin]
 
-                    # Save truncated paired arrays
-                    Save_Measured_Metric[-1] = flat_meas
-                    Save_Predicted_Metric[-1] = flat_pred
+                        # Save truncated paired arrays
+                        Save_Measured_Metric[-1] = flat_meas
+                        Save_Predicted_Metric[-1] = flat_pred
 
-                    qty_label = str(pp.d2_Dep_Col_Name).strip() or "Unknown"
-                    Save_Predicted_Quantity[-1] = np.array([qty_label] * len(flat_pred), dtype=object)
+                        qty_label = str(pp.d2_Dep_Col_Name).strip() or "Unknown"
+                        Save_Predicted_Quantity[-1] = np.array([qty_label] * len(flat_pred), dtype=object)
 
             except Exception as e:
                 print(f"[dataplot] Error computing predicted metric for {pp.Dataname}: {e}")
@@ -846,7 +895,7 @@ def dataplot(config_filename, **kwargs):
         len_m = np.size(m) if isinstance(m, np.ndarray) else 0
         len_p = np.size(p) if isinstance(p, np.ndarray) else 0
         csv_rownum = drange[i] if i < len(drange) else "?"
-        if len_m != len_p:
+        if len_m != len_p and qty != "0":
             print(f"[dataplot] Length mismatch at CSV row {csv_rownum}: {name} | {qty} | Measured={len_m}, Predicted={len_p}")
 
     print("[dataplot] returning saved_data and drange")
@@ -1683,6 +1732,9 @@ def define_plot_parameters(D, irow, lightweight=False):
         d.d1_Dep_Col_Name   = get('d1_Dep_Col_Name')
         d.d1_Key            = get('d1_Key', '')
         d.d1_Style          = get('d1_Style', '')
+        d.d1_Start          = get('d1_Start', None)
+        d.d1_End            = get('d1_End', None)
+        d.d1_Tick           = get('d1_Tick', None)
         d.d1_Comp_Start     = get('d1_Comp_Start', np.nan)
         d.d1_Comp_End       = get('d1_Comp_End', np.nan)
         d.d1_Dep_Comp_Start = get('d1_Dep_Comp_Start', np.nan)
@@ -1696,6 +1748,9 @@ def define_plot_parameters(D, irow, lightweight=False):
         d.d2_Dep_Col_Name   = get('d2_Dep_Col_Name')
         d.d2_Key            = get('d2_Key', '')
         d.d2_Style          = get('d2_Style', '')
+        d.d2_Start          = get('d2_Start', None)
+        d.d2_End            = get('d2_End', None)
+        d.d2_Tick           = get('d2_Tick', None)
         d.d2_Comp_Start     = get('d2_Comp_Start', np.nan)
         d.d2_Comp_End       = get('d2_Comp_End', np.nan)
         d.d2_Dep_Comp_Start = get('d2_Dep_Comp_Start', np.nan)
@@ -2018,7 +2073,7 @@ def scatplot(saved_data, drange, **kwargs):
 
     for _, row in Q.iterrows():
         plt.close('all')
-        plt.figure().clear()
+        plt.clf()
 
         Scatter_Plot_Title = row["Scatter_Plot_Title"]
         Plot_Filename = row["Plot_Filename"]
@@ -2026,18 +2081,21 @@ def scatplot(saved_data, drange, **kwargs):
         Plot_Max = float(row["Plot_Max"])
         Plot_Type = str(row["Plot_Type"]).strip().lower()
 
-        # --- MATLAB parity: Sigma_E only required for Validation ---
+        # --- Sigma_E only required for Validation ---
         if Stats_Output.lower() == "validation":
             Sigma_E_input = float(row["Sigma_E"]) if "Sigma_E" in row and not pd.isna(row["Sigma_E"]) else 0.0
         else:
             Sigma_E_input = 0.0
 
-        #if verbose:
-        #    print(f"[scatplot] Processing {Scatter_Plot_Title}")
+        if verbose:
+           print(f"[scatplot] Processing {Scatter_Plot_Title}")
 
         # Match dataplot entries
-        match_idx = [i for i, q in enumerate(Save_Quantity)
-                     if Scatter_Plot_Title.strip().lower() in str(q).lower()]
+        match_idx = [
+            i for i, q in enumerate(Save_Quantity)
+            if str(q).strip().lower() == Scatter_Plot_Title.strip().lower()
+        ]
+
         if not match_idx:
             print(f"[scatplot] No dataplot entries for {Scatter_Plot_Title}")
             continue
@@ -2177,13 +2235,53 @@ def scatplot(saved_data, drange, **kwargs):
             print(f"[scatplot] Skipping {Scatter_Plot_Title} (no valid data)")
             continue
 
-        # --- Compute statistics (MATLAB logic restored) ---
-        weight = np.ones_like(Measured_Values)
+        # --- Compute statistics (MATLAB bin-weighted logic) ---
+
+        n_pts = len(Measured_Values)
+        weight = np.ones(n_pts)
+
+        # MATLAB behavior: Weight_Data == 'yes' by default for validation
+        Weight_Data = True
+
+        if Weight_Data and n_pts > 0:
+            max_meas = np.max(Measured_Values)
+            bin_size = max_meas / 10.0
+
+            bin_weight = np.zeros(10)
+
+            # Compute bin weights (n_pts / points in bin)
+            for ib in range(10):
+                lo = ib * bin_size
+                hi = (ib + 1) * bin_size
+                idx = np.where((Measured_Values > lo) & (Measured_Values <= hi))[0]
+                if len(idx) > 0:
+                    bin_weight[ib] = n_pts / len(idx)
+                else:
+                    bin_weight[ib] = 0.0
+
+            # Assign weights to each point
+            for iv in range(n_pts):
+                for ib in range(10):
+                    lo = ib * bin_size
+                    hi = (ib + 1) * bin_size
+                    if Measured_Values[iv] > lo and Measured_Values[iv] <= hi:
+                        weight[iv] = bin_weight[ib]
+                        break
+
+        # Weighted log-means
         log_E_bar = np.sum(np.log(Measured_Values) * weight) / np.sum(weight)
         log_M_bar = np.sum(np.log(Predicted_Values) * weight) / np.sum(weight)
-        u2 = np.sum((((np.log(Predicted_Values) - np.log(Measured_Values))
-                      - (log_M_bar - log_E_bar)) ** 2) * weight) / (np.sum(weight) - 1)
+
+        # Weighted variance
+        denom = np.sum(weight) - 1
+        if denom > 0:
+            u2 = np.sum(((np.log(Predicted_Values) - np.log(Measured_Values)
+                          - (log_M_bar - log_E_bar)) ** 2) * weight) / denom
+        else:
+            u2 = 0.0
+
         u = np.sqrt(u2)
+
 
         # Restore MATLAB logic:
         # If no Sigma_E is supplied, experimental sigma = u/sqrt(2)
@@ -2272,7 +2370,7 @@ def scatplot(saved_data, drange, **kwargs):
         os.makedirs(os.path.dirname(pdf_path), exist_ok=True)
         fig.savefig(pdf_path)
         plt.close(fig)
-        plt.figure().clear()
+        plt.clf()
 
         # --- Collect statistics for CSV/TeX ---
         group_labels = []
@@ -2587,8 +2685,12 @@ def statistics_histogram(Measured_Values, Predicted_Values,
     ix = np.arange(x_lim[0], x_lim[1], 1e-3)
     mu = np.mean(ln_M_E)
     sd = np.std(ln_M_E, ddof=0)
-    iy = (1 / (sd * np.sqrt(2 * np.pi))) * np.exp(-(ix - mu) ** 2 / (2 * sd ** 2))
-    ax.plot(ix, iy * np.trapz(n, xcenters), 'k', linewidth=2)
+    if sd == 0:
+        # Degenerate distribution: all mass at mu
+        ax.axvline(mu, color='k', linewidth=2)
+    else:
+        iy = (1 / (sd * np.sqrt(2 * np.pi))) * np.exp(-(ix - mu) ** 2 / (2 * sd ** 2))
+        ax.plot(ix, iy * np.trapz(n, xcenters), 'k', linewidth=2)
 
     ax.set_xlim(x_lim)
     y0, y1 = ax.get_ylim()
@@ -2604,7 +2706,7 @@ def statistics_histogram(Measured_Values, Predicted_Values,
     plt.tight_layout()
     fig.savefig(outpath)
     plt.close(fig)
-    plt.figure().clear()
+    plt.clf()
 
     return f"{os.path.basename(Plot_Filename)}_Histogram"
 

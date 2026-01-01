@@ -4,6 +4,7 @@
 
 import subprocess
 import fdsplotlib
+import matplotlib.pyplot as plt
 import runpy
 import importlib
 importlib.reload(fdsplotlib) # use for development (while making changes to fdsplotlib.py)
@@ -14,6 +15,8 @@ print("Using:", fdsplotlib.__file__)
 def safe_run(script_path):
     try:
         runpy.run_path(script_path, run_name="__main__")
+        plt.clf()         # Clear the current figure (if any)
+        plt.close('all')  # Close all open figure windows
     except Exception as exc:
         print(f"Error in {script_path}: {exc}")
 
@@ -52,7 +55,7 @@ saved_data, drange = fdsplotlib.dataplot(config_filename=Dataplot_Inputs_File,
                                          pltdir=Manuals_Dir,
                                          close_figs=True,
                                          verbose=True,
-                                         plot_range=["all"]) # plot_range[start, end], optionally instead use plot_list['Dataname']
+                                         plot_range=["all"]) # see notes below on plot_range
 
 # ----- write saved_data, drange to disk -----
 import pickle
@@ -127,3 +130,34 @@ print('nat_conv_hot_plate...');             safe_run("./scripts/nat_conv_hot_pla
 
 
 print("verification scripts completed successfully!")
+
+# ------------------------------
+# plot_range usage examples
+#
+# plot_range lets you select which rows of the config file to process.
+# You can mix row numbers, ranges, and Dataname strings:
+#
+#  1. Single row by number (Spreadsheet-style, including header rows):
+#       plot_range = [1995]
+#
+#  2. Inclusive ranges by "start:stop":
+#       plot_range = ["5:9"]        # rows 5 through 9
+#
+#  3. Open-ended ranges:
+#       plot_range = ["1995:"]      # from row 1995 to the end
+#
+#  4. Named selection by Dataname (case-insensitive):
+#       plot_range = ["CSTB Tunnel", "Steckler Compartment"]
+#
+#  5. Mixed selection:
+#       plot_range = [1, 2, "5:9", "CSTB Tunnel", "7000:"]
+#
+#  6. All rows:
+#       plot_range = ["all"]
+#
+# Notes:
+# - Row numbers are 1-based (like Spreadsheet).
+# - Ranges are inclusive, e.g. "5:9" means 5,6,7,8,9.
+# - "start:" runs to the last row.
+# - Strings that are not ranges or "all" are matched to the Dataname column.
+# ------------------------------
