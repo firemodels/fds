@@ -3,10 +3,6 @@
 # Usage (Linux and macOS):
 #    source ./setup_python_env.sh
 
-# commented out because this is not good practice for sourced scripts
-# and firebot must source this script for its python setup
-#set -e  # Exit immediately if a command exits with a non-zero status
-
 BATCHMODE=false
 
 # Parse command-line arguments
@@ -39,7 +35,7 @@ fi
 
 
 # Save current directory to return later
-curdir=$(pwd)
+setup_python_env_pwd=$(pwd)
 
 # Go to .github folder
 cd "$(dirname "${BASH_SOURCE[0]}")/../../.." || error_exit "Failed to locate repo root"
@@ -103,7 +99,7 @@ cd "$reporoot/fds/Utilities/Python" || error_exit "Failed to find script directo
 python hello_world.py || error_exit "hello_world.py failed"
 
 # Return to original directory
-cd "$curdir"
+cd "$setup_python_env_pwd"
 
 echo "Python environment setup complete."
 
