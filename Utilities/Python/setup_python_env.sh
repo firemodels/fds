@@ -48,20 +48,19 @@ VENV_DIR="fds_python_env"
 VENV_BIN="$VENV_DIR/bin"
 INSTALL_REQUIREMENTS=false
 
+REINSTALL=false
+
 # Check if virtual environment exists
 if [ -d "$VENV_DIR" ]; then
     if [ "$BATCHMODE" = true ]; then
-        echo "Batch mode: activating existing virtual environment without prompts."
+        echo "Batch mode: will reinstall virtual environment."
+        REINSTALL=true
     else
         echo "Virtual environment '$VENV_DIR' already exists."
         read -p "Do you want to reinstall everything? (y/N): " choice
         case "$choice" in
             [yY]|[yY][eE][sS])
-                echo "Removing old environment..."
-                rm -rf "$VENV_DIR" || error_exit "Failed to remove existing virtual environment"
-                echo "Creating new virtual environment..."
-                python3 -m venv "$VENV_DIR" || error_exit "Failed to create virtual environment"
-                INSTALL_REQUIREMENTS=true
+                REINSTALL=true
                 ;;
             *)
                 echo "Activating existing environment..."
@@ -69,10 +68,21 @@ if [ -d "$VENV_DIR" ]; then
         esac
     fi
 else
+    REINSTALL=true
+fi
+
+# Reinstall if requested or required
+if [ "$REINSTALL" = true ]; then
+    if [ -d "$VENV_DIR" ]; then
+        echo "Removing old environment..."
+        rm -rf "$VENV_DIR" || error_exit "Failed to remove existing virtual environment"
+    fi
+
     echo "Creating new virtual environment..."
     python3 -m venv "$VENV_DIR" || error_exit "Failed to create virtual environment"
     INSTALL_REQUIREMENTS=true
 fi
+
 source "$VENV_BIN/activate" || error_exit "Failed to activate virtual environment"
 
 # Install requirements only if flagged
