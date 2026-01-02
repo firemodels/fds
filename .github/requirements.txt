@@ -9,11 +9,13 @@ scipy
 seaborn
 pygments
 ipython
-cantera
+# cantera>=3.1 pulls ruamel.yaml>=0.19 which requires ruamel.yaml.clibz (Python.h)
+cantera<3.1
+ruamel.yaml<0.19
 pyfdstools
+bibtexautocomplete
 
 # Local utility packages (imports fdsplotlib)
 -e ../Utilities/Python
 
-# Bibliography tools
-git+https://github.com/dlesbre/bibtex-autocomplete.git@v1.4.3
+
