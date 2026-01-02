@@ -1,9 +1,11 @@
 #!/bin/bash
-# Configure Spyder IDE for FDS
+# Configure Python Virtual Environment for FDS
 # Usage (Linux and macOS):
-#    source ./setup_spyder_env.sh
+#    source ./setup_python_env.sh
 
-set -e  # Exit immediately if a command exits with a non-zero status
+# commented out because this is not good practice for sourced scripts
+# and firebot must source this script for its python setup
+#set -e  # Exit immediately if a command exits with a non-zero status
 
 BATCHMODE=false
 
@@ -104,3 +106,4 @@ python hello_world.py || error_exit "hello_world.py failed"
 cd "$curdir"
 
 echo "Python environment setup complete."
+
