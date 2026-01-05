@@ -1,16 +1,15 @@
 \documentclass[12pt]{article}
+
+\input{../Bibliography/commoncommands}
 \usepackage{showkeys}
+\addbibresource{../Bibliography/FDS_refs.bib}
+
 \begin{document}
+
 \nocite{*}
-\title{FDS and Smokeview References (FDS\_refs.bib)}
+\title{FDS\_refs References}
 \maketitle
 
-% order refs as in .bib file
-%\bibliographystyle{unsrt}
+\printbibliography
 
-% order refs alphabetically (by author)
-\bibliographystyle{plain}
-
-\bibliography{FDS_refs}
 \end{document}
-
