@@ -2426,3 +2426,208 @@ A notional fuel molecule was created for each heat of combustion and soot yield 
 
 The simulation results were processed to determine $\dq_{\rm flame}''$ and $\Gamma$ for all permutations of the heat of combustion, the radiative fraction, the soot yield, and the HRRPUA. The processed results were interpolated into two four dimensional arrays with one for $\dq_{\rm flame}''$ and one for $\Gamma$. The array dimensions are the heat of combustion in increments of 10~MJ/kg, the soot yield in increments of 1~\%, the HRRPUA in increments of 100~\unit{kW/m^2}, and the radiative fraction in increments of 10~\%. During input processing, FDS uses the gas phase combustion reactions and the surface boundary conditions to determine the mass flux weighted effective heat of combustion and soot yield for all surfaces using the scaling method. This allows for the mass flux due to the HRRPUA to be defined as multiple gas species at fixed ratios. Then for each cone curve provided for a surface, FDS interpolates the $\dq_{\rm flame}''$ and $\Gamma$ arrays to construct a curve of the reference heat flux.
 
+
+\chapter{Gaurd Cell Interpolation for Consistent Gradients}
+\label{ch:flux_matching_uglmat}
+
+This section describes the details of properly matching the pressure gradient $\nabla H$ at a coarse-fine mesh interface for use with the UGLMAT (unstructured global matrix) pressure solver.
+
+\section{Grid Refinement Interface Treatment}
+
+\subsection{Geometry at Coarse-Fine Interface}
+
+At a refinement interface, one coarse cell face connects to multiple fine cell faces. For a 2:1 refinement ratio in 3D, one coarse face connects to 4 fine faces (2$\times$2 arrangement).
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[scale=1.2]
+    % Coarse mesh cell
+    \draw[thick] (0,0) rectangle (2,2);
+    \node at (1,0.7) {$H_C$};
+    \node at (1,-0.3) {Coarse Mesh};
+
+    % Fine mesh cells (2x2)
+    \draw[thick] (2.5,0) rectangle (3.5,1);
+    \draw[thick] (2.5,1) rectangle (3.5,2);
+    \draw[thick] (3.5,0) rectangle (4.5,1);
+    \draw[thick] (3.5,1) rectangle (4.5,2);
+
+    \node at (3,0.25) {$H_{F1}$};
+    \node at (3,1.25) {$H_{F2}$};
+    \node at (4,0.25) {$H_{F3}$};
+    \node at (4,1.25) {$H_{F4}$};
+    \node at (3.5,-0.3) {Fine Mesh};
+
+    % Interface
+    \draw[dashed, thick, red] (2.25,0) -- (2.25,2);
+    \node[red] at (2.25,2.3) {Interface};
+
+    % Cell centers
+    \fill[blue] (1,1) circle (3pt);
+    \fill[blue] (3,0.5) circle (2pt);
+    \fill[blue] (3,1.5) circle (2pt);
+    \fill[blue] (4,0.5) circle (2pt);
+    \fill[blue] (4,1.5) circle (2pt);
+
+    % Arrows showing flux coupling
+    \draw[-{Stealth}, thick, green!60!black] (1.2,1) -- (2.8,0.5);
+    \draw[-{Stealth}, thick, green!60!black] (1.2,1) -- (2.8,1.5);
+
+    % Distances
+    \draw[<->, gray] (1,-0.8) -- (2.25,-0.8);
+    \node[gray] at (1.625,-1.1) {$\delta x_C/2$};
+    \draw[<->, gray] (2.25,-0.8) -- (3,-0.8);
+    \node[gray] at (2.625,-1.1) {$\delta x_F/2$};
+\end{tikzpicture}
+\caption{2D view of coarse-fine interface showing cell centroids (blue dots) and flux couplings (green arrows). The interface (red dashed line) separates the coarse mesh from the fine mesh.}
+\label{fig:coarse_fine_interface}
+\end{figure}
+
+\section{Distance Calculation at Refinement Interfaces}
+
+For a face at a refinement interface between a coarse cell $C$ and a fine cell $F$, the distance between cell centers is:
+\begin{equation}
+    \delta x_{CF} = \frac{\delta x_C}{2} + \frac{\delta x_F}{2}
+    \label{eq:interface_distance}
+\end{equation}
+where $\Delta x_C$ and $\Delta x_F$ are the cell sizes in the normal direction.
+
+The inverse distance used in the flux coefficient is:
+\begin{equation}
+    \text{IDX} = \frac{1}{\delta x_{CF}} = \frac{2}{\delta x_C + \delta x_F}
+    \label{eq:idx}
+\end{equation}
+
+% \subsection{Area at Refinement Interfaces}
+
+% When a coarse cell connects to multiple fine cells, each fine cell's face area $A_F$ will be smaller than the coarse cell's face area $A_C$. The effective coupling area is the \emph{minimum} of the two:
+% \begin{equation}
+%     A_{\text{eff}} = \min(A_C, A_F) = A_F
+%     \label{eq:effective_area}
+% \end{equation}
+
+% This ensures that the flux through a fine cell's face is computed using the actual contact area, not the larger coarse cell area.
+
+\subsection{Flux Coupling Coefficient for Refinement Interface}
+
+When a coarse cell connects to multiple fine cells, each fine cell's face area $A_F$ will be smaller than the coarse cell's face area $A_C$.  The coupling coefficient between coarse cell $C$ and fine cell $F_k$ is:
+\begin{equation}
+    B_{C,F_k} = \frac{A_{F_k}}{\frac{\delta x_C}{2} + \frac{\delta x_{F_k}}{2}}
+    \label{eq:refinement_coupling}
+\end{equation}
+
+The total flux from the coarse cell is conserved:
+\begin{equation}
+    \sum_{k} B_{C,F_k} (H_{F_k} - H_C) = \text{total flux through coarse face}
+    \label{eq:flux_conservation}
+\end{equation}
+
+%=============================================================================
+\section{Guard Cell Interpolation for Consistent Gradients}
+%=============================================================================
+
+\subsection{Problem Statement}
+
+After solving the global pressure system, each mesh has the solution $H$ for its internal cells. However, to compute the pressure gradient $\nabla H$ at mesh boundaries consistently, guard cells need appropriate values of $H$.
+
+At refinement interfaces, we have:
+\begin{itemize}
+    \item The coarse mesh guard cell overlaps multiple fine cells
+    \item Simple copying would not preserve gradient continuity
+    \item Flux matching requires cell center to center distance-weighted interpolation for cartesian grids.
+\end{itemize}
+
+\subsection{Flux matched Interpolation}
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[scale=1.4]
+    % === COARSE MESH (right side) ===
+    % Internal coarse cell (width = 2 units)
+    \draw[thick, fill=blue!20] (0,0) rectangle (2,2);
+    \node at (1,0.75) {$H_{int}$};
+    \fill[blue] (1,1) circle (2.5pt);
+
+    % === FINE MESH (2 cells at the interface, width = 1 unit = half coarse) ===
+    \draw[thick, fill=green!30] (-1,0) rectangle (0,1);
+    \draw[thick, fill=green!30] (-1,1) rectangle (0,2);
+
+    % Fine cell labels and centers
+    \node at (-0.5,0.25) {$H_{ext,1}$};
+    \node at (-0.5,1.25) {$H_{ext,2}$};
+    \fill[green!60!black] (-0.5,0.5) circle (2pt);
+    \fill[green!60!black] (-0.5,1.5) circle (2pt);
+
+    % === Guard cell of coarse mesh (dashed boundary, overlapping fine cells) ===
+    \draw[very thick, dashed, red!70!black] (-2,0) rectangle (0,2);
+    % Guard cell centroid at x=-1 (corresponds to left edge of fine cells)
+    \fill[red] (-1,1) circle (3pt);
+    \node[red!70!black] at (-1.55,1) {$H_{guard}$};
+
+    % === Interface ===
+    \draw[very thick, purple] (0,-0.3) -- (0,2.3);
+
+    % === Distances ===
+    % Coarse cell distance to face
+    \draw[<->, blue!70!black, thick] (0,2.6) -- (1,2.6);
+    \node[blue!70!black, above] at (0.5,2.6) {$\frac{\Delta x_c}{2}$};
+
+    % Fine cell distance to face (half of fine cell width)
+    \draw[<->, green!50!black, thick] (-0.5,2.6) -- (0,2.6);
+    \node[green!50!black, above] at (-0.25,2.6) {$\frac{\Delta x_f}{2}$};
+
+    % Guard cell center distance from interface
+    \draw[<->, red!70!black, thick] (-1,-0.6) -- (0,-0.6);
+    \node[red!70!black, below] at (-0.5,-0.6) {$\frac{\Delta x_c}{2}$};
+
+    % Show fine cell edge aligns with guard centroid
+    \draw[dotted, gray, thick] (-1,-0.3) -- (-1,2.3);
+
+    % === Legend ===
+    \node[anchor=west] at (2.5,1.8) {\small \textcolor{blue}{$\bullet$} Coarse cell center};
+    \node[anchor=west] at (2.5,1.4) {\small \textcolor{red}{$\bullet$} Guard cell center};
+    \node[anchor=west] at (2.5,1.0) {\small \textcolor{green!60!black}{$\bullet$} Fine cell centers};
+
+\end{tikzpicture}
+\caption{Guard cell interpolation at 2:1 refinement interface. The fine cells have half the width
+of the coarse cell ($\Delta x_f = \Delta x_c/2$). The coarse guard cell (red dashed boundary)
+overlaps two fine cells. The guard cell centroid (red dot) is located at $\Delta x_c/2$ from the
+interface, which corresponds to the left edge of the fine cells (gray dotted line).}
+\label{fig:guard_interpolation}
+\end{figure}
+
+The algorithm proceeds as follows:
+
+\begin{enumerate}
+    \item \textbf{Average external cell values}: For cells in the neighbor mesh range, compute:
+    \begin{equation}
+        \bar{H}_{ext} = \frac{1}{N_{ext}} \sum_{k=1}^{N_{ext}} H_{ext,k}
+        \label{eq:h_ext_mean}
+    \end{equation}
+    Only include cells where the external wall cell type is \ct{INTERPOLATED_BOUNDARY}. Note this is equivalent to area averaging the solution for structured cartesian grids.
+
+    \item \textbf{Interpolate to face}: Using distance weighting:
+    \begin{equation}
+        H_{face} = w_{int} H_{int} + w_{ext} \bar{H}_{ext}
+        \label{eq:h_face}
+    \end{equation}
+    where the weights are:
+    \begin{align}
+        w_{int} &= \frac{\delta x_{ext}}{\delta x_{int} + \delta x_{ext}} \\
+        w_{ext} &= \frac{\delta x_{int}}{\delta x_{int} + \delta x_{ext}}
+        \label{eq:weights}
+    \end{align}
+
+    \item \textbf{Extrapolate to guard cell center}: The guard cell is located at distance $\delta x_{int}/2$ from the face on the external side:
+    \begin{equation}
+        H_{guard} = H_{int} + 2(H_{face} - H_{int})
+        \label{eq:h_guard}
+    \end{equation}
+\end{enumerate}
+
+This ensures that the gradient computed in the internal mesh:
+\begin{equation}
+    \frac{\partial H}{\partial x} \approx \frac{H_{int} - H_{guard}}{\delta x_{int}}
+    \label{eq:gradient_internal}
+\end{equation}
+is consistent with the flux used in the pressure matrix. Note that this scheme works both for the fine and coarse sides in structured cartesian refined grids, leading to the coarse side having the area average of the gradient values computed from the fine side. This leads to matching velocities in the projection, provided initial velocities and forces are flux matched.
