@@ -2101,6 +2101,21 @@ def scatplot(saved_data, drange, **kwargs):
             if str(q).strip().lower() == Scatter_Plot_Title.strip().lower()
         ]
 
+        # --- Write raw scatter values CSV (pre-mask, MATLAB-faithful) ---
+        if Stats_Output.lower() != "verification":
+            raw_csv = _write_raw_scatter_csv(
+                Scatterplot_Dir,
+                Scatter_Plot_Title,
+                match_idx,
+                Save_csv_rownum,
+                Save_Dataname,
+                Save_Measured_Metric,
+                Save_Predicted_Metric,
+            )
+
+            # if verbose:
+            #     print(f"[scatplot] Wrote raw scatter CSV: {raw_csv}")
+
         if not match_idx:
             print(f"[scatplot] No dataplot entries for {Scatter_Plot_Title}")
             continue
@@ -2411,6 +2426,68 @@ def scatplot(saved_data, drange, **kwargs):
 
     print("[scatplot] Completed successfully.")
     return
+
+
+def _write_raw_scatter_csv(
+    outdir,
+    scatter_title,
+    match_idx,
+    Save_csv_rownum,
+    Save_Dataname,
+    Save_Measured_Metric,
+    Save_Predicted_Metric,
+):
+    """
+    Write raw (pre-mask) measured/predicted values used by scatplot.
+    Values are rounded to 3 significant figures for clean CSV output.
+    """
+    import os
+    import csv
+    import numpy as np
+
+    # Match histogram naming convention
+    fname = (
+        "FDS_"
+        + scatter_title
+        .replace(" ", "_")
+        .replace(";", "")
+        .replace("/", "_")
+    )
+    csv_path = os.path.join(outdir, f"{fname}_raw_scatter_values.csv")
+
+    def _sig3(x):
+        """Round to 3 significant figures, preserving scientific notation."""
+        try:
+            return float(f"{float(x):.3g}")
+        except Exception:
+            return ""
+
+    with open(csv_path, "w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow([
+            "csv_rownum",
+            "Dataname",
+            "Predicted_Values",
+            "Measured_Values",
+        ])
+
+        for idx in match_idx:
+            rownum = Save_csv_rownum[idx]
+            dataname = Save_Dataname[idx]
+
+            mvals = np.array(Save_Measured_Metric[idx], dtype=float).flatten()
+            pvals = np.array(Save_Predicted_Metric[idx], dtype=float).flatten()
+
+            n = min(len(mvals), len(pvals))
+            for k in range(n):
+                writer.writerow([
+                    rownum,
+                    dataname,
+                    _sig3(pvals[k]),
+                    _sig3(mvals[k]),
+                ])
+
+    return csv_path
 
 
 def statistics_output(
