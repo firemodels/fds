@@ -5251,6 +5251,7 @@ END SUBROUTINE GET_WALL_NODE_WEIGHTS
 
 !> \brief Determine weighting factors for 1-D solid cells
 !> \param GEOMETRY Indicator of surface geometry: Cartesian, cylindrical, or spherical
+!> \param I_GRAD Integer denoting exponent for geometry calculations: Cartesian=1, cylindrical=2, or spherical=3
 !> \param NWP Number of interior cells
 !> \param NWP_NEW Number of interior cells after shrinkage or swelling
 !> \param INNER_RADIUS Inner radius of hollow cylinder or sphere (m)
