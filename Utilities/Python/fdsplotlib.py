@@ -271,6 +271,7 @@ def dataplot(config_filename, **kwargs):
     Save_Metric_Type = []
     Save_Measured_Quantity = []
     Save_Predicted_Quantity = []
+    Save_csv_rownum = []
 
     default_na = {
         '', '#N/A', '#N/A N/A', '#NA', '-1.#IND', '-1.#QNAN',
@@ -361,6 +362,7 @@ def dataplot(config_filename, **kwargs):
             Save_Predicted_Metric.append(np.nan)
             Save_Measured_Quantity.append(None)
             Save_Predicted_Quantity.append(None)
+            Save_csv_rownum.append(None)
 
         # ---------------------- LOAD EXP ----------------------
         E = read_csv_cached(expdir + pp.d1_Filename,
@@ -511,10 +513,12 @@ def dataplot(config_filename, **kwargs):
 
                 Save_Measured_Metric[-1] = np.array(vals_meas_list, dtype=object)
                 Save_Measured_Quantity[-1] = np.array([qty_label] * len(vals_meas_list), dtype=object)
+                Save_csv_rownum[-1] = csv_rownum
 
             except Exception as e:
                 print(f"[dataplot] Error computing measured metric for {pp.Dataname}: {e}")
                 Save_Measured_Metric[-1] = np.array([])
+                Save_Measured_Quantity[-1] = []
                 Save_Measured_Quantity[-1] = []
 
         # ---------------------- LOAD MODEL ----------------------
@@ -886,7 +890,7 @@ def dataplot(config_filename, **kwargs):
         Save_Quantity, Save_Group_Style, Save_Fill_Color, Save_Group_Key_Label,
         Save_Measured_Metric, Save_Predicted_Metric, Save_Dataname, Save_Plot_Filename,
         Save_Dep_Title, Save_Error_Tolerance, Save_Metric_Type,
-        Save_Measured_Quantity, Save_Predicted_Quantity,
+        Save_Measured_Quantity, Save_Predicted_Quantity, Save_csv_rownum,
     ]
 
     for i, (m, p, name, qty) in enumerate(zip(
@@ -2036,6 +2040,7 @@ def scatplot(saved_data, drange, **kwargs):
         Save_Metric_Type,
         Save_Measured_Quantity,
         Save_Predicted_Quantity,
+        Save_csv_rownum
     ) = saved_data
 
     Q = pd.read_csv(Scatterplot_Inputs_File)
