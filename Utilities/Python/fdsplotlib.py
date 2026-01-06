@@ -2103,15 +2103,22 @@ def scatplot(saved_data, drange, **kwargs):
 
         # --- Write raw scatter values CSV (pre-mask, MATLAB-faithful) ---
         if Stats_Output.lower() != "verification":
-            raw_csv = _write_raw_scatter_csv(
-                Scatterplot_Dir,
-                Scatter_Plot_Title,
-                match_idx,
-                Save_csv_rownum,
-                Save_Dataname,
-                Save_Measured_Metric,
-                Save_Predicted_Metric,
-            )
+            if (
+                Save_Measured_Metric is not None
+                and Save_Predicted_Metric is not None
+                and len(Save_Measured_Metric) > 0
+                and len(Save_Predicted_Metric) > 0
+                and len(Save_Measured_Metric) == len(Save_Predicted_Metric)
+            ):
+                raw_csv = _write_raw_scatter_csv(
+                    Scatterplot_Dir,
+                    Scatter_Plot_Title,
+                    match_idx,
+                    Save_csv_rownum,
+                    Save_Dataname,
+                    Save_Measured_Metric,
+                    Save_Predicted_Metric,
+                )
 
             # if verbose:
             #     print(f"[scatplot] Wrote raw scatter CSV: {raw_csv}")
@@ -2439,7 +2446,7 @@ def _write_raw_scatter_csv(
 ):
     """
     Write raw (pre-mask) measured/predicted values used by scatplot.
-    Values are rounded to 3 significant figures for clean CSV output.
+    Values are rounded to 4 significant figures for clean CSV output.
     """
     import os
     import csv
@@ -2455,10 +2462,10 @@ def _write_raw_scatter_csv(
     )
     csv_path = os.path.join(outdir, f"{fname}_raw_scatter_values.csv")
 
-    def _sig3(x):
+    def _sig4(x):
         """Round to 3 significant figures, preserving scientific notation."""
         try:
-            return float(f"{float(x):.3g}")
+            return float(f"{float(x):.4g}")
         except Exception:
             return ""
 
@@ -2483,8 +2490,8 @@ def _write_raw_scatter_csv(
                 writer.writerow([
                     rownum,
                     dataname,
-                    _sig3(pvals[k]),
-                    _sig3(mvals[k]),
+                    _sig4(pvals[k]),
+                    _sig4(mvals[k]),
                 ])
 
     return csv_path
