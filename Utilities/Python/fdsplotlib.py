@@ -271,6 +271,7 @@ def dataplot(config_filename, **kwargs):
     Save_Metric_Type = []
     Save_Measured_Quantity = []
     Save_Predicted_Quantity = []
+    Save_csv_rownum = []
 
     default_na = {
         '', '#N/A', '#N/A N/A', '#NA', '-1.#IND', '-1.#QNAN',
@@ -361,6 +362,7 @@ def dataplot(config_filename, **kwargs):
             Save_Predicted_Metric.append(np.nan)
             Save_Measured_Quantity.append(None)
             Save_Predicted_Quantity.append(None)
+            Save_csv_rownum.append(None)
 
         # ---------------------- LOAD EXP ----------------------
         E = read_csv_cached(expdir + pp.d1_Filename,
@@ -511,10 +513,12 @@ def dataplot(config_filename, **kwargs):
 
                 Save_Measured_Metric[-1] = np.array(vals_meas_list, dtype=object)
                 Save_Measured_Quantity[-1] = np.array([qty_label] * len(vals_meas_list), dtype=object)
+                Save_csv_rownum[-1] = csv_rownum
 
             except Exception as e:
                 print(f"[dataplot] Error computing measured metric for {pp.Dataname}: {e}")
                 Save_Measured_Metric[-1] = np.array([])
+                Save_Measured_Quantity[-1] = []
                 Save_Measured_Quantity[-1] = []
 
         # ---------------------- LOAD MODEL ----------------------
@@ -886,7 +890,7 @@ def dataplot(config_filename, **kwargs):
         Save_Quantity, Save_Group_Style, Save_Fill_Color, Save_Group_Key_Label,
         Save_Measured_Metric, Save_Predicted_Metric, Save_Dataname, Save_Plot_Filename,
         Save_Dep_Title, Save_Error_Tolerance, Save_Metric_Type,
-        Save_Measured_Quantity, Save_Predicted_Quantity,
+        Save_Measured_Quantity, Save_Predicted_Quantity, Save_csv_rownum,
     ]
 
     for i, (m, p, name, qty) in enumerate(zip(
@@ -2036,6 +2040,7 @@ def scatplot(saved_data, drange, **kwargs):
         Save_Metric_Type,
         Save_Measured_Quantity,
         Save_Predicted_Quantity,
+        Save_csv_rownum
     ) = saved_data
 
     Q = pd.read_csv(Scatterplot_Inputs_File)
@@ -2095,6 +2100,21 @@ def scatplot(saved_data, drange, **kwargs):
             i for i, q in enumerate(Save_Quantity)
             if str(q).strip().lower() == Scatter_Plot_Title.strip().lower()
         ]
+
+        # --- Write raw scatter values CSV (pre-mask, MATLAB-faithful) ---
+        if Stats_Output.lower() != "verification":
+            raw_csv = _write_raw_scatter_csv(
+                Scatterplot_Dir,
+                Scatter_Plot_Title,
+                match_idx,
+                Save_csv_rownum,
+                Save_Dataname,
+                Save_Measured_Metric,
+                Save_Predicted_Metric,
+            )
+
+            # if verbose:
+            #     print(f"[scatplot] Wrote raw scatter CSV: {raw_csv}")
 
         if not match_idx:
             print(f"[scatplot] No dataplot entries for {Scatter_Plot_Title}")
@@ -2406,6 +2426,68 @@ def scatplot(saved_data, drange, **kwargs):
 
     print("[scatplot] Completed successfully.")
     return
+
+
+def _write_raw_scatter_csv(
+    outdir,
+    scatter_title,
+    match_idx,
+    Save_csv_rownum,
+    Save_Dataname,
+    Save_Measured_Metric,
+    Save_Predicted_Metric,
+):
+    """
+    Write raw (pre-mask) measured/predicted values used by scatplot.
+    Values are rounded to 3 significant figures for clean CSV output.
+    """
+    import os
+    import csv
+    import numpy as np
+
+    # Match histogram naming convention
+    fname = (
+        "FDS_"
+        + scatter_title
+        .replace(" ", "_")
+        .replace(";", "")
+        .replace("/", "_")
+    )
+    csv_path = os.path.join(outdir, f"{fname}_raw_scatter_values.csv")
+
+    def _sig3(x):
+        """Round to 3 significant figures, preserving scientific notation."""
+        try:
+            return float(f"{float(x):.3g}")
+        except Exception:
+            return ""
+
+    with open(csv_path, "w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow([
+            "csv_rownum",
+            "Dataname",
+            "Predicted_Values",
+            "Measured_Values",
+        ])
+
+        for idx in match_idx:
+            rownum = Save_csv_rownum[idx]
+            dataname = Save_Dataname[idx]
+
+            mvals = np.array(Save_Measured_Metric[idx], dtype=float).flatten()
+            pvals = np.array(Save_Predicted_Metric[idx], dtype=float).flatten()
+
+            n = min(len(mvals), len(pvals))
+            for k in range(n):
+                writer.writerow([
+                    rownum,
+                    dataname,
+                    _sig3(pvals[k]),
+                    _sig3(mvals[k]),
+                ])
+
+    return csv_path
 
 
 def statistics_output(

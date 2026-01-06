@@ -27,6 +27,7 @@
 \usepackage{multirow}
 %\usepackage{pdfsync}
 \usepackage{tikz}
+\usetikzlibrary{patterns,arrows.meta,positioning}
 \usepackage{bm}
 \usepackage{pgfplots}
 %\pgfplotsset{compat=1.7}
@@ -63,7 +64,7 @@
 \usepackage[section]{placeins}
 \usepackage{scrextend}
 \usepackage{needspace}
-\usepackage[backend=biber, style=numeric, sorting=none, backref=true, giveninits=true]{biblatex}
+\usepackage[backend=biber, style=numeric, sorting=none, backref=true, giveninits=true, maxbibnames=99]{biblatex}
 
 \newcommand{\nopart}{\expandafter\def\csname Parent-1\endcsname{}} % To fix table of contents in pdf.
 \newcommand{\ct}[1]{\lstinline{#1}}
