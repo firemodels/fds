@@ -2427,14 +2427,294 @@ A notional fuel molecule was created for each heat of combustion and soot yield 
 The simulation results were processed to determine $\dq_{\rm flame}''$ and $\Gamma$ for all permutations of the heat of combustion, the radiative fraction, the soot yield, and the HRRPUA. The processed results were interpolated into two four dimensional arrays with one for $\dq_{\rm flame}''$ and one for $\Gamma$. The array dimensions are the heat of combustion in increments of 10~MJ/kg, the soot yield in increments of 1~\%, the HRRPUA in increments of 100~\unit{kW/m^2}, and the radiative fraction in increments of 10~\%. During input processing, FDS uses the gas phase combustion reactions and the surface boundary conditions to determine the mass flux weighted effective heat of combustion and soot yield for all surfaces using the scaling method. This allows for the mass flux due to the HRRPUA to be defined as multiple gas species at fixed ratios. Then for each cone curve provided for a surface, FDS interpolates the $\dq_{\rm flame}''$ and $\Gamma$ arrays to construct a curve of the reference heat flux.
 
 
-\chapter{Gaurd Cell Interpolation for Consistent Gradients}
-\label{ch:flux_matching_uglmat}
+\chapter{Pressure Poisson Equation and Solution Methods}
+\label{ch:pressure_poisson}
 
-This section describes the details of properly matching the pressure gradient $\nabla H$ at a coarse-fine mesh interface for use with the UGLMAT (unstructured global matrix) pressure solver.
+This appendix summarizes the formulation, discretization, boundary conditions,
+and numerical solution of the Poisson equation for the pressure variable $H$
+used in the FDS projection method. The emphasis is on consistency between the
+discrete Poisson operator, velocity correction, and mesh coupling, particularly
+when using global matrix solvers with mesh refinement and immersed boundaries.
 
-\section{Grid Refinement Interface Treatment}
+%=============================================================================
+\section{Pressure Projection and Definition of \texorpdfstring{$H$}{H}}
+%=============================================================================
 
-\subsection{Geometry at Coarse-Fine Interface}
+FDS advances the velocity field using a fractional--step (projection) method.
+Rather than solving directly for pressure, the scalar variable $H$ is defined as
+\begin{equation}
+H = \frac{\tilde{p}}{\rho} + \frac{|\mathbf{u}|^2}{2},
+\label{eq:H_definition}
+\end{equation}
+where $\tilde{p}$ is the perturbation pressure and $\rho$ is the density.
+
+At each time step (and, when required, within a fixed--point iteration), $H$ is
+obtained from the Poisson equation
+\begin{equation}
+\nabla^2 H
+=
+-
+\left[
+\frac{\nabla \cdot \mathbf{u}^{\,\mathrm{th},n+1} - \nabla \cdot \mathbf{u}^n}{\Delta t}
++
+\nabla \cdot (\mathbf{F}_A + \mathbf{F}_B)
+\right],
+\label{eq:poisson_H}
+\end{equation}
+where $\mathbf{F}_A$ represents known body forces and $\mathbf{F}_B$ includes
+density--dependent and immersed boundary forcing terms.
+
+Once $H$ is known, the velocity field is corrected according to
+\begin{equation}
+\mathbf{u}^{n+1}
+=
+\mathbf{u}^n
+-
+\Delta t
+\left[
+(\mathbf{F}_A + \mathbf{F}_B)
++
+\nabla H
+\right].
+\label{eq:velocity_update}
+\end{equation}
+This formulation ensures that the discrete pressure gradient used in the velocity
+update is consistent with the Poisson operator.
+
+%=============================================================================
+\section{Spatial Discretization}
+%=============================================================================
+
+%=============================================================================
+\subsection*{Staggered Grid Arrangement}
+%=============================================================================
+
+FDS employs a staggered Cartesian grid in which scalar quantities such as $H$ and
+$\rho$ are stored at cell centers, while velocity components are stored at cell
+faces. This arrangement avoids pressure–velocity decoupling and allows consistent
+discretization of divergence and gradient operators.
+
+\subsection*{Discrete Laplacian}
+
+For a two--dimensional uniform grid with $\delta x = \delta y = h$, the discrete
+Laplacian at cell $(i,j)$ is
+\begin{equation}
+\nabla^2 H_{i,j}
+\approx
+\frac{1}{h^2}
+\left(
+H_{i+1,j} + H_{i-1,j} + H_{i,j+1} + H_{i,j-1} - 4 H_{i,j}
+\right).
+\label{eq:laplacian_5pt}
+\end{equation}
+
+In three dimensions, the operator extends to a seven--point stencil. Discretization
+over $N = N_x N_y (N_z)$ cells yields a sparse linear system
+\begin{equation}
+\mathbf{A}\,\mathbf{H} = \mathbf{R},
+\label{eq:linear_system}
+\end{equation}
+where $\mathbf{A}$ is symmetric and contains at most 5 (2D) or 7 (3D) nonzero
+entries per row.
+
+%=============================================================================
+\subsection*{Discrete Laplacian on a Staggered Grid (2D)}
+%=============================================================================
+
+The Laplacian of $H$ is constructed by applying the divergence operator to the
+cell–centered gradient. On a uniform staggered grid with spacings
+$\delta x$ and $\delta y$, the gradient components are first evaluated at cell
+faces and then differenced back to the cell center.
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[scale=1.2]
+
+%-------------------------------------------------
+% Cells
+%-------------------------------------------------
+
+% Central cell
+\draw[very thick] (0,0) rectangle (2,2);
+\fill[orange] (1,1) circle (3pt);
+\node[anchor=south] at (1,0.4) {$H_{i,j}$};
+
+% Right cell
+\draw[thick] (2,0) rectangle (4,2);
+\fill[orange] (3,1) circle (3pt);
+\node[anchor=south] at (3,0.4) {$H_{i+1,j}$};
+
+% Left cell
+\draw[thick] (-2,0) rectangle (0,2);
+\fill[orange] (-1,1) circle (3pt);
+\node[anchor=south] at (-1,0.4) {$H_{i-1,j}$};
+
+% Top cell
+\draw[thick] (0,2) rectangle (2,4);
+\fill[orange] (1,3) circle (3pt);
+\node[anchor=south] at (1,2.4) {$H_{i,j+1}$};
+
+% Bottom cell
+\draw[thick] (0,-2) rectangle (2,0);
+\fill[orange] (1,-1) circle (3pt);
+\node[anchor=north] at (1,-1) {$H_{i,j-1}$};
+
+%-------------------------------------------------
+% Face-centered gradient arrows (short, centered)
+%-------------------------------------------------
+
+\tikzset{gradarrow/.style={->, thick, blue, >=Triangle}}
+
+\draw[gradarrow] (1.75,1) -- (2.25,1);
+\draw[gradarrow] (0.25,1) -- (-0.25,1);
+
+\draw[gradarrow] (1,1.75) -- (1,2.25);
+\draw[gradarrow] (1,0.25) -- (1,-0.25);
+
+
+%-------------------------------------------------
+% Gradient approximations (labels)
+%-------------------------------------------------
+
+\node[anchor=west] (gxR) at (2,-0.5)
+{$\dfrac{H_{i+1,j}-H_{i,j}}{\delta x}$};
+
+\node[anchor=east] (gxL) at (0,2.5)
+{$\dfrac{H_{i,j}-H_{i-1,j}}{\delta x}$};
+
+\node[anchor=south] (gyT) at (2.9,2.3)
+{$\dfrac{H_{i,j+1}-H_{i,j}}{\delta y}$};
+
+\node[anchor=north] (gyB) at (-0.9,-0.3)
+{$\dfrac{H_{i,j}-H_{i,j-1}}{\delta y}$};
+
+%-------------------------------------------------
+% Faint leader lines to correct face centers
+%-------------------------------------------------
+
+% x-direction gradients: use middle of labels
+\draw[gray!60, thin] (gxR.north) -- (2,1);  % right face
+\draw[gray!60, thin] (gxL.south) -- (0,1);  % left face
+
+% y-direction gradients: unchanged from previous iteration
+\draw[gray!60, thin] (gyT.south) -- (1,2);  % top face
+\draw[gray!60, thin] (gyB.north) -- (1,0);  % bottom face
+
+\end{tikzpicture}
+\caption{Construction of the discrete Laplacian of $H$ on a two–dimensional
+staggered grid. Pressure gradients are evaluated at cell faces and differenced
+back to the cell center to form the five–point stencil.}
+\label{fig:laplacian_staggered}
+\end{figure}
+
+
+
+Applying the divergence of the gradient yields
+\begin{equation}
+\nabla^2 H_{i,j}
+\approx
+\frac{1}{\delta x}
+\left(
+\frac{H_{i+1,j}-H_{i,j}}{\delta x}
+-
+\frac{H_{i,j}-H_{i-1,j}}{\delta x}
+\right)
++
+\frac{1}{\delta y}
+\left(
+\frac{H_{i,j+1}-H_{i,j}}{\delta y}
+-
+\frac{H_{i,j}-H_{i,j-1}}{\delta y}
+\right),
+\label{eq:laplacian_staggered}
+\end{equation}
+which reduces to the standard five–point stencil when
+$\delta x = \delta y = h$.
+
+%=============================================================================
+\section{Boundary Conditions}
+%=============================================================================
+
+Boundary conditions for $H$ are imposed using ghost cells at mesh boundaries.
+
+\subsection*{Dirichlet Boundary Conditions}
+
+Prescribed values of $H$ are enforced by eliminating ghost cell values through
+linear extrapolation, resulting in a modification of the diagonal entry of
+$\mathbf{A}$ and a corresponding adjustment to the right--hand side.
+
+\subsection*{Neumann Boundary Conditions}
+
+Normal gradient conditions are imposed by constraining the ghost cell such that
+\begin{equation}
+\frac{\partial H}{\partial n} = 0.
+\end{equation}
+This results in a change to the diagonal coefficient of the corresponding matrix
+row. Homogeneous Neumann conditions lead to a singular operator and require an
+additional constraint to fix the pressure reference.
+
+%=============================================================================
+\section{Immersed Boundary Treatment}
+%=============================================================================
+
+In the presence of immersed solid boundaries, FDS solves the Poisson equation for
+$H$ throughout the gas phase while enforcing velocity boundary conditions through
+additional forcing terms.
+
+At forcing points adjacent to an immersed boundary, the normal velocity is
+constrained to a prescribed value $u^d$. The combined forcing term is written as
+\begin{equation}
+(\mathbf{F}_A + \mathbf{F}_B)
+=
+-
+\frac{u^d - u^n}{\Delta t}
+-
+\frac{\Delta H}{\Delta x},
+\end{equation}
+with the pressure gradient term treated implicitly through the Poisson solve.
+This formulation allows velocity boundary conditions to be satisfied while
+retaining a standard Laplacian operator for $H$.
+
+%=============================================================================
+\section{Solution Methods}
+%=============================================================================
+
+\subsection*{Fast Trigonometric (FFT) Solver}
+
+On single, uniform, structured meshes with separable boundary conditions, the
+Poisson equation is solved using a fast trigonometric method based on discrete
+sine and cosine transforms. This approach exploits the separability of the
+Laplacian operator, yielding an $\mathcal{O}(N \log N)$ solution with minimal
+memory overhead.
+
+The FFT solver is restricted to cases without internal boundaries or mesh
+refinement.
+
+\subsection*{Global Matrix Solver (UGLMAT / HYPRE)}
+
+For general geometries involving mesh refinement, immersed boundaries, or
+multiple meshes, FDS assembles the global linear system
+\eqref{eq:linear_system} and solves it using the UGLMAT framework, which interfaces
+with the HYPRE library.
+
+The resulting matrix is sparse and symmetric, incorporates boundary conditions
+through local row modifications, and includes explicit coarse--fine coupling
+terms at refinement interfaces. Iterative solvers with multigrid
+preconditioning are used to obtain $H$, after which velocities are corrected
+locally on each mesh.
+
+%=============================================================================
+\section{Coarse--Fine Interface Consistency}
+\label{sec:flux_matching_uglmat}
+%=============================================================================
+
+The guard cell interpolation and flux--matching procedure described below ensures
+that the discrete gradient $\nabla H$ used in the velocity update is consistent
+with the fluxes represented in the global Poisson matrix. This consistency is
+essential for maintaining velocity continuity across refinement interfaces when
+using the UGLMAT solver.
+
+\subsection*{Geometry at Coarse-Fine Interface}
 
 At a refinement interface, one coarse cell face connects to multiple fine cell faces. For a 2:1 refinement ratio in 3D, one coarse face connects to 4 fine faces (2$\times$2 arrangement).
 
@@ -2508,7 +2788,7 @@ The inverse distance used in the flux coefficient is:
 
 % This ensures that the flux through a fine cell's face is computed using the actual contact area, not the larger coarse cell area.
 
-\subsection{Flux Coupling Coefficient for Refinement Interface}
+\subsection*{Flux Coupling Coefficient for Refinement Interface}
 
 When a coarse cell connects to multiple fine cells, each fine cell's face area $A_F$ will be smaller than the coarse cell's face area $A_C$.  The coupling coefficient between coarse cell $C$ and fine cell $F_k$ is:
 \begin{equation}
@@ -2526,7 +2806,7 @@ The total flux from the coarse cell is conserved:
 \section{Guard Cell Interpolation for Consistent Gradients}
 %=============================================================================
 
-\subsection{Problem Statement}
+\subsection*{Problem Statement}
 
 After solving the global pressure system, each mesh has the solution $H$ for its internal cells. However, to compute the pressure gradient $\nabla H$ at mesh boundaries consistently, guard cells need appropriate values of $H$.
 
@@ -2537,7 +2817,7 @@ At refinement interfaces, we have:
     \item Flux matching requires cell center to center distance-weighted interpolation for cartesian grids.
 \end{itemize}
 
-\subsection{Flux matched Interpolation}
+\subsection*{Flux matched Interpolation}
 
 \begin{figure}[h]
 \centering
