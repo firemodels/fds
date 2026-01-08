@@ -20,10 +20,11 @@ gitrevision=`git describe --abbrev=7 --long --dirty`
 echo "\\newcommand{\\gitrevision}{$gitrevision}" > ../Bibliography/gitrevision.tex
 
 pdflatex -interaction nonstopmode FDS_Verification_Guide &> FDS_Verification_Guide.err
-biber FDS_Verification_Guide &> FDS_Verification_Guide.err
+biber                             FDS_Verification_Guide &> FDS_Verification_Guide_biber.err
 pdflatex -interaction nonstopmode FDS_Verification_Guide &> FDS_Verification_Guide.err
 pdflatex -interaction nonstopmode FDS_Verification_Guide &> FDS_Verification_Guide.err
 pdflatex -interaction nonstopmode FDS_Verification_Guide &> FDS_Verification_Guide.err
+cat FDS_Verification_Guide_biber.err >> FDS_Verification_Guide.err
 
 if [ ! -e FDS_Verification_Guide.pdf ]; then
   clean_build=0
@@ -46,13 +47,13 @@ if [[ `grep -E "Too many|Undefined control sequence|Error:|Fatal error|! LaTeX E
 fi
 
 # Check for LaTeX warnings (undefined references or duplicate labels)
-if [[ `grep -E "undefined|multiply defined" -I FDS_Verification_Guide.err | grep -v RF1 | grep -v LastPage` == "" ]]
+if [[ `grep -E "undefined|WARNING|ERROR|multiply defined" -I FDS_Verification_Guide.err | grep -v RF1 | grep -v LastPage` == "" ]]
    then
       # Continue along
       :
    else
       echo "LaTeX warnings detected:"
-      grep -E "undefined|multiply defined" -I FDS_Verification_Guide.err | grep -v RF1 | grep -v LastPage
+      grep -E "undefined|WARNING|ERROR|multiply defined" -I FDS_Verification_Guide.err | grep -v RF1 | grep -v LastPage
       clean_build=0
 fi
 
