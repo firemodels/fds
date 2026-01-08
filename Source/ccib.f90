@@ -4436,51 +4436,27 @@ RECV_MESH_LOOP: DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
          ! Unpack velocity, momentum rhs and previous substep dH/Dx1 for cut-faces, in PREDICTOR or CORRECTOR, IBM forcing:
          IF (CODE==5  .AND. M2%NICF_R(1)>0) THEN
-         NQT2 = 4
-         LL   = 0
-         EXTERNAL_WALL_LOOP_112A : DO IW=1,M%N_EXTERNAL_WALL_CELLS
-            WC=>M%WALL(IW); IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE EXTERNAL_WALL_LOOP_112A
-            EWC=>M%EXTERNAL_WALL(IW); IF (EWC%NOM/=NM) CYCLE EXTERNAL_WALL_LOOP_112A
-            BC=>M%BOUNDARY_COORD(WC%BC_INDEX); IIO = BC%IIG; JJO = BC%JJG; KKO = BC%KKG
-            SELECT CASE(BC%IOR)
-            CASE( IAXIS); IF(M%FCVAR(IIO-1,JJO  ,KKO  ,CC_FGSC,IAXIS)/=CC_CUTCFE) CYCLE EXTERNAL_WALL_LOOP_112A
-            CASE(-IAXIS); IF(M%FCVAR(IIO  ,JJO  ,KKO  ,CC_FGSC,IAXIS)/=CC_CUTCFE) CYCLE EXTERNAL_WALL_LOOP_112A
-            CASE( JAXIS); IF(M%FCVAR(IIO  ,JJO-1,KKO  ,CC_FGSC,JAXIS)/=CC_CUTCFE) CYCLE EXTERNAL_WALL_LOOP_112A
-            CASE(-JAXIS); IF(M%FCVAR(IIO  ,JJO  ,KKO  ,CC_FGSC,JAXIS)/=CC_CUTCFE) CYCLE EXTERNAL_WALL_LOOP_112A
-            CASE( KAXIS); IF(M%FCVAR(IIO  ,JJO  ,KKO-1,CC_FGSC,KAXIS)/=CC_CUTCFE) CYCLE EXTERNAL_WALL_LOOP_112A
-            CASE(-KAXIS); IF(M%FCVAR(IIO  ,JJO  ,KKO  ,CC_FGSC,KAXIS)/=CC_CUTCFE) CYCLE EXTERNAL_WALL_LOOP_112A
-            END SELECT
-            DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
-               DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
-                  DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
-                   SELECT CASE(-BC%IOR)
-                   CASE( IAXIS); ICF=MESHES(NM)%FCVAR(IIO-1,JJO  ,KKO  ,CC_IDCF,IAXIS)
-                   CASE(-IAXIS); ICF=MESHES(NM)%FCVAR(IIO  ,JJO  ,KKO  ,CC_IDCF,IAXIS)
-                   CASE( JAXIS); ICF=MESHES(NM)%FCVAR(IIO  ,JJO-1,KKO  ,CC_IDCF,JAXIS)
-                   CASE(-JAXIS); ICF=MESHES(NM)%FCVAR(IIO  ,JJO  ,KKO  ,CC_IDCF,JAXIS)
-                   CASE( KAXIS); ICF=MESHES(NM)%FCVAR(IIO  ,JJO  ,KKO-1,CC_IDCF,KAXIS)
-                   CASE(-KAXIS); ICF=MESHES(NM)%FCVAR(IIO  ,JJO  ,KKO  ,CC_IDCF,KAXIS)
-                   END SELECT
-                   IF (ICF > 0) THEN
-                      CF => MESHES(NM)%CUT_FACE(ICF)
-                      DO JCF=1,CF%NFACE
-                         LL = LL + 1
-                         CF%FN_OMESH(JCF)   = M2%REAL_RECV_PKG112(NQT2*(LL-1)+1)
-                         ICC =CF%CELL_LIST(2, LOW_IND,JCF); JCC =CF%CELL_LIST(3, LOW_IND,JCF)
-                         ICC1=CF%CELL_LIST(2,HIGH_IND,JCF); JCC1=CF%CELL_LIST(3,HIGH_IND,JCF)
-                         IF(PREDICTOR) THEN
-                            MESHES(NM)%CUT_CELL(ICC )%H(JCC )  = M2%REAL_RECV_PKG112(NQT2*(LL-1)+2)
-                            MESHES(NM)%CUT_CELL(ICC1)%H(JCC1)  = M2%REAL_RECV_PKG112(NQT2*(LL-1)+3)
-                         ELSE
-                            MESHES(NM)%CUT_CELL(ICC )%HS(JCC ) = M2%REAL_RECV_PKG112(NQT2*(LL-1)+2)
-                            MESHES(NM)%CUT_CELL(ICC1)%HS(JCC1) = M2%REAL_RECV_PKG112(NQT2*(LL-1)+3)
-                         ENDIF
-                      ENDDO
-                   ENDIF
+            NQT2 = 4
+            LL   = 0
+            DO ICF1=1,M2%NICF_R(1)
+               ICF = M2%ICF_UFFB_CF_R(ICF1)
+               IF (ICF > 0) THEN
+                  CF => MESHES(NM)%CUT_FACE(ICF)
+                  DO JCF=1,CF%NFACE
+                     LL = LL + 1
+                     CF%FN_OMESH(JCF)   = M2%REAL_RECV_PKG112(NQT2*(LL-1)+1)
+                     ICC =CF%CELL_LIST(2, LOW_IND,JCF); JCC =CF%CELL_LIST(3, LOW_IND,JCF)
+                     ICC1=CF%CELL_LIST(2,HIGH_IND,JCF); JCC1=CF%CELL_LIST(3,HIGH_IND,JCF)
+                     IF(PREDICTOR) THEN
+                        MESHES(NM)%CUT_CELL(ICC )%H(JCC )  = M2%REAL_RECV_PKG112(NQT2*(LL-1)+2)
+                        MESHES(NM)%CUT_CELL(ICC1)%H(JCC1)  = M2%REAL_RECV_PKG112(NQT2*(LL-1)+3)
+                     ELSE
+                        MESHES(NM)%CUT_CELL(ICC )%HS(JCC ) = M2%REAL_RECV_PKG112(NQT2*(LL-1)+2)
+                        MESHES(NM)%CUT_CELL(ICC1)%HS(JCC1) = M2%REAL_RECV_PKG112(NQT2*(LL-1)+3)
+                     ENDIF
                   ENDDO
-               ENDDO
+               ENDIF
             ENDDO
-         ENDDO EXTERNAL_WALL_LOOP_112A
          ENDIF
 
          IF (CODE==3 .AND. M2%NFCC_R(1)>0) THEN
@@ -4509,45 +4485,21 @@ RECV_MESH_LOOP: DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          IF(CODE==3 .AND. M2%NICF_R(1)>0) THEN
             NQT2 = 4
             LL   = 0
-            EXTERNAL_WALL_LOOP_112B : DO IW=1,M%N_EXTERNAL_WALL_CELLS
-               WC=>M%WALL(IW); IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE EXTERNAL_WALL_LOOP_112B
-               EWC=>M%EXTERNAL_WALL(IW); IF (EWC%NOM/=NM)   CYCLE EXTERNAL_WALL_LOOP_112B
-               BC=>M%BOUNDARY_COORD(WC%BC_INDEX); IIO = BC%IIG; JJO = BC%JJG; KKO = BC%KKG
-               SELECT CASE(BC%IOR)
-               CASE( IAXIS); IF(M%FCVAR(IIO-1,JJO  ,KKO  ,CC_FGSC,IAXIS)/=CC_CUTCFE) CYCLE EXTERNAL_WALL_LOOP_112B
-               CASE(-IAXIS); IF(M%FCVAR(IIO  ,JJO  ,KKO  ,CC_FGSC,IAXIS)/=CC_CUTCFE) CYCLE EXTERNAL_WALL_LOOP_112B
-               CASE( JAXIS); IF(M%FCVAR(IIO  ,JJO-1,KKO  ,CC_FGSC,JAXIS)/=CC_CUTCFE) CYCLE EXTERNAL_WALL_LOOP_112B
-               CASE(-JAXIS); IF(M%FCVAR(IIO  ,JJO  ,KKO  ,CC_FGSC,JAXIS)/=CC_CUTCFE) CYCLE EXTERNAL_WALL_LOOP_112B
-               CASE( KAXIS); IF(M%FCVAR(IIO  ,JJO  ,KKO-1,CC_FGSC,KAXIS)/=CC_CUTCFE) CYCLE EXTERNAL_WALL_LOOP_112B
-               CASE(-KAXIS); IF(M%FCVAR(IIO  ,JJO  ,KKO  ,CC_FGSC,KAXIS)/=CC_CUTCFE) CYCLE EXTERNAL_WALL_LOOP_112B
-               END SELECT
-               DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
-                  DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
-                     DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
-                        SELECT CASE(-BC%IOR)
-                        CASE( IAXIS); ICF=MESHES(NM)%FCVAR(IIO-1,JJO  ,KKO  ,CC_IDCF,IAXIS)
-                        CASE(-IAXIS); ICF=MESHES(NM)%FCVAR(IIO  ,JJO  ,KKO  ,CC_IDCF,IAXIS)
-                        CASE( JAXIS); ICF=MESHES(NM)%FCVAR(IIO  ,JJO-1,KKO  ,CC_IDCF,JAXIS)
-                        CASE(-JAXIS); ICF=MESHES(NM)%FCVAR(IIO  ,JJO  ,KKO  ,CC_IDCF,JAXIS)
-                        CASE( KAXIS); ICF=MESHES(NM)%FCVAR(IIO  ,JJO  ,KKO-1,CC_IDCF,KAXIS)
-                        CASE(-KAXIS); ICF=MESHES(NM)%FCVAR(IIO  ,JJO  ,KKO  ,CC_IDCF,KAXIS)
-                        END SELECT
-                        IF (ICF > 0) THEN
-                           CF => MESHES(NM)%CUT_FACE(ICF)
-                           DO JCF=1,CF%NFACE
-                              LL = LL + 1
-                              CF%VELS_OMESH(JCF)   = M2%REAL_RECV_PKG112(NQT2*(LL-1)+1)
-                              CF%VEL_LNK_OMESH(JCF)= M2%REAL_RECV_PKG112(NQT2*(LL-1)+2)
-                              ICC =CF%CELL_LIST(2, LOW_IND,JCF); JCC =CF%CELL_LIST(3, LOW_IND,JCF)
-                              ICC1=CF%CELL_LIST(2,HIGH_IND,JCF); JCC1=CF%CELL_LIST(3,HIGH_IND,JCF)
-                              MESHES(NM)%CUT_CELL(ICC )%H(JCC )  = M2%REAL_RECV_PKG112(NQT2*(LL-1)+3)
-                              MESHES(NM)%CUT_CELL(ICC1)%H(JCC1)  = M2%REAL_RECV_PKG112(NQT2*(LL-1)+4)
-                           ENDDO
-                        ENDIF
-                     ENDDO
+            DO ICF1=1,M2%NICF_R(1)
+               ICF = M2%ICF_UFFB_CF_R(ICF1)
+               IF (ICF > 0) THEN
+                  CF => MESHES(NM)%CUT_FACE(ICF)
+                  DO JCF=1,CF%NFACE
+                     LL = LL + 1
+                     CF%VELS_OMESH(JCF)   = M2%REAL_RECV_PKG112(NQT2*(LL-1)+1)
+                     CF%VEL_LNK_OMESH(JCF)= M2%REAL_RECV_PKG112(NQT2*(LL-1)+2)
+                     ICC =CF%CELL_LIST(2, LOW_IND,JCF); JCC =CF%CELL_LIST(3, LOW_IND,JCF)
+                     ICC1=CF%CELL_LIST(2,HIGH_IND,JCF); JCC1=CF%CELL_LIST(3,HIGH_IND,JCF)
+                     MESHES(NM)%CUT_CELL(ICC )%H(JCC )  = M2%REAL_RECV_PKG112(NQT2*(LL-1)+3)
+                     MESHES(NM)%CUT_CELL(ICC1)%H(JCC1)  = M2%REAL_RECV_PKG112(NQT2*(LL-1)+4)
                   ENDDO
-               ENDDO
-            ENDDO EXTERNAL_WALL_LOOP_112B
+               ENDIF
+            ENDDO
          ENDIF
 
          ! Unpack densities and species mass fractions following CORRECTOR exchange
@@ -4613,45 +4565,21 @@ RECV_MESH_LOOP: DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          IF(CODE==6 .AND. M2%NICF_R(1)>0) THEN
             NQT2 = 4
             LL   = 0
-            EXTERNAL_WALL_LOOP_112C : DO IW=1,M%N_EXTERNAL_WALL_CELLS
-               WC=>M%WALL(IW); IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE EXTERNAL_WALL_LOOP_112C
-               EWC=>M%EXTERNAL_WALL(IW); IF (EWC%NOM/=NM) CYCLE EXTERNAL_WALL_LOOP_112C
-               BC=>M%BOUNDARY_COORD(WC%BC_INDEX); IIO = BC%IIG; JJO = BC%JJG; KKO = BC%KKG
-               SELECT CASE(BC%IOR)
-               CASE( IAXIS); IF(M%FCVAR(IIO-1,JJO  ,KKO  ,CC_FGSC,IAXIS)/=CC_CUTCFE) CYCLE EXTERNAL_WALL_LOOP_112C
-               CASE(-IAXIS); IF(M%FCVAR(IIO  ,JJO  ,KKO  ,CC_FGSC,IAXIS)/=CC_CUTCFE) CYCLE EXTERNAL_WALL_LOOP_112C
-               CASE( JAXIS); IF(M%FCVAR(IIO  ,JJO-1,KKO  ,CC_FGSC,JAXIS)/=CC_CUTCFE) CYCLE EXTERNAL_WALL_LOOP_112C
-               CASE(-JAXIS); IF(M%FCVAR(IIO  ,JJO  ,KKO  ,CC_FGSC,JAXIS)/=CC_CUTCFE) CYCLE EXTERNAL_WALL_LOOP_112C
-               CASE( KAXIS); IF(M%FCVAR(IIO  ,JJO  ,KKO-1,CC_FGSC,KAXIS)/=CC_CUTCFE) CYCLE EXTERNAL_WALL_LOOP_112C
-               CASE(-KAXIS); IF(M%FCVAR(IIO  ,JJO  ,KKO  ,CC_FGSC,KAXIS)/=CC_CUTCFE) CYCLE EXTERNAL_WALL_LOOP_112C
-               END SELECT
-               DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
-                  DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
-                     DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
-                      SELECT CASE(-BC%IOR)
-                      CASE( IAXIS); ICF=MESHES(NM)%FCVAR(IIO-1,JJO  ,KKO  ,CC_IDCF,IAXIS)
-                      CASE(-IAXIS); ICF=MESHES(NM)%FCVAR(IIO  ,JJO  ,KKO  ,CC_IDCF,IAXIS)
-                      CASE( JAXIS); ICF=MESHES(NM)%FCVAR(IIO  ,JJO-1,KKO  ,CC_IDCF,JAXIS)
-                      CASE(-JAXIS); ICF=MESHES(NM)%FCVAR(IIO  ,JJO  ,KKO  ,CC_IDCF,JAXIS)
-                      CASE( KAXIS); ICF=MESHES(NM)%FCVAR(IIO  ,JJO  ,KKO-1,CC_IDCF,KAXIS)
-                      CASE(-KAXIS); ICF=MESHES(NM)%FCVAR(IIO  ,JJO  ,KKO  ,CC_IDCF,KAXIS)
-                      END SELECT
-                      IF (ICF > 0) THEN
-                         CF => MESHES(NM)%CUT_FACE(ICF)
-                         DO JCF=1,CF%NFACE
-                            LL = LL + 1
-                            CF%VEL_OMESH(JCF)    = M2%REAL_RECV_PKG112(NQT2*(LL-1)+1)
-                            CF%VEL_LNK_OMESH(JCF)= M2%REAL_RECV_PKG112(NQT2*(LL-1)+2)
-                            ICC =CF%CELL_LIST(2, LOW_IND,JCF); JCC =CF%CELL_LIST(3, LOW_IND,JCF)
-                            ICC1=CF%CELL_LIST(2,HIGH_IND,JCF); JCC1=CF%CELL_LIST(3,HIGH_IND,JCF)
-                            MESHES(NM)%CUT_CELL(ICC )%HS(JCC )  = M2%REAL_RECV_PKG112(NQT2*(LL-1)+3)
-                            MESHES(NM)%CUT_CELL(ICC1)%HS(JCC1)  = M2%REAL_RECV_PKG112(NQT2*(LL-1)+4)
-                         ENDDO
-                      ENDIF
-                     ENDDO
+            DO ICF1=1,M2%NICF_R(1)
+               ICF = M2%ICF_UFFB_CF_R(ICF1)
+               IF (ICF > 0) THEN
+                  CF => MESHES(NM)%CUT_FACE(ICF)
+                  DO JCF=1,CF%NFACE
+                     LL = LL + 1
+                     CF%VEL_OMESH(JCF)    = M2%REAL_RECV_PKG112(NQT2*(LL-1)+1)
+                     CF%VEL_LNK_OMESH(JCF)= M2%REAL_RECV_PKG112(NQT2*(LL-1)+2)
+                     ICC =CF%CELL_LIST(2, LOW_IND,JCF); JCC =CF%CELL_LIST(3, LOW_IND,JCF)
+                     ICC1=CF%CELL_LIST(2,HIGH_IND,JCF); JCC1=CF%CELL_LIST(3,HIGH_IND,JCF)
+                     MESHES(NM)%CUT_CELL(ICC )%HS(JCC )  = M2%REAL_RECV_PKG112(NQT2*(LL-1)+3)
+                     MESHES(NM)%CUT_CELL(ICC1)%HS(JCC1)  = M2%REAL_RECV_PKG112(NQT2*(LL-1)+4)
                   ENDDO
-               ENDDO
-            ENDDO EXTERNAL_WALL_LOOP_112C
+               ENDIF
+            ENDDO
          ENDIF
          IF ((CODE==3.OR.CODE==6) .AND. M2%NLKF_R>0) THEN
             UP2 => M2%U_LNK ; VP2 => M2%V_LNK ; WP2 => M2%W_LNK
