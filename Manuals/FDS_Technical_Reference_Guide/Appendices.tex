@@ -2430,56 +2430,39 @@ The simulation results were processed to determine $\dq_{\rm flame}''$ and $\Gam
 \chapter{Pressure Poisson Equation and Solution Methods}
 \label{ch:pressure_poisson}
 
-This appendix summarizes the formulation, discretization, boundary conditions,
-and numerical solution of the Poisson equation for the pressure variable $H$
-used in the FDS projection method. The emphasis is on consistency between the
-discrete Poisson operator, velocity correction, and mesh coupling, particularly
-when using global matrix solvers with mesh refinement and immersed boundaries.
+This appendix summarizes the formulation, discretization, boundary conditions, and numerical solution of the Poisson equation for the pressure variable $H$ used in the FDS projection method. The emphasis is on consistency between the discrete Poisson operator, velocity correction, and mesh coupling.
 
 %=============================================================================
-\section{Pressure Projection and Definition of \texorpdfstring{$H$}{H}}
+\section{Pressure Definition and Projection Scheme}
 %=============================================================================
 
-FDS advances the velocity field using a fractional--step (projection) method.
-Rather than solving directly for pressure, the scalar variable $H$ is defined as
+FDS advances the velocity field using a projection method. Rather than solving directly for pressure, the scalar variable $H$ is defined as
 \begin{equation}
 H = \frac{\tilde{p}}{\rho} + \frac{|\mathbf{u}|^2}{2},
 \label{eq:H_definition}
 \end{equation}
 where $\tilde{p}$ is the perturbation pressure and $\rho$ is the density.
 
-At each time step (and, when required, within a fixed--point iteration), $H$ is
-obtained from the Poisson equation
+Within a given Runge-Kutta (RK) substep, $H$ is obtained from a Poisson equation.  In practice, FDS uses RK2 (second-order Runge-Kutta).  Depending on the solution method for the global Poisson equation, a fixed-point iteration may be required to reduce errors are mesh boudaries and solid boundaries.  But before explaining those details, we first describe the Poisson equation from the stand point of a simple Forward Euler (FE) update of the velocity and pressure fields from time $t^n$ to $t^{n+1}$, representing the LES timestep $\delta t$.  Taking the discrete divergence of the momentum equation yields the following Poisson equation,
 \begin{equation}
 \nabla^2 H
 =
 -
 \left[
-\frac{\nabla \cdot \mathbf{u}^{\,\mathrm{th},n+1} - \nabla \cdot \mathbf{u}^n}{\Delta t}
+\frac{(\nabla \cdot \mathbf{u})^{\,\mathrm{th},n+1} - \nabla \cdot \mathbf{u}^n}{\delta t}
 +
-\nabla \cdot (\mathbf{F}_A + \mathbf{F}_B)
+\nabla \cdot (\mathbf{F}_A^n + \mathbf{F}_B^n)
 \right],
 \label{eq:poisson_H}
 \end{equation}
-where $\mathbf{F}_A$ represents known body forces and $\mathbf{F}_B$ includes
-density--dependent and immersed boundary forcing terms.
+where $\mathbf{F}_A$ represents known body forces and $\mathbf{F}_B$ is a pressure-dependent baroclinic force which is special in that it may change during a fixed-point iteration ($\mathbf{F}_A$ does not, see Sec.~\ref{findiffmom}).  Note that $(\nabla \cdot \mathbf{u})^{\,\mathrm{th},n+1}$ is a target thermodynamic divergence obtained from the sensible enthalpy equation (see Sec.~\ref{sec:the_velocity_divergence}), whereas $\nabla \cdot \mathbf{u}^n$ is the discrete divergence of the current velocity field.
 
 Once $H$ is known, the velocity field is corrected according to
 \begin{equation}
-\mathbf{u}^{n+1}
-=
-\mathbf{u}^n
--
-\Delta t
-\left[
-(\mathbf{F}_A + \mathbf{F}_B)
-+
-\nabla H
-\right].
+\mathbf{u}^{n+1} = \mathbf{u}^n - \delta t \left[ (\mathbf{F}_A^n + \mathbf{F}_B^n) + \nabla H \right].
 \label{eq:velocity_update}
 \end{equation}
-This formulation ensures that the discrete pressure gradient used in the velocity
-update is consistent with the Poisson operator.
+This formulation ensures that the discrete divergence of the new velocity field is equivalent to the target thermodynamic divergence, $\nabla \cdot \mathbf{u}^{n+1} = (\nabla \cdot \mathbf{u})^{\,\mathrm{th},n+1}$.  Note that there is no time stamp for $H$---it is whatever is required to satisfy the projection scheme.  Its time accuracy, therefore, is first-order, even when embedded in RK2.  Within the code one finds two $H$ arrays stored---for historic reasons these are labeled $H^*$ and $H$ for the \emph{predictor} and \emph{corrector} of the time integration scheme, RK stage 1 and stage 2, respectively.
 
 %=============================================================================
 \section{Spatial Discretization}
@@ -2489,42 +2472,79 @@ update is consistent with the Poisson operator.
 \subsection*{Staggered Grid Arrangement}
 %=============================================================================
 
-FDS employs a staggered Cartesian grid in which scalar quantities such as $H$ and
-$\rho$ are stored at cell centers, while velocity components are stored at cell
-faces. This arrangement avoids pressure–velocity decoupling and allows consistent
-discretization of divergence and gradient operators.
-
-\subsection*{Discrete Laplacian}
-
-For a two--dimensional uniform grid with $\delta x = \delta y = h$, the discrete
-Laplacian at cell $(i,j)$ is
-\begin{equation}
-\nabla^2 H_{i,j}
-\approx
-\frac{1}{h^2}
-\left(
-H_{i+1,j} + H_{i-1,j} + H_{i,j+1} + H_{i,j-1} - 4 H_{i,j}
-\right).
-\label{eq:laplacian_5pt}
-\end{equation}
-
-In three dimensions, the operator extends to a seven--point stencil. Discretization
-over $N = N_x N_y (N_z)$ cells yields a sparse linear system
-\begin{equation}
-\mathbf{A}\,\mathbf{H} = \mathbf{R},
-\label{eq:linear_system}
-\end{equation}
-where $\mathbf{A}$ is symmetric and contains at most 5 (2D) or 7 (3D) nonzero
-entries per row.
+FDS employs a staggered Cartesian grid in which scalar quantities such as $H$ and $\rho$ are stored at cell centers, while velocity components are stored at cell faces. This arrangement avoids pressure–velocity decoupling and allows consistent discretization of divergence and gradient operators.  Note that cells may be stretched in any of the three coordinate directions, but this has implications for the solution method, discussed below.
 
 %=============================================================================
 \subsection*{Discrete Laplacian on a Staggered Grid (2D)}
 %=============================================================================
 
-The Laplacian of $H$ is constructed by applying the divergence operator to the
-cell–centered gradient. On a uniform staggered grid with spacings
-$\delta x$ and $\delta y$, the gradient components are first evaluated at cell
-faces and then differenced back to the cell center.
+In FDS, the pressure variable $H$ is defined at cell centers on a staggered grid, and the Laplacian operator is constructed as the divergence of face--centered pressure gradients (see Fig.~\ref{fig:laplacian_staggered}). The grid may be nonuniform, with cell sizes varying independently in each coordinate direction.
+
+Consider a two--dimensional Cartesian grid with cell--centered values $H_{i,j}$. Let $\delta x_i$ and $\delta y_j$ denote the widths of cell $(i,j)$ in the $x$ and $y$ directions, respectively. Faces normal to the $x$ direction are indexed from $0$ to $\mathrm{IBAR}$, such that face $i$ separates cells $(i,j)$ and $(i+1,j)$. The distance between neighboring cell centers in the normal direction is
+\begin{equation}
+\delta x_{n,i} = x_c(i+1) - x_c(i),
+\label{eq:dxn}
+\end{equation}
+with an analogous definition for $\delta y_{n,j}$ in the $y$ direction.
+
+\paragraph{Discrete gradient.}
+The pressure gradient is evaluated at cell faces. For example, the $x$--component of the gradient at the face between cells $(i,j)$ and $(i+1,j)$ is approximated by
+\begin{equation}
+\left( \frac{\partial H}{\partial x} \right)_{i+\frac12,j}
+\approx
+\frac{H_{i+1,j} - H_{i,j}}{\delta x_{n,i}}.
+\label{eq:grad_x}
+\end{equation}
+An analogous expression holds for the $y$--direction gradient at faces
+$(i,j+\tfrac12)$.
+
+\paragraph{Discrete divergence.}
+The divergence of the gradient is then computed by differencing the face fluxes back to the cell center. In the $x$ direction, this gives
+\begin{equation}
+\left( \nabla \cdot \nabla H \right)^{(x)}_{i,j}
+\approx
+\frac{1}{\delta x_i}
+\left[
+\left( \frac{H_{i+1,j} - H_{i,j}}{\delta x_{n,i}} \right)
+-
+\left( \frac{H_{i,j} - H_{i-1,j}}{\delta x_{n,i-1}} \right)
+\right].
+\label{eq:div_x}
+\end{equation}
+The contribution from the $y$ direction is computed similarly,
+\begin{equation}
+\left( \nabla \cdot \nabla H \right)^{(y)}_{i,j}
+\approx
+\frac{1}{\delta y_j}
+\left[
+\left( \frac{H_{i,j+1} - H_{i,j}}{\delta y_{n,j}} \right)
+-
+\left( \frac{H_{i,j} - H_{i,j-1}}{\delta y_{n,j-1}} \right)
+\right].
+\label{eq:div_y}
+\end{equation}
+
+\paragraph{Discrete Laplacian.}
+Combining the two directions, the discrete Laplacian at cell $(i,j)$ is
+\begin{equation}
+\nabla^2 H_{i,j}
+\approx
+\frac{1}{\delta x_i}
+\left[
+\frac{H_{i+1,j} - H_{i,j}}{\delta x_{n,i}}
+-
+\frac{H_{i,j} - H_{i-1,j}}{\delta x_{n,i-1}}
+\right]
++
+\frac{1}{\delta y_j}
+\left[
+\frac{H_{i,j+1} - H_{i,j}}{\delta y_{n,j}}
+-
+\frac{H_{i,j} - H_{i,j-1}}{\delta y_{n,j-1}}
+\right].
+\label{eq:laplacian_nonuniform}
+\end{equation}
+
 
 \begin{figure}[h]
 \centering
@@ -2577,16 +2597,16 @@ faces and then differenced back to the cell center.
 %-------------------------------------------------
 
 \node[anchor=west] (gxR) at (2,-0.5)
-{$\dfrac{H_{i+1,j}-H_{i,j}}{\delta x}$};
+{$\dfrac{H_{i+1,j}-H_{i,j}}{\delta x_{n,i}}$};
 
 \node[anchor=east] (gxL) at (0,2.5)
-{$\dfrac{H_{i,j}-H_{i-1,j}}{\delta x}$};
+{$\dfrac{H_{i,j}-H_{i-1,j}}{\delta x_{n,i-1}}$};
 
 \node[anchor=south] (gyT) at (2.9,2.3)
-{$\dfrac{H_{i,j+1}-H_{i,j}}{\delta y}$};
+{$\dfrac{H_{i,j+1}-H_{i,j}}{\delta y_{n,j}}$};
 
 \node[anchor=north] (gyB) at (-0.9,-0.3)
-{$\dfrac{H_{i,j}-H_{i,j-1}}{\delta y}$};
+{$\dfrac{H_{i,j}-H_{i,j-1}}{\delta y_{n,j-1}}$};
 
 %-------------------------------------------------
 % Faint leader lines to correct face centers
@@ -2601,35 +2621,50 @@ faces and then differenced back to the cell center.
 \draw[gray!60, thin] (gyB.north) -- (1,0);  % bottom face
 
 \end{tikzpicture}
-\caption{Construction of the discrete Laplacian of $H$ on a two–dimensional
-staggered grid. Pressure gradients are evaluated at cell faces and differenced
-back to the cell center to form the five–point stencil.}
+\caption{Construction of the discrete Laplacian of $H$ on a two–dimensional staggered grid. Pressure gradients are evaluated at cell faces and differenced back to the cell center to form the five–point stencil.}
 \label{fig:laplacian_staggered}
 \end{figure}
 
 
-
-Applying the divergence of the gradient yields
+\paragraph{Linear system form.}
+Discretizing $\nabla^2 H = \mathrm{RHS}$ over all gas-phase cells yields a sparse linear system
 \begin{equation}
-\nabla^2 H_{i,j}
-\approx
-\frac{1}{\delta x}
-\left(
-\frac{H_{i+1,j}-H_{i,j}}{\delta x}
--
-\frac{H_{i,j}-H_{i-1,j}}{\delta x}
-\right)
-+
-\frac{1}{\delta y}
-\left(
-\frac{H_{i,j+1}-H_{i,j}}{\delta y}
--
-\frac{H_{i,j}-H_{i,j-1}}{\delta y}
-\right),
-\label{eq:laplacian_staggered}
+\mathbf{A}\,\mathbf{H} = \mathbf{b},
+\label{eq:AHb}
 \end{equation}
-which reduces to the standard five–point stencil when
-$\delta x = \delta y = h$.
+where the unknown vector $\mathbf{H}$ contains the cell-centered values $H_{i,j}$ stacked into a single column vector of length $N=N_x \times N_y$ ($\times N_z$ in 3D), and $\mathbf{b}$ is the discrete right-hand side.  The matrix $\mathbf{A}$ is generally sparse and symmetric positive definite\footnote{With at least one Dirichlet boundary condition, the discrete Poisson operator is symmetric positive definite. For domains with only Neumann and/or periodic boundary conditions, the operator is symmetric positive semidefinite and solutions are only possible if the $RHS$ satsifies discrete compatiblity (sums to zero).} of size $N \times N$.
+
+\paragraph{Row coefficients for cell $(i,j)$.}
+For an interior cell $(i,j)$ (no boundary modification), Eq.~\eqref{eq:laplacian_nonuniform} can be written in the five-point form
+\begin{equation}
+A_{P}\,H_{i,j} + A_{E}\,H_{i+1,j} + A_{W}\,H_{i-1,j} + A_{N}\,H_{i,j+1} + A_{S}\,H_{i,j-1} \;=\; b_{i,j},
+\label{eq:row_stencil}
+\end{equation}
+with the neighbor coefficients defined by the face-based gradient/divergence construction:
+\begin{align}
+A_{E} &= \frac{1}{\delta x_i\,\delta x_{n,i}}, &
+A_{W} &= \frac{1}{\delta x_i\,\delta x_{n,i-1}}, \label{eq:AE_AW}\\[4pt]
+A_{N} &= \frac{1}{\delta y_j\,\delta y_{n,j}}, &
+A_{S} &= \frac{1}{\delta y_j\,\delta y_{n,j-1}}. \label{eq:AN_AS}
+\end{align}
+The diagonal coefficient is the negative sum of the off-diagonals,
+\begin{equation}
+A_{P} = -\left(A_{E}+A_{W}+A_{N}+A_{S}\right),
+\label{eq:AP}
+\end{equation}
+so that each interior row has at most five nonzero entries (seven in 3D).
+
+\paragraph{Right-hand side.}
+The right-hand side entry $b_{i,j}$ is the discrete approximation of $\mathrm{RHS}$ integrated over the control volume. With the present normalization (as written in Eq.~\eqref{eq:laplacian_nonuniform}), this is simply
+\begin{equation}
+b_{i,j} = \mathrm{RHS}_{i,j},
+\label{eq:bij}
+\end{equation}
+with boundary conditions and internal boundaries handled by modifying the row coefficients and/or $b_{i,j}$ as described in subsequent sections.
+
+\paragraph{Matrix symmetry and sparsity.}
+Because the operator is assembled from paired face fluxes, the resulting matrix is sparse and (for standard boundary treatments) symmetric. In 2D, each interior row has at most five nonzeros corresponding to $\{P,E,W,N,S\}$, and in 3D at most seven corresponding to $\{P,E,W,N,S,T,B\}$.
+
 
 %=============================================================================
 \section{Boundary Conditions}
@@ -2639,41 +2674,300 @@ Boundary conditions for $H$ are imposed using ghost cells at mesh boundaries.
 
 \subsection*{Dirichlet Boundary Conditions}
 
-Prescribed values of $H$ are enforced by eliminating ghost cell values through
-linear extrapolation, resulting in a modification of the diagonal entry of
-$\mathbf{A}$ and a corresponding adjustment to the right--hand side.
+Prescribed values of $H$ are enforced by eliminating ghost cell values through linear extrapolation, resulting in a modification of the diagonal entry of $\mathbf{A}$ and a corresponding adjustment to the right--hand side.  We denote the last cell on a mesh in the $y$ direction as JBAR.  In Fig.~\ref{fig:dirichlet_bc_fds}, the ghost cell value in the stencil (for a given $i$) is eliminated using the prescribed Dirichlet value of $H_{i,\mathrm{BC}}$ as follows,
+\begin{equation}
+H_{i,\mathrm{JBAR}+1} = 2 H_{i,\mathrm{BC}} - H_{i,\mathrm{JBAR}}
+\end{equation}
+Notice that this changes the diagonal coefficient of $H_{i,\mathrm{JBAR}}$ (from -4 to -5) and augments the RHS vector to be
+\begin{equation}
+\mathrm{RHS}_{i,j} = b_{i,j} - 2 H_{i,\mathrm{BC}} \,A_{N,j}
+\end{equation}
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[scale=1.0]
+
+%-------------------------------------------------
+% Styles
+%-------------------------------------------------
+\tikzset{
+  grid/.style={draw=gray!60, dashed},
+  gridint/.style={draw=gray!60},
+  boundary/.style={draw=black, line width=1.2pt},
+  gas/.style={fill=gray!25},
+  solid/.style={fill=gray!55},
+  one/.style={circle, draw, fill=white, inner sep=2pt},
+  center_before/.style={circle, draw, fill=purple!55, inner sep=1.2pt},
+  center_after/.style={circle, draw, fill=red!60, inner sep=1.2pt},
+  ghostval/.style={circle, draw, fill=yellow, inner sep=1.4pt},
+  bcval/.style={circle, draw, fill=green!70!black, inner sep=1.4pt}
+}
+
+%-------------------------------------------------
+% LEFT PANEL
+%-------------------------------------------------
+
+% Light blue interpolated mesh boundary
+\fill[blue!12] (6,0) rectangle (7,7);
+
+% Dashed grid everywhere
+\foreach \i in {0,...,6} {
+  \foreach \j in {0,...,6} {
+    \draw[grid] (\i,\j) rectangle ++(1,1);
+  }
+}
+
+% Gas region (expanded so only one ghost layer)
+\fill[gas] (1,1) rectangle (6,6);
+
+% Solid obstruction
+\fill[solid] (3,3) rectangle (4,5);
+
+% Solid interior grid overlay
+\foreach \i in {1,...,5} {
+  \foreach \j in {1,...,5} {
+    \draw[gridint] (\i,\j) rectangle ++(1,1);
+  }
+}
+
+% Exterior boundary (thicker)
+\draw[boundary] (1,1) rectangle (6,6);
+
+%-------------------------------------------------
+% Stencil coefficients (before BC)
+%-------------------------------------------------
+\node[one] (W) at (1.5,5.5) {\small $1$};
+\node[one] (E) at (3.5,5.5) {\small $1$};
+\node[one] (S) at (2.5,4.5) {\small $1$};
+
+\node[center_before] (C) at (2.5,5.5) {\small $-4$};
+
+% Ghost value (same size as off-diagonal)
+\node[ghostval] (G) at (2.5,6.5) {\small $1$};
+
+% BC annotation (same green everywhere)
+\draw[->, thick, green!70!black] (3.8,7.4) -- (2.6,6.1);
+\node[right, green!70!black] at (3.8,7.4) {$H$ prescribed};
+
+%-------------------------------------------------
+% Stencil connectivity lines
+%-------------------------------------------------
+\draw[black, thick] (C) -- (W);
+\draw[black, thick] (C) -- (E);
+\draw[black, thick] (C) -- (S);
+\draw[black, thick] (C) -- (G);
+
+% Dirichlet BC location
+\node[bcval] (BC) at (2.5,6.0) {$\;$};
+
+
+%-------------------------------------------------
+% Arrow
+%-------------------------------------------------
+\node at (8,5.5) {$\Rightarrow$};
+
+%-------------------------------------------------
+% RIGHT PANEL
+%-------------------------------------------------
+\begin{scope}[xshift=9cm]
+
+% Light blue interpolated mesh boundary
+\fill[blue!12] (6,0) rectangle (7,7);
+
+% Dashed grid
+\foreach \i in {0,...,6} {
+  \foreach \j in {0,...,6} {
+    \draw[grid] (\i,\j) rectangle ++(1,1);
+  }
+}
+
+% Gas region
+\fill[gas] (1,1) rectangle (6,6);
+
+% Solid obstruction
+\fill[solid] (3,3) rectangle (4,5);
+
+% Solid interior grid
+\foreach \i in {1,...,5} {
+  \foreach \j in {1,...,5} {
+    \draw[gridint] (\i,\j) rectangle ++(1,1);
+  }
+}
+
+% Exterior boundary
+\draw[boundary] (1,1) rectangle (6,6);
+
+% Stencil coefficients
+\node[one] (W) at (1.5,5.5) {\small $1$};
+\node[one] (E) at (3.5,5.5) {\small $1$};
+\node[one] (S) at (2.5,4.5) {\small $1$};
+
+\node[center_after] (C) at (2.5,5.5) {\small $-5$};
+
+%-------------------------------------------------
+% Stencil connectivity lines
+%-------------------------------------------------
+\draw[black, thick] (C) -- (W);
+\draw[black, thick] (C) -- (E);
+\draw[black, thick] (C) -- (S);
+
+\end{scope}
+
+\end{tikzpicture}
+\caption{Imposition of a Dirichlet boundary condition using a single ghost cell in FDS. The ghost value is eliminated using the prescribed boundary value, resulting in a modification of the diagonal entry of the discrete Laplacian and the right hand side.}
+\label{fig:dirichlet_bc_fds}
+\end{figure}
+
 
 \subsection*{Neumann Boundary Conditions}
 
-Normal gradient conditions are imposed by constraining the ghost cell such that
+Suppose we are on the left side boundary (refer to Fig.~\ref{fig:neumann_bc_fds}).  Then the first cell index is $i=1$ and the ghost cell is $i=0$, for a given $j$.  The normal gradient conditions are imposed by constraining the ghost cell such that
 \begin{equation}
-\frac{\partial H}{\partial n} = 0.
+\left.\frac{\partial H}{\partial x}\right|_{\mathrm{BC},j} = \frac{H_{1,j}-H_{0,j}}{\delta x_0} \quad \Rightarrow \quad H_{0,j} = \left.\frac{\partial H}{\partial x}\right|_{\mathrm{BC},j} \delta x_0 + H_{1,j},
 \end{equation}
-This results in a change to the diagonal coefficient of the corresponding matrix
-row. Homogeneous Neumann conditions lead to a singular operator and require an
-additional constraint to fix the pressure reference.
-
-%=============================================================================
-\section{Immersed Boundary Treatment}
-%=============================================================================
-
-In the presence of immersed solid boundaries, FDS solves the Poisson equation for
-$H$ throughout the gas phase while enforcing velocity boundary conditions through
-additional forcing terms.
-
-At forcing points adjacent to an immersed boundary, the normal velocity is
-constrained to a prescribed value $u^d$. The combined forcing term is written as
+where $\frac{\partial H}{\partial n}|_{\mathrm{BC},j}$ exactly controls the normal component of velocity at the boundary per Eqs.~(\ref{dbc}) and (\ref{dbc2}) in Sec.~\ref{ssub:solid_boundary_conditions}.  In this case, we are considering an external boundary, but later we will see that this same boundary condition can be applied to an internal solid obstruction leading to an unstructured pressure equation.  As can be seen, eliminating the ghost cell adds $1$ to the diagonal coefficient and the RHS is augmented in this case by
 \begin{equation}
-(\mathbf{F}_A + \mathbf{F}_B)
-=
--
-\frac{u^d - u^n}{\Delta t}
--
-\frac{\Delta H}{\Delta x},
+\mathrm{RHS}_{1,j} = b_{1,j} - \left.\frac{\partial H}{\partial x}\right|_{\mathrm{BC},j} \delta x_0 \, A_{W,j}
 \end{equation}
-with the pressure gradient term treated implicitly through the Poisson solve.
-This formulation allows velocity boundary conditions to be satisfied while
-retaining a standard Laplacian operator for $H$.
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[scale=1.0]
+
+%-------------------------------------------------
+% Styles (same as Dirichlet)
+%-------------------------------------------------
+\tikzset{
+  grid/.style={draw=gray!60, dashed},
+  gridint/.style={draw=gray!60},
+  boundary/.style={draw=black, line width=1.2pt},
+  gas/.style={fill=gray!25},
+  solid/.style={fill=gray!55},
+  one/.style={circle, draw, fill=white, inner sep=2pt},
+  center_before/.style={circle, draw, fill=purple!55, inner sep=1.2pt},
+  center_after/.style={circle, draw, fill=red!60, inner sep=1.2pt},
+  ghostval/.style={circle, draw, fill=yellow, inner sep=1.4pt},
+  bcval/.style={circle, draw, fill=green!70!black, inner sep=1.4pt}
+}
+
+%-------------------------------------------------
+% LEFT PANEL (before elimination)
+%-------------------------------------------------
+
+% Light blue interpolated mesh boundary
+\fill[blue!12] (6,0) rectangle (7,7);
+
+% Dashed grid everywhere
+\foreach \i in {0,...,6} {
+  \foreach \j in {0,...,6} {
+    \draw[grid] (\i,\j) rectangle ++(1,1);
+  }
+}
+
+% Gas region
+\fill[gas] (1,1) rectangle (6,6);
+
+% Solid obstruction
+\fill[solid] (3,3) rectangle (4,5);
+
+% Solid interior grid overlay
+\foreach \i in {1,...,5} {
+  \foreach \j in {1,...,5} {
+    \draw[gridint] (\i,\j) rectangle ++(1,1);
+  }
+}
+
+% Exterior boundary
+\draw[boundary] (1,1) rectangle (6,6);
+
+%-------------------------------------------------
+% Stencil coefficients (Neumann BC)
+%-------------------------------------------------
+\node[one] (E) at (2.5,4.5) {\small $1$};
+\node[one] (N) at (1.5,5.5) {\small $1$};
+\node[one] (S) at (1.5,3.5) {\small $1$};
+
+\node[center_before] (C) at (1.5,4.5) {\small $-4$};
+
+% Ghost value
+\node[ghostval] (G) at (0.5,4.5) {\small $1$};
+
+%-------------------------------------------------
+% Stencil connectivity lines
+%-------------------------------------------------
+\draw[black, thick] (C) -- (E);
+\draw[black, thick] (C) -- (N);
+\draw[black, thick] (C) -- (S);
+\draw[black, thick] (C) -- (G);
+
+% Neumann BC location
+\node[bcval] (BC) at (1.0,4.5) {$\;$};
+
+% % BC annotation
+% \draw[->, thick, green!70!black] (3.8,7.4) -- (2.6,6.1);
+% \node[left, green!70!black] at (3.5,7.7)
+% {$\displaystyle \frac{\partial H}{\partial x}\ \text{prescribed}$};
+
+% BC annotation label (unchanged)
+\node[green!70!black, anchor=west] (BCLabel)
+  at (3.8,7.7) {$\displaystyle \; \frac{\partial H}{\partial x}\ \text{prescribed}$};
+
+% Leader line: left, then slanted to BC dot
+\draw[->, thick, green!70!black]
+  ([xshift=5pt]BCLabel.west)
+  -- ++(-0pt,0)
+  -- (BC);
+
+
+%-------------------------------------------------
+% Arrow + explanation
+%-------------------------------------------------
+\node at (8,5.5) {$\Rightarrow$};
+
+%-------------------------------------------------
+% RIGHT PANEL (after elimination)
+%-------------------------------------------------
+\begin{scope}[xshift=9cm]
+
+% Light blue interpolated mesh boundary
+\fill[blue!12] (6,0) rectangle (7,7);
+
+% Dashed grid
+\foreach \i in {0,...,6} {
+  \foreach \j in {0,...,6} {
+    \draw[grid] (\i,\j) rectangle ++(1,1);
+  }
+}
+
+% Gas region
+\fill[gas] (1,1) rectangle (6,6);
+
+% Solid obstruction
+\fill[solid] (3,3) rectangle (4,5);
+
+% Solid interior grid
+\foreach \i in {1,...,5} {
+  \foreach \j in {1,...,5} {
+    \draw[gridint] (\i,\j) rectangle ++(1,1);
+  }
+}
+
+% Exterior boundary
+\draw[boundary] (1,1) rectangle (6,6);
+
+% Stencil coefficients (after elimination)
+\node[one] at (2.5,4.5) {\small $1$};
+\node[one] at (1.5,5.5) {\small $1$};
+\node[one] at (1.5,3.5) {\small $1$};
+
+\node[center_after] at (1.5,4.5) {\small $-3$};
+
+\end{scope}
+
+\end{tikzpicture}
+\caption{Imposition of a Neumann boundary condition using a ghost cell in FDS. The ghost value is defined to enforce a prescribed normal gradient at the boundary. Elimination of the ghost cell removes one neighbor contribution, resulting in a change of the diagonal entry of the discrete Laplacian from $-4$ to $-3$.  The RHS is augmented per Eq.~(X).}
+\label{fig:neumann_bc_fds}
+\end{figure}
 
 %=============================================================================
 \section{Solution Methods}
@@ -2681,38 +2975,23 @@ retaining a standard Laplacian operator for $H$.
 
 \subsection*{Fast Trigonometric (FFT) Solver}
 
-On single, uniform, structured meshes with separable boundary conditions, the
-Poisson equation is solved using a fast trigonometric method based on discrete
-sine and cosine transforms. This approach exploits the separability of the
-Laplacian operator, yielding an $\mathcal{O}(N \log N)$ solution with minimal
-memory overhead.
+On single, uniform, structured meshes with separable boundary conditions, the Poisson equation is solved using a fast trigonometric method based on discrete sine and cosine transforms. This approach exploits the separability of the Laplacian operator, yielding an $\mathcal{O}(N \log N)$ solution with minimal memory overhead.
 
 The FFT solver is restricted to cases without internal boundaries or mesh
 refinement.
 
 \subsection*{Global Matrix Solver (UGLMAT / HYPRE)}
 
-For general geometries involving mesh refinement, immersed boundaries, or
-multiple meshes, FDS assembles the global linear system
-\eqref{eq:linear_system} and solves it using the UGLMAT framework, which interfaces
-with the HYPRE library.
+For general geometries involving mesh refinement, immersed boundaries, or multiple meshes, FDS assembles the global linear system and solves it using the UGLMAT framework, which interfaces with the HYPRE library.
 
-The resulting matrix is sparse and symmetric, incorporates boundary conditions
-through local row modifications, and includes explicit coarse--fine coupling
-terms at refinement interfaces. Iterative solvers with multigrid
-preconditioning are used to obtain $H$, after which velocities are corrected
-locally on each mesh.
+The resulting matrix is sparse and symmetric, incorporates boundary conditions through local row modifications, and includes explicit coarse--fine coupling terms at refinement interfaces. Iterative solvers with multigrid preconditioning are used to obtain $H$, after which velocities are corrected locally on each mesh.
 
 %=============================================================================
 \section{Coarse--Fine Interface Consistency}
 \label{sec:flux_matching_uglmat}
 %=============================================================================
 
-The guard cell interpolation and flux--matching procedure described below ensures
-that the discrete gradient $\nabla H$ used in the velocity update is consistent
-with the fluxes represented in the global Poisson matrix. This consistency is
-essential for maintaining velocity continuity across refinement interfaces when
-using the UGLMAT solver.
+The guard cell interpolation and flux--matching procedure described below ensures that the discrete gradient $\nabla H$ used in the velocity update is consistent with the fluxes represented in the global Poisson matrix. This consistency is essential for maintaining velocity continuity across refinement interfaces when using the UGLMAT solver.
 
 \subsection*{Geometry at Coarse-Fine Interface}
 
