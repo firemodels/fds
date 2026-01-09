@@ -261,41 +261,149 @@ END SUBROUTINE GET_OPENBC_TANGENTIAL_CUTFACE_VEL
 
 SUBROUTINE GET_H_GUARD_CUTCELL(IPZ,HP)
 
+! Fill ghost cell H values for cut-cell regions at mesh boundaries.
+! Handles: RC faces (cut-cell to regular), cut-faces at interpolated boundaries.
 ! assumes POINT_TO_MESH(NM) has been called.
 INTEGER, INTENT(IN) :: IPZ
-REAL(EB), INTENT(IN), POINTER, DIMENSION(:,:,:) :: HP
+REAL(EB), INTENT(INOUT), POINTER, DIMENSION(:,:,:) :: HP
 
 ! Local Variables:
-INTEGER :: IW, ICC
-TYPE (WALL_TYPE),  POINTER :: WC
+INTEGER :: IW, II, JJ, KK, IIG, JJG, KKG, ICC, ICC_GHOST, ICC_INT, NOM, IIO, JJO, KKO, IOR, ICC_EXT
+INTEGER :: X1AXIS, ICF_EXT, ISHF(IAXIS:KAXIS)
+REAL(EB) :: H_INT, D_INT, D_GHOST, D_EXT, X_FACE, SUM_FLUX, A_INT, A_EXT, H_EXT, H_GHOST
+TYPE (WALL_TYPE), POINTER :: WC
 TYPE (BOUNDARY_COORD_TYPE), POINTER :: BC
+TYPE (EXTERNAL_WALL_TYPE), POINTER :: EWC
+TYPE (OMESH_TYPE), POINTER :: OM
+TYPE (CC_CUTFACE_TYPE), POINTER :: CF
 
-IF(PRES_FLAG==ULMAT_FLAG) THEN
-  IF(ONE_UNKH_PER_CUTCELL) THEN
+
+
+IF (PRES_FLAG==ULMAT_FLAG) THEN
+   IF (ONE_UNKH_PER_CUTCELL) THEN
      ! To DO.
   ELSE
-     WALL_CELL_LOOP_2 : DO IW=1,N_EXTERNAL_WALL_CELLS
+      WALL_CELL_LOOP_ULMAT : DO IW=1,N_EXTERNAL_WALL_CELLS
         WC => WALL(IW); BC => BOUNDARY_COORD(WC%BC_INDEX); ICC = CCVAR(BC%II,BC%JJ,BC%KK,CC_IDCC)
-        ! Gasphase cell indexes:
-        IF(ZONE_MESH(PRESSURE_ZONE(BC%IIG,BC%JJG,BC%KKG))%CONNECTED_ZONE_PARENT/=IPZ .OR. ICC<1)CYCLE WALL_CELL_LOOP_2
-        IF (PREDICTOR) THEN; CUT_CELL(ICC)%H(1:CUT_CELL(ICC)%NCELL) = HP(BC%II,BC%JJ,BC%KK)
-        ELSE;                CUT_CELL(ICC)%HS(1:CUT_CELL(ICC)%NCELL)= HP(BC%II,BC%JJ,BC%KK)
+         IF (ZONE_MESH(PRESSURE_ZONE(BC%IIG,BC%JJG,BC%KKG))%CONNECTED_ZONE_PARENT/=IPZ .OR. ICC<1) CYCLE WALL_CELL_LOOP_ULMAT
+         IF (PREDICTOR) THEN
+            CUT_CELL(ICC)%H(1:CUT_CELL(ICC)%NCELL) = HP(BC%II,BC%JJ,BC%KK)
+         ELSE
+            CUT_CELL(ICC)%HS(1:CUT_CELL(ICC)%NCELL) = HP(BC%II,BC%JJ,BC%KK)
         ENDIF
-     ENDDO WALL_CELL_LOOP_2
+      ENDDO WALL_CELL_LOOP_ULMAT
   ENDIF
+
 ELSE
-   IF(ONE_UNKH_PER_CUTCELL) THEN
-      ! To DO.
-   ELSE
-      WALL_CELL_LOOP_4 : DO IW=1,N_EXTERNAL_WALL_CELLS
-         WC => WALL(IW); BC => BOUNDARY_COORD(WC%BC_INDEX); ICC = CCVAR(BC%II,BC%JJ,BC%KK,CC_IDCC)
-         ! Gasphase cell indexes:
-         IF(ICC<1) CYCLE WALL_CELL_LOOP_4
-         IF (PREDICTOR) THEN; CUT_CELL(ICC)%H(1:CUT_CELL(ICC)%NCELL) = HP(BC%II,BC%JJ,BC%KK)
-         ELSE;                CUT_CELL(ICC)%HS(1:CUT_CELL(ICC)%NCELL)= HP(BC%II,BC%JJ,BC%KK)
+   ! EXTERNAL_WALL_CELL approach for GLMAT with refinement support
+   WALL_CELL_LOOP : DO IW=1,N_EXTERNAL_WALL_CELLS
+      WC => WALL(IW); BC => BOUNDARY_COORD(WC%BC_INDEX)
+      IF (ALL((/INTERPOLATED_BOUNDARY, PERIODIC_BOUNDARY/) /= WC%BOUNDARY_TYPE)) CYCLE
+      EWC => EXTERNAL_WALL(IW)
+      NOM = EWC%NOM; IF (NOM < 1) CYCLE
+      OM => OMESH(NOM)
+
+      II  = BC%II;  JJ  = BC%JJ;  KK  = BC%KK
+      IIG = BC%IIG; JJG = BC%JJG; KKG = BC%KKG; IOR = BC%IOR; X1AXIS = ABS(IOR)
+      ICC_GHOST = CCVAR(II,JJ,KK,CC_IDCC)      ! Ghost cell cut-cell index
+      ICC_INT   = CCVAR(IIG,JJG,KKG,CC_IDCC)   ! Internal cell cut-cell index
+      IF (ICC_GHOST < 1 .AND. ICC_INT < 1) CYCLE ! This is handled by EXTERNAL_WALL_LOOP in pres.f90
+
+      ! Get H_INT (internal cell)
+      IF (ICC_INT > 0) THEN
+         IF (PREDICTOR) THEN; H_INT = CUT_CELL(ICC_INT)%H(1)
+         ELSE;                H_INT = CUT_CELL(ICC_INT)%HS(1)
          ENDIF
-      ENDDO WALL_CELL_LOOP_4
-   ENDIF
+      ELSE
+         H_INT = HP(IIG,JJG,KKG)
+      ENDIF
+      ! Get interface location, D_INT, D_GHOST, and A_INT based on face type
+      IF (WC%CUT_FACE_INDEX > 0) THEN
+         ! Cut-face at boundary
+         CF => CUT_FACE(WC%CUT_FACE_INDEX)
+         A_INT = SUM(CF%AREA(1:CF%NFACE))  ! Total cut-face area
+      ELSE
+         ! RC face (regular Cartesian face)
+         SELECT CASE(X1AXIS)
+         CASE(1); A_INT = DY(JJG) * DZ(KKG)
+         CASE(2); A_INT = DX(IIG) * DZ(KKG)
+         CASE(3); A_INT = DX(IIG) * DY(JJG)
+         END SELECT
+      ENDIF
+      ! X_FACE location, D_INT and D_GHOST using cut-cell centroids when available
+      SELECT CASE(X1AXIS)
+      CASE(1)
+         IF (IOR > 0) THEN; X_FACE = X(IIG-1); ELSE; X_FACE = X(IIG); ENDIF
+         IF (ICC_INT > 0) THEN; D_INT = ABS(CUT_CELL(ICC_INT)%XYZCEN(IAXIS,1) - X_FACE)
+         ELSE;                  D_INT = ABS(XC(IIG) - X_FACE)
+         ENDIF
+         IF (ICC_GHOST > 0) THEN; D_GHOST = ABS(CUT_CELL(ICC_GHOST)%XYZCEN(IAXIS,1) - X_FACE)
+         ELSE;                    D_GHOST = ABS(XC(II) - X_FACE)
+         ENDIF
+      CASE(2)
+         IF (IOR > 0) THEN; X_FACE = Y(JJG-1); ELSE; X_FACE = Y(JJG); ENDIF
+         IF (ICC_INT > 0) THEN; D_INT = ABS(CUT_CELL(ICC_INT)%XYZCEN(JAXIS,1) - X_FACE)
+         ELSE;                  D_INT = ABS(YC(JJG) - X_FACE)
+         ENDIF
+         IF (ICC_GHOST > 0) THEN; D_GHOST = ABS(CUT_CELL(ICC_GHOST)%XYZCEN(JAXIS,1) - X_FACE)
+         ELSE;                    D_GHOST = ABS(YC(JJ) - X_FACE)
+         ENDIF
+      CASE(3)
+         IF (IOR > 0) THEN; X_FACE = Z(KKG-1); ELSE; X_FACE = Z(KKG); ENDIF
+         IF (ICC_INT > 0) THEN; D_INT = ABS(CUT_CELL(ICC_INT)%XYZCEN(KAXIS,1) - X_FACE)
+         ELSE;                  D_INT = ABS(ZC(KKG) - X_FACE)
+         ENDIF
+         IF (ICC_GHOST > 0) THEN; D_GHOST = ABS(CUT_CELL(ICC_GHOST)%XYZCEN(KAXIS,1) - X_FACE)
+         ELSE;                    D_GHOST = ABS(ZC(KK) - X_FACE)
+         ENDIF
+      END SELECT
+
+      ! Flux-matched sum over external cells
+      SUM_FLUX = 0._EB
+      DO KKO = EWC%KKO_MIN, EWC%KKO_MAX
+         DO JJO = EWC%JJO_MIN, EWC%JJO_MAX
+            DO IIO = EWC%IIO_MIN, EWC%IIO_MAX
+               ICC_EXT = MESHES(NOM)%CCVAR(IIO,JJO,KKO,CC_IDCC)
+               IF (PREDICTOR) THEN; H_EXT = OM%H(IIO,JJO,KKO)
+               ELSE;                H_EXT = OM%HS(IIO,JJO,KKO)
+               ENDIF
+               SELECT CASE(X1AXIS)
+               CASE(1)
+                  A_EXT = MESHES(NOM)%DY(JJO) * MESHES(NOM)%DZ(KKO)
+                  IF (ICC_EXT > 0) THEN; D_EXT = ABS(MESHES(NOM)%CUT_CELL(ICC_EXT)%XYZCEN(IAXIS,1) - X_FACE)
+                  ELSE;                  D_EXT = ABS(MESHES(NOM)%XC(IIO) - X_FACE)
+                  ENDIF
+               CASE(2)
+                  A_EXT = MESHES(NOM)%DX(IIO) * MESHES(NOM)%DZ(KKO)
+                  IF (ICC_EXT > 0) THEN; D_EXT = ABS(MESHES(NOM)%CUT_CELL(ICC_EXT)%XYZCEN(JAXIS,1) - X_FACE)
+                  ELSE;                  D_EXT = ABS(MESHES(NOM)%YC(JJO) - X_FACE)
+                  ENDIF
+               CASE(3)
+                  A_EXT = MESHES(NOM)%DX(IIO) * MESHES(NOM)%DY(JJO)
+                  IF (ICC_EXT > 0) THEN; D_EXT = ABS(MESHES(NOM)%CUT_CELL(ICC_EXT)%XYZCEN(KAXIS,1) - X_FACE)
+                  ELSE;                  D_EXT = ABS(MESHES(NOM)%ZC(KKO) - X_FACE)
+                  ENDIF
+               END SELECT
+               ISHF(IAXIS:KAXIS) = 0; IF(IOR < 0) ISHF(X1AXIS) = -1
+               ICF_EXT = MESHES(NOM)%FCVAR(IIO+ISHF(IAXIS),JJO+ISHF(JAXIS),KKO+ISHF(KAXIS),CC_IDCF,X1AXIS)
+               IF (ICF_EXT > 0) A_EXT = SUM(MESHES(NOM)%CUT_FACE(ICF_EXT)%AREA(1:MESHES(NOM)%CUT_FACE(ICF_EXT)%NFACE))
+               IF (EWC%AREA_RATIO < 0.99_EB) A_EXT = A_INT
+               SUM_FLUX = SUM_FLUX + (H_EXT - H_INT) / (D_EXT + D_INT) * A_EXT
+            ENDDO
+         ENDDO
+      ENDDO
+
+      ! Compute ghost cell value
+      H_GHOST = H_INT + (D_INT + D_GHOST) / A_INT * SUM_FLUX
+
+      ! Fill ghost cells
+      HP(II,JJ,KK) = H_GHOST
+      IF (ICC_GHOST > 0) THEN
+         IF (PREDICTOR) THEN; CUT_CELL(ICC_GHOST)%H(1:CUT_CELL(ICC_GHOST)%NCELL)  = H_GHOST
+         ELSE;                CUT_CELL(ICC_GHOST)%HS(1:CUT_CELL(ICC_GHOST)%NCELL) = H_GHOST
+         ENDIF
+      ENDIF
+   ENDDO WALL_CELL_LOOP
 ENDIF
 
 END SUBROUTINE GET_H_GUARD_CUTCELL
@@ -14865,8 +14973,9 @@ INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: DT
 
 ! Local Variables:
-INTEGER :: I,J,K,IW,II,JJ,KK,IOR,X1AXIS,ICF,JCF,IIO,JJO,KKO,IIO1,IIO2,JJO1,JJO2,KKO1,KKO2
+INTEGER :: I,J,K,IW,II,JJ,KK,IIG,JJG,KKG,IOR,X1AXIS,ICF,JCF,IIO,JJO,KKO,IIO1,IIO2,JJO1,JJO2,KKO1,KKO2,ICC_LO,ICC_HI
 REAL(EB):: ITERATIVE_FACTOR, UN_NEW, UN_NEW_OTHER, VELOCITY_ERROR, IDX, DUDT, DVDT, DWDT, DA_OTHER, AREA_FC, TNOW
+REAL(EB):: X_LO, X_HI  ! Centroid coordinates for proper IDX calculation in RC faces
 TYPE(OMESH_TYPE), POINTER :: OM
 TYPE(MESH_TYPE), POINTER :: M2
 TYPE(WALL_TYPE), POINTER :: WC
@@ -14894,63 +15003,107 @@ ENDIF
 CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
 
    WC=>WALL(IW)
-   IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY .OR. WC%CUT_FACE_INDEX<1) CYCLE CHECK_WALL_LOOP
+   IF (.NOT.(WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY .OR. WC%BOUNDARY_TYPE==PERIODIC_BOUNDARY)) CYCLE CHECK_WALL_LOOP
+
+   BC => BOUNDARY_COORD(WC%BC_INDEX)
+
+   IIG = BC%IIG; JJG = BC%JJG; KKG = BC%KKG
+   II  = BC%II;  JJ  = BC%JJ;  KK  = BC%KK; IOR = BC%IOR
+
+   ! Skip regular gas faces - only process faces where at least one cell is a cut-cell
+   IF(ALL((/CCVAR(IIG,JJG,KKG,CC_CGSC),CCVAR(II,JJ,KK,CC_CGSC)/)==CC_GASPHASE)) CYCLE CHECK_WALL_LOOP
 
    EWC=>EXTERNAL_WALL(IW)
    IF (EWC%AREA_RATIO<0.9_EB) CYCLE CHECK_WALL_LOOP
    OM => OMESH(EWC%NOM)
    M2 => MESHES(EWC%NOM)
    B1 => BOUNDARY_PROP1(WC%B1_INDEX)
-   BC => BOUNDARY_COORD(WC%BC_INDEX)
+   I=IIG; J=JJG; K=KKG;
+   SELECT CASE(IOR)
+   CASE(1); I=I-1
+   CASE(2); J=J-1
+   CASE(3); K=K-1
+   END SELECT
+   X1AXIS = ABS(IOR)
 
-   II  = BC%II
-   JJ  = BC%JJ
-   KK  = BC%KK
-   IOR = BC%IOR
-
-   CF => CUT_FACE(WC%CUT_FACE_INDEX)
-   I  = CF%IJK(IAXIS); J = CF%IJK(JAXIS); K = CF%IJK(KAXIS); X1AXIS = CF%IJK(KAXIS+1)
    UN_NEW = 0._EB
-   ! Update normal component of velocity at the mesh boundary
-   IF (PREDICTOR) THEN
-      SELECT CASE(X1AXIS)
-      CASE(IAXIS)
-         DO JCF=1,CF%NFACE
-            IDX = 1._EB/(CF%XCENHIGH(X1AXIS,JCF)-CF%XCENLOW(X1AXIS,JCF))
-            UN_NEW = UN_NEW + (CF%VEL(JCF)-DT*(CF%FN(JCF)+IDX*(H(I+1,J,K)-H(I,J,K))))*CF%AREA(JCF)
-         ENDDO
-      CASE(JAXIS)
-         DO JCF=1,CF%NFACE
-            IDX = 1._EB/(CF%XCENHIGH(X1AXIS,JCF)-CF%XCENLOW(X1AXIS,JCF))
-            UN_NEW = UN_NEW + (CF%VEL(JCF)-DT*(CF%FN(JCF)+IDX*(H(I,J+1,K)-H(I,J,K))))*CF%AREA(JCF)
-         ENDDO
-      CASE(KAXIS)
-         DO JCF=1,CF%NFACE
-            IDX = 1._EB/(CF%XCENHIGH(X1AXIS,JCF)-CF%XCENLOW(X1AXIS,JCF))
-            UN_NEW = UN_NEW + (CF%VEL(JCF)-DT*(CF%FN(JCF)+IDX*(H(I,J,K+1)-H(I,J,K))))*CF%AREA(JCF)
-         ENDDO
-      END SELECT
-   ELSE
-      SELECT CASE(X1AXIS)
-      CASE(IAXIS)
-         DO JCF=1,CF%NFACE
-            IDX = 1._EB/(CF%XCENHIGH(X1AXIS,JCF)-CF%XCENLOW(X1AXIS,JCF))
-            UN_NEW = UN_NEW + 0.5_EB*(CF%VEL(JCF)+CF%VELS(JCF)-DT*(CF%FN(JCF)+IDX*(HS(I+1,J,K)-HS(I,J,K))))*CF%AREA(JCF)
-         ENDDO
-      CASE(JAXIS)
-         DO JCF=1,CF%NFACE
-            IDX = 1._EB/(CF%XCENHIGH(X1AXIS,JCF)-CF%XCENLOW(X1AXIS,JCF))
-            UN_NEW = UN_NEW + 0.5_EB*(CF%VEL(JCF)+CF%VELS(JCF)-DT*(CF%FN(JCF)+IDX*(HS(I,J+1,K)-HS(I,J,K))))*CF%AREA(JCF)
-         ENDDO
-      CASE(KAXIS)
-         DO JCF=1,CF%NFACE
-            IDX = 1._EB/(CF%XCENHIGH(X1AXIS,JCF)-CF%XCENLOW(X1AXIS,JCF))
-            UN_NEW = UN_NEW + 0.5_EB*(CF%VEL(JCF)+CF%VELS(JCF)-DT*(CF%FN(JCF)+IDX*(HS(I,J,K+1)-HS(I,J,K))))*CF%AREA(JCF)
-         ENDDO
-      END SELECT
+   IF(WC%CUT_FACE_INDEX>0) THEN
+      CF => CUT_FACE(WC%CUT_FACE_INDEX)
+      ! Update normal component of velocity at the mesh boundary
+      IF (PREDICTOR) THEN
+         SELECT CASE(X1AXIS)
+         CASE(IAXIS)
+            DO JCF=1,CF%NFACE
+               IDX = 1._EB/(CF%XCENHIGH(X1AXIS,JCF)-CF%XCENLOW(X1AXIS,JCF))
+               UN_NEW = UN_NEW + (CF%VEL(JCF)-DT*(CF%FN(JCF)+IDX*(H(I+1,J,K)-H(I,J,K))))*CF%AREA(JCF)
+            ENDDO
+         CASE(JAXIS)
+            DO JCF=1,CF%NFACE
+               IDX = 1._EB/(CF%XCENHIGH(X1AXIS,JCF)-CF%XCENLOW(X1AXIS,JCF))
+               UN_NEW = UN_NEW + (CF%VEL(JCF)-DT*(CF%FN(JCF)+IDX*(H(I,J+1,K)-H(I,J,K))))*CF%AREA(JCF)
+            ENDDO
+         CASE(KAXIS)
+            DO JCF=1,CF%NFACE
+               IDX = 1._EB/(CF%XCENHIGH(X1AXIS,JCF)-CF%XCENLOW(X1AXIS,JCF))
+               UN_NEW = UN_NEW + (CF%VEL(JCF)-DT*(CF%FN(JCF)+IDX*(H(I,J,K+1)-H(I,J,K))))*CF%AREA(JCF)
+            ENDDO
+         END SELECT
+      ELSE
+         SELECT CASE(X1AXIS)
+         CASE(IAXIS)
+            DO JCF=1,CF%NFACE
+               IDX = 1._EB/(CF%XCENHIGH(X1AXIS,JCF)-CF%XCENLOW(X1AXIS,JCF))
+               UN_NEW = UN_NEW + 0.5_EB*(CF%VEL(JCF)+CF%VELS(JCF)-DT*(CF%FN(JCF)+IDX*(HS(I+1,J,K)-HS(I,J,K))))*CF%AREA(JCF)
+            ENDDO
+         CASE(JAXIS)
+            DO JCF=1,CF%NFACE
+               IDX = 1._EB/(CF%XCENHIGH(X1AXIS,JCF)-CF%XCENLOW(X1AXIS,JCF))
+               UN_NEW = UN_NEW + 0.5_EB*(CF%VEL(JCF)+CF%VELS(JCF)-DT*(CF%FN(JCF)+IDX*(HS(I,J+1,K)-HS(I,J,K))))*CF%AREA(JCF)
+            ENDDO
+         CASE(KAXIS)
+            DO JCF=1,CF%NFACE
+               IDX = 1._EB/(CF%XCENHIGH(X1AXIS,JCF)-CF%XCENLOW(X1AXIS,JCF))
+               UN_NEW = UN_NEW + 0.5_EB*(CF%VEL(JCF)+CF%VELS(JCF)-DT*(CF%FN(JCF)+IDX*(HS(I,J,K+1)-HS(I,J,K))))*CF%AREA(JCF)
+            ENDDO
+         END SELECT
 
+      ENDIF
+      UN_NEW = UN_NEW / SUM(CF%AREA(1:CF%NFACE))
+   ELSE
+      ! RC_FACES: Compute velocity projection using centroid-to-centroid distance
+      SELECT CASE(X1AXIS)
+      CASE(IAXIS)
+         ICC_LO = CCVAR(I,J,K,CC_IDCC); ICC_HI = CCVAR(I+1,J,K,CC_IDCC)
+         IF (ICC_LO>0) THEN; X_LO=CUT_CELL(ICC_LO)%XYZCEN(IAXIS,1); ELSE; X_LO=XC(I); ENDIF
+         IF (ICC_HI>0) THEN; X_HI=CUT_CELL(ICC_HI)%XYZCEN(IAXIS,1); ELSE; X_HI=XC(I+1); ENDIF
+         IDX = 1._EB/(X_HI - X_LO)
+         IF (PREDICTOR) THEN
+            UN_NEW = U(I,J,K) - DT*(FVX(I,J,K) + IDX*(H(I+1,J,K)-H(I,J,K)))
+         ELSE
+            UN_NEW = 0.5_EB*(U(I,J,K)+US(I,J,K)) - DT*(FVX(I,J,K) + IDX*(HS(I+1,J,K)-HS(I,J,K)))
+         ENDIF
+      CASE(JAXIS)
+         ICC_LO = CCVAR(I,J,K,CC_IDCC); ICC_HI = CCVAR(I,J+1,K,CC_IDCC)
+         IF (ICC_LO>0) THEN; X_LO=CUT_CELL(ICC_LO)%XYZCEN(JAXIS,1); ELSE; X_LO=YC(J); ENDIF
+         IF (ICC_HI>0) THEN; X_HI=CUT_CELL(ICC_HI)%XYZCEN(JAXIS,1); ELSE; X_HI=YC(J+1); ENDIF
+         IDX = 1._EB/(X_HI - X_LO)
+         IF (PREDICTOR) THEN
+            UN_NEW = V(I,J,K) - DT*(FVY(I,J,K) + IDX*(H(I,J+1,K)-H(I,J,K)))
+         ELSE
+            UN_NEW = 0.5_EB*(V(I,J,K)+VS(I,J,K)) - DT*(FVY(I,J,K) + IDX*(HS(I,J+1,K)-HS(I,J,K)))
+         ENDIF
+      CASE(KAXIS)
+         ICC_LO = CCVAR(I,J,K,CC_IDCC); ICC_HI = CCVAR(I,J,K+1,CC_IDCC)
+         IF (ICC_LO>0) THEN; X_LO=CUT_CELL(ICC_LO)%XYZCEN(KAXIS,1); ELSE; X_LO=ZC(K); ENDIF
+         IF (ICC_HI>0) THEN; X_HI=CUT_CELL(ICC_HI)%XYZCEN(KAXIS,1); ELSE; X_HI=ZC(K+1); ENDIF
+         IDX = 1._EB/(X_HI - X_LO)
+         IF (PREDICTOR) THEN
+            UN_NEW = W(I,J,K) - DT*(FVZ(I,J,K) + IDX*(H(I,J,K+1)-H(I,J,K)))
+         ELSE
+            UN_NEW = 0.5_EB*(W(I,J,K)+WS(I,J,K)) - DT*(FVZ(I,J,K) + IDX*(HS(I,J,K+1)-HS(I,J,K)))
+         ENDIF
+      END SELECT
    ENDIF
-   UN_NEW = UN_NEW / SUM(CF%AREA(1:CF%NFACE))
 
    ! At interpolated boundaries, compare updated normal component of velocity with that of the other mesh
 
@@ -14987,7 +15140,12 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
                         ENDDO
                      ELSE
                         AREA_FC  = M2%DY(JJO)*M2%DZ(KKO); DA_OTHER = DA_OTHER + AREA_FC
-                        DUDT = -OM%FVX(IIO,JJO,KKO) - M2%RDXN(IIO)*(OM%H(IIO+1,JJO,KKO)-OM%H(IIO,JJO,KKO))
+                        ! Use centroid-to-centroid distance for RC faces
+                        ICC_LO = M2%CCVAR(IIO,JJO,KKO,CC_IDCC); ICC_HI = M2%CCVAR(IIO+1,JJO,KKO,CC_IDCC)
+                        IF (ICC_LO>0) THEN; X_LO=M2%CUT_CELL(ICC_LO)%XYZCEN(IAXIS,1); ELSE; X_LO=M2%XC(IIO); ENDIF
+                        IF (ICC_HI>0) THEN; X_HI=M2%CUT_CELL(ICC_HI)%XYZCEN(IAXIS,1); ELSE; X_HI=M2%XC(IIO+1); ENDIF
+                        IDX = 1._EB/(X_HI - X_LO)
+                        DUDT = -OM%FVX(IIO,JJO,KKO) - IDX*(OM%H(IIO+1,JJO,KKO)-OM%H(IIO,JJO,KKO))
                         UN_NEW_OTHER = UN_NEW_OTHER + (OM%U(IIO,JJO,KKO) + DT*DUDT)*AREA_FC
                      ENDIF
                   ENDDO
@@ -15011,7 +15169,12 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
                         ENDDO
                      ELSE
                         AREA_FC  = M2%DY(JJO)*M2%DZ(KKO); DA_OTHER = DA_OTHER + AREA_FC
-                        DUDT = -OM%FVX(IIO-1,JJO,KKO) - M2%RDXN(IIO-1)*(OM%H(IIO,JJO,KKO)-OM%H(IIO-1,JJO,KKO))
+                        ! Use centroid-to-centroid distance for RC faces
+                        ICC_LO = M2%CCVAR(IIO-1,JJO,KKO,CC_IDCC); ICC_HI = M2%CCVAR(IIO,JJO,KKO,CC_IDCC)
+                        IF (ICC_LO>0) THEN; X_LO=M2%CUT_CELL(ICC_LO)%XYZCEN(IAXIS,1); ELSE; X_LO=M2%XC(IIO-1); ENDIF
+                        IF (ICC_HI>0) THEN; X_HI=M2%CUT_CELL(ICC_HI)%XYZCEN(IAXIS,1); ELSE; X_HI=M2%XC(IIO); ENDIF
+                        IDX = 1._EB/(X_HI - X_LO)
+                        DUDT = -OM%FVX(IIO-1,JJO,KKO) - IDX*(OM%H(IIO,JJO,KKO)-OM%H(IIO-1,JJO,KKO))
                         UN_NEW_OTHER = UN_NEW_OTHER + (OM%U(IIO-1,JJO,KKO) + DT*DUDT)*AREA_FC
                      ENDIF
                   ENDDO
@@ -15035,7 +15198,12 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
                         ENDDO
                      ELSE
                         AREA_FC  = M2%DX(IIO)*M2%DZ(KKO); DA_OTHER = DA_OTHER + AREA_FC
-                        DVDT = -OM%FVY(IIO,JJO,KKO) - M2%RDYN(JJO)*(OM%H(IIO,JJO+1,KKO)-OM%H(IIO,JJO,KKO))
+                        ! Use centroid-to-centroid distance for RC faces
+                        ICC_LO = M2%CCVAR(IIO,JJO,KKO,CC_IDCC); ICC_HI = M2%CCVAR(IIO,JJO+1,KKO,CC_IDCC)
+                        IF (ICC_LO>0) THEN; X_LO=M2%CUT_CELL(ICC_LO)%XYZCEN(JAXIS,1); ELSE; X_LO=M2%YC(JJO); ENDIF
+                        IF (ICC_HI>0) THEN; X_HI=M2%CUT_CELL(ICC_HI)%XYZCEN(JAXIS,1); ELSE; X_HI=M2%YC(JJO+1); ENDIF
+                        IDX = 1._EB/(X_HI - X_LO)
+                        DVDT = -OM%FVY(IIO,JJO,KKO) - IDX*(OM%H(IIO,JJO+1,KKO)-OM%H(IIO,JJO,KKO))
                         UN_NEW_OTHER = UN_NEW_OTHER + (OM%V(IIO,JJO,KKO) + DT*DVDT)*AREA_FC
                      ENDIF
                   ENDDO
@@ -15059,7 +15227,12 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
                         ENDDO
                      ELSE
                         AREA_FC  = M2%DX(IIO)*M2%DZ(KKO); DA_OTHER = DA_OTHER + AREA_FC
-                        DVDT = -OM%FVY(IIO,JJO-1,KKO) - M2%RDYN(JJO-1)*(OM%H(IIO,JJO,KKO)-OM%H(IIO,JJO-1,KKO))
+                        ! Use centroid-to-centroid distance for RC faces
+                        ICC_LO = M2%CCVAR(IIO,JJO-1,KKO,CC_IDCC); ICC_HI = M2%CCVAR(IIO,JJO,KKO,CC_IDCC)
+                        IF (ICC_LO>0) THEN; X_LO=M2%CUT_CELL(ICC_LO)%XYZCEN(JAXIS,1); ELSE; X_LO=M2%YC(JJO-1); ENDIF
+                        IF (ICC_HI>0) THEN; X_HI=M2%CUT_CELL(ICC_HI)%XYZCEN(JAXIS,1); ELSE; X_HI=M2%YC(JJO); ENDIF
+                        IDX = 1._EB/(X_HI - X_LO)
+                        DVDT = -OM%FVY(IIO,JJO-1,KKO) - IDX*(OM%H(IIO,JJO,KKO)-OM%H(IIO,JJO-1,KKO))
                         UN_NEW_OTHER = UN_NEW_OTHER + (OM%V(IIO,JJO-1,KKO) + DT*DVDT)*AREA_FC
                      ENDIF
                   ENDDO
@@ -15083,7 +15256,12 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
                         ENDDO
                      ELSE
                         AREA_FC  = M2%DX(IIO)*M2%DY(JJO); DA_OTHER = DA_OTHER + AREA_FC
-                        DWDT = -OM%FVZ(IIO,JJO,KKO) - M2%RDZN(KKO)*(OM%H(IIO,JJO,KKO+1)-OM%H(IIO,JJO,KKO))
+                        ! Use centroid-to-centroid distance for RC faces
+                        ICC_LO = M2%CCVAR(IIO,JJO,KKO,CC_IDCC); ICC_HI = M2%CCVAR(IIO,JJO,KKO+1,CC_IDCC)
+                        IF (ICC_LO>0) THEN; X_LO=M2%CUT_CELL(ICC_LO)%XYZCEN(KAXIS,1); ELSE; X_LO=M2%ZC(KKO); ENDIF
+                        IF (ICC_HI>0) THEN; X_HI=M2%CUT_CELL(ICC_HI)%XYZCEN(KAXIS,1); ELSE; X_HI=M2%ZC(KKO+1); ENDIF
+                        IDX = 1._EB/(X_HI - X_LO)
+                        DWDT = -OM%FVZ(IIO,JJO,KKO) - IDX*(OM%H(IIO,JJO,KKO+1)-OM%H(IIO,JJO,KKO))
                         UN_NEW_OTHER = UN_NEW_OTHER + (OM%W(IIO,JJO,KKO) + DT*DWDT)*AREA_FC
                      ENDIF
                   ENDDO
@@ -15107,7 +15285,12 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
                         ENDDO
                      ELSE
                         AREA_FC  = M2%DX(IIO)*M2%DY(JJO); DA_OTHER = DA_OTHER + AREA_FC
-                        DWDT = -OM%FVZ(IIO,JJO,KKO-1) - M2%RDZN(KKO-1)*(OM%H(IIO,JJO,KKO)-OM%H(IIO,JJO,KKO-1))
+                        ! Use centroid-to-centroid distance for RC faces
+                        ICC_LO = M2%CCVAR(IIO,JJO,KKO-1,CC_IDCC); ICC_HI = M2%CCVAR(IIO,JJO,KKO,CC_IDCC)
+                        IF (ICC_LO>0) THEN; X_LO=M2%CUT_CELL(ICC_LO)%XYZCEN(KAXIS,1); ELSE; X_LO=M2%ZC(KKO-1); ENDIF
+                        IF (ICC_HI>0) THEN; X_HI=M2%CUT_CELL(ICC_HI)%XYZCEN(KAXIS,1); ELSE; X_HI=M2%ZC(KKO); ENDIF
+                        IDX = 1._EB/(X_HI - X_LO)
+                        DWDT = -OM%FVZ(IIO,JJO,KKO-1) - IDX*(OM%H(IIO,JJO,KKO)-OM%H(IIO,JJO,KKO-1))
                         UN_NEW_OTHER = UN_NEW_OTHER + (OM%W(IIO,JJO,KKO-1) + DT*DWDT)*AREA_FC
                      ENDIF
                   ENDDO
@@ -15135,7 +15318,12 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
                         ENDDO
                      ELSE
                         AREA_FC  = M2%DY(JJO)*M2%DZ(KKO); DA_OTHER = DA_OTHER + AREA_FC
-                        DUDT = -OM%FVX(IIO,JJO,KKO) - M2%RDXN(IIO)*(OM%HS(IIO+1,JJO,KKO)-OM%HS(IIO,JJO,KKO))
+                        ! Use centroid-to-centroid distance for RC faces
+                        ICC_LO = M2%CCVAR(IIO,JJO,KKO,CC_IDCC); ICC_HI = M2%CCVAR(IIO+1,JJO,KKO,CC_IDCC)
+                        IF (ICC_LO>0) THEN; X_LO=M2%CUT_CELL(ICC_LO)%XYZCEN(IAXIS,1); ELSE; X_LO=M2%XC(IIO); ENDIF
+                        IF (ICC_HI>0) THEN; X_HI=M2%CUT_CELL(ICC_HI)%XYZCEN(IAXIS,1); ELSE; X_HI=M2%XC(IIO+1); ENDIF
+                        IDX = 1._EB/(X_HI - X_LO)
+                        DUDT = -OM%FVX(IIO,JJO,KKO) - IDX*(OM%HS(IIO+1,JJO,KKO)-OM%HS(IIO,JJO,KKO))
                         UN_NEW_OTHER = UN_NEW_OTHER + &
                         0.5_EB*(OM%U(IIO,JJO,KKO)+OM%US(IIO,JJO,KKO) + DT*DUDT)*AREA_FC
                      ENDIF
@@ -15161,7 +15349,12 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
                         ENDDO
                      ELSE
                         AREA_FC  = M2%DY(JJO)*M2%DZ(KKO); DA_OTHER = DA_OTHER + AREA_FC
-                        DUDT = -OM%FVX(IIO-1,JJO,KKO) - M2%RDXN(IIO-1)*(OM%HS(IIO,JJO,KKO)-OM%HS(IIO-1,JJO,KKO))
+                        ! Use centroid-to-centroid distance for RC faces
+                        ICC_LO = M2%CCVAR(IIO-1,JJO,KKO,CC_IDCC); ICC_HI = M2%CCVAR(IIO,JJO,KKO,CC_IDCC)
+                        IF (ICC_LO>0) THEN; X_LO=M2%CUT_CELL(ICC_LO)%XYZCEN(IAXIS,1); ELSE; X_LO=M2%XC(IIO-1); ENDIF
+                        IF (ICC_HI>0) THEN; X_HI=M2%CUT_CELL(ICC_HI)%XYZCEN(IAXIS,1); ELSE; X_HI=M2%XC(IIO); ENDIF
+                        IDX = 1._EB/(X_HI - X_LO)
+                        DUDT = -OM%FVX(IIO-1,JJO,KKO) - IDX*(OM%HS(IIO,JJO,KKO)-OM%HS(IIO-1,JJO,KKO))
                         UN_NEW_OTHER = UN_NEW_OTHER + &
                         0.5_EB*(OM%U(IIO-1,JJO,KKO)+OM%US(IIO-1,JJO,KKO) + DT*DUDT)*AREA_FC
                      ENDIF
@@ -15187,7 +15380,12 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
                         ENDDO
                      ELSE
                         AREA_FC  = M2%DX(IIO)*M2%DZ(KKO); DA_OTHER = DA_OTHER + AREA_FC
-                        DVDT = -OM%FVY(IIO,JJO,KKO) - M2%RDYN(JJO)*(OM%HS(IIO,JJO+1,KKO)-OM%HS(IIO,JJO,KKO))
+                        ! Use centroid-to-centroid distance for RC faces
+                        ICC_LO = M2%CCVAR(IIO,JJO,KKO,CC_IDCC); ICC_HI = M2%CCVAR(IIO,JJO+1,KKO,CC_IDCC)
+                        IF (ICC_LO>0) THEN; X_LO=M2%CUT_CELL(ICC_LO)%XYZCEN(JAXIS,1); ELSE; X_LO=M2%YC(JJO); ENDIF
+                        IF (ICC_HI>0) THEN; X_HI=M2%CUT_CELL(ICC_HI)%XYZCEN(JAXIS,1); ELSE; X_HI=M2%YC(JJO+1); ENDIF
+                        IDX = 1._EB/(X_HI - X_LO)
+                        DVDT = -OM%FVY(IIO,JJO,KKO) - IDX*(OM%HS(IIO,JJO+1,KKO)-OM%HS(IIO,JJO,KKO))
                         UN_NEW_OTHER = UN_NEW_OTHER + &
                         0.5_EB*(OM%V(IIO,JJO,KKO)+OM%VS(IIO,JJO,KKO) + DT*DVDT)*AREA_FC
                      ENDIF
@@ -15213,7 +15411,12 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
                         ENDDO
                      ELSE
                         AREA_FC  = M2%DX(IIO)*M2%DZ(KKO); DA_OTHER = DA_OTHER + AREA_FC
-                        DVDT = -OM%FVY(IIO,JJO-1,KKO) - M2%RDYN(JJO-1)*(OM%HS(IIO,JJO,KKO)-OM%HS(IIO,JJO-1,KKO))
+                        ! Use centroid-to-centroid distance for RC faces
+                        ICC_LO = M2%CCVAR(IIO,JJO-1,KKO,CC_IDCC); ICC_HI = M2%CCVAR(IIO,JJO,KKO,CC_IDCC)
+                        IF (ICC_LO>0) THEN; X_LO=M2%CUT_CELL(ICC_LO)%XYZCEN(JAXIS,1); ELSE; X_LO=M2%YC(JJO-1); ENDIF
+                        IF (ICC_HI>0) THEN; X_HI=M2%CUT_CELL(ICC_HI)%XYZCEN(JAXIS,1); ELSE; X_HI=M2%YC(JJO); ENDIF
+                        IDX = 1._EB/(X_HI - X_LO)
+                        DVDT = -OM%FVY(IIO,JJO-1,KKO) - IDX*(OM%HS(IIO,JJO,KKO)-OM%HS(IIO,JJO-1,KKO))
                         UN_NEW_OTHER = UN_NEW_OTHER + &
                         0.5_EB*(OM%V(IIO,JJO-1,KKO)+OM%VS(IIO,JJO-1,KKO) + DT*DVDT)*AREA_FC
                      ENDIF
@@ -15239,7 +15442,12 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
                         ENDDO
                      ELSE
                         AREA_FC  = M2%DX(IIO)*M2%DY(JJO); DA_OTHER = DA_OTHER + AREA_FC
-                        DWDT = -OM%FVZ(IIO,JJO,KKO) - M2%RDZN(KKO)*(OM%HS(IIO,JJO,KKO+1)-OM%HS(IIO,JJO,KKO))
+                        ! Use centroid-to-centroid distance for RC faces
+                        ICC_LO = M2%CCVAR(IIO,JJO,KKO,CC_IDCC); ICC_HI = M2%CCVAR(IIO,JJO,KKO+1,CC_IDCC)
+                        IF (ICC_LO>0) THEN; X_LO=M2%CUT_CELL(ICC_LO)%XYZCEN(KAXIS,1); ELSE; X_LO=M2%ZC(KKO); ENDIF
+                        IF (ICC_HI>0) THEN; X_HI=M2%CUT_CELL(ICC_HI)%XYZCEN(KAXIS,1); ELSE; X_HI=M2%ZC(KKO+1); ENDIF
+                        IDX = 1._EB/(X_HI - X_LO)
+                        DWDT = -OM%FVZ(IIO,JJO,KKO) - IDX*(OM%HS(IIO,JJO,KKO+1)-OM%HS(IIO,JJO,KKO))
                         UN_NEW_OTHER = UN_NEW_OTHER + &
                         0.5_EB*(OM%W(IIO,JJO,KKO)+OM%WS(IIO,JJO,KKO) + DT*DWDT)*AREA_FC
                      ENDIF
@@ -15265,7 +15473,12 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
                         ENDDO
                      ELSE
                         AREA_FC  = M2%DX(IIO)*M2%DY(JJO); DA_OTHER = DA_OTHER + AREA_FC
-                        DWDT = -OM%FVZ(IIO,JJO,KKO-1) - M2%RDZN(KKO-1)*(OM%HS(IIO,JJO,KKO)-OM%HS(IIO,JJO,KKO-1))
+                        ! Use centroid-to-centroid distance for RC faces
+                        ICC_LO = M2%CCVAR(IIO,JJO,KKO-1,CC_IDCC); ICC_HI = M2%CCVAR(IIO,JJO,KKO,CC_IDCC)
+                        IF (ICC_LO>0) THEN; X_LO=M2%CUT_CELL(ICC_LO)%XYZCEN(KAXIS,1); ELSE; X_LO=M2%ZC(KKO-1); ENDIF
+                        IF (ICC_HI>0) THEN; X_HI=M2%CUT_CELL(ICC_HI)%XYZCEN(KAXIS,1); ELSE; X_HI=M2%ZC(KKO); ENDIF
+                        IDX = 1._EB/(X_HI - X_LO)
+                        DWDT = -OM%FVZ(IIO,JJO,KKO-1) - IDX*(OM%HS(IIO,JJO,KKO)-OM%HS(IIO,JJO,KKO-1))
                         UN_NEW_OTHER = UN_NEW_OTHER + &
                         0.5_EB*(OM%W(IIO,JJO,KKO-1)+OM%WS(IIO,JJO,KKO-1) + DT*DWDT)*AREA_FC
                      ENDIF
@@ -15281,11 +15494,6 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
 
    VELOCITY_ERROR = UN_NEW - UN_NEW_OTHER
    B1%VEL_ERR_NEW = VELOCITY_ERROR
-   IDX = 0._EB
-   DO JCF=1,CF%NFACE
-      IDX = IDX + 1._EB/(CF%XCENHIGH(X1AXIS,JCF)-CF%XCENLOW(X1AXIS,JCF))*CF%AREA(JCF)
-   ENDDO
-   IDX = IDX / SUM(CF%AREA(1:CF%NFACE))
    WALL_WORK1(IW) = -SIGN(1._EB,REAL(IOR,EB))*ITERATIVE_FACTOR*VELOCITY_ERROR/(IDX*DT)
 
    ! If the grid cells in the current mesh are smaller than those of the other mesh, do not include in error tolerance
@@ -19616,10 +19824,14 @@ SUBROUTINE GET_H_MATRIX_CC(NM,NM1,IPZ)
 INTEGER, INTENT(IN) :: NM,NM1,IPZ
 
 ! Local Variables:
-INTEGER :: X1AXIS,IFACE,ICF,I,J,K,IND(LOW_IND:HIGH_IND),IND_LOC(LOW_IND:HIGH_IND)
-INTEGER :: LOCROW_1,LOCROW_2,ILOC,JLOC,JCOL,IROW
-REAL(EB) :: AF,IDX,BIJ,KFACE(2,2)
-
+INTEGER :: X1AXIS,IFACE,ICF,I,J,K,IND(LOW_IND:HIGH_IND),IND_LOC(LOW_IND:HIGH_IND),ILOC,JLOC,JCOL,IROW, &
+           LOCROW,LOCROW_1,LOCROW_2,IW,NOM,IIO,JJO,KKO,ICC_EXT,IND_INT,IND_EXT,ICFO,ISHF(IAXIS:KAXIS), &
+           ICC,II,JJ,KK,IIG,JJG,KKG
+REAL(EB) :: AF,IDX,BIJ,KFACE(2,2),X_FACE,D_INT,D_EXT,AF_EXT
+TYPE(CC_CUTFACE_TYPE), POINTER :: CF
+TYPE(CC_RCFACE_TYPE), POINTER :: RCF
+TYPE(EXTERNAL_WALL_TYPE), POINTER :: EWC
+TYPE(BOUNDARY_COORD_TYPE), POINTER :: BC
 
 ! X direction bounds:
 ILO_FACE = 0                ! Low mesh boundary face index.
@@ -19666,6 +19878,8 @@ DO IFACE=1,MESHES(NM)%CC_NRCFACE_H
          IF ( K == KLO_FACE ) LOCROW_1 = HIGH_IND ! Only high side unknown row.
          IF ( K == KHI_FACE)  LOCROW_2 =  LOW_IND ! Only low side unknown row.
    ENDSELECT
+   ! Skip all boundary RC faces (handled by EXTERNAL_WALL loop below)
+   IF (LOCROW_1 == LOCROW_2) CYCLE
    IDX = 1._EB / ( RCF%XCEN(X1AXIS,HIGH_IND) - RCF%XCEN(X1AXIS,LOW_IND) )
 
    ! Now add to Adiff corresponding coeff:
@@ -19673,10 +19887,15 @@ DO IFACE=1,MESHES(NM)%CC_NRCFACE_H
    !    Cols 1,2: ind(LOW_IND) ind(HIGH_IND), Rows 1,2: ind_loc(LOW_IND) ind_loc(HIGH_IND)
    KFACE(1,1) = BIJ; KFACE(2,1) =-BIJ; KFACE(1,2) =-BIJ; KFACE(2,2) = BIJ
    DO ILOC=LOCROW_1,LOCROW_2   ! Local row number in Kface
-      DO JLOC=LOW_IND,HIGH_IND ! Local col number in Kface, JD
-          IROW=IND_LOC(ILOC)                                ! Process Local Unknown number.
-          JCOL=RCF%JDH(ILOC,JLOC) ! Local position of coef in D_MAT_H
-          ZONE_SOLVE(IPZ)%ROW_H(IROW)%D(JCOL) = ZONE_SOLVE(IPZ)%ROW_H(IROW)%D(JCOL) + KFACE(ILOC,JLOC)
+      IROW=IND_LOC(ILOC)       ! Process Local Unknown number.
+      DO JLOC=LOW_IND,HIGH_IND ! Local col number in Kface
+         ! Find column position on-the-fly
+         DO JCOL = 1, ZONE_SOLVE(IPZ)%ROW_H(IROW)%NNZ
+            IF (IND(JLOC) == ZONE_SOLVE(IPZ)%ROW_H(IROW)%JD(JCOL)) THEN
+               ZONE_SOLVE(IPZ)%ROW_H(IROW)%D(JCOL) = ZONE_SOLVE(IPZ)%ROW_H(IROW)%D(JCOL) + KFACE(ILOC,JLOC)
+               EXIT
+            ENDIF
+         ENDDO
       ENDDO
    ENDDO
 ENDDO
@@ -19684,28 +19903,98 @@ ENDDO
 ! Now Gasphase CUT_FACES:
 DO ICF = 1,MESHES(NM)%N_CUTFACE_MESH
    CF =>  MESHES(NM)%CUT_FACE(ICF); IF ( CF%STATUS /= CC_GASPHASE ) CYCLE
-   ! Drop if cut-face on a wall-cell, and type different than INTERPOLATED_BOUNDARY or PERIODIC_BOUNDARY.
+   I = CF%IJK(IAXIS); J = CF%IJK(JAXIS); K = CF%IJK(KAXIS); X1AXIS = CF%IJK(KAXIS+1)
+   IF(ZONE_SOLVE(PRESSURE_ZONE(I,J,K))%CONNECTED_ZONE_PARENT/=IPZ) CYCLE
+
+   ! Handle external cut-faces (at mesh boundaries) - same-level and refined
    IF( CF%IWC > 0 ) THEN
       WC=>MESHES(NM)%WALL(CF%IWC)
       IF (.NOT.( WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY .OR. WC%BOUNDARY_TYPE==PERIODIC_BOUNDARY ) ) CYCLE
+      EWC => EXTERNAL_WALL(CF%IWC)
+      NOM = EWC%NOM
+
+      ! Determine which side is internal
+      SELECT CASE(X1AXIS)
+         CASE(IAXIS)
+            IF (I == ILO_FACE) THEN; LOCROW = HIGH_IND; X_FACE = XS
+            ELSE;                    LOCROW = LOW_IND;  X_FACE = XF
+            ENDIF
+         CASE(JAXIS)
+            IF (J == JLO_FACE) THEN; LOCROW = HIGH_IND; X_FACE = YS
+            ELSE;                    LOCROW = LOW_IND;  X_FACE = YF
+            ENDIF
+         CASE(KAXIS)
+            IF (K == KLO_FACE) THEN; LOCROW = HIGH_IND; X_FACE = ZS
+            ELSE;                    LOCROW = LOW_IND;  X_FACE = ZF
+            ENDIF
+      END SELECT
+
+      DO IFACE=1,CF%NFACE
+         ! Internal unknown
+         IND_INT = CF%UNKH(LOCROW,IFACE)
+         IROW = IND_INT - ZONE_SOLVE(IPZ)%UNKH_IND(NM1)
+         AF = CF%AREA(IFACE)
+         ! Distance from internal cell centroid to interface
+         IF (LOCROW == HIGH_IND) THEN
+            D_INT = ABS(CF%XCENHIGH(X1AXIS,IFACE) - X_FACE)
+         ELSE
+            D_INT = ABS(CF%XCENLOW(X1AXIS,IFACE) - X_FACE)
+         ENDIF
+
+         ! Loop over external cells (works for both same-level and refined)
+         DO KKO = EWC%KKO_MIN, EWC%KKO_MAX
+            DO JJO = EWC%JJO_MIN, EWC%JJO_MAX
+               DO IIO = EWC%IIO_MIN, EWC%IIO_MAX
+                  ICC_EXT = MESHES(NOM)%CCVAR(IIO,JJO,KKO,CC_IDCC)
+                  IND_EXT = OMESH(NOM)%MUNKH(IIO,JJO,KKO)
+                  SELECT CASE(X1AXIS)
+                  CASE(IAXIS)
+                        AF_EXT = MESHES(NOM)%DY(JJO) * MESHES(NOM)%DZ(KKO)
+                        D_EXT = ABS(MESHES(NOM)%XC(IIO) - X_FACE)
+                  CASE(JAXIS)
+                        AF_EXT = MESHES(NOM)%DX(IIO) * MESHES(NOM)%DZ(KKO)
+                        D_EXT = ABS(MESHES(NOM)%YC(JJO) - X_FACE)
+                  CASE(KAXIS)
+                        AF_EXT = MESHES(NOM)%DX(IIO) * MESHES(NOM)%DY(JJO)
+                        D_EXT = ABS(MESHES(NOM)%ZC(KKO) - X_FACE)
+                  END SELECT
+                  IF (ICC_EXT > 0) THEN
+                     ! Note: IND_EXT comes from OMESH(NOM)%MUNKH which was populated
+                     ! via COPY_CC_MUNKH_TO_UNKH from communicated HS data
+                     D_EXT = ABS(MESHES(NOM)%CUT_CELL(ICC_EXT)%XYZCEN(X1AXIS,1) - X_FACE)
+                  ENDIF
+                  ! Check for cut-face in NOM
+                  ISHF(IAXIS:KAXIS) = 0; IF(BOUNDARY_COORD(WC%BC_INDEX)%IOR < 0) ISHF(X1AXIS) = -1
+                  ICFO = MESHES(NOM)%FCVAR(IIO+ISHF(IAXIS),JJO+ISHF(JAXIS),KKO+ISHF(KAXIS),CC_IDCF,X1AXIS)
+                  IF (ICFO > 0) AF_EXT = SUM(MESHES(NOM)%CUT_FACE(ICFO)%AREA(1:MESHES(NOM)%CUT_FACE(ICFO)%NFACE))
+                  IF (EWC%AREA_RATIO < 0.99_EB) AF_EXT = AF
+                  BIJ = AF_EXT / (D_INT + D_EXT)
+                  ! Add to diagonal (IND_INT)
+                  DO JCOL = 1, ZONE_SOLVE(IPZ)%ROW_H(IROW)%NNZ
+                     IF (IND_INT == ZONE_SOLVE(IPZ)%ROW_H(IROW)%JD(JCOL)) THEN
+                        ZONE_SOLVE(IPZ)%ROW_H(IROW)%D(JCOL) = ZONE_SOLVE(IPZ)%ROW_H(IROW)%D(JCOL) + BIJ
+                        EXIT
+                     ENDIF
+                  ENDDO
+                  ! Add to off-diagonal (IND_EXT)
+                  DO JCOL = 1, ZONE_SOLVE(IPZ)%ROW_H(IROW)%NNZ
+                     IF (IND_EXT == ZONE_SOLVE(IPZ)%ROW_H(IROW)%JD(JCOL)) THEN
+                        ZONE_SOLVE(IPZ)%ROW_H(IROW)%D(JCOL) = ZONE_SOLVE(IPZ)%ROW_H(IROW)%D(JCOL) - BIJ
+                        EXIT
+                     ENDIF
+                  ENDDO
+               ENDDO
+            ENDDO
+         ENDDO
+      ENDDO
+      CYCLE  ! Skip normal processing - external cut-face handled
    ENDIF
-   I = CF%IJK(IAXIS); J = CF%IJK(JAXIS); K = CF%IJK(KAXIS); X1AXIS = CF%IJK(KAXIS+1)
-   IF(ZONE_SOLVE(PRESSURE_ZONE(I,J,K))%CONNECTED_ZONE_PARENT/=IPZ) CYCLE
-   ! Row ind(1),ind(2):
-   LOCROW_1 = LOW_IND; LOCROW_2 = HIGH_IND
+
+   ! Normal processing (internal cut-faces only)
    SELECT CASE(X1AXIS)
-      CASE(IAXIS)
-         IDX = RDXN(I)
-         IF ( I == ILO_FACE ) LOCROW_1 = HIGH_IND ! Only high side unknown row.
-         IF ( I == IHI_FACE ) LOCROW_2 =  LOW_IND ! Only low side unknown row.
-      CASE(JAXIS)
-         IDX = RDYN(J)
-         IF ( J == JLO_FACE ) LOCROW_1 = HIGH_IND ! Only high side unknown row.
-         IF ( J == JHI_FACE ) LOCROW_2 =  LOW_IND ! Only low side unknown row.
-      CASE(KAXIS)
-         IDX = RDZN(K)
-         IF ( K == KLO_FACE ) LOCROW_1 = HIGH_IND ! Only high side unknown row.
-         IF ( K == KHI_FACE)  LOCROW_2 =  LOW_IND ! Only low side unknown row.
+      CASE(IAXIS); IDX = RDXN(I)
+      CASE(JAXIS); IDX = RDYN(J)
+      CASE(KAXIS); IDX = RDZN(K)
    ENDSELECT
    DO IFACE=1,CF%NFACE
       ! Unknowns on related cells:
@@ -19720,11 +20009,117 @@ DO ICF = 1,MESHES(NM)%N_CUTFACE_MESH
       BIJ   = IDX*AF
       !    Cols 1,2: ind(LOW_IND) ind(HIGH_IND), Rows 1,2: ind_loc(LOW_IND) ind_loc(HIGH_IND)
       KFACE(1,1) = BIJ; KFACE(2,1) =-BIJ; KFACE(1,2) =-BIJ; KFACE(2,2) = BIJ
-      DO ILOC=LOCROW_1,LOCROW_2 ! Local row number in Kface
-         DO JLOC=LOW_IND,HIGH_IND ! Local col number in Kface, JD
-               IROW=IND_LOC(ILOC)
-               JCOL=CF%JDH(ILOC,JLOC,IFACE)
-               ZONE_SOLVE(IPZ)%ROW_H(IROW)%D(JCOL) = ZONE_SOLVE(IPZ)%ROW_H(IROW)%D(JCOL) + KFACE(ILOC,JLOC)
+      DO ILOC=LOW_IND,HIGH_IND ! Local row number in Kface (both rows for internal faces)
+         IROW=IND_LOC(ILOC)
+         DO JLOC=LOW_IND,HIGH_IND ! Local col number in Kface
+            ! Find column position on-the-fly
+            DO JCOL = 1, ZONE_SOLVE(IPZ)%ROW_H(IROW)%NNZ
+               IF (IND(JLOC) == ZONE_SOLVE(IPZ)%ROW_H(IROW)%JD(JCOL)) THEN
+                  ZONE_SOLVE(IPZ)%ROW_H(IROW)%D(JCOL) = ZONE_SOLVE(IPZ)%ROW_H(IROW)%D(JCOL) + KFACE(ILOC,JLOC)
+                  EXIT
+               ENDIF
+           ENDDO
+         ENDDO
+      ENDDO
+   ENDDO
+ENDDO
+
+! Handle RC faces at mesh boundaries (via EXTERNAL_WALL loop)
+! This handles RC faces connecting cut-cells to external meshes (same-level and refined)
+! RC face = regular Cartesian face where at least one side is a cut-cell
+DO IW = 1, N_EXTERNAL_WALL_CELLS
+   WC => WALL(IW)
+   IF (.NOT.(WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY .OR. WC%BOUNDARY_TYPE==PERIODIC_BOUNDARY)) CYCLE
+   IF (WC%CUT_FACE_INDEX > 0) CYCLE  ! Skip cut-faces (handled above)
+
+   EWC => EXTERNAL_WALL(IW)
+   NOM = EWC%NOM; IF (NOM < 1) CYCLE
+
+   ! Get cell indices from boundary coord
+   BC => BOUNDARY_COORD(WC%BC_INDEX)
+   II = BC%II; JJ = BC%JJ; KK = BC%KK         ! Ghost cell
+   IIG = BC%IIG; JJG = BC%JJG; KKG = BC%KKG   ! Internal cell
+   X1AXIS = ABS(BC%IOR)
+
+   IF (ZONE_SOLVE(PRESSURE_ZONE(IIG,JJG,KKG))%CONNECTED_ZONE_PARENT /= IPZ) CYCLE
+
+   ! Check if this is an RC face: at least one side must be a cut-cell
+   ! Skip if neither side is a cut-cell (handled by pres.f90)
+   ICC = CCVAR(IIG,JJG,KKG,CC_IDCC)
+   IF (ICC < 1 .AND. CCVAR(II,JJ,KK,CC_IDCC) < 1) CYCLE
+
+   ! Get internal unknown and distance
+   IF (ICC > 0) THEN
+      IND_INT = CUT_CELL(ICC)%UNKH(1)
+   ELSE
+      IND_INT = CCVAR(IIG,JJG,KKG,CC_UNKH)
+   ENDIF
+   IROW = IND_INT - ZONE_SOLVE(IPZ)%UNKH_IND(NM1)
+
+   ! Get interface location and internal cell distance
+   SELECT CASE(X1AXIS)
+      CASE(IAXIS)
+         IF (BC%IOR > 0) THEN; X_FACE = XS; ELSE; X_FACE = XF; ENDIF
+         IF (ICC > 0) THEN; D_INT = ABS(CUT_CELL(ICC)%XYZCEN(IAXIS,1) - X_FACE)
+         ELSE;              D_INT = ABS(XC(IIG) - X_FACE)
+         ENDIF
+         AF = DY(JJG) * DZ(KKG)
+      CASE(JAXIS)
+         IF (BC%IOR > 0) THEN; X_FACE = YS; ELSE; X_FACE = YF; ENDIF
+         IF (ICC > 0) THEN; D_INT = ABS(CUT_CELL(ICC)%XYZCEN(JAXIS,1) - X_FACE)
+         ELSE;              D_INT = ABS(YC(JJG) - X_FACE)
+         ENDIF
+         AF = DX(IIG) * DZ(KKG)
+      CASE(KAXIS)
+         IF (BC%IOR > 0) THEN; X_FACE = ZS; ELSE; X_FACE = ZF; ENDIF
+         IF (ICC > 0) THEN; D_INT = ABS(CUT_CELL(ICC)%XYZCEN(KAXIS,1) - X_FACE)
+         ELSE;              D_INT = ABS(ZC(KKG) - X_FACE)
+         ENDIF
+         AF = DX(IIG) * DY(JJG)
+   END SELECT
+
+   ! Loop over external cells (refinement)
+   DO KKO = EWC%KKO_MIN, EWC%KKO_MAX
+      DO JJO = EWC%JJO_MIN, EWC%JJO_MAX
+         DO IIO = EWC%IIO_MIN, EWC%IIO_MAX
+            ICC_EXT = MESHES(NOM)%CCVAR(IIO,JJO,KKO,CC_IDCC)
+            IND_EXT = OMESH(NOM)%MUNKH(IIO,JJO,KKO)
+            SELECT CASE(X1AXIS)
+               CASE(IAXIS)
+                  AF_EXT = MESHES(NOM)%DY(JJO) * MESHES(NOM)%DZ(KKO)
+                  D_EXT = ABS(MESHES(NOM)%XC(IIO) - X_FACE)
+               CASE(JAXIS)
+                  AF_EXT = MESHES(NOM)%DX(IIO) * MESHES(NOM)%DZ(KKO)
+                  D_EXT = ABS(MESHES(NOM)%YC(JJO) - X_FACE)
+               CASE(KAXIS)
+                  AF_EXT = MESHES(NOM)%DX(IIO) * MESHES(NOM)%DY(JJO)
+                  D_EXT = ABS(MESHES(NOM)%ZC(KKO) - X_FACE)
+            END SELECT
+            IF (ICC_EXT > 0) THEN
+               ! Note: IND_EXT comes from OMESH(NOM)%MUNKH which was populated
+               ! via COPY_CC_MUNKH_TO_UNKH from communicated HS data
+               D_EXT = ABS(MESHES(NOM)%CUT_CELL(ICC_EXT)%XYZCEN(X1AXIS,1) - X_FACE)
+            ENDIF
+            ! Check for cut-face in NOM
+            ISHF(IAXIS:KAXIS) = 0; IF (BC%IOR < 0) ISHF(X1AXIS) = -1
+            ICFO = MESHES(NOM)%FCVAR(IIO+ISHF(IAXIS),JJO+ISHF(JAXIS),KKO+ISHF(KAXIS),CC_IDCF,X1AXIS)
+            IF (ICFO > 0) AF_EXT = SUM(MESHES(NOM)%CUT_FACE(ICFO)%AREA(1:MESHES(NOM)%CUT_FACE(ICFO)%NFACE))
+            IF (EWC%AREA_RATIO < 0.99_EB) AF_EXT = AF
+            BIJ = AF_EXT / (D_INT + D_EXT)
+            ! Add to diagonal (IND_INT)
+            DO JCOL = 1, ZONE_SOLVE(IPZ)%ROW_H(IROW)%NNZ
+               IF (IND_INT == ZONE_SOLVE(IPZ)%ROW_H(IROW)%JD(JCOL)) THEN
+                  ZONE_SOLVE(IPZ)%ROW_H(IROW)%D(JCOL) = ZONE_SOLVE(IPZ)%ROW_H(IROW)%D(JCOL) + BIJ
+                  EXIT
+               ENDIF
+            ENDDO
+            ! Add to off-diagonal (IND_EXT)
+            DO JCOL = 1, ZONE_SOLVE(IPZ)%ROW_H(IROW)%NNZ
+               IF (IND_EXT == ZONE_SOLVE(IPZ)%ROW_H(IROW)%JD(JCOL)) THEN
+                  ZONE_SOLVE(IPZ)%ROW_H(IROW)%D(JCOL) = ZONE_SOLVE(IPZ)%ROW_H(IROW)%D(JCOL) - BIJ
+                  EXIT
+               ENDIF
+            ENDDO
          ENDDO
       ENDDO
    ENDDO
@@ -19743,6 +20138,7 @@ LOGICAL, INTENT(IN) :: LOOP_FLAG
 ! Local Variables:
 INTEGER :: X1AXIS,IFACE,ICF,I,J,K,IND(LOW_IND:HIGH_IND),IND_LOC(LOW_IND:HIGH_IND)
 INTEGER :: LOCROW_1,LOCROW_2,LOCROW,IIND,NII,ILOC
+INTEGER :: IW,IIG,JJG,KKG,II,JJ,KK,NOM,IIO,JJO,KKO,ICC_INT,ICC_EXT,IND_INT,IND_EXT
 
 ! X direction bounds:
 ILO_FACE = 0                    ! Low mesh boundary face index.
@@ -19813,6 +20209,37 @@ LOOP_FLAG_COND : IF ( LOOP_FLAG ) THEN ! MESH_LOOP_1 in calling routine.
             IF ( K == KLO_FACE ) LOCROW_1 = HIGH_IND ! Only high side unknown row.
             IF ( K == KHI_FACE)  LOCROW_2 =  LOW_IND ! Only low side unknown row.
       ENDSELECT
+
+      ! External cut-face at mesh boundary - need to add entries for ALL external cells
+      ! This handles both same-level and refinement cases
+      IF (CF%IWC > 0 .AND. LOCROW_1 == LOCROW_2) THEN
+         EWC => EXTERNAL_WALL(CF%IWC)
+         NOM = EWC%NOM
+         IF (NOM > 0) THEN
+            DO IFACE=1,CF%NFACE
+               IND_INT = CF%UNKH(LOCROW_1,IFACE)
+               IND_LOC(LOW_IND) = IND_INT - ZONE_SOLVE(IPZ)%UNKH_IND(NM1)
+               ! Loop over ALL external cells
+               DO KKO = EWC%KKO_MIN, EWC%KKO_MAX
+                  DO JJO = EWC%JJO_MIN, EWC%JJO_MAX
+                     DO IIO = EWC%IIO_MIN, EWC%IIO_MAX
+                        ! External unknown from communicated MUNKH array
+                        ! (MUNKH is populated from HS which contains cut-cell UNKH)
+                        IND_EXT = OMESH(NOM)%MUNKH(IIO,JJO,KKO)
+                        IF (IND_EXT < 1) CYCLE
+                        IND_LOC(HIGH_IND) = IND_EXT - ZONE_SOLVE(IPZ)%UNKH_IND(NM1)
+                        IND(LOW_IND)  = IND_INT
+                        IND(HIGH_IND) = IND_EXT
+                        CALL ADD_INPLACE_NNZ_H_WHLDOM(LOW_IND,LOW_IND,IND,IND_LOC,IPZ)
+                     ENDDO
+                  ENDDO
+               ENDDO
+            ENDDO
+         ENDIF
+         CYCLE  ! Skip normal processing for this external cut-face
+      ENDIF
+
+      ! Internal cut-faces (normal processing)
       DO IFACE=1,CF%NFACE
          !% Unknowns on related cells:
          IND(LOW_IND)     = CF%UNKH(LOW_IND,IFACE)
@@ -19821,6 +20248,56 @@ LOOP_FLAG_COND : IF ( LOOP_FLAG ) THEN ! MESH_LOOP_1 in calling routine.
          IND_LOC(HIGH_IND)= IND(HIGH_IND)- ZONE_SOLVE(IPZ)%UNKH_IND(NM1)
          ! Add to global matrix arrays:
          CALL ADD_INPLACE_NNZ_H_WHLDOM(LOCROW_1,LOCROW_2,IND,IND_LOC,IPZ)
+      ENDDO
+   ENDDO
+
+   ! Handle refinement interfaces via EXTERNAL_WALL loop (RC faces only).
+   ! For refinement, one coarse cell connects to multiple fine cells in the neighboring mesh.
+   ! We need to add graph entries for ALL external cells, not just one.
+   ! Note: Cut-faces are handled by the CUT_FACE loop above.
+   DO IW = 1, N_EXTERNAL_WALL_CELLS
+      WC => WALL(IW)
+      IF (.NOT.(WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY .OR. WC%BOUNDARY_TYPE==PERIODIC_BOUNDARY)) CYCLE
+      IF (WC%CUT_FACE_INDEX > 0) CYCLE  ! Skip cut-faces (handled above)
+      EWC => EXTERNAL_WALL(IW)
+      NOM = EWC%NOM; IF (NOM < 1) CYCLE
+
+      BC => BOUNDARY_COORD(WC%BC_INDEX)
+      IIG = BC%IIG; JJG = BC%JJG; KKG = BC%KKG   ! Internal cell
+      II  = BC%II;  JJ  = BC%JJ;  KK  = BC%KK    ! Ghost cell
+
+      IF (ZONE_SOLVE(PRESSURE_ZONE(IIG,JJG,KKG))%CONNECTED_ZONE_PARENT /= IPZ) CYCLE
+
+      ! Skip if both cells are regular gas (handled by pres.f90)
+      ICC_INT = CCVAR(IIG,JJG,KKG,CC_IDCC)
+      ICC_EXT = CCVAR(II,JJ,KK,CC_IDCC)
+      IF (ICC_INT < 1 .AND. ICC_EXT < 1) CYCLE
+
+      ! Get internal unknown
+      IF (ICC_INT > 0) THEN
+         IND_INT = CUT_CELL(ICC_INT)%UNKH(1)
+      ELSE
+         IND_INT = MESHES(NM)%MUNKH(IIG,JJG,KKG)
+      ENDIF
+      IND_LOC(LOW_IND) = IND_INT - ZONE_SOLVE(IPZ)%UNKH_IND(NM1)
+
+      ! Loop over ALL cells in the neighboring mesh that share this boundary
+      DO KKO = EWC%KKO_MIN, EWC%KKO_MAX
+         DO JJO = EWC%JJO_MIN, EWC%JJO_MAX
+            DO IIO = EWC%IIO_MIN, EWC%IIO_MAX
+               ! External unknown from communicated MUNKH array
+               ! (MUNKH is populated from HS which contains cut-cell UNKH)
+               IND_EXT = OMESH(NOM)%MUNKH(IIO,JJO,KKO)
+               IF (IND_EXT < 1) CYCLE
+
+               IND_LOC(HIGH_IND) = IND_EXT - ZONE_SOLVE(IPZ)%UNKH_IND(NM1)
+
+               ! Add graph entries: internal row -> external column
+               IND(LOW_IND)  = IND_INT
+               IND(HIGH_IND) = IND_EXT
+               CALL ADD_INPLACE_NNZ_H_WHLDOM(LOW_IND,LOW_IND,IND,IND_LOC,IPZ)
+            ENDDO
+         ENDDO
       ENDDO
    ENDDO
 
@@ -21649,38 +22126,34 @@ EXTERNAL_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
    NOM = EWC%NOM
    OM => OMESH(NOM)
 
-   ! This assumes all meshes at the same level of refinement:
-   KKO=EWC%KKO_MIN
-   JJO=EWC%JJO_MIN
-   IIO=EWC%IIO_MIN
    BC => BOUNDARY_COORD(WC%BC_INDEX)
-   II = BC%II; JJ = BC%JJ; KK = BC%KK;
-   ICC=CCVAR(II,JJ,KK,CC_IDCC)
+   II = BC%II; JJ = BC%JJ; KK = BC%KK
+   ! Copy MUNKH to current mesh guard cell storage (for same-level CF%UNKH access)
+   ICC = CCVAR(II,JJ,KK,CC_IDCC)
    IF (ICC > 0) THEN ! Cut-cells on this guard-cell Cartesian cell.
-      CUT_CELL(ICC)%UNKH(1) = OM%MUNKH(IIO,JJO,KKO)
+      CUT_CELL(ICC)%UNKH(1) = OM%MUNKH(EWC%IIO_MIN,EWC%JJO_MIN,EWC%KKO_MIN)
    ELSE
-      CCVAR(II,JJ,KK,CC_UNKH) = OM%MUNKH(IIO,JJO,KKO)
+      CCVAR(II,JJ,KK,CC_UNKH) = OM%MUNKH(EWC%IIO_MIN,EWC%JJO_MIN,EWC%KKO_MIN)
    ENDIF
 
-   ! ! Loop over all cells in mesh NOM that correspond to this boundary face (supports grid refinement):
-   ! DO KKO = EWC%KKO_MIN, EWC%KKO_MAX
-   !    DO JJO = EWC%JJO_MIN, EWC%JJO_MAX
-   !       DO IIO = EWC%IIO_MIN, EWC%IIO_MAX
-
-   !          ! Check if this cell in mesh NOM is a cut-cell:
-   !          ICC = MESHES(NOM)%CCVAR(IIO,JJO,KKO,CC_IDCC)
-
-   !          IF (ICC > 0) THEN
-   !             ! Copy to cut-cell storage in mesh NOM:
-   !             MESHES(NOM)%CUT_CELL(ICC)%UNKH(1) = OM%MUNKH(IIO,JJO,KKO)
-   !          ELSE
-   !             ! Copy to regular cell storage in mesh NOM:
-   !             MESHES(NOM)%CCVAR(IIO,JJO,KKO,CC_UNKH) = OM%MUNKH(IIO,JJO,KKO)
-   !          ENDIF
-
-   !       ENDDO
-   !    ENDDO
-   ! ENDDO
+   ! Loop over all cells in mesh NOM that correspond to this boundary face.
+   ! This populates MESHES(NOM)%CUT_CELL%UNKH for access during matrix assembly.
+   ! (Supports grid refinement where multiple external cells map to one guard cell)
+   DO KKO = EWC%KKO_MIN, EWC%KKO_MAX
+      DO JJO = EWC%JJO_MIN, EWC%JJO_MAX
+         DO IIO = EWC%IIO_MIN, EWC%IIO_MAX
+            ! Check if this cell in mesh NOM is a cut-cell:
+            ICC = MESHES(NOM)%CCVAR(IIO,JJO,KKO,CC_IDCC)
+            IF (ICC > 0) THEN
+               ! Copy to ghost cut-cell storage for mesh NOM:
+               MESHES(NOM)%CUT_CELL(ICC)%UNKH(1) = OM%MUNKH(IIO,JJO,KKO)
+            ELSE
+               ! Copy to ghost regular cell storage for mesh NOM:
+               MESHES(NOM)%CCVAR(IIO,JJO,KKO,CC_UNKH) = OM%MUNKH(IIO,JJO,KKO)
+            ENDIF
+         ENDDO
+      ENDDO
+   ENDDO
 
 ENDDO EXTERNAL_WALL_LOOP
 
@@ -21690,8 +22163,13 @@ EXTERNAL_WALL_LOOP2: DO IW=1,N_EXTERNAL_WALL_CELLS
    EWC=>EXTERNAL_WALL(IW)
    IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE EXTERNAL_WALL_LOOP2
    NOM = EWC%NOM; OM => OMESH(NOM)
-   KKO=EWC%KKO_MIN; JJO=EWC%JJO_MIN; IIO=EWC%IIO_MIN
-   OM%HS(IIO,JJO,KKO) = 0._EB ! (VAR_CC == UNKH)
+   DO KKO = EWC%KKO_MIN, EWC%KKO_MAX
+      DO JJO = EWC%JJO_MIN, EWC%JJO_MAX
+         DO IIO = EWC%IIO_MIN, EWC%IIO_MAX
+            OM%HS(IIO,JJO,KKO) = 0._EB ! (VAR_CC == UNKH)
+         ENDDO
+      ENDDO
+   ENDDO
 ENDDO EXTERNAL_WALL_LOOP2
 
 RETURN

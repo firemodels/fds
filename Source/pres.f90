@@ -781,7 +781,8 @@ SUBROUTINE COMPUTE_VELOCITY_ERROR(DT,NM)
 USE MESH_POINTERS
 USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
 USE GLOBAL_CONSTANTS, ONLY: PREDICTOR,VELOCITY_ERROR_MAX,SOLID_BOUNDARY,INTERPOLATED_BOUNDARY,VELOCITY_ERROR_MAX_LOC,T_USED,&
-                            PRES_FLAG,FREEZE_VELOCITY,SOLID_PHASE_ONLY,GLMAT_FLAG,UGLMAT_FLAG,ULMAT_FLAG
+                            PRES_FLAG,FREEZE_VELOCITY,SOLID_PHASE_ONLY,GLMAT_FLAG,UGLMAT_FLAG,ULMAT_FLAG,CC_IBM
+USE COMPLEX_GEOMETRY, ONLY: CC_CGSC,CC_GASPHASE
 
 REAL(EB), INTENT(IN) :: DT
 INTEGER, INTENT(IN) :: NM
@@ -818,9 +819,6 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    IF (WC%BOUNDARY_TYPE/=SOLID_BOUNDARY        .AND. &
        WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE CHECK_WALL_LOOP
 
-   IF (WC%CUT_FACE_INDEX>0) CYCLE CHECK_WALL_LOOP
-
-
    IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) THEN
       EWC=>EXTERNAL_WALL(IW)
       IF (EWC%AREA_RATIO<0.9_EB) CYCLE CHECK_WALL_LOOP
@@ -835,6 +833,10 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    JJ  = BC%JJ
    KK  = BC%KK
    IOR = BC%IOR
+
+   IF (CC_IBM) THEN
+      IF (ANY((/CCVAR(BC%IIG,BC%JJG,BC%KKG,CC_CGSC),CCVAR(II,JJ,KK,CC_CGSC)/)/=CC_GASPHASE)) CYCLE CHECK_WALL_LOOP
+   ENDIF
 
    DHFCT = 1._EB
    IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
@@ -3604,8 +3606,7 @@ USE GLOBAL_CONSTANTS, ONLY : N_MPI_PROCESSES
 
 LOGICAL, INTENT(OUT) :: SUPPORTED_MESH
 
-INTEGER :: NM,TRN_ME(2),IERR
-REAL(EB):: DX_P(IAXIS:KAXIS),MIN_XS(3),MAX_XF(3),LX,LY,LZ
+INTEGER :: NM,IERR
 INTEGER :: COUNT
 INTEGER, ALLOCATABLE, DIMENSION(:,:) :: MESH_GRAPH,DSETS
 LOGICAL, ALLOCATABLE, DIMENSION(:)   :: COUNTED
@@ -3619,48 +3620,7 @@ SUPPORTED_MESH = .TRUE.
 
 IF (NMESHES == 1) RETURN
 
-! 1. For now unsupported: CC_IBM and two different cell sizes in mesh (i.e. different refinement levels):
-IF(CC_IBM) THEN
-   NM = 1
-   IF (MY_RANK==PROCESS(NM)) THEN
-      CALL POINT_TO_MESH(NM)
-      DX_P(IAXIS) = DX(1)
-      DX_P(JAXIS) = DY(1)
-      DX_P(KAXIS) = DZ(1)
-   ENDIF
-   IF (N_MPI_PROCESSES > 1) CALL MPI_BCAST(DX_P(1),3,MPI_DOUBLE_PRECISION,PROCESS(NM),MPI_COMM_WORLD,IERR)
-   ! Find domain sizes to define relative epsilon:
-   MIN_XS(1:3) = (/ MESHES(NM)%XS, MESHES(NM)%YS, MESHES(NM)%ZS /)
-   MAX_XF(1:3) = (/ MESHES(NM)%XF, MESHES(NM)%YF, MESHES(NM)%ZF /)
-   DO NM=2,NMESHES
-      MIN_XS(1) = MIN(MIN_XS(1),MESHES(NM)%XS)
-      MIN_XS(2) = MIN(MIN_XS(2),MESHES(NM)%YS)
-      MIN_XS(3) = MIN(MIN_XS(3),MESHES(NM)%ZS)
-      MAX_XF(1) = MAX(MAX_XF(1),MESHES(NM)%XF)
-      MAX_XF(2) = MAX(MAX_XF(2),MESHES(NM)%YF)
-      MAX_XF(3) = MAX(MAX_XF(3),MESHES(NM)%ZF)
-   ENDDO
-   LX = MAX(MAX_XF(1)-MIN_XS(1),1._EB)
-   LY = MAX(MAX_XF(2)-MIN_XS(2),1._EB)
-   LZ = MAX(MAX_XF(3)-MIN_XS(3),1._EB)
-   TRN_ME(1:2) = 0
-   MESH_LOOP_CELL : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-      CALL POINT_TO_MESH(NM)
-      IF(ABS(DX_P(IAXIS)-DX(1)) > 10._EB*TWO_EPSILON_EB*LX) TRN_ME(1) = TRN_ME(1) + 1
-      IF(ABS(DX_P(JAXIS)-DY(1)) > 10._EB*TWO_EPSILON_EB*LY) TRN_ME(1) = TRN_ME(1) + 1
-      IF(ABS(DX_P(KAXIS)-DZ(1)) > 10._EB*TWO_EPSILON_EB*LZ) TRN_ME(1) = TRN_ME(1) + 1
-   ENDDO MESH_LOOP_CELL
-   TRN_ME(2)=TRN_ME(1)
-   IF (N_MPI_PROCESSES > 1) CALL MPI_ALLREDUCE(TRN_ME(1),TRN_ME(2),1,MPI_INTEGER,MPI_SUM,MPI_COMM_WORLD,IERR)
-   IF (TRN_ME(2) > 0) THEN ! Meshes at different refinement levels. Not Unsupported.
-      IF (MY_RANK == 0) WRITE(LU_ERR,*) 'GLMAT Setup Error: Meshes at different refinement levels currently unsupported for &GEOM.'
-      SUPPORTED_MESH = .FALSE.
-      STOP_STATUS = SETUP_STOP
-      RETURN
-   ENDIF
-ENDIF
-
-! 2. Two (or more) disjoint domains, where at least one has all Neumann BCs and one has some Dirichlet bcs.
+! Two (or more) disjoint domains, where at least one has all Neumann BCs and one has some Dirichlet bcs.
 ! This is a topological problem that would require different Matrix types (i.e. one positive definite and one
 ! indefinite), which would require separate solutions.
 ! A possible approach to look at is to solve the whole system as indefinite, and then substract a constant in
@@ -3806,8 +3766,6 @@ PREDCORR_LOOP : IF (PREDICTOR) THEN
 
       CALL POINT_TO_MESH(NM)
 
-      ! Loop over all cell edges
-
       EXTERNAL_WALL_LOOP_1 : DO IW=1,N_EXTERNAL_WALL_CELLS
 
          WC=>WALL(IW)
@@ -3831,13 +3789,9 @@ PREDCORR_LOOP : IF (PREDICTOR) THEN
          ! Here if NOM==0 means it is an OBST laying on an external boundary -> CYCLE
          OM => OMESH(NOM)
 
+         ! Skip faces connected to cut-cells or solid - handled by GET_H_GUARD_CUTCELL
          IF (CC_IBM) THEN
-            ! This assumes all meshes at the same level of refinement: For now.
-            KKO=EWC%KKO_MIN
-            JJO=EWC%JJO_MIN
-            IIO=EWC%IIO_MIN
-            H(II,JJ,KK) = OM%H(IIO,JJO,KKO)
-            CYCLE EXTERNAL_WALL_LOOP_1
+            IF (ANY( (/CCVAR(IIG,JJG,KKG,CC_CGSC),CCVAR(II,JJ,KK,CC_CGSC)/) /= IS_GASPHASE )) CYCLE EXTERNAL_WALL_LOOP_1
          ENDIF
 
          ! GRID REFINEMENT: Compute mean H accounting for boundary types
@@ -3920,13 +3874,9 @@ ELSE ! PREDCORR_LOOP
          ! Here if NOM==0 means it is an OBST laying on an external boundary -> CYCLE
          OM => OMESH(NOM)
 
+         ! Skip faces connected to cut-cells or solid - handled by GET_H_GUARD_CUTCELL
          IF (CC_IBM) THEN
-            ! This assumes all meshes at the same level of refinement: For now.
-            KKO=EWC%KKO_MIN
-            JJO=EWC%JJO_MIN
-            IIO=EWC%IIO_MIN
-            HS(II,JJ,KK) = OM%HS(IIO,JJO,KKO)
-            CYCLE EXTERNAL_WALL_LOOP_2
+            IF (ANY( (/CCVAR(IIG,JJG,KKG,CC_CGSC),CCVAR(II,JJ,KK,CC_CGSC)/) /= IS_GASPHASE )) CYCLE EXTERNAL_WALL_LOOP_2
          ENDIF
 
          ! GRID REFINEMENT: Compute mean HS accounting for boundary types
@@ -4240,6 +4190,16 @@ IPZ_LOOP : DO IPZ=0,N_ZONE_GLOBMAT
       ZSL%LOWER_ROW = MAX(1,ZSL%UNKH_IND(NM_START))
       ZSL%UPPER_ROW = MAX(1,ZSL%UNKH_IND(NM_START))
    ENDIF
+
+!   OPEN(unit=20,file="Matrix_H_UGLMAT.txt",action="write",status="replace")
+!   DO IROW=1,ZSL%NUNKH_LOCAL
+!      DO JCOL=1,ZSL%ROW_H(IROW)%NNZ
+!         WRITE(20,'(I6,",",I6,",",F18.12)') IROW, ZSL%ROW_H(IROW)%JD(JCOL), ZSL%ROW_H(IROW)%D(JCOL)
+!      ENDDO
+!   ENDDO
+!   CLOSE(20)
+!   WRITE(0,*) 'H Matrix file written...'
+!   STOP
 
    LIBRARY_SELECT: SELECT CASE(UGLMAT_SOLVER_LIBRARY)
 
@@ -4761,9 +4721,9 @@ IPZ_LOOP : DO IPZ=0,N_ZONE_GLOBMAT
          
          IOR = BC%IOR
          
-         ! Check if CC_IBM -> If IIG,JJG,KKG cell is type IS_CUTCFE or IS_SOLID cycle:
-         IF ( .NOT.PRES_ON_WHOLE_DOMAIN .AND. CC_IBM ) THEN
-            IF(CCVAR(IIG,JJG,KKG,CC_CGSC) /= IS_GASPHASE) CYCLE
+         ! Skip faces connected to cut-cells or solid - handled by GET_H_GUARD_CUTCELL
+         IF (CC_IBM) THEN
+            IF (CCVAR(IIG,JJG,KKG,CC_CGSC)/=IS_GASPHASE .OR. CCVAR(II,JJ,KK,CC_CGSC)/=IS_GASPHASE) CYCLE
          ENDIF
  
          ! IUNK_INT and IROW_INT:
@@ -5040,10 +5000,9 @@ IPZ_LOOP : DO IPZ=0,N_ZONE_GLOBMAT
          IIG = BC%IIG; JJG = BC%JJG; KKG = BC%KKG; II = BC%II; JJ = BC%JJ; KK = BC%KK;
          IF(ZONE_SOLVE(PRESSURE_ZONE(IIG,JJG,KKG))%CONNECTED_ZONE_PARENT/=IPZ) CYCLE
          
-         ! Check if CC_IBM -> If IIG,JJG,KKG cell is type IS_CUTCFE or IS_SOLID cycle:
-         ! for cut-faces, RC_faces this will be taken care of in GET_CC_MATRIXGRAPH_H
+         ! Skip faces connected to cut-cells or solid - handled by GET_CC_MATRIXGRAPH_H
          IF (CC_IBM) THEN
-            IF(CCVAR(IIG,JJG,KKG,CC_CGSC) /= IS_GASPHASE) CYCLE 
+            IF (CCVAR(IIG,JJG,KKG,CC_CGSC)/=IS_GASPHASE .OR. CCVAR(II,JJ,KK,CC_CGSC)/=IS_GASPHASE) CYCLE
          ENDIF
          
          ! Get the neighboring mesh number:
