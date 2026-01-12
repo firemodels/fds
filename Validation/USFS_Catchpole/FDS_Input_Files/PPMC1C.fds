@@ -58,21 +58,21 @@
 
 &SPEC ID='WATER VAPOR' /
 
-&SURF ID                   = 'Regular Excelsior'
-      MATL_ID              = 'Dry Regular Excelsior'
-      MOISTURE_CONTENT    = 0.06
+&SURF ID                   = 'Pine Needles'
+      MATL_ID              = 'Dry Pine Needles'
+      MOISTURE_CONTENT     = 0.06
       SURFACE_VOLUME_RATIO = 5710
       LENGTH               = 0.02
       GEOMETRY             = 'CYLINDRICAL' /
 
-&PART ID             = 'Regular Excelsior' 
+&PART ID             = 'Pine Needles' 
       DRAG_COEFFICIENT = 2.8
       COLOR          = 'GREEN'
-      SURF_ID        = 'Regular Excelsior' 
+      SURF_ID        = 'Pine Needles' 
       QUANTITIES     = 'PARTICLE TEMPERATURE','PARTICLE MASS'
       STATIC         = .TRUE. /
 
-&INIT PART_ID              = 'Regular Excelsior'
+&INIT PART_ID              = 'Pine Needles'
       XB                   = 0.0,8.0,-0.5,0.5,0,0.076
       N_PARTICLES_PER_CELL = 1
       CELL_CENTERED        = .TRUE.
@@ -105,32 +105,32 @@
       CONDUCTIVITY       = 0.11
       SPECIFIC_HEAT_RAMP = 'cp_dry_veg' /
 
-&MATL ID                 = 'Dry Regular Excelsior'
+&MATL ID                 = 'Dry Pine Needles'
       DENSITY            = 510.0
       CONDUCTIVITY       = 0.11
       SPECIFIC_HEAT_RAMP = 'cp_dry_veg'
       A                  = 1040.
       E                  = 61041.
-      MATL_ID            = 'Regular Excelsior Char' 
+      MATL_ID            = 'Char' 
       NU_MATL            = 0.154
       SPEC_ID            = 'WOOD FUEL VAPOR'
       NU_SPEC            = 0.846
       HEAT_OF_REACTION   = 609.0 /
  
-&MATL ID                 = 'Regular Excelsior Char'
+&MATL ID                 = 'Char'
       DENSITY            = 300.
       CONDUCTIVITY       = 0.052
       SPECIFIC_HEAT_RAMP = 'cp_char'
       SURFACE_OXIDATION_MODEL = T
       A                  = 465.
       E                  = 68000.  
-      MATL_ID            = 'Regular Excelsior Ash'
+      MATL_ID            = 'Ash'
       NU_MATL            = 0.02
       SPEC_ID            = 'PRODUCTS','AIR'
       NU_SPEC            = 8.18,-7.2
       HEAT_OF_REACTION   = -25000. /
 
-&MATL ID            = 'Regular Excelsior Ash'
+&MATL ID            = 'Ash'
       DENSITY       = 67.
       CONDUCTIVITY  = 0.1
       SPECIFIC_HEAT = 2.0 /
@@ -159,11 +159,12 @@
 &BNDF QUANTITY='WALL TEMPERATURE' /
 &BNDF QUANTITY='GAUGE HEAT FLUX' /
 
-&DEVC ID='x', QUANTITY='TEMPERATURE', SPATIAL_STATISTIC='MAXLOC X', XB=0,8,-0.1,0.1,0,0.203 /
+&DEVC ID='x', QUANTITY='WALL TEMPERATURE', PART_ID='Pine Needles', SPATIAL_STATISTIC='MAXLOC X', XB=0,8,-0.1,0.1,0,0.203/
 
 &DEVC ID='t', XYZ=0,0,0, QUANTITY='TIME', OUTPUT=F, SETPOINT=21.0/
-&DEVC ID='HRR', QUANTITY='HRRPUV', XB=-1.,9.,-1.5,1.5,0.,3., SPATIAL_STATISTIC='VOLUME INTEGRAL', 
+&DEVC ID='HRR', QUANTITY='HRRPUV', XB=-1.,9.,-1.5,1.5,0.,3., SPATIAL_STATISTIC='VOLUME INTEGRAL',
       OUTPUT=F, SETPOINT=0.1, LATCH=F, TRIP_DIRECTION=-1/
+
 &CTRL ID='kill', FUNCTION_TYPE='ALL', INPUT_ID='t','HRR'/
 &CTRL FUNCTION_TYPE='KILL', INPUT_ID='kill' /
 
