@@ -106,28 +106,6 @@ def _compute_metrics_block(
 
     N, ncols = Y.shape
 
-    # --- comparison mask (like MATLAB) ---
-    comp_mask = np.isfinite(x)
-    if np.isfinite(comp_start):
-        comp_mask &= (x >= comp_start)
-    if np.isfinite(comp_end):
-        comp_mask &= (x <= comp_end)
-
-    if np.isfinite(dep_comp_start) or np.isfinite(dep_comp_end):
-        y0 = Y[:, 0]
-        dep_mask = np.isfinite(y0)
-        if np.isfinite(dep_comp_start):
-            dep_mask &= (y0 >= dep_comp_start)
-        if np.isfinite(dep_comp_end):
-            dep_mask &= (y0 <= dep_comp_end)
-        comp_mask &= dep_mask
-
-    if not np.any(comp_mask):
-        return np.array([]), [], []
-
-    x_sel = x[comp_mask]
-    Y_sel = Y[comp_mask, :]
-
     # --- support patterns like mean_1_2, max_2_1, end_1_2 ---
     # NOTE: we deliberately DO NOT parse "all_*_*" here.
     def _parse_stat_xy(m):
@@ -144,6 +122,28 @@ def _compute_metrics_block(
 
     metric_str = str(metric).strip().lower()
     base, idx_first, idx_second = _parse_stat_xy(metric_str)
+
+    # --- comparison mask (like MATLAB) ---
+    comp_mask = np.isfinite(x)
+    if np.isfinite(comp_start):
+        comp_mask &= (x >= comp_start)
+    if np.isfinite(comp_end):
+        comp_mask &= (x <= comp_end)
+
+    if np.isfinite(dep_comp_start) or np.isfinite(dep_comp_end):
+        y0 = Y[:, 0]
+        dep_mask = np.isfinite(y0)
+        if np.isfinite(dep_comp_start):
+            dep_mask &= (y0 >= dep_comp_start)
+        if np.isfinite(dep_comp_end):
+            dep_mask &= (y0 <= dep_comp_end)
+        comp_mask &= dep_mask
+
+    if not np.any(comp_mask) and metric_str != "slope":
+        return np.array([]), [], []
+
+    x_sel = x[comp_mask]
+    Y_sel = Y[comp_mask, :]
 
     vals = []
     titles = []
@@ -201,7 +201,7 @@ def _compute_metrics_block(
             out = np.nanmax(np.abs(yj - initial_value))
         elif metric_str == "slope":
             msk = np.isfinite(x_sel) & np.isfinite(yj)
-            out = np.polyfit(x_sel[msk], yj[msk], 1)[0] if msk.sum() >= 2 else np.nan
+            out = np.polyfit(x_sel[msk], yj[msk], 1)[0] if msk.sum() >= 2 else 0.0
         elif metric_str == "mean":
             out = abs(np.nanmean(yj) - initial_value)
         elif metric_str == "threshold":
@@ -2103,15 +2103,22 @@ def scatplot(saved_data, drange, **kwargs):
 
         # --- Write raw scatter values CSV (pre-mask, MATLAB-faithful) ---
         if Stats_Output.lower() != "verification":
-            raw_csv = _write_raw_scatter_csv(
-                Scatterplot_Dir,
-                Scatter_Plot_Title,
-                match_idx,
-                Save_csv_rownum,
-                Save_Dataname,
-                Save_Measured_Metric,
-                Save_Predicted_Metric,
-            )
+            if (
+                Save_Measured_Metric is not None
+                and Save_Predicted_Metric is not None
+                and len(Save_Measured_Metric) > 0
+                and len(Save_Predicted_Metric) > 0
+                and len(Save_Measured_Metric) == len(Save_Predicted_Metric)
+            ):
+                raw_csv = _write_raw_scatter_csv(
+                    Scatterplot_Dir,
+                    Scatter_Plot_Title,
+                    match_idx,
+                    Save_csv_rownum,
+                    Save_Dataname,
+                    Save_Measured_Metric,
+                    Save_Predicted_Metric,
+                )
 
             # if verbose:
             #     print(f"[scatplot] Wrote raw scatter CSV: {raw_csv}")
@@ -2439,7 +2446,7 @@ def _write_raw_scatter_csv(
 ):
     """
     Write raw (pre-mask) measured/predicted values used by scatplot.
-    Values are rounded to 3 significant figures for clean CSV output.
+    Values are rounded to 4 significant figures for clean CSV output.
     """
     import os
     import csv
@@ -2455,10 +2462,10 @@ def _write_raw_scatter_csv(
     )
     csv_path = os.path.join(outdir, f"{fname}_raw_scatter_values.csv")
 
-    def _sig3(x):
+    def _sig4(x):
         """Round to 3 significant figures, preserving scientific notation."""
         try:
-            return float(f"{float(x):.3g}")
+            return float(f"{float(x):.4g}")
         except Exception:
             return ""
 
@@ -2483,8 +2490,8 @@ def _write_raw_scatter_csv(
                 writer.writerow([
                     rownum,
                     dataname,
-                    _sig3(pvals[k]),
-                    _sig3(mvals[k]),
+                    _sig4(pvals[k]),
+                    _sig4(mvals[k]),
                 ])
 
     return csv_path

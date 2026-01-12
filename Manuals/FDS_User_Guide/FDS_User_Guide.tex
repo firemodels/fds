@@ -575,8 +575,8 @@ The second way to assess MPI efficiency is known as ``strong scaling.'' Here, yo
 \ee
 In the strong study demonstrated here, a single mesh of dimension 180 by 160 by 120 is divided into a range of smaller meshes, with the smallest partitioning being 432 meshes of dimension 20 by 20 by 20. The resulting decrease in the CPU time of the entire calculation and the major subroutines is shown in the right hand plot of Fig.~\ref{fig:scaling_tests}. Ideally, the CPU time should be inversely proportional to the number of meshes (MPI processes); that is, the relative CPU times ought to follow the black dotted lines. The one notable exception to this rule is for ``COMM'' or COMMunications. This curve represents the time spent in communicating information across the network.
 \begin{figure}[!ht]
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/weak_scaling_test}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/strong_scaling_test}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/weak_scaling_test}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/strong_scaling_test}
 \caption[MPI scaling study]{Example of a weak (left) and strong (right) scaling study.}
 \label{fig:scaling_tests}
 \end{figure}
@@ -8916,12 +8916,12 @@ In this example, a fire spreads radially from a single point as directed by the 
 \label{info:external_control}
 \label{external_control}
 
-It is possible to externally control some aspects of an FDS simulation while the simulation is running. These include most \ct{RAMP}s and the logical state of any \ct{CTRL}. The logical state of a \ct{CTRL} can be externally controlled by setting \ct{FUNCTION_TYPE='EXTERNAL'} on the \ct{CTRL} input. A \ct{RAMP} can be externally controlled by setting \ct{EXTERNAL_FILE} on \ct{RAMP}. \ct{RAMP}s used during initialization only cannot be externally controlled. These include \ct{RAMP}s controlling time (such as the output time \ct{RAMP}s on \ct{DUMP} like \ct{RAMP_BNDF}), defining \ct{SPEC} or \ct{MATL} physical properties (such as \ct{CONDUCTIVITY_RAMP} on \ct{MATL}), defining particle distributions (such as \ct{CNF_RAMP} on \ct{PART}), defining atmospheric conditions (such as \ct{RAMP_T0_Z} on \ct{WIND}), or for defining the initial surface temperature {\ct{RAMP_T_I} on \ct{SURF}) cannot be externally controlled. 
-	
+It is possible to externally control some aspects of an FDS simulation while the simulation is running. These include most \ct{RAMP}s and the logical state of any \ct{CTRL}. The logical state of a \ct{CTRL} can be externally controlled by setting \ct{FUNCTION_TYPE='EXTERNAL'} on the \ct{CTRL} input. A \ct{RAMP} can be externally controlled by setting \ct{EXTERNAL_FILE} on \ct{RAMP}. \ct{RAMP}s used during initialization only cannot be externally controlled. These include \ct{RAMP}s controlling time (such as the output time \ct{RAMP}s on \ct{DUMP} like \ct{RAMP_BNDF}), defining \ct{SPEC} or \ct{MATL} physical properties (such as \ct{CONDUCTIVITY_RAMP} on \ct{MATL}), defining particle distributions (such as \ct{CNF_RAMP} on \ct{PART}), defining atmospheric conditions (such as \ct{RAMP_T0_Z} on \ct{WIND}), or for defining the initial surface temperature {\ct{RAMP_T_I} on \ct{SURF}) cannot be externally controlled.
+
 	Any FDS input that has either a \ct{RAMP_ID} (except for the output time ramps on \ct{DUMP} such as \ct{RAMP_BNDF}) or a \ct{CTRL_ID} as one of its inputs can be externally controlled. A \ct{RAMP} can be externally controlled by setting \ct{EXTERNAL_FILE} on \ct{RAMP}. A \ct{CTRL} can be externally controlled by setting \ct{FUNCTION_TYPE='EXTERNAL'}.
-	
+
 	When external control is selected, FDS will set the value of the \ct{RAMP} or the logical state of the \ct{CTRL} based on values contained in a csv file whose name is given by \ct{EXTERNAL_FILENAME} on \ct{MISC}. This file will be checked for new values every \ct{DT_EXTERNAL} on \ct{TIME} seconds. Only those inputs whose values are being changed need to specified. For inputs not specified or if the file does not exist or cannot be opened (e.g., locked by the operating system during a file write), the current values will be kept. The initial values are defined with either \ct{INITIAL_VALUE} on \ct{RAMP} or \ct{INITIAL_STATE} on \ct{CTRL}. FDS can be forced to wait if no file is present or use an alternate \ct{EXTERNAL_FILENAME} by specifying \ct{DT_EXTERNAL_HEARTBEAT} and \ct{EXTERNAL_HEARTBEAT_FILENAME} on \ct{TIME}. With this approach FDS looks for \ct{EXTERNAL_HEARTBEAT_FILENAME}. If the file is not found FDS will wait up to \ct{DT_EXTERNAL_HEARTBEAT} seconds. If \ct{EXTERNAL_HEARTBEAT_FILENAME} is still not present, FDS will stop trying to update the external controls.  If \ct{HEARTBEAT_FAIL} on \ct{TIME} is true, FDS will stop the simulation. If \ct{EXTERNAL_HEARTBEAT_FILENAME} is present, FDS will read \ct{EXTERNAL_FILENAME} from it. If your external program requires that output files it reads be current, set \ct{DT_FLUSH} to be less than the \ct{DT} values for any file types being used by the external program.
-	
+
 	The csv file format is:
 	\begin{lstlisting}
 		Type(1), ID(1), Value(1)
@@ -8930,17 +8930,17 @@ It is possible to externally control some aspects of an FDS simulation while the
 		.
 	\end{lstlisting}
 	where \ct{Type} is either \ct{RAMP} or \ct{CTRL}, \ct{ID} is the corresponding \ct{ID} in the FDS input files, and \ct{Value} is the new output value for a \ct{RAMP} or the new logical state for a \ct{CTRL} where positive values mean the \ct{CTRL} evaluates as \ct{TRUE} and negative values mean the function evaluates as \ct{FALSE}.
-	
+
 	An example set of inputs is below:
 	\begin{lstlisting}
 		&MISC EXTERNAL_FILENAME='external_test_input.csv'/
 		&TIME T_END=10,DT_EXTERNAL=5/
-		
+
 		&OBST XB=0.0,0.1,0,1,0,1/
 		&VENT XB=0.1,0.1,0,1,0,1,SURF_ID='FLOW',CTRL_ID='VENT CTRL'/
 		&SURF ID='FLOW',VEL=-1,COLOR='BLUE',TAU_V=0/
 		&CTRL ID='VENT CTRL',FUNCTION_TYPE='EXTERNAL',INITIAL_STATE=T/
-		
+
 		&VENT XB=2,2,0,1,0,1,SURF_ID='HOT'/
 		&SURF ID='HOT',TMP_FRONT=1000,RAMP_T='T RAMP',COLOR='RED'/
 		&RAMP ID='T RAMP',EXTERNAL_FILE=T,INITIAL_VALUE=0.081633/
@@ -8951,7 +8951,7 @@ It is possible to externally control some aspects of an FDS simulation while the
 		CTRL,"VENT CTRL",-1
 	\end{lstlisting}
 	This turns off the velocity vent (a negative \ct{CTRL} value means set the state to \ct{.FALSE.}) and sets the fixed temperature vent to 1000~$^\circ$C (a \ct{RAMP} value of 1 means apply the full value of \ct{TMP_FRONT}). Note that the \ct{ID} strings are enclosed in quotes. This is only required if the string has a space or comma in it.  Results of running the case are shown in Fig.~\ref{external_control_fig}
-	
+
 	\begin{figure}[ht]
 		\includegraphics[width=3in]{SCRIPT_FIGURES/external_test_temperature}
 		\includegraphics[width=3in]{SCRIPT_FIGURES/external_test_velocity}
@@ -11947,7 +11947,7 @@ would output the velocity, flow loss, and the volume fractions of oxygen and soo
 \ct{DUCT VOLUME FRACTION}                      & Volume fraction of a species in a duct      &  mol/mol           & D,H   \\ \hline
 \ct{FAN PRESSURE}                              & Pressure output of a fan in a duct          &  Pa                & D   \\ \hline
 \ct{FILTER LOADING}                            & Loading of a species in a filter            &  kg                & D   \\ \hline
-\ct{FILTER LOSS}                               & Flow loss through a filter                  &                    & D   \\ \hline
+\ct{FILTER LOSS}                               & Total filter flow loss coefficient          &                    & D   \\ \hline
 \ct{NODE DENSITY}                              & Density of the flow through a node          &  kg/m$^3$          & D,H   \\ \hline
 \ct{NODE ENTHALPY}                             & Enthalpy of a node                          &  kJ/kg             & D,H   \\ \hline
 \ct{NODE SENSIBLE ENTHALPY}                    & Sensible Enthalpy of a node                 &  kJ/kg             & D,H   \\ \hline
