@@ -106,28 +106,6 @@ def _compute_metrics_block(
 
     N, ncols = Y.shape
 
-    # --- comparison mask (like MATLAB) ---
-    comp_mask = np.isfinite(x)
-    if np.isfinite(comp_start):
-        comp_mask &= (x >= comp_start)
-    if np.isfinite(comp_end):
-        comp_mask &= (x <= comp_end)
-
-    if np.isfinite(dep_comp_start) or np.isfinite(dep_comp_end):
-        y0 = Y[:, 0]
-        dep_mask = np.isfinite(y0)
-        if np.isfinite(dep_comp_start):
-            dep_mask &= (y0 >= dep_comp_start)
-        if np.isfinite(dep_comp_end):
-            dep_mask &= (y0 <= dep_comp_end)
-        comp_mask &= dep_mask
-
-    if not np.any(comp_mask):
-        return np.array([]), [], []
-
-    x_sel = x[comp_mask]
-    Y_sel = Y[comp_mask, :]
-
     # --- support patterns like mean_1_2, max_2_1, end_1_2 ---
     # NOTE: we deliberately DO NOT parse "all_*_*" here.
     def _parse_stat_xy(m):
@@ -144,6 +122,28 @@ def _compute_metrics_block(
 
     metric_str = str(metric).strip().lower()
     base, idx_first, idx_second = _parse_stat_xy(metric_str)
+
+    # --- comparison mask (like MATLAB) ---
+    comp_mask = np.isfinite(x)
+    if np.isfinite(comp_start):
+        comp_mask &= (x >= comp_start)
+    if np.isfinite(comp_end):
+        comp_mask &= (x <= comp_end)
+
+    if np.isfinite(dep_comp_start) or np.isfinite(dep_comp_end):
+        y0 = Y[:, 0]
+        dep_mask = np.isfinite(y0)
+        if np.isfinite(dep_comp_start):
+            dep_mask &= (y0 >= dep_comp_start)
+        if np.isfinite(dep_comp_end):
+            dep_mask &= (y0 <= dep_comp_end)
+        comp_mask &= dep_mask
+
+    if not np.any(comp_mask) and metric_str != "slope":
+        return np.array([]), [], []
+
+    x_sel = x[comp_mask]
+    Y_sel = Y[comp_mask, :]
 
     vals = []
     titles = []
@@ -201,7 +201,7 @@ def _compute_metrics_block(
             out = np.nanmax(np.abs(yj - initial_value))
         elif metric_str == "slope":
             msk = np.isfinite(x_sel) & np.isfinite(yj)
-            out = np.polyfit(x_sel[msk], yj[msk], 1)[0] if msk.sum() >= 2 else np.nan
+            out = np.polyfit(x_sel[msk], yj[msk], 1)[0] if msk.sum() >= 2 else 0.0
         elif metric_str == "mean":
             out = abs(np.nanmean(yj) - initial_value)
         elif metric_str == "threshold":
