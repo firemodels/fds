@@ -11,10 +11,11 @@ gitrevision=`git describe --abbrev=7 --long --dirty`
 echo "\\newcommand{\\gitrevision}{$gitrevision}" > ../Bibliography/gitrevision.tex
 
 pdflatex -interaction nonstopmode FDS_Technical_Reference_Guide &> FDS_Technical_Reference_Guide.err
-biber FDS_Technical_Reference_Guide &> FDS_Technical_Reference_Guide.err
+biber                             FDS_Technical_Reference_Guide &> FDS_Technical_Reference_Guide_biber.err
 pdflatex -interaction nonstopmode FDS_Technical_Reference_Guide &> FDS_Technical_Reference_Guide.err
 pdflatex -interaction nonstopmode FDS_Technical_Reference_Guide &> FDS_Technical_Reference_Guide.err
 pdflatex -interaction nonstopmode FDS_Technical_Reference_Guide &> FDS_Technical_Reference_Guide.err
+cat FDS_Technical_Reference_Guide_biber.err >> FDS_Technical_Reference_Guide.err
 
 # make sure the guide exists
 if [ ! -e FDS_Technical_Reference_Guide.pdf ]; then
@@ -34,13 +35,13 @@ if [[ `grep -E "Too many|Undefined control sequence|Error:|Fatal error|! LaTeX E
 fi
 
 # Check for LaTeX warnings (undefined references or duplicate labels)
-if [[ `grep -E "undefined|multiply defined|multiply-defined" -I FDS_Technical_Reference_Guide.err` == "" ]]
+if [[ `grep -E "undefined|WARNING|ERROR|multiply defined|multiply-defined" -I FDS_Technical_Reference_Guide.err` == "" ]]
    then
       # Continue along
       :
    else
       echo "LaTeX warnings detected:"
-      grep -E "new file|undefined|multiply defined|multiply-defined" -I FDS_Technical_Reference_Guide.err
+      grep -E "new file|undefined|WARNING|ERROR|multiply defined|multiply-defined" -I FDS_Technical_Reference_Guide.err
       clean_build=0
 fi
 

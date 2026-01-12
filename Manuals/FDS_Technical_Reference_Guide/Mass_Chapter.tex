@@ -328,6 +328,7 @@ This special treatment of the ghost cell density may be accessed in the source c
 \end{figure}
 
 \section{The Velocity Divergence}
+\label{sec:the_velocity_divergence}
 
 Because of the low Mach number assumption, the velocity divergence (the rate of volumetric expansion) plays an important role in the overall solution scheme.  In the FDS algorithm, the divergence is a surrogate for the energy equation.  The divergence is factored out of the conservative form of the sensible enthalpy equation (see Appendix~\ref{app_divergence}), and when the divergence constraint is satisfied (enforced by the momentum update and solution of the Poisson equation for pressure) the conservative form of the sensible enthalpy equation is satisfied by construction.
 
