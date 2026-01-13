@@ -21,21 +21,25 @@ for i, row in metadata.iterrows():
    textout = textout.replace('svratio',str(row['s']))
 
    if (row['Test'][:2]=='MF'):
+      fuel_type = 'Pine Sticks'
       density = 442.
       heat_of_reaction = 659.
       ignition_end = 40.
       ignition_p1 = ignition_end + 1
    elif (row['Test'][:4]=='EXSC'):
+      fuel_type = 'Coarse Excelsior'
       density = 398.
       heat_of_reaction = 711.
       ignition_end = 10.
       ignition_p1 = ignition_end + 1
    elif (row['Test'][:4]=='PPMC'):
+      fuel_type = 'Pine Needles'
       density = 510.
       heat_of_reaction = 609.
       ignition_end = 20.
       ignition_p1 = ignition_end + 1
    elif (row['Test'][:2]=='EX'):
+      fuel_type = 'Regular Excelsior'
       density = 398.
       heat_of_reaction = 711.
       ignition_end = 10.
@@ -47,6 +51,7 @@ for i, row in metadata.iterrows():
    textout = textout.replace('heatofreaction',str(heat_of_reaction))
    textout = textout.replace('ignitionend',str(ignition_end))
    textout = textout.replace('ignitionp1',str(ignition_p1))
+   textout = textout.replace('fueltype',fuel_type)
 
    with open(row['Test']+'.fds', 'w') as output_file:
       output_file.write(textout)
