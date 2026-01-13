@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from scipy.interpolate import griddata
 
-expdir = '../../../exp/TUS_Facade/'
+expdir = '../../../exp/Submodules/macfp-db/Wall_Fires/JIS_Facade/Experimental_Data/'
 outdir = '../../../out/TUS_Facade/'
 pltdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/TUS_Facade/'
 
