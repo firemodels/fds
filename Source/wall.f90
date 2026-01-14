@@ -50,6 +50,21 @@ TNOW=CURRENT_TIME()
 
 CALL POINT_TO_MESH(NM)
 
+! A note concerning the pointers below.
+! At the PREDICTOR stage of the time step, RHOS and ZZS are the estimated density and species fields, and PBAR_S is the
+! estimated background pressure. At the CORRECTOR stage, RHO, ZZ, and PBAR are the corrected (final) values.
+! This routine, WALL_BC, assigns boundary values for these fields.
+! However, at this point in the PREDICTOR stage, (US,VS,WS) has NOT been calculated, nor has (U,V,W) in the CORRECTOR. 
+! So why point to them?
+! The reason is that it is not unusual for the components of velocity to change sign from the PREDICTOR to the CORRECTOR stage.
+! If that happens, the INFLOW/OUTFLOW condition at an OPEN boundary becomes inconsistent. That is, what is thought to be an 
+! OUFLOW boundary during the PREDICTOR stage, say, might actually be treated as INFLOW during the next advection calculation in the 
+! CORRECTOR stage because the velocity field to be used in the advection calculation is not yet known. 
+! The pointers used here assume that a velocity component, say US, is less likely to change sign from
+! one time step to the next, especially when U and US have different signs. Thus, the US computed at the end of the PREDICTOR 
+! stage of the previous time step is more likely to have the same sign as the US that is to be computed at the end of the 
+! PREDICTOR stage of the current time step and used in the advection of the energy/species in the CORRECTOR stage.
+
 IF (PREDICTOR) THEN
    UU => US
    VV => VS
