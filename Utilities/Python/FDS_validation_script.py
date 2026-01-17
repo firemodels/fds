@@ -103,7 +103,7 @@ print("NIST_Pool_Fires...");              safe_run("./scripts/NIST_Pool_Fires.py
 print("Sandia_Plumes...");                safe_run("./scripts/Sandia_Plumes.py")
 print("Sandia_Pools...");                 safe_run("./scripts/Sandia_Pools.py")
 print("Theobald_Hose_Stream...");         safe_run("./scripts/Theobald_Hose_Stream.py")
-print("TUS_Facade...");                   safe_run("./scripts/TUS_Facade_contours.py")
+print("JIS_Facade...");                   safe_run("./scripts/JIS_Facade_contours.py")
 print("USFS_Deep_Fuel_Beds...");          safe_run("./scripts/USFS_Deep_Fuel_Beds.py")
 print("Wu_Bakar_Tunnels...");             safe_run("./scripts/Wu_Bakar_Tunnels.py")
 

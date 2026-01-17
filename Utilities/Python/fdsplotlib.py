@@ -1870,113 +1870,6 @@ def define_plot_parameters(D, irow, lightweight=False):
     return d
 
 
-def define_qrow_variables(Q, j):
-    """
-    Define scatterplot parameters from the Scatterplot_Inputs.csv row j.
-
-    Mirrors the MATLAB 'define_qrow_variables.m' behavior and returns
-    a simple Python object with all scatterplot configuration fields.
-
-    Parameters
-    ----------
-    Q : pandas.DataFrame
-        The scatterplot input file loaded by pandas.read_csv().
-    j : int
-        Row index (0-based).
-
-    Returns
-    -------
-    q : object
-        Object with attributes corresponding to scatterplot input fields.
-    """
-
-    class qrow:
-        def __init__(self):
-            self.Scatter_Plot_Title  = Q.loc[j, "Scatter_Plot_Title"]
-            self.Ind_Title           = Q.loc[j, "Ind_Title"]
-            self.Dep_Title           = Q.loc[j, "Dep_Title"]
-            self.Plot_Min            = Q.loc[j, "Plot_Min"]
-            self.Plot_Max            = Q.loc[j, "Plot_Max"]
-            self.Title_Position      = Q.loc[j, "Title_Position"]
-            self.Key_Position        = Q.loc[j, "Key_Position"]
-            self.Paper_Width_Factor  = Q.loc[j, "Paper_Width_Factor"]
-            self.Sigma_E             = Q.loc[j, "Sigma_E"]
-            self.Weight_Data         = Q.loc[j, "Weight_Data"]
-            self.Plot_Type           = Q.loc[j, "Plot_Type"]
-            self.Plot_Filename       = Q.loc[j, "Plot_Filename"]
-
-        def __repr__(self):
-            return str(self.__dict__)
-
-    q = qrow()
-
-    # Sanitize only human-readable fields
-    q.Scatter_Plot_Title = sanitize(safe_strip(q.Scatter_Plot_Title))
-    q.Ind_Title = sanitize(safe_strip(q.Ind_Title))
-    q.Dep_Title = sanitize(safe_strip(q.Dep_Title))
-    q.Plot_Filename = safe_strip(q.Plot_Filename)
-    q.Key_Position = safe_strip(q.Key_Position)
-    q.Plot_Type = safe_strip(q.Plot_Type)
-
-    # Parse numeric fields
-    def to_float(val):
-        try:
-            return float(val)
-        except Exception:
-            return np.nan
-
-    q.Plot_Min = to_float(q.Plot_Min)
-    q.Plot_Max = to_float(q.Plot_Max)
-    q.Paper_Width_Factor = to_float(q.Paper_Width_Factor)
-    q.Sigma_E = to_float(q.Sigma_E)
-
-    # Parse Title_Position as [x, y] floats
-    if isinstance(q.Title_Position, str):
-        try:
-            vals = [float(x) for x in q.Title_Position.split()]
-            if len(vals) == 2:
-                q.Title_Position = vals
-            else:
-                q.Title_Position = [0.03, 0.95]
-        except Exception:
-            q.Title_Position = [0.03, 0.95]
-    else:
-        q.Title_Position = [0.03, 0.95]
-
-    # Normalize Weight_Data (yes/no → bool)
-    if isinstance(q.Weight_Data, str):
-        q.Weight_Data = q.Weight_Data.strip().lower() == "yes"
-    else:
-        q.Weight_Data = bool(q.Weight_Data)
-
-    return q
-
-
-def sanitize(text: str) -> str:
-    """Escape LaTeX specials outside math mode ($...$)."""
-    if not isinstance(text, str):
-        return text
-
-    specials = {
-        "&": r"\&", "%": r"\%", "_": r"\_", "#": r"\#",
-        "$": r"\$", "{": r"\{", "}": r"\}", "^": r"\^{}", "~": r"\~{}",
-    }
-
-    # Split into math and text segments
-    import re
-    parts = re.split(r"(\$.*?\$)", text)
-    sanitized = []
-    for part in parts:
-        if part.startswith("$") and part.endswith("$"):
-            sanitized.append(part)  # math untouched
-        else:
-            s = part
-            for k, v in specials.items():
-                s = s.replace(k, v)
-            sanitized.append(s)
-    return "".join(sanitized)
-
-
 def safe_strip(val):
     """Strip whitespace safely from strings; return empty string otherwise."""
     return val.strip() if isinstance(val, str) else ""
@@ -2268,9 +2161,9 @@ def scatplot(saved_data, drange, **kwargs):
         weight = np.ones(n_pts)
 
         # MATLAB behavior: Weight_Data == 'yes' by default for validation
-        Weight_Data = True
+        Weight_Data = str(row.get("Weight_Data", "yes")).strip().lower()
 
-        if Weight_Data and n_pts > 0:
+        if Weight_Data == "yes" and n_pts > 0:
             max_meas = np.max(Measured_Values)
             bin_size = max_meas / 10.0
 
