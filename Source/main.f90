@@ -1206,7 +1206,7 @@ INTEGER :: GROUP_WORLD,SUBGROUP
 TYPE (MPI_REQUEST), ALLOCATABLE, DIMENSION(:) :: REQ0,REQ0DUM
 TYPE (MPI_GROUP) :: GROUP_WORLD,SUBGROUP
 #endif
-INTEGER :: N_REQ0,SNODE,MEMBERS(0:NMESHES-1),NN,NOM,N_COMMUNICATIONS
+INTEGER :: N_REQ0,SNODE,MEMBERS(0:NMESHES-1),NN,NOM,N_COMMUNICATIONS,NZ
 CHARACTER(50) :: DUMMY_STRING
 
 SELECT CASE(TASK_NUMBER)
@@ -1502,9 +1502,16 @@ SELECT CASE(TASK_NUMBER)
 
    CASE(6)
 
-      ! Allocate a few arrays needed to exchange divergence and pressure info among meshes
+      ! CONNECTED_ZONES is a matrix of 0's and 1's such that if two zones are connected, then
+      ! CONNECTED_ZONES(NZ1,NZ2)=CONNECTED_ZONES(NZ2,NZ1)=1. The diagonal is always 1, as in a zone is always connected to itself.
 
-      ALLOCATE(CONNECTED_ZONES(0:N_ZONE,0:N_ZONE),STAT=IZERO) ; CALL ChkMemErr('INIT','CONNECTED_ZONES',IZERO) ; CONNECTED_ZONES=0
+      ALLOCATE(CONNECTED_ZONES(0:N_ZONE,0:N_ZONE),STAT=IZERO) ; CALL ChkMemErr('INIT','CONNECTED_ZONES',IZERO) 
+      CONNECTED_ZONES = 0
+      DO NZ=0,N_ZONE
+         CONNECTED_ZONES(NZ,NZ) = 1
+      ENDDO
+
+      ! DSUM, PSUM, USUM are summations of different parts of the divergence expression
 
       ALLOCATE(DSUM(N_ZONE),STAT=IZERO) ; CALL ChkMemErr('MAIN','DSUM',IZERO) ; DSUM = 0._EB
       ALLOCATE(PSUM(N_ZONE),STAT=IZERO) ; CALL ChkMemErr('MAIN','PSUM',IZERO) ; PSUM = 0._EB
@@ -1743,19 +1750,19 @@ IF (OBST_CREATED_OR_REMOVED .OR. FORCE_REASSIGN) THEN
             CALL ULMAT_SOLVER_SETUP(NM)
          ENDDO
          CALL STOP_CHECK(1)
-   CASE (UGLMAT_FLAG,GLMAT_FLAG)
-      IF(ALLOCATED(ZONE_SOLVE)) CALL FINISH_GLMAT_SOLVER
-      CALL GLMAT_SOLVER_SETUP(-1) ! Initialize EWC_TYPE, copy wall types to HS
-      CALL STOP_CHECK(1)
-      CALL MESH_EXCHANGE(3)       ! Exchange guard cell info for IS_WALLT -> HS
-      CALL GLMAT_SOLVER_SETUP(0)  ! Process coarse faces, copy updated wall types to HS
-      CALL MESH_EXCHANGE(3)       ! Re-exchange guard cell info for IS_WALLT -> HS
-      CALL GLMAT_SOLVER_SETUP(1)
-      CALL MESH_EXCHANGE(3)       ! Exchange guard cell info for CCVAR(I,J,K,CGSC) -> HS
-      CALL GLMAT_SOLVER_SETUP(2)
-      CALL MESH_EXCHANGE(3)       ! Exchange guard cell info for CCVAR(I,J,K,UNKH) -> HS
-      CALL GLMAT_SOLVER_SETUP(3)
-      CALL STOP_CHECK(1)
+      CASE (UGLMAT_FLAG,GLMAT_FLAG)
+         IF(ALLOCATED(ZONE_SOLVE)) CALL FINISH_GLMAT_SOLVER
+         CALL GLMAT_SOLVER_SETUP(-1) ! Initialize EWC_TYPE, copy wall types to HS
+         CALL STOP_CHECK(1)
+         CALL MESH_EXCHANGE(3)       ! Exchange guard cell info for IS_WALLT -> HS
+         CALL GLMAT_SOLVER_SETUP(0)  ! Process coarse faces, copy updated wall types to HS
+         CALL MESH_EXCHANGE(3)       ! Re-exchange guard cell info for IS_WALLT -> HS
+         CALL GLMAT_SOLVER_SETUP(1)
+         CALL MESH_EXCHANGE(3)       ! Exchange guard cell info for CCVAR(I,J,K,CGSC) -> HS
+         CALL GLMAT_SOLVER_SETUP(2)
+         CALL MESH_EXCHANGE(3)       ! Exchange guard cell info for CCVAR(I,J,K,UNKH) -> HS
+         CALL GLMAT_SOLVER_SETUP(3)
+         CALL STOP_CHECK(1)
    END SELECT
    OBST_CREATED_OR_REMOVED = .FALSE.
 ENDIF
