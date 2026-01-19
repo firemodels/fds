@@ -541,7 +541,12 @@ In addition to the identified configuration items included in the FDS/Smokeview 
 
 NIST management approval is required prior to destruction of old or out-of-date records. Records are typically maintained for a minimum of 25 years.
 
-\section{Securing the Application Bundle and Applications}
+\section{Securing the FDS/Smokeview Installation Files}
+
+FDS and Smokeview installation files are built on NIST managed computers. Each Bundle file and the
+bundle itself are scanned for viruses using the open source virus scanner 
+ClamAV\href{https://github.com/Cisco-Talos/clamav}. A SHA256 hash code is also generated 
+for each of these files.  
 
 \section{Training}
 
