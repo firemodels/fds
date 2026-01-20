@@ -543,10 +543,14 @@ NIST management approval is required prior to destruction of old or out-of-date 
 
 \section{Securing the FDS/Smokeview Installation Files}
 
-FDS and Smokeview installation files are built on NIST managed computers. Each Bundle file and the
-bundle itself are scanned for viruses using the open source virus scanner 
-ClamAV\href{https://github.com/Cisco-Talos/clamav}. A SHA256 hash code is also generated 
-for each of these files.  
+FDS and Smokeview installation files are built on NIST managed computers.
+Each Bundle file and the bundle itself are scanned for viruses using the open source
+virus scanner ClamAV\href{https://github.com/Cisco-Talos/clamav}.
+A SHA256 hash code is generated for each of these files so that the user may verify that the files have not been altered.
+The installation bundles are hosted at the Github website.  A SHA256 hash is assigned to each bundle when they are
+uploaded to Github.  Again, these hashes may be used to verify that the bundles have not been altered.
+A list of SHA256 hashes for each bundle file are also uploaded to Github and may be used to verify that
+the individual bundle files have not been altered.
 
 \section{Training}
 
