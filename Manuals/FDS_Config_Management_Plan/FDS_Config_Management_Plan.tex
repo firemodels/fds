@@ -541,6 +541,12 @@ In addition to the identified configuration items included in the FDS/Smokeview 
 
 NIST management approval is required prior to destruction of old or out-of-date records. Records are typically maintained for a minimum of 25 years.
 
+\section{Securing the FDS/Smokeview Installation Files}
+
+FDS and Smokeview installation files are built on NIST managed computers with access limited to only those associated with the FDS/Smokeview project. Each bundle file and the bundle itself is scanned for viruses and malware. The bundle is not made available if the scan identifies a suspicious signature. A SHA256 hash code is also generated for each bundle file so that one may verify that files have not been altered. A list of these hash codes and the status of the virus scan is stored in a separate file with the suffix {\tt \_manifest.html} and made available along with the bundle.
+
+
+
 \section{Training}
 
 No specific training is identified for use of this plan.  Details of training requirements for use of the model included in the FDS User's Guide is applicable to developers of the model as well.
