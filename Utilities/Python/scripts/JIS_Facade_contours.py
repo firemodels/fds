@@ -34,9 +34,9 @@ for j in range(3):
     T3 = df.iloc[:,23+27*j:32+27*j].dropna().values
     
     # Create figure with three subplots
-    fig, axes = plt.subplots(1, 3, figsize=(6, 4.5))
-    fig.suptitle(f'Temperature Contours, {600+j*150} kW', fontsize=14)
-    fig.subplots_adjust(left=-0.05, right=0.90, wspace=-0.20)
+    fig, axes = plt.subplots(1, 3, figsize=(4.5, 4.5))
+    fig.suptitle(f'{600+j*150} kW', fontsize=14)
+    fig.subplots_adjust(left=0.02, right=0.85, wspace=-0.30)
     
     # Plot contour maps
     contours = []
@@ -50,18 +50,18 @@ for j in range(3):
         # Only add labels to left and bottom
         if i == 0:  # leftmost plot gets y-axis labels
             ax.set_ylabel('Height (m)')
-            ax.set_title('Middle', fontsize=12)
+            ax.set_title('Middle', fontsize=10)
+            ax.set_xlabel('Distance (m)')
+            ax.xaxis.set_major_locator(MultipleLocator(0.4))
         elif i == 1:
-            ax.tick_params(labelleft=False)
-            ax.set_title('Middle-Right', fontsize=12)
+            ax.set_title('Middle-Right', fontsize=10)
+            ax.set_xticks([])
+            ax.set_yticks([])
         else:
-            ax.tick_params(labelleft=False)
-            ax.set_title('Right', fontsize=12)
+            ax.set_title('Right', fontsize=10)
+            ax.set_xticks([])
+            ax.set_yticks([])
         
-        # All plots get x-axis labels (bottom)
-        ax.set_xlabel('Distance (m)')
-        ax.xaxis.set_major_locator(MultipleLocator(0.4))
-    
     # Adjust layout and add colorbar to the right
     #plt.tight_layout(pad=0.0, w_pad=0.0, h_pad=0.0)
     cbar = plt.colorbar(contours[0], ax=axes, orientation='vertical', 
