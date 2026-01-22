@@ -1808,15 +1808,8 @@ Unlike most of the entries in the input file, the order that you specify \ct{VEN
 
 Smokeview can help identify where two \ct{VENT}s overlap, assuming each has a unique \ct{COLOR}. Because Smokeview draws \ct{VENT}s on top of each other, areas of overlap will have a grainy, awkward appearance that changes pattern as you move the scene. In situations where you desire the overlap for the sake of convenience, you might want to slightly adjust the coordinates of the preferred \ct{VENT} so that it is slightly offset from the solid surface. Make the offset less than about a tenth of a cell dimension so that FDS snaps it to its desired location. Then, by toggling the ``q'' key in Smokeview, you can eliminate the grainy color overlap by showing the \ct{VENT} exactly where you specified it, as opposed to where FDS repositioned it. This trick also works where the faces of two obstructions overlap.
 
-If an error message appears requesting that
-the orientation of a vent be specified, first check to make sure that the vent is a plane.
-If the vent is a plane, then the orientation can be forced by specifying the parameter \ct{IOR}.
-If the normal direction of the \ct{VENT} is in the positive $x$ direction, set \ct{IOR=1}.
-If the normal direction is in the negative $x$ direction, set \ct{IOR=-1}. For the $y$ and
-$z$ direction, use the number 2 and 3, respectively. Setting \ct{IOR} may sometimes solve
-the problem, but it is more likely that if there is an error message about orientation, then
-the \ct{VENT} is buried within a solid obstruction, in which case the program cannot determine
-the direction in which the \ct{VENT} is facing.
+If an error message appears requesting that the orientation of a vent should be specified, first check to make sure that the vent is a plane; that is, that two of its six coordinates are the same. If the vent is a plane, then the orientation is usually determined automatically. However, if the \ct{VENT} is attached to a thin obstruction; that is, an obstruction that is zero cells thick, then you must specify an orientation index, \ct{IOR}, to indicate in which of the two normal directions the \ct{VENT} faces. If the normal direction of the \ct{VENT} is in the positive $x$ direction, for example, set \ct{IOR=1}. If the normal direction is in the negative $x$ direction, set \ct{IOR=-1}. For the $y$ or $z$ direction, use the number $\pm 2$ or $\pm 3$, respectively. Setting \ct{IOR} may sometimes solve the problem, but there are situations where it is not possible to automatically detect the vent orientation or that the vent is completely detached from a solid surface, in which case you should rework the \ct{VENT} parameters.
+
 
 \newpage
 
@@ -14495,9 +14488,9 @@ Keyword             & Type     & Description                      & Units       
 815 \> \ct{VENT ... L_EDDY = 0 in Synthetic Eddy Method.} \> Section~\ref{info:synthetic_turbulence} \\
 816 \> \ct{VENT ... VEL_RMS = 0 in Synthetic Eddy Method.} \> Section~\ref{info:synthetic_turbulence} \\
 817 \> \ct{VENT ... Synthetic Eddy Method not permitted with HVAC.} \> Section~\ref{info:synthetic_turbulence} \\
-818 \> \ct{VENT ... requires on orientation index, IOR.} \> Section~\ref{info:VENT_Trouble} \\
+818 \> \ct{VENT ... is not attached or may require ...} \> Section~\ref{info:VENT_Trouble} \\
 819 \> \ct{VENT ... is OPEN, MIRROR OR PERIODIC ... exterior boundary.} \> Section~\ref{info:Special_VENTS} \\
-820 \> \ct{VENT ... has no solid backing or an IOR is needed.} \> Section~\ref{info:VENT_Basics} \\
+820 \> \ct{VENT ... is not attached to any solid surface.} \> Section~\ref{info:VENT_Basics} \\
 821 \> \ct{VENT ... cannot have normal component of UVW equal to 0.} \> Section~\ref{info:HVAClouvers} \\
 822 \> \ct{VENT ... has the same ID as another VENT.} \> Section~\ref{info:HVAC} \\
 823 \> \ct{VENT ... cannot have SURF_ID=HVAC and GEOM=T.} \> Section~\ref{info:hvac_geom} \\
