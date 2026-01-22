@@ -11974,7 +11974,7 @@ REAL(EB) :: SPREAD_RATE,TRANSPARENCY,XYZ(3),TMP_EXTERIOR,DYNAMIC_PRESSURE,XB_USE
 CHARACTER(LABEL_LENGTH) :: ID,DEVC_ID,CTRL_ID,SURF_ID,PRESSURE_RAMP,TMP_EXTERIOR_RAMP,MULT_ID,OBST_ID
 CHARACTER(25) :: COLOR
 TYPE(MULTIPLIER_TYPE), POINTER :: MR
-LOGICAL :: REJECT_VENT,OUTLINE,GEOM,SOLID_FOUND,AREA_ADJUST,BLOCKED
+LOGICAL :: REJECT_VENT,OUTLINE,GEOM,AREA_ADJUST,BLOCKED
 TYPE IMPLICIT_VENT_TYPE
    REAL(EB) :: XB(6)
    INTEGER, DIMENSION(3) :: RGB=-1
@@ -12360,7 +12360,8 @@ MESH_LOOP_1: DO NM=1,NMESHES
                IF (VT%SURF_INDEX==PERIODIC_FLOW_ONLY_SURF_INDEX)                                VT%BOUNDARY_TYPE = PERIODIC_BOUNDARY
                IF (VT%SURF_INDEX==HVAC_SURF_INDEX .OR. SURFACE(VT%SURF_INDEX)%NODE_ID/='null')  VT%BOUNDARY_TYPE = HVAC_BOUNDARY
 
-               VT%IOR = IOR
+               VT%IOR = 0
+               VT%IOR_INPUT = IOR
                VT%ORDINAL = N_EXPLICIT
 
                ! Activate and Deactivate logic
@@ -12532,50 +12533,63 @@ MESH_LOOP_2: DO NM=1,NMESHES
 
       ! Assign orientation and determine if the VENT has a solid backing
 
-      SOLID_FOUND = .FALSE.
-
-      IF (VT%IOR/=0) SOLID_FOUND = .TRUE.
-
-      IF (I1==I2) THEN
+      IF (I1==I2 .AND. I1>0 .AND. I2<IBAR) THEN
          DO K=K1+1,K2
             DO J=J1+1,J2
                IC0 = CELL_INDEX(I2  ,J,K)
                IC1 = CELL_INDEX(I2+1,J,K)
-               IF (VT%IOR==0 .AND. .NOT.CELL(IC1)%SOLID) VT%IOR =  1
-               IF (VT%IOR==0 .AND. .NOT.CELL(IC0)%SOLID) VT%IOR = -1
-               IF (.NOT.CELL(IC1)%EXTERIOR .AND. CELL(IC1)%SOLID) SOLID_FOUND = .TRUE.
-               IF (.NOT.CELL(IC0)%EXTERIOR .AND. CELL(IC0)%SOLID) SOLID_FOUND = .TRUE.
+               IF (CELL(IC0)%SOLID .AND. .NOT.CELL(IC1)%SOLID) VT%IOR =  1
+               IF (CELL(IC1)%SOLID .AND. .NOT.CELL(IC0)%SOLID) VT%IOR = -1
             ENDDO
          ENDDO
       ENDIF
-      IF (J1==J2) THEN
+      IF (J1==J2 .AND. J1>0 .AND. J2<JBAR) THEN
          DO K=K1+1,K2
             DO I=I1+1,I2
                IC0 = CELL_INDEX(I,J2  ,K)
                IC1 = CELL_INDEX(I,J2+1,K)
-               IF (VT%IOR==0 .AND. .NOT.CELL(IC1)%SOLID) VT%IOR =  2
-               IF (VT%IOR==0 .AND. .NOT.CELL(IC0)%SOLID) VT%IOR = -2
-               IF (.NOT.CELL(IC1)%EXTERIOR .AND. CELL(IC1)%SOLID) SOLID_FOUND = .TRUE.
-               IF (.NOT.CELL(IC0)%EXTERIOR .AND. CELL(IC0)%SOLID) SOLID_FOUND = .TRUE.
+               IF (CELL(IC0)%SOLID .AND. .NOT.CELL(IC1)%SOLID) VT%IOR =  2
+               IF (CELL(IC1)%SOLID .AND. .NOT.CELL(IC0)%SOLID) VT%IOR = -2
             ENDDO
          ENDDO
       ENDIF
-      IF (K1==K2) THEN
+      IF (K1==K2 .AND. K1>0 .AND. K2<KBAR) THEN
          DO J=J1+1,J2
             DO I=I1+1,I2
                IC0 = CELL_INDEX(I,J,K2)
                IC1 = CELL_INDEX(I,J,K2+1)
-               IF (VT%IOR==0 .AND. .NOT.CELL(IC1)%SOLID) VT%IOR =  3
-               IF (VT%IOR==0 .AND. .NOT.CELL(IC0)%SOLID) VT%IOR = -3
-               IF (.NOT.CELL(IC1)%EXTERIOR .AND. CELL(IC1)%SOLID) SOLID_FOUND = .TRUE.
-               IF (.NOT.CELL(IC0)%EXTERIOR .AND. CELL(IC0)%SOLID) SOLID_FOUND = .TRUE.
+               IF (CELL(IC0)%SOLID .AND. .NOT.CELL(IC1)%SOLID) VT%IOR =  3
+               IF (CELL(IC1)%SOLID .AND. .NOT.CELL(IC0)%SOLID) VT%IOR = -3
             ENDDO
          ENDDO
       ENDIF
 
+      ! If a solid surface has not been found, i.e. VT%IOR=0, then check if the user has supplied an IOR and also that the VENT 
+      ! is attached to a thin OBSTruction
+
       IF (VT%IOR==0) THEN
-         WRITE(MESSAGE,'(3A)')  'ERROR(818): VENT ',TRIM(VT%ID),' requires an orientation index, IOR.'
-         CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
+
+         IF (VT%IOR_INPUT==0) THEN
+            WRITE(MESSAGE,'(4A)')  'ERROR(818): VENT ',TRIM(VT%ID),' is not attached to a solid or may require ',&
+                                   'an orientation index, IOR.'
+            CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
+         ELSE
+            OBST_LOOP: DO OBST_INDEX=1,M%N_OBST
+               OB => MESHES(NM)%OBSTRUCTION(OBST_INDEX)
+               IF ((I1==I2 .AND. OB%I1==I1 .AND. ABS(VT%IOR_INPUT)==1) .OR. &
+                   (J1==J2 .AND. OB%J1==J1 .AND. ABS(VT%IOR_INPUT)==2) .OR. &
+                   (K1==K2 .AND. OB%K1==K1 .AND. ABS(VT%IOR_INPUT)==3)) THEN
+                  VT%IOR = VT%IOR_INPUT
+                  CYCLE OBST_LOOP
+               ENDIF
+            ENDDO OBST_LOOP
+         ENDIF
+
+         IF (VT%IOR==0) THEN
+            WRITE(MESSAGE,'(3A)')  'ERROR(820): VENT ',TRIM(VT%ID),' is not attached to any solid surface.'
+            CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
+         ENDIF
+
       ENDIF
 
       ! Assign global periodicity
@@ -12591,10 +12605,6 @@ MESH_LOOP_2: DO NM=1,NMESHES
           (ABS(VT%IOR)==3 .AND. K1>=1 .AND. K1<=KBM1)) THEN
          IF (VT%BOUNDARY_TYPE==OPEN_BOUNDARY .OR. VT%BOUNDARY_TYPE==MIRROR_BOUNDARY .OR. VT%BOUNDARY_TYPE==PERIODIC_BOUNDARY) THEN
             WRITE(MESSAGE,'(3A)')  'ERROR(819): VENT ',TRIM(ID),' is OPEN, MIRROR OR PERIODIC and must be on an exterior boundary.'
-            CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
-         ENDIF
-         IF (.NOT.SOLID_FOUND) THEN
-            WRITE(MESSAGE,'(3A)') 'ERROR(820): VENT ',TRIM(VT%ID),' has no solid backing or an orientation index (IOR) is needed.'
             CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
          ENDIF
          IF (VT%BOUNDARY_TYPE/=HVAC_BOUNDARY) VT%BOUNDARY_TYPE = SOLID_BOUNDARY
