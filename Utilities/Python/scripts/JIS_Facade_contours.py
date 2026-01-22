@@ -4,6 +4,9 @@ from matplotlib.ticker import MultipleLocator
 import numpy as np
 import pandas as pd
 from scipy.interpolate import griddata
+from fdsplotlib import configure_fds_fonts
+
+configure_fds_fonts(usetex=True)
 
 expdir = '../../../exp/Submodules/macfp-db/Wall_Fires/JIS_Facade/Experimental_Data/'
 outdir = '../../../out/TUS_Facade/'
