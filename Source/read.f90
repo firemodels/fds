@@ -10597,7 +10597,7 @@ LOGICAL, INTENT(IN), OPTIONAL :: QUICK_READ
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB2,OBT
 TYPE(MULTIPLIER_TYPE), POINTER :: MR
 TYPE(OBSTRUCTION_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: TEMP_OBSTRUCTION
-INTEGER :: I,NM,NOM,NOM2,N_OBST_O,IC,N,NN,NNN,NNNN,N_NEW_OBST,RGB(3),N_OBST_DIM,II,JJ,KK,MULT_INDEX,SHAPE_TYPE,IIO,JJO,KKO,IOR,&
+INTEGER :: I,NM,NOM,N_OBST_O,IC,N,NN,NNN,NNNN,N_NEW_OBST,RGB(3),N_OBST_DIM,II,JJ,KK,MULT_INDEX,SHAPE_TYPE,IIO,JJO,KKO,IOR,&
            N_LAYER_CELLS_MAX
 CHARACTER(LABEL_LENGTH) :: ID,DEVC_ID,SHAPE,SURF_ID,SURF_ID_INTERIOR,SURF_IDS(3),SURF_ID6(6),CTRL_ID,MULT_ID,&
                            MATL_ID(MAX_MATERIALS),RAMP_IHS
@@ -10885,90 +10885,83 @@ MESH_LOOP: DO NM=1,NMESHES
                IF (XB3+XB4<2._EB*YS .OR. XB3+XB4>2._EB*YF) THICKEN_DIR(2) = .FALSE.
                IF (XB5+XB6<2._EB*ZS .OR. XB5+XB6>2._EB*ZF) THICKEN_DIR(3) = .FALSE.
 
-               IF (XB2>=XS-0.5_EB*DX(0) .AND. XB2<XS) THEN
-                  DX_GHOST = DX(0)
+               IF (XB2<XS .AND. XB4>YS .AND. XB3<YF .AND. XB6>ZS .AND. XB5<ZF) THEN
                   CALL SEARCH_OTHER_MESHES(XS-0.01_EB*DX(0),0.5_EB*(MAX(YS,XB3)+MIN(YF,XB4)),0.5_EB*(MAX(ZS,XB5)+MIN(ZF,XB6)),&
                                            NOM,IIO,JJO,KKO,XXI,YYJ,ZZK)
-                  CALL SEARCH_OTHER_MESHES(XS-0.51_EB*DX(0),0.5_EB*(MAX(YS,XB3)+MIN(YF,XB4)),0.5_EB*(MAX(ZS,XB5)+MIN(ZF,XB6)),&
-                                           NOM2,IIO,JJO,KKO,XXI,YYJ,ZZK)
-                  IF (NOM==0 .AND. NOM2>0) REJECT_OBST = .TRUE.
-                  IF (NOM>0) THEN
-                     IF (ALLOCATED(MESHES(NOM)%DX)) DX_GHOST = MESHES(NOM)%DX(IIO)
+                  IF (NOM>0 .AND. PROCESS(NM)==MY_RANK) THEN
+                     DX_GHOST = MESHES(NOM)%DX(IIO)
+                  ELSE
+                     DX_GHOST = DX(0)
                   ENDIF
                   IF (XB2>=XS-0.5_EB*DX_GHOST) THEN
                      XB1 = XS
                      XB2 = XS
                   ENDIF
                ENDIF
-               IF (XB1<XF+0.5_EB*DX(IBP1) .AND. XB1>XF) THEN
-                  DX_GHOST = DX(IBP1)
+
+               IF (XB1>XF .AND. XB4>YS .AND. XB3<YF .AND. XB6>ZS .AND. XB5<ZF) THEN
                   CALL SEARCH_OTHER_MESHES(XF+0.01_EB*DX(IBP1),0.5_EB*(MAX(YS,XB3)+MIN(YF,XB4)),0.5_EB*(MAX(ZS,XB5)+MIN(ZF,XB6)),&
                                            NOM,IIO,JJO,KKO,XXI,YYJ,ZZK)
-                  CALL SEARCH_OTHER_MESHES(XF+0.51_EB*DX(IBP1),0.5_EB*(MAX(YS,XB3)+MIN(YF,XB4)),0.5_EB*(MAX(ZS,XB5)+MIN(ZF,XB6)),&
-                                           NOM2,IIO,JJO,KKO,XXI,YYJ,ZZK)
-                  IF (NOM==0 .AND. NOM2>0) REJECT_OBST = .TRUE.
-                  IF (NOM>0) THEN
-                     IF (ALLOCATED(MESHES(NOM)%DX)) DX_GHOST = MESHES(NOM)%DX(IIO)
+                  IF (NOM>0 .AND. PROCESS(NM)==MY_RANK) THEN
+                     DX_GHOST = MESHES(NOM)%DX(IIO)
+                  ELSE
+                     DX_GHOST = DX(IBP1)
                   ENDIF
                   IF (XB1<XF+0.5_EB*DX_GHOST) THEN
                      XB1 = XF
                      XB2 = XF
                   ENDIF
                ENDIF
-               IF (XB4>=YS-0.5_EB*DY(0) .AND. XB4<YS) THEN
-                  DY_GHOST = DY(0)
+
+               IF (XB4<YS .AND. XB2>XS .AND. XB1<XF .AND. XB6>ZS .AND. XB5<ZF) THEN
                   CALL SEARCH_OTHER_MESHES(0.5_EB*(MAX(XS,XB1)+MIN(XF,XB2)),YS-0.01_EB*DY(0),0.5_EB*(MAX(ZS,XB5)+MIN(ZF,XB6)),&
                                            NOM,IIO,JJO,KKO,XXI,YYJ,ZZK)
-                  CALL SEARCH_OTHER_MESHES(0.5_EB*(MAX(XS,XB1)+MIN(XF,XB2)),YS-0.51_EB*DY(0),0.5_EB*(MAX(ZS,XB5)+MIN(ZF,XB6)),&
-                                           NOM2,IIO,JJO,KKO,XXI,YYJ,ZZK)
-                  IF (NOM==0 .AND. NOM2>0) REJECT_OBST = .TRUE.
-                  IF (NOM>0) THEN
-                     IF (ALLOCATED(MESHES(NOM)%DY)) DY_GHOST = MESHES(NOM)%DY(JJO)
+                  IF (NOM>0 .AND. PROCESS(NM)==MY_RANK) THEN
+                     DY_GHOST = MESHES(NOM)%DY(JJO)
+                  ELSE
+                     DY_GHOST = DY(0)
                   ENDIF
                   IF (XB4>=YS-0.5_EB*DY_GHOST) THEN
                      XB3 = YS
                      XB4 = YS
                   ENDIF
                ENDIF
-               IF (XB3<YF+0.5_EB*DY(JBP1) .AND. XB3>YF) THEN
-                  DY_GHOST = DY(JBP1)
+
+               IF (XB3>YF .AND. XB2>XS .AND. XB1<XF .AND. XB6>ZS .AND. XB5<ZF) THEN
                   CALL SEARCH_OTHER_MESHES(0.5_EB*(MAX(XS,XB1)+MIN(XF,XB2)),YF+0.01_EB*DY(JBP1),0.5_EB*(MAX(ZS,XB5)+MIN(ZF,XB6)),&
                                            NOM,IIO,JJO,KKO,XXI,YYJ,ZZK)
-                  CALL SEARCH_OTHER_MESHES(0.5_EB*(MAX(XS,XB1)+MIN(XF,XB2)),YF+0.51_EB*DY(JBP1),0.5_EB*(MAX(ZS,XB5)+MIN(ZF,XB6)),&
-                                           NOM2,IIO,JJO,KKO,XXI,YYJ,ZZK)
-                  IF (NOM==0 .AND. NOM2>0) REJECT_OBST = .TRUE.
-                  IF (NOM>0) THEN
-                     IF (ALLOCATED(MESHES(NOM)%DY)) DY_GHOST = MESHES(NOM)%DY(JJO)
+                  IF (NOM>0 .AND. PROCESS(NM)==MY_RANK) THEN
+                     DY_GHOST = MESHES(NOM)%DY(JJO)
+                  ELSE
+                     DY_GHOST = DY(JBP1)
                   ENDIF
-                  IF (XB3<YS+0.5_EB*DY_GHOST) THEN
+                  IF (XB3<YF+0.5_EB*DY_GHOST) THEN
                      XB3 = YF
                      XB4 = YF
                   ENDIF
                ENDIF
-               IF (XB6>=ZS-0.5_EB*DZ(0) .AND. XB6<ZS) THEN
-                  DZ_GHOST = DZ(0)
+
+               IF (XB6<ZS .AND. XB2>XS .AND. XB1<XF .AND. XB4>YS .AND. XB3<YF) THEN
                   CALL SEARCH_OTHER_MESHES(0.5_EB*(MAX(XS,XB1)+MIN(XF,XB2)),0.5_EB*(MAX(YS,XB3)+MIN(YF,XB4)),ZS-0.01_EB*DZ(0),&
                                            NOM,IIO,JJO,KKO,XXI,YYJ,ZZK)
-                  CALL SEARCH_OTHER_MESHES(0.5_EB*(MAX(XS,XB1)+MIN(XF,XB2)),0.5_EB*(MAX(YS,XB3)+MIN(YF,XB4)),ZS-0.51_EB*DZ(0),&
-                                           NOM2,IIO,JJO,KKO,XXI,YYJ,ZZK)
-                  IF (NOM==0 .AND. NOM2>0) REJECT_OBST = .TRUE.
-                  IF (NOM>0) THEN
-                     IF (ALLOCATED(MESHES(NOM)%DZ)) DZ_GHOST = MESHES(NOM)%DZ(KKO)
+                  IF (NOM>0 .AND. PROCESS(NM)==MY_RANK) THEN
+                     DZ_GHOST = MESHES(NOM)%DZ(KKO)
+                  ELSE
+                     DZ_GHOST = DZ(0)
                   ENDIF
                   IF (XB6>=ZS-0.5_EB*DZ_GHOST) THEN
                      XB5 = ZS
                      XB6 = ZS
                   ENDIF
                ENDIF
-               IF (XB5<ZF+0.5_EB*DZ(KBP1) .AND. XB5>ZF) THEN
-                  DZ_GHOST = DZ(KBP1)
+
+               IF (XB5>ZF  .AND. XB2>XS .AND. XB1<XF .AND. XB4>YS .AND. XB3<YF) THEN
                   CALL SEARCH_OTHER_MESHES(0.5_EB*(MAX(XS,XB1)+MIN(XF,XB2)),0.5_EB*(MAX(YS,XB3)+MIN(YF,XB4)),ZF+0.01_EB*DZ(KBP1),&
                                            NOM,IIO,JJO,KKO,XXI,YYJ,ZZK)
-                  CALL SEARCH_OTHER_MESHES(0.5_EB*(MAX(XS,XB1)+MIN(XF,XB2)),0.5_EB*(MAX(YS,XB3)+MIN(YF,XB4)),ZF+0.51_EB*DZ(KBP1),&
-                                           NOM2,IIO,JJO,KKO,XXI,YYJ,ZZK)
-                  IF (NOM==0 .AND. NOM2>0) REJECT_OBST = .TRUE.
-                  IF (NOM>0) THEN
-                     IF (ALLOCATED(MESHES(NOM)%DZ)) DZ_GHOST = MESHES(NOM)%DZ(KKO)
+                  IF (NOM>0 .AND. PROCESS(NM)==MY_RANK) THEN
+                     DZ_GHOST = MESHES(NOM)%DZ(KKO)
+                  ELSE
+                     DZ_GHOST = DZ(KBP1)
                   ENDIF
                   IF (XB5<ZF+0.5_EB*DZ_GHOST) THEN
                      XB5 = ZF
