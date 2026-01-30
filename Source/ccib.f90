@@ -15080,7 +15080,7 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
          IF (PREDICTOR) THEN
             UN_NEW = U(I,J,K) - DT*(FVX(I,J,K) + IDX*(H(I+1,J,K)-H(I,J,K)))
          ELSE
-            UN_NEW = 0.5_EB*(U(I,J,K)+US(I,J,K)) - DT*(FVX(I,J,K) + IDX*(HS(I+1,J,K)-HS(I,J,K)))
+            UN_NEW = 0.5_EB*( (U(I,J,K)+US(I,J,K)) - DT*(FVX(I,J,K) + IDX*(HS(I+1,J,K)-HS(I,J,K))) )
          ENDIF
       CASE(JAXIS)
          ICC_LO = CCVAR(I,J,K,CC_IDCC); ICC_HI = CCVAR(I,J+1,K,CC_IDCC)
@@ -15090,7 +15090,7 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
          IF (PREDICTOR) THEN
             UN_NEW = V(I,J,K) - DT*(FVY(I,J,K) + IDX*(H(I,J+1,K)-H(I,J,K)))
          ELSE
-            UN_NEW = 0.5_EB*(V(I,J,K)+VS(I,J,K)) - DT*(FVY(I,J,K) + IDX*(HS(I,J+1,K)-HS(I,J,K)))
+            UN_NEW = 0.5_EB*( (V(I,J,K)+VS(I,J,K)) - DT*(FVY(I,J,K) + IDX*(HS(I,J+1,K)-HS(I,J,K))) )
          ENDIF
       CASE(KAXIS)
          ICC_LO = CCVAR(I,J,K,CC_IDCC); ICC_HI = CCVAR(I,J,K+1,CC_IDCC)
@@ -15100,7 +15100,7 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
          IF (PREDICTOR) THEN
             UN_NEW = W(I,J,K) - DT*(FVZ(I,J,K) + IDX*(H(I,J,K+1)-H(I,J,K)))
          ELSE
-            UN_NEW = 0.5_EB*(W(I,J,K)+WS(I,J,K)) - DT*(FVZ(I,J,K) + IDX*(HS(I,J,K+1)-HS(I,J,K)))
+            UN_NEW = 0.5_EB*( (W(I,J,K)+WS(I,J,K)) - DT*(FVZ(I,J,K) + IDX*(HS(I,J,K+1)-HS(I,J,K))) )
          ENDIF
       END SELECT
    ENDIF
