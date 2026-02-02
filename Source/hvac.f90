@@ -491,8 +491,8 @@ DO NN=1,N_HVAC_READ
          IF (DN%N_DUCTS >=2) THEN
             DN%LOSS_ARRAY = LOSS(1:DN%N_DUCTS,1:DN%N_DUCTS)
          ELSE
-            DN%LOSS_ARRAY(1,2) = LOSS(1,1)
-            DN%LOSS_ARRAY(2,1) = LOSS(2,1)
+            DN%LOSS_ARRAY(1,2) = LOSS(2,1)
+            DN%LOSS_ARRAY(2,1) = LOSS(1,1)
          ENDIF
 
          IF (NETWORK_ID=='null') THEN
