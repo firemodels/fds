@@ -149,7 +149,7 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
 
          B1 => BOUNDARY_PROP1(WC%B1_INDEX)
          VT => VENTS(WC%VENT_INDEX)
-         IF (ABS(B1%T_IGN-T_BEGIN)<=TWO_EPSILON_EB .AND. VT%PRESSURE_RAMP_INDEX >=1) THEN
+         IF (ABS(B1%T_IGN-T_BEGIN)<=TWENTY_EPSILON_EB .AND. VT%PRESSURE_RAMP_INDEX >=1) THEN
             TSI = T
          ELSE
             TSI = T - T_BEGIN
@@ -625,7 +625,7 @@ ELSE  ! MPI process 0 receives matrix components and solves tri-diagonal linear 
       TP_DD(I) = TP_DD(I) - RR*TP_AA(I-1)
       TP_CC(I) = TP_CC(I) - RR*TP_CC(I-1)
    ENDDO TRIDIAGONAL_SOLVER_1
-   IF (ABS(TP_DD(TUNNEL_NXP))>TWO_EPSILON_EB) THEN
+   IF (ABS(TP_DD(TUNNEL_NXP))>TWENTY_EPSILON_EB) THEN
       TP_CC(TUNNEL_NXP) = TP_CC(TUNNEL_NXP)/TP_DD(TUNNEL_NXP)
       SINGULAR_CASE = .FALSE.
    ELSE  ! Singular matrix when both sides of tunnel have Neumann BC
@@ -3200,7 +3200,7 @@ IPZ_LOOP : DO IPZ=0,N_ZONE_GLOBMAT
          ENDDO
          IF (N_MPI_PROCESSES>1) CALL MPI_ALLREDUCE(MPI_IN_PLACE,SUM_FH(1),2,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,IERR)
          ! Compute arithmetic mean by pressure zone:
-         MEAN_FH = SUM_FH(1)/(SUM_FH(2)+TWO_EPSILON_EB)
+         MEAN_FH = SUM_FH(1)/(SUM_FH(2)+TWENTY_EPSILON_EB)
          ! Substract Mean:
          ZSL%F_H = ZSL%F_H - MEAN_FH
       ELSE WHOLE_DOM_IF1
@@ -3280,7 +3280,7 @@ IF (ERROR /= 0 .AND. MY_RANK==0) WRITE(LU_ERR,*) 'GLMAT_SOLVER: The following ER
          ENDDO
          IF (N_MPI_PROCESSES>1) CALL MPI_ALLREDUCE(MPI_IN_PLACE,SUM_XH(1),2,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,IERR)
          ! Compute arithmetic mean by pressure zone:
-         MEAN_XH = SUM_XH(1)/(SUM_XH(2)+TWO_EPSILON_EB)
+         MEAN_XH = SUM_XH(1)/(SUM_XH(2)+TWENTY_EPSILON_EB)
          ! Substract Mean:
          ZSL%X_H = ZSL%X_H - MEAN_XH
       ELSE WHOLE_DOM_IF2
