@@ -944,6 +944,8 @@ METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
                ! store for use in divg
                B1%RHO_D_DZDN_F(N) =  RHO_D_DZDN_OTHER
             ENDDO SPECIES_LOOP_2
+            ! In DNS and LES, the diffusivity is not a constant due to the addition of the molecular value.
+            ! The following correction assures the sum of the diffusive fluxes is zero.
             IF (SIM_MODE==DNS_MODE .OR. SIM_MODE==LES_MODE) THEN
                N=MAXLOC(B1%ZZ_F(1:N_TRACKED_SPECIES),1)
                B1%RHO_D_DZDN_F(N) = -(SUM(B1%RHO_D_DZDN_F(1:N_TRACKED_SPECIES))-B1%RHO_D_DZDN_F(N))

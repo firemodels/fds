@@ -236,7 +236,7 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
 
    ! Ensure RHO_D terms sum to zero over all species.  Gather error into largest mass fraction present.
 
-   IF (SIM_MODE==DNS_MODE .OR. SIM_MODE==LES_MODE) THEN
+   IF (SIM_MODE==DNS_MODE .OR. SIM_MODE==LES_MODE .OR. TENSOR_DIFFUSIVITY) THEN
       ! for VLES and SVLES modes, the diffusivity is the same for all species
       ! so, as long as ZZP is realizable, the sum of diffusive fluxes will be zero
       ! and the flux corrections below are not required
