@@ -1611,7 +1611,7 @@ SUBROUTINE TENSOR_DIFFUSIVITY_MODEL(NM,OPT_N)
 INTEGER, INTENT(IN) :: NM
 INTEGER, INTENT(IN), OPTIONAL :: OPT_N
 INTEGER :: I,J,K,N
-REAL(EB) :: DRHOZDX,DRHOZDY,DRHOZDZ,DUDX,DUDY,DUDZ,DVDX,DVDY,DVDZ,DWDX,DWDY,DWDZ,DTDX,DTDY,DTDZ
+REAL(EB) :: DZDX,DZDY,DZDZ,DUDX,DUDY,DUDZ,DVDX,DVDY,DVDZ,DWDX,DWDY,DWDZ,DTDX,DTDY,DTDZ,RHOBAR
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP,RHO_D_DZDX,RHO_D_DZDY,RHO_D_DZDZ
 REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP,UU,VV,WW,KDTDX,KDTDY,KDTDZ
 REAL(EB), PARAMETER :: C_NL=0.083_EB ! C_NL=1/12, See Pope Exercise 13.28
@@ -1646,22 +1646,18 @@ SCALAR_FLUX_IF: IF (PRESENT(OPT_N)) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=0,IBAR
+            RHOBAR = 0.5_EB*(RHOP(I,J,K)+RHOP(I+1,J,K))
 
-            DUDX = (UU(I+1,J,K)-UU(I-1,J,K))/(DX(I)+DX(I+1))
-            DUDY = (UU(I,J+1,K)-UU(I,J-1,K))/(DYN(J)+DYN(J+1))
-            DUDZ = (UU(I,J,K+1)-UU(I,J,K-1))/(DZN(K)+DZN(K+1))
+            DUDX = (UU(I+1,J,K)-UU(MAX(0,I-1),J,K))/(DX(I)+DX(I+1))
+            DUDY = (UU(I,J+1,K)-UU(I,J-1,K))/(DYN(J-1)+DYN(J))
+            DUDZ = (UU(I,J,K+1)-UU(I,J,K-1))/(DZN(K-1)+DZN(K))
 
-            DRHOZDX = RDXN(I)*(RHOP(I+1,J,K)*ZZP(I+1,J,K,N)-RHOP(I,J,K)*ZZP(I,J,K,N))
-
-            DRHOZDY = 0.25_EB*RDY(J)*( RHOP(I,J+1,K)*ZZP(I,J+1,K,N) + RHOP(I+1,J+1,K)*ZZP(I+1,J+1,K,N) &
-                                     - RHOP(I,J-1,K)*ZZP(I,J-1,K,N) - RHOP(I+1,J-1,K)*ZZP(I+1,J-1,K,N) )
-
-            DRHOZDZ = 0.25_EB*RDZ(K)*( RHOP(I,J,K+1)*ZZP(I,J,K+1,N) + RHOP(I+1,J,K+1)*ZZP(I+1,J,K+1,N) &
-                                     - RHOP(I,J,K-1)*ZZP(I,J,K-1,N) - RHOP(I+1,J,K-1)*ZZP(I+1,J,K-1,N) )
+            DZDX = RDXN(I)*(ZZP(I+1,J,K,N)-ZZP(I,J,K,N))
+            DZDY = 0.25_EB*RDY(J)*( ZZP(I,J+1,K,N) + ZZP(I+1,J+1,K,N) - ZZP(I,J-1,K,N) - ZZP(I+1,J-1,K,N) )
+            DZDZ = 0.25_EB*RDZ(K)*( ZZP(I,J,K+1,N) + ZZP(I+1,J,K+1,N) - ZZP(I,J,K-1,N) - ZZP(I+1,J,K-1,N) )
 
             RHO_D_DZDX(I,J,K,N) = RHO_D_DZDX(I,J,K,N) &
-                                + C_NL*(DX(I)**2*DUDX*DRHOZDX+DY(J)**2*DUDY*DRHOZDY+DZ(K)**2*DUDZ*DRHOZDZ)
-
+                                + RHOBAR*C_NL*( DXN(I)**2*DZDX*DUDX + DY(J)**2*DZDY*DUDY + DZ(K)**2*DZDZ*DUDZ )
          ENDDO
       ENDDO
    ENDDO
@@ -1669,22 +1665,18 @@ SCALAR_FLUX_IF: IF (PRESENT(OPT_N)) THEN
    DO K=1,KBAR
       DO J=0,JBAR
          DO I=1,IBAR
+            RHOBAR = 0.5_EB*(RHOP(I,J,K)+RHOP(I,J+1,K))
 
-            DVDX = (VV(I+1,J,K)-VV(I-1,J,K))/(DXN(I)+DXN(I+1))
-            DVDY = (VV(I,J+1,K)-VV(I,J-1,K))/(DY(J)+DY(J+1))
-            DVDZ = (VV(I,J,K+1)-VV(I,J,K-1))/(DZN(K)+DZN(K+1))
+            DVDX = (VV(I+1,J,K)-VV(I-1,J,K))/(DXN(I-1)+DXN(I))
+            DVDY = (VV(I,J+1,K)-VV(I,MAX(0,J-1),K))/(DY(J)+DY(J+1))
+            DVDZ = (VV(I,J,K+1)-VV(I,J,K-1))/(DZN(K-1)+DZN(K))
 
-            DRHOZDX = 0.25_EB*RDX(I)*( RHOP(I+1,J,K)*ZZP(I+1,J,K,N) + RHOP(I+1,J+1,K)*ZZP(I+1,J+1,K,N) &
-                                     - RHOP(I-1,J,K)*ZZP(I-1,J,K,N) - RHOP(I-1,J+1,K)*ZZP(I-1,J+1,K,N) )
-
-            DRHOZDY = RDYN(J)*(RHOP(I,J+1,K)*ZZP(I,J+1,K,N)-RHOP(I,J,K)*ZZP(I,J,K,N))
-
-            DRHOZDZ = 0.25_EB*RDZ(K)*( RHOP(I,J,K+1)*ZZP(I,J,K+1,N) + RHOP(I,J+1,K+1)*ZZP(I,J+1,K+1,N) &
-                                     - RHOP(I,J,K-1)*ZZP(I,J,K-1,N) - RHOP(I,J+1,K-1)*ZZP(I,J+1,K-1,N) )
+            DZDX = 0.25_EB*RDX(I)*( ZZP(I+1,J,K,N) + ZZP(I+1,J+1,K,N) - ZZP(I-1,J,K,N) - ZZP(I-1,J+1,K,N) )
+            DZDY = RDYN(J)*(ZZP(I,J+1,K,N)-ZZP(I,J,K,N))
+            DZDZ = 0.25_EB*RDZ(K)*( ZZP(I,J,K+1,N) + ZZP(I,J+1,K+1,N) - ZZP(I,J,K-1,N) - ZZP(I,J+1,K-1,N) )
 
             RHO_D_DZDY(I,J,K,N) = RHO_D_DZDY(I,J,K,N) &
-                                + C_NL*(DX(I)**2*DVDX*DRHOZDX+DY(J)**2*DVDY*DRHOZDY+DZ(K)**2*DVDZ*DRHOZDZ)
-
+                                + RHOBAR*C_NL*( DX(I)**2*DZDX*DVDX + DY(J)**2*DZDY*DVDY + DZ(K)**2*DZDZ*DVDZ )
          ENDDO
       ENDDO
    ENDDO
@@ -1692,22 +1684,18 @@ SCALAR_FLUX_IF: IF (PRESENT(OPT_N)) THEN
    DO K=0,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
+            RHOBAR = 0.5_EB*(RHOP(I,J,K)+RHOP(I,J,K+1))
 
-            DWDX = (WW(I+1,J,K)-WW(I-1,J,K))/(DXN(I+1)+DXN(I) )
-            DWDY = (WW(I,J+1,K)-WW(I,J-1,K))/(DYN(J+1)+DYN(J) )
-            DWDZ = (WW(I,J,K+1)-WW(I,J,K-1))/(DZ(K)   +DZ(K+1))
+            DWDX = (WW(I+1,J,K)-WW(I-1,J,K))/(DXN(I-1)+DXN(I))
+            DWDY = (WW(I,J+1,K)-WW(I,J-1,K))/(DYN(J-1)+DYN(J))
+            DWDZ = (WW(I,J,K+1)-WW(I,J,MAX(0,K-1)))/(DZ(K)+DZ(K+1))
 
-            DRHOZDX = 0.25_EB*RDX(I)*( RHOP(I+1,J,K)*ZZP(I+1,J,K,N) + RHOP(I+1,J,K+1)*ZZP(I+1,J,K+1,N) &
-                                     - RHOP(I-1,J,K)*ZZP(I-1,J,K,N) - RHOP(I-1,J,K+1)*ZZP(I-1,J,K+1,N) )
-
-            DRHOZDY = 0.25_EB*RDY(J)*( RHOP(I,J+1,K)*ZZP(I,J+1,K,N) + RHOP(I,J+1,K+1)*ZZP(I,J+1,K+1,N) &
-                                     - RHOP(I,J-1,K)*ZZP(I,J-1,K,N) - RHOP(I,J-1,K+1)*ZZP(I,J-1,K+1,N) )
-
-            DRHOZDZ = RDZN(K)*(RHOP(I,J,K+1)*ZZP(I,J,K+1,N)-RHOP(I,J,K)*ZZP(I,J,K,N))
+            DZDX = 0.25_EB*RDX(I)*( ZZP(I+1,J,K,N) + ZZP(I+1,J,K+1,N) - ZZP(I-1,J,K,N) - ZZP(I-1,J,K+1,N) )
+            DZDY = 0.25_EB*RDY(J)*( ZZP(I,J+1,K,N) + ZZP(I,J+1,K+1,N) - ZZP(I,J-1,K,N) - ZZP(I,J-1,K+1,N) )
+            DZDZ = RDZN(K)*(ZZP(I,J,K+1,N)-ZZP(I,J,K,N))
 
             RHO_D_DZDZ(I,J,K,N) = RHO_D_DZDZ(I,J,K,N) &
-                                + C_NL*(DX(I)**2*DWDX*DRHOZDX+DY(J)**2*DWDY*DRHOZDY+DZ(K)**2*DWDZ*DRHOZDZ)
-
+                                + RHOBAR*C_NL*( DX(I)**2*DZDX*DWDX + DY(J)**2*DZDY*DWDY + DZ(K)**2*DZDZ*DWDZ )
          ENDDO
       ENDDO
    ENDDO
@@ -1735,9 +1723,9 @@ ELSE SCALAR_FLUX_IF
       DO J=1,JBAR
          DO I=0,IBAR
 
-            DUDX = (UU(I+1,J,K)-UU(I-1,J,K))/(DX(I)+DX(I+1))
-            DUDY = (UU(I,J+1,K)-UU(I,J-1,K))/(DYN(J)+DYN(J+1))
-            DUDZ = (UU(I,J,K+1)-UU(I,J,K-1))/(DZN(K)+DZN(K+1))
+            DUDX = (UU(I+1,J,K)-UU(MAX(0,I-1),J,K))/(DX(I)+DX(I+1))
+            DUDY = (UU(I,J+1,K)-UU(I,J-1,K))/(DYN(J-1)+DYN(J))
+            DUDZ = (UU(I,J,K+1)-UU(I,J,K-1))/(DZN(K-1)+DZN(K))
 
             DTDX = RDXN(I)*(TMP(I+1,J,K)-TMP(I,J,K))
             DTDY = 0.25_EB*RDY(J)*( TMP(I,J+1,K) + TMP(I+1,J+1,K) - TMP(I,J-1,K) - TMP(I+1,J-1,K) )
@@ -1753,9 +1741,9 @@ ELSE SCALAR_FLUX_IF
       DO J=0,JBAR
          DO I=1,IBAR
 
-            DVDX = (VV(I+1,J,K)-VV(I-1,J,K))/(DXN(I)+DXN(I+1))
-            DVDY = (VV(I,J+1,K)-VV(I,J-1,K))/(DY(J)+DY(J+1))
-            DVDZ = (VV(I,J,K+1)-VV(I,J,K-1))/(DZN(K)+DZN(K+1))
+            DVDX = (VV(I+1,J,K)-VV(I-1,J,K))/(DXN(I-1)+DXN(I))
+            DVDY = (VV(I,J+1,K)-VV(I,MAX(0,J-1),K))/(DY(J)+DY(J+1))
+            DVDZ = (VV(I,J,K+1)-VV(I,J,K-1))/(DZN(K-1)+DZN(K))
 
             DTDX = 0.25_EB*RDX(I)*( TMP(I+1,J,K) + TMP(I+1,J+1,K) - TMP(I-1,J,K) - TMP(I-1,J+1,K) )
             DTDY = RDYN(J)*(TMP(I,J+1,K)-TMP(I,J,K))
@@ -1771,9 +1759,9 @@ ELSE SCALAR_FLUX_IF
       DO J=1,JBAR
          DO I=1,IBAR
 
-            DWDX = (WW(I+1,J,K)-WW(I-1,J,K))/(DXN(I+1)+DXN(I) )
-            DWDY = (WW(I,J+1,K)-WW(I,J-1,K))/(DYN(J+1)+DYN(J) )
-            DWDZ = (WW(I,J,K+1)-WW(I,J,K-1))/(DZ(K)   +DZ(K+1))
+            DWDX = (WW(I+1,J,K)-WW(I-1,J,K))/(DXN(I-1)+DXN(I))
+            DWDY = (WW(I,J+1,K)-WW(I,J-1,K))/(DYN(J-1)+DYN(J))
+            DWDZ = (WW(I,J,K+1)-WW(I,J,MAX(0,K-1)))/(DZ(K)+DZ(K+1))
 
             DTDX = 0.25_EB*RDX(I)*( TMP(I+1,J,K) + TMP(I+1,J,K+1) - TMP(I-1,J,K) - TMP(I-1,J,K+1) )
             DTDY = 0.25_EB*RDY(J)*( TMP(I,J+1,K) + TMP(I,J+1,K+1) - TMP(I,J-1,K) - TMP(I,J-1,K+1) )
