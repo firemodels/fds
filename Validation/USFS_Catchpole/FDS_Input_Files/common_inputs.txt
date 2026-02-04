@@ -1,0 +1,186 @@
+
+&MISC TMPA=27 /
+
+&MESH IJK=40,20,30, XB=-1.0,1.0,-1.5,-0.5,0.0,1.50, MULT_ID='mesh' /
+&MULT ID='mesh', DX=2.0, DY=1.0, DZ=1.5, I_UPPER=4, J_UPPER=2, K_UPPER=1 /
+
+&VENT PBX=-1.0, SURF_ID='OPEN' /
+&VENT PBX= 9.0, SURF_ID='OPEN' /
+
+&MATL ID	         = 'FIRE BOARD'
+      FYI                = 'KAOWOOL M TEMPERATURE BOARD'        
+      CONDUCTIVITY_RAMP  = 'k_KAOWOOL'              
+      SPECIFIC_HEAT      = 1.1                   
+      DENSITY            =  272.                  
+      EMISSIVITY         = 0.80 /
+&RAMP ID='k_KAOWOOL', T=  20., F=0.06 /
+&RAMP ID='k_KAOWOOL', T= 260., F=0.06 /
+&RAMP ID='k_KAOWOOL', T= 538., F=0.10 /
+&RAMP ID='k_KAOWOOL', T= 816., F=0.15 /
+&RAMP ID='k_KAOWOOL', T=1093., F=0.22 /
+
+&SURF ID        = 'SUBSTRATE'
+      MATL_ID   = 'FIRE BOARD' 
+      COLOR     = 'FIREBRICK'
+      THICKNESS = 0.013 /
+
+&VENT SURF_ID='SUBSTRATE', XB=0.05,8.0,-0.5,0.5,0,0 / fire board under vegetation
+
+&MATL ID            = 'STEEL'
+      FYI           = 'Drysdale, Intro to Fire Dynamics'
+      EMISSIVITY    = 0.95
+      SPECIFIC_HEAT = 0.46
+      CONDUCTIVITY  = 45.8
+      DENSITY       = 7850. /
+
+&SURF ID='WALL'
+      MATL_ID='STEEL'
+      DEFAULT=.TRUE.
+      COLOR='GRAY 50'
+      THICKNESS=0.002 /
+
+&REAC FUEL='WOOD FUEL VAPOR'
+      SOOT_YIELD = 0.002
+      C          = 0.900
+      H          = 1.730
+      O          = 0.780
+      HEAT_OF_COMBUSTION = 15799. /
+
+&SPEC ID='WATER VAPOR' /
+
+&SURF ID                   = 'NO BURN FUEL'
+      MATL_ID              = 'NO BURN FUEL'
+      SURFACE_VOLUME_RATIO = 630
+      LENGTH               = 0.02
+      GEOMETRY             = 'CYLINDRICAL' /
+
+&PART ID             = 'NO BURN FUEL' 
+      DRAG_COEFFICIENT = 2.8
+      COLOR          = 'OLIVE'
+      SURF_ID        = 'NO BURN FUEL' 
+      QUANTITIES     = 'PARTICLE TEMPERATURE','PARTICLE MASS'
+      STATIC         = .TRUE. /
+
+&INIT ID                   = 'NO BURN FUEL'
+      PART_ID              = 'NO BURN FUEL'
+      XB                   = -0.4,0.0,-1.5,1.5,0,0.152
+      N_PARTICLES_PER_CELL = 1
+      CELL_CENTERED        = .TRUE.
+      MASS_PER_VOLUME      = 10.
+      DRY                  = T /
+
+&MATL ID                 = 'NO BURN FUEL'
+      DENSITY            = 442.0
+      CONDUCTIVITY       = 0.11
+      SPECIFIC_HEAT      = 1. /
+
+&MATL ID                 = 'Dry Pine Sticks'
+      DENSITY            = 493.
+      CONDUCTIVITY_RAMP  = 'k_dry_veg'
+      SPECIFIC_HEAT_RAMP = 'cp_dry_veg'
+      EMISSIVITY         = 0.9
+      A                  = 1.8E11
+      E                  = 1.85E5
+      N_S                = 1.89
+      MATL_ID            = 'Pine Char' 
+      NU_MATL            = 0.16
+      SPEC_ID            = 'WOOD FUEL VAPOR'
+      NU_SPEC            = 0.84
+      HEAT_OF_REACTION   = 140. /
+ 
+&MATL ID                 = 'Pine Char'
+      EMISSIVITY         = 0.84
+      DENSITY            = 104.
+      CONDUCTIVITY_RAMP  = 'k_char'
+      SPECIFIC_HEAT_RAMP = 'cp_char'
+      SURFACE_OXIDATION_MODEL = T
+      A                  = 1.79
+      E                  = 27685.  
+      N_O2               = 0.68
+      MATL_ID            = 'Ash'
+      NU_MATL            = 0.13
+      SPEC_ID            = 'PRODUCTS','AIR'
+      NU_SPEC            = 10.19,-9.32
+      HEAT_OF_REACTION   = -32000. /
+
+&MATL ID                 = 'Dry Pine Needles'
+      DENSITY            = 510.0
+      CONDUCTIVITY       = 0.11
+      SPECIFIC_HEAT_RAMP = 'cp_dry_veg'
+      A                  = 1040.
+      E                  = 61041.
+      MATL_ID            = 'Char'
+      NU_MATL            = 0.154
+      SPEC_ID            = 'WOOD FUEL VAPOR'
+      NU_SPEC            = 0.846
+      HEAT_OF_REACTION   = 609.0 /
+
+&MATL ID                 = 'Dry Coarse Excelsior'
+      DENSITY            = 398.0
+      CONDUCTIVITY       = 0.11
+      SPECIFIC_HEAT_RAMP = 'cp_dry_veg'
+      A                  = 1040.
+      E                  = 61041.
+      MATL_ID            = 'Char'
+      NU_MATL            = 0.154
+      SPEC_ID            = 'WOOD FUEL VAPOR'
+      NU_SPEC            = 0.846
+      HEAT_OF_REACTION   = 711.0 /
+
+&MATL ID                 = 'Dry Regular Excelsior'
+      DENSITY            = 398.0
+      CONDUCTIVITY       = 0.11
+      SPECIFIC_HEAT_RAMP = 'cp_dry_veg'
+      A                  = 1040.
+      E                  = 61041.
+      MATL_ID            = 'Char'
+      NU_MATL            = 0.154
+      SPEC_ID            = 'WOOD FUEL VAPOR'
+      NU_SPEC            = 0.846
+      HEAT_OF_REACTION   = 711.0 /
+
+&MATL ID                 = 'Char'
+      DENSITY            = 300.
+      CONDUCTIVITY       = 0.052
+      SPECIFIC_HEAT_RAMP = 'cp_char'
+      SURFACE_OXIDATION_MODEL = T
+      A                  = 465.
+      E                  = 68000.
+      MATL_ID            = 'Ash'
+      NU_MATL            = 0.02
+      SPEC_ID            = 'PRODUCTS','AIR'
+      NU_SPEC            = 8.18,-7.2
+      HEAT_OF_REACTION   = -25000. /
+
+&MATL ID            = 'Ash'
+      DENSITY       = 67.
+      CONDUCTIVITY  = 0.1
+      SPECIFIC_HEAT = 2.0 /
+
+&RAMP ID='k_dry_veg', T= 20.,   F=0.10 /
+&RAMP ID='k_dry_veg', T= 1000., F=0.45 /
+
+&RAMP ID='cp_dry_veg', T= 20.,   F=0.88 /
+&RAMP ID='cp_dry_veg', T= 1000., F=5.19 /
+
+&RAMP ID='k_char', T=   27, F=0.10 /
+&RAMP ID='k_char', T= 1000, F=0.50 /
+
+&RAMP ID='cp_char', T=  20, F=0.68 /
+&RAMP ID='cp_char', T= 200, F=1.27 /
+&RAMP ID='cp_char', T= 500, F=1.58 /
+&RAMP ID='cp_char', T=1000, F=1.84 /
+
+&VENT XB=-0.05,0.05,-0.5,0.5,0,0, SURF_ID='IGN FIRE' /
+
+&DUMP DT_PART=1, DT_DEVC=1, DT_HRR=1, DT_SLCF=1, DT_BNDF=1 /
+
+&SLCF PBY= 0.0, QUANTITY='TEMPERATURE', VECTOR=.TRUE. /
+&SLCF PBY= 0.0, QUANTITY='TEMPERATURE', CELL_CENTERED=.TRUE. /
+&SLCF PBY= 0.0, QUANTITY='HRRPUV',      CELL_CENTERED=.TRUE. /
+
+&BNDF QUANTITY='WALL TEMPERATURE' /
+&BNDF QUANTITY='GAUGE HEAT FLUX' /
+
+&TAIL /
+
