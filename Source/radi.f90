@@ -374,11 +374,11 @@ NSB = NUMBER_SPECTRAL_BANDS
 ! PHYSICAL PARAMETERS
 ! MINIMUM MEAN RADIUS (M)
 RMMIN = 0.5_EB*1.E-6*MIE_MINIMUM_DIAMETER
-IF (RMMIN < TWO_EPSILON_EB) RMMIN = 0.5E-6_EB
+IF (RMMIN < TWENTY_EPSILON_EB) RMMIN = 0.5E-6_EB
 
 ! MAXIMUM MEAN RADIUS (M)
 RMMAX = 0.5_EB*1.E-6*MIE_MAXIMUM_DIAMETER
-IF (RMMAX < TWO_EPSILON_EB) THEN
+IF (RMMAX < TWENTY_EPSILON_EB) THEN
    IF (PRESENT(PARTICLE_CLASS)) THEN
       RMMAX = 0.5_EB*LPC%DIAMETER
    ELSE
@@ -765,7 +765,7 @@ LAMBDALOOP: DO NLAMBDA = 1, NLMBDMIE
 
 !     CALCULATE SINGLE DROP PHASE FUNCTION
 
-      IF (ABS(QS)>TWO_EPSILON_EB) THEN
+      IF (ABS(QS)>TWENTY_EPSILON_EB) THEN
          DO I = 1,NMIEANG2
             PHSFUN(I) = 2._EB*(ABS(S1(I))**2 + ABS(S2(I))**2 )
          ENDDO
@@ -779,7 +779,7 @@ LAMBDALOOP: DO NLAMBDA = 1, NLMBDMIE
       PFOR = 0._EB
       DO J = 1,NMIEANG
          DO I = J,NMIEANG
-            IF (ABS(MUD0(I,J)-MUDPI(I,J))<=TWO_EPSILON_EB) THEN
+            IF (ABS(MUD0(I,J)-MUDPI(I,J))<=TWENTY_EPSILON_EB) THEN
                CALL INTERPOLATE1D(XMU2,PHSFUN,MUD0(I,J),FTMP)
                PFOR(I,J) = PI*FTMP
             ELSE
@@ -3597,7 +3597,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
       Z_ARRAY(1:N_TRACKED_SPECIES) = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0     ! Mass frac of the tracked species in ambient
       R_MIXTURE = RSUM0                                                           ! Specific gas constant of ambient
       MOL_RAT = GET_VOLUME_FRACTION(H2O_INDEX,Z_ARRAY,R_MIXTURE)/&
-         (GET_VOLUME_FRACTION(CO2_INDEX,Z_ARRAY,R_MIXTURE)+TWO_EPSILON_EB) ! Molar ratio
+         (GET_VOLUME_FRACTION(CO2_INDEX,Z_ARRAY,R_MIXTURE)+TWENTY_EPSILON_EB) ! Molar ratio
       BBFA = A_WSGG(TMPA,MOL_RAT,IBND)
    ELSE
       BBFA = BLACKBODY_FRACTION(WL_LOW(IBND),WL_HIGH(IBND),TMPA)
@@ -3615,7 +3615,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
          Z_ARRAY(1:N_TRACKED_SPECIES) = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0     ! Mass frac of the tracked species in ambient
          R_MIXTURE = RSUM0                                                           ! Specific gas constant of ambient
          MOL_RAT = GET_VOLUME_FRACTION(H2O_INDEX,Z_ARRAY,R_MIXTURE)/&
-            (GET_VOLUME_FRACTION(CO2_INDEX,Z_ARRAY,R_MIXTURE)+TWO_EPSILON_EB) ! Molar ratio
+            (GET_VOLUME_FRACTION(CO2_INDEX,Z_ARRAY,R_MIXTURE)+TWENTY_EPSILON_EB) ! Molar ratio
          BBF = A_WSGG(RADTMP,MOL_RAT,IBND)
       ELSE
          BBF = BLACKBODY_FRACTION(WL_LOW(IBND),WL_HIGH(IBND),RADTMP)
@@ -3630,7 +3630,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                DO J=1,JBAR
                   DO I=1,IBAR
                      IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE
-                     IF (ABS(AVG_DROP_AREA(I,J,K,ARRAY_INDEX))<TWO_EPSILON_EB) CYCLE
+                     IF (ABS(AVG_DROP_AREA(I,J,K,ARRAY_INDEX))<TWENTY_EPSILON_EB) CYCLE
                      NCSDROP = AVG_DROP_AREA(I,J,K,ARRAY_INDEX)
                      CALL INTERPOLATE1D(LPC%R50,LPC%WQABS(:,IBND),AVG_DROP_RAD(I,J,K,ARRAY_INDEX),QVAL)
                      KAPPA_PART(I,J,K) = KAPPA_PART(I,J,K) + NCSDROP*QVAL
@@ -3725,7 +3725,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                R_MIXTURE = RSUM(I,J,K)                                                       ! Specific gas constant of the mixture
                X_H2O = GET_VOLUME_FRACTION(H2O_INDEX,Z_ARRAY,R_MIXTURE)
                X_CO2 = GET_VOLUME_FRACTION(CO2_INDEX,Z_ARRAY,R_MIXTURE)
-               MOL_RAT = X_H2O/(X_CO2 + TWO_EPSILON_EB)                                      ! Molar ratio
+               MOL_RAT = X_H2O/(X_CO2 + TWENTY_EPSILON_EB)                                      ! Molar ratio
                TOTAL_P = PBAR(K,PRESSURE_ZONE(I,J,K)) + RHO(I,J,K)*(H(I,J,K)-KRES(I,J,K))    ! Total pressure
                PARTIAL_P = TOTAL_P*(X_H2O + X_CO2)/P_STP                                     ! Partial press of the CO2-H2O mixture
                BBF = A_WSGG(TMP(I,J,K),MOL_RAT,IBND)                                         ! Temp coefficient for the jth gas
@@ -3860,7 +3860,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                   IF (CC_IBM) THEN
                      IF (CCVAR(I,J,K,CC_CGSC)==CC_SOLID) CYCLE
                   ENDIF
-                  IF (ZZ(I,J,K,N) < TWO_EPSILON_EB) CYCLE
+                  IF (ZZ(I,J,K,N) < TWENTY_EPSILON_EB) CYCLE
                   NCSDROP = 1.5_EB*ZZ(I,J,K,N)*RHO(I,J,K)/ &
                             (SPECIES(SPECIES_MIXTURE(N)%SINGLE_SPEC_INDEX)%DENSITY_LIQUID*SPECIES_MIXTURE(N)%MEAN_DIAMETER)
                   CALL INTERPOLATE1D(SPECIES_MIXTURE(N)%R50,SPECIES_MIXTURE(N)%WQABS(:,IBND),&
@@ -3907,7 +3907,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                Z_ARRAY(1:N_TRACKED_SPECIES) = ZZ(BC%IIG,BC%JJG,BC%KKG,1:N_TRACKED_SPECIES)
                R_MIXTURE = RSUM(BC%IIG,BC%JJG,BC%KKG)
                MOL_RAT = GET_VOLUME_FRACTION(H2O_INDEX,Z_ARRAY,R_MIXTURE)/&
-                  (GET_VOLUME_FRACTION(CO2_INDEX,Z_ARRAY,R_MIXTURE) + TWO_EPSILON_EB)
+                  (GET_VOLUME_FRACTION(CO2_INDEX,Z_ARRAY,R_MIXTURE) + TWENTY_EPSILON_EB)
                BBF = A_WSGG(B1%TMP_F,MOL_RAT,IBND) ! Temperature coefficient for the jth gray gas in the boundary
             ENDIF                                     ! (use information of the cell adjacent to the boundary)
             SF  => SURFACE(WC%SURF_INDEX)
@@ -4401,7 +4401,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                         TEMP_ORIENTATION(3) = EVALUATE_RAMP(T,IN%ORIENTATION_RAMP_INDEX(3))
                         TEMP_ORIENTATION = TEMP_ORIENTATION / &
                                            (SQRT(TEMP_ORIENTATION(1)**2+TEMP_ORIENTATION(2)**2+TEMP_ORIENTATION(3)**2) &
-                                           +TWO_EPSILON_EB)
+                                           +TWENTY_EPSILON_EB)
                      ENDIF
                   ENDIF
                   COS_DLO = -DOT_PRODUCT(TEMP_ORIENTATION(1:3),DLANG(1:3,N))
@@ -4444,7 +4444,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
          B1 => BOUNDARY_PROP1(WC%B1_INDEX)
          SF => SURFACE(WC%SURF_INDEX)
          IF (SF%SKIP_INRAD) INRAD_W(IW) = 0._EB
-         IF (SF%EXTERNAL_FLUX > TWO_EPSILON_EB) THEN
+         IF (SF%EXTERNAL_FLUX > TWENTY_EPSILON_EB) THEN
             IF (ABS(T_BEGIN) <= SPACING(B1%T_IGN)) THEN
                TSI = T
             ELSE
@@ -4463,7 +4463,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
          B1 => BOUNDARY_PROP1(CFA%B1_INDEX)
          SF => SURFACE(CFA%SURF_INDEX)
          IF (SF%SKIP_INRAD) INRAD_W(ICF) = 0._EB
-         IF (SF%EXTERNAL_FLUX > TWO_EPSILON_EB) THEN
+         IF (SF%EXTERNAL_FLUX > TWENTY_EPSILON_EB) THEN
             IF (ABS(T_BEGIN) <= SPACING(B1%T_IGN)) THEN
                TSI = T
             ELSE
@@ -4531,7 +4531,7 @@ IF (SOLID_PARTICLES .AND. UPDATE_INTENSITY) THEN
       IF (LPC%SOLID_PARTICLE .OR. LPC%MASSLESS_TARGET) THEN
          SF => SURFACE(LPC%SURF_INDEX)
          B1 => BOUNDARY_PROP1(LP%B1_INDEX)
-         IF (SF%EXTERNAL_FLUX > TWO_EPSILON_EB) THEN
+         IF (SF%EXTERNAL_FLUX > TWENTY_EPSILON_EB) THEN
             IF (ABS(T_BEGIN) <= SPACING(B1%T_IGN)) THEN
                TSI = T
             ELSE
@@ -4690,7 +4690,7 @@ CALL GET_MOLECULAR_WEIGHT(Z_IN,MWA)
 
 DO N = 1, N_RADCAL_ARRAY_SIZE
    SCALED_Y_RADCAL_SPECIES = DOT_PRODUCT(Z2RADCAL_SPECIES(N,:),Z_IN)
-   IF (SCALED_Y_RADCAL_SPECIES<TWO_EPSILON_EB) CYCLE
+   IF (SCALED_Y_RADCAL_SPECIES<TWENTY_EPSILON_EB) CYCLE
    IF (RADCAL_SPECIES_INDEX(N)==16) THEN
       INT_FAC = MAX(0._EB,SCALED_Y_RADCAL_SPECIES)**0.25_EB
    ELSE
@@ -4722,7 +4722,7 @@ REAL(EB) :: SUM_KAPPA
 
 ! If no CO2 or H2O, return zero
 
-IF ((X_H2O<=TWO_EPSILON_EB) .AND. (X_CO2<=TWO_EPSILON_EB)) THEN
+IF ((X_H2O<=TWENTY_EPSILON_EB) .AND. (X_CO2<=TWENTY_EPSILON_EB)) THEN
    KAPPA_WSGG = 0._EB
    RETURN
 ENDIF

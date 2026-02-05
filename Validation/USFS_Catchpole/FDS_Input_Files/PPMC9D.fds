@@ -1,62 +1,15 @@
 &HEAD CHID='PPMC9D', TITLE='Catchpole simulation using Lagrangian particles' /
 
-&MISC TMPA=27 /
 &TIME T_END=179.0 /
 
-&MESH IJK=40,20,30, XB=-1.0,1.0,-1.5,-0.5,0.0,1.50, MULT_ID='mesh' /
-&MULT ID='mesh', DX=2.0, DY=1.0, DZ=1.5, I_UPPER=4, J_UPPER=2, K_UPPER=1 /
-
 &WIND SPEED=2.68 /
-
-&VENT PBX=-1.0, SURF_ID='OPEN' /
-&VENT PBX= 9.0, SURF_ID='OPEN' /
 
 &OBST XB=-1.0,-0.9,-1.5,1.5,0.0,0.025 /  Baffle upstream of fire
 
 &OBST XB= 0.0, 8.0,-0.5,-0.5, 0.0, 0.025 /  Rails on both sides of vegetation, matching height of vegetation
 &OBST XB= 0.0, 8.0, 0.5, 0.5, 0.0, 0.025 /
 
-&MATL ID	         = 'FIRE BOARD'
-      FYI                = 'KAOWOOL M TEMPERATURE BOARD'        
-      CONDUCTIVITY_RAMP  = 'k_KAOWOOL'              
-      SPECIFIC_HEAT      = 1.1                   
-      DENSITY            =  272.                  
-      EMISSIVITY         = 0.80 /
-&RAMP ID='k_KAOWOOL', T=  20., F=0.06 /
-&RAMP ID='k_KAOWOOL', T= 260., F=0.06 /
-&RAMP ID='k_KAOWOOL', T= 538., F=0.10 /
-&RAMP ID='k_KAOWOOL', T= 816., F=0.15 /
-&RAMP ID='k_KAOWOOL', T=1093., F=0.22 /
-
-&SURF ID        = 'SUBSTRATE'
-      MATL_ID   = 'FIRE BOARD' 
-      COLOR     = 'FIREBRICK'
-      THICKNESS = 0.013 /
-
-&VENT SURF_ID='SUBSTRATE', XB=0.05,8.0,-0.5,0.5,0,0 / fire board under vegetation
-
-&MATL ID            = 'STEEL'
-      FYI           = 'Drysdale, Intro to Fire Dynamics'
-      EMISSIVITY    = 0.95
-      SPECIFIC_HEAT = 0.46
-      CONDUCTIVITY  = 45.8
-      DENSITY       = 7850. /
-
-&SURF ID='WALL'
-      MATL_ID='STEEL'
-      DEFAULT=.TRUE.
-      COLOR='GRAY 50'
-      THICKNESS=0.002 /
-
-&REAC FUEL='WOOD FUEL VAPOR'
-      FYI='Ritchie, et al., 5th IAFSS, C_3.4 H_6.2 O_2.5'
-      SOOT_YIELD = 0.02
-      O          = 2.5
-      C          = 3.4
-      H          = 6.2
-      HEAT_OF_COMBUSTION = 17260. /
-
-&SPEC ID='WATER VAPOR' /
+&CATF OTHER_FILES='common_inputs.txt' /
 
 &SURF ID                   = 'Pine Needles'
       MATL_ID              = 'Dry Pine Needles'
@@ -79,68 +32,6 @@
       MASS_PER_VOLUME      = 32.13
       DRY                  = T /
 
-&SURF ID                   = 'NO BURN FUEL'
-      MATL_ID              = 'NO BURN FUEL'
-      SURFACE_VOLUME_RATIO = 5710
-      LENGTH               = 0.02
-      GEOMETRY             = 'CYLINDRICAL' /
-
-&PART ID             = 'NO BURN FUEL' 
-      DRAG_COEFFICIENT = 2.8
-      COLOR          = 'OLIVE'
-      SURF_ID        = 'NO BURN FUEL' 
-      QUANTITIES     = 'PARTICLE TEMPERATURE','PARTICLE MASS'
-      STATIC         = .TRUE. /
-
-&INIT ID                   = 'NO BURN FUEL'
-      PART_ID              = 'NO BURN FUEL'
-      XB                   = -0.4,0.0,-1.5,1.5,0,0.025
-      N_PARTICLES_PER_CELL = 1
-      CELL_CENTERED        = .TRUE.
-      MASS_PER_VOLUME      = 32.13
-      DRY                  = T /
-
-&MATL ID                 = 'NO BURN FUEL'
-      DENSITY            = 510.0
-      CONDUCTIVITY       = 0.11
-      SPECIFIC_HEAT_RAMP = 'cp_dry_veg' /
-
-&MATL ID                 = 'Dry Pine Needles'
-      DENSITY            = 510.0
-      CONDUCTIVITY       = 0.11
-      SPECIFIC_HEAT_RAMP = 'cp_dry_veg'
-      A                  = 1040.
-      E                  = 61041.
-      MATL_ID            = 'Char' 
-      NU_MATL            = 0.154
-      SPEC_ID            = 'WOOD FUEL VAPOR'
-      NU_SPEC            = 0.846
-      HEAT_OF_REACTION   = 609.0 /
- 
-&MATL ID                 = 'Char'
-      DENSITY            = 300.
-      CONDUCTIVITY       = 0.052
-      SPECIFIC_HEAT_RAMP = 'cp_char'
-      SURFACE_OXIDATION_MODEL = T
-      A                  = 465.
-      E                  = 68000.  
-      MATL_ID            = 'Ash'
-      NU_MATL            = 0.02
-      SPEC_ID            = 'PRODUCTS','AIR'
-      NU_SPEC            = 8.18,-7.2
-      HEAT_OF_REACTION   = -25000. /
-
-&MATL ID            = 'Ash'
-      DENSITY       = 67.
-      CONDUCTIVITY  = 0.1
-      SPECIFIC_HEAT = 2.0 /
-
-&RAMP ID='cp_dry_veg', T= 0.,    F=1.16 /
-&RAMP ID='cp_dry_veg', T= 1000., F=5.027 /
-
-&RAMP ID='cp_char', T=   27, F=0.715 /
-&RAMP ID='cp_char', T= 1724, F=2.04 /
-
 &SURF ID='IGN FIRE', HRRPUA=800., RAMP_Q='RAMPFIRE', COLOR='RED' /
 
 &RAMP ID='RAMPFIRE',T= 0., F=0.0 /
@@ -149,15 +40,6 @@
 &RAMP ID='RAMPFIRE',T=21.0, F=0.0 /
 
 &VENT XB=-0.05,0.05,-0.5,0.5,0,0, SURF_ID='IGN FIRE' /
-
-&DUMP DT_PART=1, DT_DEVC=1, DT_HRR=1, DT_SLCF=1, DT_BNDF=1 /
-
-&SLCF PBY= 0.0, QUANTITY='TEMPERATURE', VECTOR=.TRUE. /
-&SLCF PBY= 0.0, QUANTITY='TEMPERATURE', CELL_CENTERED=.TRUE. /
-&SLCF PBY= 0.0, QUANTITY='HRRPUV',      CELL_CENTERED=.TRUE. /
-
-&BNDF QUANTITY='WALL TEMPERATURE' /
-&BNDF QUANTITY='GAUGE HEAT FLUX' /
 
 &DEVC ID='x', QUANTITY='WALL TEMPERATURE', PART_ID='Pine Needles', SPATIAL_STATISTIC='MAXLOC X', XB=0,8,-0.1,0.1,0,0.203/
 
