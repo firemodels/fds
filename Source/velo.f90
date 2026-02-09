@@ -1816,18 +1816,21 @@ LOGICAL, INTENT(IN) :: APPLY_TO_ESTIMATED_VARIABLES
 REAL(EB) :: MUA,TSI,WGT,T_NOW,RAMP_T,OMW,MU_WALL,RHO_WALL,SLIP_COEF,VEL_T, &
             UUP(2),UUM(2),DXX(2),MU_DUIDXJ(-2:2),DUIDXJ(-2:2),PROFILE_FACTOR,VEL_GAS,VEL_GHOST, &
             MU_DUIDXJ_USE(2),DUIDXJ_USE(2),VEL_EDDY,U_TAU,Y_PLUS,U_NORM, &
-            DRAG_FACTOR,HT_SCALE_FACTOR,VEG_HT,VEL_N
-INTEGER :: NOM(2),IIO(2),JJO(2),KKO(2),IE,II,JJ,KK,IEC,IOR,IWM,IWP,ICMM,ICMP,ICPM,ICPP,ICD,ICDO,IVL,I_SGN, &
+            DRAG_FACTOR,HT_SCALE_FACTOR,VEG_HT,VEL_N,UN_OTHER
+INTEGER :: NOM(2),IIOE(2),JJOE(2),KKOE(2),IE,IIO,JJO,KKO,II,JJ,KK,IEC,IOR,IW,IWM,IWP,ICMM,ICMP,ICPM,ICPP,ICD,ICDO,IVL,I_SGN, &
            VELOCITY_BC_INDEX,IIGM,JJGM,KKGM,IIGP,JJGP,KKGP,SURF_INDEXM,SURF_INDEXP,ITMP,ICD_SGN,ICDO_SGN, &
-           BOUNDARY_TYPE_M,BOUNDARY_TYPE_P,IS,IS2,IWPI,IWMI,VENT_INDEX
+           BOUNDARY_TYPE_M,BOUNDARY_TYPE_P,IS,IS2,IWPI,IWMI,VENT_INDEX,N_INT_CELLS
 LOGICAL :: ALTERED_GRADIENT(-2:2),SYNTHETIC_EDDY_METHOD,HVAC_TANGENTIAL,INTERPOLATED_EDGE,&
            UPWIND_BOUNDARY,INFLOW_BOUNDARY
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,RHOP,VEL_OTHER
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP
 TYPE (OMESH_TYPE), POINTER :: OM
 TYPE (VENTS_TYPE), POINTER :: VT
-TYPE (WALL_TYPE), POINTER :: WCM,WCP,WCX
+TYPE (WALL_TYPE), POINTER :: WC,WCM,WCP,WCX
+TYPE (EXTERNAL_WALL_TYPE), POINTER :: EWC
+REAL(EB), POINTER, DIMENSION(:,:,:) :: OM_UU,OM_VV,OM_WW
 TYPE (BOUNDARY_PROP1_TYPE), POINTER :: WCM_B1,WCP_B1,WCX_B1
+TYPE (BOUNDARY_COORD_TYPE), POINTER :: BC
 TYPE (EDGE_TYPE), POINTER :: ED
 TYPE(SURFACE_TYPE), POINTER :: SF
 
@@ -1856,6 +1859,49 @@ ELSE
    RHOP => RHO
    ZZP => ZZ
 ENDIF
+
+! Transfer from neighboring mesh the normal component of velocity that is one grid cell beyond external boundary
+
+WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
+   WC =>WALL(IW)
+   EWC=>EXTERNAL_WALL(IW)
+   IF (EWC%NOM==0) CYCLE WALL_LOOP
+   IF (APPLY_TO_ESTIMATED_VARIABLES) THEN
+      OM_UU => OMESH(EWC%NOM)%US
+      OM_VV => OMESH(EWC%NOM)%VS
+      OM_WW => OMESH(EWC%NOM)%WS
+   ELSE
+      OM_UU => OMESH(EWC%NOM)%U
+      OM_VV => OMESH(EWC%NOM)%V
+      OM_WW => OMESH(EWC%NOM)%W
+   ENDIF
+   BC => BOUNDARY_COORD(WC%BC_INDEX)
+   UN_OTHER = 0._EB
+   DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
+      DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
+         DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
+            SELECT CASE(BC%IOR)
+               CASE(-1) ; UN_OTHER = UN_OTHER + OM_UU(IIO  ,JJO,KKO)
+               CASE( 1) ; UN_OTHER = UN_OTHER + OM_UU(IIO-1,JJO,KKO)
+               CASE(-2) ; UN_OTHER = UN_OTHER + OM_VV(IIO,JJO  ,KKO)
+               CASE( 2) ; UN_OTHER = UN_OTHER + OM_VV(IIO,JJO-1,KKO)
+               CASE(-3) ; UN_OTHER = UN_OTHER + OM_WW(IIO,JJO,KKO  )
+               CASE( 3) ; UN_OTHER = UN_OTHER + OM_WW(IIO,JJO,KKO-1)
+            END SELECT
+         ENDDO
+      ENDDO
+   ENDDO
+   N_INT_CELLS = (EWC%IIO_MAX-EWC%IIO_MIN+1) * (EWC%JJO_MAX-EWC%JJO_MIN+1) * (EWC%KKO_MAX-EWC%KKO_MIN+1)
+   UN_OTHER = UN_OTHER/REAL(N_INT_CELLS,EB)
+   SELECT CASE(BC%IOR)
+      CASE(-1) ; UU(BC%II  ,BC%JJ,BC%KK) = UN_OTHER
+      CASE( 1) ; UU(BC%II-1,BC%JJ,BC%KK) = UN_OTHER
+      CASE(-2) ; VV(BC%II,BC%JJ  ,BC%KK) = UN_OTHER
+      CASE( 2) ; VV(BC%II,BC%JJ-1,BC%KK) = UN_OTHER
+      CASE(-3) ; WW(BC%II,BC%JJ,BC%KK  ) = UN_OTHER
+      CASE( 3) ; WW(BC%II,BC%JJ,BC%KK-1) = UN_OTHER
+   END SELECT
+ENDDO WALL_LOOP
 
 DRAG_UVWMAX = 0._EB
 
@@ -1890,14 +1936,14 @@ EDGE_LOOP: DO IE=1,EDGE_COUNT(NM)
    JJ     = ED%J
    KK     = ED%K
    IEC    = ED%AXIS
-   NOM(1) = ED%NOM_1
-   IIO(1) = ED%IIO_1
-   JJO(1) = ED%JJO_1
-   KKO(1) = ED%KKO_1
-   NOM(2) = ED%NOM_2
-   IIO(2) = ED%IIO_2
-   JJO(2) = ED%JJO_2
-   KKO(2) = ED%KKO_2
+   NOM(1)  = ED%NOM_1
+   IIOE(1) = ED%IIO_1
+   JJOE(1) = ED%JJO_1
+   KKOE(1) = ED%KKO_1
+   NOM(2)  = ED%NOM_2
+   IIOE(2) = ED%IIO_2
+   JJOE(2) = ED%JJO_2
+   KKOE(2) = ED%KKO_2
 
    ! Get the velocity components at the appropriate cell faces
 
@@ -2409,25 +2455,28 @@ EDGE_LOOP: DO IE=1,EDGE_COUNT(NM)
 
             WGT = ED%EDGE_INTERPOLATION_FACTOR(ICD)
             OMW = 1._EB-WGT
+            IIO = IIOE(ICD)
+            JJO = JJOE(ICD)
+            KKO = KKOE(ICD)
 
             SELECT CASE(IEC)
                CASE(1)
                   IF (ICD==1) THEN
-                     VEL_GHOST = WGT*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)) + OMW*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)-1)
+                     VEL_GHOST = WGT*VEL_OTHER(IIO,JJO,KKO) + OMW*VEL_OTHER(IIO,JJO,KKO-1)
                   ELSE ! ICD=2
-                     VEL_GHOST = WGT*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)) + OMW*VEL_OTHER(IIO(ICD),JJO(ICD)-1,KKO(ICD))
+                     VEL_GHOST = WGT*VEL_OTHER(IIO,JJO,KKO) + OMW*VEL_OTHER(IIO,JJO-1,KKO)
                   ENDIF
                CASE(2)
                   IF (ICD==1) THEN
-                     VEL_GHOST = WGT*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)) + OMW*VEL_OTHER(IIO(ICD)-1,JJO(ICD),KKO(ICD))
+                     VEL_GHOST = WGT*VEL_OTHER(IIO,JJO,KKO) + OMW*VEL_OTHER(IIO-1,JJO,KKO)
                   ELSE ! ICD=2
-                     VEL_GHOST = WGT*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)) + OMW*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)-1)
+                     VEL_GHOST = WGT*VEL_OTHER(IIO,JJO,KKO) + OMW*VEL_OTHER(IIO,JJO,KKO-1)
                   ENDIF
                CASE(3)
                   IF (ICD==1) THEN
-                     VEL_GHOST = WGT*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)) + OMW*VEL_OTHER(IIO(ICD),JJO(ICD)-1,KKO(ICD))
+                     VEL_GHOST = WGT*VEL_OTHER(IIO,JJO,KKO) + OMW*VEL_OTHER(IIO,JJO-1,KKO)
                   ELSE ! ICD==2
-                     VEL_GHOST = WGT*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)) + OMW*VEL_OTHER(IIO(ICD)-1,JJO(ICD),KKO(ICD))
+                     VEL_GHOST = WGT*VEL_OTHER(IIO,JJO,KKO) + OMW*VEL_OTHER(IIO-1,JJO,KKO)
                   ENDIF
             END SELECT
 
@@ -2439,32 +2488,32 @@ EDGE_LOOP: DO IE=1,EDGE_COUNT(NM)
             IF (CORRECTOR) THEN
                SELECT CASE(IEC)
                   CASE(1)
-                     IF (JJ==0    .AND. KK==0    .AND. ABS(IOR)==2) UU(II,JJ  ,KK  ) = OM%U(IIO(ICD),JJO(ICD)  ,KKO(ICD)-1)
-                     IF (JJ==0    .AND. KK==0    .AND. ABS(IOR)==3) UU(II,JJ  ,KK  ) = OM%U(IIO(ICD),JJO(ICD)-1,KKO(ICD)  )
-                     IF (JJ==0    .AND. KK==KBAR .AND. ABS(IOR)==2) UU(II,JJ  ,KK+1) = OM%U(IIO(ICD),JJO(ICD)  ,KKO(ICD)+1)
-                     IF (JJ==0    .AND. KK==KBAR .AND. ABS(IOR)==3) UU(II,JJ  ,KK+1) = OM%U(IIO(ICD),JJO(ICD)-1,KKO(ICD)  )
-                     IF (JJ==JBAR .AND. KK==0    .AND. ABS(IOR)==2) UU(II,JJ+1,KK  ) = OM%U(IIO(ICD),JJO(ICD)  ,KKO(ICD)-1)
-                     IF (JJ==JBAR .AND. KK==0    .AND. ABS(IOR)==3) UU(II,JJ+1,KK  ) = OM%U(IIO(ICD),JJO(ICD)+1,KKO(ICD)  )
-                     IF (JJ==JBAR .AND. KK==KBAR .AND. ABS(IOR)==2) UU(II,JJ+1,KK+1) = OM%U(IIO(ICD),JJO(ICD)  ,KKO(ICD)+1)
-                     IF (JJ==JBAR .AND. KK==KBAR .AND. ABS(IOR)==3) UU(II,JJ+1,KK+1) = OM%U(IIO(ICD),JJO(ICD)+1,KKO(ICD)  )
+                     IF (JJ==0    .AND. KK==0    .AND. ABS(IOR)==2) UU(II,JJ  ,KK  ) = OM%U(IIO,JJO  ,KKO-1)
+                     IF (JJ==0    .AND. KK==0    .AND. ABS(IOR)==3) UU(II,JJ  ,KK  ) = OM%U(IIO,JJO-1,KKO  )
+                     IF (JJ==0    .AND. KK==KBAR .AND. ABS(IOR)==2) UU(II,JJ  ,KK+1) = OM%U(IIO,JJO  ,KKO+1)
+                     IF (JJ==0    .AND. KK==KBAR .AND. ABS(IOR)==3) UU(II,JJ  ,KK+1) = OM%U(IIO,JJO-1,KKO  )
+                     IF (JJ==JBAR .AND. KK==0    .AND. ABS(IOR)==2) UU(II,JJ+1,KK  ) = OM%U(IIO,JJO  ,KKO-1)
+                     IF (JJ==JBAR .AND. KK==0    .AND. ABS(IOR)==3) UU(II,JJ+1,KK  ) = OM%U(IIO,JJO+1,KKO  )
+                     IF (JJ==JBAR .AND. KK==KBAR .AND. ABS(IOR)==2) UU(II,JJ+1,KK+1) = OM%U(IIO,JJO  ,KKO+1)
+                     IF (JJ==JBAR .AND. KK==KBAR .AND. ABS(IOR)==3) UU(II,JJ+1,KK+1) = OM%U(IIO,JJO+1,KKO  )
                   CASE(2)
-                     IF (II==0    .AND. KK==0    .AND. ABS(IOR)==1) VV(II  ,JJ,KK  ) = OM%V(IIO(ICD)  ,JJO(ICD),KKO(ICD)-1)
-                     IF (II==0    .AND. KK==0    .AND. ABS(IOR)==3) VV(II  ,JJ,KK  ) = OM%V(IIO(ICD)-1,JJO(ICD),KKO(ICD)  )
-                     IF (II==0    .AND. KK==KBAR .AND. ABS(IOR)==1) VV(II  ,JJ,KK+1) = OM%V(IIO(ICD)  ,JJO(ICD),KKO(ICD)+1)
-                     IF (II==0    .AND. KK==KBAR .AND. ABS(IOR)==3) VV(II  ,JJ,KK+1) = OM%V(IIO(ICD)-1,JJO(ICD),KKO(ICD)  )
-                     IF (II==IBAR .AND. KK==0    .AND. ABS(IOR)==1) VV(II+1,JJ,KK  ) = OM%V(IIO(ICD)  ,JJO(ICD),KKO(ICD)-1)
-                     IF (II==IBAR .AND. KK==0    .AND. ABS(IOR)==3) VV(II+1,JJ,KK  ) = OM%V(IIO(ICD)+1,JJO(ICD),KKO(ICD)  )
-                     IF (II==IBAR .AND. KK==KBAR .AND. ABS(IOR)==1) VV(II+1,JJ,KK+1) = OM%V(IIO(ICD)  ,JJO(ICD),KKO(ICD)+1)
-                     IF (II==IBAR .AND. KK==KBAR .AND. ABS(IOR)==3) VV(II+1,JJ,KK+1) = OM%V(IIO(ICD)+1,JJO(ICD),KKO(ICD)  )
+                     IF (II==0    .AND. KK==0    .AND. ABS(IOR)==1) VV(II  ,JJ,KK  ) = OM%V(IIO  ,JJO,KKO-1)
+                     IF (II==0    .AND. KK==0    .AND. ABS(IOR)==3) VV(II  ,JJ,KK  ) = OM%V(IIO-1,JJO,KKO  )
+                     IF (II==0    .AND. KK==KBAR .AND. ABS(IOR)==1) VV(II  ,JJ,KK+1) = OM%V(IIO  ,JJO,KKO+1)
+                     IF (II==0    .AND. KK==KBAR .AND. ABS(IOR)==3) VV(II  ,JJ,KK+1) = OM%V(IIO-1,JJO,KKO  )
+                     IF (II==IBAR .AND. KK==0    .AND. ABS(IOR)==1) VV(II+1,JJ,KK  ) = OM%V(IIO  ,JJO,KKO-1)
+                     IF (II==IBAR .AND. KK==0    .AND. ABS(IOR)==3) VV(II+1,JJ,KK  ) = OM%V(IIO+1,JJO,KKO  )
+                     IF (II==IBAR .AND. KK==KBAR .AND. ABS(IOR)==1) VV(II+1,JJ,KK+1) = OM%V(IIO  ,JJO,KKO+1)
+                     IF (II==IBAR .AND. KK==KBAR .AND. ABS(IOR)==3) VV(II+1,JJ,KK+1) = OM%V(IIO+1,JJO,KKO  )
                   CASE(3)
-                     IF (II==0    .AND. JJ==0    .AND. ABS(IOR)==1) WW(II  ,JJ  ,KK) = OM%W(IIO(ICD)  ,JJO(ICD)-1,KKO(ICD))
-                     IF (II==0    .AND. JJ==0    .AND. ABS(IOR)==2) WW(II  ,JJ  ,KK) = OM%W(IIO(ICD)-1,JJO(ICD)  ,KKO(ICD))
-                     IF (II==0    .AND. JJ==JBAR .AND. ABS(IOR)==1) WW(II  ,JJ+1,KK) = OM%W(IIO(ICD)  ,JJO(ICD)+1,KKO(ICD))
-                     IF (II==0    .AND. JJ==JBAR .AND. ABS(IOR)==2) WW(II  ,JJ+1,KK) = OM%W(IIO(ICD)-1,JJO(ICD)  ,KKO(ICD))
-                     IF (II==IBAR .AND. JJ==0    .AND. ABS(IOR)==1) WW(II+1,JJ  ,KK) = OM%W(IIO(ICD)  ,JJO(ICD)-1,KKO(ICD))
-                     IF (II==IBAR .AND. JJ==0    .AND. ABS(IOR)==2) WW(II+1,JJ  ,KK) = OM%W(IIO(ICD)+1,JJO(ICD)  ,KKO(ICD))
-                     IF (II==IBAR .AND. JJ==JBAR .AND. ABS(IOR)==1) WW(II+1,JJ+1,KK) = OM%W(IIO(ICD)  ,JJO(ICD)+1,KKO(ICD))
-                     IF (II==IBAR .AND. JJ==JBAR .AND. ABS(IOR)==2) WW(II+1,JJ+1,KK) = OM%W(IIO(ICD)+1,JJO(ICD)  ,KKO(ICD))
+                     IF (II==0    .AND. JJ==0    .AND. ABS(IOR)==1) WW(II  ,JJ  ,KK) = OM%W(IIO  ,JJO-1,KKO)
+                     IF (II==0    .AND. JJ==0    .AND. ABS(IOR)==2) WW(II  ,JJ  ,KK) = OM%W(IIO-1,JJO  ,KKO)
+                     IF (II==0    .AND. JJ==JBAR .AND. ABS(IOR)==1) WW(II  ,JJ+1,KK) = OM%W(IIO  ,JJO+1,KKO)
+                     IF (II==0    .AND. JJ==JBAR .AND. ABS(IOR)==2) WW(II  ,JJ+1,KK) = OM%W(IIO-1,JJO  ,KKO)
+                     IF (II==IBAR .AND. JJ==0    .AND. ABS(IOR)==1) WW(II+1,JJ  ,KK) = OM%W(IIO  ,JJO-1,KKO)
+                     IF (II==IBAR .AND. JJ==0    .AND. ABS(IOR)==2) WW(II+1,JJ  ,KK) = OM%W(IIO+1,JJO  ,KKO)
+                     IF (II==IBAR .AND. JJ==JBAR .AND. ABS(IOR)==1) WW(II+1,JJ+1,KK) = OM%W(IIO  ,JJO+1,KKO)
+                     IF (II==IBAR .AND. JJ==JBAR .AND. ABS(IOR)==2) WW(II+1,JJ+1,KK) = OM%W(IIO+1,JJO  ,KKO)
                END SELECT
             ENDIF
 
