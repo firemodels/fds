@@ -56,6 +56,13 @@ impi_intel_linux: obj = test_mpi
 impi_intel_linux: $(obj_mpi)
 	$(FCOMPL) -o $(obj) $(FFLAGS) $(obj_mpi)
 
+ompi_gnu_linux: FFLAGS = -m64 -O2
+ompi_gnu_linux: LFLAGS =
+ompi_gnu_linux: FCOMPL = mpifort
+ompi_gnu_linux: obj = test_mpi
+ompi_gnu_linux: $(obj_mpi)
+	$(FCOMPL) -o $(obj) $(FFLAGS) $(LFLAGS) $(obj_mpi)
+
 # OSX
 
 ompi_intel_osx: FFLAGS = -m64 -O2 -traceback -no-wrap-margin
