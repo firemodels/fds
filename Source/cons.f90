@@ -745,6 +745,7 @@ LOGICAL :: IN_MASTERS_RS
 
 ! Threshold factor for volume of cut-cells respect to volume of Cartesian cells:
 ! Currently used in the thermo div definition of cut-cells.
+REAL(EB), PARAMETER :: DEFAULT_VOLFRAC_LINK = 0.5_EB
 
 REAL(EB) :: CCVOL_LINK=0.95_EB
 LOGICAL  :: GET_CUTCELLS_VERBOSE=.FALSE.

@@ -24,8 +24,8 @@ USE PHYSICAL_FUNCTIONS, ONLY: GET_MOLECULAR_WEIGHT
 
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: TNOW,MW_F,MW_G,ZZ_GET(1:N_TRACKED_SPECIES)
-REAL(EB), DIMENSION(0:3,0:3,0:3) :: U_TEMP,F_TEMP
-REAL(EB), DIMENSION(-1:3,-1:3,-1:3) :: Z_TEMP
+REAL(EB), DIMENSION(0:3,0:3,0:3) :: F_TEMP
+REAL(EB), DIMENSION(-1:3,-1:3,-1:3) :: U_TEMP,Z_TEMP
 REAL(EB), PARAMETER :: DUMMY=0._EB
 INTEGER  :: I,J,K,N,IOR,IW,IIG,JJG,KKG,II,JJ,KK,IC
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,RHOP
@@ -379,9 +379,9 @@ END SELECT
 TNOW=CURRENT_TIME()
 CALL POINT_TO_MESH(NM)
 
-UU=>WORK1
-VV=>WORK2
-WW=>WORK3
+UU=>WORK_U
+VV=>WORK_V
+WW=>WORK_W
 DEL_RHO_D_DEL_Z__0=>SWORK4
 
 PREDICTOR_STEP: SELECT CASE (PREDICTOR)
@@ -443,9 +443,15 @@ CASE(.TRUE.) PREDICTOR_STEP
    IF (CC_IBM) CALL SET_EXIMADVFLX_3D(NM,UU,VV,WW)
    IF (STORE_SPECIES_FLUX) THEN
       DO N=1,N_TOTAL_SCALARS
-         ADV_FX(:,:,:,N) = FX(:,:,:,N)*UU(:,:,:)
-         ADV_FY(:,:,:,N) = FY(:,:,:,N)*VV(:,:,:)
-         ADV_FZ(:,:,:,N) = FZ(:,:,:,N)*WW(:,:,:)
+         DO K=0,KBAR
+            DO J=0,JBAR
+               DO I=0,IBAR
+                  ADV_FX(I,J,K,N) = FX(I,J,K,N)*UU(I,J,K)
+                  ADV_FY(I,J,K,N) = FY(I,J,K,N)*VV(I,J,K)
+                  ADV_FZ(I,J,K,N) = FZ(I,J,K,N)*WW(I,J,K)
+               ENDDO
+            ENDDO
+         ENDDO
       ENDDO
    ENDIF
 
@@ -625,9 +631,15 @@ CASE(.FALSE.) PREDICTOR_STEP  ! CORRECTOR step
    IF (CC_IBM) CALL SET_EXIMADVFLX_3D(NM,UU,VV,WW)
    IF (STORE_SPECIES_FLUX) THEN
       DO N=1,N_TOTAL_SCALARS
-         ADV_FX(:,:,:,N) = 0.5_EB*( ADV_FX(:,:,:,N) + FX(:,:,:,N)*UU(:,:,:) )
-         ADV_FY(:,:,:,N) = 0.5_EB*( ADV_FY(:,:,:,N) + FY(:,:,:,N)*VV(:,:,:) )
-         ADV_FZ(:,:,:,N) = 0.5_EB*( ADV_FZ(:,:,:,N) + FZ(:,:,:,N)*WW(:,:,:) )
+         DO K=0,KBAR
+            DO J=0,JBAR
+               DO I=0,IBAR
+                  ADV_FX(I,J,K,N) = 0.5_EB*( ADV_FX(I,J,K,N) + FX(I,J,K,N)*UU(I,J,K) )
+                  ADV_FY(I,J,K,N) = 0.5_EB*( ADV_FY(I,J,K,N) + FY(I,J,K,N)*VV(I,J,K) )
+                  ADV_FZ(I,J,K,N) = 0.5_EB*( ADV_FZ(I,J,K,N) + FZ(I,J,K,N)*WW(I,J,K) )
+               ENDDO
+            ENDDO
+         ENDDO
       ENDDO
    ENDIF
 
