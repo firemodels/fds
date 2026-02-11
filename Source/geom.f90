@@ -795,7 +795,7 @@ TYPE (MPI_STATUS) :: MPISTATUS
 CHARACTER(MESSAGE_LENGTH) :: VERBOSE_FILE, VERBOSE_FILE_AUX
 CHARACTER(1), DIMENSION(3), PARAMETER :: AXSTR(1:3) = (/ 'X', 'Y', 'Z' /)
 REAL(EB) :: CPUTIME, CPUTIME_START, CPUTIME_MESH, CPUTIME_START_MESH
-INTEGER :: MIN_FACES_PER_CUTCELL, MAX_FACES_PER_CUTCELL, MEAN_FACES_PER_CUTCELL, SUM_FACE, SUM_CCELL
+INTEGER :: MIN_FACES_PER_CUTCELL, MAX_FACES_PER_CUTCELL, MEAN_FACES_PER_CUTCELL, SUM_FACE, SUM_CCELL=0
 TYPE(CFACE_TYPE), POINTER :: CFA
 REAL(EB), ALLOCATABLE, DIMENSION(:)   :: GEOM_AREA_SURF
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: GEOM_AREA_SURF_OLD,GEOM_AREA_SURF_NEW
@@ -2199,58 +2199,110 @@ CONTAINS
 
 SUBROUTINE ADD_NEIGHBOR_BLOCKED_CELLS
 
-INTEGER :: NM2,ICELL
+USE TRAN, ONLY: GET_IJK
+INTEGER :: NM2,ICELL,I2,J2,K2,BLOCK_TAG
 LOGICAL :: IND_FOUND
-REAL(EB):: XCO,YCO,ZCO
+REAL(EB):: XCO,YCO,ZCO,VOL_NM,VOL_NOM,X1,Y1,Z1
+TYPE(MESH_TYPE), POINTER :: M2
 
 MESH_LOOP : DO NM=1,NMESHES
 
    IF (.NOT.CC_COMPUTE_MESH(NM)) CYCLE ! Only MESHES assigned to processor and OMESHES of these.
    IF (PERIODIC_TEST==105 .AND. PROCESS(NM)/=MY_RANK) CYCLE ! Don't do OMESHES for PERIODIC_TEST==105
 
-   !NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    CALL POINT_TO_MESH(NM)
    M => MESHES(NM)
    CALL DEFINE_XYZFACE_CELL(ALLOC_FLG=.TRUE.)
-   ! Add blocked cut-cells from neighboring meshes:
+
+   ! Compute average cell volume for mesh NM
+   VOL_NM = (M%XF-M%XS)*(M%YF-M%YS)*(M%ZF-M%ZS) / REAL(M%IBAR*M%JBAR*M%KBAR,EB)
+
+   ! Process blocked cut-cells from neighboring meshes:
    NEIGHBORING_MESHES_DO : DO NM2=1,M%N_NEIGHBORING_MESHES
       NOM = M%NEIGHBORING_MESH(NM2); IF (NOM==NM) CYCLE
-      ICELL_DO : DO ICELL=1,MESHES(NOM)%N_CC_BLOCKED
-         XCO = MESHES(NOM)%XYZ_CC_BLOCKED(IAXIS,ICELL)
-         YCO = MESHES(NOM)%XYZ_CC_BLOCKED(JAXIS,ICELL)
-         ZCO = MESHES(NOM)%XYZ_CC_BLOCKED(KAXIS,ICELL)
-         ! Search along X dir:
-         IND_FOUND = .FALSE.
-         DO I=ILO_CELL-1,IHI_CELL+1
-            IF (ABS(XCO-XCELL(I))<GEOMEPS) THEN
-               IND_FOUND = .TRUE.
-               EXIT
-            ENDIF
-         ENDDO
-         IF(.NOT.IND_FOUND) CYCLE ICELL_DO
-         ! Search along Y dir:
-         IND_FOUND = .FALSE.
-         DO J=JLO_CELL-1,JHI_CELL+1
-            IF (ABS(YCO-YCELL(J))<GEOMEPS) THEN
-               IND_FOUND = .TRUE.
-               EXIT
-            ENDIF
-         ENDDO
-         IF(.NOT.IND_FOUND) CYCLE ICELL_DO
-         ! Search along Z dir:
-         IND_FOUND = .FALSE.
-         DO K=KLO_CELL-1,KHI_CELL+1
-            IF (ABS(ZCO-ZCELL(K))<GEOMEPS) THEN
-               IND_FOUND = .TRUE.
-               EXIT
-            ENDIF
-         ENDDO
-         IF(.NOT.IND_FOUND) CYCLE ICELL_DO
+      M2 => MESHES(NOM)
 
-         ! Here we have found the I,J,K indices of the blocked cut-cell:
-         ICC=M%CCVAR(I,J,K,CC_IDCC)
-         IF(ICC>0) M%CUT_CELL(ICC)%NOADVANCE(MESHES(NOM)%JBT_CC_BLOCKED(1,ICELL)) = &
-                                             MESHES(NOM)%JBT_CC_BLOCKED(2,ICELL)
+      ICELL_DO : DO ICELL=1,M2%N_CC_BLOCKED
+         XCO = M2%XYZ_CC_BLOCKED(IAXIS,ICELL)
+         YCO = M2%XYZ_CC_BLOCKED(JAXIS,ICELL)
+         ZCO = M2%XYZ_CC_BLOCKED(KAXIS,ICELL)
+         BLOCK_TAG = M2%JBT_CC_BLOCKED(2,ICELL)
+
+         CALL GET_IJK(XCO,YCO,ZCO,NOM,X1,Y1,Z1,I2,J2,K2)
+         VOL_NOM = M2%DX(I2)*M2%DY(J2)*M2%DZ(K2)
+
+         IF (VOL_NM > 1.5_EB * VOL_NOM) THEN ! NM is COARSE, NOM is FINE
+            IF(XCO < M2%XS .OR. XCO > M2%XF .OR. &
+               YCO < M2%YS .OR. YCO > M2%YF .OR. &
+               ZCO < M2%ZS .OR. ZCO > M2%ZF) CYCLE ICELL_DO
+            IF(XCO > M2%X(1) .AND. XCO < M2%X(M2%IBAR-1) .AND. &
+               YCO > M2%Y(1) .AND. YCO < M2%Y(M2%JBAR-1) .AND. &
+               ZCO > M2%Z(1) .AND. ZCO < M2%Z(M2%KBAR-1)) CYCLE ICELL_DO
+
+            ! Find I,J,K in NM where (XCO,YCO,ZCO) falls within cell bounds
+            IND_FOUND = .FALSE.
+            DO I=ILO_CELL-1,IHI_CELL+1
+               IF (XCO < XFACE(I-1)-GEOMEPS .OR. XCO > XFACE(I)+GEOMEPS) CYCLE
+               DO J=JLO_CELL-1,JHI_CELL+1
+                  IF (YCO < YFACE(J-1)-GEOMEPS .OR. YCO > YFACE(J)+GEOMEPS) CYCLE
+                 DO K=KLO_CELL-1,KHI_CELL+1
+                     IF (ZCO < ZFACE(K-1)-GEOMEPS .OR. ZCO > ZFACE(K)+GEOMEPS) CYCLE
+                     IF (I > ILO_CELL-1  .AND. I < IHI_CELL+1  .AND. &
+                         J > JLO_CELL-1  .AND. J < JHI_CELL+1  .AND. &
+                         K > KLO_CELL-1  .AND. K < KHI_CELL+1) CYCLE
+                     IND_FOUND = .TRUE.
+                     EXIT
+                  ENDDO
+                  IF (IND_FOUND) EXIT
+               ENDDO
+               IF (IND_FOUND) EXIT
+            ENDDO
+            IF (.NOT.IND_FOUND) CYCLE ICELL_DO
+
+            ! Tag the coarse ghost-cell in NM that contains the blocked fine cell.
+            ICC = M%CCVAR(I,J,K,CC_IDCC)
+            IF (ICC > 0) THEN
+               DO JCC = 1, M%CUT_CELL(ICC)%NCELL
+                  IF (M%CUT_CELL(ICC)%NOADVANCE(JCC) == NOT_BLOCKED) &
+                     M%CUT_CELL(ICC)%NOADVANCE(JCC) = BLOCK_TAG
+               ENDDO
+            ENDIF
+
+
+         ELSE
+            ! =====================================================
+            ! Same refinement level (or refinement handled by EXT_WALL_LOOP) - use centroid matching
+            ! =====================================================
+            IND_FOUND = .FALSE.
+            DO I=ILO_CELL-1,IHI_CELL+1
+               IF (ABS(XCO-XCELL(I))<GEOMEPS) THEN
+                  IND_FOUND = .TRUE.
+                  EXIT
+               ENDIF
+            ENDDO
+            IF(.NOT.IND_FOUND) CYCLE ICELL_DO
+            IND_FOUND = .FALSE.
+            DO J=JLO_CELL-1,JHI_CELL+1
+               IF (ABS(YCO-YCELL(J))<GEOMEPS) THEN
+                  IND_FOUND = .TRUE.
+                  EXIT
+               ENDIF
+            ENDDO
+            IF(.NOT.IND_FOUND) CYCLE ICELL_DO
+            IND_FOUND = .FALSE.
+            DO K=KLO_CELL-1,KHI_CELL+1
+               IF (ABS(ZCO-ZCELL(K))<GEOMEPS) THEN
+                  IND_FOUND = .TRUE.
+                  EXIT
+               ENDIF
+            ENDDO
+            IF(.NOT.IND_FOUND) CYCLE ICELL_DO
+
+            ! Here we have found the I,J,K indices of the blocked cut-cell:
+            ICC=M%CCVAR(I,J,K,CC_IDCC)
+            IF(ICC>0) M%CUT_CELL(ICC)%NOADVANCE(M2%JBT_CC_BLOCKED(1,ICELL)) = BLOCK_TAG
+
+         ENDIF
       ENDDO ICELL_DO
    ENDDO NEIGHBORING_MESHES_DO
    CALL DEFINE_XYZFACE_CELL(ALLOC_FLG=.FALSE.)
@@ -7410,6 +7462,7 @@ INTEGER, INTENT(OUT):: IEC2,JEC2
 
 ! Local variables:
 INTEGER :: INOD1,INOD2,VL1(1:4),VL2(1:4),NVERT,NEDGE,IEDGE
+INTEGER, ALLOCATABLE :: EDGE_LIST_AUX(:,:)
 REAL(EB):: XV1(IAXIS:KAXIS),XV2(IAXIS:KAXIS)
 TYPE(MESH_TYPE), POINTER :: M
 
@@ -7480,7 +7533,18 @@ M%CUT_EDGE(IEC2)%NEDGE = NEDGE
 M%CUT_EDGE(IEC2)%INDSEG(1:5,NEDGE) = (/ 2, TRI, TRI, IBOD, 0 /)
 
 ! Define Edge as INB CUT_EDGE, find corresponding CFGAS EDGE associated cut-face and replace it
-IF(ICF2>0) M%CUT_FACE(ICF2)%EDGE_LIST(1:3,JCE2) =(/CC_ETYPE_CFINB, IEC2, JEC2/)
+IF(ICF2>0) THEN
+   ! Reallocate EDGE_LIST if JCE2 exceeds current size
+   NVERT = 0
+   IF(ALLOCATED(M%CUT_FACE(ICF2)%EDGE_LIST)) NVERT = SIZE(M%CUT_FACE(ICF2)%EDGE_LIST,DIM=2)-1
+   IF(JCE2 > NVERT) THEN
+      ALLOCATE(EDGE_LIST_AUX(3,0:JCE2))
+      EDGE_LIST_AUX = CC_UNDEFINED
+      IF(NVERT > 0) EDGE_LIST_AUX(1:3,0:NVERT) = M%CUT_FACE(ICF2)%EDGE_LIST(1:3,0:NVERT)
+      CALL MOVE_ALLOC(FROM=EDGE_LIST_AUX, TO=M%CUT_FACE(ICF2)%EDGE_LIST)
+   ENDIF
+   M%CUT_FACE(ICF2)%EDGE_LIST(1:3,JCE2) = (/CC_ETYPE_CFINB, IEC2, JEC2/)
+ENDIF
 
 END SUBROUTINE ADD_CUTEDGE_TO_FACE
 
@@ -23801,7 +23865,7 @@ IF (PRES_FLAG/=UGLMAT_FLAG) THEN
    PRES_FLAG   = ULMAT_FLAG
 ENDIF
 PRES_ON_WHOLE_DOMAIN = .FALSE.
-IF (ABS(CCVOL_LINK-0.95_EB)<TWENTY_EPSILON_EB) CCVOL_LINK = 0.5_EB
+IF (ABS(CCVOL_LINK-0.95_EB)<TWENTY_EPSILON_EB) CCVOL_LINK = DEFAULT_VOLFRAC_LINK
 IF (CHECK_POISSON) GLMAT_VERBOSE=.TRUE.
 
 CONTAINS

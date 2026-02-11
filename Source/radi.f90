@@ -4260,7 +4260,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                            ICF = FCVAR(I,J,K+IADD,CC_IDCF,KAXIS)
                            IF (ICF>0) AZD = AZD*CUT_FACE(ICF)%ALPHA_CF
                            IF(FCVAR(I,J,K+IADD,CC_FGSC,KAXIS)==CC_SOLID) AZD = 0._EB
-
+                           IF(ALL((/EXTCOE(I,J,K),AXD+AYD+AZD+AFD/)<TWO_EPSILON_EB)) CYCLE SLICE_LOOP
                            ! Adjust volume
                            IC = CCVAR(I,J,K,CC_IDCC)
                            VC = VC*CUT_CELL(IC)%ALPHA_CC
