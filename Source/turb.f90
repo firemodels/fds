@@ -1326,7 +1326,7 @@ SCALAR_FLUX_IF: IF (PRESENT(OPT_N)) THEN
          DO I=0,IBAR
             RHOBAR = 0.5_EB*(RHOP(I,J,K)+RHOP(I+1,J,K))
 
-            DUDX = (UU(I+1,J,K)-UU(MAX(0,I-1),J,K))/(DX(I)+DX(I+1))
+            DUDX = (UU(I+1,J,K)-UU(I-1,J,K))/(DX(I)+DX(I+1))
             DUDY = (UU(I,J+1,K)-UU(I,J-1,K))/(DYN(J-1)+DYN(J))
             DUDZ = (UU(I,J,K+1)-UU(I,J,K-1))/(DZN(K-1)+DZN(K))
 
@@ -1346,7 +1346,7 @@ SCALAR_FLUX_IF: IF (PRESENT(OPT_N)) THEN
             RHOBAR = 0.5_EB*(RHOP(I,J,K)+RHOP(I,J+1,K))
 
             DVDX = (VV(I+1,J,K)-VV(I-1,J,K))/(DXN(I-1)+DXN(I))
-            DVDY = (VV(I,J+1,K)-VV(I,MAX(0,J-1),K))/(DY(J)+DY(J+1))
+            DVDY = (VV(I,J+1,K)-VV(I,J-1,K))/(DY(J)+DY(J+1))
             DVDZ = (VV(I,J,K+1)-VV(I,J,K-1))/(DZN(K-1)+DZN(K))
 
             DZDX = 0.25_EB*RDX(I)*( ZZP(I+1,J,K,N) + ZZP(I+1,J+1,K,N) - ZZP(I-1,J,K,N) - ZZP(I-1,J+1,K,N) )
@@ -1366,7 +1366,7 @@ SCALAR_FLUX_IF: IF (PRESENT(OPT_N)) THEN
 
             DWDX = (WW(I+1,J,K)-WW(I-1,J,K))/(DXN(I-1)+DXN(I))
             DWDY = (WW(I,J+1,K)-WW(I,J-1,K))/(DYN(J-1)+DYN(J))
-            DWDZ = (WW(I,J,K+1)-WW(I,J,MAX(0,K-1)))/(DZ(K)+DZ(K+1))
+            DWDZ = (WW(I,J,K+1)-WW(I,J,K-1))/(DZ(K)+DZ(K+1))
 
             DZDX = 0.25_EB*RDX(I)*( ZZP(I+1,J,K,N) + ZZP(I+1,J,K+1,N) - ZZP(I-1,J,K,N) - ZZP(I-1,J,K+1,N) )
             DZDY = 0.25_EB*RDY(J)*( ZZP(I,J+1,K,N) + ZZP(I,J+1,K+1,N) - ZZP(I,J-1,K,N) - ZZP(I,J-1,K+1,N) )
@@ -1401,7 +1401,7 @@ ELSE SCALAR_FLUX_IF
       DO J=1,JBAR
          DO I=0,IBAR
 
-            DUDX = (UU(I+1,J,K)-UU(MAX(0,I-1),J,K))/(DX(I)+DX(I+1))
+            DUDX = (UU(I+1,J,K)-UU(I-1,J,K))/(DX(I)+DX(I+1))
             DUDY = (UU(I,J+1,K)-UU(I,J-1,K))/(DYN(J-1)+DYN(J))
             DUDZ = (UU(I,J,K+1)-UU(I,J,K-1))/(DZN(K-1)+DZN(K))
 
@@ -1420,7 +1420,7 @@ ELSE SCALAR_FLUX_IF
          DO I=1,IBAR
 
             DVDX = (VV(I+1,J,K)-VV(I-1,J,K))/(DXN(I-1)+DXN(I))
-            DVDY = (VV(I,J+1,K)-VV(I,MAX(0,J-1),K))/(DY(J)+DY(J+1))
+            DVDY = (VV(I,J+1,K)-VV(I,J-1,K))/(DY(J)+DY(J+1))
             DVDZ = (VV(I,J,K+1)-VV(I,J,K-1))/(DZN(K-1)+DZN(K))
 
             DTDX = 0.25_EB*RDX(I)*( TMP(I+1,J,K) + TMP(I+1,J+1,K) - TMP(I-1,J,K) - TMP(I-1,J+1,K) )
@@ -1439,7 +1439,7 @@ ELSE SCALAR_FLUX_IF
 
             DWDX = (WW(I+1,J,K)-WW(I-1,J,K))/(DXN(I-1)+DXN(I))
             DWDY = (WW(I,J+1,K)-WW(I,J-1,K))/(DYN(J-1)+DYN(J))
-            DWDZ = (WW(I,J,K+1)-WW(I,J,MAX(0,K-1)))/(DZ(K)+DZ(K+1))
+            DWDZ = (WW(I,J,K+1)-WW(I,J,K-1))/(DZ(K)+DZ(K+1))
 
             DTDX = 0.25_EB*RDX(I)*( TMP(I+1,J,K) + TMP(I+1,J,K+1) - TMP(I-1,J,K) - TMP(I-1,J,K+1) )
             DTDY = 0.25_EB*RDY(J)*( TMP(I,J+1,K) + TMP(I,J+1,K+1) - TMP(I,J-1,K) - TMP(I,J-1,K+1) )
