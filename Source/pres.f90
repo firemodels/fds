@@ -509,7 +509,7 @@ SUBROUTINE TUNNEL_POISSON_SOLVER
 USE MPI_F08
 USE GLOBAL_CONSTANTS
 USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
-REAL(EB) :: RR,DXO
+REAL(EB) :: RR,DXO,SECTION_AREA_XS,SECTION_AREA_XF
 INTEGER :: IERR,II,NM,I,J,K
 REAL(EB) :: TNOW
 TYPE (MESH_TYPE), POINTER :: M
@@ -566,14 +566,36 @@ MESH_LOOP_1: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
    M%BXS_BAR = 0._EB
    M%BXF_BAR = 0._EB
-   DO K=1,M%KBAR
-     DO J=1,M%JBAR
-         M%BXS_BAR = M%BXS_BAR + M%BXS(J,K)*M%DY(J)*M%DZ(K)
-         M%BXF_BAR = M%BXF_BAR + M%BXF(J,K)*M%DY(J)*M%DZ(K)
+   IF(PRES_FLAG==ULMAT_FLAG) THEN
+      SECTION_AREA_XS = TWO_EPSILON_EB
+      SECTION_AREA_XF = TWO_EPSILON_EB
+      DO K=1,M%KBAR
+         DO J=1,M%JBAR
+            IF(M%CELL(M%CELL_INDEX(0,J,K))%SOLID .OR. M%CELL(M%CELL_INDEX(1,J,K))%SOLID) CYCLE
+            M%BXS_BAR = M%BXS_BAR + M%BXS(J,K)*M%DY(J)*M%DZ(K)
+            SECTION_AREA_XS = SECTION_AREA_XS + M%DY(J)*M%DZ(K)
+         ENDDO
       ENDDO
-   ENDDO
-   M%BXS_BAR = M%BXS_BAR/((M%YF-M%YS)*(M%ZF-M%ZS))  ! Left boundary condition, bar(b)_x,1
-   M%BXF_BAR = M%BXF_BAR/((M%YF-M%YS)*(M%ZF-M%ZS))  ! Right boundary condition, bar(b)_x,2
+      DO K=1,M%KBAR
+         DO J=1,M%JBAR
+            IF(M%CELL(M%CELL_INDEX(M%IBAR,J,K))%SOLID .OR. M%CELL(M%CELL_INDEX(M%IBP1,J,K))%SOLID) CYCLE
+            M%BXF_BAR = M%BXF_BAR + M%BXF(J,K)*M%DY(J)*M%DZ(K)
+            SECTION_AREA_XF = SECTION_AREA_XF + M%DY(J)*M%DZ(K)
+         ENDDO
+      ENDDO
+   ELSE
+      DO K=1,M%KBAR
+         DO J=1,M%JBAR
+            M%BXS_BAR = M%BXS_BAR + M%BXS(J,K)*M%DY(J)*M%DZ(K)
+            M%BXF_BAR = M%BXF_BAR + M%BXF(J,K)*M%DY(J)*M%DZ(K)
+         ENDDO
+      ENDDO
+      SECTION_AREA_XS=((M%YF-M%YS)*(M%ZF-M%ZS))
+      SECTION_AREA_XF=((M%YF-M%YS)*(M%ZF-M%ZS))
+   ENDIF
+
+   M%BXS_BAR = M%BXS_BAR/SECTION_AREA_XS  ! Left boundary condition, bar(b)_x,1
+   M%BXF_BAR = M%BXF_BAR/SECTION_AREA_XF  ! Right boundary condition, bar(b)_x,2
 
    M%BXS = M%BXS - M%BXS_BAR  ! This new BXS (b_x,1(j,k)) will be used for the 3-D pressure solve
    M%BXF = M%BXF - M%BXF_BAR  ! This new BXF (b_x,2(j,k)) will be used for the 3-D pressure solve
