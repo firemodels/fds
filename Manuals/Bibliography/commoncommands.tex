@@ -64,7 +64,9 @@
 \usepackage[section]{placeins}
 \usepackage{scrextend}
 \usepackage{needspace}
-\usepackage[backend=biber, style=numeric, sorting=none, backref=true, giveninits=true, maxbibnames=99]{biblatex}
+\usepackage[backend=biber, style=phys, sorting=none, backref=true, giveninits=true, maxbibnames=99]{biblatex}
+\renewbibmacro{in:}{}
+\DeclareFieldFormat{titlecase}{#1}
 
 \newcommand{\nopart}{\expandafter\def\csname Parent-1\endcsname{}} % To fix table of contents in pdf.
 \newcommand{\ct}[1]{\lstinline{#1}}
