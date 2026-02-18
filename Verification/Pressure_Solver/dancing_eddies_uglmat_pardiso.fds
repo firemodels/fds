@@ -1,4 +1,4 @@
-&HEAD CHID='dancing_eddies_uglmat', TITLE='Simple 2D Tunnel test of UGLMAT solver'/ 
+&HEAD CHID='dancing_eddies_uglmat_pardiso', TITLE='Simple 2D Tunnel test of UGLMAT PARDISO solver'/ 
 
 &MULT ID='mesh',DX=0.075,I_UPPER=3 /
 &MESH IJK=75,1,40, XB=0.0,0.075,-0.001,0.001,-0.02,0.020, MULT_ID='mesh' /
