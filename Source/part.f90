@@ -1220,14 +1220,12 @@ TOTAL_OR_PER_CELL: IF (IN%N_PARTICLES > 0) THEN
                   CF => CUT_FACE(INDCF)
                   CC_VALID = .FALSE.
                   CFA_LOOP1: DO IFACE=1,CF%NFACE
-                     P_VECTOR = (/LP_X-CF%XYZCEN(IAXIS,IFACE), &
-                                 LP_Y-CF%XYZCEN(JAXIS,IFACE), &
-                                 LP_Z-CF%XYZCEN(KAXIS,IFACE)/)
+                     P_VECTOR = (/LP_X-CF%XYZCEN(IAXIS,IFACE), LP_Y-CF%XYZCEN(JAXIS,IFACE), LP_Z-CF%XYZCEN(KAXIS,IFACE)/)
                      DIST = NORM2(P_VECTOR)
                      IF (DIST<DIST_MIN) THEN
                         DIST_MIN = DIST
                         P_VECTOR_MIN = P_VECTOR
-                        NVEC_MIN = BOUNDARY_COORD(CFACE(CF%CFACE_INDEX(IFACE))%BC_INDEX)%NVEC
+                        NVEC_MIN = MESHES(NM)%BOUNDARY_COORD(CFACE(CF%CFACE_INDEX(IFACE))%BC_INDEX)%NVEC
                      ENDIF
                   ENDDO CFA_LOOP1
                   IF (DOT_PRODUCT(NVEC_MIN,P_VECTOR_MIN) > TWENTY_EPSILON_EB) CC_VALID=.TRUE.
