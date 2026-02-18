@@ -1,6 +1,6 @@
 Test pressure iteration routine for flow through a duct across meshes
 
-&HEAD CHID='duct_flow_uglmat', TITLE='Flow through a duct, test of UGLMAT solver' /
+&HEAD CHID='duct_flow_uglmat_pardiso', TITLE='Flow through a duct, test of UGLMAT PARDISO solver' /
 
 &MESH IJK=16,16,16, XB=-.2,3.0,-.2,3.0,-.2,3.0, MULT_ID='mesh' /
 &MULT ID='mesh', DX=3.2, DY=3.2, DZ=3.2, I_UPPER=1, J_UPPER=1, K_UPPER=1 /
