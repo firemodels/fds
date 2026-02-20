@@ -144,38 +144,38 @@ The Fire Dynamics Simulator, in various forms, has been under development for al
 \item Topi Sikanen, VTT, Finland, worked on the droplet and evaporation algorithms.
 \item Ben Trettel, The University of Texas at Austin, developed high-order droplet tracking methods and primary droplet breakup models.
 \end{itemize}
-Finally, on the following pages is a list of individuals and organizations who have volunteered their time and effort to
-``beta test'' FDS and Smokeview prior to its official release. Their contribution is invaluable because there is simply no other way
-to test all of the various features of the model.
+%Finally, on the following pages is a list of individuals and organizations who have volunteered their time and effort to
+%``beta test'' FDS and Smokeview prior to its official release. Their contribution is invaluable because there is simply no other way
+%to test all of the various features of the model.
 
-\newpage
+%\newpage
 
-\begin{longtable}{|l|l|}
-\hline
-\multicolumn{2}{|c|}{\bf FDS 6 Beta Testers} \\ \hline \hline
-Mohammed Assal                          & CFD Algeria                                                               \\ \hline
-Choon-Bum Choi                          & KyungWon Tech Co., Ltd.~(KW Tech), Korea                                  \\ \hline
-William J. Ferrante                     & Roosevelt Fire District, Hyde Park, New York, USA                         \\ \hline
-Emanuele Gissi                          & Corpo Nazionale dei Vigili del Fuoco, Italy                               \\ \hline
-Timothy M. Groch                        & Engineering Planning and Management, Inc.,~Framingham, Massachusetts, USA \\ \hline
-Georges Guigay                          & Mannvit Engineering, Iceland                                              \\ \hline
-Simon J. Ham                            & Fire Safety Engineering Consultants Limited, UK                           \\ \hline
-Chris Lautenberger                      & Reax Engineering, Berkeley, California, USA                               \\ \hline
-Tim McDonald                            & Endress Ingenieurgesellschaft mbH, Germany                                \\ \hline
-Dave McGill                             & Seneca College, Ontario, Canada                                           \\ \hline
-Adrian Milford                          & Sereca Fire Consulting Ltd.,~British Columbia, Canada                     \\ \hline
-Luca Nassi                              & National Fire Department, Italy                                           \\ \hline
-Stephen Olenick                         & Combustion Science and Engineering, Inc.,~Columbia, Maryland, USA         \\ \hline
-Natalie Ong                             & Arup Fire Singapore                                                       \\ \hline
-Chris Salter                            & Hoare Lea and Partners, UK                                                \\ \hline
-Joakim Sandstr\"{o}m                    & LTU/Brandskyddslaget, Sweden                                              \\ \hline
-Julio Cesar Silva                       & Federal University of Rio de Janeiro, Brazil                              \\ \hline
-Boris Stock                             & BFT Cognos GmbH, Aachen, Germany                                          \\ \hline
-Csaba Szilagyi                          & OPTOMM Ltd.,~Budapest, Hungary                                            \\ \hline
-Giacomo Villi                           & Universit\`{a} di Padova, Italy                                           \\ \hline
-Andreas Vischer                         & Wijnveld//Ingenieure, Osnabr\"{u}ck, Germany                              \\ \hline
-Christopher Wood                        & FireLink, LLC, Tewksbury, Massachusetts, USA                              \\ \hline
-\end{longtable}
+%\begin{longtable}{|l|l|}
+%\hline
+%\multicolumn{2}{|c|}{\bf FDS 6 Beta Testers} \\ \hline \hline
+%Mohammed Assal                          & CFD Algeria                                                               \\ \hline
+%Choon-Bum Choi                          & KyungWon Tech Co., Ltd.~(KW Tech), Korea                                  \\ \hline
+%William J. Ferrante                     & Roosevelt Fire District, Hyde Park, New York, USA                         \\ \hline
+%Emanuele Gissi                          & Corpo Nazionale dei Vigili del Fuoco, Italy                               \\ \hline
+%Timothy M. Groch                        & Engineering Planning and Management, Inc.,~Framingham, Massachusetts, USA \\ \hline
+%Georges Guigay                          & Mannvit Engineering, Iceland                                              \\ \hline
+%Simon J. Ham                            & Fire Safety Engineering Consultants Limited, UK                           \\ \hline
+%Chris Lautenberger                      & Reax Engineering, Berkeley, California, USA                               \\ \hline
+%Tim McDonald                            & Endress Ingenieurgesellschaft mbH, Germany                                \\ \hline
+%Dave McGill                             & Seneca College, Ontario, Canada                                           \\ \hline
+%Adrian Milford                          & Sereca Fire Consulting Ltd.,~British Columbia, Canada                     \\ \hline
+%Luca Nassi                              & National Fire Department, Italy                                           \\ \hline
+%Stephen Olenick                         & Combustion Science and Engineering, Inc.,~Columbia, Maryland, USA         \\ \hline
+%Natalie Ong                             & Arup Fire Singapore                                                       \\ \hline
+%Chris Salter                            & Hoare Lea and Partners, UK                                                \\ \hline
+%Joakim Sandstr\"{o}m                    & LTU/Brandskyddslaget, Sweden                                              \\ \hline
+%Julio Cesar Silva                       & Federal University of Rio de Janeiro, Brazil                              \\ \hline
+%Boris Stock                             & BFT Cognos GmbH, Aachen, Germany                                          \\ \hline
+%Csaba Szilagyi                          & OPTOMM Ltd.,~Budapest, Hungary                                            \\ \hline
+%Giacomo Villi                           & Universit\`{a} di Padova, Italy                                           \\ \hline
+%Andreas Vischer                         & Wijnveld//Ingenieure, Osnabr\"{u}ck, Germany                              \\ \hline
+%Christopher Wood                        & FireLink, LLC, Tewksbury, Massachusetts, USA                              \\ \hline
+%\end{longtable}
 
 \cleardoublepage
 \phantomsection
@@ -209,102 +209,121 @@ Smokeview is a separate visualization program that is used to display the result
 
 \section{Features of FDS}
 
-The first version of FDS was publicly released in February 2000. To date, about half of the applications of the model have been for design of smoke handling systems and sprinkler/detector activation studies. The other half consist of residential and industrial fire reconstructions. Throughout its development, FDS has been aimed at solving practical fire problems in fire protection engineering, while at the same time providing a tool to study fundamental fire dynamics and combustion.
+The first version of FDS was publicly released in February 2000. %To date, about half of the applications of the model have been for design of smoke handling systems and sprinkler/detector activation studies. The other half consist of residential and industrial fire reconstructions.
+Throughout its development, FDS has been aimed at solving practical fire problems in fire protection engineering, while at the same time providing a tool to study fundamental fire dynamics and combustion.
 
 \begin{description}
 \item[Hydrodynamic Model] FDS solves numerically a form of the Navier-Stokes equations appropriate for low-speed, thermally-driven flow with an emphasis on smoke and heat transport from fires. The core algorithm is an explicit predictor-corrector scheme, second order accurate in space and time. Turbulence is treated by means of Large Eddy Simulation (LES). It is possible to perform a Direct Numerical Simulation (DNS) if the underlying numerical mesh is fine enough. See Sec.~\ref{Sim_Mode} for further details.
-\item[Combustion Model] For most applications, FDS uses a single step, mixing-controlled chemical reaction which uses three lumped species (a species representing a group of species). These lumped species are air, fuel, and products. By default the last two lumped species are explicitly computed. Options are available to include multiple reactions and reactions that are not necessarily mixing-controlled.
-\item[Radiation Transport] Radiative heat transfer is included in the model via the solution of the radiation transport equation for a gray gas, and in some limited cases using a wide band model. The equation is solved using a technique similar to finite volume methods for convective transport, thus the name given to it is the Finite Volume Method (FVM).  Using approximately 100 discrete angles, the finite volume solver requires about 20~\% of the total CPU time of a calculation, a modest cost given the complexity of radiation heat transfer. The absorption coefficients of the gas-soot mixtures are computed using the RadCal narrow-band model~\cite{RadCal}.  Liquid droplets can absorb and scatter thermal radiation. This is important in cases involving mist sprinklers, but also plays a role in all sprinkler cases.  The absorption and scattering coefficients are based on Mie theory.
+\item[Combustion Model] For most applications, FDS uses a single step, mixing-controlled chemical reaction which uses three lumped species (a species representing a group of species). These lumped species are air, fuel, and products. %By default the last two lumped species are explicitly computed. 
+Options are available to include multiple reactions and reactions that are not necessarily mixing-controlled.
+\item[Radiation Transport] Radiative heat transfer is included in the model via the solution of the radiation transport equation for a gray gas. A wide band model is also available. The equation is solved using a technique similar to finite volume methods for convective transport, thus the name given to it is the Finite Volume Method (FVM).  Using approximately 100 discrete angles, the finite volume solver requires about 20~\% of the total CPU time of a calculation, a modest cost given the complexity of radiation heat transfer. The absorption coefficients of the gas-soot mixtures are computed using the RadCal narrow-band model~\cite{RadCal}.  Liquid droplets can absorb and scatter thermal radiation. This is important in cases involving mist sprinklers, but also plays a role in all sprinkler cases.  The absorption and scattering coefficients are based on Mie theory.
 \item[Geometry] FDS approximates the governing equations on a rectilinear mesh. Rectangular obstructions are forced to conform with the underlying mesh.
 \item[Multiple Meshes] This is a term used to describe the use of more than one rectangular mesh in a calculation. It is possible to prescribe more than one rectangular mesh to handle cases where the computational domain is not easily embedded within a single mesh.
 \item[Parallel Processing] FDS employs OpenMP~\cite{Chapman:OpenMP}, a programming interface that exploits multiple processing units on a single computer. For clusters of computers, FDS employs Message Passing Interface (MPI)~\cite{Gropp:1}. Details can be found in Sec.~\ref{info:parallelprocessing}.
-\item[Boundary Conditions] All solid surfaces are assigned thermal boundary conditions, plus information about the burning behavior of the material. Heat and mass transfer to and from solid surfaces is usually handled with empirical correlations, although it is possible to compute directly the heat and mass transfer when performing a Direct Numerical Simulation (DNS).
+\item[Boundary Conditions] All solid surfaces are assigned thermal, flow, and species boundary conditions. Flow and species conditions can be specified or computed using a pyrolysis model that describes the burning behavior of the material. Heat transfer to and from solid surfaces is usually handled with empirical correlations, although it is possible to compute directly the heat and mass transfer when performing a Direct Numerical Simulation (DNS).
 \end{description}
 
 
-\section{What's New in FDS 6?}
+\section{What's New in FDS 7?}
 
 Many of the changes in FDS~6 are improvements to the various sub-models that do not affect the basic structure or parameters of the input file. Most of the changes listed below do not require additional input parameters beyond those used in FDS~5.
 
 \subsubsection{Hydrodynamics and Turbulence}
 
    \begin{itemize}
-   \item Conservative, total variation diminishing (TVD) scalar transport is implemented: Superbee (VLES default) and CHARM (LES and DNS default). These schemes prevent over-shoots and under-shoots in species concentrations and temperature.
-   \item Improved models for the turbulent viscosity are implemented: Deardorff (default), Dynamic Smagorinsky, and Vreman. These models provide more dynamic range to the flow field for coarse resolution and converge to the correct solution at fine resolution.
-   \item The conservative form of the sensible enthalpy equation is satisfied by construction in the FDS~6 formulation, eliminating temperature anomalies and energy conservation errors due to numerical mixing.
-   \item The baroclinic torque is included by default.
-   \item Improvements are made to the wall functions for momentum and heat flux. An optional wall heat flux model accounts for variable Prandtl number fluids.
-   \item Jarrin's Synthetic Eddy Method (SEM) is implemented for turbulent boundary conditions at vents.
+   		\item The background species is now explicitly tracked.
+		\item An improved, total variation diminishing (TVD) scalar transport is implemented that fixes an existing issue when three or more species are being transported.
+		\item A new approach for treating flows at corners has been implemented.
+		\item The near wall turbulence model was changed to \ct{WALE}.
+    	\item \ct{SIMULATON_MODE} and \ct{FLUX_LIMITER} are now used to set basic parameters for the flow solver.
+    	\item The \ct{WIND} keyword was added to provide various means of specifying wind.
+    	\item Multiple new pressure solvers added in addition to the default FFT solver.
    \end{itemize}
 
 \subsubsection{Species and Combustion}
 
     \begin{itemize}
-    \item Custom species mixtures (``lumped species'') can be defined with the input group SPEC.
-    \item Turbulent combustion is handled with a new partially-stirred batch reactor model. At the subgrid level, species exist in one of two states: unmixed or mixed. The degree of mixing evolves over the FDS time step by the interaction by exchange with the mean (IEM) mixing model. Chemical kinetics may be considered infinitely fast or obey an Arrhenius rate law.
-    \item It is now possible to transport, produce, and consume product species such as CO and soot. Chemical mechanisms must be provided by the user and may include reversible reactions.
-    \item It is now possible to deposit aerosol species onto surfaces.
-    \item There are an increased number of predefined species that now include liquid properties.
+    	\item Detailed chemistry is supported by the use of the CVODES solver. Python scripts are provided to convert Canterra YAML files to FDS  inputs.
+    	\item Finite rate chemistry now supports third body reactions with non-unity collision efficiencies, pressure based reaction rates, and catalytic reactions.
+    	\item The species of \ct{SOOT} now has a default formula of C only.
+    	\item Over 300 gas and liquid species now predefined.
+    	\item HCN yields can be specified for either single or two step simple chemistry reactions.
+    	\item A drift flux model has been added for gas phase settling of aerosol species.
     \end{itemize}
 
 \subsubsection{Lagrangian Particles}
 
     \begin{itemize}
-    \item The functionality of Lagrangian particles has expanded to include the same heat transfer and pyrolysis models that apply to solid walls. In other words, you can now assign a set of surface properties to planar, cylindrical, or spherical particles much like you would for a solid surface.
-    \item More alternatives and user-defined option are available for the liquid droplet size distribution.
-    \item You can specify the radiative properties of the liquid droplets.
-    \item Drag effects of thin porous media (i.e., window screens) can be simulated using planes of particles.
+    	\item \ct{ORIENTATION_RAMP} added to \ct{INIT} to control the orientation of particles placed with \ct{INTI}.
     \end{itemize}
 
 \subsubsection{Solid Phase Heat Transfer and Pyrolysis}
 
     \begin{itemize}
-    \item The basic 1-D heat transfer and pyrolysis model for solid surfaces remains the same, but there has been a change in several of the input parameters to expand functionality and readability of the input file.
-    \item The pyrolysis model allows for the surface to shrink or swell, based on the specified material densities.
+    	\item Thin obstructions can now burn.
+    	\item A flux based model for oxidative pyrolysis has been added.
+    	\item A new approach to dynamic wall re-noding was implemented.
+    	\item SPyro (Scaling Pyrolysis) added. This uses the FDS predicted incident flux to scale burning rate data from multiple cone calorimeter tests with varying exposures and sample thicknesses.
+    	\item 1D heat transfer can occur over multi-cell thick obstacles.
+    	\item Global energy conversation during pyrolysis is now strictly enforced.
     \end{itemize}
 
 \subsubsection{HVAC}
 
    \begin{itemize}
-    \item Filters, louvered vents, and heating/cooling capability has been added for HVAC systems.
-    \item HVAC is now functional with MPI.
+	   	\item HVAC can now be used with \ct{GEOM}.
+	   	\item An improved algorithm for identifying HVAC coupled pressure zones was added.
+	   	\item Smokeview outputs for HVAC added to visualize the network and duct and node outputs.
+	   	\item DUCT \ct{WAYPOINT}s added to improve Smokeview visualization.
     \end{itemize}
 
 \subsubsection{Radiation}
 
     \begin{itemize}
-    \item RadCal database has been extended to include additional fuel species.
-    \item In cells with heat release, the emission term is based on a corrected $\sigma \, T^4$ such that when this term is integrated over the flame volume the specified radiative fraction (default 0.35) is recovered. This differs from FDS~5 and earlier where the radiative fraction times the heat release rate was applied locally as the emission term.
+    	\item A new method of adjusting the radiative emission on coarse grids was added.
+    	\item Default values for the radiative fraction is specified for various fuels. and the radiant fraction can be a function of the local mixture of fuels.
     \end{itemize}
 
 \subsubsection{Multi-Mesh Computations}
 
     \begin{itemize}
-    \item By default, FDS now iterates pressure and velocity at mesh and solid boundaries. You can control the error tolerance and maximum number of iterations via parameters on the \ct{PRES} line.
+    \item The UGLMAT pressure solver can now be used with mesh refinement.
+    \item Various improvements in the efficiency of MPI communications have been implemented.
+    \item A \ct{TUNNEL_PRECONDITIONER} was added for cases consisting of a single long tunnel.
     \end{itemize}
 
 \subsubsection{Control Functions}
 
     \begin{itemize}
-    \item \ct{CTRL} functions have been extended to include math operations.
-    \item The evaluation of \ct{RAMP}s and \ct{DEVC}s can be stopped, freezing their value, based upon the activation of a device or control function.
+    \item \ct{CTRL} functions and \ct{RAMP}s can be controlled by an external process running simultaneously with FDS.
     \end{itemize}
 
 \subsubsection{Devices and Output}
 
     \begin{itemize}
-    \item Multiple pipe networks can be specified for sprinklers for reduction of flow rate based on the number of operating heads.
-    \item The numerical value of a control function can be output with a \ct{DEVC}.
-    \item A line of devices can be specified using a number of \ct{POINTS} on one \ct{DEVC} line.
-    \item Statistical outputs for RMS, covariance, and correlation coefficient are available.
+    	\item A \ct{BI-DIRECTIONAL PROBE} output is added which models the output of a typical probe.
+    	\item The \ct{DRY} flag for species outputs can be added to HVAC and \ct{SLCF} outputs.
+    	\item \ct{VIEW_ANGLE} can be specified for heat flux gauges.
+    	\item \ct{PROF}ile outputs can now use any solid phase \ct{QUANTITY} that takes a \ct{DEPTH}.
+    	\item Both spatial and temporal statistics can be applied to a \ct{DEVC} that spans multiple meshes.
     \end{itemize}
 
+\subsubsection{Beta Features}
+	\begin{itemize}
+		\item Unstructured geometry (\ct{GEOM}) remains in beta.
+		\item 3D heat transfer remain in beta.
+	\end{itemize}
 
+\subsection{Quality Assurance}
+	\begin{itemize}
+		\item Continuous integration has been migrated from Matlan to Python.
+	\end{itemize}
 
-
-
-
-
+\subsection{FDS Executable}
+	\begin{itemize}
+		\item Two executables are now provided for running FDS with and without OpenMP.
+		\item For Windows a special command prompt (CMDfds) is added.
+	\end{itemize}
 
 \chapter{Getting Started}
 \label{info:gettingstarted}
@@ -332,7 +351,7 @@ The typical FDS/Smokeview distribution consists of an installation package or co
 
 The only hard requirement to run the compiled versions of FDS and Smokeview is a 64~bit Windows, Linux, or macOS operating system. The single computer or compute cluster ought to have fast processors (CPUs), and at least 2 to 4~GB RAM per core. The CPU speed will determine how long the computation will take to finish, while the amount of RAM will determine how many mesh cells can be held in memory. A large hard drive is required to store the output of the calculations since the FDS output for a single calculation may consume more than 10~GB of storage space.
 
-Most computers purchased within the past few years are adequate for running Smokeview with the caveat that additional memory (RAM) should be purchased to bring the memory size up to at least 2~GB. This is so the computer can display results without ``swapping'' to disk. For Smokeview it is also important to obtain a fast graphics card for the PC used to display the results of the FDS computations.
+Most computers purchased within the past few years are adequate for running Smokeview with the caveat that additional memory (RAM) should be purchased to bring the memory size up to at least 16~GB. This is so the computer can display results without ``swapping'' to disk. For Smokeview it is also important to obtain a fast graphics card for the PC used to display the results of the FDS computations.
 
 Running FDS using MPI requires shared disk access to each computer on which cases will be run.  On Windows systems this involves a domain network with the ability to share folders.  On a Linux or macOS system this involves NFS cross mounted files systems with ssh keys setup for password-less login. For Multi-Mesh calculations, the FDS can operate over standard 100~Mb/s networks. A gigabit (1000~Mb/s) network will further reduce network communication times improving data transfer rates between instances of FDS running the parallel cases.
 
@@ -357,7 +376,7 @@ If you are a first-time user or you simply want to ensure that FDS and Smokeview
 \chapter{Running FDS}
 \label{info:runningFDS}
 
-Each FDS simulation is controlled by a single text-based input file, typically given a name that helps identify the particular case, and ending with the file extension \ct{.fds}. This input file can be written directly with a text editor or with the help of a third-party graphical user interface (GUI). The simulation is started directly via the command prompt or through the GUI. The creation of an input file is covered in detail in Part~\ref{info:inputfilecreation}. This chapter describes how the simulation is run once the input file is written.
+Each FDS simulation is usually controlled by a single text-based input file, typically given a name that helps identify the particular case, and ending with the file extension \ct{.fds}. This input file can be written directly with a text editor or with the help of a third-party graphical user interface (GUI). The simulation is started directly via the command prompt or through the GUI. The creation of an input file is covered in detail in Part~\ref{info:inputfilecreation}. This chapter describes how the simulation is run once the input file is written.
 
 If you are new to FDS and Smokeview, it is strongly suggested that you start with an existing input file, run it as is, and then make the appropriate changes to the file for your desired scenario. By running a sample case, you become familiar with the procedure, learn how to use Smokeview, and ensure that your computer is up to the task before embarking on learning how to create new input files.
 
@@ -370,16 +389,16 @@ Sample input files are included as part of the standard installation. A good cas
 
 FDS simulations can exploit multiple processing units on a single computer or multiple computers on a network. Before running an FDS simulation, you should familiarize yourself with your computer hardware.
 
-When using a computer running Microsoft Windows, open up the Task Manager, Performance tab, and look for the number of {\em sockets}, {\em cores}, and {\em logical processors}\footnote{The terms sockets, cores, and logical processors are used by the Windows~10 Task Manager on a computer using an Intel processor. These terms might vary with different versions of Windows and different processors.}. The socket refers to the physical connector on the motherboard that has a power supply and a connection to random access memory (RAM). This is usually referred to as the central processing unit or CPU. Some motherboards have multiple sockets that can in turn support multiple CPUs, but for typical Windows desktops or laptops, there is one socket/CPU. Each CPU, however, typically has multiple cores, and each core is essentially an independent processing unit that shares access to power and memory. Sometimes cores are referred to as {\em physical cores} to distinguish them from {\em logical cores} or {\em logical processors}. A logical processor is one of multiple {\em threads} that can be supported by a core. For the purpose of running FDS on a Windows computer, the number of logical processors is the most important consideration.
+When using a computer running Microsoft Windows, open up the Task Manager, Performance tab, and look for the number of {\em sockets}, {\em cores}, and {\em logical processors}\footnote{The terms sockets, cores, and logical processors are used by the Windows~10 Task Manager on a computer using an Intel processor. These terms might vary with different versions of Windows and different processors.}. The socket refers to the physical connector on the motherboard that has a power supply and a connection to random access memory (RAM). This is usually referred to as the central processing unit or CPU. Some motherboards have multiple sockets that can in turn support multiple CPUs, but for typical Windows desktops or laptops, there is one socket/CPU. Each CPU, however, typically has multiple cores, and each core is essentially an independent processing unit that shares access to power and memory. Sometimes cores are referred to as {\em physical cores} to distinguish them from {\em logical cores} or {\em logical processors}. A logical processor is one of multiple {\em threads} that can be supported by a core. Depending on your specific hardware, you may not be able to efficiently use multiple threads on one core.
 
 If you are running FDS under any variety of Linux or macOS, you can determine the number of logical processors using the command ``lscpu'' for Linux or ``sysctl hw'' for OS~X. These operating systems might use slightly different terms, but the processors are similar if not the same as those on a Windows computer.
 
 
 \subsection{Two Ways to Use Multiple Processors}
 
-FDS can be run on a single computer, using one or more cores, or it can be run on multiple computers. Starting with FDS version~6.2.0, for each supported operating system (Windows, Linux, macOS) there is a single\footnote{Previous releases of FDS contained two executables, one that ran on a single processor and one that ran on multiple processors. Starting with FDS~6.2.0, these two executables have been combined into one, and it can run either in serial or parallel mode.} executable file called \ct{fds} (with an \ct{.exe}\ file extension on Windows).
+FDS can be run on a single computer, using one or more cores, or it can be run on multiple computers. For each supported operating system (Windows, Linux, macOS) there are two executables. One is for running with OpenMP and one is for running without OpenMP. Both executables support using MPI.
 
-There are two ways that FDS can be run in parallel; that is, exploit multiple cores on a single computer or multiple processors/cores distributed over multiple computers on a network or compute cluster. The first way is OpenMP (Open Multi-Processing)~\cite{Chapman:OpenMP} which allows a single computer to run a single or multiple mesh FDS simulation on multiple cores. The use of OpenMP does not require the computational domain to be broken up into multiple meshes, and it will still work with cases that have multiple meshes defined. The second way to run FDS in parallel is by way of MPI (Message Passing Interface). Here, the computational domain must be divided into multiple meshes and typically each mesh is assigned its own {\em process}. These processes can be limited to a single computer, or they can be distributed over a network.
+There are two ways that FDS can be run in parallel; that is, exploit multiple cores on a single computer or multiple processors/cores distributed over multiple computers on a network or compute cluster. The first way is OpenMP (Open Multi-Processing)~\cite{Chapman:OpenMP} which allows a single computer to run a single or multiple mesh FDS simulation on multiple cores. The use of OpenMP does not require the computational domain to be broken up into multiple meshes, and it will still work with cases that have multiple meshes defined. The second way to run FDS in parallel is by way of MPI (Message Passing Interface). Here, the computational domain must be divided into multiple meshes. Typically each mesh is assigned its own {\em process}. These processes can be limited to a single computer, or they can be distributed over a network.
 
 
 
@@ -395,7 +414,7 @@ When the job is started, FDS will print the number of cores being used for that 
 
 MPI (Message-Passing Interface)~\cite{Gropp:1} enables multiple computers, or multiple cores on one computer, to run a multi-mesh FDS job. The main idea is to break up the FDS domain into multiple meshes, and then the flow field in each mesh is computed as an MPI {\em process.}  The {\em process} can be thought of as a ``task'' that you would see in the Windows Task Manager or by executing the ``top'' command on a Linux/Unix machine. MPI handles the transfer of information between the meshes, i.e. MPI processes. Usually, each mesh is assigned its own {\em process} in an MPI calculation, although it is also possible to assign multiple meshes to a single MPI {\em process}. In this way, large meshes can be computed on dedicated cores, while smaller meshes can be clustered together in a single {\em process} running on a single core, without the need for MPI message passing.
 
-Also note that FDS refers to its meshes by the numbers 1, 2, 3, and so on, whereas MPI refers to its processes by the numbers 0, 1, 2, and so on. Thus, Mesh~1 is assigned to Process~0; Mesh~2 to Process~1, and so on. You do not explicitly number the meshes or the processes yourself, but error statements from FDS or from MPI might refer to the meshes or processes by number. As an example, if a FDS case with five meshes, the first printout (usually to the screen unless otherwise directed) is:
+Also note that FDS refers to its meshes by the numbers 1, 2, 3, and so on, whereas MPI refers to its processes by the numbers 0, 1, 2, and so on. Thus, Mesh~1, the first mesh in the input file, is assigned to Process~0; Mesh~2 to Process~1, and so on. You do not explicitly number the meshes or the processes yourself, but error statements from FDS or from MPI might refer to the meshes or processes by number. As an example, if a FDS case with five meshes, the first printout (usually to the screen unless otherwise directed) is:
 \begin{lstlisting}
 Mesh   1 is assigned to MPI Process   0
 Mesh   2 is assigned to MPI Process   1
@@ -567,7 +586,7 @@ There are two basic approaches to assessing the efficiency or {\em scalability} 
 \be
    E_{\rm w} = \frac{t_1}{t_N}
 \ee
-where $t_1$ is the CPU time for the case with 1 mesh (MPI process), and $t_N$ is the CPU time for the case with $N$ meshes (MPI processes). The left hand plot of Fig.~\ref{fig:scaling_tests} shows the results of a weak scaling study of FDS. Meshes with dimension 50 by 50 by 50 are lined up side by side, ranging from 1 to 432 meshes. Ideally, the CPU time ought to be about the same for all cases, because each MPI process is doing the same amount of work. Only mesh to mesh communication should lead to inefficiencies. However, notice in the figure that the efficiency of the 1, 2, 4, and 8 mesh cases is greater than those with more MPI processes. The reason for this is that on most compute clusters, each node has multiple cores, and typically jobs run faster when a node is less than completely full. These test cases were run at NIST, where there is a compute cluster with 8 cores per node, and one with 12 cores per node.
+where $t_1$ is the CPU time for the case with 1 mesh (MPI process), and $t_N$ is the CPU time for the case with $N$ meshes (MPI processes). The left hand plot of Fig.~\ref{fig:scaling_tests} shows the results of a weak scaling study of FDS. Meshes with dimension 50 by 50 by 50 are lined up side by side, ranging from 1 to 432 meshes. Ideally, the CPU time ought to be about the same for all cases, because each MPI process is doing the same amount of work. Only mesh to mesh communication should lead to inefficiencies. However, notice in the figure that the efficiency of the 1, 2, 4, and 8 mesh cases is greater than those with more MPI processes. The reason for this is that on most compute clusters, each node has multiple cores, and typically jobs run faster when a node is less than completely full. These test cases were run at NIST, where there is a compute cluster with 64 cores per node.
 
 The second way to assess MPI efficiency is known as ``strong scaling.'' Here, you simulate a given scenario on a single mesh, and then you divide the mesh so that the cell size and the overall number of cells does not change. Ideally, if you divide a given mesh into two and run the case with two MPI processes instead of one, you would expect computational time to decrease by a factor of two. However, more MPI processes requires more communication among the processes. Additionally, more meshes results in more mesh boundary cells to compute, even though the overall number of gas phase cells remains the same.  The efficiency of such a set of calculations is given by:
 \be
@@ -588,7 +607,7 @@ To confirm the speedup provided by OpenMP, a series of test cases\footnote{The i
 \begin{figure}[ht!]
 \centering
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/openmp_timing_benchmarks}
-\caption[OpenMP timing study]{Benchmark timing comparison for the OpenMP test cases. The computer that ran these jobs has 2 (physical) sockets, and each socket has 4 (logical) cores. This explains the decrease in efficiency beyond 4 OpenMP threads.}
+\caption[OpenMP timing study]{Benchmark timing comparison for the OpenMP test cases.}
 \label{fig:openmp_timing_benchmarks}
 \end{figure}
 
@@ -606,7 +625,7 @@ Diagnostics for a given calculation are written into a file called \ct{CHID.out}
 \end{lstlisting}
 At any time during a calculation, Smokeview can be run and the progress can be checked visually.
 
-By default, the diagnostics in the \ct{CHID.out} file are verbose. By default, its value is \ct{F} for jobs involving 32 Meshes or less, and \ct{T} for bigger numbers. When running large MPI jobs, quieting this output, which only written by MPI process 0, may be advantageous.  To do this, add
+By default, the diagnostics in the \ct{CHID.out} file are verbose if the job has 32 meshes or less, and not verbose if more than 32 meshes. The default behavior can be changed by setting \ct{SUPPRESS_DIAGNOSTICS} to \ct{F} for verbose output and to \ct{T} for non-verbose output. For example, to force a 16 mesh input to not be verbose add
 \begin{lstlisting}
 &DUMP SUPPRESS_DIAGNOSTICS=T /
 \end{lstlisting}
