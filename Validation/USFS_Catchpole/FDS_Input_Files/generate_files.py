@@ -28,17 +28,17 @@ for i, row in metadata.iterrows():
    elif (row['Test'][:4]=='EXSC'):
       fuel_type = 'Coarse Excelsior'
       density = 398.
-      ignition_end = 10.
+      ignition_end = 60.
       ignition_p1 = ignition_end + 1
    elif (row['Test'][:4]=='PPMC'):
       fuel_type = 'Pine Needles'
       density = 510.
-      ignition_end = 20.
+      ignition_end = 60.
       ignition_p1 = ignition_end + 1
    elif (row['Test'][:2]=='EX'):
       fuel_type = 'Regular Excelsior'
       density = 398.
-      ignition_end = 10.
+      ignition_end = 60.
       ignition_p1 = ignition_end + 1
    
    mpv=round(row['beta']*density,2)

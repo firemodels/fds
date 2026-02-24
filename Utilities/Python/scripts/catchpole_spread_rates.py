@@ -26,8 +26,8 @@ tests = pd.read_csv(os.path.join(validation_path,"Test_Matrix.csv"))
 for ti,test in tests.iterrows():
     R = tests['R'].iloc[ti]
     chid = tests['Test'].iloc[ti]
-    fds_file = os.path.join(base_path, f"{chid}_devc.csv")
-    git_file = os.path.join(base_path, f"{chid}_git.txt")
+    fds_file = os.path.join(base_path, f"{chid}_cat_devc.csv")
+    git_file = os.path.join(base_path, f"{chid}_cat_git.txt")
     version_string = fdsplotlib.get_version_string(git_file)
     
     fds_data = pd.read_csv(fds_file,header=1)
