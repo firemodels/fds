@@ -115,7 +115,7 @@ for k in range(17):  # Experiments
         Z_mod = np.zeros((len(hgt_mod[1]), 13))
         Z_exp = np.zeros((len(hgt_exp[1]), 13))
 
-        for kk in range(1, 14):  # Loops (Matlab: 2:14, Python: 1:14)
+        for kk in range(1, 14):  # Loops
             Z_mod[:, kk - 1] = M.data[mod_time_index, mod_data_indices[kk]]
             Z_exp[:, kk - 1] = E.data[exp_time_index, exp_data_indices[kk][::-1]]
 
@@ -268,7 +268,7 @@ HRR_crit_mod_sup = []
 V_crit_mod_nosup = []
 HRR_crit_mod_nosup = []
 
-for k in range(2, 17):  # Experiments (Matlab: 3:17, Python: 2:17)
+for k in range(2, 17):  # Experiments
 
     M = importdata(outdir + 'Test_' + test[k] + '_cat_devc.csv', ',', 2)
     E = importdata(expdir + 'TP' + test[k] + '.csv', ',', 2)
@@ -284,7 +284,7 @@ for k in range(2, 17):  # Experiments (Matlab: 3:17, Python: 2:17)
         hrr_mod_time_index = int(np.interp(60 * cv_time[k][i], HM.data[:, 0], np.arange(len(HM.data[:, 0]))))
         exp_VF_time_index = int(np.interp(60 * cv_time[k][i], EV.data[:, 0], np.arange(len(EV.data[:, 0]))))
 
-        if E.data[exp_time_index, 63] < 30:
+        if E.data[exp_time_index, 56] < 30:
             V_crit_exp_sup.append(-EV.data[exp_VF_time_index, 1] / 60.4)
             HRR_crit_exp_sup.append(H.data[hrr_time_index, 1] / 1000)
             js = js + 1
@@ -302,25 +302,48 @@ for k in range(2, 17):  # Experiments (Matlab: 3:17, Python: 2:17)
             HRR_crit_mod_nosup.append(HM.data[hrr_mod_time_index, 1] / 1000)
             kn = kn + 1
 
+# Wu and Bakar correlation
+
+H_bar = 8.16
+g = 9.81
+rho_inf = 1.2
+cp = 1.0
+T_inf = 293
+
+Q = np.linspace(6, 110, 50)
+Qs = Q*1000 / (rho_inf * cp * T_inf * np.sqrt(g * H_bar**5))
+v_const = 0.4 * np.sqrt(g * H_bar)
+V = np.where(
+     Qs < 0.2, 
+     v_const * (Qs / 0.2)**(1/3), 
+     v_const
+    )
+    
+Q_NFPA = [1.0,5.0,10.0,20.0,25.0,30.0,40.0,50.0,75.0,100.0,110.0,120.0,140.0]
+V_NFPA = [1.02,1.70,2.08,2.52,2.67,2.80,3.00,3.15,3.43,3.61,3.67,3.72,3.81]
+
 # Create critical velocity plot
 
-fig = fdsplotlib.plot_to_fig(x_data=[8.5,105], y_data=[1.9,3.5], marker_style='k-',
-                             data_label='Theoretical Critical Velocity',
-                             x_min=5, x_max=200, y_min=0, y_max=4,
-                             plot_type='semilogx',
+#fig = fdsplotlib.plot_to_fig(x_data=[8.5,105], y_data=[1.9,3.5], marker_style='k-',
+fig = fdsplotlib.plot_to_fig(x_data=Q, y_data=V, marker_style='k-',
+                             data_label='Wu-Bakar Correlation',
+                             x_min=0, x_max=110, y_min=0, y_max=4,
+                             legend_fontsize=10,
+                             legend_location='lower right',
                              revision_label=version_string,
                              x_label='Heat Release Rate (MW)',
                              y_label='Velocity (m/s)')
 
-fdsplotlib.plot_to_fig(x_data=HRR_crit_exp_sup, y_data=V_crit_exp_sup, marker_style='kd', marker_fill_color='none', figure_handle=fig, data_label='Backlayering Controlled (Exp)')
-fdsplotlib.plot_to_fig(x_data=HRR_crit_mod_sup, y_data=V_crit_mod_sup, marker_style='rd', marker_fill_color='none', figure_handle=fig, data_label='Backlayering Controlled (FDS)')
+fdsplotlib.plot_to_fig(x_data=Q_NFPA, y_data=V_NFPA, marker_style='k--', figure_handle=fig, data_label='NFPA 502 (2014)')
+fdsplotlib.plot_to_fig(x_data=HRR_crit_exp_sup, y_data=V_crit_exp_sup, marker_style='ks', marker_fill_color='none', figure_handle=fig, data_label='Backlayering Controlled (Exp)')
+fdsplotlib.plot_to_fig(x_data=HRR_crit_mod_sup, y_data=V_crit_mod_sup, marker_style='rs', marker_fill_color='none', figure_handle=fig, data_label='Backlayering Controlled (FDS)')
 fdsplotlib.plot_to_fig(x_data=HRR_crit_exp_nosup, y_data=V_crit_exp_nosup, marker_style='ks', marker_fill_color='black', figure_handle=fig, data_label='Backlayering Not Controlled (Exp)')
 fdsplotlib.plot_to_fig(x_data=HRR_crit_mod_nosup, y_data=V_crit_mod_nosup, marker_style='rs', marker_fill_color='red', figure_handle=fig, data_label='Backlayering Not Controlled (FDS)')
 
-ax = plt.gca()
-xtick = [10, 50, 100]
-ax.set_xticks(xtick)
-ax.set_xticklabels(['10','50','100'])
+#ax = plt.gca()
+#xtick = [10, 50, 100]
+#ax.set_xticks(xtick)
+#ax.set_xticklabels(['10','50','100'])
 
 plt.savefig(pltdir + 'Critical_Velocity.pdf', format='pdf')
 plt.close()

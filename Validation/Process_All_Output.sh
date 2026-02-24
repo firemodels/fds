@@ -24,23 +24,33 @@ GET_UNIX_TIME()
 PROCESS()
 {
   case=$1
-  casedir=$FIREMODELS/out/$case
-  GET_UNIX_TIME $casedir
-  out_date=$gitdate2
   curdir=`pwd`
   casedir=$case/Current_Results
-  GET_UNIX_TIME $casedir
-  new_date=$gitdate2
-  cd $case
-  nout=`ls -l Current_Results/*.out |& grep -v cannot | wc -l`
-  nfds=`ls -l Current_Results/*.fds |& grep -v cannot | wc -l`
-  ncfds=`ls -l Current_Results/*cat.fds |& grep -v cannot | wc -l`
-  if [ $ncfds -gt 0 ] ; then
-    nfds=$ncfds
+  if [[ -d "$casedir" ]]; then
+    outdir=$FIREMODELS/out/$case
+    GET_UNIX_TIME $outdir
+    out_date=$gitdate2
+    GET_UNIX_TIME $casedir
+    new_date=$gitdate2
+    cd $case
+    nout=`ls -l Current_Results/*.out |& grep -v cannot | wc -l`
+    nfds=`ls -l Current_Results/*.fds |& grep -v cannot | wc -l`
+    ncfds=`ls -l Current_Results/*cat.fds |& grep -v cannot | wc -l`
+    if [ $ncfds -gt 0 ] ; then
+      nfds=$ncfds
+    fi
+    nsuccess=`tail Current_Results/*.out |& grep successfully | wc -l`
+  else
+    nout=0
+    nfds=0
+    ncfds=0
+    nsuccess=0
   fi
-  nsuccess=`tail Current_Results/*.out |& grep successfully | wc -l`
+
   status="***error: $case cases not run"
-  if [ $nfds -gt 0 ] && [ $nfds -gt $nout ]; then
+  if [ $nfds -eq 0 ]; then
+    status=" "
+  elif [ $nfds -gt 0 ] && [ $nfds -gt $nout ]; then
     status="***error: some $case cases did not run or are not complete"
   elif [ $out_date \> $new_date ]; then
     status="***error: existing output is newer than the cases being processed"
