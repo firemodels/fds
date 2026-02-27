@@ -21,7 +21,7 @@ if not exist %AUXUSER% goto else1
 
 echo pass 1
 pdflatex -interaction nonstopmode %paper% > %paper%.err
-bibtex %paper% > %paper%.err
+biber %paper% > %paper%.err
 echo pass 2
 pdflatex -interaction nonstopmode %paper% > %paper%.err
 echo pass 3

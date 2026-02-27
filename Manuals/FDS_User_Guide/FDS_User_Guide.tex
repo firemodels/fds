@@ -209,12 +209,11 @@ Smokeview is a separate visualization program that is used to display the result
 
 \section{Features of FDS}
 
-The first version of FDS was publicly released in February 2000. %To date, about half of the applications of the model have been for design of smoke handling systems and sprinkler/detector activation studies. The other half consist of residential and industrial fire reconstructions.
-Throughout its development, FDS has been aimed at solving practical fire problems in fire protection engineering, while at the same time providing a tool to study fundamental fire dynamics and combustion.
+The first version of FDS was publicly released in February 2000. Throughout its development, FDS has been aimed at solving practical fire problems in fire protection engineering, while at the same time providing a tool to study fundamental fire dynamics and combustion.
 
 \begin{description}
 \item[Hydrodynamic Model] FDS solves numerically a form of the Navier-Stokes equations appropriate for low-speed, thermally-driven flow with an emphasis on smoke and heat transport from fires. The core algorithm is an explicit predictor-corrector scheme, second order accurate in space and time. Turbulence is treated by means of Large Eddy Simulation (LES). It is possible to perform a Direct Numerical Simulation (DNS) if the underlying numerical mesh is fine enough. See Sec.~\ref{Sim_Mode} for further details.
-\item[Combustion Model] For most applications, FDS uses a single step, mixing-controlled chemical reaction which uses three lumped species (a species representing a group of species). These lumped species are air, fuel, and products. %By default the last two lumped species are explicitly computed. 
+\item[Combustion Model] For most applications, FDS uses a single step, mixing-controlled chemical reaction which uses three lumped species (a species representing a group of species). These lumped species are air, fuel, and products.
 Options are available to include multiple reactions and reactions that are not necessarily mixing-controlled.
 \item[Radiation Transport] Radiative heat transfer is included in the model via the solution of the radiation transport equation for a gray gas. A wide band model is also available. The equation is solved using a technique similar to finite volume methods for convective transport, thus the name given to it is the Finite Volume Method (FVM).  Using approximately 100 discrete angles, the finite volume solver requires about 20~\% of the total CPU time of a calculation, a modest cost given the complexity of radiation heat transfer. The absorption coefficients of the gas-soot mixtures are computed using the RadCal narrow-band model~\cite{RadCal}.  Liquid droplets can absorb and scatter thermal radiation. This is important in cases involving mist sprinklers, but also plays a role in all sprinkler cases.  The absorption and scattering coefficients are based on Mie theory.
 \item[Geometry] FDS approximates the governing equations on a rectilinear mesh. Rectangular obstructions are forced to conform with the underlying mesh.
@@ -230,100 +229,101 @@ Many of the changes in FDS~6 are improvements to the various sub-models that do 
 
 \subsubsection{Hydrodynamics and Turbulence}
 
-   \begin{itemize}
-   		\item The background species is now explicitly tracked.
-		\item An improved, total variation diminishing (TVD) scalar transport is implemented that fixes an existing issue when three or more species are being transported.
-		\item A new approach for treating flows at corners has been implemented.
-		\item The near wall turbulence model was changed to \ct{WALE}.
-    	\item \ct{SIMULATON_MODE} and \ct{FLUX_LIMITER} are now used to set basic parameters for the flow solver.
-    	\item The \ct{WIND} keyword was added to provide various means of specifying wind.
-    	\item Multiple new pressure solvers added in addition to the default FFT solver.
-   \end{itemize}
+\begin{itemize}
+  \item The background species is now explicitly tracked.
+  \item An improved, total variation diminishing (TVD) scalar transport is implemented that fixes an existing issue when three or more species are being transported.
+  \item A new approach for treating flows at corners has been implemented.
+  \item The near wall turbulence model was changed to \ct{WALE}.
+  \item \ct{SIMULATON_MODE} and \ct{FLUX_LIMITER} are now used to set basic parameters for the flow solver.
+  \item The \ct{WIND} keyword was added to provide various means of specifying wind.
+  \item Multiple new pressure solvers added in addition to the default FFT solver.
+\end{itemize}
 
 \subsubsection{Species and Combustion}
 
-    \begin{itemize}
-    	\item Detailed chemistry is supported by the use of the CVODES solver. Python scripts are provided to convert Canterra YAML files to FDS  inputs.
-    	\item Finite rate chemistry now supports third body reactions with non-unity collision efficiencies, pressure based reaction rates, and catalytic reactions.
-    	\item The species of \ct{SOOT} now has a default formula of C only.
-    	\item Over 300 gas and liquid species now predefined.
-    	\item HCN yields can be specified for either single or two step simple chemistry reactions.
-    	\item A drift flux model has been added for gas phase settling of aerosol species.
-    \end{itemize}
+\begin{itemize}
+     \item Detailed chemistry is supported by the use of the CVODES solver. Python scripts are provided to convert Canterra YAML files to FDS  inputs.
+     \item Finite rate chemistry now supports third body reactions with non-unity collision efficiencies, pressure based reaction rates, and catalytic reactions.
+     \item The species of \ct{SOOT} now has a default formula of C only.
+     \item Over 300 gas and liquid species now predefined.
+     \item HCN yields can be specified for either single or two step simple chemistry reactions.
+     \item A drift flux model has been added for gas phase settling of aerosol species.
+\end{itemize}
 
 \subsubsection{Lagrangian Particles}
 
-    \begin{itemize}
-    	\item \ct{ORIENTATION_RAMP} added to \ct{INIT} to control the orientation of particles placed with \ct{INTI}.
-    \end{itemize}
+\begin{itemize}
+  \item \ct{ORIENTATION_RAMP} added to \ct{INIT} to control the orientation of particles placed with \ct{INTI}.
+\end{itemize}
 
 \subsubsection{Solid Phase Heat Transfer and Pyrolysis}
 
-    \begin{itemize}
-    	\item Thin obstructions can now burn.
-    	\item A flux based model for oxidative pyrolysis has been added.
-    	\item A new approach to dynamic wall re-noding was implemented.
-    	\item SPyro (Scaling Pyrolysis) added. This uses the FDS predicted incident flux to scale burning rate data from multiple cone calorimeter tests with varying exposures and sample thicknesses.
-    	\item 1D heat transfer can occur over multi-cell thick obstacles.
-    	\item Global energy conversation during pyrolysis is now strictly enforced.
-    \end{itemize}
+\begin{itemize}
+     \item Thin obstructions can now burn.
+     \item A flux based model for oxidative pyrolysis has been added.
+     \item A new approach to dynamic wall re-noding was implemented.
+     \item SPyro (Scaling Pyrolysis) added. This uses the FDS predicted incident flux to scale burning rate data from multiple cone calorimeter tests with varying exposures and sample thicknesses.
+     \item 1D heat transfer can occur over multi-cell thick obstacles.
+     \item Global energy conversation during pyrolysis is now strictly enforced.
+\end{itemize}
 
 \subsubsection{HVAC}
 
-   \begin{itemize}
-	   	\item HVAC can now be used with \ct{GEOM}.
-	   	\item An improved algorithm for identifying HVAC coupled pressure zones was added.
-	   	\item Smokeview outputs for HVAC added to visualize the network and duct and node outputs.
-	   	\item DUCT \ct{WAYPOINT}s added to improve Smokeview visualization.
-    \end{itemize}
+\begin{itemize}
+     \item HVAC can now be used with \ct{GEOM}.
+     \item An improved algorithm for identifying HVAC coupled pressure zones was added.
+     \item Smokeview outputs for HVAC added to visualize the network and duct and node outputs.
+     \item DUCT \ct{WAYPOINT}s added to improve Smokeview visualization.
+\end{itemize}
 
 \subsubsection{Radiation}
 
-    \begin{itemize}
-    	\item A new method of adjusting the radiative emission on coarse grids was added.
-    	\item Default values for the radiative fraction is specified for various fuels. and the radiant fraction can be a function of the local mixture of fuels.
-    \end{itemize}
+\begin{itemize}
+\item A new method of adjusting the radiative emission on coarse grids was added.
+\item Default values for the radiative fraction is specified for various fuels. and the radiant fraction can be a function of the local mixture of fuels.
+\end{itemize}
 
 \subsubsection{Multi-Mesh Computations}
 
-    \begin{itemize}
-    \item The UGLMAT pressure solver can now be used with mesh refinement.
-    \item Various improvements in the efficiency of MPI communications have been implemented.
-    \item A \ct{TUNNEL_PRECONDITIONER} was added for cases consisting of a single long tunnel.
-    \end{itemize}
+\begin{itemize}
+\item The UGLMAT pressure solver can now be used with mesh refinement.
+\item Various improvements in the efficiency of MPI communications have been implemented.
+\item A \ct{TUNNEL_PRECONDITIONER} was added for cases consisting of a single long tunnel.
+\end{itemize}
 
 \subsubsection{Control Functions}
 
-    \begin{itemize}
-    \item \ct{CTRL} functions and \ct{RAMP}s can be controlled by an external process running simultaneously with FDS.
-    \end{itemize}
+\begin{itemize}
+\item \ct{CTRL} functions and \ct{RAMP}s can be controlled by an external process running simultaneously with FDS.
+\end{itemize}
 
 \subsubsection{Devices and Output}
 
-    \begin{itemize}
-    	\item A \ct{BI-DIRECTIONAL PROBE} output is added which models the output of a typical probe.
-    	\item The \ct{DRY} flag for species outputs can be added to HVAC and \ct{SLCF} outputs.
-    	\item \ct{VIEW_ANGLE} can be specified for heat flux gauges.
-    	\item \ct{PROF}ile outputs can now use any solid phase \ct{QUANTITY} that takes a \ct{DEPTH}.
-    	\item Both spatial and temporal statistics can be applied to a \ct{DEVC} that spans multiple meshes.
-    \end{itemize}
+\begin{itemize}
+\item A \ct{BI-DIRECTIONAL PROBE} output is added which models the output of a typical probe.
+\item The \ct{DRY} flag for species outputs can be added to HVAC and \ct{SLCF} outputs.
+\item \ct{VIEW_ANGLE} can be specified for heat flux gauges.
+\item \ct{PROF}ile outputs can now use any solid phase \ct{QUANTITY} that takes a \ct{DEPTH}.
+\item Both spatial and temporal statistics can be applied to a \ct{DEVC} that spans multiple meshes.
+\end{itemize}
 
 \subsubsection{Beta Features}
-	\begin{itemize}
-		\item Unstructured geometry (\ct{GEOM}) remains in beta.
-		\item 3D heat transfer remain in beta.
-	\end{itemize}
+
+\begin{itemize}
+\item Unstructured geometry (\ct{GEOM}) remains in beta.
+\item 3D heat transfer remain in beta.
+\end{itemize}
 
 \subsection{Quality Assurance}
-	\begin{itemize}
-		\item Continuous integration has been migrated from Matlan to Python.
-	\end{itemize}
+ \begin{itemize}
+  \item Continuous integration has been migrated from Matlan to Python.
+ \end{itemize}
 
 \subsection{FDS Executable}
-	\begin{itemize}
-		\item Two executables are now provided for running FDS with and without OpenMP.
-		\item For Windows a special command prompt (CMDfds) is added.
-	\end{itemize}
+ \begin{itemize}
+  \item Two executables are now provided for running FDS with and without OpenMP.
+  \item For Windows a special command prompt (CMDfds) is added.
+ \end{itemize}
 
 \chapter{Getting Started}
 \label{info:gettingstarted}
@@ -337,12 +337,9 @@ Some third-party applications, like \href{https://www.thunderheadeng.com/pyrosim
 \label{info:acquire}
 
 The project homepage provides detailed instructions on how to download executables, manuals, source-code and related utilities.
-
 \begin{center}
 \href{https://pages.nist.gov/fds-smv/}{\ct{https://pages.nist.gov/fds-smv/}}
 \end{center}
-
-\noindent
 The typical FDS/Smokeview distribution consists of an installation package or compressed archive, which is available for MS Windows, macOS, and Linux.
 
 
@@ -1430,8 +1427,7 @@ have outward consistent normals, as illustrated in Figure \ref{figure:GEOM_orien
 
 If the previous conditions are respected, a well-formed \ct{GEOM}\ namelist is obtained that represents one or more \textit{closed}, \textit{manifold}, \textit{orientable}, \textit{non intersecting} triangulated surfaces, that enclose well-defined volumes. An example of a well-formed triangulated surface is presented in Figure \ref{figure:GEOM_ok_surface_2}.
 
-\pagebreak
-Whenever one of the checks on these conditions fails, FDS outputs an error message describing the problem and its location in the domain. For example:\nopagebreak
+Whenever one of the checks on these conditions fails, FDS outputs an error message describing the problem and its location in the domain. For example:
 \begin{lstlisting}
 ERROR: GEOM ID='Cube': Non manifold geometry at edge: ...
 \end{lstlisting}
@@ -1525,16 +1521,14 @@ The \ct{GEOM}\ namelist allows the quick definition of particular kinds of geome
 
 \subsubsection{Blocks}
 \label{info:geomobst}
-A \ct{GEOM}\ namelist defining a block is specified by
 
+A \ct{GEOM}\ namelist defining a block is specified by
 \begin{lstlisting}
 &GEOM ID='block'
       SURF_ID='S1'
-      XB=0.0,1.0,0.0,1.0,0.0,1.0
-/
+      XB=0.0,1.0,0.0,1.0,0.0,1.0 /
 \end{lstlisting}
-
-\noindent where \ct{XB=xmin,xmax,ymin,ymax,zmin,zmax} defines the min and max bounds of the block.
+where \ct{XB=xmin,xmax,ymin,ymax,zmin,zmax} defines the min and max bounds of the block.
 The \ct{XB}\ parameter is used in the same way as on an \ct{OBST}\ or \ct{VENT}\ line.
 A block may be refined into many parts by specifying the \ct{IJK} parameter.
 For example, \ct{IJK=8,6,4} would split the block into 8 parts along the $x$ dimension,
@@ -1545,15 +1539,13 @@ The \ct{SURF_ID}\ parameter assigns the specified boundary condition to all the 
 \subsubsection{Spheres}
 \label{info:geomsphere}
 A \ct{GEOM}\ namelist defining a sphere centered at $(0,0,0)$ with radius $1$ is specified by
-
 \begin{lstlisting}
 &GEOM ID='sphere'
       SURF_ID='S1'
       SPHERE_ORIGIN=0.0,0.0,0.0, SPHERE_RADIUS=1.0
 /
 \end{lstlisting}
-
-\noindent Spheres are discretized by default so that each face is consistent in size with the grid resolution.
+Spheres are discretized by default so that each face is consistent in size with the grid resolution.
 One may specify a \ct{N_LEVEL}\ parameter which defines the number of times the sphere is split.
 
 
@@ -1578,7 +1570,6 @@ where the cylinder is discretized using 6 segments along its axis and 48 segment
 \label{info:terrain_geom}
 
 A \ct{GEOM}\ namelist defining a 2D terrain elevation is given by
-
 \begin{lstlisting}
 &GEOM ID='terrain'
       SURF_ID='S1'
@@ -1587,8 +1578,7 @@ A \ct{GEOM}\ namelist defining a 2D terrain elevation is given by
       ZVALS=...
 /
 \end{lstlisting}
-
-\noindent where \ct{XB}\ defines a rectangular region bounded by $(x_{\rm min}, y_{\rm min})$ and $(x_{\rm max}, y_{\rm max})$
+where \ct{XB}\ defines a rectangular region bounded by $(x_{\rm min}, y_{\rm min})$ and $(x_{\rm max}, y_{\rm max})$
 and where \ct{ZVALS} defines elevation data in this region.
 \ct{IJK}\ specifies how many vertices occur in this region along each dimension.
 In this example \ct{ivals}\ values occur along the x dimension and \ct{jval}\ values occur along the y dimension.
@@ -2081,10 +2071,7 @@ Note that objects and meshes in the \ct{MULT} array may be skipped using \ct{I_L
 
 Block obstructions made using an \ct{OBST} line are constrained to the box defined by \ct{XB}.  However, \ct{MULT} can be used to create an array of obstructions---each of which can be as small as a single grid cell--- that can be manipulated into one of four basic shapes: sphere, cylinder, cone or box.  The flow obstruction is created from the intersection of the \ct{OBST} array, created using a \ct{MULT_ID}, and the \ct{SHAPE} defined on the \ct{OBST} line.  Note that this method may be memory intensive since each grid cell can be its own \ct{OBST}, similar to the way \ct{OBST} are decomposed when using \ct{BURN_AWAY} for pyrolysis.
 
-%With regard to the \ct{SURF_ID},
-
 The first step in carving out the shape is to create a \ct{MULT} line that defines the replication of the \ct{OBST}.  Then a \ct{SHAPE} is entered on the \ct{OBST} line together with whatever parameters are required; parameters are listed in Table~\ref{tab:obst_shape}.
-
 \begin{table}[ht]
 \caption[\ct{OBST SHAPE} parameters]{\ct{OBST SHAPE} parameters.}
 \label{tab:obst_shape}
@@ -2098,9 +2085,7 @@ The first step in carving out the shape is to create a \ct{MULT} line that defin
 \ct{'BOX'}            & \ct{XYZ}, \ct{LENGTH}, \ct{WIDTH}, \ct{HEIGHT}, \ct{ORIENTATION}, \ct{THETA} \\ \hline
 \end{tabular}
 \end{table}
-
 An example of a sphere is given below.  By default, the center of the sphere is at (0,0,0), so only the \ct{RADIUS} is required.  If the \ct{RADIUS} is larger than the half-width the \ct{OBST} array, this is not a problem, but the end result will not be a sphere.  If the \ct{RADIUS} is smaller than the half-width, this is also permissible, but it is inefficient.
-
 \begin{lstlisting}
 &MESH IJK=50,50,50, XB=-0.125,0.125,-0.125,0.125,-0.125,0.125/
 &SURF ID='shape', COLOR='ORANGE'/
@@ -2111,18 +2096,15 @@ An example of a sphere is given below.  By default, the center of the sphere is 
       SHAPE='SPHERE'
       RADIUS=0.1/
 \end{lstlisting}
-
 \begin{figure}[ht]
 \centering
 \includegraphics[width=.7\textwidth,trim={0 0.5in 0 0.5in},clip]{SCRIPT_FIGURES/obst_sphere}
 \caption[Creating an \ct{OBST} sphere using \ct{MULT} and \ct{SHAPE}]{Creating an \ct{OBST} sphere using \ct{MULT} and \ct{SHAPE}.}
 \label{fig:obst_sphere}
 \end{figure}
-
 To create a cylinder we need a height and orientation in addition to the radius.  The position of the center of the bottom face of the cylinder \ct{XYZ} defaults to (0,0,0).  An example of a vertically oriented (default) cylinder is shown below in Fig.~\ref{fig:obst_cylinder}.  Note that the magnitude of the orientation vector is not important; the vector is only used to specify the direction.
 
 A word of caution about precise area adjustments: Changing the \ct{ORIENTATION} from the default (0,0,1) or using \ct{SHAPE} with multiple meshes voids the area adjustment algorithm.  As a result, FDS cannot achieve the exact mass flux out of the surface as prescribed by the \ct{SURF} line and the precise area given by the geometry parameters for the \ct{SHAPE} on the \ct{OBST} line.  The mass flux FDS generates will be determined by \ct{SURF} line and the size of the grid cells the \ct{OBST} snaps to.  If either reorientation or a multiple mesh calculation is required, first run a sample case to see what total flow rate the surface is achieving (usually found in the \ct{CHID_hrr.csv} file).  Then manually adjust your mass flux (or \ct{HRRPUA}) on the appropriate \ct{SURF} line.
-
 \begin{lstlisting}
 &SURF ID='shape', COLOR='DARK GRAY'/
 &MULT ID='cube array', DX=0.005,DY=0.005,DZ=0.005, I_UPPER=41,J_UPPER=41,K_UPPER=41/
@@ -2135,16 +2117,13 @@ A word of caution about precise area adjustments: Changing the \ct{ORIENTATION} 
       XYZ=0,0,-0.1
       ORIENTATION=0,0,1/
 \end{lstlisting}
-
 \begin{figure}[ht]
 \centering
 \includegraphics[width=.7\textwidth,trim={0 .5in 0 .5in},clip]{SCRIPT_FIGURES/obst_cylinder}
 \caption[Creating an \ct{OBST} cylinder using \ct{MULT} and \ct{SHAPE}]{Creating an \ct{OBST} cylinder using \ct{MULT} and \ct{SHAPE}.}
 \label{fig:obst_cylinder}
 \end{figure}
-
 A cone needs basically the same input parameters as a cylinder.  The position of the center of the bottom face is specified using \ct{XYZ} and the \ct{RADIUS} of the bottom face, the \ct{HEIGHT}, and the \ct{ORIENTATION} must be specified.  An example is shown below in Fig~\ref{fig:obst_cone}.
-
 \begin{lstlisting}
 &SURF ID='shape', COLOR='FOREST GREEN'/
 &MULT ID='cube array', DX=0.005,DY=0.005,DZ=0.005, I_UPPER=41,J_UPPER=41,K_UPPER=41/
@@ -2157,18 +2136,15 @@ A cone needs basically the same input parameters as a cylinder.  The position of
       XYZ=0,0,-0.1
       ORIENTATION=0,0,1/
 \end{lstlisting}
-
 \begin{figure}[ht]
 \centering
 \includegraphics[width=.7\textwidth,trim={0 .5in 0 .5in},clip]{SCRIPT_FIGURES/obst_cone}
 \caption[Creating an \ct{OBST} cone using \ct{MULT} and \ct{SHAPE}]{Creating an \ct{OBST} cone using \ct{MULT} and \ct{SHAPE}.}
 \label{fig:obst_cone}
 \end{figure}
-
 Finally, the box shape allows to define rotated cuboids. A box shape is defined locally by its \ct{HEIGHT}, \ct{WIDTH} and \ct{LENGTH}. The location of the box center is provided in \ct{XYZ}. The angle \ct{THETA} in degrees specifies a rotation of the box respect to the global $z$ axis, following right hand rule.
 Subsequently, the \ct{ORIENTATION} direction vector allows for an orientation change respect to the \ct{THETA} rotated reference frame. This direction vector changes the box orientation such that the local \ct{HEIGHT} direction matches it.
 A simple example is shown Fig~\ref{fig:obst_rotbox}.
-
 \begin{lstlisting}
 &SURF ID='shape', COLOR='GRAY'/
 &MULT ID='cube array', DX=0.005,DY=0.005,DZ=0.005, I_UPPER=41,J_UPPER=41,K_UPPER=41/
@@ -2183,7 +2159,6 @@ A simple example is shown Fig~\ref{fig:obst_rotbox}.
       ORIENTATION=0.5,0,1
       THETA = 45. /
 \end{lstlisting}
-
 \begin{figure}[ht]
 \centering
 \includegraphics[width=.6\textwidth,trim={0 .5in 0 .5in},clip]{SCRIPT_FIGURES/obst_rotbox}
@@ -2223,12 +2198,9 @@ properties and let the model compute the heat flux to, and temperature of, the w
 Typically, the surface temperature of a solid boundary is predicted by FDS using thermal properties specified via the
 \ct{MATL} namelist group, which are in turn invoked by the \ct{SURF} entry via
 the character string \ct{MATL_ID}. However, the input \ct{TMP_FRONT}, the surface temperature in units of $^\circ$C, can be used to specify a fixed temperature boundary condition:
-
 \begin{lstlisting}
 &SURF ID='HOT WALL', COLOR='RED', TMP_FRONT=200. /
 \end{lstlisting}
-
-\noindent
 Note that there is no need to specify a \ct{MATL_ID} or \ct{THICKNESS}. Because the wall is to be maintained at the given temperature,
 there is no need to say anything about its material composition or thickness.
 
@@ -2543,7 +2515,7 @@ This line fixes the front temperature of a 1~cm thick plate to 500~$^\circ$C and
 \newpage
 
 
-\section{3-D Heat Conduction (Beta)}
+\section{3-D Heat Conduction}
 \label{info:ht3d}
 \label{ht3d_demo}
 \label{info:mesh_separation}
@@ -3734,13 +3706,14 @@ The second method is setting the keyword \ct{HVAC_LOCAL_PRESSURE} on the \ct{MIS
 A typical input line specifying a duct is as follows:
 \begin{lstlisting}
 &HVAC TYPE_ID='DUCT', ID='ductname', NODE_ID='node 1','node 2', AREA=3.14,
-      LOSS=1.,1., LENGTH=2., ROUGHNESS=0.001, FAN_ID='fan 1', DEVC_ID='device 1' /
+      LOSS=1.,1., LENGTH=2., ROUGHNESS=0.001, FAN_ID='fan 1', 
+      DEVC_ID='device 1' /
 \end{lstlisting}
 Or, if you are using HVAC mass transport, as follows:
 \begin{lstlisting}
 &HVAC TYPE_ID='DUCT', ID='ductname', NODE_ID='node 1','node 2', AREA=3.14,
-      LOSS=1.,1., LENGTH=2., ROUGHNESS=0.001, FAN_ID='fan 1', DEVC_ID='device 1',
-      N_CELLS=200 /
+      LOSS=1.,1., LENGTH=2., ROUGHNESS=0.001, FAN_ID='fan 1', 
+      DEVC_ID='device 1', N_CELLS=200 /
 \end{lstlisting}
 where:
 \begin{itemize}
@@ -3843,9 +3816,9 @@ The pressure zone and physical presence restrictions also apply to \ct{GEOM} bei
 
 Below are sample inputs for the three types of fans supported by FDS.
 \begin{lstlisting}
-&HVAC TYPE_ID='FAN', ID='constant volume', VOLUME_FLOW=1.0, LOSS=2./
-&HVAC TYPE_ID='FAN', ID='quadratic', MAX_FLOW=1., MAX_PRESSURE=1000., LOSS=2. /
-&HVAC TYPE_ID='FAN', ID='user fan curve', RAMP_ID='fan curve',  LOSS=2. /
+&HVAC TYPE_ID='FAN', ID='constant volume', VOLUME_FLOW=1, LOSS=2 /
+&HVAC TYPE_ID='FAN', ID='quadratic', MAX_FLOW=1, MAX_PRESSURE=1000., LOSS=2 /
+&HVAC TYPE_ID='FAN', ID='user fan curve', RAMP_ID='fan curve',  LOSS=2 /
 \end{lstlisting}
 where:
 \begin{itemize}
@@ -4023,39 +3996,38 @@ In the second approach, one or more ducts have flows that are not specified, in 
 Assigning either a normal HVAC node or a localized leakage HVAC to a GEOM is done using \ct{SURF}. Using the simple example from Section~\ref{info:GEOM_Basics}, an HVAC node named \ct{'MY NODE'} is assigned to the first face by defining a \ct{SURF} with \ct{NODE_ID='MY NODE'}. No other boundary conditions should be set on the \ct{SURF} other than a color or texture. On the node \ct{HVAC} input set \ct{GEOM=T} to indicate FDS needs to look for a \ct{GEOM} and not a \ct{VENT} for the node:
 
 \begin{lstlisting}
-	&SURF ID='NODE SURF',NODE_ID='MY NODE'/
-	&GEOM ID='My Solid'
-	SURF_ID='NODE SURF','INERT'
-	VERTS= -1.0, -1.0,  0.0,
-	1.0, -1.0,  0.0,
-	0.0,  1.0,  0.0,
-	0.0,  0.0,  1.0,
-	FACES= 1,3,2, 2,
-	1,4,3, 1,
-	3,4,2, 1,
-	2,4,1, 0 /
-	&HVAC ID='MY NODE',TYPE_ID='NODE',GEOM=T,..../
+ &SURF ID='NODE SURF',NODE_ID='MY NODE'/
+ &GEOM ID='My Solid'
+ SURF_ID='NODE SURF','INERT'
+ VERTS= -1.0, -1.0,  0.0,
+ 1.0, -1.0,  0.0,
+ 0.0,  1.0,  0.0,
+ 0.0,  0.0,  1.0,
+ FACES= 1,3,2, 2,
+ 1,4,3, 1,
+ 3,4,2, 1,
+ 2,4,1, 0 /
+ &HVAC ID='MY NODE',TYPE_ID='NODE',GEOM=T,..../
 \end{lstlisting}
 
 The \ct{SURF} input \ct{NODE_ID} can only be applied to complex geometry. It cannot be used for \ct{OBST} or \ct{VENT}. While more than one \ct{GEOM} and more than one face of a \ct{GEOM} can use the same node, the same node cannot be shared by both a \ct{VENT} and a \ct{GEOM}.
 
 To apply localized leakage to \ct{GEOM}, the process is similar. \ct{NODE_ID} on \ct{SURF} is still used to link faces of \ct{GEOM} to the localized leakage. The input for the localized leakage changes slightly. The inputs \ct{VENT_ID} and \ct{VENT2_ID} use \ct{GEOM} and \ct{GEOM2} to determine if the respective \ct{ID} is attached to a \ct{VENT} or a \ct{GEOM}.  For example, to attach the second vent for a localized leakage path:
-
 \begin{lstlisting}
-	&SURF ID='LEAK SURF',NODE_ID='LEAK OUT'/
-	&GEOM ID='My Solid'
-	SURF_ID='LEAK SURF','INERT'
-	VERTS= -1.0, -1.0,  0.0,
-	1.0, -1.0,  0.0,
-	0.0,  1.0,  0.0,
-	0.0,  0.0,  1.0,
-	FACES= 1,3,2, 2,
-	1,4,3, 1,
-	3,4,2, 1,
-	2,4,1, 0 /
-	&HVAC ID='MY LEAK',TYPE_ID='LEAK',VENT_ID='LEAK IN',VENT2_ID='LEAK OUT',GEOM2=T,AREA=0.01/
+ &SURF ID='LEAK SURF',NODE_ID='LEAK OUT'/
+ &GEOM ID='My Solid'
+ SURF_ID='LEAK SURF','INERT'
+ VERTS= -1.0, -1.0,  0.0,
+ 1.0, -1.0,  0.0,
+ 0.0,  1.0,  0.0,
+ 0.0,  0.0,  1.0,
+ FACES= 1,3,2, 2,
+ 1,4,3, 1,
+ 3,4,2, 1,
+ 2,4,1, 0 /
+ &HVAC ID='MY LEAK',TYPE_ID='LEAK',VENT_ID='LEAK IN',
+       VENT2_ID='LEAK OUT',GEOM2=T,AREA=0.01/
 \end{lstlisting}
-
 Here the use of \ct{GEOM2=T} indicates that \ct{VENT2_ID} is a \ct{NODE_ID} on \ct{SURF}.
 
 \newpage
@@ -4356,8 +4328,8 @@ FDS limits the number of \ct{RAMP}s that can be specified in the input file. Thi
 
 At the start of any calculation, the temperature is ambient everywhere, the flow velocity is zero everywhere, nothing is burning, and the mass fractions of all species are uniform. You can control the rate at which things turn on, or turn off, by specifying time histories either with pre-defined functions or with user-defined functions.  The parameters \ct{TAU_Q}, \ct{TAU_T}, and \ct{TAU_V} indicate that the heat release rate (\ct{HRRPUA}); surface temperature (\ct{TMP_FRONT}); and/or normal velocity (\ct{VEL}, \ct{VOLUME_FLOW}), or \ct{MASS_FLUX_TOTAL} are to ramp up to their prescribed values as follows, using the heat release rate, $\dot{Q}(t)$, as an example:
 \begin{equation}
-\dot Q(t) = \left\{ \begin{array}{ll} \dot Q_0 \, \left( t/\tau \right)^2      &  \mbox{if \ct{TAU_Q} is negative} \\[.1in]
-                                      \dot Q_0 \, \tanh \left( t/\tau \right)  &  \mbox{if \ct{TAU_Q} is positive}  \end{array} \right.
+\dot Q(t) = \left\{ \begin{array}{ll} \dot Q_0 \, \left( t/\tau \right)^2      &  (\tau < 0) \\[.1in]
+                                      \dot Q_0 \, \tanh \left( t/\tau \right)  &  (\tau > 0) \end{array} \right.
 \end{equation}
 $\dot Q_0$ is the user-specified heat release rate. If the fire ramps up following a $t$-squared curve, then it remains constant after \ct{TAU_Q} seconds.  These rules apply to \ct{TAU_T} and \ct{TAU_V} as well. The default value for all \ct{TAU}s is 1~s\footnote{You can change the default ramp-up time by setting \ct{TAU_DEFAULT} on the \ct{MISC} line.}.  If something other than a tanh or $t$-squared ramp up is desired, then a user-defined function can be input. To do this, set \ct{RAMP_Q}, \ct{RAMP_T} or \ct{RAMP_V} equal to a character string designating the ramp function to use for that particular surface type, then somewhere in the input file generate lines of the form:
 \begin{lstlisting}
@@ -4367,7 +4339,8 @@ $\dot Q_0$ is the user-specified heat release rate. If the fire ramps up followi
 \end{lstlisting}
 Here, \ct{T} is the time, and \ct{F} indicates the fraction of the heat release rate, wall temperature, velocity, mass fraction, etc., to apply. Linear interpolation\footnote{By default, FDS uses a linear interpolation routine to find time or temperature-dependent values between user-specified points. The default number of interpolation points is 5000, more than enough for most applications. However, you can change this value by specifying \ct{NUMBER_INTERPOLATION_POINTS} on any \ct{RAMP} line.} is used to fill in intermediate time points. Note that each set of \ct{RAMP} lines must have a unique \ct{ID} and that the lines must be listed with monotonically increasing \ct{T}. Note also that the \ct{TAU}s and the \ct{RAMP}s are mutually exclusive. For a given surface quantity, both cannot be prescribed. As an example, a simple blowing vent can be controlled via the lines:
 \begin{lstlisting}
-&SURF ID='BLOWER', VEL=-1.2, TMP_FRONT=50., RAMP_V='BLOWER RAMP', RAMP_T='HEATER RAMP' /
+&SURF ID='BLOWER', VEL=-1.2, TMP_FRONT=50., RAMP_V='BLOWER RAMP', 
+      RAMP_T='HEATER RAMP' /
 &RAMP ID='BLOWER RAMP', T= 0.0, F=0.0 /
 &RAMP ID='BLOWER RAMP', T=10.0, F=1.0 /
 &RAMP ID='BLOWER RAMP', T=80.0, F=1.0 /
@@ -4377,11 +4350,11 @@ Here, \ct{T} is the time, and \ct{F} indicates the fraction of the heat release 
 &RAMP ID='HEATER RAMP', T=30.0, F=1.0 /
 &RAMP ID='HEATER RAMP', T=40.0, F=0.0 /
 \end{lstlisting}
-Use \ct{TAU_T} or \ct{RAMP_T} to control the ramp-ups for surface temperature. The surface temperature at time $t$, $T_{\rm w}(t)$, is
+Use \ct{TAU_T} or \ct{RAMP_T} to control the ramp-ups for surface temperature. The surface temperature at time $t$, $T(t)$, is
 \be
-   T_{\rm w}(t) = T_0 + f(t) \left( \hbox{\ct{TMP_FRONT}} - T_0 \right)
+   T(t) = T_0 + f(t) \left( T_{\rm f} - T_0 \right)
 \ee
-where $f(t)$ is the result of evaluating the \ct{RAMP_T} at time $t$, $T_0$ is the ambient temperature, and \ct{TMP_FRONT} is specified on the same \ct{SURF} line as \ct{RAMP_T}. Use \ct{TAU_MF(N)} or \ct{RAMP_MF(N)} to control the ramp-ups for either the mass fraction or mass flux of species \ct{N}. For example:
+where $f(t)$ is the result of evaluating the \ct{RAMP_T} at time $t$, $T_0$ is the ambient temperature, and $T_{\rm f}$ is specified via \ct{TMP_FRONT} on the same \ct{SURF} line as \ct{RAMP_T}. Use \ct{TAU_MF(N)} or \ct{RAMP_MF(N)} to control the ramp-ups for either the mass fraction or mass flux of species \ct{N}. For example:
 \begin{lstlisting}
 &SURF ID='...', MASS_FLUX(1:2)=0.1,0.3, SPEC_ID(1:2)='ARGON','NITROGEN',
       TAU_MF(1:2)=5.,10. /
@@ -4396,7 +4369,7 @@ Table~\ref{tau_table} lists the various quantities that can be controlled by \ct
 \caption[Parameters used to control time-dependence]{Parameters for controlling the time-dependence of given quantities.}
 \label{tau_table}
 \begin{center}
-\begin{tabular}{|l|l|l|l|l|}
+\begin{xltabular}{\textwidth}{|l|p{1.5cm}|X|p{2cm}|X|}
 \hline
 Quantity            & Group       & Input Parameter(s)                                      & \ct{TAU}           & \ct{RAMP ID}       \\ \hline \hline
 Volume Flow   & \ct{HVAC}  & \ct{VOLUME_FLOW}                                        & \ct{TAU_FAN}      & \ct{RAMP_ID}       \\ \hline
@@ -4416,7 +4389,7 @@ Flow                & \ct{PROP}  & \ct{FLOW_RATE}                               
 Gravity             & \ct{MISC}  & \ct{GVEC(1)}                                           &                     & \ct{RAMP_GX}      \\ \hline
 Gravity             & \ct{MISC}  & \ct{GVEC(2)}                                           &                     & \ct{RAMP_GY}      \\ \hline
 Gravity             & \ct{MISC}  & \ct{GVEC(3)}                                           &                     & \ct{RAMP_GZ}      \\ \hline
-\end{tabular}
+\end{xltabular}
 \end{center}
 \end{table}
 
@@ -4440,7 +4413,7 @@ the \ct{RAMP} function like this:
 &RAMP ID='k_steel', T= 20., F=48.    /
 &RAMP ID='k_steel', T=677., F=30.    /
 \end{lstlisting}
-Note that for temperature ramps, as opposed to time ramps, the parameter \ct{F} is the actual physical quantity, not just a fraction of some other quantity. Thus, if \ct{CONDUCTIVITY_RAMP} is used, there should be no value of \ct{CONDUCTIVITY} given. Note also that for values of temperature, \ct{T}, below and above the given range, FDS will assume a constant value equal to the first or last \ct{F} specified. Note also that the \ct{DENSITY} of a material cannot be controlled with a \ct{RAMP} function.
+Note that for temperature ramps, as opposed to time ramps, the parameter \ct{F} is the actual physical quantity, not just a fraction of some other quantity. Thus, if \ct{CONDUCTIVITY_RAMP} is used, there should be no value of \ct{CONDUCTIVITY} given. For values of temperature, \ct{T}, below and above the given range, FDS will assume a constant value equal to the first or last \ct{F} specified. Note also that the \ct{DENSITY} of a material cannot be controlled with a \ct{RAMP} function.
 
 \section{Spatially-Dependent Velocity Profiles}
 \label{info:RAMP_Vel_Prof}
@@ -4523,7 +4496,8 @@ Note that while you can define as many species using \ct{SPEC} as you wish in an
 Each \ct{SPEC} line should include at the very least the name of the species via a character string, \ct{ID}. Once the extra species has been declared, you introduce it at surfaces via the parameters \ct{MASS_FRACTION(:)} or \ct{MASS_FLUX(:)} along with the character array \ct{SPEC_ID(:)}. A very simple example of how a gas can be introduced into the simulation is given by the simple input file called \ct{gas_filling.fds}. The relevant lines are as follows:
 \begin{lstlisting}
 &SPEC ID='HYDROGEN' /
-&SURF ID='LEAK', SPEC_ID(1)='HYDROGEN', MASS_FLUX(1)=0.01667, RAMP_MF(1)='leak_ramp' /
+&SURF ID='LEAK', SPEC_ID(1)='HYDROGEN', MASS_FLUX(1)=0.01667, 
+      RAMP_MF(1)='leak_ramp' /
 &RAMP ID='leak_ramp', T=  0., F=0.0 /
 &RAMP ID='leak_ramp', T=  1., F=1.0 /
 &RAMP ID='leak_ramp', T=180., F=1.0 /
@@ -4551,7 +4525,6 @@ If the initial mass fraction of the gas is something other than zero, then the p
 \begin{lstlisting}
 &SPEC ID='ARGON', MASS_FRACTION_0=0.1 /
 \end{lstlisting}
-
 An alternative means of specifying the initial mass fraction is to use the \ct{BACK} namelist with inputs of \ct{SPEC_ID} and \ct{MASS_FRACTION}. One use of this would be to modify or add initial species to a pre-existing set of detailed chemistry inputs referenced via \ct{CATF}.
 
 \subsubsection{Specifying Humidity}
@@ -4584,9 +4557,7 @@ If you want FDS to compute the molecular weight of the gas species, you can inpu
 &SPEC ID='ETHYLENE GLYCOL', FORMULA='OHC2H4OH'/
 &SPEC ID='ETHYLENE GLYCOL', FORMULA='C2H4(OH)2'/
 \end{lstlisting}
-
 Fuels compatible with the simple chemistry approach to defining reactions can use the inputs \ct{C, H, O,} and \ct{N}. Which specify the number of atoms of those elements in the fuel molecule. If these inputs are used, then \ct{FORMULA} should not be specified and vice versa. The following would be equivalent to the prior examples:
-
 \begin{lstlisting}
 &SPEC ID='ETHYLENE GLYCOL', C=2, H=6, O=2/
 \end{lstlisting}
@@ -4612,7 +4583,6 @@ The gas phase output quantity \ct{'CONDUCTIVITY'} denotes that which is actually
 Diffusivity is assumed to be the binary diffusion coefficient between the given species and the background species. Diffusivity can be specified in one of three ways:  it can be defined as a constant using \ct{DIFFUSIVITY} (m$^2$/s), it can be defined as a temperature vs. diffusivity ramp  using \ct{RAMP_D}, or it can be computed by FDS using \ct{MW} and the Lennard-Jones potential parameters $\sigma$ (\ct{SIGMALJ}) and $\epsilon/k$ (\ct{EPSILONKLJ}).  If no inputs are specified, FDS will compute the diffusivity using the \ct{MW} and the Lennard-Jones parameters for nitrogen.
 
 Note that the turbulent diffusivity, $D_{\rm t} = \mu_{\rm t}/{\rm Sc}_{\rm t}$, is controlled by the turbulent Schmidt number, ${\rm Sc}_{\rm t}$, which is 0.5 by default and presumed the same for all tracked species.  In some special cases, usually when the species is an aerosol such as soot, it may be valid to alter the turbulent Schmidt number independently from other species.  To accommodate this, you may set the turbulent Schmidt number on the \ct{SPEC} line for a primitive species (one with no subspecies).  For example, the following lines set up tracking for primitive species with ethylene as the primary fuel allowing differential turbulent transport of soot (note that soot particles transport very slowly compared to gas species \cite{Bisetti:2008,Fernandez:2018}).
-
 \begin{lstlisting}
 &SPEC ID='NITROGEN',        MASS_FRACTION_0=0.762470, BACKGROUND=T/
 &SPEC ID='OXYGEN',          MASS_FRACTION_0=0.230997 /
@@ -4643,7 +4613,6 @@ The ratio of specific heats, \ct{GAMMA}, is 1.4 by default and can be changed on
 Note that species used in chemical reactions must either be predefined or have an explicitly defined $h(T_{\rm ref})$. The exception is the species defined as \ct{FUEL} on the \ct{REAC} input as long as a \ct{HEAT_OF_COMBUSTION} is defined or the reaction is a simple chemistry reaction where \ct{EPUMO2} applies. Specifying either \ct{SPECIFIC_HEAT} or \ct{RAMP_CP} is considered to have explicitly defined $h(T_{\rm ref})$. If you still wish to use the default \ct{EPUMO2} or 13,100~kJ/kg, then you will need to explicitly define it on the \ct{REAC} input.
 
 The thermodynamic properties (specific heat, enthalpy, entropy, and other derived properties) of a species can also be specified using NASA polynomials, as shown below. Two sets of \ct{POLYNOMIAL_COEFF} are specified: the first set is valid for the temperature range of 200 K to 1000 K, and the second set is valid for the temperature range of 1000 K to 5000 K, as indicated by the \ct{POLYNOMIAL_TEMP} parameter. In general, detailed mechanisms (see Section \ref{info:detailedChemMech}) specify species properties using NASA polynomials.
-
 \begin{lstlisting}
 &SPEC ID='OH',
       PR_GAS= 0.763 ,
@@ -4814,7 +4783,6 @@ When defining a lumped species, either \ct{MASS_FRACTION} or \ct{VOLUME_FRACTION
 \ct{MATL}, \ct{PART}, and \ct{SURF}, \ct{SPEC_ID} refers to either a tracked primitive species or a lumped species.  For outputs and devices, \ct{DEVC}, that require a \ct{SPEC_ID}, the \ct{SPEC_ID} input can refer to either a tracked primitive species, a lumped species, or a lumped species component that is not tracked.  For \ct{REAC} see the discussion on specifying reactions in Chapter~\ref{info:REAC}.
 
 It is possible to create a separately tracked copy of a lumped species by using \ct{COPY_LUMPED}. For example, if in Example 2 above one added the line:
-
 \begin{lstlisting}
 &SPEC ID='AIR2', COPY_LUMPED=T, SPEC_ID='AIR'/
 \end{lstlisting}
@@ -4823,12 +4791,10 @@ then FDS would create a copy of the \ct{AIR} lumped species called \ct{AIR2}.
 \subsection{Combining Lumped and Primitive Species}
 
 There are cases where you may wish to have a single primitive species be both part of a lumped species and also a separately tracked species.  For example, when using simple chemistry, Sec.~\ref{info:simple_chemistry}, FDS will include water vapor in the product species and in the air background species.  If you also wish to have sprinklers in the simulation, then you will need to track water vapor from the sprinklers separately from that in the air or products.  This is simply done by adding the line:
-
 \begin{lstlisting}
 &SPEC ID='WATER VAPOR'/
 \end{lstlisting}
 This will override the implicitly created water vapor species defined with \ct{LUMPED_COMPONENT_ONLY=T} and cause FDS to track water vapor as a separate species.  Note that in this case if you requested an output for the mass fraction of \ct{WATER VAPOR} you would get the water vapor in the air and product lumped species as well as that which evaporated from sprinkler droplets.  If you wanted in this case (where water vapor is implicitly defined), to be able to track the water vapor from sprinklers separately you could follow the example in Sec.~\ref{info:SPEC_advanced} and define:
-
 \begin{lstlisting}
 &SPEC ID='SPRINKLER WATER VAPOR',SPEC_ID='WATER VAPOR'/
 \end{lstlisting}
@@ -4923,7 +4889,6 @@ You can specify unknown enthalpies on the \ct{SPEC} line in units of kJ/mol:
 \begin{lstlisting}
 &SPEC ID = 'GLUCOSE', FORMULA = 'C62H12O6', ENTHALPY_OF_FORMATION=-1.297E3 /
 \end{lstlisting}
-
 Note FDS will also use \ct{REFERENCE_ENTHALPY}, \ct{SPECIFIC_HEAT}, or \ct{RAMP_CP} to define the enthalpy of formation as discussed in Section~\ref{info:Enthalpy}.
 
 \subsubsection{Option 2: Specify Heat of Combustion}
@@ -5164,9 +5129,7 @@ FDS assumes the following reaction:
 9.6339 \; \underbrace{ \mathrm{\left( 0.20756 \; O_2 + 0.78257 \; N_2 + 0.00948 \; H_2O + 0.00039 \; CO_2 \right)}}_\text{Air} \longrightarrow \\
 10.6339 \; \underbrace{\mathrm{(0.09440 \; CO_2 +  0.19668 \; H_2O + 0.70891 \; N_2)}}_\text{Products}
 \end{multline}
-
-\noindent By default, there are trace amounts of carbon dioxide and water vapor in the air, which, like the nitrogen, is carried along in the reaction. This is important, because the more complicated way to specify a single step reaction of methane is as follows:
-
+By default, there are trace amounts of carbon dioxide and water vapor in the air, which, like the nitrogen, is carried along in the reaction. This is important, because the more complicated way to specify a single step reaction of methane is as follows:
 \begin{lstlisting}
 &SPEC ID='NITROGEN',       LUMPED_COMPONENT_ONLY=T /
 &SPEC ID='OXYGEN',         LUMPED_COMPONENT_ONLY=T /
@@ -5188,8 +5151,6 @@ FDS assumes the following reaction:
 &REAC FUEL='METHANE', SPEC_ID_NU='METHANE','AIR','PRODUCTS',
       NU=-1,-9.6357,10.6357, HEAT_OF_COMBUSTION=50000. /
 \end{lstlisting}
-
-\noindent
 The reaction stoichiometry is specified using the stoichiometric coefficients, \ct{NU(N)}, corresponding to the tracked\footnote{A ``tracked'' species is one for which \ct{LUMPED_COMPONENT_ONLY} is \ct{F}} species, \ct{SPEC_ID_NU(N)}. If complex stoichiometry is being used, a \ct{FUEL} input is not required. If no \ct{FUEL} input is given, FDS will assume it is the first species in \ct{SPEC_ID_NU} with a net negative value for \ct{NU} (i.e., if a species appeared on both sides of the reaction as a collision species it would not be used as the \ct{FUEL}). There are several parameters on the \ct{REAC} line that control the specification of the stoichiometry:
 \begin{itemize}
 \item \ct{CHECK_ATOM_BALANCE}  If chemical formulas are provided for all species that participate in a reaction, then FDS will check the stoichiometry to ensure that atoms are conserved.  Setting this flag to \ct{F} will bypass this check.  (Default \ct{T})
@@ -5426,9 +5387,7 @@ When specifying a reaction scheme using all primitive variables ({\em i.e., no l
 \item The stoichiometry is given before each species and is separated by an asterisk. Real numbers are allowed but exponential notation is not (i.e., \ct{201.1} but not \ct{2.011E2}).
 \item The reactants and products are separated by an equals sign.
 \end{itemize}
-
-\noindent For example, if the reaction defines the complete combustion of methane using primitive species, then the following would be equivalent:
-
+For example, if the reaction defines the complete combustion of methane using primitive species, then the following would be equivalent:
 \begin{lstlisting}
 &REAC FUEL='METHANE', EQUATION ='METHANE+2*OXYGEN=CARBON DIOXIDE+2*WATER VAPOR' /
 &REAC FUEL='METHANE', EQUATION ='CH4+2*O2=CO2+2*H2O' /
@@ -5586,7 +5545,6 @@ This type of reaction is specified by adding \ct{THIRD_BODY=T} to the \ct{REAC} 
 \subsection{Fall-off Reactions}
 \label{info:falloff_reactions}
 Fall-off reactions are a type of reaction where rates depend on both pressure and temperature, as described in the FDS Tech Guide \cite{FDS_Math_Guide}. These reactions are prevalent in detailed chemical mechanisms (see Section \ref{info:detailedChemMech}). Following are the example of Lindermann-fall-off and Troe-fall-off reaction entries from GRI-3 mechanism \cite{gri3:1999} in FDS format. SRI-fall-off reactions are not supported yet, and will be incorporated in future.
-
 \begin{lstlisting}
 &REAC ID='R12',
      REACTYPE='FALLOFF-LINDEMANN',
@@ -5718,19 +5676,13 @@ If Eq.~(\ref{eq:PROPANE_depo}) is properly balanced, you can directly use the st
 &SPEC ID = 'PRODUCTS', SPEC_ID ='NITROGEN','CARBON DIOXIDE','WATER VAPOR',
       VOLUME_FRACTION = 18.10978,2.81643,4.0 /
 \end{lstlisting}
-
-\noindent
 The heat of combustion for propane is found in the SFPE Handbook~\cite{SFPE:Tewarson}.
-
 \begin{lstlisting}
 &REAC FUEL = 'PROPANE', HEAT_OF_COMBUSTION=44715.,
       SPEC_ID_NU = 'PROPANE','AIR','PRODUCTS','SOOT',
       NU=-1.,-4.81643,1.,0.18357/
 \end{lstlisting}
-
-\noindent
 Note: The sign of \ct{NU} corresponds to whether that species is consumed (-) or produced (+). Figure~\ref{soot_deposition} shows the soot surface deposition on the wall.  This boundary quantity is given by the input below.
-
 \begin{lstlisting}
 &BNDF QUANTITY='SURFACE DEPOSITION', SPEC_ID='SOOT' /
 \end{lstlisting}
@@ -5754,14 +5706,11 @@ Soot oxidation cannot be used with simple chemistry; you must use primitive spec
 \label{info:agglomeration}
 
 Aerosol particles will, over time, collide with one another and stick together to form larger particles. This process is called agglomeration. The agglomeration model in FDS is automatically invoked by defining an aerosol species with size bins. The agglomeration model can be disabled the logical flag \ct{AGGLOMERATION} on the \ct{MISC} input. Particle bins are defined by giving a minimum particle diameter, \ct{MIN_DIAMETER} in m, a maximum particle diameter, \ct{MAX_DIAMETER} in m, and the desired number of size bins, \ct{N_BINS}, on the \ct{SPEC} line for an aerosol species. Note that if multiple aerosol species are defined, the agglomeration model will agglomerate each species independently, that is particles of different species do not agglomerate together into a larger mixed-species particle. The following input defines a soot species as an aerosol with 10 bins between 1 and 100~$\mu$m. Each bin will be created as its own lumped species with names \ct{SOOT_1} through \ct{SOOT_10}. A summary of the particle bins will be written to the \ct{CHID.out} file.
-
 \begin{lstlisting}
 &SPEC ID='SOOT', AEROSOL=T,MIN_DIAMETER=1.E-6,MAX_DIAMETER=100.E-6,
       N_BINS=10,LUMPED_COMPONENT_ONLY=T/
 \end{lstlisting}
-
 It may be desirable to combine aerosol agglomeration with chemical reaction.  That is, one or more of the aerosol species may participate in a chemical reaction, either as a reactant or product.  Keep in mind that tracked species for the aerosol distribution are appended with the bin number, as stated above.  Within FDS, it is these subspecies that are being tracked and you must explicitly specify the stoichiometry of the subspecies within the reaction (see Sec.~\ref{info:REAC_Diagnostics}).  Below is an example for combustion of \emph{n}-heptane generating soot as an aerosol with five size bins.
-
 \begin{lstlisting}
 &SPEC ID='N-HEPTANE' /
 &SPEC ID='NITROGEN',LUMPED_COMPONENT_ONLY=T/
@@ -5973,7 +5922,6 @@ If multiple fuels are present, e.g., one fuel for cardboard and one fuel for pol
 \label{ramp_chi_r}
 
 Even for a single fuel species the global flame radiative fraction may depend on other parameters of the problem like global equivalent ratio.  If a time variation of the radiative fraction is necessary, it may be added through a ramp function, \ct{RAMP_CHI_R}, on the \ct{REAC} line. The results of running the \ct{ramp_chi_r} test case containing the \ct{RAMP} given below is shown in Fig.~\ref{ramp_chi}.
-
 \begin{lstlisting}
 &REAC FUEL='METHANE', RADIATIVE_FRACTION=1.0, RAMP_CHI_R='CHI_R RAMP' /
 &RAMP ID='CHI_R RAMP', T= 0.0, F=0.238 /
@@ -6411,7 +6359,6 @@ A 3-D array of particles can be used to represent the drag exerted by porous med
 &INIT XB=1.010,1.095,0.0,0.5,0.0,0.5, N_PARTICLES_PER_CELL=1, CELL_CENTERED=T,
       PART_ID='FOAM' /
 \end{lstlisting}
-
 The basic geometry of the foam ligaments is defined with the \ct{SURF} line. It is assumed that the ligaments are made of an aluminum alloy whose properties are given on the \ct{MATL} line. The radius of the assumed cylindrical ligament is indicated by the \ct{THICKNESS}. Note that the \ct{LENGTH} of the cylinder which is normally required on the \ct{SURF} line is computed automatically so that the volume fraction of the grid cell occupied by the foam, specified by \ct{POROUS_VOLUME_FRACTION} on the \ct{PART} line, is achieved. In a sense, the foam is modeled by a long cylinder chopped up into small pieces and represented by a single particle in each grid cell. The \ct{SURF} inputs of \ct{POROUS_VOLUME_FRACTION} and \ct{THICKNESS} do not directly effect the drag calculation. They are used to define the surface area for computing heat transfer between the gas and the porous media.
 
 The \ct{PART} line provides information about the particles which includes the drag they impose on the flow. The \ct{DRAG_LAW} of \ct{POROUS MEDIA} indicates a special drag model for porous media. This model states that the pressure drop through the media is given by
@@ -6632,7 +6579,6 @@ If you want to delay the insertion of droplets, you can use either a \ct{DEVC_ID
 Particles can either be static, massless tracers (go with the flow), massive droplets or thermally thick solids (experience drag), or have its position controlled by a \ct{PATH_RAMP}.  A scenario where this might be useful is when you have a heat or mass source that changes position in time.  Or, you might want a \ct{DEVC} measurement location to change with time; the \ct{DEVC} can be linked to a particle through an \ct{INIT} line with a \ct{PATH_RAMP}, as we will discuss next.
 
 The \ct{INIT} parameter \ct{PATH_RAMP(1:3)} is a list of three character strings for the ramp IDs associated with the $x$, $y$, and $z$ positions of a particle.  We use the volume insert method for the particle, with \ct{N_PARTICLES=1}.  An example may be found in the verification case \ct{part_path_ramp_jog.fds} in the \ct{fds/Verification/Miscellaneous/} directory.  The output of the example is shown in Fig.~\ref{fig:part_path_ramp_jog}.  The basics that are needed to implement the path ramp are the following:
-
 \begin{lstlisting}
 &RAMP ID='PART RAMP X', T=0,  F=0/ start position at X=0 m at Time=0 s
 &RAMP ID='PART RAMP X', T=10, F=5/ move linearly to  X=5 m at Time=10 s
@@ -6657,7 +6603,6 @@ The \ct{INIT} parameter \ct{PATH_RAMP(1:3)} is a list of three character strings
 \label{part_orientation_ramp}
 
 The \ct{ORIENTATION} for a particle placed with an \ct{INIT} line can be controlled by specifying \ct{ORIENTATION_RAMP} on the \ct{INIT} line. \ct{ORIENTATION_RAMP} specifies a \ct{RAMP} for each of the three components for the particle \ct{ORIENTATION}. All three components must be defined. At each timestep, the outputs for the \ct{RAMP}s will be normalized to a vector magnitude of one. In the example below, the particle orientation is changed from -x to +x over 10~s by rotating around the z-axis.
-
 \begin{lstlisting}
 &PART ID='MY PART',SURF_ID='PART SURF',STATIC=T, ORIENTATION=1,1,1/
 &INIT ID='ONE PART',PART_ID='MY PART',XYZ=0.975,1,1,
@@ -6670,7 +6615,6 @@ The \ct{ORIENTATION} for a particle placed with an \ct{INIT} line can be control
 &RAMP ID='O3',T=0, F= 0/
 &RAMP ID='O3',T=10,F= 0/
 \end{lstlisting}
-
 Note that the \ct{PART} input must contain \ct{ORIENTATION} as this signals to FDS to allocate array space for the angular radiative fluxes for that class of particles. This block of input was used in test case consisting of a 1~\unit{m^3} box with the +x wall emitting a radiative flux of 10~\unit{kW/m^2}, and the remaining walls emitting 1~\unit{kW/m^2}. Results are shown in Fig.~\ref{fig:part_orientation_ramp}.
 
 \begin{figure}[ht]
@@ -8461,7 +8405,7 @@ There are many systems whose functionality cannot be described by a simple devic
 \item \ct{ID} A name for the control function that is unique over all control functions.
 \item \ct{FUNCTION_TYPE} The type of control function.  The possible types are shown in Table~\ref{tab:funcvalues}.
 \item \ct{INPUT_ID} A list of \ct{DEVC} or \ct{CTRL} \ct{ID}s that are the inputs to the control function.  Up to forty inputs can be specified.  If a \ct{DEVC} or \ct{CTRL} is being used as an \ct{INPUT_ID} for a control function, then it must have a unique \ct{ID} over both devices and control functions.  Additionally, a control function cannot be used as an input for itself.
-\item \ct{SETPOINT} The value of the control function at which its state changes. This is only appropriate for functions that return numerical values.
+\item \ct{SETPOINT} The value(s) of the control function at which its state changes. This is only appropriate for functions that return numerical values.
 \item \ct{TRIP_DIRECTION} A positive integer means the control function will change state when its value increases past the setpoint and a negative integer means the control function will change state when its value decreases past the setpoint.  The default value is +1.
 \item \ct{LATCH} If this logical value is set to \ct{T} the control function will only change state once. The default is \ct{LATCH=T}.
 \item \ct{INITIAL_STATE} The initial state of the control function. Default \ct{F}. For example, if an obstruction associated with the control function is to disappear, set \ct{INITIAL_STATE=T} on the \ct{DEVC} line.
@@ -8756,8 +8700,7 @@ The \ct{control_test_2} example demonstrates the use of the mathematical and PID
 &CTRL ID='PID',FUNCTION_TYPE='PID',INPUT_ID='Time',TARGET_VALUE=5.,
           PROPORTIONAL_GAIN=-0.5,INTEGRAL_GAIN=0.001,DIFFERENTIAL_GAIN=1./
 \end{lstlisting}
-
-\noindent Results are shown in Fig.~\ref{control_test_2_fig}.
+Results are shown in Fig.~\ref{control_test_2_fig}.
 \begin{figure}[ht]
 \centering
 \includegraphics[scale=0.55]{SCRIPT_FIGURES/control_test_2}
@@ -8930,46 +8873,46 @@ In this example, a fire spreads radially from a single point as directed by the 
 
 It is possible to externally control some aspects of an FDS simulation while the simulation is running. These include most \ct{RAMP}s and the logical state of any \ct{CTRL}. The logical state of a \ct{CTRL} can be externally controlled by setting \ct{FUNCTION_TYPE='EXTERNAL'} on the \ct{CTRL} input. A \ct{RAMP} can be externally controlled by setting \ct{EXTERNAL_FILE} on \ct{RAMP}. \ct{RAMP}s used during initialization only cannot be externally controlled. These include \ct{RAMP}s controlling time (such as the output time \ct{RAMP}s on \ct{DUMP} like \ct{RAMP_BNDF}), defining \ct{SPEC} or \ct{MATL} physical properties (such as \ct{CONDUCTIVITY_RAMP} on \ct{MATL}), defining particle distributions (such as \ct{CNF_RAMP} on \ct{PART}), defining atmospheric conditions (such as \ct{RAMP_T0_Z} on \ct{WIND}), or for defining the initial surface temperature {\ct{RAMP_T_I} on \ct{SURF}) cannot be externally controlled.
 
-	Any FDS input that has either a \ct{RAMP_ID} (except for the output time ramps on \ct{DUMP} such as \ct{RAMP_BNDF}) or a \ct{CTRL_ID} as one of its inputs can be externally controlled. A \ct{RAMP} can be externally controlled by setting \ct{EXTERNAL_FILE} on \ct{RAMP}. A \ct{CTRL} can be externally controlled by setting \ct{FUNCTION_TYPE='EXTERNAL'}.
+ Any FDS input that has either a \ct{RAMP_ID} (except for the output time ramps on \ct{DUMP} such as \ct{RAMP_BNDF}) or a \ct{CTRL_ID} as one of its inputs can be externally controlled. A \ct{RAMP} can be externally controlled by setting \ct{EXTERNAL_FILE} on \ct{RAMP}. A \ct{CTRL} can be externally controlled by setting \ct{FUNCTION_TYPE='EXTERNAL'}.
 
-	When external control is selected, FDS will set the value of the \ct{RAMP} or the logical state of the \ct{CTRL} based on values contained in a csv file whose name is given by \ct{EXTERNAL_FILENAME} on \ct{MISC}. This file will be checked for new values every \ct{DT_EXTERNAL} on \ct{TIME} seconds. Only those inputs whose values are being changed need to specified. For inputs not specified or if the file does not exist or cannot be opened (e.g., locked by the operating system during a file write), the current values will be kept. The initial values are defined with either \ct{INITIAL_VALUE} on \ct{RAMP} or \ct{INITIAL_STATE} on \ct{CTRL}. FDS can be forced to wait if no file is present or use an alternate \ct{EXTERNAL_FILENAME} by specifying \ct{DT_EXTERNAL_HEARTBEAT} and \ct{EXTERNAL_HEARTBEAT_FILENAME} on \ct{TIME}. With this approach FDS looks for \ct{EXTERNAL_HEARTBEAT_FILENAME}. If the file is not found FDS will wait up to \ct{DT_EXTERNAL_HEARTBEAT} seconds. If \ct{EXTERNAL_HEARTBEAT_FILENAME} is still not present, FDS will stop trying to update the external controls.  If \ct{HEARTBEAT_FAIL} on \ct{TIME} is true, FDS will stop the simulation. If \ct{EXTERNAL_HEARTBEAT_FILENAME} is present, FDS will read \ct{EXTERNAL_FILENAME} from it. If your external program requires that output files it reads be current, set \ct{DT_FLUSH} to be less than the \ct{DT} values for any file types being used by the external program.
+ When external control is selected, FDS will set the value of the \ct{RAMP} or the logical state of the \ct{CTRL} based on values contained in a csv file whose name is given by \ct{EXTERNAL_FILENAME} on \ct{MISC}. This file will be checked for new values every \ct{DT_EXTERNAL} on \ct{TIME} seconds. Only those inputs whose values are being changed need to specified. For inputs not specified or if the file does not exist or cannot be opened (e.g., locked by the operating system during a file write), the current values will be kept. The initial values are defined with either \ct{INITIAL_VALUE} on \ct{RAMP} or \ct{INITIAL_STATE} on \ct{CTRL}. FDS can be forced to wait if no file is present or use an alternate \ct{EXTERNAL_FILENAME} by specifying \ct{DT_EXTERNAL_HEARTBEAT} and \ct{EXTERNAL_HEARTBEAT_FILENAME} on \ct{TIME}. With this approach FDS looks for \ct{EXTERNAL_HEARTBEAT_FILENAME}. If the file is not found FDS will wait up to \ct{DT_EXTERNAL_HEARTBEAT} seconds. If \ct{EXTERNAL_HEARTBEAT_FILENAME} is still not present, FDS will stop trying to update the external controls.  If \ct{HEARTBEAT_FAIL} on \ct{TIME} is true, FDS will stop the simulation. If \ct{EXTERNAL_HEARTBEAT_FILENAME} is present, FDS will read \ct{EXTERNAL_FILENAME} from it. If your external program requires that output files it reads be current, set \ct{DT_FLUSH} to be less than the \ct{DT} values for any file types being used by the external program.
 
-	The csv file format is:
-	\begin{lstlisting}
-		Type(1), ID(1), Value(1)
-		Type(2), ID(2), Value(2)
-		.
-		.
-	\end{lstlisting}
-	where \ct{Type} is either \ct{RAMP} or \ct{CTRL}, \ct{ID} is the corresponding \ct{ID} in the FDS input files, and \ct{Value} is the new output value for a \ct{RAMP} or the new logical state for a \ct{CTRL} where positive values mean the \ct{CTRL} evaluates as \ct{TRUE} and negative values mean the function evaluates as \ct{FALSE}.
+ The csv file format is:
+ \begin{lstlisting}
+  Type(1), ID(1), Value(1)
+  Type(2), ID(2), Value(2)
+  .
+  .
+ \end{lstlisting}
+ where \ct{Type} is either \ct{RAMP} or \ct{CTRL}, \ct{ID} is the corresponding \ct{ID} in the FDS input files, and \ct{Value} is the new output value for a \ct{RAMP} or the new logical state for a \ct{CTRL} where positive values mean the \ct{CTRL} evaluates as \ct{TRUE} and negative values mean the function evaluates as \ct{FALSE}.
 
-	An example set of inputs is below:
-	\begin{lstlisting}
-		&MISC EXTERNAL_FILENAME='external_test_input.csv'/
-		&TIME T_END=10,DT_EXTERNAL=5/
+ An example set of inputs is below:
+ \begin{lstlisting}
+  &MISC EXTERNAL_FILENAME='external_test_input.csv'/
+  &TIME T_END=10,DT_EXTERNAL=5/
 
-		&OBST XB=0.0,0.1,0,1,0,1/
-		&VENT XB=0.1,0.1,0,1,0,1,SURF_ID='FLOW',CTRL_ID='VENT CTRL'/
-		&SURF ID='FLOW',VEL=-1,COLOR='BLUE',TAU_V=0/
-		&CTRL ID='VENT CTRL',FUNCTION_TYPE='EXTERNAL',INITIAL_STATE=T/
+  &OBST XB=0.0,0.1,0,1,0,1/
+  &VENT XB=0.1,0.1,0,1,0,1,SURF_ID='FLOW',CTRL_ID='VENT CTRL'/
+  &SURF ID='FLOW',VEL=-1,COLOR='BLUE',TAU_V=0/
+  &CTRL ID='VENT CTRL',FUNCTION_TYPE='EXTERNAL',INITIAL_STATE=T/
 
-		&VENT XB=2,2,0,1,0,1,SURF_ID='HOT'/
-		&SURF ID='HOT',TMP_FRONT=1000,RAMP_T='T RAMP',COLOR='RED'/
-		&RAMP ID='T RAMP',EXTERNAL_FILE=T,INITIAL_VALUE=0.081633/
-	\end{lstlisting}
-	In these inputs a vent with a fixed velocity is externally controlled by a \ct{CTRL} that is initially \ct{TRUE}, and a vent with a fixed temperature is externally controlled with a \ct{RAMP} with an initial ramp value that results in a temperature of 100~$^\circ$C. These vents are applied to two faces of a 1 m$^3$ box. At 5~s, the csv file is read with contents of:
-	\begin{lstlisting}
-		RAMP,"T RAMP"   , 1
-		CTRL,"VENT CTRL",-1
-	\end{lstlisting}
-	This turns off the velocity vent (a negative \ct{CTRL} value means set the state to \ct{.FALSE.}) and sets the fixed temperature vent to 1000~$^\circ$C (a \ct{RAMP} value of 1 means apply the full value of \ct{TMP_FRONT}). Note that the \ct{ID} strings are enclosed in quotes. This is only required if the string has a space or comma in it.  Results of running the case are shown in Fig.~\ref{external_control_fig}
+  &VENT XB=2,2,0,1,0,1,SURF_ID='HOT'/
+  &SURF ID='HOT',TMP_FRONT=1000,RAMP_T='T RAMP',COLOR='RED'/
+  &RAMP ID='T RAMP',EXTERNAL_FILE=T,INITIAL_VALUE=0.081633/
+ \end{lstlisting}
+ In these inputs a vent with a fixed velocity is externally controlled by a \ct{CTRL} that is initially \ct{TRUE}, and a vent with a fixed temperature is externally controlled with a \ct{RAMP} with an initial ramp value that results in a temperature of 100~$^\circ$C. These vents are applied to two faces of a 1 m$^3$ box. At 5~s, the csv file is read with contents of:
+ \begin{lstlisting}
+  RAMP,"T RAMP"   , 1
+  CTRL,"VENT CTRL",-1
+ \end{lstlisting}
+ This turns off the velocity vent (a negative \ct{CTRL} value means set the state to \ct{.FALSE.}) and sets the fixed temperature vent to 1000~$^\circ$C (a \ct{RAMP} value of 1 means apply the full value of \ct{TMP_FRONT}). Note that the \ct{ID} strings are enclosed in quotes. This is only required if the string has a space or comma in it.  Results of running the case are shown in Fig.~\ref{external_control_fig}
 
-	\begin{figure}[ht]
-		\includegraphics[width=3in]{SCRIPT_FIGURES/external_test_temperature}
-		\includegraphics[width=3in]{SCRIPT_FIGURES/external_test_velocity}
-		\caption[Results of the \ct{external_test} test case]{(Left) Surface temperature. (Right) Wall velocity.}
-		\label{external_control_fig}
-	\end{figure}
+ \begin{figure}[ht]
+  \includegraphics[width=3in]{SCRIPT_FIGURES/external_test_temperature}
+  \includegraphics[width=3in]{SCRIPT_FIGURES/external_test_velocity}
+  \caption[Results of the \ct{external_test} test case]{(Left) Surface temperature. (Right) Wall velocity.}
+  \label{external_control_fig}
+ \end{figure}
 
 \chapter{Numerical Considerations}
 \label{info:MISC}
@@ -10604,10 +10547,10 @@ Bi-directional probes have biases due to both the Reynolds number (based on the 
 
 Figure~\ref{bi_dir_fig} shows the results of a bi-directional probe with varying angle to a 1~m/s flow and varying flow speed.
 \begin{figure}[ht]
-	\includegraphics[width=3in]{SCRIPT_FIGURES/bi_dir}
-	\includegraphics[width=3in]{SCRIPT_FIGURES/bi_dir_2}
-	\caption[Results of the \ct{bi_dir} test case]{Measured velocities using a bi-directional probe. (Left) Varying angle for a 1~m/s flow. (Right) Probe axis aligned flow with varied flow speed.}
-	\label{bi_dir_fig}
+ \includegraphics[width=3in]{SCRIPT_FIGURES/bi_dir}
+ \includegraphics[width=3in]{SCRIPT_FIGURES/bi_dir_2}
+ \caption[Results of the \ct{bi_dir} test case]{Measured velocities using a bi-directional probe. (Left) Varying angle for a 1~m/s flow. (Right) Probe axis aligned flow with varied flow speed.}
+ \label{bi_dir_fig}
 \end{figure}
 
 \subsection{Volume Flow}
@@ -11477,12 +11420,9 @@ where $\mu_t$ is the turbulent viscosity and $|\tilde{S}|$ is the filtered strai
 \label{info:yplus}
 
 Large-eddy simulations of boundary layer flows fall into two general categories: LES with near-wall resolution and LES with near-wall modeling (wall functions).  FDS employs the latter.  The wall models used in FDS are law of the wall \cite{Pope:2000}.  For the wall models to function properly, the grid resolution near the wall should fall within a certain range of $y^+$, the non-dimensional distance from the wall expressed in viscous units.  To check this, you may add a boundary file output as follows:
-
 \begin{lstlisting}
 &BNDF QUANTITY='VISCOUS WALL UNITS' /
 \end{lstlisting}
-
-\noindent
 The value of $y^+$ reported is half (since the velocity lives at the cell face center) the wall-normal cell dimension ($\delta n$) divided by the maximum between the local viscous length scale, $\delta_\nu$ \cite{Pope:2000} or the sand grain roughness, $s$, for rough walls:
 \be
 y^+ = \frac{\delta n/2}{\max(\delta_\nu,s)} \,\mbox{;} \quad\quad \delta_\nu = \frac{\mu/\rho}{u_\tau} \,\mbox{;} \quad\quad u_\tau = \sqrt{\tau_w/\rho} \,\mbox{,}
@@ -11491,8 +11431,7 @@ where $\tau_{\rm w} = \mu\,\partial |\mathbf{u}|/\partial n$ is the viscous stre
 \begin{lstlisting}
 &DEVC XYZ=1,0,0, QUANTITY='FRICTION VELOCITY', IOR=3, ID='u_tau' /
 \end{lstlisting}
-
-\noindent Wall functions for LES are still under development, but as a general guideline for efficiency reasons it is recommended that the first grid cell fall within the log layer.  There is no penalty---other than computational time---for being more highly resolved. The viscous sublayer lies within $0 < y^+ < 5$.  The transition region lies roughly between $5 < y^+ < 30$, a value $y^+=30$ would be considered highly resolved.  The upper limit of the log region for statistically stationary boundary layers depends on the Reynolds number, and there are no hard rules for transient flows.  Beyond $y^+=1000$ the first grid cell is likely to fall in the wake region of the boundary layer and may produce unreliable results.  A reasonable target for practical engineering LES is $y^+ = {\cal O}(100)$.
+Wall functions for LES are still under development, but as a general guideline for efficiency reasons it is recommended that the first grid cell fall within the log layer.  There is no penalty---other than computational time---for being more highly resolved. The viscous sublayer lies within $0 < y^+ < 5$.  The transition region lies roughly between $5 < y^+ < 30$, a value $y^+=30$ would be considered highly resolved.  The upper limit of the log region for statistically stationary boundary layers depends on the Reynolds number, and there are no hard rules for transient flows.  Beyond $y^+=1000$ the first grid cell is likely to fall in the wake region of the boundary layer and may produce unreliable results.  A reasonable target for practical engineering LES is $y^+ = {\cal O}(100)$.
 
 
 \subsection{Extinction}
@@ -12218,7 +12157,7 @@ Keyword             & Type     & Description                      & Units       
 \ct{PERCENTILE}         & Real           & Section~\ref{info:PERCENTILE}           &    &                        \\ \hline
 \ct{PROPORTIONAL_GAIN} & Real           & Section~\ref{info:CONTROL_PID}          &    &  0.                    \\ \hline
 \ct{RAMP_ID}           & Character      & Section~\ref{info:CUSTOM}               &    &                        \\ \hline
-\ct{SETPOINT(2)}        & Real           & Section~\ref{info:basic_control}        &    &                        \\ \hline
+\ct{SETPOINT(2)}        & Real           & Section~\ref{info:CTRL}                &    &                        \\ \hline
 \ct{TARGET_VALUE}      & Real           & Section~\ref{info:CONTROL_PID}          &    &  0.                    \\ \hline
 \ct{TRIP_DIRECTION}    & Integer        & Section~\ref{info:basic_control}        &    &   1                    \\ \hline
 \end{xltabular}
@@ -15039,9 +14978,7 @@ IF (N_VERT_D>0) WRITE(LU_ISO) (Xvert(I),Yvert(I),Zvert(I),I=1,N_VERT)
 IF (N_FACE_D>0) WRITE(LU_ISO) (FACE1(I),FACE2(I),FACE3(I),I=1,N_FACE)
 IF (N_FACE_D>0) WRITE(LU_ISO) (ISO_LEVEL_INDICES(I),I=1,N_FACE)
 \end{lstlisting}
-
-\noindent where:
-
+where:
 \begin{itemize}
 \item \ct{ONE}\ Integer set to 1. Smokeview uses this number to determine whether the computer creating the geometry file and the computer viewing the geometry file use the same or different byte swap (endian) conventions for storing floating point numbers.
 \item \ct{VERSION}\ currently has value 1 and indicates the version number of this file format.
@@ -15077,9 +15014,7 @@ IF (N_VERT>0 .AND. N_FACE>0) THEN
    ENDIF
 ENDIF
 \end{lstlisting}
-
-\noindent where:
-
+where:
 \begin{itemize}
 \item \ct{ONE}\ Integer set to 1.
 \item \ct{VERSION}\ currently has value 2 and indicates the version number of this file format.
@@ -15140,9 +15075,7 @@ WRITE(LU_TERRAIN(NM)) ((Z_TERRAIN(I,J),J=0,M%JBAR),I=0,M%IBAR)
 \label{inout:bingeom}
 
 The binary format for geometries read by FDS as described in section~\ref{subsec:readbin} is the following. Binary files read by the FDS released pre-compiled bundles must have \textit{little endian} endianness.
-
 \begin{lstlisting}
-
 WRITE(LU_BINGEOM) GEOM_TYPE
 WRITE(LU_BINGEOM) N_VERTS,N_FACES,N_SURF_ID,N_VOLUS
 WRITE(LU_BINGEOM) VERTS(1:3*N_VERTS)
@@ -15150,9 +15083,7 @@ WRITE(LU_BINGEOM) FACES(1:3*N_FACES)
 WRITE(LU_BINGEOM) SURFS(1:N_FACES)
 WRITE(LU_BINGEOM) VOLUS(1:4*N_VOLUS)
 \end{lstlisting}
-
-\noindent where:
-
+where:
 \begin{itemize}
   \item \ct{GEOM_TYPE} Integer equal to 1 for CAD geometries, and 2 for terrains (top surfaces only). All FDS analytical geometries, including extruded POLYs, are written to binary as general CAD geometries.
   \item \ct{N_VERTS,N_FACES,N_SURF_ID,N_VOLUS} number of vertices, triangles, surface types and volumes on the geometry.

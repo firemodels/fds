@@ -1011,6 +1011,18 @@ Note that the full-scale test with plywood lining is included in the validation 
 The National Institute of Justice (NIJ) sponsored a series of experiments to develop a systematic approach to quantify material and reaction property inputs for accurate computer fire models~\cite{Lattimer:NIJ19}. The research focused on identifying the optimal experiments to use in determining these properties to minimize the variability in the determination through optimization. TGA experiments at three heating rates, cone calorimeter experiments at three thermal exposures in accordance with ASTM E1354, and MCC experiments with four oxygen concentrations in accordance with ASTM D7309-13 were conducted on seven diverse materials. The materials studied in this work included black poly(methyl methacrylate) (PMMA), fiberglass reinforced plastic (FRP), medium-density fibreboard (MDF), white pine, white spruce, cardboard, and oriented strand board (OSB). The cone calorimeter experiments from this study are used in validation of the scaling-based pyrolysis model.
 
 
+\section{JIS Facade Experiments}
+\label{JIS_Facade_Description}
+
+Sun et~al.~\cite{Sun:FAM2024} describe experiments in a large-scale facade apparatus based on the Japanese Industrial Standard (JIS)~A~1310. The fire compartment for this test is 1.35~m by 1.35~m by 1.35~m with a 0.91~m by 0.91~m opening. The 0.6~m by 0.6~m propane burner is flush with the floor at the rear of the compartment with nominal heat release rates of 600~kW, 750~kW, and 900~kW.
+
+\subsubsection{Modeling Notes}
+
+Ref.~\cite{Sun:FAM2024} reports the volume flow of propane at 20~$^\circ$C and 1~atm to be 433~L/min, 541~L/min, and 649~L/min. Assuming that propane has a heat of combustion of approximately 46.4~MJ/kg, the specified HRR in the simulation is approximately 613~kW, 766~kW, and 919~kW.
+
+A two-step combustion mechanism is implemented for propane. In the first reaction, fuel is converted to CO, soot, H$_2$, and H$_2$O. In the second reaction, the CO, soot, and H$_2$ are converted to CO$_2$ and H$_2$O. Both reactions employ fast kinetics, but proceed in series, not in parallel. The fraction of carbon atoms converted to CO in the first step is 0.75. One half of the hydrogen atoms are converted to H$_2$ in the first step. This same scheme has been used to model the NIST Pool Fires cases, Sec.~\ref{NIST_Pool_Fires_Description}. In addition, the radiative fraction is {\em not} specified---emission is governed by the local temperature and species composition. Post-flame yields of soot and CO are set to 0.019 and 0.005, respectively, based on Table~A.40 of the SFPE Handbook~\cite{SFPE}.
+
+
 \section{Kashiwagi Gasification}
 \label{Kashiwagi_Gasification_Description}
 
@@ -2163,7 +2175,7 @@ Details and references with regard to the plume temperature measurements are giv
 
 The 30~cm and 37~cm fires are modeled at three different grid resolutions---2~cm, 1~cm, and 0.5~cm. The 100~cm methanol pool fire is modeled at 4~cm, 2~cm, and 1~cm resolution. The mass loss rate of the fuel is specified for the 30~cm and 37~cm fires, and both predicted and specified for the 100~cm fire.
 
-A two-step reaction mechanism is implemented. In the first reaction, fuel is converted to CO, soot, H$_2$, and H$_2$O. In the second reaction, the CO, soot, and H$_2$ are converted to CO$_2$ and H$_2$O. Both reactions employ fast kinetics, but proceed in series, not in parallel. The relative amounts of CO, soot, and H$_2$ produced in the first step are still subjects of study, and for the moment have been estimated based on measured results. The fractions of carbon atoms converted to CO in the first step are as follows---0.85 for acetone; 0.95 for ethanol; 0.97 for methane; 1.0 for methanol; 0.85 for propane. For all fuels, one half of the hydrogen atoms are converted to H$_2$ in the first step.
+A two-step reaction mechanism is implemented. In the first reaction, fuel is converted to CO, soot, H$_2$, and H$_2$O. In the second reaction, the CO, soot, and H$_2$ are converted to CO$_2$ and H$_2$O. Both reactions employ fast kinetics, but proceed in series, not in parallel. The relative amounts of CO, soot, and H$_2$ produced in the first step are still subjects of study, and for the moment have been estimated based on measured results. The fractions of carbon atoms converted to CO in the first step are as follows---0.80 for acetone; 0.95 for ethanol; 0.80 for heptane, 0.95 for methane; 1.0 for methanol; 0.75 for propane. For all fuels, one half of the hydrogen atoms are converted to H$_2$ in the first step.
 
 The radiative fractions are specified based on reported values from Ref.~\cite{Sung:TN2162r1}---0.31 for acetone; 0.26 for ethanol; 0.35 for heptane; 0.21 for methane; 0.21 for 1~m methanol; 0.23 for 30~cm methanol; 0.23, 0.30, and 0.33 for the 20~kW, 34~kW, and 50~kW propane fires, respectively.
 
@@ -3020,13 +3032,10 @@ The compartment dimension were 4.0~m by 4.0~m by 1.7~m. Note that the dimensions
 
 A mixture of gaseous fuels supplied by the local utility was used as a fuel. It was supplied to the compartment through four, room-wide burner pipes with holes on the top surface, approximately 20~cm above the floor. The experiments were conducted in three series, named I, 1 and 2. For each, multiple fires were generated between which changes were made to the ventilation and HRR. The test duration was 5~min with 10~min of cooling between each.
 
-A second set of experiments was performed in this facility by Sun et~al.~\cite{Sun:FAM2024} using a configuration based on the JIS~A~1310 test standard. The fire compartment for this test is 1.35~m by 1.35~m by 1.35~m with a 0.91~m by 0.91~m opening. The 0.6~m by 0.6~m propane burner is flush with the floor at the rear of the compartment with heat release rates of 600~kW, 750~kW, and 900~kW.
-
 \subsubsection{Modeling Notes}
 
 Gleb Bytskov at the University of Aalto, Finland, performed numerical simulations of these experiments using FDS as part of his master's thesis~\cite{Bytskov:Thesis}. The grid resolution is 10~cm. The fuel is assumed to be propane with a soot yield of 0.015, CO yield of 0.015, and radiative fraction of 0.20.
 
-The JIS~A~1310 simulations use propane with a radiative fraction of 0.30.
 
 
 \section{UL/NIST Vent Experiments}
@@ -3562,11 +3571,33 @@ The U.S. Coast Guard sponsored a series of experiments to assess the fire suppre
 \section{USFS/Catchpole Experiments}
 \label{USFS_Catchpole_Description}
 
-The U.S. Forest Service and collaborators from the University of New South Wales, Australia, conducted 354 fire experiments in a wind tunnel with a cross section of 3~m by 3~m~\cite{Catchpole:CST1998}. The tunnel is part of the Intermountain Fire Sciences Laboratory in Missoula, Montana. The fires involved four different fuel species, a range of fuel bed depths, packing ratios, moisture contents and wind speeds. The fuels were regular and coarse excelsior ({\em Populus tranulos}), and pine needles and heartwood sticks ({\em Pinus ponderosa}). The vegetation was placed in a 1~m wide and 8~m long tray. An approximately 5~cm wide tray of ethanol liquid was positioned at one end, and the fire spread rate was measured using photocells and video analysis.
+The U.S. Forest Service and collaborators from the University of New South Wales, Australia, conducted 357 fire experiments in a wind tunnel with a cross section of 3~m by 3~m~\cite{Catchpole:CST1998}. The tunnel is part of the Intermountain Fire Sciences Laboratory in Missoula, Montana. The fires involved four different fuel species, a range of fuel bed depths, packing ratios, moisture contents and wind speeds. The fuels were regular and coarse excelsior ({\em Populus tranulos}), and pine needles and pine heartwood sticks ({\em Pinus ponderosa}). The vegetation was placed in a 1~m wide and 8~m long tray. An approximately 5~cm wide tray of ethanol liquid was positioned at one end, and the fire spread rate was measured using photocells and video analysis.
+
+\begin{table}[ht!]
+\centering
+\caption[Material properties for the USFS/Catchpole experiments]
+{Reported material properties for the USFS/Catchpole experiments~\cite{Catchpole:CST1998}. The symbol $s$ means surface area to volume ratio, $w_0$ is the fuel load, $\beta$ is the packing ratio, $\delta$ is the fuel depth, $\rho_{\rm p}$ is the particle density, and $Q_{\rm p}$ is the heat of pyrolysis.}
+\label{Catchpole_Parameters}
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+Property                  & Regular       & Pine        & Coarse         & Pine           \\
+                          & Excelsior     & Needles     & Excelsior      & Sticks         \\ \hline \hline
+Identifier                & EXMC          & PPMC        & EXSC           & MF             \\ \hline
+No. Fires                 & 108           & 85          & 144            & 20             \\ \hline
+$s$ (m$^{-1}$)            & 7596          & 5710        & 3092           & 630            \\ \hline
+$w_0$ (kg/m$^2$)          & 0.051-2.426   & 0.101-3.66  & 0.101-2.73     & 0.604-2.324    \\ \hline
+$\beta$                   & 0.0025-0.04   & 0.02-0.094  & 0.0064-0.090   & 0.009-0.035    \\ \hline
+$\delta$ (m)              & 0.025-0.305   & 0.013-0.076 & 0.025-0.152    & 0.076-0.152    \\ \hline
+$\rho_{\rm p}$ (kg/m$^3$) & 398           & 510         & 398            & 442            \\ \hline
+$Q_{\rm p}$ (kJ/kg)       & 711           & 609         & 711            & 659            \\ \hline
+\end{tabular}
+\end{table}
+
+Properties of the fuels are given in Table~\ref{Catchpole_Parameters}. The \href{https://github.com/firemodels/fds/blob/master/Validation/USFS_Catchpole/FDS_Input_Files/Test_Matrix.csv}{test matrix} is available via the FDS GitHub repository. For each experiment, there is a unique combination of fuel type, surface to volume ratio, packing ratio, fuel depth, wind speed, moisture content, and a measured rate of spread. Note that the wind speed, $U$, and the rate of spread, $R$, are given in units of m/s.
 
 \subsubsection{Modeling Notes}
 
-The vegetation is modeled as a collection of cylindrical Lagrangian particles. The pyrolysis model assigned to the particles is described in the FDS User's Guide~\cite{FDS_Users_Guide}, chapter ``Wildland Fire Spread,'' Sec.~\ref{UG-vegetation_model}, ``Thermal Degradation Model for Vegetation.'' The parameters for each experiment are listed in a table in Ref.~\cite{Catchpole:CST1998}.
+The vegetation is modeled as a collection of cylindrical Lagrangian particles. The basic properties of the vegetation are taken directly from the Ref.~\cite{Catchpole:CST1998}. The reaction mechanism for the pine needles and excelsior is described in the FDS User's Guide~\cite{FDS_Users_Guide}, chapter ``Wildland Fire Spread,'' Sec.~\ref{UG-vegetation_model}, ``Thermal Degradation Model for Vegetation.'' The reaction mechanism for the pine sticks is taken from Ref.~\cite{Rinta-Paavola:2023}.
 
 
 \section{USFS/Corsica Experiments}

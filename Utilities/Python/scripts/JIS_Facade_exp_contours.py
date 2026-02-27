@@ -9,7 +9,7 @@ from fdsplotlib import configure_fds_fonts
 configure_fds_fonts(usetex=True)
 
 expdir = '../../../exp/Submodules/macfp-db/Wall_Fires/JIS_Facade/Experimental_Data/'
-pltdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/TUS_Facade/'
+pltdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/JIS_Facade/'
 
 # Read the CSV file, skipping the header row
 df = pd.read_csv(expdir + 'Sun_FAM_2024_mean_temperature.csv', skiprows=1, header=None)

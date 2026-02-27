@@ -122,6 +122,7 @@ PROCESS Heated_Channel_Flow
 PROCESS Heskestad_Flame_Height
 PROCESS Insulation_Materials
 PROCESS JH_FRA
+PROCESS JIS_Facade
 PROCESS Juelich_SETCOM
 PROCESS Lattimer_Corridor_Ceiling
 PROCESS Lattimer_Tilted_Wall
