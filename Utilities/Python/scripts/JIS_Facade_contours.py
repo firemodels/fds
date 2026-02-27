@@ -9,8 +9,8 @@ from fdsplotlib import configure_fds_fonts
 configure_fds_fonts(usetex=True)
 
 expdir = '../../../exp/Submodules/macfp-db/Wall_Fires/JIS_Facade/Experimental_Data/'
-outdir = '../../../out/TUS_Facade/'
-pltdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/TUS_Facade/'
+outdir = '../../../out/JIS_Facade/'
+pltdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/JIS_Facade/'
 
 # Read the CSV file, skipping the first two header rows
 df = pd.read_csv(outdir + 'JIS_facade_2cm_line.csv', skiprows=2, header=None)

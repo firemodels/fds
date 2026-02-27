@@ -43,6 +43,10 @@ fig = fdsplotlib.plot_to_fig(x_data=ncores, y_data=time64, marker_style='b^-', d
 
 fdsplotlib.plot_to_fig(x_data=ncores, y_data=time128, marker_style='rsq-', data_label='$128^3$', figure_handle=fig)
 
+ax = plt.gca()
+ax.set_xticks([1,2,3,4,5,6,7,8])
+ax.set_xticklabels(['1','2','3','4','5','6','7','8'])
+
 plt.savefig(pltdir + 'openmp_timing_benchmarks.pdf', format='pdf')
 plt.close()
 

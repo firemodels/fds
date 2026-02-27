@@ -29,6 +29,7 @@ cd FM_Vertical_Wall_Flames;  ./Run_All.sh $OPTIONS; cd ..
 cd Harrison_Spill_Plumes;  ./Run_All.sh $OPTIONS; cd ..
 cd Heated_Channel_Flow;  ./Run_All.sh $OPTIONS; cd ..
 cd JH_FRA; ./Run_All.sh $OPTIONS; cd ..
+cd JIS_Facade;  ./Run_All.sh $OPTIONS; cd ..
 cd Juelich_SETCOM;  ./Run_All.sh $OPTIONS; cd ..
 cd Lattimer_Corridor_Ceiling;  ./Run_All.sh $OPTIONS; cd ..
 cd Lattimer_Tilted_Wall;  ./Run_All.sh $OPTIONS; cd ..

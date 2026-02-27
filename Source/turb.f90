@@ -17,7 +17,7 @@ PUBLIC :: INIT_TURB_ARRAYS, VARDEN_DYNSMAG, &
           SYNTHETIC_TURBULENCE, SYNTHETIC_EDDY_SETUP, TEST_FILTER, &
           TWOD_VORTEX_CERFACS, TWOD_VORTEX_UMD, TWOD_SOBOROT_UMD, &
           NS_ANALYTICAL_SOLUTION, NS_U_EXACT, NS_V_EXACT, NS_H_EXACT, SANDIA_DAT, SPECTRAL_OUTPUT, SANDIA_OUT, &
-          FILL_EDGES, WALE_VISCOSITY, TAU_WALL_IJ, TEST_FILTER_LOCAL
+          FILL_EDGES, WALE_VISCOSITY, TAU_WALL_IJ, TEST_FILTER_LOCAL, K_SGS_POPE
 
 
 CONTAINS
@@ -1289,7 +1289,7 @@ SUBROUTINE TENSOR_DIFFUSIVITY_MODEL(NM,OPT_N)
 INTEGER, INTENT(IN) :: NM
 INTEGER, INTENT(IN), OPTIONAL :: OPT_N
 INTEGER :: I,J,K,N
-REAL(EB) :: DZDX,DZDY,DZDZ,DUDX,DUDY,DUDZ,DVDX,DVDY,DVDZ,DWDX,DWDY,DWDZ,DTDX,DTDY,DTDZ,RHOBAR
+REAL(EB) :: DZDX,DZDY,DZDZ,DUDX,DUDY,DUDZ,DVDX,DVDY,DVDZ,DWDX,DWDY,DWDZ,DTDX,DTDY,DTDZ,RHOBAR,DX2,DY2,DZ2,KX,KY,KZ
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP,RHO_D_DZDX,RHO_D_DZDY,RHO_D_DZDZ
 REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP,UU,VV,WW,KDTDX,KDTDY,KDTDZ
 REAL(EB), PARAMETER :: C_NL=0.083_EB ! C_NL=1/12, See Pope Exercise 13.28
@@ -1334,8 +1334,13 @@ SCALAR_FLUX_IF: IF (PRESENT(OPT_N)) THEN
             DZDY = 0.25_EB*RDY(J)*( ZZP(I,J+1,K,N) + ZZP(I+1,J+1,K,N) - ZZP(I,J-1,K,N) - ZZP(I+1,J-1,K,N) )
             DZDZ = 0.25_EB*RDZ(K)*( ZZP(I,J,K+1,N) + ZZP(I+1,J,K+1,N) - ZZP(I,J,K-1,N) - ZZP(I+1,J,K-1,N) )
 
-            RHO_D_DZDX(I,J,K,N) = RHO_D_DZDX(I,J,K,N) &
-                                + RHOBAR*C_NL*( DXN(I)**2*DZDX*DUDX + DY(J)**2*DZDY*DUDY + DZ(K)**2*DZDZ*DUDZ )
+            DX2 = DXN(I)**2
+            DY2 = DY(J)**2
+            DZ2 = DZ(K)**2
+
+            RHO_D_DZDX(I,J,K,N) = RHO_D_DZDX(I,J,K,N) + RHOBAR*C_NL*( DX2*DZDX*DUDX + DY2*DZDY*DUDY + DZ2*DZDZ*DUDZ )
+            KX = C_NL * ( ABS(DX2*DUDX) + ABS(DY2*DUDY) + ABS(DZ2*DUDZ) ) ! stability strength for this x-face (m^2/s)
+            D_Z_MAX(I,J,K) = MAX(D_Z_MAX(I,J,K),KX)
          ENDDO
       ENDDO
    ENDDO
@@ -1353,8 +1358,13 @@ SCALAR_FLUX_IF: IF (PRESENT(OPT_N)) THEN
             DZDY = RDYN(J)*(ZZP(I,J+1,K,N)-ZZP(I,J,K,N))
             DZDZ = 0.25_EB*RDZ(K)*( ZZP(I,J,K+1,N) + ZZP(I,J+1,K+1,N) - ZZP(I,J,K-1,N) - ZZP(I,J+1,K-1,N) )
 
-            RHO_D_DZDY(I,J,K,N) = RHO_D_DZDY(I,J,K,N) &
-                                + RHOBAR*C_NL*( DX(I)**2*DZDX*DVDX + DY(J)**2*DZDY*DVDY + DZ(K)**2*DZDZ*DVDZ )
+            DX2 = DX(I)**2
+            DY2 = DYN(J)**2
+            DZ2 = DZ(K)**2
+
+            RHO_D_DZDY(I,J,K,N) = RHO_D_DZDY(I,J,K,N) + RHOBAR*C_NL*( DX2*DZDX*DVDX + DY2*DZDY*DVDY + DZ2*DZDZ*DVDZ )
+            KY = C_NL * ( ABS(DX2*DVDX) + ABS(DY2*DVDY) + ABS(DZ2*DVDZ) )
+            D_Z_MAX(I,J,K) = MAX(D_Z_MAX(I,J,K),KY)
          ENDDO
       ENDDO
    ENDDO
@@ -1372,8 +1382,13 @@ SCALAR_FLUX_IF: IF (PRESENT(OPT_N)) THEN
             DZDY = 0.25_EB*RDY(J)*( ZZP(I,J+1,K,N) + ZZP(I,J+1,K+1,N) - ZZP(I,J-1,K,N) - ZZP(I,J-1,K+1,N) )
             DZDZ = RDZN(K)*(ZZP(I,J,K+1,N)-ZZP(I,J,K,N))
 
-            RHO_D_DZDZ(I,J,K,N) = RHO_D_DZDZ(I,J,K,N) &
-                                + RHOBAR*C_NL*( DX(I)**2*DZDX*DWDX + DY(J)**2*DZDY*DWDY + DZ(K)**2*DZDZ*DWDZ )
+            DX2 = DX(I)**2
+            DY2 = DY(J)**2
+            DZ2 = DZN(K)**2
+
+            RHO_D_DZDZ(I,J,K,N) = RHO_D_DZDZ(I,J,K,N) + RHOBAR*C_NL*( DX2*DZDX*DWDX + DY2*DZDY*DWDY + DZ2*DZDZ*DWDZ )
+            KZ = C_NL * ( ABS(DX2*DWDX) + ABS(DY2*DWDY) + ABS(DZ2*DWDZ) )
+            D_Z_MAX(I,J,K) = MAX(D_Z_MAX(I,J,K),KZ)
          ENDDO
       ENDDO
    ENDDO
@@ -1400,7 +1415,6 @@ ELSE SCALAR_FLUX_IF
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=0,IBAR
-
             DUDX = (UU(I+1,J,K)-UU(I-1,J,K))/(DX(I)+DX(I+1))
             DUDY = (UU(I,J+1,K)-UU(I,J-1,K))/(DYN(J-1)+DYN(J))
             DUDZ = (UU(I,J,K+1)-UU(I,J,K-1))/(DZN(K-1)+DZN(K))
@@ -1409,8 +1423,13 @@ ELSE SCALAR_FLUX_IF
             DTDY = 0.25_EB*RDY(J)*( TMP(I,J+1,K) + TMP(I+1,J+1,K) - TMP(I,J-1,K) - TMP(I+1,J-1,K) )
             DTDZ = 0.25_EB*RDZ(K)*( TMP(I,J,K+1) + TMP(I+1,J,K+1) - TMP(I,J,K-1) - TMP(I+1,J,K-1) )
 
-            KDTDX(I,J,K) = KDTDX(I,J,K) + C_NL*(DX(I)**2*DUDX*DTDX + DY(J)**2*DUDY*DTDY + DZ(K)**2*DUDZ*DTDZ)
+            DX2 = DXN(I)**2
+            DY2 = DY(J)**2
+            DZ2 = DZ(K)**2
 
+            KDTDX(I,J,K) = KDTDX(I,J,K) + C_NL*(DX2*DUDX*DTDX + DY2*DUDY*DTDY + DZ2*DUDZ*DTDZ)
+            KX = C_NL * ( ABS(DX2*DUDX) + ABS(DY2*DUDY) + ABS(DZ2*DUDZ) ) ! stability strength for this x-face (m^2/s)
+            D_Z_MAX(I,J,K) = MAX(D_Z_MAX(I,J,K),KX)
          ENDDO
       ENDDO
    ENDDO
@@ -1418,7 +1437,6 @@ ELSE SCALAR_FLUX_IF
    DO K=1,KBAR
       DO J=0,JBAR
          DO I=1,IBAR
-
             DVDX = (VV(I+1,J,K)-VV(I-1,J,K))/(DXN(I-1)+DXN(I))
             DVDY = (VV(I,J+1,K)-VV(I,J-1,K))/(DY(J)+DY(J+1))
             DVDZ = (VV(I,J,K+1)-VV(I,J,K-1))/(DZN(K-1)+DZN(K))
@@ -1427,8 +1445,13 @@ ELSE SCALAR_FLUX_IF
             DTDY = RDYN(J)*(TMP(I,J+1,K)-TMP(I,J,K))
             DTDZ = 0.25_EB*RDZ(K)*( TMP(I,J,K+1) + TMP(I,J+1,K+1) - TMP(I,J,K-1) - TMP(I,J+1,K-1) )
 
-            KDTDY(I,J,K) = KDTDY(I,J,K) + C_NL*(DX(I)**2*DVDX*DTDX + DY(J)**2*DVDY*DTDY + DZ(K)**2*DVDZ*DTDZ)
+            DX2 = DX(I)**2
+            DY2 = DYN(J)**2
+            DZ2 = DZ(K)**2
 
+            KDTDY(I,J,K) = KDTDY(I,J,K) + C_NL*(DX2*DVDX*DTDX + DY2*DVDY*DTDY + DZ2*DVDZ*DTDZ)
+            KY = C_NL * ( ABS(DX2*DVDX) + ABS(DY2*DVDY) + ABS(DZ2*DVDZ) )
+            D_Z_MAX(I,J,K) = MAX(D_Z_MAX(I,J,K),KY)
          ENDDO
       ENDDO
    ENDDO
@@ -1445,8 +1468,13 @@ ELSE SCALAR_FLUX_IF
             DTDY = 0.25_EB*RDY(J)*( TMP(I,J+1,K) + TMP(I,J+1,K+1) - TMP(I,J-1,K) - TMP(I,J-1,K+1) )
             DTDZ = RDZN(K)*(TMP(I,J,K+1)-TMP(I,J,K))
 
-            KDTDZ(I,J,K) = KDTDZ(I,J,K) + C_NL*(DX(I)**2*DWDX*DTDX + DY(J)**2*DWDY*DTDY + DZ(K)**2*DWDZ*DTDZ)
+            DX2 = DX(I)**2
+            DY2 = DY(J)**2
+            DZ2 = DZN(K)**2
 
+            KDTDZ(I,J,K) = KDTDZ(I,J,K) + C_NL*(DX2*DWDX*DTDX + DY2*DWDY*DTDY + DZ2*DWDZ*DTDZ)
+            KZ = C_NL * ( ABS(DX2*DWDX) + ABS(DY2*DWDY) + ABS(DZ2*DWDZ) )
+            D_Z_MAX(I,J,K) = MAX(D_Z_MAX(I,J,K),KZ)
          ENDDO
       ENDDO
    ENDDO
@@ -1454,6 +1482,57 @@ ELSE SCALAR_FLUX_IF
 ENDIF SCALAR_FLUX_IF
 
 END SUBROUTINE TENSOR_DIFFUSIVITY_MODEL
+
+
+REAL(EB) FUNCTION K_SGS_POPE(NU, S2, DELTA) RESULT(K_SGS)
+
+! Pope model spectrum, see Pope, Turbulent Flows, 2000, Sec. 6.5.3, p.232
+
+REAL(EB), INTENT(IN) :: NU        ! EFFECTIVE KINEMATIC VISCOSITY (MOLECULAR + TURBULENT)
+REAL(EB), INTENT(IN) :: S2        ! S_IJ S_IJ
+REAL(EB), INTENT(IN) :: DELTA     ! GRID SPACING
+
+REAL(EB) :: EPS, ETA, KC, XC, F_ETA
+REAL(EB), PARAMETER :: CK=1.5_EB, BETA=5.2_EB, CETA=0.4_EB, FITH=5._EB/3._EB
+
+! ---- GUARD AGAINST LAMINAR REGIONS ----
+IF (S2 <= 0._EB) THEN
+   K_SGS = 0._EB
+   RETURN
+ENDIF
+
+! ---- DISSIPATION ESTIMATE ----
+EPS = 2._EB * NU * S2
+IF (EPS < TWENTY_EPSILON_EB) THEN
+   K_SGS = 0._EB
+   RETURN
+ENDIF
+
+! ---- KOLMOGOROV LENGTH ----
+ETA = (NU**3 / EPS)**0.25_EB
+
+! ---- CUTOFF WAVENUMBER ----
+KC = PI / DELTA
+
+! ---- DIMENSIONLESS CUTOFF ----
+XC = KC * ETA
+
+! ---- DISSIPATION-RANGE SHAPING FUNCTION F_ETA(XC) ----
+F_ETA = EXP( -BETA * ( ( (XC**4 + CETA**4)**0.25_EB ) - CETA ) )
+
+! ---- PIECEWISE APPROXIMATION ----
+IF (XC <= 2._EB) THEN
+  ! INERTIAL + CUTOFF CORRECTION
+  K_SGS = 1.5_EB * CK * (EPS/KC)**TWTH * F_ETA
+ELSE
+  ! EXPONENTIAL TAIL ASYMPTOTIC
+  K_SGS = CK * (EPS*ETA)**TWTH * EXP(BETA*CETA) * XC**(-FITH) * EXP(-BETA*XC) / BETA
+ENDIF
+
+! ---- SAFETY FLOOR ----
+IF (K_SGS < TWO_EPSILON_EB) K_SGS = 0._EB
+
+END FUNCTION K_SGS_POPE
 
 
 SUBROUTINE TAU_WALL_IJ(TAU_IJ,SS,U_VELO,U_SURF,NN,DN,DIVU,MU,RHO,ROUGHNESS)
