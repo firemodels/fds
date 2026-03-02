@@ -1,3 +1,47 @@
+------------------------------MESHES----------------------------------
+
+&MESH IJK=40,24,18, XB=0.0,4.0,2.3,4.7,0.0,1.8 / Fire Compartment, Rear
+
+&MESH IJK=40,24,18, XB=0.0,2.0,-0.1,1.1,0.0,0.9, MULT_ID='mesh1' / Fire Compartment
+&MULT ID='mesh1', DX=2.0, DY=1.2, DZ=0.9, I_UPPER=1, J_UPPER=1, K_UPPER=1 /
+
+&MESH IJK=36,30,20, XB=0.0,1.8,-3.1,-1.6,0.0,1.0, MULT_ID='mesh2' / Exterior
+&MULT ID='mesh2', DX=1.8, DY=1.5, DZ=1.0, I_UPPER=1, J_UPPER=1, K_UPPER=1 /
+
+&MESH IJK=36,30,20, XB=0.0,3.6,-3.1,-0.1,0.0,2.0, MULT_ID='mesh3' / Exterior
+&MULT ID='mesh3', DZ=2.0, K_LOWER=1, K_UPPER=2 /
+
+------------------------------COMBUSTION------------------------------
+
+&MISC TMPA=30. /
+
+ISO max 5.6 MW
+&SURF ID='BURNER',
+      HRRPUA=3783.8
+      RAMP_Q='fireramp',
+      MATL_ID = 'CALSIUM_SILICATE_BOARD', COLOR='RASPBERRY', THICKNESS = 0.025 /
+
+&SPEC ID='PROPANE', LUMPED_COMPONENT_ONLY=T /
+&SPEC ID='METHANE', LUMPED_COMPONENT_ONLY=T /
+&SPEC ID='City Gas', SPEC_ID(1)='PROPANE', VOLUME_FRACTION(1)=0.1, SPEC_ID(2)='METHANE', VOLUME_FRACTION(2)=0.9 /
+
+&REAC FUEL = 'City Gas' 
+      SOOT_YIELD = 0.01
+      CO_YIELD = 0.005 
+      RADIATIVE_FRACTION = 0. 
+      N_SIMPLE_CHEMISTRY_REACTIONS = 2 
+      FUEL_C_TO_CO_FRACTION = 0.9 
+      FUEL_H_TO_H2_FRACTION = 0.5 /
+
+Burner area 4 = 0.1 x 3.7 m = 1.48 m2
+Nominal HRR = 5.6 MW
+HRRPUA = 3783.8 kW/m2
+
+&OBST XB= 0.5,0.6, 0.2,3.9, 0.0,0.2, SURF_IDS='BURNER','PIPE','PIPE' /
+&OBST XB= 1.5,1.6, 0.2,3.9, 0.0,0.2, SURF_IDS='BURNER','PIPE','PIPE' /
+&OBST XB= 2.4,2.5, 0.2,3.9, 0.0,0.2, SURF_IDS='BURNER','PIPE','PIPE' /
+&OBST XB= 3.3,3.4, 0.2,3.9, 0.0,0.2, SURF_IDS='BURNER','PIPE','PIPE' /
+
 ------------------------------MATERIALS-------------------------------
 EN1992-1-2 values for normal weight concrete
 
@@ -32,15 +76,15 @@ EUROCODE 1993-1-2:1995  &3.4.1.3 carbon steel
 
 ISOWOOL 1260
 &MATL ID = 'CERAMIC_FIBRE_BLANKET'
-      EMISSIVITY = 0.9	
-      DENSITY = 100.		
-      CONDUCTIVITY_RAMP = 'c-ceramic'				
+      EMISSIVITY = 0.9
+      DENSITY = 100.
+      CONDUCTIVITY_RAMP = 'c-ceramic'
       SPECIFIC_HEAT= 1.0/
       
 &RAMP ID = 'c-ceramic', T = 0., F = 0.1/
 &RAMP ID = 'c-ceramic', T = 600., F = 0.15/
 &RAMP ID = 'c-ceramic', T = 800., F = 0.22/
-	
+
 ISOURU BOARD 1260
 http://isolite.co.jp/info/ceramicfiber/seihin2-6/index.html
 &MATL ID = 'CERAMIC_FIBRE_BOARD'
@@ -49,7 +93,7 @@ http://isolite.co.jp/info/ceramicfiber/seihin2-6/index.html
       CONDUCTIVITY_RAMP = 'c-board'
       SPECIFIC_HEAT= 1.0 /
 
-&RAMP ID = 'c-board', T = 0., F = 0.07/	  
+&RAMP ID = 'c-board', T = 0., F = 0.07/ 
 &RAMP ID = 'c-board', T = 400., F = 0.07/
 &RAMP ID = 'c-board', T = 600., F = 0.12/
 &RAMP ID = 'c-board', T = 800., F = 0.16/
@@ -103,3 +147,4 @@ According to EN 1094-4:1995
       MATL_ID = 'CERAMIC_FIBRE_BOARD','CALSIUM_SILICATE_BOARD',
       STRETCH_FACTOR   = 2,2,2,
       THICKNESS = 0.025,0.025 /
+
