@@ -3030,11 +3030,13 @@ Yoshioka and co-workers~\cite{Yoshioka:FST2012} at the Tokyo University of Scien
 
 The compartment dimension were 4.0~m by 4.0~m by 1.7~m. Note that the dimensions are incorrect in Ref.~\cite{Yoshioka:FST2012}. The facade was 5.7~m tall, with a 1.2~m wide side wall made of the same material as the main facade. The fire compartment had one 1.2~m tall and 2.0~m wide window in the facade wall, but the window was partially closed in two of the experiments. The rear of the fire compartment had four 0.5~m by 0.6~m openings that were open or closed according to the desired ventilation condition. These openings were closed by heavy fire blankets, and there was considerable uncertainty in the actual opening area.
 
-A mixture of gaseous fuels supplied by the local utility was used as a fuel. It was supplied to the compartment through four, room-wide burner pipes with holes on the top surface, approximately 20~cm above the floor. The experiments were conducted in three series, named I, 1 and 2. For each, multiple fires were generated between which changes were made to the ventilation and HRR. The test duration was 5~min with 10~min of cooling between each.
+The fuel for the experiments is referred to as ``city gas,'' which is supplied by the local utility and assumed to be approximately 90~\% methane with a mixture of other gaseous fuels like propane and butane. The gas was supplied to the compartment through four, room-wide burner pipes with holes on the top surface, approximately 20~cm above the floor. The experiments were conducted in three series, named I, 1 and 2. For each, multiple fires were generated between which changes were made to the ventilation and HRR. The test duration was 5~min with 10~min of cooling between each.
 
 \subsubsection{Modeling Notes}
 
-Gleb Bytskov at the University of Aalto, Finland, performed numerical simulations of these experiments using FDS as part of his master's thesis~\cite{Bytskov:Thesis}. The grid resolution is 10~cm. The fuel is assumed to be propane with a soot yield of 0.015, CO yield of 0.015, and radiative fraction of 0.20.
+Gleb Bytskov at the University of Aalto, Finland, performed numerical simulations of these experiments as part of his master's thesis~\cite{Bytskov:Thesis}. Further refinements to the FDS input files have been made, including the inclusion of the two-step reaction scheme used for the simulations of the JIS Facade experiments described in Section~\ref{JIS_Facade_Description}. Because the ``city gas'' used in the TUS experiments is mostly methane, it has been assumed that a fraction of 0.9 of the carbon atoms in the fuel molecule are converted to CO in the first step of the reaction sequence. The radiative fraction is not specified, but rather it is predicted by the model. Post-flame soot and CO yields of 0.01 and 0.005, respectively, are specified. No measurements were made to justify the use of these values.
+
+A grid of 5~cm resolution is used in the vicinity of the compartment opening, and it is 10~cm elsewhere.
 
 
 
