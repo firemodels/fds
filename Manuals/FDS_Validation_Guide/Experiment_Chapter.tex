@@ -221,7 +221,7 @@ Exp. & Spr.~1 & Time (s) & Spr.~2 & Time (s) & $T_0$ (\unit{\degreeCelsius}) & D
 
 The assumptions given in this section were used in the original analysis of the experiments~\cite{Bittern:Thesis}.
 
-The gypsum board had a thickness of 1~cm, density of 731~kg/m\textsuperscript{3}, specific heat of 0.90~kJ/(kg$\cdot$K), conductivity of 0.17~W/(m$\cdot$K), and emissivity of 0.88. The concrete floor was assumed to have a thickness of 10~cm, density of 2300~kg/m$^3$, specific heat of 0.88~kJ/(kg$\cdot$K), conductivity of 1.2~W/(m$\cdot$K), and emissivity of 0.5.
+The gypsum board had a thickness of 1~cm, density of 731~kg/m\textsuperscript{3}, specific heat of 0.90~\unit{kJ/(kg.K)}, conductivity of 0.17~\unit{W/(m.K)}, and emissivity of 0.88. The concrete floor was assumed to have a thickness of 10~cm, density of 2300~\unit{kg/m^3}, specific heat of 0.88~\unit{kJ/(kg.K)}, conductivity of 1.2~\unit{W/(m.K)}, and emissivity of 0.5.
 
 The properties of the sprinklers are shown in Table~\ref{Bittern_Sprinklers}. These properties are based on the manufacturer's specification where available or otherwise estimated based on measured values of comparable sprinklers. For modeling purposes, the sprinkler offset, 2~cm, was selected based on an approximate 2~cm glass bulb length, and the C-factor selected was based on a sensitivity analyses undertaken in the original study.
 
@@ -231,8 +231,8 @@ The properties of the sprinklers are shown in Table~\ref{Bittern_Sprinklers}. Th
 \label{Bittern_Sprinklers}
 \begin{tabular}{|l|l|c|c|c|}
 \hline
-\textbf{Short} & \textbf{Description}                & \textbf{RTI}        & \textbf{C-Factor} & \textbf{Act. Temp.} \\
-\textbf{Name}  &                                     & (m$\cdot$s)$^{1/2}$ & (m/s)$^{1/2}$     & \unit{\degreeCelsius}           \\ \hline
+\textbf{Short} & \textbf{Description}                & \textbf{RTI}        & \textbf{C-Factor}  & \textbf{Act. Temp.} \\
+\textbf{Name}  &                                     & \unit{(m.s)^{1/2}}  & \unit{(m/s)^{1/2}} & \unit{\degreeCelsius}           \\ \hline
 Res A          & Residential, 3 mm glass bulb        & 36                  & 0.4               & 68                  \\ \hline
 Res B          & Residential, 3 mm glass bulb        & 36                  & 0.4               & 68                  \\ \hline
 SS68           & Standard Response, 5 mm glass bulb  & 95                  & 0.4               & 68                  \\ \hline
@@ -292,11 +292,11 @@ lower two-thirds of the doorway because of difficulties in seeding the hot outfl
 
 In 1993, British Steel Technical, Swinden Laboratories, in collaboration with the Building Research Establishment (BRE), Fire Research Station, conducted nine fire experiments inside the BRE ex-airship hangar testing facility at Cardington, Bedfordshire, England~\cite{BST_FRS:1994}. The objective of the experiments was to examine the influence of combustible loading and ventilation on fire severity.
 
-The roof of the test compartment was made of 20~cm thick reinforced aerated concrete slabs with a density of 450~kg/m$^3$. The walls were made of 215~mm thick lightweight concrete blocks with a density of 1375~kg/m$^3$. The floor was covered with a 125~mm deep layer of sand with a density of 1750~kg/m$^3$. Both the roof and walls were lined with two 25~mm thick layers of standard grade ceramic fiber blanket with a density of 128~kg/m$^3$. Taking into account the lining materials, the compartment was 22.9~m long, 5.6~m deep, and 2.8~m high.
+The roof of the test compartment was made of 20~cm thick reinforced aerated concrete slabs with a density of 450~\unit{kg/m^3}. The walls were made of 215~mm thick lightweight concrete blocks with a density of 1375~\unit{kg/m^3}. The floor was covered with a 125~mm deep layer of sand with a density of 1750~\unit{kg/m^3}. Both the roof and walls were lined with two 25~mm thick layers of standard grade ceramic fiber blanket with a density of 128~\unit{kg/m^3}. Taking into account the lining materials, the compartment was 22.9~m long, 5.6~m deep, and 2.8~m high.
 
 Ventilation was provided at one end of the compartment through a full-width, variable height opening. Lightweight concrete blocks were used to construct temporary walls to reduce the ventilation from fully open to an eighth of the available area.
 
-The combustibles consisted of 33 1~m square wood cribs in 11 rows. Each crib was constructed of 1~m long and 5~cm square cross section sticks of Western Hemlock softwood (density 400~kg/m$^3$), dried to 10~\% moisture content. The sticks were stacked with 5~cm gaps. Table~\ref{BST_FRS_wood_cribs_tests} lists the fire load densities and ventilation areas. The rear-most three cribs at the back of the compartment were ignited simultaneously. Temperatures were measured along crib lines 2 (back), 6 (middle) and 10 (front), using 3~mm thermocouples placed 300~mm below the ceiling. The average of three thermocouples at the same longitudinal position is used for model validation.
+The combustibles consisted of 33 1~m square wood cribs in 11 rows. Each crib was constructed of 1~m long and 5~cm square cross section sticks of Western Hemlock softwood (density 400~\unit{kg/m^3}), dried to 10~\% moisture content. The sticks were stacked with 5~cm gaps. Table~\ref{BST_FRS_wood_cribs_tests} lists the fire load densities and ventilation areas. The rear-most three cribs at the back of the compartment were ignited simultaneously. Temperatures were measured along crib lines 2 (back), 6 (middle) and 10 (front), using 3~mm thermocouples placed 300~mm below the ceiling. The average of three thermocouples at the same longitudinal position is used for model validation.
 
 \begin{table}[ht]
 \centering
@@ -334,11 +334,11 @@ Petra Andersson and Patrick Van Hees of the Swedish National Testing and Researc
 \section{Crown Fires}
 \label{Crown_Fires_Description}
 
-The term ``crown fire'' refers to a wildfire that spreads from the ground surface into the tree canopy. Alexander and Cruz~\cite{Alexander:CJFR2006} compiled a data set of 57 crown fires that occurred in the U.S. and Canada between 1965 and 2003. For each fire, the relative humidity, ambient temperature, and dominant vegetation type are reported, along with estimated values for the vegetation moisture content, {\em canopy}\footnote{Note the difference between {\em canopy} bulk density and {\em crown} bulk density, both of which are abbreviated CBD. The former is the bulk density over the entire forested area, whereas the latter refers to the bulk density within the crown of an individual tree.} bulk density, and open 10~m wind speed. The vegetation consists mainly of coniferous trees, like pines and spruces, and dry undergrowth and ground cover, i.e. scrub brush and dry pine needles. The reported relative humidity ranges between 5~\% and 50~\%, the estimated moisture content ranges between 5~\% and 10~\%, the estimated {\em canopy} bulk density ranges between 0.1~kg/m$^3$ and 0.2~kg/m$^3$, the estimated wind speed ranges between 10~km/h and 50~km/h, and the observed rate of spread ranges between 10~m/min and 110~m/min.
+The term ``crown fire'' refers to a wildfire that spreads from the ground surface into the tree canopy. Alexander and Cruz~\cite{Alexander:CJFR2006} compiled a data set of 57 crown fires that occurred in the U.S. and Canada between 1965 and 2003. For each fire, the relative humidity, ambient temperature, and dominant vegetation type are reported, along with estimated values for the vegetation moisture content, {\em canopy}\footnote{Note the difference between {\em canopy} bulk density and {\em crown} bulk density, both of which are abbreviated CBD. The former is the bulk density over the entire forested area, whereas the latter refers to the bulk density within the crown of an individual tree.} bulk density, and open 10~m wind speed. The vegetation consists mainly of coniferous trees, like pines and spruces, and dry undergrowth and ground cover, i.e. scrub brush and dry pine needles. The reported relative humidity ranges between 5~\% and 50~\%, the estimated moisture content ranges between 5~\% and 10~\%, the estimated {\em canopy} bulk density ranges between 0.1~\unit{kg/m^3} and 0.2~\unit{kg/m^3}, the estimated wind speed ranges between 10~km/h and 50~km/h, and the observed rate of spread ranges between 10~m/min and 110~m/min.
 
 \subsubsection{Modeling Notes}
 
-It is not possible to compare directly the model simulations with the observed fires because of lack of information about the number, spacing, and height of the trees; and the depth, mass, and composition of the ground cover. Instead, Ziegler~et~al.~\cite{Ziegler:thesis,Ziegler:FEM2017,Ziegler:Data2019,Hoffman:FT2016} developed tree maps based on various forests found in the western region of the U.S. The maps contain the location and rough dimensions of each tree in a 4~ha area. Eight maps were developed based on four specific locations and pre- or post-treated conditions. In addition, Ziegler~et~al.~suggest that the moisture content of the trees is approximately 100~\%, and the ground cover 5~\%. The {\em crown} bulk density for all simulations is 1.2~kg/m$^3$, and the surface density is 0.72~kg/m$^2$ with a depth of 6~cm. The simulated fires are ignited along a strip, and the rate of spread is calculated based on the position of peak temperature.
+It is not possible to compare directly the model simulations with the observed fires because of lack of information about the number, spacing, and height of the trees; and the depth, mass, and composition of the ground cover. Instead, Ziegler~et~al.~\cite{Ziegler:thesis,Ziegler:FEM2017,Ziegler:Data2019,Hoffman:FT2016} developed tree maps based on various forests found in the western region of the U.S. The maps contain the location and rough dimensions of each tree in a 4~ha area. Eight maps were developed based on four specific locations and pre- or post-treated conditions. In addition, Ziegler~et~al.~suggest that the moisture content of the trees is approximately 100~\%, and the ground cover 5~\%. The {\em crown} bulk density for all simulations is 1.2~\unit{kg/m^3}, and the surface density is 0.72~kg/m$^2$ with a depth of 6~cm. The simulated fires are ignited along a strip, and the rate of spread is calculated based on the position of peak temperature.
 
 The simulations are performed with a numerical grid that has a resolution of 1~m by 1~m by 0.5~m near the ground, and the vertical dimension increases gradually with height. Because of this relatively coarse resolution, the burning rate of the vegetation is limited to ensure that any given patch of surface vegetation or volume of canopy vegetation cannot burn completely in less than 30~s.
 
@@ -396,16 +396,16 @@ Chemical Composition            & --                    & C$_6$H$_{10}$O$_5$    
 Heat of Combustion              & kJ/kg                 & 15600                     & \cite{Susott:FS1982}                  \\ \hline
 Soot Yield                      & kg/kg                 & 0.015                     & \cite{SFPE:Tewarson}                  \\ \hline
 Char Yield                      & kg/kg                 & 0.2                       & \cite{Susott:FS1982}                  \\ \hline
-Specific Heat                   & kJ/(kg$\cdot$K)       & 1.5                       & Various sources                       \\ \hline
-Conductivity                    & W/(m$\cdot$K)         & 0.1                       & Assumption                            \\ \hline
-Density                         & kg/m$^3$              & 512                       & \cite{Rothermel:1972}                 \\ \hline
+Specific Heat                   & \unit{kJ/(kg.K)}       & 1.5                       & Various sources                       \\ \hline
+Conductivity                    & \unit{W/(m.K)}         & 0.1                       & Assumption                            \\ \hline
+Density                         & \unit{kg/m^3}              & 512                       & \cite{Rothermel:1972}                 \\ \hline
 Heat of Pyrolysis               & kJ/kg                 & 418                       & \cite{Morvan:CF2004}                  \\ \hline
 Obukhov Length                  & m                     & -500                      & Assumption                            \\ \hline
 Aerodynamic Roughness Length    & m                     & 0.03                      & Assumption                            \\ \hline
 Drag Coefficient                & --                    & 2.8                       & \cite{Falkenstein-Smith:2018}         \\ \hline \hline
-Soil Specific Heat              & kJ/(kg$\cdot$K)       & 2.0                       & \cite{Farouki:1981}                   \\ \hline
-Soil Conductivity               & W/(m$\cdot$K)         & 0.25                      & \cite{Farouki:1981}                   \\ \hline
-Soil Density                    & kg/m$^3$              & 1300                      & \cite{Farouki:1981}                   \\ \hline
+Soil Specific Heat              & \unit{kJ/(kg.K)}       & 2.0                       & \cite{Farouki:1981}                   \\ \hline
+Soil Conductivity               & \unit{W/(m.K)}         & 0.25                      & \cite{Farouki:1981}                   \\ \hline
+Soil Density                    & \unit{kg/m^3}              & 1300                      & \cite{Farouki:1981}                   \\ \hline
 
 \end{tabular}
 \end{table}
@@ -527,9 +527,9 @@ The U.S. Department of Justice sponsored a series of liquid pool fire experiment
 
 \subsubsection{Modeling Notes}
 
-The test report for the experiments does not explicitly list the components of the gasoline or kerosene. Rather, distillation curves are provided showing that the initial and final boiling points for gasoline are 45~\unit{\degreeCelsius} and 212~\unit{\degreeCelsius}, and for kerosene 170~\unit{\degreeCelsius} and 257~\unit{\degreeCelsius}. The density of the gasoline is 742~kg/m$^3$ and the kerosene 798~kg/m$^3$. From various industry documents, it is postulated that the gasoline is a mixture of n-hexane (0.521 by mass), n-heptane (0.054), n-octane (0.063), n-decane (0.023), benzene (0.20), and toluene (0.139). The kerosene is assumed to be a mixture of iso-octane (0.04), n-nonane (0.19), iso-nonane (0.12), n-decane (0.15), iso-decane (0.11), n-undecane (0.09), and cis-decalin (0.30). The relevant properties of these liquids are listed in Table~\ref{fuelprops}.
+The test report for the experiments does not explicitly list the components of the gasoline or kerosene. Rather, distillation curves are provided showing that the initial and final boiling points for gasoline are 45~\unit{\degreeCelsius} and 212~\unit{\degreeCelsius}, and for kerosene 170~\unit{\degreeCelsius} and 257~\unit{\degreeCelsius}. The density of the gasoline is 742~\unit{kg/m^3} and the kerosene 798~\unit{kg/m^3}. From various industry documents, it is postulated that the gasoline is a mixture of n-hexane (0.521 by mass), n-heptane (0.054), n-octane (0.063), n-decane (0.023), benzene (0.20), and toluene (0.139). The kerosene is assumed to be a mixture of iso-octane (0.04), n-nonane (0.19), iso-nonane (0.12), n-decane (0.15), iso-decane (0.11), n-undecane (0.09), and cis-decalin (0.30). The relevant properties of these liquids are listed in Table~\ref{fuelprops}.
 
-A few additional assumptions are made concerning the mixtures. First, that the absorption coefficient of all components is set to 150~m$^{-1}$, a value that is typical of heavy hydrocarbon liquids. Seconds, the thermal conductivity of the components is set to an artificially low value of 0.02~W/m/K to roughly account for the buoyancy that drives heated liquid upward toward the surface. Third, all liquid components are assumed to evaporate into a single gas phase species, n-hexane. If this were not assumed, additional transport equations and combustion reactions would be needed for all liquid components.
+A few additional assumptions are made concerning the mixtures. First, that the absorption coefficient of all components is set to 150~m$^{-1}$, a value that is typical of heavy hydrocarbon liquids. Seconds, the thermal conductivity of the components is set to an artificially low value of 0.02~\unit{W/(m.K)} to roughly account for the buoyancy that drives heated liquid upward toward the surface. Third, all liquid components are assumed to evaporate into a single gas phase species, n-hexane. If this were not assumed, additional transport equations and combustion reactions would be needed for all liquid components.
 
 Finally, to simulate the ignition of the liquid pools, an external flux is imposed at the surface for 10~s in the case of gasoline and 25~s for kerosene.
 
@@ -539,7 +539,7 @@ Finally, to simulate the ignition of the liquid pools, an external flux is impos
 \label{fuelprops2}
 \begin{tabular}{|l|c|c|c|c|c|c|} \hline
 Fuel        & Chemical          & $W$         & $\rho$      & $c_p$              & $h_{\rm v}$        & $T_{\rm b}$     \\
-Component   & Formula           & (g/mol)     & (kg/m$^3$)  & (kJ/(kg$\cdot$K))  & (kJ/kg)            & \unit{\degreeCelsius}       \\
+Component   & Formula           & (g/mol)     & (\unit{kg/m^3})  & (\unit{kJ/(kg.K)})  & (kJ/kg)            & \unit{\degreeCelsius}       \\
 \hline \hline
 Benzene     & C$_6$H$_{6}$      & 78.1        & 879         & 1.72              & 393                 & 80.1   \\ \hline
 cis-Decalin & C$_{10}$H$_{18}$  & 138.3       & 897         & 1.68              & 297                 & 195.8  \\ \hline
@@ -590,11 +590,11 @@ Taflin measured the diameter of suspended water droplets in dry air~\cite{Snegir
 \section{Edinburgh Vegetation Drag}
 \label{Edinburgh_Veg_Drag_Description}
 
-Mueller et al.~\cite{Mueller:TIPM2021} characterized the pressure drop through beds of randomly oriented pine needles and used the results to parameterize a drag model following the form of the Forchheimer equation. They then measured the development of velocity profiles within and above these pine needle beds, using a hotwire anemometer, and compared the results to FDS predictions using the parameterized model. Fuel beds with bulk densities of 20~kg/m$^3$, 40~kg/m$^3$, and 60~kg/m$^3$ were tested, with inlet velocities in the range of 0.5-2.0~m/s. A condensed version of the comparison is reproduced in this guide, which serves to test the ability of the model to represent the general features of flow in sparse multiphase media.
+Mueller et al.~\cite{Mueller:TIPM2021} characterized the pressure drop through beds of randomly oriented pine needles and used the results to parameterize a drag model following the form of the Forchheimer equation. They then measured the development of velocity profiles within and above these pine needle beds, using a hotwire anemometer, and compared the results to FDS predictions using the parameterized model. Fuel beds with bulk densities of 20~\unit{kg/m^3}, 40~\unit{kg/m^3}, and 60~\unit{kg/m^3} were tested, with inlet velocities in the range of 0.5-2.0~m/s. A condensed version of the comparison is reproduced in this guide, which serves to test the ability of the model to represent the general features of flow in sparse multiphase media.
 
 \subsubsection{Modeling Notes}
 
-In the experiment, the test section extended 400~mm beyond the vegetation layer. This extent of the domain is reproduced in the simulations in order to avoid possible influence of the downstream boundary condition. The upstream boundary condition is set using the measurements located at $x=-75$~mm, which allows for the reproduction of a slight non-uniformity in the flowfield. Due to difficulties in compacting the high bulk density case, the fuel layer is set to extend to 55~mm in the 60~kg/m$^3$ simulations.
+In the experiment, the test section extended 400~mm beyond the vegetation layer. This extent of the domain is reproduced in the simulations in order to avoid possible influence of the downstream boundary condition. The upstream boundary condition is set using the measurements located at $x=-75$~mm, which allows for the reproduction of a slight non-uniformity in the flowfield. Due to difficulties in compacting the high bulk density case, the fuel layer is set to extend to 55~mm in the 60~\unit{kg/m^3} simulations.
 
 \begin{figure}[ht]
 \centering
@@ -857,7 +857,7 @@ Experiments were performed by Frankman et al.~\cite{Frankman:CST2010} at Brigham
 
 \subsubsection{Modeling Notes}
 
-These calculations are performed with a relatively crude grid because typical wildland fire simulations cannot employ fine grids. A free convection correlation for horizontal cylinders is employed for the convective heat transfer coefficient of the fuel samples. Cylindrical Lagrangian particles are used to represent the fuels with diameters equal to the reported hydraulic diameters. The burner is modeled as a hot plate with a radiative heat flux of 37~kW/m$^2$. Nominal values of 0.1~W/m/K, 1~kJ/kg/K, and 450~kg/m$^3$ are assumed for the thermal conductivity, specific heat, and density of the vegetation. The emissivity is assumed to be 1. The results are relatively insensitive to the thermal properties because the final temperatures are largely determined via the balance of radiation heat flux on to and convective heat flux off of the fuel samples. The temperature rise of all samples does not exceed 100~\unit{\degreeCelsius}.
+These calculations are performed with a relatively crude grid because typical wildland fire simulations cannot employ fine grids. A free convection correlation for horizontal cylinders is employed for the convective heat transfer coefficient of the fuel samples. Cylindrical Lagrangian particles are used to represent the fuels with diameters equal to the reported hydraulic diameters. The burner is modeled as a hot plate with a radiative heat flux of 37~kW/m$^2$. Nominal values of 0.1~\unit{W/(m.K)}, 1~\unit{kJ/(kg.K)}, and 450~\unit{kg/m^3} are assumed for the thermal conductivity, specific heat, and density of the vegetation. The emissivity is assumed to be 1. The results are relatively insensitive to the thermal properties because the final temperatures are largely determined via the balance of radiation heat flux on to and convective heat flux off of the fuel samples. The temperature rise of all samples does not exceed 100~\unit{\degreeCelsius}.
 
 
 \section{FSRI/NIJ Materials}
@@ -1026,24 +1026,24 @@ A two-step combustion mechanism is implemented for propane. In the first reactio
 \section{Kashiwagi Gasification}
 \label{Kashiwagi_Gasification_Description}
 
-In the pine wood gasification experiments of Kashiwagi et al.~\cite{Kashiwagi:1987}, white pine cube blocks 3.8~cm on a side were irradiated at 25~\si{kW/m^2} and 40~\si{kW/m^2} with three different oxygen concentrations in the coflow: pure nitrogen (${\rm N}_2$), 10.5 vol.~\% ${\rm O}_2$, and air (21 vol.~\% ${\rm O}_2$).  The initial moisture content of each sample was 5~\% by mass. Mass fluxes obtained from weight loss measurements are reported, as well as temperature time histories at several depths within the solid.
+In the pine wood gasification experiments of Kashiwagi et al.~\cite{Kashiwagi:1987}, white pine cube blocks 3.8~cm on a side were irradiated at 25~\unit{kW/m^2} and 40~\unit{kW/m^2} with three different oxygen concentrations in the coflow: pure nitrogen (${\rm N}_2$), 10.5 vol.~\% ${\rm O}_2$, and air (21 vol.~\% ${\rm O}_2$).  The initial moisture content of each sample was 5~\% by mass. Mass fluxes obtained from weight loss measurements are reported, as well as temperature time histories at several depths within the solid.
 
 \subsubsection{Modeling Notes}
 
-The FDS domain is specified as a box twice as wide as the block, 0.076 m, with the cube centered in the domain.  The FDS grid resolution is 0.00475 m (16 cubic cells in each direction), which puts 8 cells across the width of the solid block (64 total wall cells).  The $-x$ face of the block is exposed to radiation using an \ct{EXTERNAL_FLUX}.  The lateral domain boundaries are specified as free slip, transparent walls (emissivity zero) with zero convective heat transfer.  The bottom boundary is a vent with a small coflow velocity of 0.005 m/s at $T_{\rm amb} = 30\;\si{\degreeCelsius}$ and the specified ${\rm O}_2$ concentration for the specific case.  The top boundary is set to \ct{OPEN}.  The radiation field is solved completely on each time step and the number of solid angles is set to 16.  The \ct{WALL_INCREMENT} is set to 1, meaning the solid phase is updated at every FDS time step.  The simulation is run to 900 s.
+The FDS domain is specified as a box twice as wide as the block, 0.076 m, with the cube centered in the domain.  The FDS grid resolution is 0.00475 m (16 cubic cells in each direction), which puts 8 cells across the width of the solid block (64 total wall cells).  The $-x$ face of the block is exposed to radiation using an \ct{EXTERNAL_FLUX}.  The lateral domain boundaries are specified as free slip, transparent walls (emissivity zero) with zero convective heat transfer.  The bottom boundary is a vent with a small coflow velocity of 0.005 m/s at $T_{\rm amb} = 30\;\unit{\degreeCelsius}$ and the specified ${\rm O}_2$ concentration for the specific case.  The top boundary is set to \ct{OPEN}.  The radiation field is solved completely on each time step and the number of solid angles is set to 16.  The \ct{WALL_INCREMENT} is set to 1, meaning the solid phase is updated at every FDS time step.  The simulation is run to 900 s.
 
-The exposed surface specifies a convective length scale of 0.038 m with blowing. The solid phase model is 1D in depth from the center of an exposed wall cell.  The backing is ``exposed'', meaning the backside boundary condition considers convective heat transfer to the ambient.  The 1D domain is uniform (\ct{STRETCH_FACTOR=1}).  The default 1D grid resolution is automatically selected to satisfy the condition $\delta x_{\rm s}^2/\tau < k/(\rho c_v)$ with $\tau=1\;\si{s}$.  With the chosen physical parameters (see Table~\ref{tab:thermophysical_props}) this works out to $\delta x_{\rm s} = 1.2 \times 10^{-4}$ m, or 312 cells across the 3.8 cm block at the start of the simulation (note that there is a small amount of shrinking in the oxidative cases and the solid phase is remeshed accordingly).  Both the default resolution and 10 times this resolution are tested with no significant difference in the results.  Hence, the default resolution is considered converged.  The results presented below, however, are for the higher resolution runs.
+The exposed surface specifies a convective length scale of 0.038 m with blowing. The solid phase model is 1D in depth from the center of an exposed wall cell.  The backing is ``exposed'', meaning the backside boundary condition considers convective heat transfer to the ambient.  The 1D domain is uniform (\ct{STRETCH_FACTOR=1}).  The default 1D grid resolution is automatically selected to satisfy the condition $\delta x_{\rm s}^2/\tau < k/(\rho c_v)$ with $\tau=1\;\unit{s}$.  With the chosen physical parameters (see Table~\ref{tab:thermophysical_props}) this works out to $\delta x_{\rm s} = 1.2 \times 10^{-4}$ m, or 312 cells across the 3.8 cm block at the start of the simulation (note that there is a small amount of shrinking in the oxidative cases and the solid phase is remeshed accordingly).  Both the default resolution and 10 times this resolution are tested with no significant difference in the results.  Hence, the default resolution is considered converged.  The results presented below, however, are for the higher resolution runs.
 
 A device measuring the surface integral of surface density (which yields the total solid mass) is positioned in the center of the exposed face.  Also, devices for in-depth profiles of temperature, material component densities, and ${\rm O}_2$ mass fraction are positioned in the same location.  Time histories of temperature are recorded at the in-depth positions reported in \cite{Kashiwagi:1987} for comparison.
 
 \paragraph{Thermo-physical Properties}
 
-The thermo-physical properties of the pine wood are adopted from \cite{Lautenberger:2009}.  The values of of the thermal conductivity and specific heat at a reference temperature, $T_{\rm ref}=300 \;\si{K}$, are denoted by $k_0$ and $c_{v,0}$, respectively. The temperature dependence is based on a power law as follows:
+The thermo-physical properties of the pine wood are adopted from \cite{Lautenberger:2009}.  The values of of the thermal conductivity and specific heat at a reference temperature, $T_{\rm ref}=300 \;\unit{K}$, are denoted by $k_0$ and $c_{v,0}$, respectively. The temperature dependence is based on a power law as follows:
 \begin{align}
 k(T)   &= k_0 (T/T_{\rm ref})^{n_k} + \gamma \sigma T^3 \\
 c_v(T) &= c_{v,0} (T/T_{\rm ref})^{n_c}
 \end{align}
-where $\sigma=5.67\times10^{-8} \;\si{W/m^2/K^4}$ is the Stefan-Boltzmann constant. The reference values, exponents, and internal radiation factor, $\gamma$, are given in Table \ref{tab:thermophysical_props}.  For simplicity in adjusting the reaction energies, we opted to use constant specific heats ($n_c=0$), taken from the range obtained by \cite{Lautenberger:2009}.
+where $\sigma=5.67\times10^{-8} \;\unit{W/m^2/K^4}$ is the Stefan-Boltzmann constant. The reference values, exponents, and internal radiation factor, $\gamma$, are given in Table \ref{tab:thermophysical_props}.  For simplicity in adjusting the reaction energies, we opted to use constant specific heats ($n_c=0$), taken from the range obtained by \cite{Lautenberger:2009}.
 
 \begin{table}[h]
 \centering
@@ -1083,7 +1083,7 @@ The reaction model and kinetics parameters are based on the single component mod
 \hline
 Reaction  & $A$ & $E$ & $n_{\rm s}$ & $n_{{\rm O}_2}$ & \multicolumn{5}{c}{component $\nu$} & $H_{\rm r}$ \\
  \cmidrule(rl){6-10}
-  & \si{(kg/m^3)^{1-n_s}/s} & J/mol & & & $\nu_{{\rm O}_2}$ & $\nu_{\rm char}$ & $\nu_{\rm fv}$ & $\nu_{\rm ash}$ & $\nu_{{\rm C}{\rm O}_2}$ & kJ/kg\\
+  & \unit{(kg/m^3)^{1-n_s}/s} & J/mol & & & $\nu_{{\rm O}_2}$ & $\nu_{\rm char}$ & $\nu_{\rm fv}$ & $\nu_{\rm ash}$ & $\nu_{{\rm C}{\rm O}_2}$ & kJ/kg\\
 \hline
 R1  & 4.29E+03 & 4.38E+04 & 1  & 0    &          &       &       &      &      & $2\,410$   \\
 R2  & 1.00E+06 & 1.05E+05 & 1  & 0    &          & 0.30  & 0.70  &      &      & $200$      \\
@@ -1201,7 +1201,7 @@ Properties of the liquid fuels are listed in Table~\ref{LEMTA_UGent_Fuels}. The 
 \hline
            & Liquid     & Eff.     & Spec.         & Heat of        & Heat of      & Boiling       & Soot   & CO     & Rad.     \\
 Fuel       & Density    & Cond.    & Heat          & Vap.           & Comb.        & Temp.         & Yield  & Yield  & Frac.    \\
-           & (kg/m$^3$) & (W/m/K)  & (kJ/kg/K)     & (kJ/kg)        & (kJ/kg)      & (\unit{\degreeCelsius})   & (--)   & (--)   & (--)     \\ \hline \hline
+           & (\unit{kg/m^3}) & (\unit{W/(m.K)})  & (\unit{kJ/(kg.K)})     & (kJ/kg)        & (kJ/kg)      & (\unit{\degreeCelsius})   & (--)   & (--)   & (--)     \\ \hline \hline
 Heptane    & 675        & 1.68     & 2.24          & 317            & 43610        & 98.5          & 0.037  & 0.01   & 0.29     \\ \hline
 Methanol   & 796        & 0.90     & 2.48          & 1099           & 21060        & 64.8          & 0.001  & 0.001  & 0.16     \\ \hline
 \end{tabular}
@@ -1296,7 +1296,7 @@ The simulations of liquefied natural gas (LNG) dispersion experiments that are d
 
 Parameters for the LNG dispersion experiments are given in Table~\ref{tab:LNG_Dispersion}. In some cases, values of the Monin-Obukhov parameters are taken directly from the test reports. However, for some of the experiments, these parameters were not derived using the same similarity functions as those presented above, in which case the parameters have been recomputed to best fit the measured velocity and temperature profiles. In the table, $u_*$ is the friction velocity, $\kappa=0.41$ is the Von K\'{a}rm\'{a}n constant, $z_0$ is the \emph{aerodynamic} roughness length, $\theta_*$ is the scaling potential temperature, $\theta_0$ is the ground level potential temperature, $L$ is the Monin-Obukhov length, and the similarity functions are those proposed by Dyer~\cite{Dyer:1974} and discussed in the report of the Falcon field experiments~\cite{Falcon}.
 
-In the experiments, a fixed mass, $m$, of LNG was spilled onto water, forming a pool of increasing radius. For modeling purposes, it is assumed that the mass flux of natural gas from the circular pool is fixed at $\dot{m}''_{\rm max}=0.167$~kg/(m$^2 \cdot$s), and the temperature of the gas is $-162$~\unit{\degreeCelsius}, as suggested in the testing protocols. The diameter of the pool, $D$, is calculated using the assumed mass flux per unit area, the reported mass of LNG, $m$, and the spill duration, $\Delta t$.
+In the experiments, a fixed mass, $m$, of LNG was spilled onto water, forming a pool of increasing radius. For modeling purposes, it is assumed that the mass flux of natural gas from the circular pool is fixed at $\dot{m}''_{\rm max}=0.167$~\unit{kg/(m^2.s)}, and the temperature of the gas is $-162$~\unit{\degreeCelsius}, as suggested in the testing protocols. The diameter of the pool, $D$, is calculated using the assumed mass flux per unit area, the reported mass of LNG, $m$, and the spill duration, $\Delta t$.
 \be
    D = \sqrt{ \frac{4 \, m}{\pi \, \dot{m}''_{\rm max} \, \Delta t} }
 \ee
@@ -1350,7 +1350,7 @@ Table~\ref{Loughborough_Parameters} lists the key parameters for the natural gas
 \hline
 Test    & Fuel     & Hole  & Dist.    & Wind          & Wind    & Mass   & Heat Rel.    & Flame     & Stand-Off  & Rad.      \\
 No.     & Type     & Diam. & to Pipe  & Dir.          & Speed   & Flow   & Rate         & Length    & Distance   & Frac.     \\
-        &          & (mm)  & (m)      & ($^\circ$)    & (m/s)   & (kg/s) & (MW)         & (m)       & (m)        & (\%)      \\ \hline
+        &          & (mm)  & (m)      & (\unit{\degree})    & (m/s)   & (kg/s) & (MW)         & (m)       & (m)        & (\%)      \\ \hline
 1       & Nat.~Gas & 20    & 9.45     & 271           & 6.3     & 2.9    & 140          & 19.8      & 6.0        & 13.7      \\
 2       & Nat.~Gas & 35    & 15.45    & 297           & 6.2     & 9.6    & 462          & 37.8      & 7.5        & 17.9      \\
 3       & Nat.~Gas & 50    & 21.61    & 267           & 3.6     & 19.5   & 939          & 49.9      & 8.7        & 20.2      \\ \hline
@@ -1360,7 +1360,7 @@ No.     & Type     & Diam. & to Pipe  & Dir.          & Speed   & Flow   & Rate 
 
 \subsubsection{Modeling Notes}
 
-FDS is a low Mach number code and cannot model directly the supersonic flow at the pipe orifice. Instead, cold (-160~\unit{\degreeCelsius}) droplets with a median volumetric diameter of 1000~$\mu$m are injected with an initial velocity of 1000~m/s and spray angle of 10$^\circ$. These droplets evaporate readily to form methane gas. No attempt is made to model the stand-off distance because there is no mechanism in FDS to account for flame suppression due to high shear.
+FDS is a low Mach number code and cannot model directly the supersonic flow at the pipe orifice. Instead, cold (-160~\unit{\degreeCelsius}) droplets with a median volumetric diameter of 1000~$\mu$m are injected with an initial velocity of 1000~m/s and spray angle of 10\unit{\degree}. These droplets evaporate readily to form methane gas. No attempt is made to model the stand-off distance because there is no mechanism in FDS to account for flame suppression due to high shear.
 
 The grid resolution is 20~cm; thus, the circular pipe is modeled as a collection of 20~cm square rods with a cross section that is 0.8~m by 0.8~m, but with the corners removed. The velocity boundary condition is assumed to be free-slip because otherwise the polygonally-shaped obstruction would exert a fictitiously high drag force on the flow. The empirical heat transfer coefficient for the pipe is calculated using parameters appropriate for a cylindrical rather than a flat plate. The Nusselt number is taken as
 \be
@@ -1384,7 +1384,7 @@ The wind profile is based on measurements made 10.85~m above the relatively flat
 \section{McCaffrey Plume Experiments}
 \label{McCaffrey_Plume_Description}
 
-In 1979, at the National Bureau of Standards (now NIST), Bernard McCaffrey measured centerline temperature and velocity profiles above a porous, refractory burner. There were five distinct heat release rates, ranging from 14~kW to 57~kW. The fuel was natural gas (35 kJ/L [45 MJ/kg assuming 19 kg/kgmol as mole weight for natural gas]). The burner was square, 0.3~m on each side. The results of the experiments are reported in Reference~\cite{McCaffrey:NBSIR_79-1910}. Along the centerline of the burner, velocity and temperature were measured using bi-directional probes and thermocouples, respectively.  The centerline data collapses when scaled by the Froude number as shown in Fig.~\ref{fig:McCaffrey_Correlations}. Radiant fraction measurements for natural gas were made in \cite{McCaffrey:1981}.  For convenience, we have extracted the data from that report for the heat release rates reported in \cite{McCaffrey:NBSIR_79-1910}.  See Table \ref{tab:McCaffrey_Plume_Exp}.  The burner surface temperatures are extrapolated to the surface location from a least squares fit of of the temperature data below $z/Q^{2/5} = 0.05$ \si{m.kW^{-2/5}}.  The extrapolations for each power are shown in Fig.~\ref{fig:McCaffrey_Surf_Temp}.
+In 1979, at the National Bureau of Standards (now NIST), Bernard McCaffrey measured centerline temperature and velocity profiles above a porous, refractory burner. There were five distinct heat release rates, ranging from 14~kW to 57~kW. The fuel was natural gas (35~kJ/L [45 MJ/kg assuming 19 kg/kgmol as mole weight for natural gas]). The burner was square, 0.3~m on each side. The results of the experiments are reported in Reference~\cite{McCaffrey:NBSIR_79-1910}. Along the centerline of the burner, velocity and temperature were measured using bi-directional probes and thermocouples, respectively.  The centerline data collapses when scaled by the Froude number as shown in Fig.~\ref{fig:McCaffrey_Correlations}. Radiant fraction measurements for natural gas were made in \cite{McCaffrey:1981}.  For convenience, we have extracted the data from that report for the heat release rates reported in \cite{McCaffrey:NBSIR_79-1910}.  See Table \ref{tab:McCaffrey_Plume_Exp}.  The burner surface temperatures are extrapolated to the surface location from a least squares fit of of the temperature data below $z/Q^{2/5} = 0.05$ \unit{m.kW^{-2/5}}.  The extrapolations for each power are shown in Fig.~\ref{fig:McCaffrey_Surf_Temp}.
 
 \begin{figure}[!ht]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -1401,7 +1401,7 @@ In 1979, at the National Bureau of Standards (now NIST), Bernard McCaffrey measu
 \caption[Summary of McCaffrey Plume Experiments]{Summary of McCaffrey Plume Experiments, 1979.}
 \begin{tabular}{|c|c|c|c|c|c|}
 \hline
-$Q$ (kW) & $Q^*$    & $D^*$ (m)   & HRRPUA (kW/m$^2$)  & $\chi_r$ & $T_{\rm surf}$ (\si{\degreeCelsius}) \\ \hline\hline
+$Q$ (kW) & $Q^*$    & $D^*$ (m)   & HRRPUA (kW/m$^2$)  & $\chi_r$ & $T_{\rm surf}$ (\unit{\degreeCelsius}) \\ \hline\hline
 14.4     & 0.270    & 0.178       & 160                & 0.17     & 750 \\ \hline
 21.7     & 0.407    & 0.209       & 241                & 0.21     & 716 \\ \hline
 33.0     & 0.618    & 0.248       & 367                & 0.25     & 630 \\ \hline
@@ -1681,7 +1681,7 @@ Avg.~Base Width                         & m             & 1.7           & 1.7   
 Foliage Surface Area to Volume Ratio    & m$^{-1}$      & 3940          & 3940          & 3940       \\ \hline
 Avg.~Initial Mass                       & kg            & 9.7           & 13.5          & 57.9       \\ \hline
 Avg.~Moisture Fraction                  & \%            & 14            & 49            & 26         \\ \hline
-Assumed Bulk Mass per Unit Volume       & kg/m$^3$      & 3.2           & 4.6           & 2.7        \\ \hline
+Assumed Bulk Mass per Unit Volume       & \unit{kg/m^3}      & 3.2           & 4.6           & 2.7        \\ \hline
 \end{tabular}
 \end{table}
 
@@ -1696,9 +1696,9 @@ Chemical Composition            & --                    & C$_{3.4}$H$_{6.2}$O$_{
 Heat of Combustion              & kJ/kg                 & 17700                              & \cite{Susott:FS1982}                  \\ \hline
 Soot Yield                      & kg/kg                 & 0.02                               & \cite{Mell:2009}                      \\ \hline
 Char Yield                      & kg/kg                 & 0.26                               & \cite{Susott:FS1982}                  \\ \hline
-Specific Heat                   & kJ/(kg$\cdot$K)       & $1.1+0.0037 \, T$                  & \cite{Parker:1989}                    \\ \hline
-Conductivity                    & W/(m$\cdot$K)         & 0.2                                & Assumption                            \\ \hline
-Density                         & kg/m$^3$              & 514                                & \cite{Rothermel:1972}                 \\ \hline
+Specific Heat                   & \unit{kJ/(kg.K)}       & $1.1+0.0037 \, T$                  & \cite{Parker:1989}                    \\ \hline
+Conductivity                    & \unit{W/(m.K)}         & 0.2                                & Assumption                            \\ \hline
+Density                         & \unit{kg/m^3}              & 514                                & \cite{Rothermel:1972}                 \\ \hline
 Heat of Pyrolysis               & kJ/kg                 & 416                                & \cite{Morvan:CF2004}                  \\ \hline
 \end{tabular}
 \end{table}
@@ -2137,11 +2137,11 @@ In the model, all of the wood and paper materials are assumed to be made up of c
 \ee
 Note that the fuel gas is taken as cellulose with 20~\% of its molecular mass decreased to account for the residual char, which is assumed to be pure carbon. The heat of combustion of this modified fuel gas is 12120~MJ/kg. The yield of residual Ash is based on the measured residual mass.
 
-The crinkle paper is assumed to consist of 3~cm long, 4~mm wide strips with a surface area to volume ratio of 10000~m$^{-1}$ (approximately 0.2~mm thick). The length and width are important only in defining the mass and volume of each particle. The thermal and kinetic properties of the paper are assumed to be similar to those of corrugated cardboard given in Table~\ref{Properties_Cardboard}. The cardboard that makes up the box that holds the crinkle paper has a mass of 0.62~kg/m$^2$ and the box itself has a mass of 1.6~kg. The corrugated paper has an assumed dry density of 350~kg/m$^3$, yielding an effective thickness of 1.8~mm. In the model, the box does not undergo char oxidation but rather ``burns away'' to expose the crinkle paper inside.
+The crinkle paper is assumed to consist of 3~cm long, 4~mm wide strips with a surface area to volume ratio of 10000~m$^{-1}$ (approximately 0.2~mm thick). The length and width are important only in defining the mass and volume of each particle. The thermal and kinetic properties of the paper are assumed to be similar to those of corrugated cardboard given in Table~\ref{Properties_Cardboard}. The cardboard that makes up the box that holds the crinkle paper has a mass of 0.62~kg/m$^2$ and the box itself has a mass of 1.6~kg. The corrugated paper has an assumed dry density of 350~\unit{kg/m^3}, yielding an effective thickness of 1.8~mm. In the model, the box does not undergo char oxidation but rather ``burns away'' to expose the crinkle paper inside.
 
-The wood crib is made up of 104 56~cm (22~in) long, 3.8~cm (1.5~in) square interlacing pine wood strips. The particles used to model the crib are assumed to be cylindrical in shape but with a surface area to volume ratio of 69~m$^{-1}$ based on a direct measurement of the actual crib geometry. The dry density of the wood has been measured to be 463~kg/m$^3$, its peak pyrolysis temperature is taken to be 320~\unit{\degreeCelsius}~\cite{Fraga:2020}, its char yield assumed to be 20~\%, and its heat of reaction is taken to be 418~kJ/kg~\cite{Morvan:CF2001}. Other property values are based on the default vegetation pyrolysis model described in the FDS User's Guide.
+The wood crib is made up of 104 56~cm (22~in) long, 3.8~cm (1.5~in) square interlacing pine wood strips. The particles used to model the crib are assumed to be cylindrical in shape but with a surface area to volume ratio of 69~m$^{-1}$ based on a direct measurement of the actual crib geometry. The dry density of the wood has been measured to be 463~\unit{kg/m^3}, its peak pyrolysis temperature is taken to be 320~\unit{\degreeCelsius}~\cite{Fraga:2020}, its char yield assumed to be 20~\%, and its heat of reaction is taken to be 418~kJ/kg~\cite{Morvan:CF2001}. Other property values are based on the default vegetation pyrolysis model described in the FDS User's Guide.
 
-The pine wood pallets are constructed of 1.6~cm (5/8~in) thick planks and modeled as a collection of flat particles with a thickness of 8~mm and the same thermal and kinetic properties as the cribs, except that the wood making up the pallets has a dry density of 414~kg/m$^3$.
+The pine wood pallets are constructed of 1.6~cm (5/8~in) thick planks and modeled as a collection of flat particles with a thickness of 8~mm and the same thermal and kinetic properties as the cribs, except that the wood making up the pallets has a dry density of 414~\unit{kg/m^3}.
 
 The drag per unit volume exerted by the particles is given by
 \be
@@ -2185,7 +2185,7 @@ The radiative fractions are specified based on reported values from Ref.~\cite{S
 
 A series of experiments was conducted by NIST to measure the activation time of ionization and photoelectric smoke alarms in a residential setting~\cite{Bukowski:1}. Tests were conducted in actual homes with representative sizes and floor plans, utilized actual furnishings and household items for fire sources, and tested actual smoke alarms sold in retail stores at that time. Thirty-six tests were conducted in two homes; 27 in a single-story manufactured home, and 8 in a two-story home. Eight experiments that were conducted in the single-story manufactured home were selected for model validation. Only tests that used a flaming ignition source with a couch or mattress fuel package were considered; the cooking oil fires and tests that used a smoldering ignition source were not considered. The flaming ignition tests used a moderate flame source to quickly ignite the fuel package.
 
-The primary partitioning of the single-story floor plan consisted of three bedrooms, one full bathroom, one kitchen/dining area, one living room, and two hallways (see Fig.~\ref{NIST_Smoke_Alarms_Drawing}). For testing, the doors to Bedroom~3 and the bathroom were always closed. The ceiling was peaked on the long axis, reaching a height of 2.4~m. The outside walls were approximately 2.1~m in height. The slope of the ceiling was approximately 8.4$^\circ$. Groups of smoke alarms were located in the room of fire origin, at least one bedroom, and in a central location. Five stations (Station A through Station E) containing smoke alarm\footnote{Note that, in the FDS Guides, smoke detectors and smoke alarms are collectively referred to as smoke detectors because the same smoke detection algorithm is used to predict activation of either type of device.} arrays were mounted parallel to the ceiling.
+The primary partitioning of the single-story floor plan consisted of three bedrooms, one full bathroom, one kitchen/dining area, one living room, and two hallways (see Fig.~\ref{NIST_Smoke_Alarms_Drawing}). For testing, the doors to Bedroom~3 and the bathroom were always closed. The ceiling was peaked on the long axis, reaching a height of 2.4~m. The outside walls were approximately 2.1~m in height. The slope of the ceiling was approximately 8.4\unit{\degree}. Groups of smoke alarms were located in the room of fire origin, at least one bedroom, and in a central location. Five stations (Station A through Station E) containing smoke alarm\footnote{Note that, in the FDS Guides, smoke detectors and smoke alarms are collectively referred to as smoke detectors because the same smoke detection algorithm is used to predict activation of either type of device.} arrays were mounted parallel to the ceiling.
 
 Although a load cell was used in the experiments to measure the mass loss rate of the fuel package, the mass loss data were not reliable enough to reconstruct the HRR curves for each test. Instead, the HRR curves were determined by approximating the fire growth using a $t$-squared ramp, as in Eq.~(\ref{eq:t_squared}). The parameters for the $t$-squared ramp were calibrated in FDS by using the temperature measured at the highest thermocouple in the tree (2~cm below the ceiling) in the fire room.
 \be
@@ -2315,7 +2315,7 @@ The front door was open in all experiments. For some portion of some of the expe
 
 \subsubsection{Material Properties}
 
-The walls, ceiling and floor of each compartment was 1.6~cm (5/8~in) Type~X gypsum board. Wood studs formed the exterior frame. Thermo-physical properties of the gypsum board were taken from in Ref.~\cite{Manzello:SiF08} and manufacturer literature. It was assumed that the specific heat was 1.089~kJ/(kg $\cdot$ K), thermal conductivity 0.15~W/m/K, and density 673~kg/m$^3$.  Additionally, a  layer of kaowool, shown in Fig.~\ref{NIST_Vent_Study_Drawing} was used to seal the gap between the removable roof and the second story walls. Aluminum tape was used to seal all other seams.
+The walls, ceiling and floor of each compartment was 1.6~cm (5/8~in) Type~X gypsum board. Wood studs formed the exterior frame. Thermo-physical properties of the gypsum board were taken from in Ref.~\cite{Manzello:SiF08} and manufacturer literature. It was assumed that the specific heat was 1.089~\unit{kJ/(kg.K)}, thermal conductivity 0.15~\unit{W/(m.K)}, and density 673~\unit{kg/m^3}.  Additionally, a  layer of kaowool, shown in Fig.~\ref{NIST_Vent_Study_Drawing} was used to seal the gap between the removable roof and the second story walls. Aluminum tape was used to seal all other seams.
 
 \subsubsection{Burner}
 
@@ -2509,7 +2509,7 @@ The effective absorption coefficients. $\kappa$, for benzene and ethanol are bas
 \caption[Liquid fuel properties]{Liquid fuel properties.} \label{fuelprops}
 \begin{tabular}{|l|c|c|c|c|c|c|c|c|c|c|} \hline
         & $\rho$               & $c_p$                        & $k$                &  $\Delta h_{\rm v}$         &  $\Delta h_{\rm c}$  & $\chi_{\rm r}$       & $y_{\rm CO}$         & $y_{\rm s}$          & $T_{\rm b}$                    & $\kappa$  \\
-Fuel    & \si{\kg/\m^3}        & \si{\kJ/(\kg.\K)}            & \si{\W/(\m.\K)}    & \si{\kJ/\kg}                & \si{\kJ/\kg}         &                      &  \si{\g/\g}          &  \si{\g/\g}          & \unit{\degreeCelsius}                      & m$^{-1}$  \\
+Fuel    & \unit{\kg/\m^3}        & \unit{\kJ/(\kg.\K)}            & \unit{\W/(\m.\K)}    & \unit{\kJ/\kg}                & \unit{\kJ/\kg}         &                      &  \unit{\g/\g}          &  \unit{\g/\g}          & \unit{\degreeCelsius}                      & m$^{-1}$  \\
         & \cite{Babrauskas:1}  & \cite{Webbook:HeatCapacity}  & \cite{CRCHandbook} &  \cite{Webbook:FluidThermo} & See text             & \cite{SFPE:Tewarson} & \cite{SFPE:Tewarson} & \cite{SFPE:Tewarson} & \cite{Webbook:BoilingPoint}    & See text  \\
 \hline \hline
 Acetone  &  791  &  2.13   & 0.20  &   501   & 28555  & 0.27 & 0.003 & 0.014 & 56.15 & 100    \\ \hline
@@ -2537,7 +2537,7 @@ While not technically a part of the PRISME project, one of a series of experimen
 \section{Purdue Flames}
 \label{Purdue_Flames_Description}
 
-A turbulent buoyant diffusion flame is established on a diffuser burner with an exit diameter of 7.1 cm. The diverging angle of the burner is 7$^\circ$ such that the gaseous fuel (methane) is decelerated and forms a uniform velocity distribution at the burner exit \cite{Xin:CF2005}. The methane (CH4) mass flow rate (84.3 mg/s) The buoyant diffusion flame burns in a quiescent atmospheric pressure environment. The flame is surrounded by a screened enclosure to minimize flame disturbance. The Froude number of the flame is 0.109 and matches that of a 7.1 cm diameter liquid toluene pool fire \cite{Xin:CF2005,Zhou:CS1998}. The total heat release rate of the methane flame is 4.2 kW under the assumption of complete combustion, and the visible flame height is approximately 36 cm \cite{Xin:CF2005}. Measured and computed vertical and horizontal velocity, mixture fraction, and temperature values for this flame have been reported by Xin et al.~\cite{Xin:CF2005,Xin:PhD2002} and Zhou et al.~\cite{Zhou:CS1998,Zhou:PurduePhD1999}. The mean temperatures have been inferred from the measured species concentrations \cite{Xin:CF2005} by assuming an adiabatic flame. The inter-dependencies between species concentrations, temperature and specific heat have been ignored for determining the mean temperature.
+A turbulent buoyant diffusion flame is established on a diffuser burner with an exit diameter of 7.1 cm. The diverging angle of the burner is 7\unit{\degree} such that the gaseous fuel (methane) is decelerated and forms a uniform velocity distribution at the burner exit \cite{Xin:CF2005}. The methane (CH4) mass flow rate (84.3 mg/s) The buoyant diffusion flame burns in a quiescent atmospheric pressure environment. The flame is surrounded by a screened enclosure to minimize flame disturbance. The Froude number of the flame is 0.109 and matches that of a 7.1 cm diameter liquid toluene pool fire \cite{Xin:CF2005,Zhou:CS1998}. The total heat release rate of the methane flame is 4.2 kW under the assumption of complete combustion, and the visible flame height is approximately 36 cm \cite{Xin:CF2005}. Measured and computed vertical and horizontal velocity, mixture fraction, and temperature values for this flame have been reported by Xin et al.~\cite{Xin:CF2005,Xin:PhD2002} and Zhou et al.~\cite{Zhou:CS1998,Zhou:PurduePhD1999}. The mean temperatures have been inferred from the measured species concentrations \cite{Xin:CF2005} by assuming an adiabatic flame. The inter-dependencies between species concentrations, temperature and specific heat have been ignored for determining the mean temperature.
 
 \section{Ranz Marshall Droplet Experiments}
 \label{Ranz_Marshall_Description}
@@ -2711,13 +2711,7 @@ The empirical model requires soot yield, $Y_{s}$, data.
 Materials which $Y_{s}$ was measured to be zero or less than zero were set to a minimum value of 0.001 g/g.
 Materials for which data was not available in the original studies used a $Y_{s}$ of 0.05 g/g.
 
-Note that the RISE and FPL databases did not provide ignition properties or information on specific material conditioning or modifications to test procedures.
-For these materials,
-a thermal conductivity of 0.4 $\mathrm{W/(m\cdot K)}$,
-specific heat capacity of 1.0 $\mathrm{kJ/(kg\cdot K)}$,
-and an emissivity of unity was assumed.
-The ignition temperature of each material was calculated based on measured time to ignitions across all tests using either properties provided by the authors or these assumed properties.
-The ignition temperature is provided for reference; however, in the models the time to ignition in each case is fixed based on experimental data (i.e., the validation focuses on what happens after ignition).
+Note that the RISE and FPL databases did not provide ignition properties or information on specific material conditioning or modifications to test procedures. For these materials, a thermal conductivity of 0.4~\unit{W/(m.K)}, specific heat capacity of 1.0~\unit{kJ/(kg.K)}, and an emissivity of unity was assumed. The ignition temperature of each material was calculated based on measured time to ignitions across all tests using either properties provided by the authors or these assumed properties. The ignition temperature is provided for reference; however, in the models the time to ignition in each case is fixed based on experimental data (i.e., the validation focuses on what happens after ignition).
 
 \FloatBarrier
 
@@ -2792,7 +2786,7 @@ Mark Sippola, a doctoral student at the University of California, Berkeley, meas
 \begin{tabular}{|c|c|c|c|}
 \hline
 Test      &  Air Speed        &  Particle Diameter          &  Particle Density             \\
-No.       &  (m/s)            &  ($\mu$m)                   &  (kg/m$^3$)                   \\ \hline \hline
+No.       &  (m/s)            &  ($\mu$m)                   &  (\unit{kg/m^3})                   \\ \hline \hline
 1         &  2.2              &  1.0                        &  1350                         \\ \hline
 2         &  2.2              &  2.8                        &  1170                         \\ \hline
 3         &  2.1              &  5.2                        &  1210                         \\ \hline
@@ -2834,12 +2828,12 @@ FDS treats smoke particulate and aerosols in a similar way to other gaseous comb
 \be
    u_{\rm dep} = \frac{J_1 + J_2 + J_3 + J_4}{4 \; C_{\rm avg}}
 \ee
-where $J_1$ through $J_4$ are the deposition fluxes (\si{kg/(m^2.s)}) for duct panels 1 through 4 given by
+where $J_1$ through $J_4$ are the deposition fluxes (\unit{kg/(m^2.s)}) for duct panels 1 through 4 given by
 \be
    J = \frac{m_{\rm d}}{A_{\rm d} \; \Delta t}
 \ee
 where $m_{\rm d}$ is the mass of particles on the duct panel (kg), $A_{\rm d}$ is the area of the duct panel (m$^2$), and $\Delta t$ is the duration over which the aerosol deposits onto the panel (s). $C_{\rm avg}$ is the
-average aerosol concentration in the duct test section (kg/m$^3$) and is given by
+average aerosol concentration in the duct test section (\unit{kg/m^3}) and is given by
 \be
    C_{\rm avg} = \frac{C_{\rm upstream} + C_{\rm downstream}}{2}
 \ee
@@ -2877,7 +2871,7 @@ This database does not provide thermal properties of the materials. Thermal cond
 
 In 2008, three compartment experiments were performed at SP Technical Research Institute of Sweden under the sponsorship of Brandforsk, the Swedish Fire Research Board~\cite{Wickstrom_AST}. The objective of the experiments was to demonstrate how plate thermometer measurements in the vicinity of a simple steel beam can be used to supply the boundary conditions for a multi-dimensional heat conduction calculation for the beam. The adiabatic surface temperature was derived from the plate temperatures.
 
-The experiments were performed inside a standard compartment designed for corner fire testing (ISO 9705). The compartment is 3.6~m deep, 2.4~m wide and 2.4~m high and includes a door opening 0.8~m by 2.0~m (Fig.~\ref{Room_Drawing}). The room was constructed of 20~cm thick light weight concrete blocks with a density of 600~kg/m$^3$~$\pm$~100~kg/m$^3$. The heat source was a gas burner run at a constant power of 450~kW. The top of the burner, with a square opening 30~cm by 30~cm, was placed 65~cm above the floor, 2.5~cm from the walls. A single steel beam was suspended 20~cm below the ceiling along the centerline of the compartment. There were three measurement stations along the beam at lengths of 0.9~m (Position A), 1.8~m (Position B), and 2.7~m (Position C) from the far wall where the fire was either positioned in the corner (Tests 1 and 2), or the center (Test 3). The beam in Test 1 was a rectangular steel tube filled with an insulation material. The beam in Tests 2 and 3 was an I-beam. A diagram of the room used in Test~2 is displayed in Figure~\ref{Room_Drawing}.
+The experiments were performed inside a standard compartment designed for corner fire testing (ISO 9705). The compartment is 3.6~m deep, 2.4~m wide and 2.4~m high and includes a door opening 0.8~m by 2.0~m (Fig.~\ref{Room_Drawing}). The room was constructed of 20~cm thick light weight concrete blocks with a density of 600~\unit{kg/m^3}~$\pm$~100~\unit{kg/m^3}. The heat source was a gas burner run at a constant power of 450~kW. The top of the burner, with a square opening 30~cm by 30~cm, was placed 65~cm above the floor, 2.5~cm from the walls. A single steel beam was suspended 20~cm below the ceiling along the centerline of the compartment. There were three measurement stations along the beam at lengths of 0.9~m (Position A), 1.8~m (Position B), and 2.7~m (Position C) from the far wall where the fire was either positioned in the corner (Tests 1 and 2), or the center (Test 3). The beam in Test 1 was a rectangular steel tube filled with an insulation material. The beam in Tests 2 and 3 was an I-beam. A diagram of the room used in Test~2 is displayed in Figure~\ref{Room_Drawing}.
 
 \begin{figure}[!ht]
 \includegraphics[width=\textwidth]{FIGURES/SP_AST/SP_AST_Compartment_Drawing}
@@ -2924,22 +2918,22 @@ The parameters for the pyrolysis model are listed in Table~\ref{Pine_Properties}
 \hline
 Property                &      Units    &      Value                           \\ \hline \hline
 $M$                     &    kg/kg      & 0.016                                \\ \hline
-$\rho_{\rm H_2O}$       &     kg/m$^3$  & 1000                                 \\ \hline
-$c_{\rm H_2O}$          &    kJ/kg/K    & 4.18                                 \\ \hline
-$k_{\rm H_2O}$          &      W/m/K    & 0.1                                  \\ \hline
+$\rho_{\rm H_2O}$       &     \unit{kg/m^3}  & 1000                                 \\ \hline
+$c_{\rm H_2O}$          & \unit{kJ/(kg.K)}    & 4.18                                 \\ \hline
+$k_{\rm H_2O}$          &      \unit{W/(m.K)}    & 0.1                                  \\ \hline
 $A_{\rm H_2O}$          &               & $9.57 \times 10^{22}$                \\ \hline
 $E_{\rm H_2O}$          & J/mol         & 136000                               \\ \hline
 $\Delta h_{\rm H_2O}$   & kJ/kg         & 2500                                 \\ \hline \hline
-$\rho_{\rm wood}$       &     kg/m$^3$  & 393                                  \\ \hline
-$c_{\rm wood}$          &    kJ/kg/K    & $0.85+0.00241(T-20)$                 \\ \hline
-$k_{\rm wood}$          &      W/m/K    & $0.07+0.00038(T-20)$                 \\ \hline
+$\rho_{\rm wood}$       &     \unit{kg/m^3}  & 393                                  \\ \hline
+$c_{\rm wood}$          &    \unit{kJ/(kg.K)}    & $0.85+0.00241(T-20)$                 \\ \hline
+$k_{\rm wood}$          &      \unit{W/(m.K)}    & $0.07+0.00038(T-20)$                 \\ \hline
 $\epsilon_{\rm wood}$   &               & 0.95                                 \\ \hline
 $A_{\rm wood}$          &               & 141000                               \\ \hline
 $E_{\rm wood}$          & J/mol         & 89700                                \\ \hline
 $\Delta h_{\rm wood}$   & kJ/kg         & 250                                  \\ \hline \hline
-$\rho_{\rm char}$       &     kg/m$^3$  & 135                                  \\ \hline
-$c_{\rm char}$          &    kJ/kg/K    & (see Ref.~\cite{Janardhan:FSJ2021})  \\ \hline
-$k_{\rm char}$          &      W/m/K    & $0.11+0.00031(T-20)$                 \\ \hline
+$\rho_{\rm char}$       &     \unit{kg/m^3}  & 135                                  \\ \hline
+$c_{\rm char}$          &    \unit{kJ/(kg.K)}    & (see Ref.~\cite{Janardhan:FSJ2021})  \\ \hline
+$k_{\rm char}$          &      \unit{W/(m.K)}    & $0.11+0.00031(T-20)$                 \\ \hline
 $\epsilon_{\rm char}$   &               & 1.0                                  \\ \hline
 $\nu_{\rm char}$        & g/g           & 0.195                                \\ \hline
 \end{tabular}
@@ -3347,9 +3341,9 @@ II-12 & C  & All Open at Start       & 23 & 0:58 & 4:55 & 119.0 &246.2 \\ \hline
 \end{figure}
 
 \begin{description}
-\item[Ceiling:] The ceiling was raised to a height of 7.6~m and instrumented with thermocouples and other measurement devices. The ceiling was constructed of 0.6~m by 1.2~m by 1.6~cm UL fire-rated Armstrong Ceramaguard (Item 602B) ceiling tiles. The manufacturer reported the thermal properties of the material to be: specific heat 753 J/(kg$\cdot$K), thermal conductivity 0.0611~W/(m$\cdot$K), and density 313~kg/m$^3$.
+\item[Ceiling:] The ceiling was raised to a height of 7.6~m and instrumented with thermocouples and other measurement devices. The ceiling was constructed of 0.6~m by 1.2~m by 1.6~cm UL fire-rated Armstrong Ceramaguard (Item 602B) ceiling tiles. The manufacturer reported the thermal properties of the material to be: specific heat 753~\unit{J/(kg.K)}, thermal conductivity 0.0611~\unit{W/(m.K)}, and density 313~\unit{kg/m^3}.
 \item[Draft Curtains:] Sheet metal, 1.2~mm thick and 1.8~m deep, was suspended from the ceiling for 16 of the 22 Series~I tests, enclosing an area of about 450~m$^2$ and 49 sprinklers. The curtains were in place for all of the Series~II tests.
-\item[Sprinklers:] Central ELO-231 (Extra Large Orifice) uprights were used for all the tests. The orifice diameter of this sprinkler is reported by the manufacturer to be nominally 1.6~cm (0.64~in), the reference actuation temperature is reported by the manufacturer to be 74\unit{\degreeCelsius} (165\unit{\degree F}). The RTI (Response Time Index) and C-factor (Conductivity factor) were reported by UL to be 148~(m$\cdot$s)$^\ha$ and 0.7~(m/s)$^\ha$, respectively~\cite{Sheppard:1}. When installed, the sprinkler deflector was located 8~cm below the ceiling. The thermal element of the sprinkler was located 11~cm below the ceiling. The sprinklers were installed with nominal 3~m by 3~m (exact 10~ft by 10~ft) spacing in a system designed to deliver a constant 0.34~L/(s$\cdot$m$^2$) (0.50 gpm/ft$^2$) discharge density when supplied by a 131~kPa (19~psi) discharge pressure
+\item[Sprinklers:] Central ELO-231 (Extra Large Orifice) uprights were used for all the tests. The orifice diameter of this sprinkler is reported by the manufacturer to be nominally 1.6~cm (0.64~in), the reference actuation temperature is reported by the manufacturer to be 74\unit{\degreeCelsius} (165\unit{\degree F}). The RTI (Response Time Index) and C-factor (Conductivity factor) were reported by UL to be 148~\unit{(m.s)^{1/2}} and 0.7~\unit{(m/s)^{1/2}}, respectively~\cite{Sheppard:1}. When installed, the sprinkler deflector was located 8~cm below the ceiling. The thermal element of the sprinkler was located 11~cm below the ceiling. The sprinklers were installed with nominal 3~m by 3~m (exact 10~ft by 10~ft) spacing in a system designed to deliver a constant 0.34~\unit{L/(s.m^2)} (0.50~\unit{gal/(min.ft^2)}) discharge density when supplied by a 131~kPa (19~psi) discharge pressure
 \item[Vent:] UL-listed double leaf fire vents with steel covers and steel curb were installed in the adjustable height ceiling in the position shown in Figs.~\ref{layout} and \ref{burnerlayoutA}. The vent is designed to open manually or automatically. The vent doors were recessed into the ceiling about 0.3~m (1~ft).
 \item[Heptane Spray Burner:] The heptane spray burner consisted of a 1~m by 1~m square of 1.3~cm pipe supported by four cement blocks 0.6~m off the floor. Four atomizing spray nozzles were used to provide a free spray of heptane that was then ignited. For all but one of the Series~I tests, the total heat release rate from the fire was manually ramped up following a ``t-squared'' curve to a steady-state in 75~s (150~s was used in Test I-16). The fire was ramped to 10~MW in 75~s for the Series~II tests. The fire growth curve was followed until a specified fire size was reached or the first sprinkler activated. After either of these events, the fire size was maintained at that level until conditions reached roughly a steady state, i.e., the temperatures recorded near the ceilings remained steady and no more sprinkler activations occurred. The heat release rate from the burner was confirmed by placing it under the large product calorimeter at UL, ramping up the flow of heptane in the same manner as in the tests, and measuring the total and convective heat release rates. It was found that the convective heat release rate was 0.65~$\pm$~0.02 of the total.
 \item[Plastic Commodity:] The Factory Mutual Research Corporation (FMRC) standard ``Group A Plastic'' test commodity served as the fuel for the rack storage experiments~\cite{Troup:1}. The cartoned plastic commodity consists of rigid crystalline polystyrene cups packaged in compartmented, single-wall, corrugated paper cartons. Each carton is a cube 0.53~m (21~in) on a side. Eight boxes comprise a pallet load. Two-way, slatted deck hardwood pallets support the loads.  A pallet load weighs approximately 80~kg (170~lb), of which about 36~\% is plastic, 35~\% is wood, and 29~\% is corrugated paper~\cite{Troup:1}. Each storage array consisted of a main (ignition) double-row rack at the center, flanked on two sides by single row target racks. The rows were separated by 8~ft wide aisles.  Each of the two rows of the main array consisted of four 2.4~m (8~ft) long bays; a 0.15~m (6~in) flue separated the rows. Longitudinal flues of 0.2~m (7.5~in) were used to separate the pallets within a row. The overall loaded area of the double-row rack measured approximately 2.3~m (7.5~ft) wide by 10~m (33~ft) long.  The racks were divided vertically into 4 tiers; the overall loaded height was 5.8~m (19~ft). The fire was ignited with 2 standard igniters which consisted of 8~cm (3~in) long by 8~cm diameter cylinders of rolled cotton material, each soaked in 120~mL (4~oz) of gasoline and enclosed in a polyethylene bag.  The rolls were placed against the carton surfaces in the first tier, just above the pallet. The igniters were lit with a flaming propane torch at the start of each test.
@@ -3506,7 +3500,7 @@ For nitrogen-dilution suppression experiments, the flame is suppressed via the i
 
 Visible flame height is measured using a video camera, defined based on a 50~\% intermittent flame height \cite{White:2015}. These image-based measurements rely on visible flame emissions, including the incandescence of soot particles, and do not strictly locate the stoichiometric flame sheet. The uncertainty in each flame height measurement is less than $\pm$1.5~cm.
 
-Infrared radiative emissions are measured using a water-cooled Schmidt-Boelter heat-flux transducer. The sensor is positioned 100~cm radially outward from the burner centroid, 18~cm above the fuel port, facing perpendicular to the long axis of the burner. This device has a hemispherical absorptance of 0.94 for a spectral range between 0.6-15.0~$\mu$m, a maximum viewing angle of 90\si{\degree}, and a response time of 0.25~s. Measurement accuracy is $\pm$3~\%. The convective portion of the measured heat flux is neglected and sans-flame measurements are applied to correct for background irradiation.
+Infrared radiative emissions are measured using a water-cooled Schmidt-Boelter heat-flux transducer. The sensor is positioned 100~cm radially outward from the burner centroid, 18~cm above the fuel port, facing perpendicular to the long axis of the burner. This device has a hemispherical absorptance of 0.94 for a spectral range between 0.6-15.0~$\mu$m, a maximum viewing angle of 90\unit{\degree}, and a response time of 0.25~s. Measurement accuracy is $\pm$3~\%. The convective portion of the measured heat flux is neglected and sans-flame measurements are applied to correct for background irradiation.
 
 Heat flux data are converted to radiative loss fraction, $\chi_{\rm r}$, using a weighted multi-point radiation source model, whereby the measured heat flux is assumed to be received from an array of isotropic point sources uniformly distributed over a two-dimensional plane oriented across the visible flame surface. The uncertainty in each $\chi_{\rm r}$ measurement is less than $\pm$4.5~\%.
 
@@ -3590,7 +3584,7 @@ $s$ (m$^{-1}$)            & 7596          & 5710        & 3092           & 630  
 $w_0$ (kg/m$^2$)          & 0.051-2.426   & 0.101-3.66  & 0.101-2.73     & 0.604-2.324    \\ \hline
 $\beta$                   & 0.0025-0.04   & 0.02-0.094  & 0.0064-0.090   & 0.009-0.035    \\ \hline
 $\delta$ (m)              & 0.025-0.305   & 0.013-0.076 & 0.025-0.152    & 0.076-0.152    \\ \hline
-$\rho_{\rm p}$ (kg/m$^3$) & 398           & 510         & 398            & 442            \\ \hline
+$\rho_{\rm p}$ (\unit{kg/m^3}) & 398           & 510         & 398            & 442            \\ \hline
 $Q_{\rm p}$ (kJ/kg)       & 711           & 609         & 711            & 659            \\ \hline
 \end{tabular}
 \end{table}
@@ -3605,7 +3599,7 @@ The vegetation is modeled as a collection of cylindrical Lagrangian particles. T
 \section{USFS/Corsica Experiments}
 \label{USFS_Corsica_Description}
 
-Perez-Ramirez et al.~at the University of Corsica, France, and Mell at the U.S. Forest Service's Pacific Wildland Fire Science Laboratory in Seattle, Washington, simulated six bench-scale fires spreading over a 1~m wide by 2~m long bed of pine needles~\cite{Perez-Ramirez:FT2017}. The heat release rates from the spreading fires were measured in a furniture calorimeter. The fuel beds were made up of {\em Pinus pinaster} needles, and three different fuel loadings (0.6, 0.9 and 1.2 kg/m$^2$) were tested under no-slope and up-slope conditions (20$^\circ$).
+Perez-Ramirez et al.~at the University of Corsica, France, and Mell at the U.S. Forest Service's Pacific Wildland Fire Science Laboratory in Seattle, Washington, simulated six bench-scale fires spreading over a 1~m wide by 2~m long bed of pine needles~\cite{Perez-Ramirez:FT2017}. The heat release rates from the spreading fires were measured in a furniture calorimeter. The fuel beds were made up of {\em Pinus pinaster} needles, and three different fuel loadings (0.6, 0.9 and 1.2 kg/m$^2$) were tested under no-slope and up-slope conditions (20\unit{\degree}).
 
 \subsubsection{Modeling Notes}
 
@@ -3621,7 +3615,7 @@ The test parameters for these experiments are given in Table~\ref{Corsica_Parame
 \begin{tabular}{|c|c|c|c|c|c|}
 \hline
 Exp.         & Dry Fuel Loading    & Slope     & Dry Mass per Volume  & Packing & Bed Depth       \\
-No.          & (kg/m$^2$)          & (deg.)    & (kg/m$^3$)           & Ratio   & (cm)            \\ \hline \hline
+No.          & (kg/m$^2$)          & (deg.)    & (\unit{kg/m^3})           & Ratio   & (cm)            \\ \hline \hline
 1\_0         & 0.6                 & 0         & 17                   & 0.033   & 3.5             \\ \hline
 2\_0         & 0.9                 & 0         & 16                   & 0.031   & 5.5             \\ \hline
 3\_0         & 1.2                 & 0         & 18                   & 0.035   & 6.5             \\ \hline
@@ -3653,7 +3647,7 @@ Wind tunnel measurements were conducted at the University of Western Ontario (UW
 
 The 1:100 scale model of the Test~7 building is approximately 14~cm long, 9~cm wide, and 4~cm tall. The simulations use 5.0~mm, 2.5~mm, and 1.25~mm cubic grid cells, uniformly spanning the computational domain of dimensions 1.12~m $\times$ 0.56~m $\times$ 0.28~m. The 4~cm height of the scale model is spanned by 8, 16, and 32 grid cells. The grid resolution was assessed by checking that the values of $y^+$, a non-dimensional distance, never exceed 150 for any mesh resolution. $y^+$ values are dependent on turbulence model wall laws and a value of 150 means that the first grid point is well within the logarithmic region.
 
-Only two wind directions are chosen for validation, 180\si{\degree} and 270\si{\degree}, representing right angles formed with the long and short sides of the building. For each angle, 3 lines of pressure measurements running up the windward side, along the roof, and down the leeward side are used for comparison to the simulation. One line of pressure measurements along the side of the scale model is also used.
+Only two wind directions are chosen for validation, 180\unit{\degree} and 270\unit{\degree}, representing right angles formed with the long and short sides of the building. For each angle, 3 lines of pressure measurements running up the windward side, along the roof, and down the leeward side are used for comparison to the simulation. One line of pressure measurements along the side of the scale model is also used.
 
 The incoming flow is defined using an \ct{OPEN} wind boundary condition, and is characterized by its mean wind speed profile and turbulent fluctuations. For consistency with the UWO experiments, the mean wind speed profile was modeled by the power law:
 \begin{equation}
@@ -3730,7 +3724,7 @@ Time    & Slow     & Medium     & Fast   \\
 
 Vettori~\cite{Vettori:2} performed a series of 72 compartment experiments to measure the activation times of quick-response residential pendent sprinklers mounted under a ceiling with an adjustable slope. There were 36 unique configurations (2 replicates of each) combining the following parameters:
 \begin{itemize}
-\item \underline{F}lat, \underline{13}$^\circ$, or \underline{24}$^\circ$ Ceiling Slope
+\item \underline{F}lat, \underline{13}\unit{\degree}, or \underline{24}\unit{\degree} Ceiling Slope
 \item \underline{S}mooth or \underline{O}bstructed Ceiling Surface
 \item \underline{F}ast or \underline{S}low Growth Fire
 \item \underline{C}orner, \underline{W}all, or \underline{D}etached Burner Location
@@ -3830,7 +3824,7 @@ The methanol pool fire is modeled at three different grid resolutions---2~cm, 1~
 
 Because measurements of CO were made within the flame envelop, a two-step reaction mechanism is implemented. In the first reaction, fuel is converted to CO and H$_2$O, and in the second reaction, CO is converted to CO$_2$. Both reactions employ fast kinetics and performed serially. It is assumed that no soot is formed in either reaction.
 
-Physical properties of methanol are taken from a data sheet published by the Methanol Institute~\cite{Methanol}: boiling temperature, 64.6~\unit{\degreeCelsius}, heat of vaporization at 64.6~\unit{\degreeCelsius}, 1098.3~kJ/kg, thermal conductivity, 0.2~W/(m$\cdot$K), specific heat at 25~\unit{\degreeCelsius}, 2.53~kJ/(kg$\cdot$K), density at 20~\unit{\degreeCelsius}, 792~kg/m$^3$. The heat of combustion is given as 19.9~kJ/g, but this value is not input directly, but rather calculated based on the heats of formation of the reactants and products of combustion.
+Physical properties of methanol are taken from a data sheet published by the Methanol Institute~\cite{Methanol}: boiling temperature, 64.6~\unit{\degreeCelsius}, heat of vaporization at 64.6~\unit{\degreeCelsius}, 1098.3~kJ/kg, thermal conductivity, 0.2~\unit{W/(m.K)}, specific heat at 25~\unit{\degreeCelsius}, 2.53~\unit{kJ/(kg.K)}, density at 20~\unit{\degreeCelsius}, 792~\unit{kg/m^3}. The heat of combustion is given as 19.9~kJ/g, but this value is not input directly, but rather calculated based on the heats of formation of the reactants and products of combustion.
 
 The radiative fraction is {\em predicted} by the model, not specified by the user, for all cases. The path length used by RadCal to compute the table of effective radiative absorption coefficients for the gas mixture is set to 10~cm, the default value. The absorption coefficient of the liquid methanol is given as 1140~m$^{-1}$.
 
@@ -3842,7 +3836,7 @@ For the simulations where the burning rate is not specified, a liquid fuel evapo
 \section{WTC Spray Burner Experiments}
 \label{WTC_Description}
 
-As part of its investigation of the World Trade Center disaster, the Building and Fire Research Laboratory at NIST conducted several series of fire experiments to both gain insight into the observed fire behavior and also to validate FDS for use in reconstructing the fires. The first series of experiments involved a relatively simple compartment with a liquid spray burner and various structural elements with varying amounts of sprayed fire-resistive materials (SFRM). A diagram of the compartment is shown in Fig.~\ref{WTC_Drawing}. A complete description of the experiments can be found in the NIST WTC report NCSTAR~1-5B~\cite{NIST_NCSTAR_1-5B}. A complete description of the SFRM can be found in the NIST WTC report NCSTAR~1-6A~\cite{NIST_NCSTAR_1-6A}. The overall enclosure was rectangular, as were the vents and most of the obstructions. The compartment walls and ceiling were made of 2.54~cm thick marinite. The manufacturer provided the thermal properties of the material used in the calculation. The density was 737~kg/m$^3$, conductivity 0.12~W/m/K. The specific heat ranged from 1.17~kJ/kg/K at 93~\unit{\degreeCelsius} to 1.42~kJ/kg/K at 425~\unit{\degreeCelsius}. This value was assumed for higher temperatures. The steel used to construct the column and truss flanges was 0.64~cm thick.  The density of the steel was assumed to be 7,860~kg/m$^3$; its specific heat 0.45~kJ/kg/K.
+As part of its investigation of the World Trade Center disaster, the Building and Fire Research Laboratory at NIST conducted several series of fire experiments to both gain insight into the observed fire behavior and also to validate FDS for use in reconstructing the fires. The first series of experiments involved a relatively simple compartment with a liquid spray burner and various structural elements with varying amounts of sprayed fire-resistive materials (SFRM). A diagram of the compartment is shown in Fig.~\ref{WTC_Drawing}. A complete description of the experiments can be found in the NIST WTC report NCSTAR~1-5B~\cite{NIST_NCSTAR_1-5B}. A complete description of the SFRM can be found in the NIST WTC report NCSTAR~1-6A~\cite{NIST_NCSTAR_1-6A}. The overall enclosure was rectangular, as were the vents and most of the obstructions. The compartment walls and ceiling were made of 2.54~cm thick marinite. The manufacturer provided the thermal properties of the material used in the calculation. The density was 737~\unit{kg/m^3}, conductivity 0.12~\unit{W/(m.K)}. The specific heat ranged from 1.17~\unit{kJ/(kg.K)} at 93~\unit{\degreeCelsius} to 1.42~\unit{kJ/(kg.K)} at 425~\unit{\degreeCelsius}. This value was assumed for higher temperatures. The steel used to construct the column and truss flanges was 0.64~cm thick.  The density of the steel was assumed to be 7,860~\unit{kg/m^3}; its specific heat 0.45~\unit{kJ/(kg.K)}.
 
 Two fuels were used in the tests. The properties of the fuels were obtained from measurements made on a series of unconfined burns that are referenced in the test report. The first fuel was a blend of heptane isomers, C$_7$H$_{16}$. Its soot yield was set at a constant 1.5~\%. The second fuel was a mixture (40~\% - 60~\% by mass) of toluene, C$_7$H$_8$, and heptane. Because FDS only considers the burning of a single hydrocarbon fuel, the mixture was taken to be C$_7$H$_{12}$ with a soot yield of 11.4~\%. The radiative fraction for the heptane blend was 0.44; for the heptane/toluene mixture it was 0.39. The heat release rate of the simulated burner was set to that which was measured in the experiments. The spray burner was modeled using reported properties of the nozzle and liquid fuel droplets.
 
@@ -3857,7 +3851,7 @@ Two fuels were used in the tests. The properties of the fuels were obtained from
 \section{Wu Bakar Tunnel Experiments}
 \label{Wu_Bakar_Tunnels_Description}
 
-An important issue in road tunnel design with respect to fire safety is {\em back-layering}. In the event of a fire in a tunnel, a common strategy is to blow the smoke in one direction to allow occupants to escape and first responders to find the fire. The extent to which smoke from the fire spreads against imposed ventilation is known as back-layering. Experiments to quantify back-layering have been conducted at both small and full-scale. One important set of small-scale experiments was performed by Wu and Bakar~\cite{Wu:FSJ2000}. The experiments were conducted in 15~m long tunnels with 5 different cross sections. Tunnels~A, B, C, and D were rectangular in cross section with a height of 25~cm and widths of 13.6~cm, 25~cm, 50~cm, and 100~cm, respectively. Tunnel~E was 24.4~cm high, 27.4~cm wide at the base, with walls slanted inward 7$^\circ$ from the vertical leading to a circular arch ceiling.
+An important issue in road tunnel design with respect to fire safety is {\em back-layering}. In the event of a fire in a tunnel, a common strategy is to blow the smoke in one direction to allow occupants to escape and first responders to find the fire. The extent to which smoke from the fire spreads against imposed ventilation is known as back-layering. Experiments to quantify back-layering have been conducted at both small and full-scale. One important set of small-scale experiments was performed by Wu and Bakar~\cite{Wu:FSJ2000}. The experiments were conducted in 15~m long tunnels with 5 different cross sections. Tunnels~A, B, C, and D were rectangular in cross section with a height of 25~cm and widths of 13.6~cm, 25~cm, 50~cm, and 100~cm, respectively. Tunnel~E was 24.4~cm high, 27.4~cm wide at the base, with walls slanted inward 7\unit{\degree} from the vertical leading to a circular arch ceiling.
 
 A 12~cm diameter circular propane burner was placed flush with the floor at a distance of approximately 6~m from the upstream opening. For a range of fire sizes, the air velocity through the tunnel was ramped up until the back-layer length was reduced to zero; that is, the upstream extent of the smoke layer coincided with the upstream edge of the burner. These results were then used to develop an empirical correlation relating the {\em critical velocity}, tunnel cross section, and heat release rate.
 
