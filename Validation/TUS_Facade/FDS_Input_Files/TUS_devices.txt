@@ -1,4 +1,8 @@
------------------------------------------------MEASURING-------------------------------------------------
+
+&DUMP NFRAMES  = 1800
+      DT_HRR   = 10.0
+      DT_DEVC  = 10.0 /
+
 &PROP ID        = 'TC'
       QUANTITY  = 'THERMOCOUPLE'
       DIAMETER  = 0.0032/
@@ -10,27 +14,27 @@
 Gas temperatures at facade
 
 Line a
-&DEVC 	XYZ=1.1,-0.25,1.75,     PROP_ID = 'TC', ID='TC_23' / 
-&DEVC 	XYZ=1.1,-0.25,2.6,      PROP_ID = 'TC', ID='TC_20' / 
-&DEVC 	XYZ=1.1,-0.25,2.9,      PROP_ID = 'TC', ID='TC_17' /
-&DEVC 	XYZ=1.1,-0.25,3.2,      PROP_ID = 'TC', ID='TC_14' /
-&DEVC 	XYZ=1.1,-0.25,5.7,      PROP_ID = 'TC', ID='TC_3' / 
+&DEVC XYZ=1.1,-0.25,1.75,     PROP_ID = 'TC', ID='TC_23' / 
+&DEVC XYZ=1.1,-0.25,2.6,      PROP_ID = 'TC', ID='TC_20' / 
+&DEVC XYZ=1.1,-0.25,2.9,      PROP_ID = 'TC', ID='TC_17' /
+&DEVC XYZ=1.1,-0.25,3.2,      PROP_ID = 'TC', ID='TC_14' /
+&DEVC XYZ=1.1,-0.25,5.7,      PROP_ID = 'TC', ID='TC_3' / 
 
 Line b
-&DEVC 	XYZ=2.0,-0.25,1.75,     PROP_ID = 'TC', ID='TC_22' / This may be functioning wrong.
-&DEVC 	XYZ=2.0,-0.25,2.6,      PROP_ID = 'TC', ID='TC_19' / 
-&DEVC 	XYZ=2.0,-0.25,2.9,      PROP_ID = 'TC', ID='TC_16' / 
-&DEVC 	XYZ=2.0,-0.25,3.2,      PROP_ID = 'TC', ID='TC_13' / 
-&DEVC 	XYZ=2.0,-0.25,3.7,      PROP_ID = 'TC', ID='TC_11' / 
-&DEVC 	XYZ=2.0,-0.25,5.7,      PROP_ID = 'TC', ID='TC_2' / 
+&DEVC XYZ=2.0,-0.25,1.75,     PROP_ID = 'TC', ID='TC_22' / This may be functioning wrong.
+&DEVC XYZ=2.0,-0.25,2.6,      PROP_ID = 'TC', ID='TC_19' / 
+&DEVC XYZ=2.0,-0.25,2.9,      PROP_ID = 'TC', ID='TC_16' / 
+&DEVC XYZ=2.0,-0.25,3.2,      PROP_ID = 'TC', ID='TC_13' / 
+&DEVC XYZ=2.0,-0.25,3.7,      PROP_ID = 'TC', ID='TC_11' / 
+&DEVC XYZ=2.0,-0.25,5.7,      PROP_ID = 'TC', ID='TC_2' / 
 
 Line c
-&DEVC 	XYZ=2.9,-0.25,1.75,     PROP_ID = 'TC', ID='TC_21' / 
-&DEVC 	XYZ=2.9,-0.25,2.6,      PROP_ID = 'TC', ID='TC_18' / 
-&DEVC 	XYZ=2.9,-0.25,2.9,      PROP_ID = 'TC', ID='TC_15' / 
-&DEVC 	XYZ=2.9,-0.25,3.2,      PROP_ID = 'TC', ID='TC_12' / 
-&DEVC 	XYZ=2.9,-0.25,3.7,      PROP_ID = 'TC', ID='TC_10' / 
-&DEVC 	XYZ=2.9,-0.25,5.7,      PROP_ID = 'TC', ID='TC_1' / 
+&DEVC XYZ=2.9,-0.25,1.75,     PROP_ID = 'TC', ID='TC_21' / 
+&DEVC XYZ=2.9,-0.25,2.6,      PROP_ID = 'TC', ID='TC_18' / 
+&DEVC XYZ=2.9,-0.25,2.9,      PROP_ID = 'TC', ID='TC_15' / 
+&DEVC XYZ=2.9,-0.25,3.2,      PROP_ID = 'TC', ID='TC_12' / 
+&DEVC XYZ=2.9,-0.25,3.7,      PROP_ID = 'TC', ID='TC_10' / 
+&DEVC XYZ=2.9,-0.25,5.7,      PROP_ID = 'TC', ID='TC_1' / 
 
 Gauge Heat fluxes
 Line a
@@ -63,3 +67,12 @@ POLE_B
 &DEVC XYZ=3.91,3.91,0.855,      PROP_ID = 'TC2', ID='TC_35'/
 &DEVC XYZ=3.91,3.91,1.28,       PROP_ID = 'TC2', ID='TC_34'/
 &DEVC XYZ=3.91,3.91,1.49,       PROP_ID = 'TC2', ID='TC_33'/
+
+&BNDF QUANTITY='GAUGE HEAT FLUX', CELL_CENTERED=T /
+&BNDF QUANTITY='WALL TEMPERATURE', CELL_CENTERED=T /
+&SLCF QUANTITY='TEMPERATURE', PBX=1.1, CELL_CENTERED=T /
+&SLCF QUANTITY='TEMPERATURE', PBX=2.0, CELL_CENTERED=T /
+&SLCF QUANTITY='TEMPERATURE', PBX=2.9, CELL_CENTERED=T /
+&SLCF QUANTITY='VOLUME FRACTION', SPEC_ID='OXYGEN', PBX=2.0, CELL_CENTERED=T /
+
+
