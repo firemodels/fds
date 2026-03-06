@@ -2646,6 +2646,7 @@ def statistics_histogram(Measured_Values, Predicted_Values,
     import numpy as np
     import matplotlib.pyplot as plt
     import os
+    from matplotlib.ticker import MaxNLocator
 
     # --- Compute ln(M/E) exactly as MATLAB
     with np.errstate(divide='ignore', invalid='ignore'):
@@ -2677,10 +2678,11 @@ def statistics_histogram(Measured_Values, Predicted_Values,
     ax.set_xlim(x_lim)
     y0, y1 = ax.get_ylim()
     ax.set_ylim([y0, y1 * 1.25])
-    ax.set_xlabel("Interval Number")
+    ax.set_xlabel("$\ln(M/E)$")
     ax.set_ylabel("Number of Data Points")
-    ax.set_xticks(xcenters)
-    ax.set_xticklabels([str(i) for i in range(1, len(xcenters) + 1)])
+    ax.set_xticks(xout)
+    ax.set_xticklabels([f"{x:.2f}" for x in xout])
+    ax.yaxis.set_major_locator(MaxNLocator(integer=True))
     ax.text(0.03, 0.90, Scatter_Plot_Title, transform=ax.transAxes)
 
     outpath = os.path.join(Manuals_Dir, f"{Plot_Filename}_Histogram.pdf")
