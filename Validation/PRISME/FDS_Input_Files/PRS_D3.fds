@@ -6,7 +6,7 @@
 &TIME T_BEGIN=-30., T_END=2400. /
 &DUMP DT_DEVC=15., DT_HRR=15. /
 
-&MISC TMPA= 25., P_INF= 101225   /
+&MISC TMPA= 26., P_INF= 101225   /
 
 Heat of Combustion from PRS-DI-D3 Specification
 &REAC FUEL='TETRA-PROPYLENE'
