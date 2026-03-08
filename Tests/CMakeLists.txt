@@ -1,6 +1,6 @@
 
 include(CTest)
-
+include(FetchContent)
 set(FIG_COMMIT "513dc046131f5dfdda47ff485efc2db7243f06b1")
 
 FetchContent_Declare(

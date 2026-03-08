@@ -8,6 +8,7 @@ project(
 enable_language(Fortran)
 
 option(DUMP_JSON           "Add the option to dump info to JSON"      OFF)
+option(USE_SYSTEM_JSON     "Use the json library from the system"     OFF)
 
 option(USE_HYPRE           "Use the hypre library"                    ON)
 option(USE_SYSTEM_HYPRE    "Use the hypre library from the system"    OFF)
@@ -234,7 +235,7 @@ endif()
 
 if (DUMP_JSON)
     target_compile_definitions(fds PRIVATE DUMP_JSON)
-    if (NOT WIN32)
+    if (NOT WIN32 AND USE_SYSTEM_JSON)
         # On non-Windows platforms use the system version of json-fortran
         find_package(PkgConfig REQUIRED)
         pkg_check_modules(json-fortran REQUIRED IMPORTED_TARGET json-fortran)
