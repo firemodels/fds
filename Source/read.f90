@@ -13995,9 +13995,17 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
          ENDIF
       ELSE
          IF (XYZ(1) < -1.E5_EB .AND. CTRL_ID=='null' .AND. DUCT_ID=='null' .AND. NODE_ID(1)=='null' .AND. INIT_ID=='null' &
-            .AND. CELL_L < 0._EB .AND. LP_TAG==0) THEN
+            .AND. CELL_L < 0._EB .AND. LP_TAG==0 .AND. SURF_ID=='null') THEN
             WRITE(MESSAGE,'(3A)')  'ERROR(885): DEVC ',TRIM(ID),' must have coordinates, even if it is not a point quantity.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
+         ENDIF
+         IF (SURF_ID/='null' .AND. SPATIAL_STATISTIC/='null') THEN
+            XB(1) = XS_MIN
+            XB(2) = XF_MAX
+            XB(3) = YS_MIN
+            XB(4) = YF_MAX
+            XB(5) = ZS_MIN
+            XB(6) = ZF_MAX
          ENDIF
       ENDIF
 
@@ -14148,7 +14156,7 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
 
       IF (BAD) THEN
          IF (CTRL_ID/='null' .OR. DUCT_ID/='null' .OR. NODE_ID(1)/='null' .OR. INIT_ID/='null' .OR. &
-             CELL_L>-1._EB .OR. LP_TAG>0) THEN
+             CELL_L>-1._EB .OR. LP_TAG>0 .OR. SURF_ID/='null') THEN
             XYZ(1) = MESHES(1)%XS
             XYZ(2) = MESHES(1)%YS
             XYZ(3) = MESHES(1)%ZS
