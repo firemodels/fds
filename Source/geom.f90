@@ -15,6 +15,8 @@ USE MKL_CLUSTER_SPARSE_SOLVER
 #endif /* WITH_MKL */
 
 IMPLICIT NONE (TYPE,EXTERNAL)
+PRIVATE
+
 CHARACTER(2*MESSAGE_LENGTH) :: MESSAGE
 
 !! ---------------------------------------------------------------------------------
@@ -311,7 +313,6 @@ INTEGER, PARAMETER :: BLOCKED_SPECIAL_CELL=6
 ! End Variable declaration for CC_IBM.
 ! ---------------------------------------------------------------------------------
 
-PRIVATE
 PUBLIC :: BLOCK_CC_SOLID_EXTWALLCELLS,GEOFCT,CALL_FOR_GLMAT,CALL_FROM_GLMAT_SETUP,CCGUARD,CC_MATVEC_DEFINED,GEOMEPS,&
           DELTA_INT,DELTA_VERT,DEBUG_SET_CUTCELLS,DEBUG_WAIT,DIST_THRES,&
           GET_CARTCELL_CUTCELLS_TIME_INDEX,GET_CFACE_INDEX,GETU,&
