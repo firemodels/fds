@@ -121,7 +121,7 @@ The following expressions are simplifications of those given in Ref.~\cite{Incro
                                                 2 +  0.454 \, \hbox{Ra}^{1/4}                         &  \hbox{Sphere}
        \end{array} \right.
 \ee
-\footnotetext{The heat transfer coefficient for a vertical plate or cylinder is simplified to $h=1.31 \, (\Delta T)^{1/3}$~\cite{Holman:2} in cases where the back side of a solid obstruction is outside the computational domain and the gas temperature is assumed to be ambient. }
+\footnotetext{The heat transfer coefficient for a vertical plate or cylinder is simplified to $h=1.31 \, (\Delta T)^{1/3}$~\cite{Holman:2} when the back side of a solid obstruction is outside the computational domain or \ct{BACKING='VOID'}, and the back side gas temperature is assumed to be ambient or is user-specified. }
 For forced convection, the Nusselt number takes the form:
 \be
    \NU_{\rm forced} = C_0 + \left( C_1 \, \RE^n - C_2 \right) \, \PR^m  \quad ; \quad \RE = \frac{\rho |\bu| L}{\mu}  \quad ; \quad m=1/3
