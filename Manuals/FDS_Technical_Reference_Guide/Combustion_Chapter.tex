@@ -162,11 +162,11 @@ The bold solid line in Fig.~\ref{fig_reaction_time_scale} is mathematically repr
 \end{equation}
 The mathematical details of the submodels are as follows:
 \begin{align}
-\label{eq:tau_diff} \tau_{\rm d} &= \frac{\Delta^2}{D_{\si{F}}} \\
+\label{eq:tau_diff} \tau_{\rm d} &= \frac{\Delta^2}{D_{\unit{F}}} \\
 \label{eq:tau_sgs}  \tau_{\rm u} &= \frac{C_u \,\Delta}{\sqrt{(2/3)k_{\rm sgs}}} \\
 \label{eqn_tau_grav}\tau_{\rm g} &= \sqrt{ 2\Delta/g }
 \end{align}
-where $D_{\si{F}}$ is the diffusivity of the fuel species. Note that $k_{\rm sgs}$ is the unclosed subgrid kinetic energy per unit mass which by default is taken from the model for the turbulent viscosity (see Sec.~\ref{section:turbulent_viscosity}, Eq.~(\ref{Deardorff_LES})).  The advective time scale constant is calibrated to match the Heskestad flame height correlation \cite{FDS_Validation_Guide} and is set to $C_u = 0.4$. The acceleration time scale $\tau_{\rm g}$ is the time required to travel a distance $\Delta$ starting from rest under a constant acceleration, $g=\SI{9.81}{m/s^2}$.
+where $D_{\unit{F}}$ is the diffusivity of the fuel species. Note that $k_{\rm sgs}$ is the unclosed subgrid kinetic energy per unit mass which by default is taken from the model for the turbulent viscosity (see Sec.~\ref{section:turbulent_viscosity}, Eq.~(\ref{Deardorff_LES})).  The advective time scale constant is calibrated to match the Heskestad flame height correlation \cite{FDS_Validation_Guide} and is set to $C_u = 0.4$. The acceleration time scale $\tau_{\rm g}$ is the time required to travel a distance $\Delta$ starting from rest under a constant acceleration, $g=\SI{9.81}{m/s^2}$.
 
 
 
@@ -247,9 +247,9 @@ The minimum is taken in Eq.~(\ref{eq:stoich_fuel_single}) to ensure that the rea
 This approach is used for the vast majority of large-scale fire applications---the so-called ``mixed is burnt'' assumption, where the mean chemical source term for the Fuel, F, is modeled using the Eddy Dissipation Concept (EDC) of Magnussen and Hjertager~\cite{Magnussen:1,Poinsot:TNC}:
 \begin{equation}
 \label{eq:edc}
-\dot{m}_{\si{F}}^{\prime\prime\prime} = -\rho \frac{\min(Y_{\si{F}}, Y_{\si{A}}/s)}{\tau_{\rm mix}}
+\dot{m}_{\unit{F}}^{\prime\prime\prime} = -\rho \frac{\min(Y_{\unit{F}}, Y_{\unit{A}}/s)}{\tau_{\rm mix}}
 \end{equation}
-Here, $Y_{\si{F}}$ and $Y_{\si{A}}$ are the cell mean mass fractions of Fuel and Air, respectively, and $s$ is the mass stoichiometric coefficient for Air.
+Here, $Y_{\unit{F}}$ and $Y_{\unit{A}}$ are the cell mean mass fractions of Fuel and Air, respectively, and $s$ is the mass stoichiometric coefficient for Air.
 
 \subsubsection{Multiple Reactions}
 For multiple reactions with infinitely fast chemistry, the reaction rate is treated as a second-order (assuming two reactants) Arrhenius reaction with zero activation energy.  The Arrhenius constant is set to a large value.  Further discussion of the time integration for these cases is given in Appendix \ref{chemistry_integration}.
@@ -262,23 +262,23 @@ Consider a simple one-step forward reaction:
 \begin{equation}\label{eq:generic_1step}
 a\mathrm{A} + b\mathrm{B} \rightarrow c\mathrm{C} + d\mathrm{D}
 \end{equation}
-The rate expression for species A with a mixed zone concentration of $C_{\mbox{\scriptsize A}}$ in \si{mol/cm^3} and rate constant $k$ is
+The rate expression for species A with a mixed zone concentration of $C_{\mbox{\scriptsize A}}$ in \unit{mol/cm^3} and rate constant $k$ is
 \begin{equation}\label{eq:generic_rate}
 \frac{\d C_{\mbox{\scriptsize A}}}{\d t}= -k\; C_{\mbox{\scriptsize A}}^{\,a}\; C_{\mbox{\scriptsize B}}^{\,b}
 \end{equation}
-Consider a set of $N_r$ reactions with fuel F. The reaction rate (\si{mol/(cm^3.s)}) for F in the $i$th reaction is
+Consider a set of $N_r$ reactions with fuel F. The reaction rate (\unit{mol/(cm^3.s)}) for F in the $i$th reaction is
 \begin{equation}\label{eq:rate_f}
-r_{\si{F},i}= -k_{i}\; \prod C_{\alpha}^{\,a_{\alpha,i}}
+r_{\unit{F},i}= -k_{i}\; \prod C_{\alpha}^{\,a_{\alpha,i}}
 \end{equation}
 For the $i$th Arrhenius reaction, the rate constant, $k_i$, depends on the temperature, $T$, the temperature exponent, $n_i$, the pre-exponential factor, $A_i$, and the activation energy, $E_i$:
 \begin{equation}\label{eq:rate_cons}
 k_i = A_i\;T^{n_i}\;\mathrm{e}^{-E_{a,i}/RT}
 \end{equation}
-Note that the units of $E_a$ are J/mol and units of $A$ are ((\si{mol/cm^3})$^{1-\sum a_{\alpha}}$)/s.  Note that $\sum a_{\alpha}$ is the \emph{order} of the reaction.  The units of $A$ take the appropriate form to ensure the units of Eq.~(\ref{eq:rate_f}) are \si{mol/(cm^3.s)}.
+Note that the units of $E_a$ are J/mol and units of $A$ are ((\unit{mol/cm^3})$^{1-\sum a_{\alpha}}$)/s.  Note that $\sum a_{\alpha}$ is the \emph{order} of the reaction.  The units of $A$ take the appropriate form to ensure the units of Eq.~(\ref{eq:rate_f}) are \unit{mol/(cm^3.s)}.
 
 The reaction rate for species $\alpha$ of the $i$th reaction is based on the ratio of stoichiometric coefficients:
 \begin{equation}\label{eq:rate_a}
-r_{\alpha,i}= \left(\frac{\nu_{\alpha,i}}{\nu_{F,i}}\right)\,r_{\si{F},i}
+r_{\alpha,i}= \left(\frac{\nu_{\alpha,i}}{\nu_{F,i}}\right)\,r_{\unit{F},i}
 \end{equation}
 The change in concentration for species $\alpha$ within the mixed reactor zone is then:
 \begin{equation}\label{rate_expression}
@@ -286,22 +286,22 @@ The change in concentration for species $\alpha$ within the mixed reactor zone i
 \end{equation}
 FDS only transports lumped species and only lumped species can be consumed or created.  Note, however, that any of the primitive species may participate in a reaction rate law.
 
-It is more convenient for FDS to work in terms of mass fractions, $Y_{\alpha}$.  The concentrations (\unit{mol-\alpha/cm^3}) and mass fractions (kg-$\alpha$/kg) are related by $C_{\alpha}=Y_{\alpha} \rho/(W_{\alpha} \times 1000)$, where the density, $\rho$, has units of \si{kg/m^3}.
+It is more convenient for FDS to work in terms of mass fractions, $Y_{\alpha}$.  The concentrations (\unit{mol-\alpha/cm^3}) and mass fractions (kg-$\alpha$/kg) are related by $C_{\alpha}=Y_{\alpha} \rho/(W_{\alpha} \times 1000)$, where the density, $\rho$, has units of \unit{kg/m^3}.
 To simplify the calculations within FDS, density and molecular weight are pulled out of the product concentrations on the right hand side of Eq.~(\ref{eq:rate_f}) and combined with the other constants to form $A^{\prime}$:
 \begin{equation}\label{eq:aprime}
-A^{\prime}_{i} = A_{i} \, \bigg( \prod \, [W_{\alpha} \times 1000]^{\,-a_{\alpha,i}} \bigg) \times \left(\frac{1 \; \si{kmol}}{10^3 \; \si{mol}}\right) \times \left(\frac{10^6 \; \si{cm^3}}{1 \; \si{m^3}}\right) \times W_{\,\si{F}}
+A^{\prime}_{i} = A_{i} \, \bigg( \prod \, [W_{\alpha} \times 1000]^{\,-a_{\alpha,i}} \bigg) \times \left(\frac{1 \; \unit{kmol}}{10^3 \; \unit{mol}}\right) \times \left(\frac{10^6 \; \unit{cm^3}}{1 \; \unit{m^3}}\right) \times W_{\,\unit{F}}
 \end{equation}
 Using $A_i^{\prime}$, the reaction rate in mass units becomes
 \begin{equation}\label{eq:finite_rate_fin}
-r^{\prime}_{\si{F},i} = -A_i^{\prime}\;\rho^{\sum a_{\alpha,i}}\;T^{n_i}\;\mathrm{e}^{-E_i/RT}\;\prod Y_{\alpha}^{\,a_{\alpha,i}} \quad [=] \quad \left(\frac{\si{kg \; F}}{\si{m^3.s}}\right)
+r^{\prime}_{\unit{F},i} = -A_i^{\prime}\;\rho^{\sum a_{\alpha,i}}\;T^{n_i}\;\mathrm{e}^{-E_i/RT}\;\prod Y_{\alpha}^{\,a_{\alpha,i}} \quad [=] \quad \left(\frac{\unit{kg \; F}}{\unit{m^3.s}}\right)
 \end{equation}
 The mass rate of reaction per unit volume for species $\alpha$ in the $i$th reaction is
 \begin{equation}\label{eq:rate_a_y}
-r^{\prime}_{\alpha,i}= \left(\frac{\nu_{\alpha,i}\,W_{\alpha}}{\nu_{\si{F},i}\,W_{\,\si{F}}}\right)\,r^{\prime}_{\si{F},i} \quad [=] \quad \left(\frac{\si{kg \; \alpha}}{\si{m^3.s}}\right)
+r^{\prime}_{\alpha,i}= \left(\frac{\nu_{\alpha,i}\,W_{\alpha}}{\nu_{\unit{F},i}\,W_{\,\unit{F}}}\right)\,r^{\prime}_{\unit{F},i} \quad [=] \quad \left(\frac{\unit{kg \; \alpha}}{\unit{m^3.s}}\right)
 \end{equation}
 Last, the rate of change in composition for species $\alpha$ in the mixed reactor zone becomes
 \begin{equation}\label{rate_expression_y}
-\frac{\d \hat{Y}_{\alpha}}{\d t} = \frac{1}{\rho}\sum_{i} r^{\prime}_{\alpha,i} \quad [=] \quad \left(\frac{\si{kg \; \alpha}}{\si{kg.s}}\right)
+\frac{\d \hat{Y}_{\alpha}}{\d t} = \frac{1}{\rho}\sum_{i} r^{\prime}_{\alpha,i} \quad [=] \quad \left(\frac{\unit{kg \; \alpha}}{\unit{kg.s}}\right)
 \end{equation}
 See Appendix~\ref{chemistry_integration} for a discussion on the algorithm used to ensure species remain bounded.
 
@@ -311,7 +311,7 @@ At low pressures, it is common to see so-called \emph{third body} reactions.  Th
 \begin{equation}\label{eq:third_body}
 \mathrm{A} + \mathrm{B} + \mathrm{M} \rightarrow \mathrm{C} + \mathrm{M}
 \end{equation}
-The Arrhenius rate law has a first-order dependence on the concentration of M.  Since M may be \emph{any} other molecule, we take $C_{\si{M}} = \bar{p}/(R T) = \rho/(\overline{W} \times 1000) \;[=]\;\si{mol/cm^3}$. Some molecules may be more or less efficient as a collision species. This non-unity effect may be specified in the input file. If non-unity species are present, then the concentration of M is taken as the sum of all the individual species concentrations times their weighting factor (if all species have a weighting factor of 1, then the result is $C_{\si{M}}$).
+The Arrhenius rate law has a first-order dependence on the concentration of M.  Since M may be \emph{any} other molecule, we take $C_{\unit{M}} = \bar{p}/(R T) = \rho/(\overline{W} \times 1000) \;[=]\;\unit{mol/cm^3}$. Some molecules may be more or less efficient as a collision species. This non-unity effect may be specified in the input file. If non-unity species are present, then the concentration of M is taken as the sum of all the individual species concentrations times their weighting factor (if all species have a weighting factor of 1, then the result is $C_{\unit{M}}$).
 
 \subsubsection{Equilibrium Chemistry}
 \label{sec:equilChem}
@@ -325,7 +325,7 @@ a \, \mathrm{A} + b \, \mathrm{B} \overset{r_1}{\underset{r_2}{\leftrightharpoon
 
 \noindent At equilibrium, the forward and reverse reaction rates are equal, $r_{1} = r_{2}$.  The rate constants for each direction are the $k$s in Eq.~(\ref{eq:generic_rate}).  The equilibrium constant is defined as $K \equiv k_{1}/k_{2}$.  The equilibrium constant is computed via
 \begin{equation}\label{eq:equilibrium_const}
-K(T) = C_{\si{M}}^{\nu_n} \exp(-\Delta G_{\mathrm{rxn}}^\circ(T)/(RT))
+K(T) = C_{\unit{M}}^{\nu_n} \exp(-\Delta G_{\mathrm{rxn}}^\circ(T)/(RT))
 \end{equation}
 where $\nu_n$ is the net reaction order (for Eq.~\ref{eq:reverse} $\nu_n = a + b - c - d$) and
 \be                                                               
@@ -345,7 +345,7 @@ A chemical mechanism represents different chemical pathways using multiple speci
 \sum_{j=1}^{N_{\text{s}}}{\nu}_{ji}^{'} \ X_j \Leftrightarrow \sum_{j=1}^{N_{\text{s}}}{\nu}_{ji}^{''} \ X_j, i=1,2,3,...,N_\text{r}
 \end{equation}
 Here, $X_j$ represents the chemical symbol of the $j$th species (i.e. $\mathrm{CH_4, H_2, O_2}$); ${\nu}_{ji}^{'}$ and ${\nu}_{ji}^{''}$ are the stoichiometric coefficients of the $j$th species in the $i$th reaction; ${N_{\text{s}}}$ and ${N_\text{r}}$ are the total number of species and total number of reactions, respectively.
-The rate of change of the molar concentration \si{(kmol/m^3/s)} of each species can be represented using the following system of ordinary differential equations (ODEs):
+The rate of change of the molar concentration \unit{(kmol/m^3/s)} of each species can be represented using the following system of ordinary differential equations (ODEs):
 \begin{equation}\label{eq:chemistry_ode_system}
 \frac{\d C_k}{\d t} =  \dot{\omega_k} = \sum_{i=1}^{N_\text{r}} b_{i} \ \nu_{ki} \ r_i
 \end{equation}
@@ -400,7 +400,7 @@ To solve the reactive system, we assume a constant pressure reactor. For that, t
 \begin{equation}\label{eq:TemperatureDerivative}
 \frac{\d T}{\d t} = \dot{T} = -\frac{1}{\rho c_p} \sum_{j=1}^{N_{\mathrm{s}}}h_j W_j \dot{\omega_j}
 \end{equation} 
-Here,  $\rho$  is the density (\si{kg/m^3}), $c_{\mathrm{p}}$ is the specific heat of the mixture (\si{J/(kg.K)}), $h_k$ is the absolute enthalpy that includes enthalpy of formation (J/kg), $W_j$ is the molecular weight (kg/kmol) of species $j$, and $\dot{\omega}$ is the species production rate given by Eq.~(\ref{eq:chemistry_ode_system}).
+Here,  $\rho$  is the density (\unit{kg/m^3}), $c_{\mathrm{p}}$ is the specific heat of the mixture (\unit{J/(kg.K)}), $h_k$ is the absolute enthalpy that includes enthalpy of formation (J/kg), $W_j$ is the molecular weight (kg/kmol) of species $j$, and $\dot{\omega}$ is the species production rate given by Eq.~(\ref{eq:chemistry_ode_system}).
 To solve the system of ODEs, we first convert the mass fraction of species to molar concentrations using $C_j=Y_j\rho/W_j$. Then, CVODE from Sundials \cite{cvodeDoc:2024} is used to solve the system of ODEs by supplying an analytical Jacobian. The details of analytical Jacobian formulation is provided in the Appendix \ref{chemistry_analytical_jacobian}.
 
 
@@ -474,9 +474,9 @@ The first of two optional extinction models (referred to as \ct{'EXTINCTION 1'} 
 \caption[Extinction criteria for the {\small \tt 'EXTINCTION 1'} model]{Extinction criteria for the \ct{'EXTINCTION 1'} model.}
 \label{extinction_1_sketch}
 \end{figure}
-If $X_{\OTWO,ijk}<X_{\OTWO,\lim}$, local extinction is assumed and $\dot{m}_\alpha'''=0$ and $\dot{q}'''=0$ for that grid cell at that time step. At an ambient temperature of 20~$^\circ$C, the default limiting oxygen volume fraction is 0.135.  This value is consistent with the measurements of Morehart et al.~\cite{Morehart:1991}, who measured the oxygen concentration near self-extinguishing flames. They found that flames self-extinguished at oxygen volume fractions of 12.4~\% to 14.3~\%. Note that their results are expressed as volume, not mass, fractions. Beyler's chapter in the SFPE Handbook references other researchers who measured oxygen concentrations at extinction ranging from 12~\% to 15~\%.
+If $X_{\OTWO,ijk}<X_{\OTWO,\lim}$, local extinction is assumed and $\dot{m}_\alpha'''=0$ and $\dot{q}'''=0$ for that grid cell at that time step. At an ambient temperature of 20~\degC, the default limiting oxygen volume fraction is 0.135.  This value is consistent with the measurements of Morehart et al.~\cite{Morehart:1991}, who measured the oxygen concentration near self-extinguishing flames. They found that flames self-extinguished at oxygen volume fractions of 12.4~\% to 14.3~\%. Note that their results are expressed as volume, not mass, fractions. Beyler's chapter in the SFPE Handbook references other researchers who measured oxygen concentrations at extinction ranging from 12~\% to 15~\%.
 
-The \ct{'EXTINCTION 1'} model is intended for relatively coarse fire simulations where the grid cell cannot resolve details of the flame structure or capture flame temperatures. The ``free-burn'' temperature, $T_{\rm fb}$, in Eq.~(\ref{extinction_model}) is needed for simulations in which the characteristic grid cell size, $\dx$, is much larger than 1~cm. In such cases, the combustion occurs within a fraction of the grid cell and its energy cannot raise the cell bulk temperature to the critical value. Its default value is 600~$^\circ$C. Measurements of Pitts~\cite{Pitts:1995}, Bundy~\cite{Bundy:1}, and others, have shown that the upper layer oxygen concentration drops to zero in flashover compartment fire experiments when the temperature increases above approximately 600~$^\circ$C.
+The \ct{'EXTINCTION 1'} model is intended for relatively coarse fire simulations where the grid cell cannot resolve details of the flame structure or capture flame temperatures. The ``free-burn'' temperature, $T_{\rm fb}$, in Eq.~(\ref{extinction_model}) is needed for simulations in which the characteristic grid cell size, $\dx$, is much larger than 1~cm. In such cases, the combustion occurs within a fraction of the grid cell and its energy cannot raise the cell bulk temperature to the critical value. Its default value is 600~\degC. Measurements of Pitts~\cite{Pitts:1995}, Bundy~\cite{Bundy:1}, and others, have shown that the upper layer oxygen concentration drops to zero in flashover compartment fire experiments when the temperature increases above approximately 600~\degC.
 
 
 \subsection{Extinction Based on Both Fuel and Oxygen}

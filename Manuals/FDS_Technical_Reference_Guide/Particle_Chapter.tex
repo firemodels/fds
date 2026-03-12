@@ -238,11 +238,11 @@ Equation~(\ref{droplet_mass}) through Equation~(\ref{droplet_gas_temp}) are solv
 
 \subsection{Filtered Volumetric Source Terms}
 
-The filtered volumetric source terms for mass and energy---which are required in the mass transport equation, Eq.~(\ref{species}), and the divergence expression, Eq.~(\ref{eqn_simplediv1})---are obtained by summation of the individual particle source contributions with a given cell divided by the LES time step, $\delta t_{\si{LES}}$, and the local cell volume, $V_{\si{c}}$. The bulk mass and energy source terms are, respectively,
+The filtered volumetric source terms for mass and energy---which are required in the mass transport equation, Eq.~(\ref{species}), and the divergence expression, Eq.~(\ref{eqn_simplediv1})---are obtained by summation of the individual particle source contributions with a given cell divided by the LES time step, $\delta t_{\unit{LES}}$, and the local cell volume, $V_{\unit{c}}$. The bulk mass and energy source terms are, respectively,
 \begin{equation}
 \label{eq:bulk_source}
-\dot{m}_{{\rm b},\alpha}^{\ppp} = - \frac{ \sum_p \sum_n \delta m_{\si{p}}^n }{\delta t_{\si{LES}} V_{\si{c}}} \quad ; \quad
-\dot{q}_{\rm b}^{\ppp} = - \frac{ \sum_p \sum_n \delta q_{\si{p}}^n }{\delta t_{\si{LES}} V_{\si{c}}} \,\mbox{.}
+\dot{m}_{{\rm b},\alpha}^{\ppp} = - \frac{ \sum_p \sum_n \delta m_{\unit{p}}^n }{\delta t_{\unit{LES}} V_{\unit{c}}} \quad ; \quad
+\dot{q}_{\rm b}^{\ppp} = - \frac{ \sum_p \sum_n \delta q_{\unit{p}}^n }{\delta t_{\unit{LES}} V_{\unit{c}}} \,\mbox{.}
 \end{equation}
 where $n$ represents the sub-time step in the integration of the droplet mass and energy equations.  The summation over $p$ is over all the particles within the cell.
 
@@ -250,7 +250,7 @@ where $n$ represents the sub-time step in the integration of the droplet mass an
 
 In practice, the filtered mass and energy source term contributions to the velocity divergence constraint are collected in a single term denoted \ct{D\_SOURCE} within the code,
 \begin{equation}
-D_{\si{\tiny SOURCE}} = \frac{1}{\rho} \sum_\alpha \frac{\overline{W}}{W_\alpha} \, \dot{m}_{{\rm b},\alpha}^{\ppp} + \frac{1}{\rho c_p T} \left( \dot{q}_{\rm b}^{\ppp} - \sum_\alpha \dot{m}_{{\rm b},\alpha}^{\ppp} \, \int_{T_{\rm b}}^T c_{p,\alpha} \d T'  \right)
+D_{\unit{\tiny SOURCE}} = \frac{1}{\rho} \sum_\alpha \frac{\overline{W}}{W_\alpha} \, \dot{m}_{{\rm b},\alpha}^{\ppp} + \frac{1}{\rho c_p T} \left( \dot{q}_{\rm b}^{\ppp} - \sum_\alpha \dot{m}_{{\rm b},\alpha}^{\ppp} \, \int_{T_{\rm b}}^T c_{p,\alpha} \d T'  \right)
 \label{eq:D_SOURCE_vap}
 \end{equation}
 which is embedded in Eq.~(\ref{eqn_fdsD1}).
@@ -295,7 +295,7 @@ where $\dQ_0$ is the total heat release rate at the time of application $t_0$, a
 \be
    \dq''(t) = \dq_0''(t) \; \mathrm{e}^{-\int k(t) \, \d t}
 \label{nistexting} \ee
-where $\dq_0''(t)$ is the burning rate per unit area of the fuel when no water is applied and $k(t)$ is a linear function of the local water mass per unit area, $m_{\rm w}''$, expressed in units of \si{kg/m^2},
+where $\dq_0''(t)$ is the burning rate per unit area of the fuel when no water is applied and $k(t)$ is a linear function of the local water mass per unit area, $m_{\rm w}''$, expressed in units of \unit{kg/m^2},
 \be
    k(t) = a \; m_{\rm w}''(t) \quad   \hbox{s}^{-1}
 \ee
