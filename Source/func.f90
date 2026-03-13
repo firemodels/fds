@@ -138,42 +138,24 @@ END SUBROUTINE SHUTDOWN
 !> \brief Return current system memory usage.
 !> \param VALUE_RSS Resident stack size
 !> Return the memory used by the given process at the time of the call. This only works under Linux because
-!> the system file called '/proc/PID/status' is queried for the VmRSS value (kB).
+!> the system file called '/proc/self/status' is queried for the VmRSS value (kB).
 !> The DEVC output QUANTITY 'RAM' outputs this value in units of MB.
-!> For non-linux or non-Intel builds, this routine just returns 0 because it is non-standard Fortran and it makes use
-!> of linux system files.
+!> For non-linux builds this routine just returns 0 
 
 SUBROUTINE SYSTEM_MEM_USAGE(VALUE_RSS)
 
-#ifdef USE_IFPORT
-   USE IFPORT  ! Intel Fortran extension library. This is needed for GETPID.
-#endif
 INTEGER, INTENT(OUT) :: VALUE_RSS
-CHARACTER(200):: FILENAME=' '
+INTEGER :: IOS
 CHARACTER(80) :: LINE
-CHARACTER(8)  :: PID_CHAR=' '
-INTEGER :: PID
 LOGICAL :: IFXST
 
 VALUE_RSS=0  ! return zero if the memory file is not found
 
-PID = 0
-#ifdef USE_IFPORT
-   PID = GETPID() ! GETPID is non-standard Fortran.
-#endif
+INQUIRE(FILE='/proc/self/status',EXIST=IFXST)
+IF (.NOT.IFXST) RETURN
 
-IF (PID==0) RETURN
-
-WRITE(PID_CHAR,'(I8)') PID
-FILENAME = '/proc/'//TRIM(ADJUSTL(PID_CHAR))//'/status'
-
-INQUIRE(FILE=FILENAME,EXIST=IFXST)
-IF (.NOT.IFXST) then
-   WRITE (*,*) 'WARNING: Memory system file does not exist'
-  RETURN
-ENDIF
-
-OPEN(1000,FILE=FILENAME,ACTION='READ')
+OPEN(1000,FILE='/proc/self/status',STATUS='OLD', ACTION='READ', IOSTAT=IOS)
+IF (IOS /= 0) RETURN
 DO
    READ (1000,'(A)',END=120) LINE
    IF (LINE(1:6)=='VmRSS:') THEN
