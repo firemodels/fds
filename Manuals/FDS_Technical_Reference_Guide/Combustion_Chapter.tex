@@ -147,6 +147,8 @@ Referring now to the solid line in Fig.~\ref{fig_reaction_time_scale}, for relat
 
 Now, let us imagine what should happen to the mixing time as the filter width increases beyond the inertial subrange to a length scale larger than the height of the flame itself (actually a possibility in wildfire modeling). We would \emph{not} expect the inertial range scaling to continue up through the so-called ``energy-containing'' range of turbulent length scales.  Rather, for fires we expect buoyant acceleration to control the mixing at these relatively coarse scales.  A time scale based on a constant acceleration goes as the square root of the filter width, as shown by the regime marked $\tau_{\rm g}$ in the diagram.  This shift in scaling may appear minor given the log-log nature of the plot, but the effect of the acceleration-based time scale is indeed significant for large cell sizes.
 
+If the subgrid turbulence is high but the grid spacing is too large to capture this effect $\tau_{\rm flame}$ may be reached before the grid resolved physics can estimate the proper time scale.  This happens when the fire is completely subgrid.  The parameter $\tau_{\rm flame}$ is very large by default in FDS and must be explicitly set by the user to have an effect.  The line shown in Fig.~\ref{fig_reaction_time_scale} is for illustration purposes only.
+
 \begin{figure}
 \centering
 \includegraphics[width=4.5in]{FIGURES/reaction_time_scale}
@@ -160,7 +162,7 @@ Of course, the relative importance of the physical processes will depend on the 
 The bold solid line in Fig.~\ref{fig_reaction_time_scale} is mathematically represented by
 \begin{equation}
 \label{eqn_tau_mix}
-\tau_{\rm mix} = \max(\tau_{\rm chem},\min(\tau_{\rm d},\tau_{\rm u},\tau_{\rm g}))
+\tau_{\rm mix} = \max(\tau_{\rm chem},\tau_{\rm min},\min(\tau_{\rm d},\tau_{\rm u},\tau_{\rm g},\tau_{\rm flame}))
 \end{equation}
 The mathematical details of the submodels are as follows:
 \begin{align}
