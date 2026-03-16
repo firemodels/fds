@@ -538,6 +538,7 @@ SPRINKLER_INSERT_LOOP: DO KS=1,N_DEVC
                WRITE(MESSAGE,'(A,A,A)') 'ERROR: Check position of DEVC ',TRIM(DV%ID),&
                   '.  Too many particle insertion attempts fail solid cell check,'
                CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.)
+               RETURN
             ENDIF
             IF (.NOT.CELL(IC)%SOLID) EXIT CHOOSE_COORDS
          ENDIF
