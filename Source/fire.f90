@@ -817,7 +817,7 @@ ELSE
          END IF
          TAU_U = C_U*DELTA/SQRT(TWTH*(K_SGS+TAU_EPS))                  ! FDS Tech Guide (5.15)
          TAU_G = SQRT(2._EB*DELTA/(GRAV+TAU_EPS))                      ! FDS Tech Guide (5.16)
-         TAU_MIN = MAX(TAU_CHEM,0.01_EB*DELTA)                         ! Lower bound for mixing time
+         TAU_MIN = MAX(TAU_CHEM,DELTA/TURBULENT_FLAME_SPEED)           ! Lower bound for mixing time
          MIX_TIME_OUT= MAX(TAU_MIN,MIN(TAU_D,TAU_U,TAU_G,TAU_FLAME))   ! FDS Tech Guide (5.13)
       CASE (DNS_MODE)
          MIX_TIME_OUT= MAX(TAU_CHEM,TAU_D)
