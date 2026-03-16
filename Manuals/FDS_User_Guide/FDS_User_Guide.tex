@@ -4994,19 +4994,15 @@ Unless you are performing a Direct Numerical Simulation (DNS), the reaction rate
 \frac{\d \zeta}{\d t}=\frac{-\zeta}{\tau_{\rm mix}}
 \label{eq:edc_mix}
 \end{equation}
-Here, $\tau_{\rm mix}$ is the mixing time scale. The change in mass of a species is found from the combination of mixing and the production/destruction rate found from the chemical reaction. If a cell is initially unmixed, $\zeta_0=1$ by default, then combustion is considered non-premixed within the grid cell.  In this case, the fuel and air are considered completely separate at the start of the time step and must mix together before they burn.  This means if the mixing is slow enough, that unburned fuel may exist at the end of the time step even if sufficient oxygen is present in the grid cell to burn all the fuel. If the cell is initially fully mixed, $\zeta_0=0$, then the combustion is considered premixed (e.g., equivalent to infinitely fast mixing). You can set the amount of mixing in each cell at the beginning of every time step using the parameter \ct{INITIAL_UNMIXED_FRACTION} on the \ct{COMB} line.
-
+Here, $\tau_{\rm mix}$ is the mixing time scale. The change in mass of a species is found from the combination of mixing and the production/destruction rate found from the chemical reaction. If a cell is initially unmixed, $\zeta_0=1$ by default, then combustion is considered non-premixed within the grid cell. In this case, the fuel and air are considered completely separate at the start of the time step and must mix together before they burn. This means if the mixing is slow enough, that unburned fuel may exist at the end of the time step even if sufficient oxygen is present in the grid cell to burn all the fuel. If the cell is initially fully mixed, $\zeta_0=0$, then the combustion is considered premixed (e.g., equivalent to infinitely fast mixing). You can set the amount of mixing in each cell at the beginning of every time step using the parameter \ct{INITIAL_UNMIXED_FRACTION} on the \ct{COMB} line.
 
 Setting \ct{INITIAL_UNMIXED_FRACTION=0} often leads to instabilities.  It may be useful to ramp the initial unmixed fraction in time to get over the initial steep transient for ignition.  The example below starts the calculation with the default \ct{INITIAL_UNMIXED_FRACTION=1}, then ramps it down to 0 within a second and holds it there for the remainder of the calculation.
 \begin{lstlisting}
 &COMB RAMP_ZETA_0='zeta_0 ramp' /
-
 &RAMP ID='zeta_0 ramp', T=0, F=1/
 &RAMP ID='zeta_0 ramp', T=1, F=0/
 &RAMP ID='zeta_0 ramp', T=..., F=0/
 \end{lstlisting}
-
-
 The mixing time, $\tau_{\rm mix}$, is a function of the level of turbulence in the current grid cell. However, you may override the calculation of $\tau_{\rm mix}$ by setting a \ct{FIXED_MIX_TIME} (s) on the \ct{COMB} line. Alternatively, you can bound the computed value of $\tau_{\rm mix}$ by setting a lower bound \ct{TAU_CHEM} and/or an upper bound \ct{TAU_FLAME} on the \ct{COMB} line.
 
 The Technical Reference Guide~\cite{FDS_Math_Guide} contains more detailed information about the turbulent combustion model.
