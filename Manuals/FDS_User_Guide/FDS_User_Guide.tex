@@ -5003,9 +5003,9 @@ Setting \ct{INITIAL_UNMIXED_FRACTION=0} often leads to instabilities.  It may be
 &RAMP ID='zeta_0 ramp', T=1, F=0/
 &RAMP ID='zeta_0 ramp', T=..., F=0/
 \end{lstlisting}
-The mixing time, $\tau_{\rm mix}$, is a function of the level of turbulence in the current grid cell. However, you may override the calculation of $\tau_{\rm mix}$ by setting a \ct{FIXED_MIX_TIME} (s) on the \ct{COMB} line. Alternatively, you can bound the computed value of $\tau_{\rm mix}$ by setting a lower bound ($\tau_{\rm min}$) controlled by \ct{TAU_CHEM} ($\tau_{\rm chem}$) and \ct {TURBULENT_FLAME_SPEED} ($v_{\rm T}$) and/or an upper bound \ct{TAU_FLAME} on the \ct{COMB} line.  The lower bound is evaluated as:
+The mixing time, $\tau_{\rm mix}$, is a function of the level of turbulence in the current grid cell. However, you may override the calculation of $\tau_{\rm mix}$ by setting a \ct{FIXED_MIX_TIME} (s) on the \ct{COMB} line. Alternatively, you can bound the computed value of $\tau_{\rm mix}$ by setting a lower bound ($\tau_{\rm min}$) controlled by \ct{TAU_CHEM} ($\tau_{\rm chem}$) and \ct {TURBULENT_FLAME_SPEED} ($s_{\rm T}$) and/or an upper bound \ct{TAU_FLAME} on the \ct{COMB} line.  The lower bound is evaluated as:
 \be
-\tau_{\rm min} = \min \left(\tau_{\rm chem },\frac{\Delta}{v_{\rm T}} \right)
+\tau_{\rm min} = \min \left(\tau_{\rm chem },\frac{\Delta}{s_{\rm T}} \right)
 \ee
 where $\Delta$ is the grid size. The Technical Reference Guide~\cite{FDS_Math_Guide} contains more detailed information about the turbulent combustion model.
 
