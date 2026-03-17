@@ -7,8 +7,8 @@ USE GLOBAL_CONSTANTS
 USE MESH_POINTERS
 USE COMP_FUNCTIONS, ONLY : CURRENT_TIME
 USE COMPLEX_GEOMETRY, ONLY: CC_IDCC,CC_IDCF,CC_CGSC,CC_SOLID
-IMPLICIT NONE (TYPE,EXTERNAL)
 
+IMPLICIT NONE (TYPE,EXTERNAL)
 PRIVATE
 
 PUBLIC INSERT_ALL_PARTICLES,MOVE_PARTICLES,PARTICLE_MASS_ENERGY_TRANSFER,REMOVE_PARTICLES,&
@@ -305,7 +305,7 @@ CONTAINS
 SUBROUTINE INSERT_SPRAY_PARTICLES
 
 USE MEMORY_FUNCTIONS, ONLY: ALLOCATE_STORAGE
-INTEGER :: I,OI
+INTEGER :: I,OI,COUNTER
 
 ! Loop over all devices, but look for sprinklers or nozzles. Count actuated sprinklers for output purposes.
 
@@ -409,6 +409,8 @@ SPRINKLER_INSERT_LOOP: DO KS=1,N_DEVC
       LP%T_INSERT = T
 
       ! Randomly choose particle direction angles, theta and phi
+      
+      COUNTER = 0
 
       CHOOSE_COORDS: DO
          PICK_PATTERN: IF(PY%SPRAY_PATTERN_INDEX>0) THEN ! Use spray pattern table
@@ -531,6 +533,13 @@ SPRINKLER_INSERT_LOOP: DO KS=1,N_DEVC
             IC = CELL_INDEX(II,JJ,KK)
             BC%IIG = II; BC%JJG = JJ; BC%KKG = KK
             BC%II  = II; BC%JJ  = JJ; BC%KK  = KK
+            COUNTER = COUNTER + 1
+            IF (COUNTER > 1000) THEN
+               WRITE(MESSAGE,'(A,A,A)') 'ERROR: Check position of DEVC ',TRIM(DV%ID),&
+                  '.  Too many particle insertion attempts fail solid cell check,'
+               CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.)
+               RETURN
+            ENDIF
             IF (.NOT.CELL(IC)%SOLID) EXIT CHOOSE_COORDS
          ENDIF
 
@@ -1594,6 +1603,7 @@ END SUBROUTINE VOLUME_INIT_PARTICLE
 !> \brief Set up the properties of a single, newly inserted particle
 
 SUBROUTINE INITIALIZE_SINGLE_PARTICLE
+
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 REAL(EB) :: AREA,SCALE_FACTOR,RADIUS,LP_VOLUME
 INTEGER :: N

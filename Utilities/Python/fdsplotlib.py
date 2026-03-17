@@ -2678,7 +2678,7 @@ def statistics_histogram(Measured_Values, Predicted_Values,
     ax.set_xlim(x_lim)
     y0, y1 = ax.get_ylim()
     ax.set_ylim([y0, y1 * 1.25])
-    ax.set_xlabel("$\ln(M/E)$")
+    ax.set_xlabel(r"$\ln(M/E)$")
     ax.set_ylabel("Number of Data Points")
     ax.set_xticks(xout)
     ax.set_xticklabels([f"{x:.2f}" for x in xout])

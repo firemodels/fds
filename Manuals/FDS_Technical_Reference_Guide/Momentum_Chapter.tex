@@ -175,7 +175,7 @@ The model constant may be related to the Smagorinsky constant, $c \approx 2.5 \,
 The Wall-Adapting Local Eddy-viscosity, or WALE, model of Nicoud and Ducros \cite{Nicoud:1999} was originally conceived as a method for properly scaling the eddy viscosity in the vicinity of a wall.  While the invariant used in the Smagorinsky model $|S|$ is $O(1)$ near a wall, the invariant designed for WALE correctly scales as $O(y^3)$, where $y$ is the distance from the wall.  The WALE model is used for the eddy viscosity in the first off-wall grid cell.  The dynamic turbulent viscosity is written as follows:
 \begin{equation}
 \label{eq:wale}
-\mu_{\si{t}} = \rho (C_{\si{w}} \Delta)^2 \frac{(S^d_{ij} S^d_{ij})^{3/2}}{(S_{ij} S_{ij})^{5/2} + (S^d_{ij} S^d_{ij})^{5/4}}
+\mu_{\unit{t}} = \rho (C_{\unit{w}} \Delta)^2 \frac{(S^d_{ij} S^d_{ij})^{3/2}}{(S_{ij} S_{ij})^{5/2} + (S^d_{ij} S^d_{ij})^{5/4}}
 \end{equation}
 where
 \begin{equation}
@@ -231,19 +231,19 @@ and material diffusivity are approximated from kinetic theory because the temper
 dependence of each is important in combustion scenarios.
 The viscosity of the species $\alpha$ is given by
 \be \mu_\alpha = \frac{26.69\times 10^{-7} (W_\alpha \, T)^\ha}{\sigma_\alpha^2 \, \Omega_v}
-\quad [=] \quad \si{kg/(m.s)} \ee
+\quad [=] \quad \unit{kg/(m.s)} \ee
 where $\sigma_\alpha$ is the Lennard-Jones
 hard-sphere diameter ($\text{\AA}$) and $\Omega_v$ is the
 collision integral, an empirical function of the
 temperature $T$. The thermal conductivity of species $\alpha$ is given by
-\be k_\alpha = \frac{\mu_\alpha \, c_{p,\alpha}}{\PR_\alpha}  \quad [=] \quad \si{W/(m.K)} \ee
+\be k_\alpha = \frac{\mu_\alpha \, c_{p,\alpha}}{\PR_\alpha}  \quad [=] \quad \unit{W/(m.K)} \ee
 Note if $\PR_\alpha$ is not defined, the value for nitrogen (0.71) is assumed.
 The viscosity and thermal conductivity of a gas mixture are given by  ~\cite{Davidson:1993}
 \be \mu_{\hbox{\tiny DNS}} = \frac{\sum_\alpha \mu_\alpha \; X_\alpha \; M_\alpha ^{1/2}}{\sum_\alpha X_\alpha \; M_\alpha ^{1/2}}  \quad ; \quad k_{\hbox{\tiny DNS}} = \frac{\sum_\alpha k_\alpha \; X_\alpha \; M_\alpha ^{1/2}}{\sum_\alpha X_\alpha \; M_\alpha ^{1/2}}  \ee
 The binary diffusion coefficient of species $\alpha$
 diffusing into species $\beta$ is given by
 \be D_{\alpha \beta} = \frac{2.66\times 10^{-7} \, T^{3/2} }{W_{\alpha \beta}^\ha \, \sigma_{\alpha \beta}^2 \, \Omega_D }
-\quad [=] \quad \si{m^2/s} \ee
+\quad [=] \quad \unit{m^2/s} \ee
 where $W_{\alpha \beta}=2(1/W_\alpha+1/W_\beta)^{-1}$, $\sigma_{\alpha \beta}=(\sigma_\alpha+\sigma_\beta)/2$, and
 $\Omega_D$ is the diffusion collision integral, an empirical
 function of the temperature, $T$~\cite{Poling:1}.

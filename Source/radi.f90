@@ -1,7 +1,9 @@
 MODULE SPECDATA
 
 USE PRECISION_PARAMETERS
+
 IMPLICIT NONE (TYPE,EXTERNAL)
+
 INTEGER ::  I,J
 INTEGER, PARAMETER :: NWATERK=183
 REAL(EB) :: CPLXREF_WATER(NWATERK,2)
@@ -315,14 +317,16 @@ DATA (CPLXREF_FUEL( 94,J), J=1,3) / 10.0_EB, 1.45_EB, 8.24E-04_EB /
 
 END MODULE SPECDATA
 
-MODULE WSGG_ARRAYS
-USE PRECISION_PARAMETERS
 
+MODULE WSGG_ARRAYS
+
+USE PRECISION_PARAMETERS
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: WSGG_B1_ARRAY,WSGG_B2_ARRAY,WSGG_D_ARRAY
 REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: WSGG_C_ARRAY
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: WSGG_KAPPAP1_ARRAY,WSGG_KAPPAP2_ARRAY
 
 END MODULE WSGG_ARRAYS
+
 
 MODULE MIEV
 
@@ -2666,14 +2670,17 @@ END FUNCTION WRONG
 END SUBROUTINE TESTMI
 
 
+!> \brief Print out a warning or error message;  ABORT IF ERROR AFTER MAKING SYMBOLIC DUMP (MACHINE-SPECIFIC)
+
 SUBROUTINE ERRMSG( MESSAG, FATAL )
-! PRINT OUT A WARNING OR ERROR MESSAGE;  ABORT IF ERROR AFTER MAKING SYMBOLIC DUMP (MACHINE-SPECIFIC)
+
 USE COMP_FUNCTIONS, ONLY: SHUTDOWN
 CHARACTER :: MESSAG*(*)
 LOGICAL ::  FATAL,MSGLIM
 INTEGER ::  MAXMSG, NUMMSG
 SAVE      MAXMSG, NUMMSG, MSGLIM
 DATA      NUMMSG / 0 /,  MAXMSG / 100 /,  MSGLIM /.FALSE./
+
 IF (FATAL) CALL SHUTDOWN(MESSAG)
 NUMMSG = NUMMSG + 1
 IF( MSGLIM ) RETURN
@@ -2688,19 +2695,21 @@ RETURN
 END SUBROUTINE ERRMSG
 
 
+!> \brief Write names of erroneous variables and return T
+!> \param VARNAM Name of erroneous variable to be written
+
 LOGICAL FUNCTION WRTBAD( VARNAM )
-!          WRITE NAMES OF ERRONEOUS VARIABLES AND RETURN 'TRUE'
-!      INPUT :   VARNAM = NAME OF ERRONEOUS VARIABLE TO BE WRITTEN
-!                         ( CHARACTER, ANY LENGTH )
+
 CHARACTER VARNAM*(*)
 INTEGER   MAXMSG, NUMMSG
 SAVE      NUMMSG, MAXMSG
 DATA      NUMMSG / 0 /, MAXMSG / 50 /
+
 WRTBAD = .TRUE.
 NUMMSG = NUMMSG + 1
 WRITE(LU_ERR, '(3A)' ) ' ****  INPUT VARIABLE  ', VARNAM,'  IN ERROR  ****'
 IF( NUMMSG==MAXMSG ) CALL ERRMSG( 'TOO MANY INPUT ERRORS.  ABORTING...',.TRUE.)
-RETURN
+
 END FUNCTION WRTBAD
 
 
@@ -2717,7 +2726,7 @@ INTEGER ::  MINVAL
 
 WRITE(LU_ERR, '(3A,I7)' ) ' ****  SYMBOLIC DIMENSION  ', DIMNAM,'  SHOULD BE INCREASED TO AT LEAST ', MINVAL
 WRTDIM = .TRUE.
-RETURN
+
 END FUNCTION WRTDIM
 
 
@@ -2739,15 +2748,15 @@ END FUNCTION SQ
 
 END MODULE MIEV
 
-MODULE RAD
 
-! Radiation heat transfer
+!> \brief Radiation heat transfer
+
+MODULE RAD
 
 USE PRECISION_PARAMETERS
 USE GLOBAL_CONSTANTS
 USE OUTPUT_CLOCKS, ONLY: RADF_CLOCK,RADF_COUNTER
 USE MESH_POINTERS
-USE MESH_VARIABLES
 USE RADCONS
 USE RADCAL_VAR
 
@@ -2762,7 +2771,7 @@ CONTAINS
 
 
 !> \brief Initialize radiation arrays.
-!>
+
 SUBROUTINE INIT_RADIATION
 
 ! Meanings of some variables defined here:
@@ -4710,12 +4719,11 @@ GET_KAPPA = KAPPA_SUM
 END FUNCTION GET_KAPPA
 
 
-!==================================================================================
-!Function to compute the absorption coefficient according to Bordbar et al. (2014)
-!==================================================================================
-REAL(EB) FUNCTION KAPPA_WSGG(X_H2O, X_CO2, MOL_RATIO,PARTIAL_PRESSURE,JWSGG)
-USE WSGG_ARRAYS
+!> \brief Function to compute the absorption coefficient according to Bordbar et al. (2014)
 
+REAL(EB) FUNCTION KAPPA_WSGG(X_H2O, X_CO2, MOL_RATIO,PARTIAL_PRESSURE,JWSGG)
+
+USE WSGG_ARRAYS
 INTEGER, INTENT(IN) :: JWSGG
 INTEGER :: NN
 REAL(EB), INTENT(IN) :: X_H2O, X_CO2, MOL_RATIO,PARTIAL_PRESSURE
@@ -4754,26 +4762,21 @@ KAPPA_WSGG = SUM_KAPPA*PARTIAL_PRESSURE
 
 END FUNCTION KAPPA_WSGG
 
-!===================================================================================
-!Function to compute the temperature coefficient according to Bordbar et al. (2014)
-!===================================================================================
-REAL(EB) RECURSIVE FUNCTION A_WSGG(TTMP,MOL_RATIO,JWSGG) &
-   RESULT(A_FUNC_RES)
-USE WSGG_ARRAYS
 
+!> \brief Function to compute the temperature coefficient according to Bordbar et al. (2014)
+
+REAL(EB) RECURSIVE FUNCTION A_WSGG(TTMP,MOL_RATIO,JWSGG) RESULT(A_FUNC_RES)
+
+USE WSGG_ARRAYS
 INTEGER,INTENT(IN) :: JWSGG
 INTEGER :: MM,NN
 REAL(EB),INTENT(IN) :: MOL_RATIO,TTMP
 REAL(EB) :: TREF,SUM_A,SUM_B,SUM_C
 
-!------------------------
-!Parameters of the model
-!------------------------
 TREF = 1200._EB ! Reference temperature
 
-!------------------------------------------------------------------
-!Computing the temperature coefficient for the transparent windows
-!------------------------------------------------------------------
+! Computing the temperature coefficient for the transparent windows
+
 IF (JWSGG==5) THEN
    SUM_A = 0._EB
    DO MM=1,4
@@ -4782,19 +4785,17 @@ IF (JWSGG==5) THEN
    A_FUNC_RES = 1._EB - SUM_A
 
 ELSE
-!---------------------------------------------------------
-!Computing the temperature coefficient for the gray gases
-!(within three intervals of molar ratio)
-!---------------------------------------------------------
+   ! Computing the temperature coefficient for the gray gases (within three intervals of molar ratio)
+
    IF (MOL_RATIO < 0.01_EB) THEN               !Only CO2
-      !Computing the polynomial
+      ! Computing the polynomial
       SUM_B = 0._EB
       DO MM=0,4
          SUM_B = SUM_B + WSGG_B1_ARRAY(JWSGG,MM)*(TTMP/TREF)**(REAL(MM,EB))
       ENDDO
 
    ELSEIF (MOL_RATIO > 4._EB) THEN               !Only H2O
-      !Computing the polynomial
+      ! Computing the polynomial
       SUM_B = 0._EB
       DO MM=0,4
          SUM_B = SUM_B + WSGG_B2_ARRAY(JWSGG,MM)*(TTMP/TREF)**(REAL(MM,EB))
@@ -4818,22 +4819,16 @@ ENDIF
 END FUNCTION A_WSGG
 
 
-!====================================================
-!Function to compute the gray absorption coefficient
-!of soot (same function as the one used by Fluent)
-!====================================================
+!> \brief Function to compute the gray absorption coefficient of soot (same function as the one used by Fluent)
+
 REAL(EB) FUNCTION KAPPA_SOOT(SOOT_MASS_CONCENTRATION,TTMP)
 
 REAL(EB),INTENT(IN) :: SOOT_MASS_CONCENTRATION,TTMP
 
-   !KAPPA_SOOT = 1232.4_EB*SOOT_MASS_CONCENTRATION*(1._EB+4.8E-4_EB*(TTMP-2000._EB))
-   KAPPA_SOOT = SOOT_MASS_CONCENTRATION*(1232.4_EB+0.591552_EB*(TTMP-2000._EB))
+KAPPA_SOOT = SOOT_MASS_CONCENTRATION*(1232.4_EB+0.591552_EB*(TTMP-2000._EB))
 
 END FUNCTION KAPPA_SOOT
 
 
 END MODULE RAD
-
-
-
 
