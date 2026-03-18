@@ -2494,7 +2494,7 @@ The default parameters governing the node spacing are appropriate for simple hea
 \item[Improve the time resolution] by setting \ct{WALL_INCREMENT=1} on the \ct{TIME} line. This forces the solid phase solution to be updated every time step instead of the default every 2 time steps. If this is still not sufficient, you can direct that FDS use smaller time steps to update the solid phase heat conduction calculation than that used by the gas phase solver. This can be done specifically for a selected surface (\ct{SURF}) type using the parameter \ct{TIME_STEP_FACTOR}. Its default value is 10, meaning that the solid phase time step for that particular \ct{SURF} type can be sub-divided by {\em at most} a factor of 10. The decision to sub-divide the time step is based on the criterion that the internal temperature of the solid should not change by more than \ct{DELTA_TMP_MAX} \unit{\degreeCelsius} during that sub-step. The default value of \ct{DELTA_TMP_MAX} is 10 \unit{\degreeCelsius}, and this is also a \ct{SURF} parameter. You can choose \ct{QUANTITY='SUBSTEPS'} on either a \ct{DEVC} or \ct{BNDF} output line to see how many sub-steps are being used by a particular surface cell or the entire domain, respectively.  You can also ask FDS to use a solid phase time step that obeys the Fourier number constraint, $\mathrm{Fo}=\delta t \alpha/\delta x^2=1$; this is done by setting \ct{CHECK_FO=T} on \ct{MISC}.
 \item[Limit the number of cells in any layer] by setting \ct{N_LAYER_CELLS_MAX(NL)} (default 1000), where \ct{NL} designates a particular layer. Reducing this value does not necessarily improve accuracy, but it does save computing time. However, rarely does the solid phase require this many cells. The output file \ct{CHID.out} contains the coordinates of the solid phase nodes.
 \item[Change when a wall cell is renoded] by setting \ct{REMESH_RATIO} on the \ct{SURF} line and/or \ct{REAC_RATE_DELTA} on the \ct{MATL} line. If nodes changes size during pyrolysis, FDS will try and renode layers with changing cell size to optimize the number of nodes. This renoding process is costly if it is done frequently. The parameter \ct{REMESH_RATIO} sets the fractional change in the size of a wall cell before FDS will check for renoding. For example, with the default value of 0.25, FDS will not attempt the first renode of a wall cell that is initially all 0.1~m nodes unless one node has either increased to 0.125~m or decreased to 0.075~m. A second potential challenge with renoding occurs when there are large cell-to-cell temperature differences inside a pyrolyzing layer. Renoding will combine cells causing changes in temperature. If there is a large enough temperature difference, this can cause large swings in the pyrolysis rate. The parameter \ct{REAC_RATE_DELTA}, default value of 0.15, sets the fractional change in the pyrolysis rate for a material that is considered acceptable. If renoding of a layer could cause a temperature change large enough to achieve that change in pyrolysis rate, then FDS will not renode that layer.
-\item[Make a very thin solid layer disappear] by specifying a lower bound on it thickness or mass. If all the material components react and leave no solid residue, the thickness of the solid will shrink to zero. Each of the shrinking layers will vanish from the computation when its thickness gets smaller than a prescribed limiting value. This value can be set on the \ct{SURF} line using \ct{MINIMUM_LAYER_THICKNESS(N)}, where \ct{N} is the index of the layer. If you do not specify a layer index, the value shall be applied to all layers. The default value is $10^{-6}$~m or 0.1 times the specified \ct{THICKNESS}, whichever is less. Alternatively, you can specify \ct{MINIMUM_LAYER_MASS_FRACTION(N)}, the fraction of the layer mass below which the layer is removed.
+\item[Make a very thin solid layer disappear] by specifying a lower bound on it thickness or mass. If all the material components react and leave no solid residue, the thickness of the solid will shrink to zero. Each of the shrinking layers will vanish from the computation when its thickness gets smaller than a prescribed limiting value. This value can be set on the \ct{SURF} line using \ct{MINIMUM_LAYER_THICKNESS(N)}, where \ct{N} is the index of the layer. If you do not specify a layer index, the value shall be applied to all layers. The default value is \qty{1e-6}{\meter} or 0.1 times the specified \ct{THICKNESS}, whichever is less. Alternatively, you can specify \ct{MINIMUM_LAYER_MASS_FRACTION(N)}, the fraction of the layer mass below which the layer is removed.
 \end{description}
 When all the material of a shrinking surface is consumed but \ct{BURN_AWAY} is not prescribed, the surface temperature is set to \ct{TMP_GAS_BACK}, the convective heat flux to zero, and the burning rate to zero.
 
@@ -3395,7 +3395,7 @@ The constant timestep used in the TGA analysis, $\delta t_{\rm \tiny TGA}$, is c
 \be
    \delta t_{\rm \tiny TGA} = 0.1 \, \frac{\rho_{\rm s} c_{\rm s} \, \delta}{h}
 \ee
-where $\rho_{\rm s}$ is the initial sample density, $c_{\rm s}$ is the initial sample specific heat, $\delta$ is the initial sample thickness which is assumed to be $1 \times 10^{-5}$~m, and $h$ is the heat transfer coefficient, assumed to be 100~\unit{W/(m^2.K)}. The time step can be over-ridden via the parameter \ct{TGA_DT} on the \ct{SURF} line. The output spacing for temperature can be set with \ct{TGA_DUMP} on the \ct{SURF} line.
+where $\rho_{\rm s}$ is the initial sample density, $c_{\rm s}$ is the initial sample specific heat, $\delta$ is the initial sample thickness which is assumed to be \qty{1e-5}{\meter}, and $h$ is the heat transfer coefficient, assumed to be 100~\unit{W/(m^2.K)}. The time step can be over-ridden via the parameter \ct{TGA_DT} on the \ct{SURF} line. The output spacing for temperature can be set with \ct{TGA_DUMP} on the \ct{SURF} line.
 
 The \ct{TGA}, \ct{MCC} or \ct{DSC/STA} output can be multiplied by \ct{X_CONVERSION_FACTOR}, where \ct{X} is \ct{TGA}, \ct{MCC}, or \ct{DSC}, respectively. For example, the \ct{DSC} output assumes that an endothermic reaction is represented by a positive peak, and an exothermic reaction by a negative peak. To flip this around, set \ct{DSC_CONVERSION_FACTOR=-1}.
 
@@ -5410,7 +5410,7 @@ For example, if the reaction defines the complete combustion of methane using pr
 \section{Finite Rate Combustion}
 \label{info:finite}
 
-By default, FDS uses a mixing-controlled combustion model, meaning that the reaction rate is infinite and limited only by species concentrations. However, FDS can also employ finite-rate reactions using an Arrhenius model. Since finite-rate reactions require a fully-resolved temperature field (i.e., a simulation on a grid capable of resolving the flame temperature), it is recommended that finite-rate reactions be invoked only when FDS is running in DNS mode (\ct{SIMULATION_MODE='DNS'} on the \ct{MISC} line). A specific finite-rate reaction will only be computed if all species consumed or otherwise required (third-body or catalyst) in the reaction are present with a mass fraction greater than \ct{ZZ_MIN_GLOBAL} and the local cell temperature is above \ct{FINITE_RATE_MIN_TEMP}, both specified on \ct{COMB}. The default value for \ct{ZZ_MIN_GLOBAL} is $1\times 10^{-10}$, which is generally adequate. An exception might be for detailed chemistry where equations involving free-radicals are used.  The user should consider setting \ct{FINITE_RATE_MIN_TEMP} to be around 100 \unit{\degreeCelsius} to avoid unnecessary and expensive time integration of the ODEs for detailed kinetics.
+By default, FDS uses a mixing-controlled combustion model, meaning that the reaction rate is infinite and limited only by species concentrations. However, FDS can also employ finite-rate reactions using an Arrhenius model. Since finite-rate reactions require a fully-resolved temperature field (i.e., a simulation on a grid capable of resolving the flame temperature), it is recommended that finite-rate reactions be invoked only when FDS is running in DNS mode (\ct{SIMULATION_MODE='DNS'} on the \ct{MISC} line). A specific finite-rate reaction will only be computed if all species consumed or otherwise required (third-body or catalyst) in the reaction are present with a mass fraction greater than \ct{ZZ_MIN_GLOBAL} and the local cell temperature is above \ct{FINITE_RATE_MIN_TEMP}, both specified on \ct{COMB}. The default value for \ct{ZZ_MIN_GLOBAL} is \num{1e-10}, which is generally adequate. An exception might be for detailed chemistry where equations involving free-radicals are used.  The user should consider setting \ct{FINITE_RATE_MIN_TEMP} to be around 100 \unit{\degreeCelsius} to avoid unnecessary and expensive time integration of the ODEs for detailed kinetics.
 
 \subsubsection{Single Step Reaction}
 
@@ -7251,7 +7251,7 @@ This model is invoked by setting \ct{SURFACE_OXIDATION_MODEL} to \ct{T} on the \
   h_m \, \ln(B+1) &=& Y_{\rm O_2,surf} \, A_{\rm char} \exp \left(  -\frac{E_{\rm char}}{R \, T} \right) \\[.1in]
   B  &=& \frac{Y_{\rm O_2,\infty} - Y_{\rm O_2,surf}}{\nu_{\rm O_2,char}+Y_{\rm O_2,surf}}
 \end{eqnarray}
-The mass transfer coefficient is $h_m = h/c_p$, using the heat and mass transfer analogy ($h$ is obtained from Eq.~(\ref{h_particles})). A linear approximation of $\ln(B + 1) \approx B$ is applied, allowing $Y_{\rm O_2,surf}$ to be calculated from a quadratic equation and substituted into Eq.~(\ref{r_char}). It is important to note that the transport equation assumes a single reaction for char that produces CO$_2$, as in Eq.~(\ref{lumped_char_reaction}). This approach also assumes the oxidation of char is a surface reaction where the details of temperature and oxygen gradients through the particle depth can be neglected and is therefore most applicable for thermally thin solids. These assumptions are not enforced by FDS in any way, however, so consideration should be given when using the \ct{SURFACE_OXIDATION_MODEL}. Also note that because this model depends on full-scale parameters $\sigma$ and $h_m$ it is not necessarily appropriate to compare directly with micro-scale TGA data via \ct{TGA_ANALYSIS}.
+The mass transfer coefficient is $h_m = h/c_p$, using the heat and mass transfer analogy ($h$ is obtained from Eq.~(\ref{h_particles})). A linear approximation of $\ln(B + 1) \approx B$ is applied, allowing $Y_{\rm O_2,surf}$ to be calculated from a quadratic equation and substituted into Eq.~(\ref{r_char}). It is important to note that the transport equation assumes a single reaction for char that produces CO$_2$, as in Eq.~(\ref{lumped_char_reaction}). This approach also assumes the oxidation of char is a surface reaction where the details of temperature and oxygen gradients through the particle depth can be neglected and is therefore most applicable for thermally thin solids. These assumptions are not enforced by FDS in any way, however, so consideration should be given when using the \linebreak[4]\ct{SURFACE_OXIDATION_MODEL}. Also note that because this model depends on full-scale parameters $\sigma$ and $h_m$ it is not necessarily appropriate to compare directly with micro-scale TGA data via \ct{TGA_ANALYSIS}.
 
 \begin{table}[!ht]
 \caption[Default vegetation kinetic constants]{Default vegetation pyrolysis constants.}
@@ -7275,6 +7275,7 @@ $\Delta h_{\rm H_2O}$   & 2,259 kJ/kg                   & Porterie et al.~\cite{
 \end{table}
 
 \subsection{Heat Transfer}
+\label{info:wui_heat_transfer}
 
 The equation governing the temperature of the thermally-thick solid is
 \be
@@ -7313,9 +7314,7 @@ The rate of change for the components of the vegetative mass during thermal degr
 \end{eqnarray}
 Gaseous products created during the thermal degradation process are water vapor (during evaporation), fuel vapor (during pyrolysis), and CO$_2$ (during char oxidation). The source terms (\unit{kg/(m^3.s)}) for these species are, respectively, $r_{\rm H_2O}$, $(1-\nu_{\rm char}) \, r_{\rm pyr}$, and  $(1+\nu_{\rm O_2,char} - \nu_{\rm ash}) \, r_{\rm char}$. In addition, the char oxidation process consumes oxygen in the gas phase at a rate of $-\nu_{\rm O_2,char} \, r_{\rm char}$.
 
-Figure~\ref{vege_inputs} includes sample input lines demonstrating how the vegetation model can be applied to particles that represent pine needles that are 1~mm in diameter and 5~cm long. Note that the special surface oxidation model is invoked by setting \ct{SURFACE_OXIDATION_MODEL} to \ct{T} on the \ct{MATL} line. All parameters described above must be explicitly specified in the input file---there are no hard-wired default values.
-
-\begin{figure}[ht]
+The sample input lines below demonstrate how the vegetation model can be applied to particles that represent pine needles that are 1~mm in diameter and 5~cm long. Note that the special surface oxidation model is invoked by setting \ct{SURFACE_OXIDATION_MODEL} to \ct{T} on the \ct{MATL} line. All parameters described above must be explicitly specified in the input file---there are no hard-wired default values.
 \begin{lstlisting}
 &MATL ID = 'MOISTURE'
       DENSITY = 1000.
@@ -7358,17 +7357,12 @@ Figure~\ref{vege_inputs} includes sample input lines demonstrating how the veget
       CONDUCTIVITY = 0.1
       SPECIFIC_HEAT_RAMP = '...' /
 \end{lstlisting}
-\caption[Material parameters describing vegetation]{Input parameters describing vegetation.}
-\label{vege_inputs}
-\end{figure}
-
-\FloatBarrier
 
 \subsection{Examples}
 \label{char_oxidation_1}
 \label{char_oxidation_2}
 
-Consider the sample case called \ct{WUI/char_oxidation_1.fds} where $m=0.0531$~kg of dry vegetation is completely consumed by fire except for a small amount of ash. The char and ash yields are $\nu_{\rm char}=0.25$ and $\nu_{\rm ash}=0.04$. The heat of combustion of the pyrolyzed fuel vapor is $\Delta h_{\rm c}=17400$~kJ/kg; thus the effective heat of combustion for the mass of vegetation consumed is $\Delta h_{\rm c,eff}=19146$~kJ/kg according to Eq.~(\ref{DeltaHeff}). The area under the heat release rate curve in the left hand plot of Fig.~\ref{char_oxidation_1_fig} should be $m (1-\nu_{\rm char}\nu_{\rm ash}) \Delta h_{\rm c,eff} \approx 1012$~kJ and the mass of ash remaining should be $\nu_{\rm char}\nu_{\rm ash} m \approx 0.000531$~kg, as shown in the right hand plot of Fig.~\ref{char_oxidation_1_fig}.
+Consider the sample case called \ct{WUI/char_oxidation_1.fds} where $m=0.0531$~kg of dry vegetation is completely consumed by fire except for a small amount of ash. The char and ash yields are $\nu_{\rm char}=0.25$ and $\nu_{\rm ash}=0.04$. The heat of combustion of the pyrolyzed fuel vapor is $\Delta h_{\rm c}=17,400$~kJ/kg; thus the effective heat of combustion for the mass of vegetation consumed is $\Delta h_{\rm c,eff}=19,146$~kJ/kg according to Eq.~(\ref{DeltaHeff}). The area under the heat release rate curve in the left hand plot of Fig.~\ref{char_oxidation_1_fig} should be $m (1-\nu_{\rm char}\nu_{\rm ash}) \Delta h_{\rm c,eff} \approx 1012$~kJ and the mass of ash remaining should be $\nu_{\rm char}\nu_{\rm ash} m \approx 0.000531$~kg, as shown in the right hand plot of Fig.~\ref{char_oxidation_1_fig}.
 \begin{figure}[ht]
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/char_oxidation_1_hrr}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/char_oxidation_1_mass}
@@ -7455,13 +7449,13 @@ The length of each needle is specified directly, but its diameter is specified v
       CONDUCTIVITY = 1.0
       SPECIFIC_HEAT = 1.6 /
 \end{lstlisting}
-Note that if you specify a \ct{MOISTURE_CONTENT} on the \ct{SURF} line, FDS will automatically add a \ct{MATL} line for \ct{'MOISTURE'} as it is written in Fig.~\ref{vege_inputs}. FDS will also alter the \ct{DENSITY} of the dry vegetation, in this case \ct{'dry pine'}, so that the size and wood content of the particle do not change when moisture is added. The modified density of the ``dry'' vegetation, $\tilde{\rho}_{\rm d}$, is given by:
+Note that if you specify a \ct{MOISTURE_CONTENT} on the \ct{SURF} line, FDS will automatically add a \ct{MATL} line for \ct{'MOISTURE'} as it is written in the example in Sec.~\ref{info:wui_heat_transfer}. FDS will also alter the \ct{DENSITY} of the dry vegetation, in this case \ct{'dry pine'}, so that the size and wood content of the particle do not change when moisture is added. The modified density of the ``dry'' vegetation, $\tilde{\rho}_{\rm d}$, is given by:
 \be
    \tilde{\rho}_{\rm d} = \frac{\rho_{\rm d}} {1-\frac{\rho_{\rm d}}{\rho_{\rm m}} M }
 \ee
 where $\rho_{\rm d}$ is the user-specified density of the dry vegetation and $\rho_{\rm m}$ is the density of the moisture, typically assumed to be 1000~\unit{kg/m^3}. The rationale behind this adjustment is that dry vegetation contains small pores that trap moisture. Thus, when moisture is added, the size and vegetation content of the particle do not change.
 
-Each \ct{MATL} line must include the \ct{DENSITY}, \ct{CONDUCTIVITY} and \ct{SPECIFIC_HEAT} of that component. If the material component undergoes a reaction, there needs to be either a \ct{REACTION_TEMPERATURE} or more detailed kinetic parameters like the ones listed in Fig.~\ref{vege_inputs}. Material components that react need stoichiometric coefficients \ct{NU_SPEC} and \ct{NU_MATL} to designate how much of the material mass is converted to a gas \ct{SPEC}ies and how much to a solid \ct{MAT}eria\ct{L}. In this case, \ct{'CELLULOSE'} is the gas-phase fuel specified on the \ct{REAC} line. The gas species \ct{'WATER VAPOR'} is defined by a \ct{SPEC} line. Even though water vapor is included in the combustion products, you still need to explicitly specify \ct{'WATER VAPOR'} as the gasified form of the moisture in the pine needles.
+Each \ct{MATL} line must include the \ct{DENSITY}, \ct{CONDUCTIVITY} and \ct{SPECIFIC_HEAT} of that component. If the material component undergoes a reaction, there needs to be either a \ct{REFERENCE_TEMPERATURE} or more detailed kinetic parameters, see Sec.~\ref{info:reaction_mechanism}. Material components that react need stoichiometric coefficients \ct{NU_SPEC}, \ct{NU_MATL}, and/or \ct{NU_PART} to designate how much of the material mass is converted to gas species, other materials, or Lagrangian particles. In this case, \ct{'CELLULOSE'} is the gas-phase fuel specified on the \ct{REAC} line. The gas species \ct{'WATER VAPOR'} is defined by a \ct{SPEC} line. Even though water vapor is included in the combustion products, you still need to explicitly specify \ct{'WATER VAPOR'} as the gasified form of the moisture in the pine needles.
 
 Finally, the pine needles are introduced into the simulation via the \ct{INIT} line:
 \begin{lstlisting}
@@ -7472,7 +7466,7 @@ This line inserts 1000 Lagrangian particles representing pine needles randomly w
 \be
   m_{\rm w}''' = m_{\rm d}''' \, (1+M)
 \ee
-In the example, 1~kg of wet pine needles occupy 1~\unit{m^3}. The number of particles used to represent the pine needles is somewhat arbitrary. FDS will automatically weight the specified number so that the total mass per volume is 1~kg. The vegetation is heated until all of the water and fuel evaporate. The fuel is not allowed to burn by setting the ambient oxygen concentration to 1~\%. Figure~\ref{pine_needles_fig} shows the evolution of the fuel, water and char mass. Agreement with the expected values means that mass is conserved.
+In the example, 1~kg of wet pine needles occupy 1~\unit{m^3}. The number of particles used to represent the pine needles is somewhat arbitrary. FDS will automatically weight each particle so that the total mass per volume is 1~kg. The vegetation is heated until all of the water and fuel evaporate. The fuel is not allowed to burn by setting the ambient oxygen concentration to 1~\%. Figure~\ref{pine_needles_fig} shows the evolution of the fuel, water and char mass. Agreement with the expected values means that mass is conserved.
 
 \begin{figure}[ht]
 \begin{center}
@@ -7495,13 +7489,13 @@ A coniferous tree (e.g. pine, spruce, fir) can be represented in FDS as a collec
       CROWN_BASE_HEIGHT=0.2, TREE_HEIGHT=2, SHAPE='CONE', N_PARTICLES_PER_CELL=1,
       MASS_PER_VOLUME=10., DRY=T /
 \end{lstlisting}
-These lines create a collection of particles in the shape of a cone. The dimensions of the cone are specified via the parameters \ct{CROWN_BASE_WIDTH}, the diameter of the base of the cone (m), \ct{CROWN_BASE_HEIGHT}, the distance (m) from the ground to the base of the cone, \ct{TREE_HEIGHT}, the height (m) of the tree from ground to tip, and the position triplet, \ct{XYZ}, of the trunk at the ground. Note that in this example, exactly one particle is specified per grid cell, positioned randomly within the cell. The number of actual pine needles this single particle represents depends on the specified (dry) \ct{MASS_PER_VOLUME}. Additional details on specifying different standard tree crown geometries can be found in Section~\ref{info:initial_droplets}.
+These lines create a collection of particles in the shape of a cone. The dimensions of the cone are specified via the parameters \ct{CROWN_BASE_WIDTH}, the diameter of the base of the cone (m); \ct{CROWN_BASE_HEIGHT}, the distance (m) from the ground to the base of the cone, \ct{TREE_HEIGHT}, the height (m) of the tree from ground to tip; and the position triplet, \ct{XYZ}, of the trunk at the ground. Note that in this example, exactly one particle is specified per grid cell with a random position within the cell. The number of actual pine needles this single particle represents depends on the specified (dry) \ct{MASS_PER_VOLUME}. Additional details on specifying different standard tree crown geometries can be found in Section~\ref{info:initial_droplets}.
 
 A handy way to introduce many trees into a simulation is by way of a \ct{SURF} line as follows:
 \begin{lstlisting}
 &SURF ID='forest',..., INIT_IDS(1:2)='needles','branches', INIT_PER_AREA=0.1 /
 \end{lstlisting}
-This line indicates that solid boundaries with the surface properties given by \ct{'forest'} shall have 1 tree per 10~\unit{m^2}, as indicated by the parameter \ct{INIT_PER_AREA}. The trees may consist of more than one type of particle, as indicated by the array \ct{INIT_IDS}. Note that this construct is designed for trees and is only invoked on upward-facing horizontal boundaries. Also note that the coordinates \ct{XYZ} on the \ct{INIT} line should be \ct{0,0,0} so that it can be repositioned accordingly.
+This line indicates that solid boundaries with the surface properties given by \ct{'forest'} shall have 1 tree per 10~\unit{m^2}, as indicated by the parameter \ct{INIT_PER_AREA}. The trees may consist of more than one type of particle, as indicated by the array \ct{INIT_IDS}. Note that this construct is designed for trees and is only invoked on upward-facing horizontal boundaries. Also note that the coordinates \ct{XYZ} on the \ct{INIT} line should be \ct{0,0,0} so that the trees are correctly positioned.
 
 
 \subsection{Bulk Density Input Files}
@@ -7528,9 +7522,9 @@ WRITE(LU_VEG_IN) MASS_PER_VOLUME
 \end{lstlisting}
 The sextuplet \ct{VXMIN,VXMAX,VYMIN,VYMAX,VZMIN,VZMAX} gives the bounds (upper and lower voxel faces) of the entire vegetation containing volume. This is used to determine whether a specific mesh contains any of the vegetation. The triplet \ct{VDX,VDY,VDZ} gives the spatial resolution of the input data and \ct{NVOX} is the total number of voxels which actually contain vegetation. The coordinates of each voxel center are given by \ct{VCX,VCY,VCZ} and the bulk density by \ct{MASS_PER_VOLUME}. Third-party tools to create vegetation inputs are in development. However, an example python script for creating a custom \ct{BULK_DENSITY_FILE} can be found in the cad GitHub repository, \ct{firemodels/cad}.
 
-FDS effectively creates a \ct{BLOCK} shaped \ct{INIT} line for each voxel. In this way, it is possible to change the FDS resolution and meshing without needing to create a new \ct{BULK_DENSITY_FILE}. By default, if a \ct{BULK_DENSITY_FILE} is specified FDS will input vegetation with \ct{N_PARTICLES_PER_CELL = 1} to minimize memory usage. However, if an FDS grid cell intersects multiple vegetation voxels (for example, due to misalignment between FDS and voxel resolution), more than one particle will be added to the cell. The input mass will be conserved; this will simply increase memory usage, and it is generally recommended to provide a \ct{BULK_DENSITY_FILE} with the same resolution as your simulation if possible.
+FDS creates a \ct{BLOCK} shaped \ct{INIT} line for each voxel. In this way, it is possible to change the FDS resolution and meshing without needing to create a new \ct{BULK_DENSITY_FILE}. By default, if a \ct{BULK_DENSITY_FILE} is specified FDS will input vegetation with \ct{N_PARTICLES_PER_CELL = 1} to minimize memory usage. However, if an FDS grid cell intersects multiple vegetation voxels (for example, due to misalignment between FDS and voxel resolution), more than one particle will be added to the cell. The input mass will be conserved; this will simply increase memory usage. It is recommended to provide a \ct{BULK_DENSITY_FILE} with the same resolution as your simulation if possible.
 
-Additionally, the \ct{BULK_DENSITY_FILE} can be scaled using a \ct{BULK_DENSITY_FACTOR}. The value of this input, also provided on the \ct{INIT} line, will be multiplied by all values in the \ct{BULK_DENSITY_FILE} when they are read in. This allows quick adjustment of the overall canopy density without having to regenerate new binary files. It can also be used to re-apply the same \ct{BULK_DENSITY_FILE} for different classes of particles, such as foliage and branches, which may have the same spatial distribution of material but different proportions of bulk density.
+Additionally, the \ct{BULK_DENSITY_FILE} can be scaled using a \ct{BULK_DENSITY_FACTOR}. The value of this input, also provided on the \ct{INIT} line, will multiply by all \ct{MASS_PER_VOLUME} values in the \ct{BULK_DENSITY_FILE} when they are read in. This allows quick adjustment of the overall canopy density without having to regenerate new binary files. It can also be used to re-apply the same \ct{BULK_DENSITY_FILE} for different classes of particles, such as foliage and branches, which may have the same spatial distribution of material but different proportions of bulk density.
 
 \subsection{Firebrands}
 \label{info:firebrands}
@@ -7565,8 +7559,6 @@ Although in its early stages of development, a rudimentary ember generation algo
 In some cases, tracking embers may be prohibitively expensive or irrelevant to the problem and it may be sufficient simply to remove the particles from the calculation once they reach the ember thresholds.  If this is desired, add \ct{TRACK_EMBERS=F} to the \ct{PART} line.
 
 
-\newpage
-
 \section{Boundary Fuel Model}
 \label{info:boundary_fuel_model}
 
@@ -7582,7 +7574,7 @@ To invoke this {\em Boundary Fuel Model}, create a \ct{SURF} line similar to the
       MASS_PER_VOLUME(1) = 5.
       THICKNESS(1:2) = 0.076,0.1 /
 \end{lstlisting}
-The presence of the parameter \ct{MASS_PER_VOLUME} automatically triggers the Boundary Fuel Model. Note that its argument of 1 refers to the first layer; the second layer being \ct{Soil}. If you specify \ct{MOISTURE_CONTENT}, FDS will automatically add a \ct{MATL} line for \ct{'MOISTURE'}.
+The presence of the parameter \ct{MASS_PER_VOLUME} automatically triggers the Boundary Fuel Model. Note that its argument of 1 refers to the first layer; the second layer being \ct{Soil}. If you specify \linebreak[4]\ct{MOISTURE_CONTENT}, FDS will automatically add a \ct{MATL} line for \ct{'MOISTURE'}.
 
 The drag exerted on the wind flowing through the vegetation is imposed as a force term in the gas phase grid cell adjacent to the boundary:
 \be
@@ -7610,10 +7602,6 @@ For scenarios where the fire's rate of spread (ROS) is relatively slow and the n
 \ee
 The more grid cells spanning the front width, the better resolved the simulation. In badly resolved simulations, the time required for the fire to spread the width of a grid cell may be comparable or longer than the burnout time, $\Delta t_{\rm b}$. In such cases, it is necessary to specify an effective ``burnout time'' that accounts for the unresolved burning occurring at subgrid scales. This parameter, \ct{MINIMUM_BURNOUT_TIME} (s), is specified on the \ct{SURF} line that provides parameters for the vegetation. By default, it has a very large value, meaning that it is ignored unless specified.
 
-
-\newpage
-
-
 \section{Comparing the Particle and Boundary Fuel Models of Vegetation}
 \label{ground_vegetation}
 
@@ -7638,7 +7626,7 @@ Figure~\ref{ground_vegetation_load_fig} displays the heat release rate (left) an
 \subsection{Vegetation Drag}
 \label{ground_vegetation_drag}
 
-In this next example, ground vegetation with the same properties as the previous example lines the floor of two wind tunnels that are 8~m long, 1~m wide, and 0.5~m tall. The height of the vegetation is 2.5~cm, and the grid size in the simulation is 5~cm. The tunnel walls and ceiling are free-slip. Particles model the vegetation in one tunnel; the Boundary Fuel Model is applied in the other. A 2~m/s wind is imposed for 30~s, followed by 4~m/s for another 30~s, and finally 6~m/s for another 30~s. The pressure upstream of the vegetation is recorded. The tunnel is open downstream, where the pressure is ambient. The upstream pressure ought to be similar, as shown in Fig.~\ref{ground_vegetation_drag_fig}.
+In this next example, ground vegetation with the same properties as the previous example lines the floor of three wind tunnels that are 8~m long, 1~m wide, and 0.5~m tall. The height of the vegetation is 2.5~cm, and the grid size in the simulation is 5~cm. The tunnel walls and ceiling are free-slip. Particles model the vegetation in one tunnel, the Boundary Fuel Model is applied in another tunnel, and the Level Set Model (see Sec.~\ref{info:level_set}) is applied in the final tunnel. A 2~m/s wind is imposed for 30~s, followed by 4~m/s for another 30~s, and finally 6~m/s for another 30~s. The pressure upstream of the vegetation is recorded. The tunnel is open downstream, where the pressure is ambient. The upstream pressure ought to be similar for all three models, as shown in Fig.~\ref{ground_vegetation_drag_fig}.
 
 \begin{figure}[ht]
 \centering
@@ -7670,7 +7658,7 @@ In this next example, two small wind tunnels blowing hot air at $U=2$~m/s and $T
 \be
    \rho_{\rm s} \, c_{\rm s} \, \frac{\d T}{\d t} = \sigma_{\rm v} \, h \, (T_{\rm air} - T)  \quad ; \quad   h= \frac{k_{\rm air}}{D} \, 0.683 \, \RE^{0.466} \, \PR^{0.333}  \quad ; \quad  \RE = \frac{\rho_{\rm air} U D}{\mu_{\rm air}} \quad ; \quad \PR=0.7
 \ee
-where the solid density $\rho_{\rm s}=400$~\unit{kg/m^3}, specific heat $c_{\rm s}=1.5$~\unit{kJ/(kg.K)}, $\rho_{\rm air}\approx 0.60$~\unit{kg/m^3}, $\mu_{\rm air}\approx 3 \times 10^{-5}$~\unit{kg/(m.s)}, $k_{\rm air}\approx 4 \times 10^{-5}$~\unit{kW/(m.K)}, $D=4/\sigma_{\rm v}$. The solution is:
+where the solid density $\rho_{\rm s}=400$~\unit{kg/m^3}, specific heat $c_{\rm s}$=\qty{1.5}{kJ/(kg.K)}, $\rho_{\rm air}\approx$\qty{0.60}{kg/m^3}, $\mu_{\rm air}\approx$\qty{3E-5}{kg/(m.s)}, $k_{\rm air}\approx$\qty{4E-5}{kW/(m.K)}, $D=4/\sigma_{\rm v}$. The solution is:
 \be
    T(t) = T_{\rm air} - (T_{\rm air}-T_0) \, \exp \left(- \frac{h \, \sigma_{\rm v} \, t}{\rho_{\rm s} \, c_{\rm s}} \right) \; \unit{\degreeCelsius}
 \ee
@@ -7899,21 +7887,19 @@ All devices, in the broadest sense of the word, are designated via the namelist 
 \section{Device Location and Orientation}
 \label{info:DEVC}
 
-Regardless of the specific properties, each device needs to be sited either at a point within the computational domain, or
-over a span of the domain, like a beam smoke detector. For example, a sprinkler is sited within the domain with a line like:
+Regardless of the specific properties, each device needs a location such as a point within the computational domain (a thermocouple), a span of the domain (a beam smoke detector), or an object in the simulation (an HVAC component or a specific particle). For example, a sprinkler is sited at a point in the domain with a line like:
 \begin{lstlisting}
 &DEVC XYZ=3.0,5.6,2.3, PROP_ID='Acme Sprinkler 123', ID='Spk_39' /
 \end{lstlisting}
-The physical coordinates of the device are given by a triplet of real numbers, \ct{XYZ}.  FDS uses these coordinates to determine in which gas or wall cell the device is located. Devices are evaluated using cell centered or face centered values of the cell the device is located in; no interpolation is done. The properties of the device are contained on the \ct{PROP} line designated by \ct{PROP_ID}, which will be explained below for each of the special devices included in FDS. The character string \ct{ID} is merely a descriptor to identify the device in the output files, and if any action is tied to its activation. There should be no commas in \ct{ID} because commas are used as column separators in the output file.
+The physical coordinates of the device are given by a triplet of real numbers, \ct{XYZ}.  FDS uses these coordinates to determine in which gas or wall cell the device is located. By default, devices are evaluated using cell centered or face centered values of the cell the device is located in; no interpolation to the exact \ct{XYZ} location is done. The properties of the device are contained on the \ct{PROP} line designated by \ct{PROP_ID}, which will be explained below for each of the special devices included in FDS. The character string \ct{ID} is merely a descriptor to identify the device in the \ct{CHID_devc.csv} output files, and if any action is tied to its activation. There should be no commas in \ct{ID} because commas are used as column separators in the output file. There should also be no plus (+) signs in the \ct{ID} since this has special meaning in scripts used for the FDS verification and validation process.
 
-Not all devices need to be associated with a particular set of properties via the \ct{PROP_ID}. For example, pointwise output quantities are specified with a single \ct{DEVC} line, like
+Most devices are not associated with a particular set of properties via the \ct{PROP_ID}. For example, a single \ct{DEVC} line, like
 \begin{lstlisting}
 &DEVC ID='TC-23', XYZ=3.0,5.6,2.3, QUANTITY='TEMPERATURE'  /
 \end{lstlisting}
-which tells FDS to record the temperature at the given point as a function of time. The \ct{ID} is a label in the output file whose name is \ct{CHID_devc.csv}. Note that FDS outputs the data stored for that cell without performing any interpolation with surrounding cells.
+tells FDS to record the predicted gas temperature at the given point as a function of time. As this is a basic physical quantity, no additional data on a \ct{PROP} is needed. 
 
-Some devices have a particular orientation. The parameter \ct{IOR} (Index of Orientation) is required for any device that is placed on the surface of a solid. The values $\pm$1 or $\pm$2 or $\pm$3 indicate the direction that the device ``points.'' For example, \ct{IOR=-1} means that the device is mounted on a wall that faces in the negative $x$ direction. \ct{ORIENTATION} is used for devices that are not on a surface and require a directional specification, like a sprinkler. \ct{ORIENTATION} is specified with a triplet of real number values that indicate the components of the direction vector. The default value of \ct{ORIENTATION} is (0,0,-1). For example, a default downward-directed sprinkler spray can be redirected in other direction.
-If you were to specify
+Some devices have a particular orientation. The parameter \ct{IOR} (Index of Orientation) is required for any device that is placed on the surface of a solid. The values $\pm$1 or $\pm$2 or $\pm$3 indicate the direction that the device ``points.'' For example, \ct{IOR=-1} means that the device is mounted on a wall that faces in the negative $x$ direction. \ct{ORIENTATION} is used for devices that are not on a surface and require a directional specification, like a sprinkler. \ct{ORIENTATION} is specified with a triplet of real number values that indicate the components of the direction vector. The default value of \ct{ORIENTATION} is (0,0,-1) indicating the spray is pointed at the floor of the domain. This can be changed to another direction. For example, if you were to specify
 \begin{lstlisting}
 &DEVC XYZ=3.0,5.6,2.3, PROP_ID='...', ID='...', ORIENTATION=0.707,0.707,0.0 /
 \end{lstlisting}
@@ -7924,9 +7910,9 @@ The delivered density to the floor from a sprinkler depends upon where the sprin
 \section{Device Output}
 \label{info:out:DEVC}
 
-Each device has a \ct{QUANTITY} associated with it. The time history of each \ct{DEVC} quantity is output to a comma-delimited ASCII file called \ct{CHID_devc.csv} (see Sec.~\ref{out:DEVC} for output file format). This file can be imported into most spreadsheet software packages.  Most spreadsheet programs limit the number of columns to some number (for example the 2003 version Microsoft Excel had a 256 column limit).  As a default, FDS places no limit on the amount of columns in a comma-separated value (.csv) file.  If your spreadsheet application allows fewer columns than the number of \ct{DEVC} or \ct{CTRL} in your input file then set \ct{COLUMN_DUMP_LIMIT} equal to \ct{T} on the \ct{DUMP} line. Use \ct{DEVC_COLUMN_LIMIT} and \ct{CTRL_COLUMN_LIMIT} to indicate the limit of columns in the device and control output files. Their default values are 254. If more devices or controls are present than the limit, then multiple output files will be written. The file name will have a number appended to it. For example, if two device file are required, they will be named \ct{CHID_1_devc.csv} and \ct{CHID_2_devc.csv}.
+Each device has a \ct{QUANTITY} associated with it. The time history of each \ct{DEVC} \ct{QUANTITY} is output to a comma-delimited ASCII file called \ct{CHID_devc.csv} (see Sec.~\ref{out:DEVC} for output file format). This file can be imported into most spreadsheet software packages.  Most spreadsheet programs limit the number of columns to some number (for example the 2003 version Microsoft Excel had a 256 column limit).  As a default, FDS places no limit on the amount of columns in a comma-separated value (.csv) file.  If your spreadsheet application allows fewer columns than the number of \ct{DEVC} or \ct{CTRL} in your input file then set \ct{COLUMN_DUMP_LIMIT} equal to \ct{T} on the \ct{DUMP} line. Use \ct{DEVC_COLUMN_LIMIT} and \linebreak[4]\ct{CTRL_COLUMN_LIMIT} to indicate the limit of columns in the device and control output files. Their default values are 254. If more devices or controls are present than the limit, then multiple output files will be written. The file name will have a number appended to it. For example, if two device file are required, they will be named \ct{CHID_1_devc.csv} and \ct{CHID_2_devc.csv}.
 
-The \ct{DEVC} output is written to a file every \ct{DT_DEVC} seconds or at discrete times indicated by \ct{RAMP_DEVC}, both of which are specified on the \ct{DUMP} line. By default, the output \ct{QUANTITY} is time-averaged between printouts. To prevent this, add \ct{TIME_AVERAGED=F} to the \ct{DEVC} line.
+The \ct{DEVC} output is written to a file every \ct{DT_DEVC} seconds or at discrete times indicated by \linebreak[4]\ct{RAMP_DEVC}, both of which are specified on the \ct{DUMP} line. By default, the output \ct{QUANTITY} is time-averaged between printouts. To prevent this and get the instantaneous value, add \ct{TIME_AVERAGED=F} to the \ct{DEVC} line.
 
 A useful option for the \ct{DEVC} line is to add \ct{RELATIVE=T}, which will indicate that only the change in the initial value of the \ct{QUANTITY} is to be output. This can be useful for verification and validation studies. You can also output the absolute value of the device quantity by setting \ct{ABSOLUTE_VALUE} to \ct{T} on the \ct{DEVC} line.
 
@@ -7943,7 +7929,7 @@ All devices must have a specified \ct{QUANTITY}.  Some special devices (Sec.~\re
 \section{Special Device Properties}
 \label{info:PROP}
 
-Many devices are fairly easy to describe, like a point measurement, with only a few parameters which can be included on the \ct{DEVC} line. However, for more complicated devices, it is inconvenient to list all of the properties on each and every \ct{DEVC} line. For example, a simulation might include hundreds of sprinklers, but it is tedious to list the properties of the sprinkler each time the sprinkler is sited. For these devices, use a separate namelist group called \ct{PROP} to store the relevant parameters. Each \ct{PROP} line is identified by a unique \ct{ID}, and invoked by a \ct{DEVC} line by the string \ct{PROP_ID}. The best way to describe the \ct{PROP} group is to list the various special devices and their properties.
+Many devices are fairly easy to describe, like a point measurement, with only a few parameters which can be included on the \ct{DEVC} line. However, for more complicated devices, it is inconvenient to list all of the properties on each and every \ct{DEVC} line. For example, a simulation might include hundreds of sprinklers, but it is tedious to list the properties of the sprinkler each time the sprinkler is sited. For these devices, use a separate namelist group called \ct{PROP} to store the relevant parameters. Each \ct{PROP} line is identified by a unique \ct{ID}, and invoked by a \ct{DEVC} line by the string \ct{PROP_ID}. The sections that follow list the various special devices and their properties.
 
 
 \subsection{Sprinklers}
@@ -7965,9 +7951,9 @@ A sprinkler, known as \ct{'Spr-1'}, is located at a point in space given by \ct{
 \item \ct{C_FACTOR} Conduction Factor in units of \unit{(m/s)\tothe{1/2}}. (Default 0.)
 \item \ct{ACTIVATION_TEMPERATURE} in units of \unit{\degreeCelsius}. (Default 74~\unit{\degreeCelsius})
 \item \ct{INITIAL_TEMPERATURE} of the link in units of \unit{\degreeCelsius}. (Default \ct{TMPA})
-\item \ct{FLOW_RATE} in units of L/min. This parameter is only appropriate for liquid droplets. An alternative is to provide the \ct{K_FACTOR} in units of \unit{L/(min.bar\tothe{1/2})} and the \ct{OPERATING_PRESSURE}, the gauge pressure at the sprinkler, in units of bar. The flow rate is then given by $K \sqrt{p}$. Note that 1~bar is equivalent to 14.5~psi, 1~gpm (gal/min) is equivalent to 3.785~L/min, 1~\unit{gpm/psi\tothe{1/2}} is equivalent to 14.41~\unit{L/(min.bar\tothe{1/2})}.
+\item \ct{FLOW_RATE} in units of L/min. This parameter is only appropriate for liquid droplets. An alternative is to provide the \ct{K_FACTOR} ($K$) in units of \unit{L/(min.bar\tothe{1/2})} and the \ct{OPERATING_PRESSURE}, the gauge pressure ($p$) at the sprinkler, in units of bar. The flow rate is then given by $K \sqrt{p}$. Note that 1~bar is equivalent to 14.5~psi, 1~gpm (gal/min) is equivalent to 3.785~L/min, 1~\unit{gpm/psi\tothe{1/2}} is equivalent to 14.41~\unit{L/(min.bar\tothe{1/2})}.
 \item \ct{MASS_FLOW_RATE} in units of kg/s. This parameter can be used instead of \ct{FLOW_RATE} for liquid droplets, but it must be used for solid particles. If \ct{MASS_FLOW_RATE} is specified, the \ct{PARTICLE_VELOCITY} must also be specified.
-\item \ct{OFFSET} Radius (m) of a sphere surrounding the sprinkler where the water droplets are initially placed in the simulation (Default 0.05~m). It is assumed that beyond the \ct{OFFSET} the droplets have completely broken up and are transported independently of each other. Do not locate a sprinkler or nozzle within \ct{OFFSET} meters of a mesh boundary. If you do, the droplets introduced into the adjacent mesh will be rejected. The entire spray pattern of the sprinkler need not lie within one mesh, but the volume immediately surrounding the sprinkler itself must lie in one mesh.
+\item \ct{OFFSET} Radius (m) of a sphere surrounding the sprinkler where the water droplets are initially placed in the simulation (Default 0.05~m). It is assumed that beyond the \ct{OFFSET} the droplets have completely broken up and are transported independently of each other. The entire spray pattern of the sprinkler need not lie within one mesh, but the volume immediately surrounding the sprinkler itself must lie in one mesh. For very small droplets, consider setting offset to be at least one grid cell away from the sprinkler.
 \item \ct{PARTICLE_VELOCITY}  Initial droplet velocity. (Default 0~m/s)
 \item \ct{ORIFICE_DIAMETER} Diameter of the nozzle orifice in m (default 0~m). This input provides an alternative way to set droplet velocity by giving values for \ct{FLOW_RATE} and \ct{ORIFICE_DIAMETER}, in which case the droplet velocity is computed by dividing the flow rate by the orifice area. Use this method if you do not have any information about droplet velocity. However, quite often you must fine-tune the \ct{PARTICLE_VELOCITY} in order to reproduce a particular spray profile. The \ct{ORIFICE_DIAMETER} is not used if either \ct{PARTICLE_VELOCITY} or \ct{SPRAY_PATTERN_TABLE} is specified.
 \item \ct{SPRAY_ANGLE} A pair of angles (in degrees) through which the droplets are sprayed. The angles outline a conical spray pattern relative to the south pole of the sphere centered at the sprinkler with radius \ct{OFFSET}. For example, \ct{SPRAY_ANGLE=30.,80.} directs the water spray through a band between 30\unit{\degree} and 80\unit{\degree} of the \ct{ORIENTATION} vector, which is (0,0,-1) by default (see Figure~\ref{Sprinkler_Sketch}). Elliptical spray patterns can be specified via a pair of spray angles. For example, \ct{SPRAY_ANGLE(1:2,1)=0.,60.}  and \ct{SPRAY_ANGLE(1:2,2)=0.,30.}, defines a spray pattern with 60 degree angle in the direction of the $x$ axis and a 30 degree angle in the direction of the $y$ axis. From above, the spray pattern resembles an ellipse. \ct{SPRAY_PATTERN_SHAPE} determines how the droplets are distributed within the specified \ct{SPRAY_ANGLE}. Choices are \ct{'UNIFORM'} and \ct{'GAUSSIAN'}. The default distribution is \ct{'GAUSSIAN'}. The parameter \ct{SPRAY_PATTERN_MU} controls the latitude of the maximum density of droplets for the \ct{'GAUSSIAN'} distribution. The width of the distribution is controlled by the parameter \ct{SPRAY_PATTERN_BETA}.
@@ -8086,7 +8072,7 @@ designate two nozzles of the same type, one which activates at time zero, the ot
 \subsubsection{Example Case: Setting the Flow Rate of a Nozzle}
 \label{flow_rate}
 
-This example demonstrates the use of pressure ramps and control logic for opening and closing nozzles. It also serves as a verification test for the water flow rate. There are four nozzles that open at designated times: 0 s, 15 s, 30 s and 45 s. At time 60 s, all the nozzles are closed. The number of open nozzles is measured using a device with quantity \ct{'OPEN NOZZLES'}. A comparison of the FDS result and the exact, intended values is shown in Fig.~\ref{flow_rate_fig}.  Note that \ct{'OPEN NOZZLES'} counts only nozzles belonging to the specified \ct{PIPE_INDEX}. The pressure ramp has been designed to deliver a total flow rate of 10~L/min at all values of open nozzles. Mathematically this means that
+The \ct{flow_rate.fds} example case demonstrates the use of pressure ramps and control logic for opening and closing nozzles. It also serves as a verification test for the water flow rate. There are four nozzles that open at designated times: 0 s, 15 s, 30 s and 45 s. At time 60 s, all the nozzles are closed. The number of open  nozzles is measured using a device with \ct{QUANTITY='OPEN NOZZLES'}. A comparison of the FDS result and the exact, intended values is shown in Fig.~\ref{flow_rate_fig}.  Note that \ct{'OPEN NOZZLES'} counts only nozzles belonging to the specified \ct{PIPE_INDEX}. The pressure ramp has been designed to deliver a total flow rate of 10~L/min at all values of open nozzles. Mathematically this means that
 \be
 n K \sqrt{p} = 10 \;\unit{L/min} \quad \Rightarrow \quad
 p = \left( \frac{10 \;\unit{L/min}}{n K}\right)^2
@@ -8130,7 +8116,7 @@ In this example, a velocity patch is activated at 10 s in the simulation.  Any $
 \subsection{Heat Detectors}
 \label{info:heat_detectors}
 
-\ct{QUANTITY='LINK TEMPERATURE'} defines a heat detector, which uses essentially the same activation algorithm as a sprinkler, without the water spray.
+\ct{QUANTITY='LINK TEMPERATURE'} defines a heat detector. This uses the same activation algorithm as a sprinkler without water spray cooling effects or pipe conduction (\ct{C_FACTOR}) effects. 
 \begin{lstlisting}
 &DEVC ID='HD_66', PROP_ID='Acme Heat', XYZ=2.3,4.6,3.4 /
 &PROP ID='Acme Heat', QUANTITY='LINK TEMPERATURE', RTI=132., ACTIVATION_TEMPERATURE=74. /
@@ -8222,7 +8208,7 @@ Note that the transmission is given in units of \%/m rather than \% like obscura
 \subsubsection{Example Case: A Beam Detector}
 \label{beam_detector}
 
-A 10~m by 10~m by 4~m compartment is filled with air at 20~\unit{\degreeCelsius} with a density of $\rho=1.195$~\unit{kg/m^3}. A uniformly distributed gas species with a mass fraction of $Y_{\rm s}=3 \times 10^{-5}$ represents smoke. The ``smoke'' density is $\rho_{\rm s}\equiv \rho Y_{\rm s}=3.585 \times 10^{-5}$~\unit{kg/m^3}. Using the default mass extinction coefficient of $K_{\rm m}=8700$~\unit{m^2/kg}, the optical depth is calculated to be $K \equiv K_{\rm m} \rho_{\rm s} = 0.3119$~\unit{m^{-1}}. Three beam detectors are located in the compartment, all with a path length of $L=10$~m but with different orientations. The expected path obscuration is $100(1-\exp(-KL))=95.58$~\%. Note that this case uses 8 meshes to span the computational domain, and the beams are permitted to pass from one mesh to another.
+A 10~m by 10~m by 4~m compartment is filled with air at 20~\unit{\degreeCelsius} with a density of $\rho=1.195$~\unit{kg/m^3}. A uniformly distributed gas species with a mass fraction of $Y_{\rm s}$=\num{3e-5} represents smoke. The ``smoke'' density is $\rho_{\rm s}\equiv \rho Y_{\rm s}$=\qty{3.585e-5}{kg/m^3}. Using the default mass extinction coefficient of $K_{\rm m}=8700$~\unit{m^2/kg}, the optical depth is calculated to be $K \equiv K_{\rm m} \rho_{\rm s} = 0.3119$~\unit{m^{-1}}. Three beam detectors are located in the compartment, all with a path length of $L=10$~m but with different orientations. The expected path obscuration is $100(1-\exp(-KL))=95.58$~\%. Note that this case uses 8 meshes to span the computational domain, and the beams are permitted to pass from one mesh to another.
 
 This case also provides a check on the Smokeview rendering of the smoke-filled compartment. Nine columns are located at increasing distance from the front wall in increments of 1~m. Equation~(\ref{vis}) predicts a visibility distance of $S \equiv 3/K=9.6$~m. Referring to Fig.~\ref{beam_detector_fig}, you should just barely see the ninth column at a distance of 8.9~m from the front wall. The plot at the bottom of Fig.~\ref{beam_detector_fig} compares the pixel values used by Smokeview to color the columns versus the expected values. The pixel values are integers between 0 and 255, where 255 is white and 0 is black.
 
@@ -8242,7 +8228,7 @@ This case also provides a check on the Smokeview rendering of the smoke-filled c
 \subsection{Aspiration Detection Systems}
 \label{info:aspiration_detector}
 
-An aspiration detection system groups together a series of smoke measurement devices. An aspiration system consists of a sampling pipe network that draws air from a series of locations to a central point where an obscuration measurement is made.  To define such a system in FDS, you must provide the sampling locations, sampling flow rates, the transport time from each sampling location, and if an alarm output is desired, the overall obscuration ``setpoint.''  One or more \ct{DEVC} inputs are used to specify details of the sampling locations, and one additional input is used to specify the central detector:
+An aspiration detection system groups together a series of smoke measurement devices. An aspiration system consists of a sampling pipe network that draws air from multiple locations to a central point where an obscuration measurement is made.  To define such a system in FDS, you must provide the sampling locations, sampling flow rates, the transport time from each sampling location to the central measurement location, and if an alarm output is desired, the overall obscuration \ct{SETPOINT}.  One or more \ct{DEVC} inputs are used to specify details of the sampling locations, and one additional input is used to specify the central detector:
 \begin{lstlisting}
 &DEVC XYZ=..., QUANTITY='DENSITY', SPEC_ID='SOOT', ID='soot1', DEVC_ID='asp1',
       FLOWRATE=0.1, DELAY=20 /
@@ -8266,7 +8252,7 @@ Note that FDS doesn't actually remove gas from the computational domain based up
 \subsubsection{Example Case: \ct{aspiration_detector}}
 \label{aspiration_detector}
 
-A cubical compartment, 2~m on a side has a three sampling location aspiration system.  The three locations have equal flow rates of 0.3~kg/s, and transport times of 50, 100, and 150~s, respectively.  No bypass flow rate is specified for the aspiration detector.  Combustion products are forced into the bottom of the compartment at a rate of 1~kg/s. The \ct{SOOT_YIELD=0.001}. Mass is removed from the top of the compartment at a rate of 1~kg/s. The aspiration detector shows an increasing obscuration over time.  There is a delay of slightly over 50~s in the initial increase which results from the 50~s transport time for the first sampling location plus a short period of time to transport the combustion products to the sampling location.  The detector response has three plateaus that result from the delay times of the sampling locations.  The sampling points are co-located, so each plateau represents an additional one third of the soot being transported to the detector.  The soot density at the sampling point is $7.1 \times 10^{-5}$~\unit{kg/m^3}.  Using this value the plateaus are computed as 18~\%, 33.2~\%, and 45.7~\%, as seen in Fig.~\ref{aspiration_detector_fig}.
+A cubical compartment, 2~m on a side has a three sampling location aspiration system.  The three locations have equal flow rates of 0.3~kg/s, and transport times of 50, 100, and 150~s, respectively.  No bypass flow rate is specified for the aspiration detector.  Combustion products are forced into the bottom of the compartment at a rate of 1~kg/s. The \ct{SOOT_YIELD=0.001}. Mass is removed from the top of the compartment at a rate of 1~kg/s. The aspiration detector shows an increasing obscuration over time.  There is a delay of slightly over 50~s in the initial increase which results from the 50~s transport time for the first sampling location plus a short period of time to transport the combustion products to the sampling location.  The detector response has three plateaus that result from the delay times of the sampling locations.  The sampling points are co-located, so each plateau represents an additional one third of the soot being transported to the detector.  The soot density at the sampling point is \qty{7.1e-5}{kg/m^3}.  Using this value the plateaus are computed as 18~\%, 33.2~\%, and 45.7~\%, as seen in Fig.~\ref{aspiration_detector_fig}.
 
 \begin{figure}[ht]
 \begin{center}
@@ -8285,7 +8271,7 @@ In some cases it may be useful to output a characteristic depth of the fire alon
            0 & \dot{q}_i''' \le \dot{q}_{\rm thresh}''' \\
            1 & \dot{q}_i''' > \dot{q}_{\rm thresh}''' \end{array} \right.\\
 \end{equation}
-As with the beam detectors, $i$ is a mesh cell along the path of the beam and $ \Delta x_i$ is the distance within the mesh cell that is traversed by the beam. The threshold value, $\dot{q}_{\rm thresh}'''$, is applied by setting \ct{SETPOINT} on the \ct{DEVC} line in units of \unit{kW/m^3}. If this value is not provided, the default is the threshold for rendering HRRPUV as described in Section~\ref{info:SMOKE3D}.
+As with the beam detectors, $i$ is a mesh cell along the path of the beam and $ \Delta x_i$ is the distance within the mesh cell that is traversed by the beam. The threshold value, $\dot{q}_{\rm thresh}'''$, is applied by setting \ct{QUANTITY_RANGE(1)} on the \ct{DEVC} line in units of \unit{kW/m^3}. If this value is not provided, the default is the threshold for rendering HRRPUV as described in Section~\ref{info:SMOKE3D}.
 
 
 \section{Basic Control Logic}
@@ -12030,9 +12016,9 @@ Keyword                           & Type           & Description                
 Keyword                           & Type           & Description                                  & Units                 & Default   \\ \hline  \hline
 \endhead
 \ct{CLIP_DT_RESTRICTIONS_MAX}     & Integer        & Section~\ref{info:CLIP:dens}                 &                       & 5      \\ \hline
-\ct{MAXIMUM_DENSITY}              & Real           & Section~\ref{info:CLIP:dens}                 & \unit{kg/m^3}         &        \\ \hline
+\ct{MAXIMUM_DENSITY}              & Real           & Section~\ref{info:CLIP:dens}                 & \unit{kg/m^3} \rule{0pt}{2.3ex} &        \\ \hline
 \ct{MAXIMUM_TEMPERATURE}          & Real           & Section~\ref{info:CLIP:temp}                 & \unit{\degreeCelsius} &        \\ \hline
-\ct{MINIMUM_DENSITY}              & Real           & Section~\ref{info:CLIP:dens}                 & \unit{kg/m^3}         &        \\ \hline
+\ct{MINIMUM_DENSITY}              & Real           & Section~\ref{info:CLIP:dens}                 & \unit{kg/m^3} \rule{0pt}{2.3ex} &        \\ \hline
 \ct{MINIMUM_TEMPERATURE}          & Real           & Section~\ref{info:CLIP:temp}                 & \unit{\degreeCelsius} &        \\ \hline
 \end{xltabular}
 
@@ -12074,10 +12060,10 @@ Keyword                                          & Type       & Description     
 \ct{ODE_REL_ERROR}                               & Real       & Section~\ref{info:chem_integration}          &           &                     \\ \hline
 \ct{RAMP_ZETA_0}                                 & Character  & Section~\ref{info:turbulent_combustion}      &           &                     \\ \hline
 \ct{SUPPRESSION}                                 & Logical    & Section~\ref{info:extinction}                &           & \ct{T}              \\ \hline
-\ct{TAU_CHEM}                                    & Real       & Section~\ref{info:turbulent_combustion}      &           & 1.E-5               \\ \hline
-\ct{TAU_FLAME}                                   & Real       & Section~\ref{info:turbulent_combustion}      &           & 1.E10               \\ \hline
+\ct{TAU_CHEM}                                    & Real       & Section~\ref{info:turbulent_combustion}      &           & \num{1e-5} \rule{0pt}{2.3ex} \\ \hline
+\ct{TAU_FLAME}                                   & Real       & Section~\ref{info:turbulent_combustion}      &           & \num{1E10} \rule{0pt}{2.3ex} \\ \hline
 \ct{TURBULENT_FLAME_SPEED}                       & Real       & Section~\ref{info:turbulent_combustion}      & m/s       & 100.                \\ \hline
-\ct{ZZ_MIN_GLOBAL}                               & Real       & Section~\ref{info:finite}                    &           & 1.E-10              \\ \hline
+\ct{ZZ_MIN_GLOBAL}                               & Real       & Section~\ref{info:finite}                    &           & \num{1E-10} \rule{0pt}{2.3ex} \\ \hline
 \end{xltabular}
 
 \vspace{\baselineskip}
@@ -12152,7 +12138,7 @@ Keyword                & Type          & Description                            
 \needspace{2.5in}
 \section{\texorpdfstring{{\tt DEVC}}{DEVC} (Device Parameters)}
 
-\begin{xltabular}{\textwidth}{|p{6cm}|X|X|l|X|}
+\begin{xltabular}{\textwidth}{|p{4.2cm}|X|X|l|X|}
 \caption[Device parameters (\ct{DEVC} namelist group)]{For more information see Section~\ref{info:DEVC}.}
 \label{tbl:DEVC} \\
 \hline
@@ -12209,7 +12195,7 @@ Keyword                 & Type            & Description                         
 \ct{PROP_ID}            & Character       & Section~\ref{info:DEVC}                                         &       &               \\ \hline
 \ct{QUANTITY}           & Character       & Section~\ref{info:DEVC}                                         &       &               \\ \hline
 \ct{QUANTITY2}          & Character       & Section~\ref{info:line_file}                                    &       &               \\ \hline
-\ct{QUANTITY_RANGE}     & Real(2)         & Section~\ref{info:statistics}                                   &       & -1.E50,1.E50  \\ \hline
+\ct{QUANTITY_RANGE}     & Real(2)         & Section~\ref{info:statistics}                                   &       & \num{-1E50},\num{1E50} \rule{0pt}{2.3ex} \\ \hline
 \ct{REAC_ID}            & Character       & Section~\ref{info:gasoutputquantities}                          &       &               \\ \hline
 \ct{RELATIVE}           & Logical         & Section~\ref{info:out:DEVC}                                     &       & \ct{F}       \\ \hline
 \ct{R_ID}               & Character       & Section~\ref{info:line_file}                                    &       &               \\ \hline
@@ -12288,9 +12274,9 @@ Keyword                           & Type         & Description                  
 \ct{DT_TMP}                       & Real         & Section~\ref{info:CSVF}                &  s        &                               \\ \hline
 \ct{DT_UVW}                       & Real         & Section~\ref{info:CSVF}                &  s        &                               \\ \hline
 \ct{FLUSH_FILE_BUFFERS}           & Logical      & Section~\ref{info:DUMP}                &           & \ct{T}                        \\ \hline
-\ct{HRRPUV_MAX_SMV}               & Real         & Section~\ref{info:SMOKE3D}             & \unit{kW/m^3} & 1200                          \\ \hline
+\ct{HRRPUV_MAX_SMV}               & Real         & Section~\ref{info:SMOKE3D}             & \unit{kW/m^3} & 1200 \rule{0pt}{2.3ex}      \\ \hline
 \ct{MASS_FILE}                    & Logical      & Section~\ref{info:DUMP}                &           & \ct{F}                        \\ \hline
-\ct{MAXIMUM_PARTICLES}            & Integer      & Section~\ref{info:controlling_droplets}&           & 1000000                       \\ \hline
+\ct{MAXIMUM_PARTICLES}            & Integer      & Section~\ref{info:controlling_droplets}&           & \num{1e6} \rule{0pt}{2.3ex}   \\ \hline
 \ct{NFRAMES}                      & Integer      & Section~\ref{info:DUMP}                &           & 1000                          \\ \hline
 \ct{PLOT3D_PART_ID(5)}            & Char.~Quint  & Section~\ref{info:PL3D}                &           &                               \\ \hline
 \ct{PLOT3D_QUANTITY(5)}           & Char.~Quint  & Section~\ref{info:PL3D}                &           &                               \\ \hline
@@ -12494,7 +12480,7 @@ Keyword                      & Type          & Description                      
 \endhead
 \ct{AIRCOIL_ID}              & Character     & Section~\ref{info:HVACduct}                                              &                  &                \\ \hline
 \ct{AMBIENT}                 & Logical       & Section~\ref{info:HVACnode}                                              &                  & \ct{F}  \\ \hline
-\ct{AREA}                    & Real          & Section~\ref{info:HVACduct}                                              & \unit{m^2}       &                \\ \hline
+\ct{AREA}                    & Real          & Section~\ref{info:HVACduct}                                              & \unit{m^2}       & \rule{0pt}{2.3ex} \\ \hline
 \ct{CLEAN_LOSS}              & Real          & Section~\ref{info:HVACfilter}                                            &                  &                \\ \hline
 \ct{COOLANT_MASS_FLOW}       & Real          & Section~\ref{info:HVACaircoil}                                           & kg/s             &                \\ \hline
 \ct{COOLANT_SPECIFIC_HEAT}   & Real          & Section~\ref{info:HVACaircoil}                                           & \unit{kJ/(kg.K)} &               \\ \hline
@@ -12518,10 +12504,10 @@ Keyword                      & Type          & Description                      
 \ct{LEAK_REFERENCE_PRESSURE} & Real          & Section~\ref{info:Leaks}                                                 & Pa               & 4              \\ \hline
 \ct{LENGTH}                  & Real          & Section~\ref{info:HVACduct}                                              &  m               &                \\ \hline
 \ct{LOADING}                 & Real Array    & Section ~\ref{info:HVACfilter}                                           & kg               & 0.0            \\ \hline
-\ct{LOADING_MULTIPLIER}      & Real Array    & Section ~\ref{info:HVACfilter}                                           & 1/kg             & 1.0            \\ \hline
+\ct{LOADING_MULTIPLIER}      & Real Array    & Section ~\ref{info:HVACfilter}                                           & \unit{\per\kg}   & 1.0 \rule{0pt}{2.3ex} \\ \hline
 \ct{LOSS}                    & Real Array    & Sections ~\ref{info:HVACduct} -- \ref{info:HVACfilter}                   &                  & 0.0            \\ \hline
 \ct{MASS_FLOW}               & Real          & Section~\ref{info:HVACduct}                                              &  kg/s            &                \\ \hline
-\ct{MAX_FLOW}                & Real          & Section ~\ref{info:HVACfan}                                              & \unit{m^3/s}     &                \\ \hline
+\ct{MAX_FLOW}                & Real          & Section ~\ref{info:HVACfan}                                              & \unit{m^3/s}     & \rule{0pt}{2.3ex} \\ \hline
 \ct{MAX_PRESSURE}            & Real          & Section ~\ref{info:HVACfan}                                              &  Pa              &                \\ \hline
 \ct{N_CELLS}                 & Integer       & Section~\ref{info:hvacmasstransport}                                     &                  &                \\ \hline
 \ct{NETWORK_ID}              & Character     & Section~\ref{info:HVAC}                                                  &                  &                \\ \hline
@@ -12543,7 +12529,7 @@ Keyword                      & Type          & Description                      
 \ct{TYPE_ID}                 & Character     & Section~\ref{info:HVAC}                                                  &                  &                \\ \hline
 \ct{VENT_ID}                 & Character     & Section~\ref{info:HVACnode}                                              &                  &                \\ \hline
 \ct{VENT2_ID}                & Character     & Section~\ref{info:local_leakage}                                         &                  &                \\ \hline
-\ct{VOLUME_FLOW}             & Real          & Section~\ref{info:HVACduct}, \ref{info:HVACfan}                          & \unit{m^3/s}     &                \\ \hline
+\ct{VOLUME_FLOW}             & Real          & Section~\ref{info:HVACduct}, \ref{info:HVACfan}                          & \unit{m^3/s}     & \rule{0pt}{2.4ex} \\ \hline
 \ct{WAYPOINTS}               & Real Array    & Section~\ref{info:HVACduct}                                              &  m               &                \\ \hline
 \ct{XYZ}                     & Real Triplet  & Section~\ref{info:HVACnode}                                              &  m               &  0.0           \\ \hline
 \end{xltabular}
@@ -12585,12 +12571,12 @@ Keyword                       & Type              & Description                 
 \ct{DY}                       & Real              & Section~\ref{info:initial_droplets}           & m              & 0.            \\ \hline
 \ct{DZ}                       & Real              & Section~\ref{info:initial_droplets}           & m              & 0.            \\ \hline
 \ct{HEIGHT}                   & Real              & Section~\ref{info:initial_droplets}           & m              &               \\ \hline
-\ct{HRRPUV}                   & Real              & Section~\ref{info:init_hrrpuv}                & \unit{kW/m^3}   &               \\ \hline
+\ct{HRRPUV}                   & Real              & Section~\ref{info:init_hrrpuv}                & \unit{kW/m^3}   & \rule{0pt}{2.3ex} \\ \hline
 \ct{ID}                       & Character         & Section~\ref{info:PART_SURF}                  &                &               \\ \hline
 \ct{INNER_RADIUS}             & Real              & Section~\ref{info:initial_droplets}           & m              & 0.            \\ \hline
 \ct{MASS_FRACTION(:)}         & Real Array        & Section~\ref{info:init_species}               & kg/kg          & Ambient       \\ \hline
 \ct{MASS_PER_TIME}            & Real              & Section~\ref{info:initial_droplets}           & kg/s           &               \\ \hline
-\ct{MASS_PER_VOLUME}          & Real              & Section~\ref{info:initial_droplets}           & \unit{kg/m^3}  & 1             \\ \hline
+\ct{MASS_PER_VOLUME}          & Real              & Section~\ref{info:initial_droplets}           & \unit{kg/m^3}  & 1 \rule{0pt}{2.3ex} \\ \hline
 \ct{MULT_ID}                  & Character         & Section~\ref{info:MULT}                       &                &               \\ \hline
 \ct{NODE_ID}                  & Character         & Section~\ref{info:hvacmasstransport}          &                &               \\ \hline
 \ct{N_PARTICLES}              & Integer           & Section~\ref{info:initial_droplets}           &                & 0             \\ \hline
@@ -12608,7 +12594,7 @@ Keyword                       & Type              & Description                 
 \ct{RAMP_VF_Z}                & Character         & Section~\ref{info:init_species}               &                &               \\ \hline
 \ct{SHAPE}                    & Character         & Section~\ref{info:initial_droplets}           &                & \ct{'BLOCK'} \\ \hline
 \ct{SPEC_ID(N)}               & Char.~Array       & Section~\ref{info:init_species}               &                &               \\ \hline
-\ct{TEMPERATURE}              & Real              & Section~\ref{info:init_temperature}           & \unit{\degree C} & \ct{TMPA}    \\ \hline
+\ct{TEMPERATURE}              & Real              & Section~\ref{info:init_temperature}           & \unit{\degreeCelsius} & \ct{TMPA}    \\ \hline
 \ct{TREE_HEIGHT}              & Real              & Section~\ref{info:trees}                      & m              &               \\ \hline
 \ct{UNIFORM}                  & Logical           & Section~\ref{info:initial_droplets}           &                & \ct{F} \\ \hline
 \ct{UVW(3)}                   & Real Array        & Section~\ref{info:initial_droplets}           & m/s            & 0.            \\ \hline
@@ -12679,16 +12665,16 @@ Keyword                             & Type            & Description             
 \ct{BOILING_TEMPERATURE}            & Real            & Section~\ref{info:liquid_fuels}               & \unit{\degreeCelsius} & 5000.         \\ \hline
 \ct{CONDUCTIVITY}                   & Real            & Section~\ref{info:thermal_properties}         & \unit{W/(m.K)}    & 0.            \\ \hline
 \ct{CONDUCTIVITY_RAMP}              & Character       & Section~\ref{info:thermal_properties}         &                   &               \\ \hline
-\ct{DENSITY}                        & Real            & Section~\ref{info:thermal_properties}         & \unit{kg/m^3}     & 0.            \\ \hline
+\ct{DENSITY}                        & Real            & Section~\ref{info:thermal_properties}         & \unit{kg/m^3}     & 0.\rule{0pt}{2.3ex} \\ \hline
 \ct{E(:)}                           & Real Array      & Section~\ref{info:reaction_rates}             & J/mol             &               \\ \hline
 \ct{EMISSIVITY}                     & Real            & Section~\ref{info:thermal_properties}         &                   & 0.9           \\ \hline
 \ct{GAS_DIFFUSION_DEPTH(:)}         & Real Array      & Section~\ref{info:reaction_rates}             & m                 & 0.001         \\ \hline
-\ct{HEATING_RATE(:)}                & Real Array      & Section~\ref{info:kinetic_parameters}         & \unit{\degreeCelsius}/min & 5.            \\ \hline
+\ct{HEATING_RATE(:)}                & Real Array      & Section~\ref{info:kinetic_parameters}         & \unit{\degreeCelsius/min} & 5.            \\ \hline
 \ct{HEAT_OF_COMBUSTION(:,:)}        & Real Array      & Section~\ref{info:reaction_mechanism}         & kJ/kg             &               \\ \hline
 \ct{HEAT_OF_REACTION(:)}            & Real Array      & Section~\ref{info:reaction_mechanism}         & kJ/kg             & 0.            \\ \hline
 \ct{ID}                             & Character       & Section~\ref{info:SURF_MATL_Basics}           &                   &               \\ \hline
 \ct{MATL_ID(:,:)}                   & Character       & Section~\ref{info:reaction_mechanism}         &                   &               \\ \hline
-\ct{MAX_REACTION_RATE(:)}           & Real Array      & Section~\ref{info:reaction_rates}             & \unit{kg/(m^3.s)} & $\infty$      \\ \hline
+\ct{MAX_REACTION_RATE(:)}           & Real Array      & Section~\ref{info:reaction_rates}             & \unit{kg/(m^3.s)} & $\infty$ \rule{0pt}{2.3ex} \\ \hline
 \ct{MW}                             & Real            & Section~\ref{info:liquid_fuels}               & g/mol             &               \\ \hline
 \ct{N_O2(:)}                        & Real Array      & Section~\ref{info:reaction_rates}             &                   & 0.            \\ \hline
 \ct{N_REACTIONS}                    & Integer         & Section~\ref{info:reaction_mechanism}         &                   & 0             \\ \hline
@@ -12793,7 +12779,7 @@ Keyword                                         & Type         & Description    
 \ct{GAMMA}                                      & Real         & Section~\ref{gas_species_props}         &              & 1.4               \\ \hline
 \ct{GRAVITATIONAL_DEPOSITION}                   & Logical      & Section~\ref{info:deposition}           &              & \ct{T}           \\ \hline
 \ct{GRAVITATIONAL_SETTLING}                     & Logical      & Section~\ref{info:deposition}           &              & \ct{T}           \\ \hline
-\ct{GVEC(3)}                                    & Real Array   & Section~\ref{info:GVEC}                 & \unit{m/s^2} & 0,0,-9.81         \\ \hline
+\ct{GVEC(3)}                                    & Real Array   & Section~\ref{info:GVEC}                 & \unit{m/s^2} & 0,0,-9.81 \rule{0pt}{2.3ex} \\ \hline
 \ct{H_F_REFERENCE_TEMPERATURE}                  & Real         & Section~\ref{info:enthalpy}             & \unit{\degreeCelsius} & 25.               \\ \hline
 \ct{HUMIDITY}                                   & Real         & Section~\ref{info:humidity}             & \%           & 40.               \\ \hline
 \ct{HVAC_LOCAL_PRESSURE}                        & Logical      & Section~\ref{info:HVAC}                 &              &  \ct{T}          \\ \hline
@@ -12808,7 +12794,7 @@ Keyword                                         & Type         & Description    
 \ct{MAXIMUM_VISIBILITY}                         & Real         & Section~\ref{info:visibility}           &  m           &  30               \\ \hline
 \ct{MAX_LEAK_PATHS}                             & Integer      & Section~\ref{info:Leaks}                &              &  200              \\ \hline
 \ct{MAX_RAMPS}                                  & Integer      & Section~\ref{info:RAMP}                 &              &  100              \\ \hline
-\ct{MINIMUM_ZONE_VOLUME}                        & Real         & Section~\ref{info:filling_zones}        & \unit{m^3}   & 0                 \\ \hline
+\ct{MINIMUM_ZONE_VOLUME}                        & Real         & Section~\ref{info:filling_zones}        & \unit{m^3}   & 0 \rule{0pt}{2.3ex} \\ \hline
 \ct{MPI_TIMEOUT}                                & Real         & Section~\ref{info:Errors}               &  s           & 600.              \\ \hline
 \ct{NEAR_WALL_PARTICLE_INTERPOLATION}           & Logical      & Section~\ref{info:particle_drag}        &              & \ct{F}            \\ \hline
 \ct{NEIGHBOR_SEPARATION_DISTANCE}               & Real         & Section~\ref{info:mesh_separation}      &  m           & 0.                \\ \hline
@@ -12816,7 +12802,7 @@ Keyword                                         & Type         & Description    
 \ct{NOISE_VELOCITY}                             & Real         & Section~\ref{info:NOISE}                &  m/s         & 0.005             \\ \hline
 \ct{NO_PRESSURE_ZONES}                          & Logical      & Section~\ref{info:ZONE_Basics}          &              & \ct{F}           \\ \hline
 \ct{NORTH_BEARING}                              & Real         & Section~\ref{info:earth}                & deg.         &                   \\ \hline
-\ct{NUCLEATION_SITES}                           & Real         & Section~\ref{info:condensation}         & \unit{\#/m^3} & $1\times 10^7$    \\ \hline
+\ct{NUCLEATION_SITES}                           & Real         & Section~\ref{info:condensation}         & \unit{\#/m^3} & \num{1e7} \rule{0pt}{2.3ex} \\ \hline
 \ct{ORIGIN_LAT}                                 & Real         & Section~\ref{info:earth}                & degrees      &                   \\ \hline
 \ct{ORIGIN_LON}                                 & Real         & Section~\ref{info:earth}                & degrees      &                   \\ \hline
 \ct{OVERWRITE}                                  & Logical      & Section~\ref{info:OVERWRITE}            &              & \ct{T}           \\ \hline
@@ -12970,7 +12956,7 @@ Keyword                    & Type            & Description                      
 \ct{ALLOW_VENT}            & Logical         & Section~\ref{info:OBST_Basics}          &               & \ct{T}       \\ \hline
 \ct{BNDF_FACE(-3:3)}       & Logical Array   & Section~\ref{info:BNDF}                 &               & \ct{T}       \\ \hline
 \ct{BNDF_OBST}             & Logical         & Section~\ref{info:BNDF}                 &               & \ct{T}       \\ \hline
-\ct{BULK_DENSITY}          & Real            & Section~\ref{info:BURN_AWAY}            & \unit{kg/m^3} &               \\ \hline
+\ct{BULK_DENSITY}          & Real            & Section~\ref{info:BURN_AWAY}            & \unit{kg/m^3} & \rule{0pt}{2.3ex} \\ \hline
 \ct{CELL_SIZE}             & Real            & Section~\ref{info:HT3D_Basics}          & m             &               \\ \hline
 \ct{CELL_SIZE_FACTOR}      & Real            & Section~\ref{info:HT3D_Basics}          &               &               \\ \hline
 \ct{COLOR}                 & Character       & Section~\ref{info:OBST_Basics}          &               &               \\ \hline
@@ -13030,7 +13016,7 @@ Keyword                                    & Type        & Description          
 Keyword                                    & Type        & Description                                                     & Units             & Default   \\ \hline  \hline
 \endhead
 \ct{ADHERE_TO_SOLID}                       & Integer     & Section~\ref{info:surface_solid_particles}                      &                   & 0                     \\ \hline
-\ct{AGE}                                   & Real        & Section~\ref{info:controlling_droplets}                         & s                 & $1\times 10^5$        \\ \hline
+\ct{AGE}                                   & Real        & Section~\ref{info:controlling_droplets}                         & s                 & \num{1e5} \rule{0pt}{2.3ex} \\ \hline
 \ct{BREAKUP}                               & Logical     & Section~\ref{info:secondary_breakup}                            &                   & \ct{F}               \\ \hline
 \ct{BREAKUP_CNF_RAMP_ID}                   & Character   & Section~\ref{info:secondary_breakup}                            &                   &                       \\ \hline
 \ct{BREAKUP_DISTRIBUTION}                  & Character   & Section~\ref{info:secondary_breakup}                            &                   & \ct{'ROSIN...'}      \\ \hline
@@ -13042,7 +13028,7 @@ Keyword                                    & Type        & Description          
 \ct{COLOR}                                 & Character   & Section~\ref{info:part_output}                                  &                   & \ct{'BLACK'}         \\ \hline
 \ct{COMPLEX_REFRACTIVE_INDEX}              & Real        & Section~\ref{radiative_part_props}                              &                   & 0.01                  \\ \hline
 \ct{CTRL_ID}                               & Character   & Section~\ref{info:particle_flux}                                &                   &                       \\ \hline
-\ct{DENSE_VOLUME_FRACTION}                 & Real        & Section~\ref{info:DENSE_VOLUME_FRACTION}                        &                   & $1\times 10^{-5}$     \\ \hline
+\ct{DENSE_VOLUME_FRACTION}                 & Real        & Section~\ref{info:DENSE_VOLUME_FRACTION}                        &                   & \num{1e-5} \rule{0pt}{2.3ex}  \\ \hline
 \ct{DEVC_ID}                               & Character   & Section~\ref{info:particle_flux}                                &                   &                       \\ \hline 
 \ct{DIAMETER}                              & Real        & Section~\ref{info:particle_size}                                & \unit{\micro m}   &                       \\ \hline
 \ct{DISTRIBUTION}                          & Character   & Section~\ref{info:particle_size}                                &                   & \ct{'ROSIN...'}      \\ \hline
@@ -13055,8 +13041,8 @@ Keyword                                    & Type        & Description          
 \ct{FREE_AREA_FRACTION}                    & Real        & Section~\ref{info:particle_screen}                              &                   &                       \\ \hline
 \ct{GAMMA_D}                               & Real        & Section~\ref{info:particle_size}                                &                   & 2.4                   \\ \hline
 \ct{HEAT_OF_COMBUSTION}                    & Real        & Section~\ref{info:fuel_droplets}                                & kJ/kg             &                       \\ \hline
-\ct{HEAT_TRANSFER_COEFFICIENT_GAS}         & Real        & Section~\ref{thermal_part_props}                                & W/m$^2$/K         &                       \\ \hline
-\ct{HEAT_TRANSFER_COEFFICIENT_SOLID}       & Real        & Section~\ref{info:surface_droplets}                             & W/m$^2$/K         &                       \\ \hline
+\ct{HEAT_TRANSFER_COEFFICIENT_GAS}         & Real        & Section~\ref{thermal_part_props}                                & \unit{W/(m^2.K)}  & \rule{0pt}{2.3ex}  \\ \hline
+\ct{HEAT_TRANSFER_COEFFICIENT_SOLID}       & Real        & Section~\ref{info:surface_droplets}                             & \unit{W/(m^2.K)}  & \rule{0pt}{2.3ex}   \\ \hline
 \ct{HORIZONTAL_VELOCITY}                   & Real        & Section~\ref{info:surface_droplets}                             & m/s               &  0.2                  \\ \hline
 \ct{ID}                                    & Character   & Section~\ref{info:PART_Basics}                                  &                   &                       \\ \hline
 \ct{INITIAL_TEMPERATURE}                   & Real        & Section~\ref{thermal_part_props}                                & \unit{\degreeCelsius} & \ct{TMPA}            \\ \hline
@@ -13087,7 +13073,7 @@ Keyword                                    & Type        & Description          
 \ct{SPEC_ID}                               & Character   & Section~\ref{thermal_part_props}                                &                   &                       \\ \hline
 \ct{STATIC}                                & Logical     & Section~\ref{info:PART_SURF}                                    &                   & \ct{F}               \\ \hline
 \ct{SURFACE_DIAMETER}                      & Real        & Section~\ref{info:surface_droplets}                             & \unit{\micro m}    &                      \\ \hline
-\ct{SURFACE_TENSION}                       & Real        & Section~\ref{info:secondary_breakup}                            & N/m               & $7.28 \times 10^{-2}$ \\ \hline
+\ct{SURFACE_TENSION}                       & Real        & Section~\ref{info:secondary_breakup}                            & N/m               & \num{7.28e-2} \rule{0pt}{2.3ex} \\ \hline
 \ct{SURF_ID}                               & Character   & Section~\ref{info:PART_SURF}                                    &                   &                       \\ \hline
 \ct{TARGET_ONLY}                           & Logical     & Section~\ref{info:target_particles}                             &                   & \ct{F}               \\ \hline
 \ct{TRACK_EMBERS}                          & Logical     & Section~\ref{info:ember_generation_part}                        &                   & \ct{T}               \\ \hline
@@ -13121,7 +13107,7 @@ Keyword                          & Type          & Description                  
 \ct{MAX_PREDICTOR_PRESSURE_ITERATIONS} & Integer & Section~\ref{pressure_solver}               &               & * \\ \hline
 \ct{MAX_PRESSURE_ITERATIONS}     & Integer       & Section~\ref{pressure_solver}               &               & 10           \\ \hline
 \ct{PRESSURE_RELAX_TIME}         & Real          & Section~\ref{background_pressure}           & s             & 1.           \\ \hline
-\ct{PRESSURE_TOLERANCE}          & Real          & Section~\ref{pressure_solver}               & s$^{-2}$      &              \\ \hline
+\ct{PRESSURE_TOLERANCE}          & Real          & Section~\ref{pressure_solver}               & \unit{\per\second^2} & \rule{0pt}{2.3ex} \\ \hline
 \ct{RELAXATION_FACTOR}           & Real          & Section~\ref{background_pressure}           &               & 1.           \\ \hline
 \ct{SOLVER}                      & Character     & Section~\ref{optional_pressure_solver}      &               & \ct{'FFT'}   \\ \hline
 \ct{SUSPEND_PRESSURE_ITERATIONS} & Logical       & Section~\ref{pressure_solver}               &               & \ct{T}       \\ \hline
@@ -13191,7 +13177,7 @@ Keyword                           & Type          & Description                 
 \ct{CALIBRATION_CONSTANT}         & Real          & Section~\ref{info:bidir_probe}            &                       & 0.93                 \\ \hline
 \ct{CHARACTERISTIC_VELOCITY}      & Real          & Section~\ref{info:pressure_coefficient}   & m/s                   & 1.                   \\ \hline
 \ct{C_FACTOR}                     & Real          & Section~\ref{info:sprinklers}             & \unit{(m/s)\tothe{1/2}} & 0.                   \\ \hline
-\ct{DENSITY}                      & Real          & Section~\ref{info:THERMOCOUPLE}           & \unit{kg/m^3}         & 8700.                \\ \hline
+\ct{DENSITY}                      & Real          & Section~\ref{info:THERMOCOUPLE}           & \unit{kg/m^3}         & 8700. \rule{0pt}{2.3ex} \\ \hline
 \ct{DIAMETER}                     & Real          & Section~\ref{info:THERMOCOUPLE}           & m                     & 0.001                \\ \hline
 \ct{EMISSIVITY}                   & Real          & Section~\ref{info:THERMOCOUPLE}           &                       & 0.85                 \\ \hline
 \ct{FED_ACTIVITY}                 & Integer       & Section~\ref{info:FED}                    &                       & 2                    \\ \hline
@@ -13200,7 +13186,7 @@ Keyword                           & Type          & Description                 
 \ct{FLOW_TAU}                     & Real          & Section~\ref{info:sprinklers}             &                       & 0.                   \\ \hline
 \ct{GAUGE_EMISSIVITY}             & Real          & Section~\ref{info:heat_flux}              &                       & 1.                   \\ \hline
 \ct{GAUGE_TEMPERATURE}            & Real          & Section~\ref{info:heat_flux}              & \unit{\degreeCelsius} & \ct{TMPA}           \\ \hline
-\ct{HEAT_TRANSFER_COEFFICIENT}    & Real          & Section~\ref{info:THERMOCOUPLE}           & $\unit{W/(m^2.K)}$     &                      \\ \hline
+\ct{HEAT_TRANSFER_COEFFICIENT}    & Real          & Section~\ref{info:THERMOCOUPLE}           & \unit{W/(m^2.K)}      & \rule{0pt}{2.3ex}   \\ \hline
 \ct{HISTOGRAM}                    & Logical       & Section~\ref{info:histograms}             &                       & F                    \\ \hline
 \ct{HISTOGRAM_CUMULATIVE}         & Logical       & Section~\ref{info:histograms}             &                       & F                    \\ \hline
 \ct{HISTOGRAM_LIMITS(2)}          & Real Array    & Section~\ref{info:histograms}             &                       &                      \\ \hline
@@ -13208,7 +13194,7 @@ Keyword                           & Type          & Description                 
 \ct{HISTOGRAM_NORMALIZE}          & Logical       & Section~\ref{info:histograms}             &                       & T                    \\ \hline
 \ct{ID}                           & Character     & Section~\ref{info:PROP}                   &                       &                      \\ \hline
 \ct{INITIAL_TEMPERATURE}          & Real          & Section~\ref{info:sprinklers}             & \unit{\degreeCelsius} & \ct{TMPA}           \\ \hline
-\ct{K_FACTOR}                     & Real          & Section~\ref{info:sprinklers}             & $\unit{L/(min.bar^{\ha})}$ & 1.                \\ \hline
+\ct{K_FACTOR}                     & Real          & Section~\ref{info:sprinklers}             & \unit{L/(min.bar^{\ha})} & 1.                \\ \hline
 \ct{LENGTH}                       & Real          & Section~\ref{info:smoke_detector}         & m                     & 1.8                  \\ \hline
 \ct{MASS_FLOW_RATE}               & Real          & Section~\ref{info:sprinklers}             & kg/s                  &                      \\ \hline
 \ct{OFFSET}                       & Real          & Section~\ref{info:sprinklers}             & m                     & 0.05                 \\ \hline
@@ -13230,12 +13216,12 @@ Keyword                           & Type          & Description                 
 \ct{PX(3)}                        & Real          & Section~\ref{info:velocity_patch}         & m/s                   &  0.                  \\ \hline
 \ct{PXX(3,3)}                     & Real          & Section~\ref{info:velocity_patch}         & m/s                   &  0.                  \\ \hline
 \ct{QUANTITY}                     & Character     & Section~\ref{info:sprinklers}             &                       &                      \\ \hline
-\ct{RTI}                          & Real          & Section~\ref{info:sprinklers}             & $\sqrt{\unit{m.s}}$   & 100.                 \\ \hline
+\ct{RTI}                          & Real          & Section~\ref{info:sprinklers}             & \unit{(m.s)\tothe{1/2}}    & 100.                 \\ \hline
 \ct{SMOKEVIEW_ID(:)}              & Char.~Array   & Section~\ref{info:SMOKEVIEW_ID}           &                       &                      \\ \hline
 \ct{SMOKEVIEW_PARAMETERS(:)}      & Char.~Array   & Section~\ref{info:SMOKEVIEW_PARAMETERS}   &                       &                      \\ \hline
 \ct{SPARK}                        & Logical       & Section~\ref{info:ignition}               &                       & \ct{F}              \\ \hline
 \ct{SPEC_ID}                      & Character     & Section~\ref{info:alternative_smoke}      &                       &                      \\ \hline
-\ct{SPECIFIC_HEAT}                & Real          & Section~\ref{info:THERMOCOUPLE}           & $\unit{kJ/(kg.K)}$    &                     \\ \hline
+\ct{SPECIFIC_HEAT}                & Real          & Section~\ref{info:THERMOCOUPLE}           & \unit{kJ/(kg.K)}      &                     \\ \hline
 \ct{SPECIFIC_HEAT_RAMP}           & Character     & Section~\ref{info:THERMOCOUPLE}           &                       &                     \\ \hline
 \ct{SPRAY_ANGLE(2,2)}             & Real          & Section~\ref{info:sprinklers}             & degrees               & 60.,75.              \\ \hline
 \ct{SPRAY_PATTERN_BETA}           & Real          & Section~\ref{info:sprinklers}             & degrees               & 5.                   \\ \hline
@@ -13401,8 +13387,8 @@ Keyword                                & Type           & Description           
 \ct{PRIORITY}                          & Integer        & Section~\ref{info:priority}                  &                   & 1                 \\ \hline
 \ct{RADIATIVE_FRACTION}                & Real           & Section~\ref{info:CHI_R}                     &                   &                   \\ \hline
 \ct{RAMP_CHI_R}                        & Character      & Section~\ref{info:CHI_R}                     &                   &                   \\ \hline
-\ct{REAC_ATOM_ERROR}                   & Real           & Section~\ref{info:REAC_Diagnostics}          & atoms             & 1.E-4             \\ \hline
-\ct{REAC_MASS_ERROR}                   & Real           & Section~\ref{info:REAC_Diagnostics}          & kg/kg             & 1.E-4             \\ \hline
+\ct{REAC_ATOM_ERROR}                   & Real           & Section~\ref{info:REAC_Diagnostics}          & atoms             & \num{1E-4}        \\ \hline
+\ct{REAC_MASS_ERROR}                   & Real           & Section~\ref{info:REAC_Diagnostics}          & kg/kg             & \num{1E-4}        \\ \hline
 \ct{REACTYPE}                          & Character      & Section~\ref{info:falloff_reactions}         &                   & \ct{'ARRHENIUS-TYPE'}   \\ \hline
 \ct{REVERSE}                           & Logical        & Section~\ref{info:eqbm_reac}                 &                   & \ct{F}           \\ \hline
 \ct{SOOT_YIELD}                        & Real           & Section~\ref{info:simple_chemistry}          & kg/kg             & 0.0               \\ \hline
@@ -13510,7 +13496,7 @@ Keyword                          & Type              & Description              
 \ct{COPY_LUMPED}                 & Logical           & Section~\ref{info:lumped}               &                   & \ct{F} \\ \hline
 \ct{DENSITY_LIQUID}              & Real              & Section~\ref{thermal_part_props}        & \unit{kg/m^3}     &               \\ \hline
 \ct{DENSITY_SOLID}               & Real              & Section~\ref{info:deposition}           & \unit{kg/m^3}     &  1800.        \\ \hline
-\ct{DIFFUSIVITY}                 & Real              & Section~\ref{info:diffusivity}          & m$^2$/s           &               \\ \hline
+\ct{DIFFUSIVITY}                 & Real              & Section~\ref{info:diffusivity}          & \unit{m^2/s}      & \rule{0pt}{2.3ex} \\ \hline
 \ct{ENTHALPY_OF_FORMATION}       & Real              & Section~\ref{thermal_part_props}        & kJ/mol            &               \\ \hline
 \ct{EPSILONKLJ}                  & Real              & Section~\ref{gas_species_props}         &                   & 0             \\ \hline
 \ct{FIC_CONCENTRATION}           & Real              & Section~\ref{info:FED}                  & ppm               & 0.            \\ \hline
@@ -13554,7 +13540,7 @@ Keyword                          & Type              & Description              
 \ct{SPEC_ID(:)}                  & Char.~Array       & Section~\ref{info:lumped}               &                   &               \\ \hline
 \ct{SPECIFIC_HEAT}               & Real              & Section~\ref{gas_species_props}         & \unit{kJ/(kg.K)}    &               \\ \hline
 \ct{SPECIFIC_HEAT_LIQUID}        & Real              & Section~\ref{thermal_part_props}        & \unit{kJ/(kg.K)}    &               \\ \hline
-\ct{THERMOPHORETIC_DIAMETER}     & Real              & Section~\ref{info:deposition}           & m                 &  0.03E-6      \\ \hline
+\ct{THERMOPHORETIC_DIAMETER}     & Real              & Section~\ref{info:deposition}           & m                 &  \num{0.03E-6}     \\ \hline
 \ct{TURBULENT_SCHMIDT_NUMBER}    & Real              & Section~\ref{gas_species_props}         &                   & 0.5           \\ \hline
 \ct{VAPORIZATION_TEMPERATURE}    & Real              & Section~\ref{thermal_part_props}        & \unit{\degreeCelsius} &               \\ \hline
 \ct{VISCOSITY}                   & Real              & Section~\ref{gas_species_props}         & \unit{kg/(m.s)}   &               \\ \hline
@@ -13587,82 +13573,82 @@ Keyword                                               & Type            & Descri
 \ct{AREA_MULTIPLIER}                                  & Real            & Section~\ref{info:area_mult}              &                     & 1.0                     \\ \hline
 \ct{BACKING}                                          & Character       & Section~\ref{info:BACKING}                &                     & \ct{'EXPOSED'}         \\ \hline
 \ct{BLOWING}                                          & Logical         & Section~\ref{info:blowing}                &                     &                         \\ \hline
-\ct{BURN_AWAY}                                        & Logical         & Section~\ref{info:BURN_AWAY}              &                     & \ct{F}                 \\ \hline
-\ct{BURN_DURATION}                                    & Real            & Section~\ref{info:BURN_DURATION}          & s                   & 1000000                 \\ \hline
+\ct{BURN_AWAY}                                        & Logical         & Section~\ref{info:BURN_AWAY}              &                     & \ct{F}                  \\ \hline
+\ct{BURN_DURATION}                                    & Real            &  Section~\ref{info:BURN_DURATION}          & s                   & 1000000                 \\ \hline
 \ct{CELL_SIZE(:)}                                     & Real Array      & Section~\ref{info:solid_phase_stability}  & m                   &                         \\ \hline
 \ct{CELL_SIZE_FACTOR(:)}                              & Real Array      & Section~\ref{info:solid_phase_stability}  &                     & 1.0                     \\ \hline
 \ct{COLOR}                                            & Character       & Section~\ref{info:colors}                 &                     &                         \\ \hline
 \ct{CONVECTION_LENGTH_SCALE}                          & Real            & Section~\ref{info:convection}             & m                   & 1.                      \\ \hline
-\ct{CONVECTIVE_HEAT_FLUX}                             & Real            & Section~\ref{info:convection}             & \unit{kW/m^2}       &                         \\ \hline
-\ct{CONVERT_VOLUME_TO_MASS}                           & Logical         & Section~\ref{info:MASS_FLUX}              &                     & \ct{F}                 \\ \hline
-\ct{DEFAULT}                                          & Logical         & Section~\ref{info:SURF}                   &                     & \ct{F}                 \\ \hline
-\ct{DELAMINATION_DENSITY(:)}                          & Real Array      & Section~\ref{info:surf_delamination}      & \unit{kg/m^3}       &                        \\ \hline
-\ct{DELAMINATION_TMP(:)}                              & Real Array      & Section~\ref{info:surf_delamination}      & \unit{\degreeCelsius} &                        \\ \hline
-\ct{DELTA_TMP_MAX}                                    & Real            & Section~\ref{info:solid_phase_stability}  & \unit{\degreeCelsius} & 10                      \\ \hline
+\ct{CONVECTIVE_HEAT_FLUX}                             & Real            & Section~\ref{info:convection}             & \unit{kW/m^2}       &  \rule{0pt}{2.3ex}      \\ \hline
+\ct{CONVERT_VOLUME_TO_MASS}                           & Logical         & Section~\ref{info:MASS_FLUX}              &                     & \ct{F}                  \\ \hline
+\ct{DEFAULT}                                          & Logical         & Section~\ref{info:SURF}                   &                     & \ct{F}                  \\ \hline
+\ct{DELAMINATION_DENSITY(:)}                          & Real Array      & Section~\ref{info:surf_delamination}      & \unit{kg/m^3}       &    \rule{0pt}{2.3ex}    \\ \hline
+\ct{DELAMINATION_TMP(:)}                              & Real Array      & Section~\ref{info:surf_delamination}      & \unit{\degreeCelsius} &                       \\ \hline
+\ct{DELTA_TMP_MAX}                                    & Real            & Section~\ref{info:solid_phase_stability}  & \unit{\degreeCelsius} & 10                    \\ \hline
 \ct{DRAG_COEFFICIENT}                                 & Real            & Section~\ref{info:boundary_fuel_model}    &                     & 2.8                     \\ \hline
 \ct{DSC_CONVERSION_FACTOR}                            & Real            & Section~\ref{info:TGA_DSC_MCC}            &                     & 1                       \\ \hline
 \ct{DT_INSERT}                                        & Real            & Section~\ref{info:particle_flux}          & s                   & 0.01                    \\ \hline
-\ct{E_COEFFICIENT}                                    & Real            & Section~\ref{info:suppression}            & \unit{m^2/(kg.s)}   &                         \\ \hline
+\ct{E_COEFFICIENT}                                    & Real            & Section~\ref{info:suppression}            & \unit{m^2/(kg.s)}   &  \rule{0pt}{2.3ex}      \\ \hline
 \ct{EMBER_GENERATION_HEIGHT(2)}                       & Real            & Section~\ref{info:ember_generation_surf}  & m                   &                         \\ \hline
 \ct{EMBER_IGNITION_POWER_MEAN}                        & Real            & Section~\ref{info:Ember_Ignition}         & kW                  &                         \\ \hline
 \ct{EMBER_IGNITION_POWER_SIGMA}                       & Real            & Section~\ref{info:Ember_Ignition}         & kW                  & 0.001                   \\ \hline
-\ct{EMBER_TRACKING_RATIO}                             & Real            & Section~\ref{info:ember_generation_surf}  &                     & 100                  \\ \hline
-\ct{EMBER_YIELD}                                      & Real            & Section~\ref{info:ember_generation_surf}  & kg/kg               &                      \\ \hline
+\ct{EMBER_TRACKING_RATIO}                             & Real            & Section~\ref{info:ember_generation_surf}  &                     & 100                     \\ \hline
+\ct{EMBER_YIELD}                                      & Real            & Section~\ref{info:ember_generation_surf}  & kg/kg               &                         \\ \hline
 \ct{EMISSIVITY}                                       & Real            & Section~\ref{info:convection}             &                     & 0.9                     \\ \hline
 \ct{EMISSIVITY_BACK}                                  & Real            & Section~\ref{info:BACKING}                &                     &                         \\ \hline
-\ct{EXTERNAL_FLUX}                                    & Real            & Section~\ref{solid_phase_verification}    & \unit{kW/m^2}       &                         \\ \hline
-\ct{EXTINCTION_TEMPERATURE}                           & Real            & Section~\ref{info:specified_burning}      & \unit{\degreeCelsius} & -273.                   \\ \hline
-\ct{FREE_SLIP}                                        & Logical         & Section~\ref{info:WALL_MODEL}             &                     & \ct{F}                 \\ \hline
-\ct{GEOMETRY}                                         & Character       & Section~\ref{info:GEOMETRY}               &                     & \ct{'CARTESIAN'}       \\ \hline
+\ct{EXTERNAL_FLUX}                                    & Real            & Section~\ref{solid_phase_verification}    & \unit{kW/m^2}       &   \rule{0pt}{2.3ex}     \\ \hline
+\ct{EXTINCTION_TEMPERATURE}                           & Real            & Section~\ref{info:specified_burning}      & \unit{\degreeCelsius} & -273.                 \\ \hline
+\ct{FREE_SLIP}                                        & Logical         & Section~\ref{info:WALL_MODEL}             &                     & \ct{F}                  \\ \hline
+\ct{GEOMETRY}                                         & Character       & Section~\ref{info:GEOMETRY}               &                     & \ct{'CARTESIAN'}        \\ \hline
 \ct{HEAT_OF_VAPORIZATION}                             & Real            & Section~\ref{info:specified_burning}      & kJ/kg               &                         \\ \hline
-\ct{HEAT_TRANSFER_COEFFICIENT}                        & Real            & Section~\ref{info:convection}             & \unit{W/(m^2.K)}    &                         \\ \hline
-\ct{HEAT_TRANSFER_COEFFICIENT_BACK}                   & Real            & Section~\ref{info:convection}             & \unit{W/(m^2.K)}    &                         \\ \hline
+\ct{HEAT_TRANSFER_COEFFICIENT}                        & Real            & Section~\ref{info:convection}             & \unit{W/(m^2.K)}    &   \rule{0pt}{2.3ex}     \\ \hline
+\ct{HEAT_TRANSFER_COEFFICIENT_BACK}                   & Real            & Section~\ref{info:convection}             & \unit{W/(m^2.K)}    &   \rule{0pt}{2.3ex}     \\ \hline
 \ct{HEAT_TRANSFER_COEFFICIENT_SIGMA}                  & Real            & Section~\ref{info:impinging_jet}          & m                   &                         \\ \hline
 \ct{HEAT_TRANSFER_MODEL}                              & Character       & Section~\ref{info:convection}             &                     &                         \\ \hline
-\ct{HORIZONTAL}                                       & Logical         & Section~\ref{info:GEOMETRY}               &                     & \ct{F}                 \\ \hline
-\ct{HRRPUA}                                           & Real            & Section~\ref{info:gas_burner}             & \unit{kW/m^2}       &                         \\ \hline
-\ct{HT3D}                                             & Logical         & Section~\ref{info:ht3d}                   &                     & \ct{F}                 \\ \hline
+\ct{HORIZONTAL}                                       & Logical         & Section~\ref{info:GEOMETRY}               &                     & \ct{F}                  \\ \hline
+\ct{HRRPUA}                                           & Real            & Section~\ref{info:gas_burner}             & \unit{kW/m^2}       &    \rule{0pt}{2.3ex}    \\ \hline
+\ct{HT3D}                                             & Logical         & Section~\ref{info:ht3d}                   &                     & \ct{F}                  \\ \hline
 \ct{ID}                                               & Character       & Section~\ref{info:SURF}                   &                     &                         \\ \hline
-\ct{IGNITION_TEMPERATURE}                             & Real            & Section~\ref{info:specified_burning}      & \unit{\degreeCelsius} & 5000.                   \\ \hline
+\ct{IGNITION_TEMPERATURE}                             & Real            & Section~\ref{info:specified_burning}      & \unit{\degreeCelsius} & 5000.                 \\ \hline
 \ct{INERT_Q_REF}                                      & Logical         & Section~\ref{info:scaled_burning}         &                     & F                       \\ \hline
 \ct{INIT_IDS}                                         & Char.~Array     & Section~\ref{info:trees}                  &                     &                         \\ \hline
 \ct{INIT_PER_AREA}                                    & Real            & Section~\ref{info:trees}                  & m$^{-2}$            &                         \\ \hline
 \ct{INNER_RADIUS}                                     & Real            & Section~\ref{info:PART_GEOMETRY}          & m                   &                         \\ \hline
 \ct{INTERNAL_HEAT_SOURCE}                             & Real Array      & Section~\ref{info:INTERNAL_HEAT_SOURCE}   & \unit{kW/m^3}       &                         \\ \hline
-\ct{LAYER_DIVIDE}                                     & Real            & Section~\ref{info:LAYER_DIVIDE}           &                     & \ct{N_LAYERS}/2       \\ \hline
+\ct{LAYER_DIVIDE}                                     & Real            & Section~\ref{info:LAYER_DIVIDE}           &                     & \ct{N_LAYERS}/2         \\ \hline
 \ct{LEAK_PATH}                                        & Int.~Pair       & Section~\ref{info:Leaks}                  &                     &                         \\ \hline
 \ct{LEAK_PATH_ID}                                     & Character~Pair  & Section~\ref{info:Leaks}                  &                     &                         \\ \hline
 \ct{LENGTH}                                           & Real            & Section~\ref{info:PART_GEOMETRY}          & m                   &                         \\ \hline
-\ct{MASS_FLUX(:)}                                     & Real Array      & Section~\ref{info:MASS_FLUX}              & \unit{kg/(m^2.s)}   &                         \\ \hline
-\ct{MASS_FLUX_TOTAL}                                  & Real            & Section~\ref{info:MASS_FLUX_TOTAL}        & \unit{kg/(m^2.s)}   &                         \\ \hline
+\ct{MASS_FLUX(:)}                                     & Real Array      & Section~\ref{info:MASS_FLUX}              & \unit{kg/(m^2.s)}   &  \rule{0pt}{2.3ex}      \\ \hline
+\ct{MASS_FLUX_TOTAL}                                  & Real            & Section~\ref{info:MASS_FLUX_TOTAL}        & \unit{kg/(m^2.s)}   &  \rule{0pt}{2.3ex}      \\ \hline
 \ct{MASS_FLUX_VAR}                                    & Real            & Section~\ref{info:MASS_FLUX_VAR}          &                     &                         \\ \hline
 \ct{MASS_FRACTION(:)}                                 & Real Array      & Section~\ref{info:MASS_FLUX}              &                     &                         \\ \hline
-\ct{MASS_PER_VOLUME(:)}                               & Real Array      & Section~\ref{pine_needles}                & \unit{kg/m^3}       &                         \\ \hline
+\ct{MASS_PER_VOLUME(:)}                               & Real Array      & Section~\ref{pine_needles}                & \unit{kg/m^3}       & \rule{0pt}{2.3ex}       \\ \hline
 \ct{MASS_TRANSFER_COEFFICIENT}                        & Real            & Section~\ref{info:liquid_fuels}           & m/s                 &                         \\ \hline
 \ct{MATL_ID(:,:)}                                     & Char.~Array     & Section~\ref{info:solid_pyrolysis}        &                     &                         \\ \hline
 \ct{MATL_MASS_FRACTION(:,:)}                          & Real Array      & Section~\ref{info:solid_pyrolysis}        &                     &                         \\ \hline
-\ct{MAXIMUM_SCALING_HEAT_FLUX}                        & Real            & Section~\ref{info:scaled_burning}         & \unit{kW/m^2}       & 1500                     \\ \hline
+\ct{MAXIMUM_SCALING_HEAT_FLUX}                        & Real            & Section~\ref{info:scaled_burning}         & \unit{kW/m^2}       & 1500  \rule{0pt}{2.3ex} \\ \hline
 \ct{MCC_CONVERSION_FACTOR}                            & Real            & Section~\ref{info:TGA_DSC_MCC}            &                     & 1                       \\ \hline
 \ct{MINIMUM_BURNOUT_TIME}                             & Real            & Section~\ref{veg_burnout_time}            & s                   & 1000000                 \\ \hline
-\ct{MINIMUM_LAYER_MASS_FRACTION(:)}                   & Real Array      & Section~\ref{info:solid_phase_stability}  &                     & 1.E-12                  \\ \hline
-\ct{MINIMUM_LAYER_THICKNESS(:)}                       & Real Array      & Section~\ref{info:solid_phase_stability}  & m                   & 1.E-4                   \\ \hline
+\ct{MINIMUM_LAYER_MASS_FRACTION(:)}                   & Real Array      & Section~\ref{info:solid_phase_stability}  &                     & \num{1e-12} \rule{0pt}{2.3ex} \\ \hline
+\ct{MINIMUM_LAYER_THICKNESS(:)}                       & Real Array      & Section~\ref{info:solid_phase_stability}  & m                   & \num{1E-4} \rule{0pt}{2.3ex} \\ \hline
 \ct{MINIMUM_SCALING_HEAT_FLUX}                        & Real            & Section~\ref{info:scaled_burning}         & \unit{kW/m^2}       & 0                       \\ \hline
 \ct{MLRPUA}                                           & Real            & Section~\ref{info:gas_burner}             & \unit{kg/(m^2.s)}   &                         \\ \hline
 \ct{MOISTURE_CONTENT(:)}                              & Real Array      & Section~\ref{info:vegetation}             &                     & 0.                      \\ \hline
 \ct{N_LAYER_CELLS_MAX(:)}                             & Integer Array   & Section~\ref{info:solid_phase_stability}  &                     & 1000                    \\ \hline
-\ct{NEAR_WALL_EDDY_VISCOSITY}                         & Real            & Section~\ref{info:LES}                    & m$^2$/s             &                         \\ \hline
+\ct{NEAR_WALL_EDDY_VISCOSITY}                         & Real            & Section~\ref{info:LES}                    & \unit{m^2/s}        &                         \\ \hline
 \ct{NEAR_WALL_TURBULENCE_MODEL}                       & Character       & Section~\ref{info:LES}                    &                     &                         \\ \hline
 \ct{NET_HEAT_FLUX}                                    & Real            & Section~\ref{info:convection}             & \unit{kW/m^2}       &                         \\ \hline
-\ct{NO_SLIP}                                          & Logical         & Section~\ref{info:WALL_MODEL}             &                     & \ct{F}                 \\ \hline
-\ct{NODE_ID}                                          & Character       & Section~\ref{info:hvac_geom}              &                     &                       \\ \hline
+\ct{NO_SLIP}                                          & Logical         & Section~\ref{info:WALL_MODEL}             &                     & \ct{F}                  \\ \hline
+\ct{NODE_ID}                                          & Character       & Section~\ref{info:hvac_geom}              &                     &                         \\ \hline
 \ct{NPPC}                                             & Integer         & Section~\ref{info:particle_flux}          &                     & 1                       \\ \hline
 \ct{NUSSELT_C0}                                       & Real            & Section~\ref{info:convection}             &                     &                         \\ \hline
 \ct{NUSSELT_C1}                                       & Real            & Section~\ref{info:convection}             &                     &                         \\ \hline
 \ct{NUSSELT_C2}                                       & Real            & Section~\ref{info:convection}             &                     &                         \\ \hline
 \ct{NUSSELT_M}                                        & Real            & Section~\ref{info:convection}             &                     &                         \\ \hline
 \ct{PARTICLE_EXTRACTION_VELOCITY}                     & Real            & Section~\ref{info:particle_removal}       & m/s                 &                         \\ \hline
-\ct{PARTICLE_MASS_FLUX}                               & Real            & Section~\ref{info:particle_flux}          & \unit{kg/(m^2.s)}   &                         \\ \hline
-\ct{PARTICLE_SURFACE_DENSITY}                         & Real            & Section~\ref{info:particle_flux}          & \unit{kg/m^2)}      &                         \\ \hline
+\ct{PARTICLE_MASS_FLUX}                               & Real            & Section~\ref{info:particle_flux}          & \unit{kg/(m^2.s)}   &   \rule{0pt}{2.3ex}     \\ \hline
+\ct{PARTICLE_SURFACE_DENSITY}                         & Real            & Section~\ref{info:particle_flux}          & \unit{kg/m^2)}      &  \rule{0pt}{2.3ex}      \\ \hline
 \ct{PART_ID}                                          & Character       & Section~\ref{info:particle_flux}          &                     &                         \\ \hline
 \ct{PLE}                                              & Real            & Section~\ref{info:stratification}         &                     & 0.3                     \\ \hline
 \ct{PROFILE}                                          & Character       & Section~\ref{info:profiles}               &                     &                         \\ \hline
@@ -13683,7 +13669,7 @@ Keyword                                               & Type            & Descri
 \ct{RAMP_V_X}                                         & Character       & Section~\ref{info:RAMP_Vel_Prof}          &                     &                         \\ \hline
 \ct{RAMP_V_Y}                                         & Character       & Section~\ref{info:RAMP_Vel_Prof}          &                     &                         \\ \hline
 \ct{RAMP_V_Z}                                         & Character       & Section~\ref{info:RAMP_Vel_Prof}          &                     &                         \\ \hline
-\ct{REFERENCE_HEAT_FLUX}                              & Real Array      & Section~\ref{info:scaled_burning}         & \unit{kW/m^2}       &                         \\ \hline
+\ct{REFERENCE_HEAT_FLUX}                              & Real Array      & Section~\ref{info:scaled_burning}         & \unit{kW/m^2}       &   \rule{0pt}{2.3ex}     \\ \hline
 \ct{REFERENCE_HEAT_FLUX_TIME_INTERVA}                 & Real            & Section~\ref{info:scaled_burning}         & s                   & 1.0                     \\ \hline
 \ct{REFERENCE_THICKNESS}                              & Real Array      & Section~\ref{info:scaled_burning}         & m                   &                         \\ \hline
 \ct{REMESH_RATIO}                                     & Real            & Section~\ref{info:solid_phase_stability}  &                     & 0.15                    \\ \hline
@@ -13731,14 +13717,14 @@ Keyword                                               & Type            & Descri
 \ct{VEG_LSET_M100}                                    & Real            & Section~\ref{info:level_set}              &                     & 0.05                    \\ \hline
 \ct{VEG_LSET_MLW}                                     & Real            & Section~\ref{info:level_set}              &                     & 0.70                    \\ \hline
 \ct{VEG_LSET_MLH}                                     & Real            & Section~\ref{info:level_set}              &                     & 0.70                    \\ \hline
-\ct{VEG_LSET_QCON}                                    & Real            & Section~\ref{info:level_set}              & \unit{kW/m^2}       & 0.                      \\ \hline
+\ct{VEG_LSET_QCON}                                    & Real            & Section~\ref{info:level_set}              & \unit{kW/m^2}       & 0. \rule{0pt}{2.3ex}    \\ \hline
 \ct{VEG_LSET_ROS_00}                                  & Real            & Section~\ref{info:level_set}              & m/s                 & 0.                      \\ \hline
 \ct{VEG_LSET_ROS_BACK}                                & Real            & Section~\ref{info:level_set}              & m/s                 & 0.                      \\ \hline
 \ct{VEG_LSET_ROS_FLANK}                               & Real            & Section~\ref{info:level_set}              & m/s                 & 0.                      \\ \hline
 \ct{VEG_LSET_ROS_HEAD}                                & Real            & Section~\ref{info:level_set}              & m/s                 & 0.                      \\ \hline
-\ct{VEG_LSET_ROS_FIXED}                               & Logical         & Section~\ref{info:level_set}              &                     & \ct{F}                        \\ \hline
-\ct{VEG_LSET_SIGMA}                                   & Real            & Section~\ref{info:level_set}              & 1/m                 & 5000.                    \\ \hline
-\ct{VEG_LSET_SURF_LOAD}                               & Real            & Section~\ref{info:level_set}              & \unit{kg/m^2)}      & 1.0                     \\ \hline
+\ct{VEG_LSET_ROS_FIXED}                               & Logical         & Section~\ref{info:level_set}              &                     & \ct{F}                  \\ \hline
+\ct{VEG_LSET_SIGMA}                                   & Real            & Section~\ref{info:level_set}              & 1/m                 & 5000.                   \\ \hline
+\ct{VEG_LSET_SURF_LOAD}                               & Real            & Section~\ref{info:level_set}              & \unit{kg/m^2)}      & 1.0 \rule{0pt}{2.3ex}   \\ \hline
 \ct{VEG_LSET_TAN2}                                    & Real            & Section~\ref{info:level_set}              &                     &                         \\ \hline
 \ct{VEG_LSET_WIND_EXP}                                & Real            & Section~\ref{info:level_set}              &                     & 1.                      \\ \hline
 \ct{VEG_LSET_WIND_HEIGHT}                             & Real            & Section~\ref{info:level_set}              & m                   & 6.1                      \\ \hline
@@ -13748,7 +13734,7 @@ Keyword                                               & Type            & Descri
 \ct{VEL_GRAD}                                         & Real            & Section~\ref{info:vel_grad}               & 1/s                 &                         \\ \hline
 \ct{VEL_PART}                                         & Real            & Section~\ref{info:particle_flux}          & m/s                 &                         \\ \hline
 \ct{VEL_T(2)}                                         & Real Array      & Section~\ref{info:louvers}                & m/s                 &                         \\ \hline
-\ct{VOLUME_FLOW}                                      & Real            & Section~\ref{info:Velocity_BC}            & \unit{m^3/s}        &                         \\ \hline
+\ct{VOLUME_FLOW}                                      & Real            & Section~\ref{info:Velocity_BC}            & \unit{m^3/s}        & \rule{0pt}{2.3ex}       \\ \hline
 \ct{WIDTH}                                            & Real            & Section~\ref{info:PART_GEOMETRY}          & m                   &                         \\ \hline
 \ct{XYZ(3)}                                           & Real Array      & Section~\ref{info:spread}                 & m                   &                         \\ \hline
 \ct{Z0}                                               & Real            & Section~\ref{info:stratification}         & m                   & 10.                     \\ \hline
@@ -13802,7 +13788,7 @@ Keyword                          & Type       & Description                     
 Keyword                          & Type       & Description                              & Units        & Default   \\ \hline  \hline
 \endhead
 \ct{DT}                          & Real       & Section~\ref{info:TIME_Control}           & s           &                 \\ \hline
-\ct{DT_END_FILL}                 & Real       & Section~\ref{info:TIME_Control}           & s           & $1.0 \times 10^{-6}$  \\ \hline
+\ct{DT_END_FILL}                 & Real       & Section~\ref{info:TIME_Control}           & s           & \num{1e-6}  \\ \hline
 \ct{DT_END_MINIMUM}              & Real       & Section~\ref{info:TIME_Control}           & s           &  \ct{2.*EPSILON}  \\ \hline
 \ct{DT_EXTERNAL}                 & Real       & Section~\ref{info:external_control}       & s           & 0               \\ \hline
 \ct{DT_EXTERNAL_HEARTBEAT}       & Real       & Section~\ref{info:external_control}       & s           & 0               \\ \hline
