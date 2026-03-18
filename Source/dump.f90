@@ -8180,7 +8180,7 @@ IND_SELECT: SELECT CASE(IND)
          I = SDV%I_PATH(NN)
          J = SDV%J_PATH(NN)
          K = SDV%K_PATH(NN)
-         IF (Q(I,J,K)>(1.E3_EB*DV%SETPOINT)) THEN
+         IF (Q(I,J,K)>(1.E3_EB*DV%QUANTITY_RANGE(1))) THEN
             GAS_PHASE_OUTPUT_RES = GAS_PHASE_OUTPUT_RES + SDV%D_PATH(NN)
          ENDIF
       ENDDO
