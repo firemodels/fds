@@ -3271,51 +3271,18 @@ MAKE_KAPPA_ARRAYS: IF (.NOT.SOLID_PHASE_ONLY .AND. ANY(SPECIES%RADCAL_ID/='null'
                RADCAL_SPECIES_LOOP: DO NS = 1, N_RADCAL_ARRAY_SIZE
                   PARTIAL_PRESSURES_ATM = 0._EB
                   SELECT CASE(RADCAL_SPECIES_INDEX(NS))
-                     CASE(1) ! CARBON DIOXIDE
-                        PARTIAL_PRESSURES_ATM(1,1) = XX
-                        PARTIAL_PRESSURES_ATM(14,1) = 1._EB - PARTIAL_PRESSURES_ATM(1,1)
-                     CASE(2) ! WATER VAPOR
-                        PARTIAL_PRESSURES_ATM(2,1) = XX
-                        PARTIAL_PRESSURES_ATM(14,1) = 1._EB - PARTIAL_PRESSURES_ATM(2,1)
-                     CASE(3) ! CARBON MONOXIDE
-                        PARTIAL_PRESSURES_ATM(3,1) = XX
-                        PARTIAL_PRESSURES_ATM(14,1) = 1._EB - PARTIAL_PRESSURES_ATM(3,1)
-                     CASE(4) ! METHANE
-                        PARTIAL_PRESSURES_ATM(4,1) = XX
-                        PARTIAL_PRESSURES_ATM(14,1) = 1._EB - PARTIAL_PRESSURES_ATM(4,1)
-                     CASE(5) ! EHTYLENE
-                        PARTIAL_PRESSURES_ATM(5,1) = XX
-                        PARTIAL_PRESSURES_ATM(14,1) = 1._EB - PARTIAL_PRESSURES_ATM(5,1)
-                     CASE(6) ! ETHANE
-                        PARTIAL_PRESSURES_ATM(6,1) = XX
-                        PARTIAL_PRESSURES_ATM(14,1) = 1._EB - PARTIAL_PRESSURES_ATM(6,1)
-                     CASE(7) ! PROPYLENE
-                        PARTIAL_PRESSURES_ATM(7,1) = XX
-                        PARTIAL_PRESSURES_ATM(14,1) = 1._EB - PARTIAL_PRESSURES_ATM(7,1)
-                     CASE(8) ! PROPANE
-                        PARTIAL_PRESSURES_ATM(8,1) = XX
-                        PARTIAL_PRESSURES_ATM(14,1) = 1._EB - PARTIAL_PRESSURES_ATM(8,1)
-                     CASE(9) ! TOLUENE
-                        PARTIAL_PRESSURES_ATM(9,1) = XX
-                        PARTIAL_PRESSURES_ATM(14,1) = 1._EB - PARTIAL_PRESSURES_ATM(9,1)
-                     CASE(10) ! N-HEPTANE
-                        PARTIAL_PRESSURES_ATM(10,1) = XX
-                        PARTIAL_PRESSURES_ATM(14,1) = 1._EB - PARTIAL_PRESSURES_ATM(10,1)
-                     CASE(11) ! METHANOL
-                        PARTIAL_PRESSURES_ATM(11,1) = XX
-                        PARTIAL_PRESSURES_ATM(14,1) = 1._EB - PARTIAL_PRESSURES_ATM(11,1)
-                     CASE(12) ! MMA
-                        PARTIAL_PRESSURES_ATM(12,1) = XX
-                        PARTIAL_PRESSURES_ATM(14,1) = 1._EB - PARTIAL_PRESSURES_ATM(12,1)
+                     CASE(1:12) ! All non-soot, non NITROGEN species
+                        PARTIAL_PRESSURES_ATM(RADCAL_SPECIES_INDEX(NS),1) = XX
+                        PARTIAL_PRESSURES_ATM(14,1) = 1._EB - XX
                      CASE(16) ! SOOT
                         PARTIAL_PRESSURES_ATM(16,1) = YY*RCRHO/SPECIES(SOOT_INDEX)%DENSITY_SOLID
                         PARTIAL_PRESSURES_ATM(14,1) = 1._EB
                   END SELECT
                   CALL SUB_RADCAL(AMEAN,AP0,RADIANCE,TRANSMISSIVITY)
                   IF (PATH_LENGTH > 0.0_EB) THEN
-                     RADCAL_SPECIES2KAPPA(NS,J,K,IBND) = MIN(AMEAN,AP0)/BBF
+                     RADCAL_SPECIES2KAPPA(NS,J+1,K,IBND) = MIN(AMEAN,AP0)/BBF
                   ELSE ! zero path length
-                     RADCAL_SPECIES2KAPPA(NS,J,K,IBND) = AP0/BBF
+                     RADCAL_SPECIES2KAPPA(NS,J+1,K,IBND) = AP0/BBF
                   ENDIF
                END DO RADCAL_SPECIES_LOOP
             ENDDO X_LOOP_Z
