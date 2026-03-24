@@ -2772,6 +2772,11 @@ REAL(EB):: KAPPA_X_MIN=1.E-5_EB,KAPPA_X_MAX=1._EB  !< Min/max volume fraction fo
 REAL(EB):: KAPPA_C_MIN=2.E-7_EB,KAPPA_C_MAX=0.2_EB !< Min/Max mass fraction for soot coefficient look-up table
 REAL(EB):: KAPPA_X_FAC,LOG_KAPPA_X_FAC             !< Scaling factor for absorption coefficient look-up table
 REAL(EB):: KAPPA_C_FAC,LOG_KAPPA_C_FAC             !< Scaling factor for soot coefficient look-up table
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: Y2RADCAL_SPECIES !< Primitive species mapping to radcal species
+REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: RADCAL_SPECIES2KAPPA ! Absorption coefficient look-up table
+INTEGER :: N_RADCAL_ARRAY_SIZE                     !< Number of radcal species present
+INTEGER :: RADCAL_SPECIES_INDEX(16)                !< Mapping of radcal species present to radcal calling function
+CHARACTER(LABEL_LENGTH) :: RADCAL_SPECIES_ID(16)='NULL'!< Name of radcal species
 
 CONTAINS
 

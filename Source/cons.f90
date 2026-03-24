@@ -877,15 +877,9 @@ INTEGER :: NRT                    !< Number of radiation theta angles
 INTEGER :: NCO
 INTEGER :: UIIDIM
 INTEGER :: NLAMBDAT               !< Number of wavelength subdivisions
-INTEGER :: N_RADCAL_ARRAY_SIZE
-INTEGER :: RADCAL_SPECIES_INDEX(16)
 
 LOGICAL :: WIDE_BAND_MODEL        !< Non-gray gas, wide band model
 LOGICAL :: WSGG_MODEL             !< Weighted Sum of Gray Gas model
-
-REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: Y2RADCAL_SPECIES
-REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: RADCAL_SPECIES2KAPPA
-CHARACTER(LABEL_LENGTH) :: RADCAL_SPECIES_ID(16)='NULL'
 
 END MODULE RADCONS
 
