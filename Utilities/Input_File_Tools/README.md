@@ -22,3 +22,7 @@ The script `pan_with_lip.py` creates a simple circular pan with a lip. Input you
 
 The script `fds_simple_chemistry.py` replicates the internal processing done by FDS when simple chemistry is being used for a `REAC` input. The begining of the script contains inputs for the fuel chemistry, soot and CO yields, ambient conditions, one or two-step chemistry, and if soot should be tracked seperately or as part of product lumped species.  The script outputs stoichiometry, heats of combustion, and EPUMO2 for all reactions and the total reaction; a mass and molar definition, molecular weight, and heat of formation for all lumped species used by the reactions; the fuel specifc heat calculated using gamma; and provides warning messages for EPUMO2 or gamma based fuel specific heat values that are abnormal.
 
+## One-Dimensional Mesh Stretching
+
+The script `mesh_quad_stretch.py` generates `&TRNX`, `&TRNY`, or `&TRNZ` ramp lines for a one-dimensional stretched mesh, writes the ramp file, and produces plots of the stretched cell boundaries and the computational-to-physical coordinate mapping. You can define an initial section of uniform grid, and subsequent stretching up to a specified mesh size and number of cells.
+
