@@ -1699,7 +1699,7 @@ One current limitation of the unstructured geometry algorithm is that a Cartesia
 
 \paragraph{Big picture} The long-term goal for complex geometry in FDS is to allow for relatively seamless work-flow with Building Information Management (BIM) models and complex CAD geometries.  However, the past several years have been spent developing a formulation that is conservative and stable.  In so doing, for the time being we have had to abandon the immersed boundary method and move to a cut cell scheme that requires an unstructured pressure solver (ULMAT; see Sec.~\ref{pressure_solver}).
 
-\paragraph{Run time} When using complex geometry you may notice slower runtimes for two reasons.  First, the setup time will be noticeably slower, especially if you are not importing geometry from binary (see Sec.~\ref{subsec:readbin}).  This is inevitable, because identifying and processing cutcells is time-consuming.  Second, the use of ULMAT, while more accurate at solid boundaries, is slower than the FFT pressure solver (per iteration).  Further, ULMAT gets progressively slower as the size of the mesh increases.  Therefore, for larger cases using ULMAT it is important to break the domain up into meshes with less than 150,000 cells (roughly $53^3$).
+\paragraph{Run time} When using complex geometry you may notice slower runtimes for two reasons.  First, the setup time will be noticeably slower, especially if you are not importing geometry from binary (see Sec.~\ref{subsec:readbin}).  This is inevitable, because identifying and processing cutcells is time-consuming.  Second, \ct{GEOM} forces the use of the UGLMAT pressure solver, which, while more accurate at solid boundaries, is slower than the FFT pressure solver per iteration.  However, there are cases where UGLMAT is faster than FFT, which requires many more iterations to repair mesh and solid boundary errors.  This is problem-dependent.
 
 \paragraph{Accuracy} The rationale for using curvilinear geometry should be that the accuracy of the Cartesian geometry is not sufficient.  For example, you may have a sloped ceiling or some detail of a room that requires higher fidelity.  When higher accuracy is required, this usually also means that better grid resolution is required.  Keep the fidelity of the geometry and the Cartesian grid consistent with each other.  Do not expect a highly detailed geometry to give improved results if the Cartesian grid is disproportionately coarse.
 
@@ -3995,7 +3995,7 @@ In the second approach, one or more ducts have flows that are not specified, in 
 \subsection{HVAC and Unstructured Geometry}
 \label{info:hvac_geom}
 
-Assigning either a normal HVAC node or a localized leakage HVAC to a GEOM is done using \ct{SURF}. 
+Assigning either a normal HVAC node or a localized leakage HVAC to a GEOM is done using \ct{SURF}.
 
 In the case of a normal HVAC node, using the simple example from Section~\ref{info:GEOM_Basics}, an HVAC node named \ct{'MY NODE'} is assigned to the first face by defining a \ct{SURF} with \ct{NODE_ID='MY NODE'}. No other boundary conditions should be set on the \ct{SURF} other than a color or texture. On the node \ct{HVAC} input set \ct{GEOM=T} to indicate FDS needs to look for a \ct{GEOM} and not a \ct{VENT} for the node:
 
@@ -4736,7 +4736,7 @@ that resulted from combustion.  The following inputs would allow you to do that:
 &DEVC XYZ=..., QUANTITY='MASS FRACTION', SPEC_ID='WATER VAPOR SPK', ID='Spr H2O'/
 &DEVC XYZ=..., QUANTITY='MASS FRACTION', SPEC_ID='WATER VAPOR', ID='All H2O'/
 \end{lstlisting}
-The gas species called \ct{WATER VAPOR SPK} has the same properties as \ct{WATER VAPOR}. The first device records only water that results from droplet evaporation, and the second device records water that originates from both sprinklers and combustion. 
+The gas species called \ct{WATER VAPOR SPK} has the same properties as \ct{WATER VAPOR}. The first device records only water that results from droplet evaporation, and the second device records water that originates from both sprinklers and combustion.
 
 By default, duplicate species are considered to be a lumped species and not a primitive species.  That is, by default, a duplicate species cannot be used in a lumped species definition.  Setting \ct{PRIMITIVE=T} will have FDS treat the duplicate species as a primitive species and allow it to be used in a lumped species definition.  Note that when this is done, one can no longer aggregate \ct{SPEC_ID} based outputs over the original and the duplicate species as the aggregation is done on the basis of the primitive species names.  This is demonstrated in the example below.  The species \ct{O2 LUMPED} and \ct{O2 DUPLICATE PRIMITIVE} are duplicate species of \ct{OXYGEN}.  \ct{O2 DUPLICATE PRIMITIVE} is defined as a primitive species and \ct{O2 LUMPED} is considered only a lumped species.  The initial \ct{DEVC} outputs in order would be 0.3 (0.1 for \ct{OXYGEN} plus 0.2 for \ct{O2 LUMPED}), 0.2 (the \ct{O2 LUMPED} initial value), and 0.3 (the \ct{O2 DUPLICATE PRIMITIVE} initial value).  Note the \ct{OXYGEN} output is not 0.6 since the \ct{O2 DUPLICATE PRIMITIVE} is defined as a new primitive species.
 \begin{lstlisting}
@@ -5526,7 +5526,7 @@ python Utilities/Python/scripts/cantera_yaml_2_fds.py --yaml_file output.yaml --
 	\item \ct{background_species} is the FDS species input that will get \ct{BACKGROUND=T}. The name must match one of the species names in the YAML file.
 	\item \ct{spec_filename} is a csv file with column headings \ct{FORMULA}, \ct{NAME}, and \ct{RADCAL\_ID}. The rows are the species formulas in the YAML file and the FDS predefined name for that formula. Its default value is \ct{output.spec}. If the file is present and a YAML file formula for a species is listed in the file, then the FDS input for that species will have both \ct{ID} and \ct{ALT_ID} where \ct{ID} will be the species name and \ct{ALT_ID} will be the species formula. If not the file or species is not present, then the species outputs will only have \ct{ID} using the YAML file formula.
 	\item \ct{prop_flag} when \emph{True} will result in FDS using predefined species properties for any species whose name is listed in \ct{spec_filename}. Otherwise the YAML file properties will be used.
-	\item \ct{radcal_fag} when \emph{True} will set the \ct{RADCAL_ID} for any species where a name other than \ct{NONE} is listed in the \ct{spec_filename}. 
+	\item \ct{radcal_fag} when \emph{True} will set the \ct{RADCAL_ID} for any species where a name other than \ct{NONE} is listed in the \ct{spec_filename}.
 	\item \ct{mf0_filename} is a csv file with column headings \ct{FORMULA} and \ct{MF0}. For each listed species \ct{MASS_FRACTION_0} will be set to the value of \ct{MF0}.
 	\item \ct{output.fds} is the name of the file where the FDS \ct{SPEC} and \ct{REAC} inputs will be written. This file can then be concatenated into another FDS file, see Sec.~\ref{info:CATF}.
 \end{itemize}
@@ -7125,7 +7125,7 @@ The Particle Model and Boundary Fuel Model use the same basic pyrolysis model (S
 \section{Thermal Degradation Model for Vegetation}
 \label{vegetation_model}
 
-This section includes a relatively simple description of the thermal decomposition of a vegetative fuel. The FDS Github repository contains a useful calculation script for converting basic information about the vegetation into FDS input parameters (\ct{Utilities/Input_File_Tools/vegetation_chemistry.py}). 
+This section includes a relatively simple description of the thermal decomposition of a vegetative fuel. The FDS Github repository contains a useful calculation script for converting basic information about the vegetation into FDS input parameters (\ct{Utilities/Input_File_Tools/vegetation_chemistry.py}).
 
 \subsection{Required Information}
 \label{veg_pyrolysis_gas_phase}
@@ -7897,7 +7897,7 @@ Most devices are not associated with a particular set of properties via the \ct{
 \begin{lstlisting}
 &DEVC ID='TC-23', XYZ=3.0,5.6,2.3, QUANTITY='TEMPERATURE'  /
 \end{lstlisting}
-tells FDS to record the predicted gas temperature at the given point as a function of time. As this is a basic physical quantity, no additional data on a \ct{PROP} is needed. 
+tells FDS to record the predicted gas temperature at the given point as a function of time. As this is a basic physical quantity, no additional data on a \ct{PROP} is needed.
 
 Some devices have a particular orientation. The parameter \ct{IOR} (Index of Orientation) is required for any device that is placed on the surface of a solid. The values $\pm$1 or $\pm$2 or $\pm$3 indicate the direction that the device ``points.'' For example, \ct{IOR=-1} means that the device is mounted on a wall that faces in the negative $x$ direction. \ct{ORIENTATION} is used for devices that are not on a surface and require a directional specification, like a sprinkler. \ct{ORIENTATION} is specified with a triplet of real number values that indicate the components of the direction vector. The default value of \ct{ORIENTATION} is (0,0,-1) indicating the spray is pointed at the floor of the domain. This can be changed to another direction. For example, if you were to specify
 \begin{lstlisting}
@@ -8116,7 +8116,7 @@ In this example, a velocity patch is activated at 10 s in the simulation.  Any $
 \subsection{Heat Detectors}
 \label{info:heat_detectors}
 
-\ct{QUANTITY='LINK TEMPERATURE'} defines a heat detector. This uses the same activation algorithm as a sprinkler without water spray cooling effects or pipe conduction (\ct{C_FACTOR}) effects. 
+\ct{QUANTITY='LINK TEMPERATURE'} defines a heat detector. This uses the same activation algorithm as a sprinkler without water spray cooling effects or pipe conduction (\ct{C_FACTOR}) effects.
 \begin{lstlisting}
 &DEVC ID='HD_66', PROP_ID='Acme Heat', XYZ=2.3,4.6,3.4 /
 &PROP ID='Acme Heat', QUANTITY='LINK TEMPERATURE', RTI=132., ACTIVATION_TEMPERATURE=74. /
@@ -12717,7 +12717,7 @@ Keyword                           & Type                      & Description     
 \multicolumn{5}{|c|}{\ct{MESH} (Mesh Parameters)} \\
 \hline
 Keyword                           & Type                      & Description                              & Units & Default   \\ \hline  \hline
-\endhead 
+\endhead
 \ct{BNDF_MESH}                    & Logical                   & Section~\ref{info:BNDF}                  &       & \ct{T}          \\ \hline
 \ct{CHECK_MESH_ALIGNMENT}         & Logical                   & Section~\ref{info:mesh_alignment}        &       & \ct{F}          \\ \hline
 \ct{COLOR}                        & Character                 & Section~\ref{info:multimesh}             &       & \ct{'BLACK'}    \\ \hline
@@ -13029,7 +13029,7 @@ Keyword                                    & Type        & Description          
 \ct{COMPLEX_REFRACTIVE_INDEX}              & Real        & Section~\ref{radiative_part_props}                              &                   & 0.01                  \\ \hline
 \ct{CTRL_ID}                               & Character   & Section~\ref{info:particle_flux}                                &                   &                       \\ \hline
 \ct{DENSE_VOLUME_FRACTION}                 & Real        & Section~\ref{info:DENSE_VOLUME_FRACTION}                        &                   & \num{1e-5} \rule{0pt}{2.3ex}  \\ \hline
-\ct{DEVC_ID}                               & Character   & Section~\ref{info:particle_flux}                                &                   &                       \\ \hline 
+\ct{DEVC_ID}                               & Character   & Section~\ref{info:particle_flux}                                &                   &                       \\ \hline
 \ct{DIAMETER}                              & Real        & Section~\ref{info:particle_size}                                & \unit{\micro m}   &                       \\ \hline
 \ct{DISTRIBUTION}                          & Character   & Section~\ref{info:particle_size}                                &                   & \ct{'ROSIN...'}      \\ \hline
 \ct{DRAG_COEFFICIENT(3)}                   & Real Array  & Section~\ref{info:particle_drag}                                &                   &                       \\ \hline
