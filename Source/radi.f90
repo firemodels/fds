@@ -2766,14 +2766,15 @@ PRIVATE
 PUBLIC INIT_RADIATION,COMPUTE_RADIATION,BLACKBODY_FRACTION
 
 REAL(EB) :: TYY_FAC
-INTEGER :: N_KAPPA_T=44                            !< Number of temperature points in absorption coefficient look-up table
-INTEGER :: N_KAPPA_X=50                            !< Number of species points in absorption coefficient look-up table
-REAL(EB):: KAPPA_X_MIN=1.E-5_EB,KAPPA_X_MAX=1._EB  !< Min/max volume fraction for absorption coefficient look-up table
-REAL(EB):: KAPPA_C_MIN=2.E-7_EB,KAPPA_C_MAX=0.2_EB !< Min/Max mass fraction for soot coefficient look-up table
-REAL(EB):: KAPPA_X_FAC,LOG_KAPPA_X_FAC             !< Scaling factor for absorption coefficient look-up table
-REAL(EB):: KAPPA_C_FAC,LOG_KAPPA_C_FAC             !< Scaling factor for soot coefficient look-up table
+INTEGER :: N_KAPPA_T=44                             !< Number of temperature points in absorption coefficient look-up table
+INTEGER :: N_KAPPA_X=50                             !< Number of species points in absorption coefficient look-up table
+REAL(EB) :: KAPPA_X_MIN=1.E-5_EB,KAPPA_X_MAX=1._EB  !< Min/max volume fraction for absorption coefficient look-up table
+REAL(EB) :: KAPPA_C_MIN=2.E-7_EB,KAPPA_C_MAX=0.2_EB !< Min/Max mass fraction for soot coefficient look-up table
+REAL(EB) :: KAPPA_X_FAC,LOG_KAPPA_X_FAC             !< Scaling factor for absorption coefficient look-up table
+REAL(EB) :: KAPPA_C_FAC,LOG_KAPPA_C_FAC             !< Scaling factor for soot coefficient look-up table
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: Y2RADCAL_SPECIES !< Primitive species mapping to radcal species
 REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: RADCAL_SPECIES2KAPPA ! Absorption coefficient look-up table
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: KAPPA_COND  !< Array to remove condensed species from absorption coefficient look-up 
 INTEGER :: N_RADCAL_ARRAY_SIZE                     !< Number of radcal species present
 INTEGER :: RADCAL_SPECIES_INDEX(16)                !< Mapping of radcal species present to radcal calling function
 CHARACTER(LABEL_LENGTH) :: RADCAL_SPECIES_ID(16)='NULL'!< Name of radcal species
@@ -3208,8 +3209,15 @@ MAKE_KAPPA_ARRAYS: IF (.NOT.SOLID_PHASE_ONLY .AND. ANY(SPECIES%RADCAL_ID/='null'
       CALL ChkMemErr('RADI','Y2RADCAL_SPECIES',IZERO)
       Y2RADCAL_SPECIES = 0._EB
 
+      ALLOCATE(KAPPA_COND(N_TRACKED_SPECIES),STAT=IZERO)
+      CALL ChkMemErr('RADI','KAPPA_COND',IZERO)
+      KAPPA_COND = 1._EB
+      
       DO NS=1,N_TRACKED_SPECIES
-         IF( SPECIES_MIXTURE(NS)%EVAPORATION_SMIX_INDEX>0) CALL MEAN_CROSS_SECTIONS(SMIX_INDEX=NS)
+         IF (SPECIES_MIXTURE(NS)%EVAPORATION_SMIX_INDEX>0) THEN
+            CALL MEAN_CROSS_SECTIONS(SMIX_INDEX=NS)
+            KAPPA_COND(NS) = 0._EB
+         ENDIF
       ENDDO
       DO NS=1,N_SPECIES
          SS => SPECIES(NS)
@@ -4675,10 +4683,13 @@ REAL(EB) FUNCTION GET_KAPPA(Z_IN,TMP,IBND)
 ! Returns the radiative absorption
 
 USE PHYSICAL_FUNCTIONS, ONLY : GET_MOLECULAR_WEIGHT,GET_MASS_FRACTION_ALL
-REAL(EB), INTENT(IN) :: Z_IN(1:N_TRACKED_SPECIES),TMP
+REAL(EB), INTENT(INOUT) :: Z_IN(1:N_TRACKED_SPECIES)
+REAL(EB), INTENT(IN) :: TMP
 REAL(EB) :: KAPPA_TEMP,INT_FAC,KAPPA_SUM,SCALED_X_RADCAL_SPECIES,MWA,Y_OUT(1:N_SPECIES)
 INTEGER, INTENT(IN) :: IBND
 INTEGER :: LBND,UBND,N,TYY
+
+Z_IN = Z_IN * KAPPA_COND
 
 KAPPA_SUM = 0._EB
 
