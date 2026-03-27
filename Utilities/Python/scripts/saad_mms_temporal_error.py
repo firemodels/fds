@@ -67,11 +67,11 @@ p_Z = np.log( abs(Z_3-Z_2)/np.abs(Z_2-Z_1) )/np.log(r);
 
 L2_rho = np.linalg.norm(p_rho,ord=2)/math.sqrt(nx)
 if L2_rho<1.99:
-   print('Matlab Warning: L2_rho = ',L2_rho,' in Saad MMS')
+   print('Python Warning: L2_rho = ',L2_rho,' in Saad MMS')
 
 L2_Z = np.linalg.norm(p_Z,ord=2)/math.sqrt(nx);
 if L2_Z<1.99:
-   print('Matlab Warning: L2_Z = ',L2_Z,' in Saad MMS')
+   print('Python Warning: L2_Z = ',L2_Z,' in Saad MMS')
 
 # write the l2 norm to latex
 
@@ -202,11 +202,11 @@ p_Z = np.log( abs(Z_3-Z_2)/np.abs(Z_2-Z_1) )/np.log(r);
 
 L2_rho = np.linalg.norm(p_rho,ord=2)/math.sqrt(nx)
 if L2_rho<1.99:
-   print('Matlab Warning: L2_rho = ',L2_rho,' in Saad CC MMS')
+   print('Python Warning: L2_rho = ',L2_rho,' in Saad CC MMS')
 
 L2_Z = np.linalg.norm(p_Z,ord=2)/math.sqrt(nx);
 if L2_Z<1.99:
-   print('Matlab Warning: L2_Z = ',L2_Z,' in Saad CC MMS')
+   print('Python Warning: L2_Z = ',L2_Z,' in Saad CC MMS')
 
 # write the l2 norm to latex
 

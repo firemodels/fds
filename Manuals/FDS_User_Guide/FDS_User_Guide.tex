@@ -223,107 +223,107 @@ Options are available to include multiple reactions and reactions that are not n
 \end{description}
 
 
-\section{What's New in FDS 7?}
+%\section{What's New in FDS 7?}
 
-Many of the changes in FDS~6 are improvements to the various sub-models that do not affect the basic structure or parameters of the input file. Most of the changes listed below do not require additional input parameters beyond those used in FDS~5.
+%Many of the changes in FDS~7 are improvements to the various sub-models that do not affect the basic structure or parameters of the input file. Most of the changes listed below do not require additional input parameters beyond those used in FDS~6.
 
-\subsubsection{Hydrodynamics and Turbulence}
+%\subsubsection{Hydrodynamics and Turbulence}
 
-\begin{itemize}
-  \item The background species is now explicitly tracked.
-  \item An improved, total variation diminishing (TVD) scalar transport is implemented that fixes an existing issue when three or more species are being transported.
-  \item A new approach for treating flows at corners has been implemented.
-  \item The near wall turbulence model was changed to \ct{WALE}.
-  \item \ct{SIMULATON_MODE} and \ct{FLUX_LIMITER} are now used to set basic parameters for the flow solver.
-  \item The \ct{WIND} keyword was added to provide various means of specifying wind.
-  \item Multiple new pressure solvers added in addition to the default FFT solver.
-\end{itemize}
+%\begin{itemize}
+%  \item The background species is now explicitly tracked.
+%  \item An improved, total variation diminishing (TVD) scalar transport is implemented that fixes an existing issue when three or more species are being transported.
+%  \item A new approach for treating flows at corners has been implemented.
+%  \item The near wall turbulence model was changed to \ct{WALE}.
+%  \item \ct{SIMULATON_MODE} and \ct{FLUX_LIMITER} are now used to set basic parameters for the flow solver.
+%  \item The \ct{WIND} keyword was added to provide various means of specifying wind.
+%  \item Multiple new pressure solvers added in addition to the default FFT solver.
+%\end{itemize}
 
-\subsubsection{Species and Combustion}
+%\subsubsection{Species and Combustion}
 
-\begin{itemize}
-     \item Detailed chemistry is supported by the use of the CVODES solver. Python scripts are provided to convert Canterra YAML files to FDS  inputs.
-     \item Finite rate chemistry now supports third body reactions with non-unity collision efficiencies, pressure based reaction rates, and catalytic reactions.
-     \item The species of \ct{SOOT} now has a default formula of C only.
-     \item Over 300 gas and liquid species now predefined.
-     \item HCN yields can be specified for either single or two step simple chemistry reactions.
-     \item A drift flux model has been added for gas phase settling of aerosol species.
-\end{itemize}
+%\begin{itemize}
+%     \item Detailed chemistry is supported by the use of the CVODES solver. Python scripts are provided to convert Canterra YAML files to FDS  inputs.
+%     \item Finite rate chemistry now supports third body reactions with non-unity collision efficiencies, pressure based reaction rates, and catalytic reactions.
+%     \item The species of \ct{SOOT} now has a default formula of C only.
+%     \item Over 300 gas and liquid species now predefined.
+%     \item HCN yields can be specified for either single or two step simple chemistry reactions.
+%     \item A drift flux model has been added for gas phase settling of aerosol species.
+%\end{itemize}
 
-\subsubsection{Lagrangian Particles}
+%\subsubsection{Lagrangian Particles}
 
-\begin{itemize}
-  \item \ct{ORIENTATION_RAMP} added to \ct{INIT} to control the orientation of particles placed with \ct{INTI}.
-\end{itemize}
+%\begin{itemize}
+%  \item \ct{ORIENTATION_RAMP} added to \ct{INIT} to control the orientation of particles placed with \ct{INTI}.
+%\end{itemize}
 
-\subsubsection{Solid Phase Heat Transfer and Pyrolysis}
+%\subsubsection{Solid Phase Heat Transfer and Pyrolysis}
 
-\begin{itemize}
-     \item Thin obstructions can now burn.
-     \item A flux based model for oxidative pyrolysis has been added.
-     \item A new approach to dynamic wall re-noding was implemented.
-     \item SPyro (Scaling Pyrolysis) added. This uses the FDS predicted incident flux to scale burning rate data from multiple cone calorimeter tests with varying exposures and sample thicknesses.
-     \item 1D heat transfer can occur over multi-cell thick obstacles.
-     \item Global energy conversation during pyrolysis is now strictly enforced.
-\end{itemize}
+%\begin{itemize}
+%     \item Thin obstructions can now burn.
+%     \item A flux based model for oxidative pyrolysis has been added.
+%     \item A new approach to dynamic wall re-noding was implemented.
+%     \item SPyro (Scaling Pyrolysis) added. This uses the FDS predicted incident flux to scale burning rate data from multiple cone calorimeter tests with varying exposures and sample %thicknesses.
+%     \item 1D heat transfer can occur over multi-cell thick obstacles.
+%     \item Global energy conversation during pyrolysis is now strictly enforced.
+%\end{itemize}
 
-\subsubsection{HVAC}
+%\subsubsection{HVAC}
 
-\begin{itemize}
-     \item HVAC can now be used with \ct{GEOM}.
-     \item An improved algorithm for identifying HVAC coupled pressure zones was added.
-     \item Smokeview outputs for HVAC added to visualize the network and duct and node outputs.
-     \item DUCT \ct{WAYPOINT}s added to improve Smokeview visualization.
-\end{itemize}
+%\begin{itemize}
+%     \item HVAC can now be used with \ct{GEOM}.
+%     \item An improved algorithm for identifying HVAC coupled pressure zones was added.
+%     \item Smokeview outputs for HVAC added to visualize the network and duct and node outputs.
+%     \item DUCT \ct{WAYPOINT}s added to improve Smokeview visualization.
+%\end{itemize}
 
-\subsubsection{Radiation}
+%\subsubsection{Radiation}
 
-\begin{itemize}
-\item A new method of adjusting the radiative emission on coarse grids was added.
-\item Default values for the radiative fraction is specified for various fuels. and the radiant fraction can be a function of the local mixture of fuels.
-\end{itemize}
+%\begin{itemize}
+%\item A new method of adjusting the radiative emission on coarse grids was added.
+%\item Default values for the radiative fraction is specified for various fuels. and the radiant fraction can be a function of the local mixture of fuels.
+%\end{itemize}
 
-\subsubsection{Multi-Mesh Computations}
+%\subsubsection{Multi-Mesh Computations}
 
-\begin{itemize}
-\item The UGLMAT pressure solver can now be used with mesh refinement.
-\item Various improvements in the efficiency of MPI communications have been implemented.
-\item A \ct{TUNNEL_PRECONDITIONER} was added for cases consisting of a single long tunnel.
-\end{itemize}
+%\begin{itemize}
+%\item The UGLMAT pressure solver can now be used with mesh refinement.
+%\item Various improvements in the efficiency of MPI communications have been implemented.
+%\item A \ct{TUNNEL_PRECONDITIONER} was added for cases consisting of a single long tunnel.
+%\end{itemize}
 
-\subsubsection{Control Functions}
+%\subsubsection{Control Functions}
 
-\begin{itemize}
-\item \ct{CTRL} functions and \ct{RAMP}s can be controlled by an external process running simultaneously with FDS.
-\end{itemize}
+%\begin{itemize}
+%\item \ct{CTRL} functions and \ct{RAMP}s can be controlled by an external process running simultaneously with FDS.
+%\end{itemize}
 
-\subsubsection{Devices and Output}
+%\subsubsection{Devices and Output}
 
-\begin{itemize}
-\item A \ct{BI-DIRECTIONAL PROBE} output is added which models the output of a typical probe.
-\item The \ct{DRY} flag for species outputs can be added to HVAC and \ct{SLCF} outputs.
-\item \ct{VIEW_ANGLE} can be specified for heat flux gauges.
-\item \ct{PROF}ile outputs can now use any solid phase \ct{QUANTITY} that takes a \ct{DEPTH}.
-\item Both spatial and temporal statistics can be applied to a \ct{DEVC} that spans multiple meshes.
-\end{itemize}
+%\begin{itemize}
+%\item A \ct{BI-DIRECTIONAL PROBE} output is added which models the output of a typical probe.
+%\item The \ct{DRY} flag for species outputs can be added to HVAC and \ct{SLCF} outputs.
+%\item \ct{VIEW_ANGLE} can be specified for heat flux gauges.
+%\item \ct{PROF}ile outputs can now use any solid phase \ct{QUANTITY} that takes a \ct{DEPTH}.
+%\item Both spatial and temporal statistics can be applied to a \ct{DEVC} that spans multiple meshes.
+%\end{itemize}
 
-\subsubsection{Beta Features}
+%\subsubsection{Beta Features}
 
-\begin{itemize}
-\item Unstructured geometry (\ct{GEOM}) remains in beta.
-\item 3D heat transfer remain in beta.
-\end{itemize}
+%\begin{itemize}
+%\item Unstructured geometry (\ct{GEOM}) remains in beta.
+%\item 3D heat transfer remain in beta.
+%\end{itemize}
 
-\subsection{Quality Assurance}
- \begin{itemize}
-  \item Continuous integration has been migrated from Matlab to Python.
- \end{itemize}
+%\subsection{Quality Assurance}
+ %\begin{itemize}
+ % \item Continuous integration has been migrated from Matlab to Python.
+ %\end{itemize}
 
-\subsection{FDS Executable}
- \begin{itemize}
-  \item Two executables are now provided for running FDS with and without OpenMP.
-  \item For Windows a special command prompt (CMDfds) is added.
- \end{itemize}
+%\subsection{FDS Executable}
+% \begin{itemize}
+%  \item Two executables are now provided for running FDS with and without OpenMP.
+%  \item For Windows a special command prompt (CMDfds) is added.
+% \end{itemize}
 
 \chapter{Getting Started}
 \label{info:gettingstarted}
@@ -732,7 +732,7 @@ sets various values of parameters contained in the \ct{DUMP} namelist group. The
 
 Parameters within a namelist record can be separated by either commas, spaces, or line breaks. It is recommended that you use commas or line breaks, and never use tab stops because they are not explicitly defined in the namelist data structure. Comments and notes can be written into the file so long as nothing comes before the ampersand except a space and nothing comes between the ampersand and the slash except appropriate parameters corresponding to that particular namelist group.
 
-The parameters in the input file can be integers, reals, character strings, or logical parameters. A logical parameter (outside of Fortran known as boolean parameter) is either \ct{T} (for True) or \ct{F} (for False). The periods following numbers (e.g. \ct{10.}) are a convention for specifying a real as opposed to an integer (\ct{10.} is equivalent to \ct{10.0}). Character strings that are listed in this User's Guide must be copied exactly as written -- the code is case sensitive and underscores {\em do} matter. The maximum length of most character input parameters is 60. Depending on your operating system, it may matter that integers are specified as integers (e.g. \ct{10} and not \ct{10.}).
+The parameters in the input file can be integers, reals, character strings, or logical parameters. A logical parameter (outside of Fortran known as boolean parameter) is either \ct{T} (for True) or \ct{F} (for False)\footnote{The values of \ct{.TRUE.} and \ct{.FALSE.} can also be used}. The periods following numbers (e.g. \ct{10.}) are a convention for specifying a real as opposed to an integer (\ct{10.} is equivalent to \ct{10.0}). Character strings that are listed in this User's Guide must be copied exactly as written -- the code is case sensitive and underscores {\em do} matter. The maximum length of most character input parameters is 60. Depending on your operating system, it may matter that integers are specified as integers (e.g. \ct{10} and not \ct{10.}).
 
 Most of the input parameters are simply real or integer scalars, like \ct{DT=0.02}, but sometimes the inputs are
 multidimensional arrays. For example, when describing a particular solid surface, you need to express the mass fractions of multiple materials that are to be found in multiple layers. The input array \ct{MATL_MASS_FRACTION(IL,IC)} is intended to convey to FDS the mass fraction of component \ct{IC} of layer \ct{IL}. For example, if the mass fraction of the second material of the third layer is 0.5, then write
@@ -2816,7 +2816,7 @@ FDS has a simple scaling-based pyrolysis model (SPyro) that scales burning rate 
 \begin{itemize}
 \item \ct{HRRPUA} (Required) Specified heat release rate per unit area (HRRPUA) for the \ct{SURF} which is multiplied by \ct{RAMP_Q}. Typically, HRRPUA is set to 1.0 \unit{kW/m^2} using this model.
 \item \ct{IGNITION_TEMPERATURE} (Required) Specifies ignition temperature of the material in degrees Celsius.
-\item \ct{INERT_Q_REF} Specifies whether the test data represents an inert test device where pyrolysis occurs without combustion. This flag applies to all specified test data if an array of experimental data is provided. (Default False)
+\item \ct{INERT_Q_REF} Specifies whether the test data represents an inert test device where pyrolysis occurs without combustion. This flag applies to all specified test data if an array of experimental data is provided. (Default \ct{F})
 \item \ct{RAMP_Q} (Required) Specifies the \ct{ID} of a \ct{RAMP} which contains the experimental data with \ct{T} as time and \ct{F} as the measured HRRPUA in \unit{kW/m^2}. The test data should be adjusted so that 0~s in the ramp represents the time the sample started burning/pyrolyzing in the test. More than one \ct{ID} can be listed.
 \item \ct{REFERENCE_HEAT_FLUX} (Required) Specifies the radiant heat flux in \unit{kW/m^2} imposed by the test device to the sample prior to the start of pyrolysis, i.e., what a water-cooled heat flux gauge would measure. As many values should be specified as there are \ct{ID} listed for \ct{RAMP_Q}.
 \item \ct{REFERENCE_THICKNESS} Specifies the thickness of the sample in the experiment. If not specified, FDS will assume the experiment was at the same \ct{THICKNESS(1)} defined on the \ct{SURF} line. Note that this is just the combustible portion of the sample and not any insulation or other inert backing materials. (Default \ct{THICKNESS(1)})
@@ -3036,7 +3036,7 @@ the \ct{DENSITY} on the \ct{MATL} line. In cases involving several material comp
 For example, if the original material with a \ct{DENSITY} of 500~\unit{kg/m^3} is completely converted into a residue with a \ct{DENSITY} of 1000~\unit{kg/m^3}, the thickness of the material layer will be half of the original.
 
 Shrinking is prevented by setting \ct{ALLOW_SHRINKING} to \ct{F} on the \ct{MATL} line. Swelling is prevented by setting
-\ct{ALLOW_SWELLING} to \ct{F} on the \ct{MATL} line.  By default, these flags are true. Shrinking/swelling does not take place if any of the materials with non-zero density has the corresponding flag set to false.
+\ct{ALLOW_SWELLING} to \ct{F} on the \ct{MATL} line.  The default value for both is \ct{T}. Shrinking/swelling does not take place if any of the materials with non-zero density has the corresponding flag set to \ct{F}.
 
 
 \subsection{Multiple Solid Phase Reactions}
@@ -3330,7 +3330,7 @@ This section describes how to set up a simple model of the cone calorimeter or s
 \item Create \ct{SPEC} lines to list any gas species created in the pyrolysis process. A \ct{REAC} line is not needed, as there is no gas phase combustion allowed.
 \item On the \ct{TIME} line, set \ct{WALL_INCREMENT=1} to force FDS to update the solid phase every time step (normally it does this every other time step), and set \ct{DT} to a value that is appropriate for the solid phase calculation. Since there is no gas phase calculation that will limit the time step, it is best to control this yourself.
 \item Generate \ct{MATL} lines, plus a single \ct{SURF} line, as you normally would, except add \ct{EXTERNAL_FLUX} to the \ct{SURF} line. This is simply a ``virtual'' source that heats the solid. Think of this as a perfect radiant panel or conical heating unit. You can control the \ct{EXTERNAL_FLUX} using either \ct{TAU_EF} or \ct{RAMP_EF}. This is useful if you want to ramp up the heat flux following ignition to account for the additional radiation from the flame. See Sec.~\ref{info:RAMP_Time} for more details about ramps. Note that if you want the \ct{EXTERNAL_FLUX} to {\em replace} all other sources of radiation at the surface, set \ct{SKIP_INRAD=T} on the \ct{SURF} line along with \ct{EXTERNAL_FLUX}.
-\item On the \ct{SURF} line, set a gas temperature, \ct{TMP_GAS_FRONT} (\unit{\degreeCelsius}), and optionally a \linebreak[4]\ct{HEAT_TRANSFER_COEFFICIENT} (\unit{W/(m^2.K)}), allowing you to control the convective heat flux from gas to surface and vice versa. Similar to \ct{EXTERNAL_FLUX}, \ct{RAMP_TMP_GAS_FRONT} and \ct{RAMP_HEAT_TRANSFER_COEFFICIENT} can be set to account for pre- vs. post-ignition conditions. Note that \ct{TMP_GAS_FRONT} and \ct{EXTERNAL_FLUX} should not be specified on the same \ct{SURF} line.
+\item On the \ct{SURF} line, set a gas temperature, \ct{TMP_GAS_FRONT} (\unit{\degreeCelsius}), and optionally a \linebreak[4]\ct{HEAT_TRANSFER_COEFFICIENT} (\unit{W/(m^2.K)}), allowing you to control the convective heat flux from gas to surface and vice versa. Similar to \ct{EXTERNAL_FLUX}, \ct{RAMP_TMP_GAS_FRONT} and \ct{RAMP_HEAT_TRANSFER_COEFFICIENT} can be set to account for pre- vs. post-ignition conditions.
 \item Assign the \ct{SURF_ID} to a \ct{VENT} that spans at least one grid cell.
 \item Add solid phase output devices to the solid surface, like \ct{'WALL TEMPERATURE'}, \ct{'TOTAL HEAT FLUX'}, \ct{'GAUGE HEAT FLUX'}, and \ct{'WALL THICKNESS'}. Use these to track the condition of the solid as a function of time. The generation rate of the various gases is output via the quantity \ct{'MASS FLUX'} along with the appropriate \ct{SPEC_ID}. Do not specify the quantity \ct{'BURNING RATE'} because FDS assumes that this is specific for fuel gas, and in this exercise there is no fuel gas.
 \end{enumerate}
@@ -3399,7 +3399,7 @@ where $\rho_{\rm s}$ is the initial sample density, $c_{\rm s}$ is the initial s
 
 The \ct{TGA}, \ct{MCC} or \ct{DSC/STA} output can be multiplied by \ct{X_CONVERSION_FACTOR}, where \ct{X} is \ct{TGA}, \ct{MCC}, or \ct{DSC}, respectively. For example, the \ct{DSC} output assumes that an endothermic reaction is represented by a positive peak, and an exothermic reaction by a negative peak. To flip this around, set \ct{DSC_CONVERSION_FACTOR=-1}.
 
-Details of the output quantities are discussed in Sec.~\ref{info:material_components}. Further details on these measurement techniques and how to interpret them are found in the FDS Verification Guide~\cite{FDS_Verification_Guide}.
+Details of the output quantities are discussed in Sec.~\ref{info:thermal_analysis_outputs}. Further details on these measurement techniques and how to interpret them are found in the FDS Verification Guide~\cite{FDS_Verification_Guide}.
 
 \subsubsection{Example}
 
@@ -3735,7 +3735,7 @@ where:
 \item \ct{RAMP_LOSS} If specified this \ct{RAMP} is a multiplier for the \ct{LOSS}.
 \item \ct{REVERSE}  is a logical parameter that when \ct{T} indicates that the specified \ct{FAN_ID} blows from the second node to the first. \ct{REVERSE} has no effect on \ct{VOLUME_FLOW} or \ct{MASS_FLOW} as a duct input. If \ct{VOLUME_FLOW} or \ct{MASS_FLOW} is specified for a duct and the reverse flow direction is needed, change the sign of the input to negative.
 \item \ct{ROUGHNESS} is the absolute roughness in m of the duct that is used to compute the friction factor for the duct. If \ct{ROUGHNESS} is not set, the HVAC solver will not compute the friction factor and the wall friction will be zero - if this is the case you may want to account for wall friction losses in \ct{LOSS}. "Perfectly smooth" ducts and pipes still have wall losses and therefore setting \ct{ROUGHNESS} to zero will tell the HVAC solver to compute the minimum friction factor (which is non-zero) - this is not the same as leaving \ct{ROUGHNESS} unset.
-\item \ct{ROUND} flag indicating a round duct. The default value is true.
+\item \ct{ROUND} flag indicating a round duct. The default value is \ct{T}.
 \item \ct{SQUARE} flag indicating a square duct.
 \item \ct{VOLUME_FLOW} is a fixed flow rate in \unit{m^3/s} through the duct.  Only specify one of \ct{MASS_FLOW} or \ct{VOLUME_FLOW}. If you specify \ct{VOLUME_FLOW}, its value in time either using the characteristic time, \ct{TAU_VF},  to define a tanh (\ct{TAU_VF}>0) or t$^2$ ramp (\ct{TAU_VF}<0); or \ct{RAMP_ID} to specify the flow over time.  \ct{VOLUME_FLOW} cannot be controlled by a device or control function. This can, however, be cone using a constant volume flow \ct{FAN}.
 \item \ct{WAYPOINTS} is an array of coordinates in m that define the path a duct takes. Currently this only used for Smokeview visualization of the HVAC network. Up to 30 \ct{WAYPOINTS} can be defined. For example: \ct{WAYPOINTS(1,1:3)=1,1,1, WAYPOINTS(2,1:3)=2,2,2} as part of a duct input would mean the duct starts at the first node, then goes to the point (1,1,1), then to (2,2,2), and finally to the second node.
@@ -4278,7 +4278,7 @@ The purpose of the test case is to ensure that the proper amount of gas (in this
 \be
    \frac{\d p}{\d t} = \frac{\gamma \, \dot{V}}{V} \, p   \quad \Longrightarrow \quad p(t) - p_0 = p_0 \left( {\rm e}^{\frac{\gamma \, \dot{V}}{V} \, t} - 1 \right)
 \ee
-where the ratio of specific heats, $\gamma=1.4$, volume flow rate, $\dot{V}=1$~\unit{m^3/s}, volume, $V=4000$~\unit{m^3}, and ambient pressure, $p_0=101325$~Pa. Note that to obtain this simple result, FDS was run with the option \ct{CONSTANT_SPECIFIC_HEAT_RATIO} set to true.
+where the ratio of specific heats, $\gamma=1.4$, volume flow rate, $\dot{V}=1$~\unit{m^3/s}, volume, $V=4000$~\unit{m^3}, and ambient pressure, $p_0=101325$~Pa. Note that to obtain this simple result, FDS was run with the option \ct{CONSTANT_SPECIFIC_HEAT_RATIO=T}.
 \begin{figure}[ht]
 \centering
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/parabolic_profile}
@@ -5641,7 +5641,7 @@ For anything more than a handful of finite rate reactions, it is recommended to 
 \end{itemize}
 The parameter \ct{FINITE_RATE_MIN_TEMP} defines the minimum grid cell temperature (in \unit{\degreeCelsius}) above which chemistry calculation will be performed. CVODE allows specification of relative and absolute tolerances at the species level using the \ct{ODE_REL_ERROR} and \ct{ODE_ABS_ERROR} parameters in the \ct{SPEC} input line. These tolerances can also be set globally in the \ct{COMB} input line, with species-level settings taking precedence. Currently, CVODE does not allow relative tolerance at the species level. The minimum concentration of a species is determined as the product of \ct{ODE_REL_ERROR} and \ct{ZZ_MIN_GLOBAL}. Concentrations below this threshold are treated as zero.
 
-Additional optional parameters include \ct{EQUIV_RATIO_CHECK}, \ct{MIN_EQUIV_RATIO}, and \ct{MAX_EQUIV_RATIO}. When \ct{EQUIV_RATIO_CHECK} is enabled (set to true), the chemistry calculation is performed only for those cells for which equivalence ratio is within the specified \ct{MIN_EQUIV_RATIO} and \ct{MAX_EQUIV_RATIO} limits, reducing computational time. Enabling \ct{DO_CHEM_LOAD_BALANCE} significantly accelerates chemistry calculations by distributing the computational load evenly across all MPI processes. The parameter \ct{CVODE_ORDER} controls the order of discretization when solving the ODE system. By default (0), CVODE dynamically selects an order between 1 and 5. For very stiff problems, the user may specify a lower order (1 or 2) to improve stability, at the cost of slower performance because CVODE will take much smaller internal substeps.
+Additional optional parameters include \ct{EQUIV_RATIO_CHECK}, \ct{MIN_EQUIV_RATIO}, and \ct{MAX_EQUIV_RATIO}. When \ct{EQUIV_RATIO_CHECK} is enabled (\ct {T}), the chemistry calculation is performed only for those cells for which equivalence ratio is within the specified \ct{MIN_EQUIV_RATIO} and \ct{MAX_EQUIV_RATIO} limits, reducing computational time. Enabling \ct{DO_CHEM_LOAD_BALANCE} significantly accelerates chemistry calculations by distributing the computational load evenly across all MPI processes. The parameter \ct{CVODE_ORDER} controls the order of discretization when solving the ODE system. By default (0), CVODE dynamically selects an order between 1 and 5. For very stiff problems, the user may specify a lower order (1 or 2) to improve stability, at the cost of slower performance because CVODE will take much smaller internal substeps.
 
 You can modify the default values of any or all of these parameters pn the \ct{COMB} line.
 
@@ -6658,7 +6658,7 @@ When a liquid droplet hits a solid surface, it transfers heat over the area of t
 
 The heat transfer between the solid surface and the liquid film layer makes use of an empirical turbulent heat transfer correlation that is a function of the properties of the liquid and the user-specified \ct{HORIZONTAL_VELOCITY} or \ct{VERTICAL_VELOCITY}. Details can be found in the FDS Technical Reference Guide chapter, ``Lagrangian Particles,'' section ``Heating and Evaporation of Liquid Droplets.'' Alternatively, you may specify a constant value on the \ct{PART} line, \ct{HEAT_TRANSFER_COEFFICIENT_SOLID}, in units of \unit{W/m^2.K}.
 
-There are some applications, like the suppression of racked storage commodity fires, where it is useful to allow water droplets to move horizontally along the underside of a solid object. It is difficult to model this phenomenon precisely because it involves surface tension, surface porosity and absorption, and complicated geometry. However, a way to capture some of the effect is to set \ct{ALLOW_UNDERSIDE_PARTICLES=T} on the \ct{SURF} line(s). It is normally false. Also, note that when droplets hit obstructions, the vertical direction is assumed to coincide with the $z$ axis, regardless of any change to the gravity vector, \ct{GVEC}. To stop particles or droplets from ``sticking'' to surfaces, set \ct{ALLOW_SURFACE_PARTICLES=F} on the \ct{SURF} line.
+There are some applications, like the suppression of racked storage commodity fires, where it is useful to allow water droplets to move horizontally along the underside of a solid object. It is difficult to model this phenomenon precisely because it involves surface tension, surface porosity and absorption, and complicated geometry. However, a way to capture some of the effect is to set \ct{ALLOW_UNDERSIDE_PARTICLES=T} on the \ct{SURF} line(s). It is normally \ct{F}. Also, note that when droplets hit obstructions, the vertical direction is assumed to coincide with the $z$ axis, regardless of any change to the gravity vector, \ct{GVEC}. To stop particles or droplets from ``sticking'' to surfaces, set \ct{ALLOW_SURFACE_PARTICLES=F} on the \ct{SURF} line.
 
 A useful sample case to demonstrate various features of droplet motion on solid obstructions is the test case called \ct{Sprinklers_and_Sprays/cascade.fds}. The image to the left in Fig.~\ref{cascade_image} shows 1~L of water droplets cascading down the sides of an array of boxes. The plot to the right checks that the total water mass is conserved. Note that some of the water evaporates into the compartment that initially has zero humidity.
 
@@ -8283,10 +8283,10 @@ indirectly on the optional \ct{PROP} line. Using the \ct{DEVC} parameter \ct{SET
 occur when the \ct{QUANTITY} value passes above, or below, the given \ct{SETPOINT}.
 The following parameters dictate how a device will control something:
 \begin{itemize}
-\item \ct{SETPOINT} The value of the device at which its state changes.  For a detection type of device (e.g., heat or smoke) this value is taken from the device's \ct{PROP} inputs and need not be specified on the \ct{DEVC} line.
-\item \ct{TRIP_DIRECTION} A positive integer means the device will change from its \ct{INITIAL_STATE} when the value of the device is greater than the \ct{SETPOINT} and be equal to the \ct{INITIAL_STATE} when the value is less than the \ct{SETPOINT}. A negative integer has the opposite behavior. The device will change from its \ct{INITIAL_STATE} when the value of the device is less than the \ct{SETPOINT} and be equal to the \ct{INITIAL_STATE} when the value is greater than the \ct{SETPOINT}. The default value is +1.
-\item \ct{LATCH} If this logical value is set to \ct{T} the device will only change state once. The default value is \ct{T}.
-\item \ct{INITIAL_STATE} This logical value is the initial state of the device. The default value is \ct{F}. For example, if an obstruction associated with the device is to disappear, set \ct{INITIAL_STATE=T}.
+\item \ct{SETPOINT} is the value of the device at which its state changes.  For a detection type of device (e.g., heat or smoke) this value is taken from the device's \ct{PROP} inputs and need not be specified on the \ct{DEVC} line.
+\item \ct{TRIP_DIRECTION} is an integer that determines how the \ct{SETPOINT} is evaluated. If \ct{TRIP_DIRECTION}>0, the device will change from its \ct{INITIAL_STATE} when the value of the device is greater than the \ct{SETPOINT} and be equal to the \ct{INITIAL_STATE} when the value is less than the \ct{SETPOINT}. \ct{TRIP_DIRECTION}<0 has the opposite behavior. The device will change from its \ct{INITIAL_STATE} when the value of the device is less than the \ct{SETPOINT} and be equal to the \ct{INITIAL_STATE} when the value is greater than the \ct{SETPOINT}. The default value is +1.
+\item \ct{LATCH} determines how many times the state of a device can change. If it is set to \ct{T} the device will only change state once. The default value is \ct{T}.
+\item \ct{INITIAL_STATE} defines the initial state of the device. The default value is \ct{F}. For example, if an obstruction associated with the device is to disappear, set \ct{INITIAL_STATE=T}.
 \end{itemize}
 If you desire to control FDS using more complex logic than can be provided
 by the use of a single device and its setpoint, control functions can be specified using the \ct{CTRL} input.
@@ -8297,15 +8297,15 @@ The simplest example of a device is just a timer:
 \end{lstlisting}
 Anything associated with the device via the parameter, \ct{DEVC_ID='my clock'}, will change its state at 30~s. For example, if the text were added to an \ct{OBST} line, that obstruction would change from its \ct{INITIAL_STATE} of \ct{F} to \ct{T} after 30~s. In other words, it would be created at 30~s instead of at the start of the simulation. This is a simple way to open a door or window.
 
-When using a \ct{DEVC} output to control FDS, the instantaneous value of the \ct{DEVC} is used.  For some \ct{QUANTITY} types, such as \ct{TEMPERATURE}, this output can be very noisy.  To prevent a spurious spike from causing a state change of the \ct{DEVC} you can specify the parameter \ct{SMOOTHING_FACTOR}.  This is a parameter that can vary between 0 and 1.  It performs an exponential smoothing of the \ct{DEVC} output as follows:
+When using a \ct{DEVC} output to control FDS, the instantaneous value of the \ct{DEVC} is used.  For some \ct{QUANTITY} types, such as \ct{TEMPERATURE}, this output can be very noisy.  To prevent a spurious spike from causing a state change of the \ct{DEVC} you can specify the parameter \ct{SMOOTHING_FACTOR} ($\alpha$).  This is a parameter that can vary between 0 and 1.  It performs an exponential smoothing of the \ct{DEVC} output as follows:
 \be
-\bar{x}^n=\bar{x}^{n-1} \; \mbox{\ct{SMOOTHING_FACTOR}} + x^n \; (1-\mbox{\ct{SMOOTHING_FACTOR}})
+\bar{x}^n=\bar{x}^{n-1} \; \alpha + x^n \; (1-\alpha)
 \ee
-where n is the time step, $x$ is the instantaneous device output and $\bar{x}$ is the smoothed output.  The \linebreak[4]\ct{SMOOTHING_FACTOR} defaults to 0 which means no smoothing is performed.  Note that \ct{SMOOTHING_FACTOR} only changes the value passed to control functions; it has no effect on the value of the \ct{DEVC} written to the \ct{CHID_devc.csv} file.
+where n is the time step, $x$ is the instantaneous device output and $\bar{x}$ is the smoothed output.  The \linebreak[4]\ct{SMOOTHING_FACTOR} defaults to 0 which means no smoothing is performed.  Note that \linebreak[4]\ct{SMOOTHING_FACTOR} only changes the value passed to control functions; it has no effect on the value of the \ct{DEVC} written to the \ct{CHID_devc.csv} file.
 
-An alternative to \ct{SMOOTHING_FACTOR} is to instead use a \ct{SMOOTHING_TIME} (units of seconds [s]), which may provide a more intuitive time scale over which the function is to be smoothed.  The two parameters are mathematically related by,
+An alternative to \ct{SMOOTHING_FACTOR} is to instead use a \ct{SMOOTHING_TIME} ($\tau_{\rm smooth}$ with units of seconds [s]), which may provide a more intuitive time scale over which the function is to be smoothed.  The two parameters are mathematically related by,
 \be
-\mbox{\ct{SMOOTHING_FACTOR}} = \left(1-\frac{\delta t}{\mbox{\ct{SMOOTHING_TIME}}} \right)
+\alpha = 1-\frac{\delta t}{\tau_{\rm smooth}} 
 \ee
 where $\delta t$ is the local time step in the simulation.  With a constant \ct{SMOOTHING_TIME} used on the \ct{DEVC} line, the \ct{SMOOTHING_FACTOR} dynamically adjusts with the local time step.
 
@@ -8356,13 +8356,13 @@ To create and remove obstructions multiple times, either set \ct{LATCH=F} togeth
 \subsection{Activating and Deactivating Vents}
 \label{info:activate_deactivate}
 
-When a device or control function is applied to a \ct{VENT}, the purpose is to either activate or deactivate any time ramp associated with the \ct{VENT} via its \ct{DEVC_ID}. For example, to control a fan, do the following:
+When a device or control function is applied to a \ct{VENT}, the purpose is to either activate or deactivate any time ramp, for example a \ct{RAMP_Q} or \ct{TAU_Q} for a burner, associated with the \ct{VENT} via its \ct{DEVC_ID}. Any boundary conditions not associated with a time ramp would always still apply, for example any properties defined for a \ct{MATTL}. For example, to control a fan, do the following:
 \begin{lstlisting}
 &SURF ID='FAN', VOLUME_FLOW=5. /
 &VENT XB=..., SURF_ID='FAN', DEVC_ID='det2' /
 &DEVC ID='det2', XYZ=..., QUANTITY='TIME', SETPOINT=30., INITIAL_STATE=F /
 \end{lstlisting}
-Note that at 30~s, the ``state'' of the \ct{'FAN'} changes from \ct{F} to \ct{T}, or more simply, the \ct{'FAN'} turns on. Since there is no explicit time function associated with the \ct{'FAN'}, the default 1~s ramp-up will begin at 30~s instead of at 0~s. If \ct{INITIAL_STATE=T}, then the fan should turn off at 30~s. Essentially, ``activation'' of a \ct{VENT} causes all associated time functions to be delayed until the device \ct{SETPOINT} is reached. ``Deactivation'' of a \ct{VENT} turns off all time functions. Usually this means that the parameters on the \ct{SURF} line are all nullified, so it is a good idea to check the functionality with a simple example.
+Note that at 30~s, the ``state'' of the \ct{'FAN'} changes from \ct{F} to \ct{T}, or more simply, the \ct{'FAN'} turns on. Since there is no explicit time function associated with the \ct{'FAN'}, the default 1~s ramp-up will begin at 30~s instead of at 0~s. If \ct{INITIAL_STATE=T}, then the fan will turn off at 30~s. Essentially, ``activation'' of a \ct{VENT} causes all associated time functions to be delayed until the device \ct{SETPOINT} is reached. ``Deactivation'' of a \ct{VENT} turns off all time functions. Usually this means that the parameters on the \ct{SURF} line are all nullified, so it is a good idea to check the functionality with a simple example.
 
 A \ct{'MIRROR'} or \ct{'OPEN'} \ct{VENT} should not be activated or deactivated. You can, however, place an obstruction in front of an \ct{'OPEN'} \ct{VENT} and then create it or remove it to model the closing or opening of a door or window.
 
@@ -8373,15 +8373,15 @@ There are sometimes circumstances when you might want to create or remove obstru
 \section{Advanced Control Functions: The \texorpdfstring{{\tt CTRL}}{CTRL} Namelist Group}
 \label{info:CTRL}
 
-There are many systems whose functionality cannot be described by a simple device with a single ``setpoint.'' Consider for example, a typical HVAC system used for heat.  It is controlled by a thermostat that is given a temperature setpoint. The system turns on when the temperature goes below the setpoint by some amount and then turns off when the temperature rises above that same setpoint by some amount. This behavior cannot be defined by merely specifying a single setpoint. You must also define the range or ``deadband'' around the setpoint, and whether an increasing or decreasing temperature activates the system.  For the HVAC example, crossing the lower edge of the deadband activates heating; crossing the upper edge deactivates heating.  These more complicated behaviors can be modeled in FDS using \ct{CTRL}s.  The following parameters dictate how a control function will behave:
+There are many systems whose functionality cannot be described by a simple device with a single ``setpoint.'' Consider for example, a typical HVAC system used for heat.  It is controlled by a thermostat that is given a temperature setpoint. The system turns on when the temperature goes below the setpoint by some amount and then turns off when the temperature rises above that same setpoint by some amount. This behavior cannot be defined by merely specifying a single setpoint. For a thermostat for heat you must also define the range or ``deadband'' around the setpoint and that it is a decreasing temperature activates the system.  In this example, crossing the lower edge of the deadband activates heating; crossing the upper edge deactivates heating.  These more complicated behaviors can be modeled in FDS using \ct{CTRL} inputs.  The following parameters dictate how a control function will behave:
 \begin{itemize}
-\item \ct{ID} A name for the control function that is unique over all control functions.
-\item \ct{FUNCTION_TYPE} The type of control function.  The possible types are shown in Table~\ref{tab:funcvalues}.
-\item \ct{INPUT_ID} A list of \ct{DEVC} or \ct{CTRL} \ct{ID}s that are the inputs to the control function.  Up to forty inputs can be specified.  If a \ct{DEVC} or \ct{CTRL} is being used as an \ct{INPUT_ID} for a control function, then it must have a unique \ct{ID} over both devices and control functions.  Additionally, a control function cannot be used as an input for itself.
-\item \ct{SETPOINT} The value(s) of the control function at which its state changes. This is only appropriate for functions that return numerical values.
-\item \ct{TRIP_DIRECTION} A positive integer means the control function will change state when its value increases past the setpoint and a negative integer means the control function will change state when its value decreases past the setpoint.  The default value is +1.
-\item \ct{LATCH} If this logical value is set to \ct{T} the control function will only change state once. The default is \ct{LATCH=T}.
-\item \ct{INITIAL_STATE} The initial state of the control function. Default \ct{F}. For example, if an obstruction associated with the control function is to disappear, set \ct{INITIAL_STATE=T} on the \ct{DEVC} line.
+\item \ct{ID} is the name for the control function that is unique over all control functions.
+\item \ct{FUNCTION_TYPE} is the type of control function.  The possible types are shown in Table~\ref{tab:funcvalues}.
+\item \ct{INPUT_ID} is a list of \ct{DEVC} or \ct{CTRL} \ct{ID}s that are the inputs to the control function.  Up to forty inputs can be specified.  If a \ct{DEVC} or \ct{CTRL} is being used as an \ct{INPUT_ID} for a control function, then it must have a unique \ct{ID} over both devices and control functions.  Additionally, a control function cannot be used as an input for itself.
+\item \ct{SETPOINT} is(are) the value(s) of the control function at which its state changes. This is only appropriate for control functions that return numerical values.
+\item \ct{TRIP_DIRECTION} is an integer that controls when the control function changes state. If \ct{TRIP_DIRECTION}>0, the control function will change from its \ct{INITIAL_STATE} when the value of the control function is greater than the \ct{SETPOINT} and be equal to the \ct{INITIAL_STATE} when the value is less than the \ct{SETPOINT}. \ct{TRIP_DIRECTION}<0 has the opposite behavior. The control function will change from its \ct{INITIAL_STATE} when the value of the control function is less than the \ct{SETPOINT} and be equal to the \ct{INITIAL_STATE} when the value is greater than the \ct{SETPOINT}. The default value is +1.
+\item \ct{LATCH} determines how many times the state of the control function can change. If it is set to \ct{T} the control function will only change state once. The default value is \ct{T}.
+\item \ct{INITIAL_STATE} defines the initial state of the control function. The default value is \ct{F}. For example, if an obstruction associated with the control function is to disappear, set \ct{INITIAL_STATE=T}.
 \end{itemize}
 For any object for which a \ct{DEVC_ID} can be specified (such as \ct{OBST} or \ct{VENT}), a \ct{CTRL_ID} can be specified instead.
 
@@ -8398,12 +8398,12 @@ For any object for which a \ct{DEVC_ID} can be specified (such as \ct{OBST} or \
 \ct{AT_LEAST}                   & Changes state if \underline{at least} \ct{N} \ct{INPUT}s are \ct{T}  \\ \hline
 %\ct{CYCLING}                     & Changes state in a cyclical manner once its sole \ct{INPUT} is \ct{T} \\ \hline
 \ct{TIME_DELAY}                 & Changes state \ct{DELAY} s after \ct{INPUT} becomes \ct{T} \\ \hline
-\ct{CUSTOM}                      & Changes state based on evaluating a \ct{RAMP} of the function's input \\ \hline
+\ct{CUSTOM}                      & Changes state based on evaluating a \ct{RAMP} of the function's \ct{INPUT} \\ \hline
 \ct{DEADBAND}                    & Behaves like a thermostat  \\ \hline
 \ct{KILL}                        & Terminates code execution if \ct{INPUT} is \ct{T}  \\ \hline
 \ct{RESTART}                     & Dumps restart files if \ct{INPUT} is \ct{T} \\ \hline
 \ct{SUM}                         & Sums the outputs of the \ct{INPUT}s \\ \hline
-\ct{SUBTRACT}                    & Subtracts the second \ct{INPUT} from the first \\ \hline
+\ct{SUBTRACT}                    & Subtracts the second and other \ct{INPUT}s from the first \\ \hline
 \ct{MULTIPLY}                    & Multiplies the \ct{INPUT}s \\ \hline
 \ct{DIVIDE}                      & Divides the first \ct{INPUT} by the second \\ \hline
 \ct{POWER}                       & The first \ct{INPUT} to the power of the second \\ \hline
@@ -8423,15 +8423,15 @@ For any object for which a \ct{DEVC_ID} can be specified (such as \ct{OBST} or \
 \end{center}
 \end{table}
 
-If you want to design a system of controls and devices that involves multiple changes of state, include the attribute \ct{LATCH=F} on the relevant \ct{DEVC} or \ct{CTRL} lines. By default, devices and controls may only change state once, like a sprinkler activating or smoke detector alarming. \ct{LATCH=T} by default for both devices and controls.
+If you want to design a system of controls and devices that involves multiple changes of state, include the attribute \ct{LATCH=F} on the relevant \ct{DEVC} or \ct{CTRL} lines. By default \ct{LATCH=T} and devices and controls may only change state once, like a sprinkler activating or smoke detector alarming. 
 
 If you want a \ct{DEVC} to operate based on the logical state of a \ct{CTRL}, set \ct{QUANTITY='CONTROL'} and set the \ct{CTRL_ID} to the \ct{ID} of the control function. The numerical output in the \ct{CHID_devc.csv} file will be zero when the logical state is \ct{F} and 1 when the logical state is \ct{T}.
 
-The output value of a numerical control function is defined by a \ct{DEVC} line with \ct{QUANTITY='CONTROL VALUE'} and \ct{CTRL_ID} set equal to the \ct{ID} of the control function.  You can then use \ct{SETPOINT} to have the \ct{DEVC} operate a particular output value of the control function. This output cannot be used for a purely logical control function whose only output is a logical state such as \ct{ANY} or \ct{DEADBAND}. For \ct{CUSTOM} the output will be the value of the \ct{RAMP} function, and for \ct{TIME_DELAY} the value will be the evaluated delay.
+The output value of a numerical control function is defined by a \ct{DEVC} line with \ct{QUANTITY='CONTROL VALUE'} and \ct{CTRL_ID} set equal to the \ct{ID} of the control function.  You can then use \ct{SETPOINT} to have the \ct{DEVC} operate at a particular output value of the control function. This output cannot be used for a purely logical control function whose only output is a logical state such as \ct{ANY} or \ct{DEADBAND}. For \ct{CUSTOM} the output will be the value of the \ct{RAMP} function, and for \ct{TIME_DELAY} the value will be the evaluated delay.
 
 The outputs \ct{QUANTITY='CONTROL'} and \ct{QUANTITY='CONTROL VALUE'} have the default of \ct{TEMPORAL_STATISTIC='INSTANT VALUE'}.
 
-The time dependent logical state of each control function is written to the \ct{CHID_ctrl.csv} log file, see Sec.~\ref{out:CTRL}. Each state change of a control function or device with a \ct{SETPOINT} is recorded to the \ct{CHID_devc_ctrl_log.csv} log file, see Sec.~\ref{out:DEVC_CTRL_log}.
+The time dependent logical state of each \ct{CTRL} is written to the \ct{CHID_ctrl.csv} log file, see Sec.~\ref{out:CTRL}. Each state change of a \ct{CTRL} or \ct{DEVC} with a \ct{SETPOINT} is recorded to the \ct{CHID_devc_ctrl_log.csv} log file, see Sec.~\ref{out:DEVC_CTRL_log}.
 
 \subsection{Control Functions: \texorpdfstring{{\tt ANY}}{ANY}, \texorpdfstring{{\tt ALL}}{ALL}, \texorpdfstring{{\tt ONLY}}{ONLY}, and
 \texorpdfstring{{\tt AT\_LEAST}}{AT\_LEAST}}
@@ -8484,9 +8484,9 @@ This relationship between a sprinkler and its pipes means that the sprinkler spr
 \subsection{Control Function: \texorpdfstring{{\tt DEADBAND}}{DEADBAND}}
 \label{info:DEADBAND}
 
-This control function behaves like an HVAC thermostat.  It can operate in one of two modes analogous to heating or cooling. The function is provided with an \ct{INPUT_ID} which is the \ct{DEVC} whose value is used by the function, an upper and lower \ct{SETPOINT}, and the mode of operation by \ct{ON_BOUND}.  If  \ct{ON_BOUND='LOWER'}, the function changes state from its \ct{INITIAL_STATE} when the value of the \ct{INPUT_ID} drops below the lower value in \ct{SETPOINT} and reverts when it increases past the upper value, i.e., like a heating system. The reverse will occur if \ct{ON_BOUND='UPPER'}, i.e., a cooling system.
+This control function behaves like an HVAC thermostat.  It can operate in one of two modes analogous to heating or cooling. The function is provided with an \ct{INPUT_ID} which is the \ct{DEVC} or \ct{CTRL} whose value is used by the function, an upper and lower \ct{SETPOINT}, and the mode of operation by \ct{ON_BOUND}.  If  \ct{ON_BOUND='LOWER'}, the function changes state from its \ct{INITIAL_STATE} when the value of the \ct{INPUT_ID} drops below the lower value in \ct{SETPOINT} and reverts when it increases past the upper value, i.e., like a heating system. The reverse will occur if \ct{ON_BOUND='UPPER'}, i.e., a cooling system.
 
-For an HVAC system, the following lines of input would set up a simple thermostat:
+The following lines of input would set up a simple thermostat controlled heating system:
 \begin{lstlisting}
 &SURF ID='FAN', TMP_FRONT=40., VOLUME_FLOW=-1. /
 &VENT XB=-0.3,0.3,-0.3,0.3,0.0,0.0, SURF_ID='FAN', CTRL_ID='thermostat' /
@@ -8494,7 +8494,7 @@ For an HVAC system, the following lines of input would set up a simple thermosta
 &CTRL ID='thermostat', FUNCTION_TYPE='DEADBAND', INPUT_ID='TC',
       ON_BOUND='LOWER', SETPOINT=23.,27., LATCH=F/
 \end{lstlisting}
-Here, we want to control the \ct{VENT} that simulates the \ct{FAN}, which blows hot air into the room. A \ct{DEVC} called \ct{TC} is positioned in the room to measure the \ct{TEMPERATURE}. The \ct{thermostat} uses a \ct{SETPOINT} to turn on the \ct{FAN} when the temperature falls below 23~\unit{\degreeCelsius} (\ct{ON_BOUND='LOWER'}) and it turns off when the temperature rises above 27~\unit{\degreeCelsius}.
+Here, we want to control the \ct{VENT} that blows hot air into the room. A \ct{DEVC} called \ct{TC} is positioned in the room to measure the \ct{TEMPERATURE}. The \ct{thermostat} uses a \ct{SETPOINT} to turn on the \ct{VENT} flow and raise the vent temperature above \ct{TMPA} when the room temperature falls below 23~\unit{\degreeCelsius} (\ct{ON_BOUND='LOWER'}) and it turns off and resets the vent temperature to \ct{TMPA} when the room temperature rises above 27~\unit{\degreeCelsius}.
 
 Note that a deadband controller needs to have \ct{LATCH} set to \ct{F}
 
@@ -8521,10 +8521,9 @@ will kill the job when the temperature at the given point rises above 1000~\unit
 \subsection{Control Function: \texorpdfstring{{\tt CUSTOM}}{CUSTOM} }
 \label{info:CUSTOM}
 
-For most of the control function types, the logical (true/false) output of the devices and control functions and the time they last changed state are taken as inputs.  A \ct{CUSTOM} function uses the numerical output of a \ct{DEVC} along with a \ct{RAMP} to determine the output of the function.  When the \ct{RAMP} output for the \ct{DEVC} value is negative, the \ct{CTRL} will have the value of its \ct{INITIAL_STATE}.  When the \ct{RAMP} output for the \ct{DEVC} value is positive, the \ct{CTRL} will have the opposite value of its \ct{INITIAL_STATE}. In the case below, the \ct{CUSTOM} control function uses the numerical output of a timer device as its input.  The function returns true (the default value for \ct{INITIAL_STATE} is \ct{F}) when the \ct{F} parameter in the ramp specified with \ct{RAMP_ID} is a positive value and false when the \ct{RAMP} \ct{F} value is negative. In this case, the control would start false and would switch to true when the timer reaches 60~s.  It would then stay in a true state until the timer reaches 120~s and would then change back to false.
+For most of the control function types, the logical (true/false) output of the devices and control functions and the time they last changed state are taken as inputs.  A \ct{CUSTOM} function uses the numerical value of its input as the dependent value for a \ct{RAMP} to determine the output of the function.  When the \ct{RAMP} output value is negative, the \ct{CTRL} will have the value of its \ct{INITIAL_STATE}.  When the \ct{RAMP} output value is positive, the \ct{CTRL} will have the opposite value of its \ct{INITIAL_STATE}. In the case below, the \ct{CUSTOM} control function uses the numerical output of a timer device as its input.  The function returns true (the default value for \ct{INITIAL_STATE} is \ct{F}) when output of the ramp specified with \ct{RAMP_ID} using the value \ct{TIMER} as its input is a positive value and false when the \ct{RAMP} output is negative. In this case, the control would start false and would switch to true when the value of \ct{TIMER} equals 60~s.  It would then stay in a true state until the value of \ct{TIMER} reaches 120~s and would then change back to false.
 
 
-Note that when using control functions the \ct{ID}s assigned to both the \ct{CTRL} and the \ct{DEVC} inputs must be unique across both sets of inputs, i.e., you cannot use the same \ct{ID} for both a control function and a device. You can make a fan operate on a fixed cycle by using a \ct{CUSTOM} control function based on time:
 \begin{lstlisting}
 &SURF ID='FAN', TMP_FRONT=40., VOLUME_FLOW=-1. /
 &VENT XB=-0.3,0.3,-0.3,0.3,0.0,0.0, SURF_ID='FAN', CTRL_ID='cycling timer' /
@@ -8535,9 +8534,8 @@ Note that when using control functions the \ct{ID}s assigned to both the \ct{CTR
 &RAMP ID='cycle', T=119, F= 1 /
 &RAMP ID='cycle', T=121, F=-1 /
 \end{lstlisting}
-In the above example the fan will be off initially, turn on at 60~s and then turn off at 120~s.
 
-You can make an obstruction appear and disappear multiple times by using the following lines
+You can make an obstruction appear and disappear multiple times by using the following lines:
 \begin{lstlisting}
 &OBST XB=..., SURF_ID='whatever', CTRL_ID='cycling timer' /
 &DEVC ID='TIMER', XYZ=..., QUANTITY='TIME' /
@@ -8548,14 +8546,12 @@ You can make an obstruction appear and disappear multiple times by using the fol
 &RAMP ID='cycle', T=119, F= 1 /
 &RAMP ID='cycle', T=121, F=-1 /
 \end{lstlisting}
-The above will have the obstacle initially removed, then added at 60 s, and removed again at 120 s.
-
-Experiment with these combinations using a simple case before trying a case to make sure that FDS indeed is doing what is intended.
+The above will have the obstruction initially removed, added at 60~s, and removed again at 120~s.
 
 \subsection{Control Function: Math Operations }
 \label{info:CONTROL_MATH}
 
-The control functions that perform simple math operations (\ct{SUM},  \ct{SUBTRACT},  \ct{MULTIPLY},  \ct{DIVIDE}, \ct{POWER}, etc.) can have a constant value specified as one of their inputs.  This is done by specifying one of the \ct{INPUT_ID}s as \ct{'CONSTANT'} and providing the value using the input \ct{CONSTANT}. For example, the inputs below represent a control function whose state changes when the square of the velocity exceeds 10 (see Sec.~\ref{info:basic_control} for an explanation of \ct{TRIP_DIRECTION}).
+The control functions that perform simple math operations (\ct{SUM},  \ct{SUBTRACT},  \ct{MULTIPLY},  \ct{DIVIDE}, \ct{POWER}, etc.) can have a constant value specified as one of their inputs.  This is done by specifying one of the \ct{INPUT_ID}s as \ct{'CONSTANT'} and providing the value using the input \ct{CONSTANT}. For example, the inputs below represent a control function whose state changes when the square of the velocity exceeds 10~\unit{m^2/s^2} (see Sec.~\ref{info:basic_control} for an explanation of \ct{TRIP_DIRECTION}).
 
 \begin{lstlisting}
 &DEVC ID='SPEED SENSOR', XYZ=..., QUANTITY='VELOCITY' /
@@ -8568,7 +8564,7 @@ The control functions that perform simple math operations (\ct{SUM},  \ct{SUBTRA
 \subsection{Control Function: PID Control Function}
 \label{info:CONTROL_PID}
 
-A PID (Proportional Integral Derivative) control function is a commonly used feedback controller for controlling electrical and mechanical systems.  The function computes an error between a process variable and a desired setpoint.  The goal of the PID function is to minimize the error.  A PID control function is computed as
+A PID (Proportional Integral Derivative) control function is a commonly used feedback controller for controlling electrical and mechanical systems.  The function computes an error, $e(t)$, between a process variable and a desired setpoint.  The goal of the PID function is to minimize the error.  A PID control function is computed as
 \be u(t) \; = \; K_{\rm p} \, e(t) \; + \; \; K_{\rm i} \int_0^t \! e(t) \, \d t   \; + \; K_{\rm d} \frac{\d e(t)}{\d t}\ee
 where $K_{\rm p}$, $K_{\rm i}$, and $K_{\rm d}$ are respectively the \ct{PROPORTIONAL_GAIN}, the \ct{INTEGRAL_GAIN}, and the
 \linebreak[4]\ct{DIFFERENTIAL_GAIN}; $e(t)$ is the error given by subtracting the \ct{TARGET_VALUE} from the \ct{INPUT_ID}; and $u(t)$ is the output.
@@ -8634,7 +8630,7 @@ For a deluge sprinkler system, the normally
 dry sprinkler pipes are flooded when a detection event occurs. For this example, the detection event is
 when two of four smoke detectors alarm.  It takes 30~s to flood the piping network.
 The nozzle is a \ct{DEVC} named \ct{'NOZZLE 1'} controlled by the \ct{CTRL} named \ct{'nozzle trigger'}.
-The nozzle activates when both detection \underline{and} the time delay have occurred.  Note that the \ct{DEVC} is
+The nozzle activates when both detection \underline{and} the time delay have occurred.  Note that the \ct{DEVC} for the nozzle is
 specified with \ct{QUANTITY='CONTROL'}.
 
 \begin{lstlisting}
@@ -8733,9 +8729,9 @@ The simple test case called \ct{activate_vents} demonstrates several of the cont
 \subsection{Changing the Independent Variable}
 \label{info:RAMPDEVC}
 
-For any user-defined \ct{RAMP}, the normal independent variable, for example time for \ct{RAMP_V}, can be replaced by the output of a \ct{DEVC}.
-This is done by specifying the input \ct{DEVC_ID} on one of the \ct{RAMP} input lines.  When this is done, the current output of the \ct{DEVC} is used as the independent variable for the \ct{RAMP}.  A \ct{CTRL_ID} can also be specified as long as the control function outputs a numerical value (i.e., is a mathematical function (Sec.~\ref{info:CONTROL_MATH}) or a PID function (Sec.~\ref{info:CONTROL_PID}).
-In the following example a blower is ramped from 0~\% flow at 20~\unit{\degreeCelsius}, to 50~\% flow when the temperature exceeds 100~\unit{\degreeCelsius}, and to 100~\% flow when the temperature exceeds 200~\unit{\degreeCelsius}.
+For any user-defined \ct{RAMP}, the normal independent variable, for example time for \ct{RAMP_V}, can be replaced by the output of a \ct{DEVC} or \ct{CTRL}.
+This is done by specifying the input \ct{DEVC_ID} or \ct{CTRL_ID} on one of the \ct{RAMP} input lines.  When this is done, the current output of the \ct{DEVC} or \ct{CTRL} is used as the independent variable for the \ct{RAMP}. If a \ct{CTRL_ID} is specified, the control function must output a numerical value (i.e., is a mathematical function (Sec.~\ref{info:CONTROL_MATH}) or a PID function (Sec.~\ref{info:CONTROL_PID}).
+In the following example a blower is ramped from 0~\% flow at 20~\unit{\degreeCelsius} to 50~\% flow at 100~\unit{\degreeCelsius}, and then to 100~\% flow at 200~\unit{\degreeCelsius}.
 This is similar functionality to the \ct{CUSTOM} control function, but it allows for variable response rather than just on or off.
 
 \begin{lstlisting}
@@ -8779,7 +8775,7 @@ The function is shown in Fig.~\ref{special_ramps_fig}.
 \label{info:freeze_device}
 \label{hrr_freeze}
 
-There are occasions where you may want the value of a \ct{RAMP} to stop updating.  For example, if you are simulating a growing fire in a room with sprinklers, you may wish to stop the fire from growing when a sprinkler over the fire activates.  This type of action can be accomplished by changing the input of the \ct{RAMP} to a \ct{DEVC} (see the previous section) and then giving that \ct{DEVC} either a \ct{NO_UPDATE_DEVC_ID} or a \ct{NO_UPDATE_CTRL_ID}.  When the specified controller changes its state to \ct{T} it will cause the \ct{DEVC} to stop updating its value.  Since the \ct{DEVC} is being used as the independent variable to a \ct{RAMP}, the \ct{RAMP} will have its output remain the same.  This is shown in the example below.  A fire is given a linear \ct{RAMP} from 0 to 1000~\unit{kW/m^2} over 50~s. Rather than using the simulation time, the \ct{RAMP} uses a \ct{DEVC} for the time.  The timer is set to freeze when another \ct{DEVC} measuring time reaches 200~\unit{\degreeCelsius}.  Figure~\ref{freeze_hrr} shows the result of these inputs in the test case \ct{hrr_freeze} where it can be seen that the pyrolysis rate stops increasing once the gas temperature reaches 200~\unit{\degreeCelsius}.
+There are occasions where you may want the value of a \ct{RAMP} to stop updating.  For example, if you are simulating a growing fire in a room with sprinklers, you may wish to stop the fire from growing when a sprinkler over the fire activates.  This type of action can be accomplished by changing the input of the \ct{RAMP} to a \ct{DEVC} (see the previous section) and then giving that \ct{DEVC} either a \ct{NO_UPDATE_DEVC_ID} or a \ct{NO_UPDATE_CTRL_ID}.  When the specified controller changes its state to \ct{T} it will cause the \ct{DEVC} to stop updating its value.  Since the \ct{DEVC} is being used as the independent variable to a \ct{RAMP}, the \ct{RAMP} will have its output remain the same.  This is shown in the example below.  A fire is given a linear \ct{RAMP} from 0 to 1000~\unit{kW/m^2} over 50~s. Rather than using the simulation time, the \ct{RAMP} uses a \ct{DEVC} for the time.  The timer is set to freeze when another \ct{DEVC} measuring temperature reaches 200~\unit{\degreeCelsius}.  Figure~\ref{freeze_hrr} shows the result of these inputs in the test case \ct{hrr_freeze} where it can be seen that the pyrolysis rate stops increasing once the gas temperature reaches 200~\unit{\degreeCelsius}.
 \begin{lstlisting}
 &SURF ID='FIRE', HRRPUA=1000., RAMP_Q='FRAMP', COLOR='ORANGE'/
 &RAMP ID='FRAMP', T= 0, F=0, DEVC_ID='FREEZE TIME'/
@@ -8804,7 +8800,7 @@ It should be noted that devices are updated sequentially in the order that they 
 \subsection{Example Case: Heat Release Rate of a Spreading Fire}
 \label{spreading_fire}
 
-In this example, a fire spreads radially from a single point as directed by the parameters \ct{SPREAD_RATE} and \ct{XYZ} on a \ct{VENT} line. Usually, the user specifies the heat release rate per unit area (\ct{HRRPUA}) for each burning surface cell on the corresponding \ct{SURF} line, but in this case, a specific time \ct{RAMP} for the {\em total} heat release rate is specified. The following input lines show how the user-specified \ct{RAMP} called \ct{'HRR'} controls the total HRR of the growing fire. The key point is that the user-specified {\em total} HRR is divided by the area of burning surface, and this heat release rate per unit area is imposed on all burning cells. Normally FDS will adjust a mass flux input (\ct{MASS_FLUX}, \ct{HRRPUA} ,etc.) input to account for any differences in the area of the \ct{VENT} as specified with \ct{XB} and the area is it is actually resolved on the grid. In this case we are using control functions to determine the heat release rate. In this case the control logic is directly computing the required flux based on the area as resolved so no additional correction is needed. When false, the \ct{AREA_ADJUST} flag prevents any additional adjustment. Regardless of the fact that the spreading fire reaches a barrier and is stopped from spreading radially, the user-specified \ct{RAMP} controls the HRR, as shown in Fig.~\ref{spreading_fire_hrr}.
+In this example, a fire spreads radially from a single point as directed by the parameters \ct{SPREAD_RATE} and \ct{XYZ} on a \ct{VENT} line. Usually, the user specifies the heat release rate per unit area (\ct{HRRPUA}) for each burning surface cell on the corresponding \ct{SURF} line, but in this case, a specific time \ct{RAMP} for the {\em total} heat release rate is specified. The following input lines show how the user-specified \ct{RAMP} called \ct{'HRR'} controls the total HRR of the growing fire. The key point is that the user-specified {\em total} HRR is divided by the area of burning surface, and this heat release rate per unit area is imposed on all burning cells. Normally FDS will adjust a mass flux input (\ct{MASS_FLUX}, \ct{HRRPUA} ,etc.) input to account for any differences in the area of the \ct{VENT} as specified with \ct{XB} and the area is it is actually resolved on the grid. In this case we are using control functions to determine the heat release rate. Since the control logic is directly computing the required flux based on the area as resolved, no additional correction by FDS is needed. When \ct{AREA_ADJUST=F}, the normal adjustment of the burning rate to the resolved area is not performed. Regardless of the fact that the spreading fire reaches a barrier and is stopped from spreading radially, the user-specified \ct{RAMP} controls the HRR, as shown in Fig.~\ref{spreading_fire_hrr}.
 \begin{lstlisting}
 &VENT SURF_ID='FIRE', XB=1.0,7.0,1.0,7.0,0.0,0.0, XYZ=3.0,3.0,0.0, SPREAD_RATE=0.1, AREA_ADJUST=F /
 
@@ -8832,13 +8828,8 @@ In this example, a fire spreads radially from a single point as directed by the 
 \end{figure}
 
 
-
-
-\newpage
-
 \input{smv_objects.tex}
 
-\newpage
 
 \section{External Control of FDS (Beta)}
 \label{info:external_control}
@@ -8846,9 +8837,7 @@ In this example, a fire spreads radially from a single point as directed by the 
 
 It is possible to externally control some aspects of an FDS simulation while the simulation is running. These include most \ct{RAMP}s and the logical state of any \ct{CTRL}. The logical state of a \ct{CTRL} can be externally controlled by setting \ct{FUNCTION_TYPE='EXTERNAL'} on the \ct{CTRL} input. A \ct{RAMP} can be externally controlled by setting \ct{EXTERNAL_FILE} on \ct{RAMP}. \ct{RAMP}s used during initialization only cannot be externally controlled. These include \ct{RAMP}s controlling time (such as the output time \ct{RAMP}s on \ct{DUMP} like \ct{RAMP_BNDF}), defining \ct{SPEC} or \ct{MATL} physical properties (such as \ct{CONDUCTIVITY_RAMP} on \ct{MATL}), defining particle distributions (such as \ct{CNF_RAMP} on \ct{PART}), defining atmospheric conditions (such as \ct{RAMP_T0_Z} on \ct{WIND}), or for defining the initial surface temperature {\ct{RAMP_T_I} on \ct{SURF}) cannot be externally controlled.
 
- Any FDS input that has either a \ct{RAMP_ID} (except for the output time ramps on \ct{DUMP} such as \ct{RAMP_BNDF}) or a \ct{CTRL_ID} as one of its inputs can be externally controlled. A \ct{RAMP} can be externally controlled by setting \ct{EXTERNAL_FILE} on \ct{RAMP}. A \ct{CTRL} can be externally controlled by setting \ct{FUNCTION_TYPE='EXTERNAL'}.
-
- When external control is selected, FDS will set the value of the \ct{RAMP} or the logical state of the \ct{CTRL} based on values contained in a csv file whose name is given by \ct{EXTERNAL_FILENAME} on \ct{MISC}. This file will be checked for new values every \ct{DT_EXTERNAL} on \ct{TIME} seconds. Only those inputs whose values are being changed need to specified. For inputs not specified or if the file does not exist or cannot be opened (e.g., locked by the operating system during a file write), the current values will be kept. The initial values are defined with either \ct{INITIAL_VALUE} on \ct{RAMP} or \ct{INITIAL_STATE} on \ct{CTRL}. FDS can be forced to wait if no file is present or use an alternate \ct{EXTERNAL_FILENAME} by specifying \ct{DT_EXTERNAL_HEARTBEAT} and \ct{EXTERNAL_HEARTBEAT_FILENAME} on \ct{TIME}. With this approach FDS looks for \ct{EXTERNAL_HEARTBEAT_FILENAME}. If the file is not found FDS will wait up to \ct{DT_EXTERNAL_HEARTBEAT} seconds. If \ct{EXTERNAL_HEARTBEAT_FILENAME} is still not present, FDS will stop trying to update the external controls.  If \ct{HEARTBEAT_FAIL} on \ct{TIME} is true, FDS will stop the simulation. If \ct{EXTERNAL_HEARTBEAT_FILENAME} is present, FDS will read \ct{EXTERNAL_FILENAME} from it. If your external program requires that output files it reads be current, set \ct{DT_FLUSH} to be less than the \ct{DT} values for any file types being used by the external program.
+When external control is selected, FDS will set the value of the \ct{RAMP} or the logical state of the \ct{CTRL} based on values contained in a csv file whose name is given by \ct{EXTERNAL_FILENAME} on \ct{MISC}. This file will be checked for new values every \ct{DT_EXTERNAL} on \ct{TIME} seconds. Only those inputs whose values are being changed need to specified. For inputs not specified or if the file does not exist or cannot be opened (e.g., locked by the operating system during a file write), the current values will be kept. The initial values are defined with either \ct{INITIAL_VALUE} on \ct{RAMP} or \ct{INITIAL_STATE} on \ct{CTRL}. FDS can be forced to wait if no file is present or use an alternate \ct{EXTERNAL_FILENAME} by specifying \ct{DT_EXTERNAL_HEARTBEAT} and \ct{EXTERNAL_HEARTBEAT_FILENAME} on \ct{TIME}. With this approach FDS looks for \ct{EXTERNAL_HEARTBEAT_FILENAME}. If the file is not found FDS will wait up to \ct{DT_EXTERNAL_HEARTBEAT} seconds. If \ct{EXTERNAL_HEARTBEAT_FILENAME} is still not present, FDS will stop trying to update the external controls.  If \ct{HEARTBEAT_FAIL=T} on \ct{TIME}, FDS will stop the simulation after failing to find \ct{EXTERNAL_HEARTBEAT_FILENAME}. If \ct{EXTERNAL_HEARTBEAT_FILENAME} is present, FDS will read \ct{EXTERNAL_FILENAME} from it. If your external program requires that output files it reads be current, set \ct{DT_FLUSH} to be less than the \ct{DT} values for any file types being used by the external program.
 
  The csv file format is:
  \begin{lstlisting}
@@ -8857,7 +8846,7 @@ It is possible to externally control some aspects of an FDS simulation while the
   .
   .
  \end{lstlisting}
- where \ct{Type} is either \ct{RAMP} or \ct{CTRL}, \ct{ID} is the corresponding \ct{ID} in the FDS input files, and \ct{Value} is the new output value for a \ct{RAMP} or the new logical state for a \ct{CTRL} where positive values mean the \ct{CTRL} evaluates as \ct{TRUE} and negative values mean the function evaluates as \ct{FALSE}.
+ where \ct{Type} is either \ct{RAMP} or \ct{CTRL}, \ct{ID} is the corresponding \ct{ID} in the FDS input files, and \ct{Value} is the new output value for a \ct{RAMP} or the new logical state for a \ct{CTRL} where positive values mean the \ct{CTRL} evaluates as true and negative values mean the function evaluates as false.
 
  An example set of inputs is below:
  \begin{lstlisting}
@@ -8878,7 +8867,7 @@ It is possible to externally control some aspects of an FDS simulation while the
   RAMP,"T RAMP"   , 1
   CTRL,"VENT CTRL",-1
  \end{lstlisting}
- This turns off the velocity vent (a negative \ct{CTRL} value means set the state to \ct{.FALSE.}) and sets the fixed temperature vent to 1000~\unit{\degreeCelsius} (a \ct{RAMP} value of 1 means apply the full value of \ct{TMP_FRONT}). Note that the \ct{ID} strings are enclosed in quotes. This is only required if the string has a space or comma in it.  Results of running the case are shown in Fig.~\ref{external_control_fig}
+ This turns off the velocity vent (a negative \ct{CTRL} value means set the state to \ct{F}) and sets the fixed temperature vent to 1000~\unit{\degreeCelsius} (a \ct{RAMP} value of 1 means apply the full value of \ct{TMP_FRONT}). Note that the \ct{ID} strings are enclosed in quotes. This is only required if the string has a space or comma in it.  Results of running the case are shown in Fig.~\ref{external_control_fig}
 
  \begin{figure}[ht]
   \includegraphics[width=3in]{SCRIPT_FIGURES/external_test_temperature}
@@ -8932,7 +8921,7 @@ By default FDS uses the Deardorff~\cite{Deardorff:1980,Pope:2000} turbulent visc
 \end{equation}
 where $C_\nu=0.1$ and the subgrid scale (sgs) kinetic energy is taken from an algebraic relationship based on scale similarity (see the FDS Technical Reference Guide~\cite{FDS_Math_Guide}). The LES filter width is taken as the geometric mean\footnote{An alternative to the geometric mean filter width type is to use the maximum cell dimension, $\Delta = \max(\delta x, \delta y, \delta z)$.  This should be used sparingly but may be necessary when the cell aspect ratios are high.  Using \ct{LES_FILTER_TYPE='MAX'} on \ct{MISC} will lead to a larger value of turbulent viscosity and hence a more dissipative numerical solution.} of the local mesh spacing in each direction, $\Delta = (\delta x\, \delta y\, \delta z)^{1/3}$. You may also choose a constant filter width by setting \ct{FIXED_LES_FILTER_WIDTH} on the \ct{MISC} line, in meters. This is not a recommended thing to do in practice, but may be useful for convergence studies and other diagnostic tests.
 
-Options for the \ct{TURBULENCE_MODEL} on the \ct{MISC} line are listed in Table~\ref{turb_table}. Note that the model used in FDS versions 1-5 is \ct{'CONSTANT SMAGORINSKY'}. The thermal conductivity and material diffusivity are related to the turbulent viscosity by:
+Options for the \ct{TURBULENCE_MODEL} on the \ct{MISC} line are listed in Table~\ref{turb_table}. Note that the model used in FDS versions 1 through 5 is \ct{'CONSTANT SMAGORINSKY'}. The thermal conductivity and material diffusivity are related to the turbulent viscosity by:
 \be
    k_{\hbox{\tiny LES}} = \frac{\mu_{\hbox{\tiny LES}} \, c_p}{\PR_{\rm t}}
    \quad ; \quad  (\rho D)_{\hbox{\tiny LES}} =\frac{\mu_{\hbox{\tiny LES}}}{\SC_{\rm t}}
@@ -9000,12 +8989,12 @@ The exact CFL needed to maintain stability depends on the order (as well as othe
     \end{equation}
 The last listed form of the constraint is the least restrictive, but also the most dangerous in the sense that a numerical instability is more likely to occur when the CFL constraint is least restrictive. This option is akin to a high optimization level of a computer program compiler---there is a trade-off between added speed and added risk of failure.
 
-Notice that the CFL norms 0-2 include the divergence of the velocity field. This is an added safeguard because often numerical instabilities arise when there is a sudden release of energy and a corresponding increase in the divergence within a single grid cell. In an explicit Euler update of the continuity equation, if the time increment is too large the grid cell may be totally drained of mass, which, of course, is not physical. The constraint $\rho^{n+1}>0$ therefore leads to the following restriction on the time step:
+Notice that the CFL norms 0-2 include the divergence of the velocity field. This is an added safeguard because often numerical instabilities arise when there is a sudden release of energy and a corresponding increase in the divergence within a single grid cell. In an explicit Euler update of the continuity equation, if the time increment is too large, the grid cell may be totally drained of mass, which is not physical. The constraint $\rho^{n+1}>0$ leads to the following restriction on the time step:
 \begin{equation}
 \label{eqn_dtmassrestrict}
 \delta t < \frac{\rho^n}{\overline{\mathbf{u}}^n\cdot\nabla\rho^n + \rho^n \nabla\cdot\mathbf{u}^n}
 \end{equation}
-We can argue that the case we are most concerned with is when $\rho^n$ is near zero.  A reasonable approximation to (\ref{eqn_dtmassrestrict}) then becomes
+We can argue that the most concerning case is when $\rho^n$ is near zero.  A reasonable approximation to (\ref{eqn_dtmassrestrict}) then becomes
 \be
 \label{eqn_divstability}
 \delta t < \frac{\rho}{\overline{u}_i \left(\frac{\rho-0}{\delta x_i}\right) + \rho \nabla\cdot\mathbf{u}}
@@ -9029,7 +9018,7 @@ The Von Neumann constraint is given by
 \begin{equation}
 \mbox{VN} \equiv  2 \; \delta t \; \max \left[ \frac{\mu}{\rho},D_\alpha \right] \; \left( \frac{1}{\delta x^2}+\frac{1}{\delta y^2}+\frac{1}{\delta z^2} \right) < 1
 \end{equation}
-The limits for VN may be adjusted using \ct{VN_MIN} (default 0.8 for all forms of LES, 0.4 for DNS) and \ct{VN_MAX} (default 1.0 for all forms of LES, 0.5 for DNS) on \ct{MISC}. We can understand this constraint in a couple of different ways.  First, we could consider the model for the diffusion velocity of species $\alpha$ in direction $i$, $V_{\alpha,i} Y_\alpha = -D_\alpha \; \partial Y_\alpha/\partial x_i$, and we would then see that VN is simply a CFL constraint due to diffusive transport.
+The limits for VN may be adjusted using \ct{VN_MIN} (default 0.8 for all forms of LES, 0.4 for DNS) and \linebreak[4]\ct{VN_MAX} (default 1.0 for all forms of LES, 0.5 for DNS) on \ct{MISC}. We can understand this constraint in a couple of different ways.  First, we could consider the model for the diffusion velocity of species $\alpha$ in direction $i$, $V_{\alpha,i} Y_\alpha = -D_\alpha \; \partial Y_\alpha/\partial x_i$, and we would then see that VN is simply a CFL constraint due to diffusive transport.
 
 We can also think of VN in terms of a total variation diminishing (TVD) constraint.  That is, if we have variation (curvature) in the scalar field, we do not want to create spurious oscillations that can lead to an instability by overshooting the smoothing step.  Consider the following explicit update of the heat equation for $u$ in 1-D. Here subscripts indicate grid indices and $\nu$ is the diffusivity.
 \begin{equation}
@@ -9052,7 +9041,7 @@ In some cases with extremely fast particles, however, the stability of the overa
 \subsection{Heat Transfer Constraint}
 \label{info:HT}
 
-Note that the heat flux has units of \unit{W/m^2}.  Thus, a velocity scale may be formed from $(\dot{q}''_{\rm w}/\rho_{\rm w})^{1/3}$, where $\rho_{\rm w}$ is the gas phase density at the wall and $\dot{q}''_{\rm w}$ is the total heat flux (convective plus net radiative) at the wall. Anytime we have a velocity scale to resolve, we have a CFL-type stability restriction. Therefore, the heat transfer stability check loops over all wall cells to ensure $\delta t < (\delta x/2) / (\dot{q}''_{\rm w}/\rho_{\rm w})^{1/3}$. This check is invoked by setting \ct{CHECK_HT=T} on the \ct{MISC} line. It is \ct{F} by default.
+Since heat flux has units of \unit{W/m^2}, a velocity scale may be formed from $(\dot{q}''_{\rm w}/\rho_{\rm w})^{1/3}$, where $\rho_{\rm w}$ is the gas phase density at the wall and $\dot{q}''_{\rm w}$ is the total heat flux (convective plus net radiative) at the wall. Anytime we have a velocity scale to resolve, we have a CFL-type stability restriction. Therefore, the heat transfer stability check loops over all wall cells to ensure $\delta t < (\delta x/2) / (\dot{q}''_{\rm w}/\rho_{\rm w})^{1/3}$. This check is invoked by setting \ct{CHECK_HT=T} on the \ct{MISC} line. It is \ct{F} by default.
 
 
 
@@ -9061,7 +9050,7 @@ Note that the heat flux has units of \unit{W/m^2}.  Thus, a velocity scale may b
 \section{Flux Limiters}
 \label{info:flux_limiters}
 
-FDS employs \emph{total variation diminishing} (TVD) schemes for scalar transport.  The default for VLES (FDS default \ct{SIMULATION_MODE}) is Superbee \cite{Roe:1986}, so chosen because this scheme does the best job preserving the scalar variance in highly turbulent flows with coarse grid resolution.  The default scheme for DNS and LES is CHARM \cite{Zhou:1995} because the gradient steepening used in Superbee forces a stair step pattern at high resolution, while CHARM is convergent.   Godunov and central differencing are included for completeness; more details can be found in the Tech Guide \cite{FDS_Tech_Guide}.  Table \ref{tab:flux_limiters} below shows the character strings which may be used to invoke the various limiter schemes.
+FDS employs \emph{total variation diminishing} (TVD) schemes for scalar transport.  The default for VLES (FDS default \ct{SIMULATION_MODE}) is Superbee \cite{Roe:1986}, which is chosen because this scheme does the best job preserving the scalar variance in highly turbulent flows with coarse grid resolution.  The default scheme for DNS and LES is CHARM \cite{Zhou:1995} because the gradient steepening used in Superbee forces a stair step pattern at high resolution, while CHARM is convergent.   Godunov and central differencing are included for completeness; more details can be found in the Tech Guide \cite{FDS_Tech_Guide}.  Table \ref{tab:flux_limiters} below shows the character strings which may be used to invoke the various limiter schemes.
 
 \begin{lstlisting}
 &MISC FLUX_LIMITER='GODUNOV' / ! invoke Godunov (first-order upwind scheme)
@@ -9114,7 +9103,7 @@ The density of the gas has a natural lower bound of zero, but if the density in 
 \ee
 To override the limits of density, specify \ct{MINIMUM_DENSITY} and/or \ct{MAXIMUM_DENSITY} on the \ct{CLIP} line in units of \unit{kg/m^3}.
 
-Clipping of density and mass fractions violates mass conservation, so it is preferable to avoid clipping if possible.  As discussed in Sec.~\ref{info:Stability_Constraints}, the time step is set to adhere to the CFL constraints of the flow field.  The proper \ct{DT} combined with flux limiters generally avoids the need for clipping.  Beyond this, FDS then employs a mass redistribution scheme, as discussed in FDS Technical Guide~\cite{FDS_Math_Guide}.  If this fails, there is yet one more attempt to avoid clipping---the time step is decreased by 10~\% ($\dt_{\mathrm{new}} = 0.9 \,\dt$) and the scalar transport equations are reiterated.  This process is carried out a maximum of \ct{CLIP_DT_RESTRICTIONS_MAX} times; the default is 5.  In some very extreme circumstances, this loop can drive the time step into numerical instability range ($\dt/\dt_{\mathrm{init}} < \mbox{\ct{LIMITING_DT_RATIO}}$).  You can control the max number of time step restrictions by setting the parameter \ct{CLIP_DT_RESTRICTIONS_MAX} on the \ct{CLIP} line (set to 0 to bypass the algorithm altogether). The number of restrictions (if any) is noted in the \ct{CHID.out} file for a given time step.
+Clipping of density and mass fractions violates mass conservation, so it is preferable to avoid clipping if possible.  As discussed in Sec.~\ref{info:Stability_Constraints}, the time step is set to adhere to the CFL constraints of the flow field.  The proper \ct{DT} combined with flux limiters generally avoids the need for clipping.  Beyond this, FDS then employs a mass redistribution scheme, as discussed in FDS Technical Guide~\cite{FDS_Math_Guide}.  If this fails, there is yet one more attempt to avoid clipping---the time step is decreased by 10~\% ($\dt_{\mathrm{new}} = 0.9 \,\dt$) and the scalar transport equations are reiterated.  This process is carried out a maximum of \ct{CLIP_DT_RESTRICTIONS_MAX} times; the default is 5.  In some very extreme circumstances, this loop can drive the time step into numerical instability range ($\dt/\dt_{\mathrm{init}}$ < \ct{LIMITING_DT_RATIO}).  You can control the max number of time step restrictions by setting the parameter \ct{CLIP_DT_RESTRICTIONS_MAX} on the \ct{CLIP} line (set to 0 to bypass the algorithm altogether). The number of restrictions (if any) is noted in the \ct{CHID.out} file for a given time step.
 
 
 
@@ -9125,9 +9114,9 @@ Clipping of density and mass fractions violates mass conservation, so it is pref
 \chapter{Changing the Initial Conditions}
 \label{info:INIT}
 
-Typically, an FDS simulation begins at time $t=0$ with ambient conditions. The air temperature is assumed constant with height, and the density and pressure decrease with height (the $z$ direction). This decrease is not noticed in most building scale calculations, but it is important in large outdoor simulations.
+Typically, an FDS simulation begins at time $t=0$~s with ambient conditions. The air temperature is assumed constant with height, and the density and pressure decrease with height (the $z$ direction). This decrease is not noticed in most building scale calculations, but it is important in large outdoor simulations.
 
-There are some scenarios for which it is convenient to change the ambient conditions within rectangular regions of the domain using the namelist keyword \ct{INIT} (Table~\ref{tbl:INIT}). There can be multiple \ct{INIT} lines. If two rectangular regions defined by \ct{INIT} overlap, it is the second of the overlapping regions that takes precedence.
+There are some scenarios for which it is convenient to change the ambient conditions within rectangular regions of the domain using the namelist keyword \ct{INIT} (Table~\ref{tbl:INIT}). There can be multiple \ct{INIT} lines. If two more more rectangular regions defined by \ct{INIT} overlap, the last region takes precedence in the overlap.
 
 \section{Gas Species}
 \label{info:init_species}
@@ -9142,10 +9131,10 @@ where \ct{XB} indicates a rectangular volume within the domain where the initial
 \begin{itemize}
 \item The indices of \ct{SPEC_ID} and \ct{MASS_FRACTION} are not necessarily indicative of the order in which the species are listed in the input file, but rather should come in consecutive order starting from 1.
 \item \ct{VOLUME_FRACTION(N)} can be used instead of \ct{MASS_FRACTION(N)} as long as they are not used together on the same input line.
-\item Instead of specifying a \ct{MASS_FRACTION(N)} or \ct{VOLUME_FRACTION(N)}, you can specify a \ct{RAMP_MF_Z(N)} or \ct{RAMP_VF_Z(N)} to indicate a vertical profile. The corresponding \ct{RAMP} lines should use the parameter \ct{Z} for the height $z$ (m) and \ct{F} for the value of the mass or volume fraction. A single \ct{INIT} line can have both fixed and ramped values, but they must refer to either mass or volume fraction.
+\item Instead of specifying a \ct{MASS_FRACTION(N)} or \ct{VOLUME_FRACTION(N)}, you can specify a \linebreak[4]\ct{RAMP_MF_Z(N)} or \ct{RAMP_VF_Z(N)} to indicate a vertical profile. The corresponding \ct{RAMP} lines should use the parameter \ct{Z} for the height $z$ (m) and \ct{F} for the value of the mass or volume fraction. A single \ct{INIT} line can have both fixed and ramped values, but they must refer to either mass or volume fraction.
 \item Specify all species components on the same \ct{INIT} line.
 \item The initial concentration of the background gas species cannot be specified this way.  The mass or volume fraction of the background species will be set to account for the unspecified fraction.
-\item All gas species must be specified using the \ct{SPEC} or \ct{REAC} namelist groups. In other words, any species listed must be individually tracked and not just a component of a lumped species. See Chapter~\ref{info:SPEC} for details.
+\item Any species listed must be individually tracked and not just a component of a lumped species. See Chapter~\ref{info:SPEC} for details.
 \item You may use the shortcut \ct{DB='WHOLE DOMAIN'} in place of \ct{XB=...}, which is equivalent to specifying the entire domain as the region of initialization.
 \end{itemize}
 
@@ -9156,8 +9145,8 @@ where \ct{XB} indicates a rectangular volume within the domain where the initial
 
 You can set the ambient temperature and pressure using the following parameters on the \ct{MISC} line:
 \begin{itemize}
-\item \ct{P_INF} Background pressure (at the ground) in Pa. The default is 101325 Pa.
-\item \ct{TMPA} Ambient temperature, the temperature of everything at the start of the simulation. The default is 20~\unit{\degreeCelsius}.
+\item \ct{P_INF} is the background pressure (at the ground) in Pa. The default is 101325 Pa.
+\item \ct{TMPA} is the ambient temperature, the temperature of everything at the start of the simulation. The default is 20~\unit{\degreeCelsius}.
 \end{itemize}
 To modify the local initial temperature in certain regions of the domain, add lines of the form,
 \begin{lstlisting}
@@ -9357,7 +9346,7 @@ It is possible for the pressure iteration scheme to seem ``stuck''---the solutio
 \subsection{Optional Pressure Solvers}
 \label{optional_pressure_solver}
 
-The default Poisson solver in FDS (\ct{SOLVER='FFT'} on the \ct{PRES} line) is based on the package of linear algebra routines called CrayFishpak. However, in certain circumstances you may need to use one of several alternatives that is based on the Intel\textsuperscript{\textregistered} MKL Sparse Cluster Solver or the HYPRE solver library from Lawrence Livermore National Laboratories (LLNL) \cite{HYPRE}.
+The default Poisson solver in FDS (\ct{SOLVER='FFT'} on the \ct{PRES} line) is based on the package of linear algebra routines called CrayFishpak. However, in certain circumstances you may need to use one of several alternatives that are based on the Intel\textsuperscript{\textregistered} MKL Sparse Cluster Solver or the HYPRE solver library from Lawrence Livermore National Laboratories (LLNL) \cite{HYPRE}.
 \begin{itemize}
 \item \ct{SOLVER='ULMAT'} This solver is useful when the computational domain has relatively small, sealed cavities enclosed with thin (i.e. zero cell thick) walls. The small error in the normal component of velocity that you incur with the FFT solver can lead to unphysical changes in temperature, density and pressure that may eventually cause the calculation to become numerically unstable. For example, suppose you have hollow steel columns or hollow aluminum ducts with thin walls and you want to simulate the heat penetration within these spaces.
 
@@ -9670,7 +9659,7 @@ By default, FDS outputs all result files to the current working directory. A sep
 \section{Controlling the Frequency of Output}
 \label{info:DT_DUMP}
 
-Point device data, slice (contour) data, particle data, isosurface data, 3D smoke data, boundary data, solid phase profile data, and control function data are written to file every \ct{(T_END-T_BEGIN)/NFRAMES} seconds unless otherwise specified using the parameters listed in Table~\ref{tbl:dt_params}. These parameters are written on the \ct{DUMP} line. You can also set \ct{NFRAMES} to a value other than 1000, its default. The parameters named \ct{DT_XXXX} specify the uniform time interval between data dumps. The parameters \ct{RAMP_XXXX} allow you to specify exactly which times to write out. For example, if you want to write boundary files at 10, 20, and 60~s, add the following:
+Point device data, slice (contour) data, particle data, isosurface data, 3D smoke data, boundary data, solid phase profile data, and control function data are written to file every \ct{(T_END-T_BEGIN)/NFRAMES} seconds unless otherwise specified using the parameters listed in Table~\ref{tbl:dt_params}. These parameters are written on the \ct{DUMP} line. You can also set \ct{NFRAMES} to a value other than 1000, its default. The parameters named \linebreak[4]\ct{DT_XXXX} specify the uniform time interval between data dumps. The parameters \ct{RAMP_XXXX} allow you to specify exactly which times to write out. For example, if you want to write boundary files at 10, 20, and 60~s, add the following:
 \begin{lstlisting}
 &DUMP ..., RAMP_BNDF='b-ramp' /
 &RAMP ID='b-ramp', T=10 /
@@ -9735,13 +9724,13 @@ If you just want to record the time history of, say, the temperature at a partic
 \begin{lstlisting}
 &DEVC XYZ=6.7,2.9,2.1, QUANTITY='TEMPERATURE', ID='T-1' /
 \end{lstlisting}
-and a column will be added to the output file \ct{CHID_devc.csv} under the label \ct{'T-1'}. FDS reports the value of the \ct{QUANTITY} in the cell containing the point \ct{XYZ}. Most scalar quantities, like \ct{TEMPERATURE}, are defined at cell centers and represent the average of that value over the entire cell. If you specify coordinates \ct{XYZ} that place the device on a cell boundary, halfway between two cell centers, FDS chooses the one that has the greater coordinate value. FDS does not take a weighted average among the nearest 8 cell centers. The reason is that some of these cell centers might be on the other side of a thin obstruction.
+and a column will be added to the output file \ct{CHID_devc.csv} under the label \ct{'T-1'}. FDS reports the value of the \ct{QUANTITY} in the cell containing the point \ct{XYZ}. Most scalar quantities, like \ct{TEMPERATURE}, are defined at cell centers and represent the average of that value over the entire cell. If you specify coordinates \ct{XYZ} that place the device on a cell boundary, halfway between two cell centers, FDS chooses the one that has the greater coordinate value. By default, FDS does not take a weighted average among the nearest 8 cell centers. The reason is that some of these cell centers might be on the other side of a thin obstruction.
 
 In cases where the \ct{QUANTITY} is defined on a cell face, like \ct{'U-VELOCITY'}, FDS chooses the nearest cell face and reports the corresponding value.
 
 \subsection{Solid Phase Quantity at a Single Point}
 
-When prescribing a solid phase quantity, be sure to position the device at a solid surface. It is not always obvious where the solid surface is since the mesh does not always align with the input obstruction locations. To help locate the appropriate surface, the parameter \ct{IOR} {\em must} be included when designating a solid phase quantity, except when using one of the spatial statistics options that are described in Sec.~\ref{info:statistics} in which case the output quantity is not associated with just a single point on the surface. If the orientation of the solid surface is in the positive $x$ direction, set \ct{IOR=1}. If it is in the negative $x$ direction, set \ct{IOR=-1}, and so for the $y$ and $z$ directions. For example, the line
+When prescribing a solid phase quantity, be sure to position the device at a solid surface. It is not always obvious where the solid surface is since the mesh does not always align with the input obstruction locations. To help locate the appropriate surface, the parameter \ct{IOR} {\em must} be included when designating a solid phase quantity, except when using one of the spatial statistics options that are described in Sec.~\ref{info:statistics} in which case the output quantity is not associated with just a single point on the surface. If the orientation of the solid surface is in the positive $x$ direction, set \ct{IOR=1}. If it is in the negative $x$ direction, set \ct{IOR=-1}, and so on for the $y$ and $z$ directions. For example, the line
 \begin{lstlisting}
 &DEVC XYZ=0.7,0.9,2.1, QUANTITY='WALL TEMPERATURE', IOR=-2, ID='...' /
 \end{lstlisting}
@@ -9920,7 +9909,7 @@ The \ct{TEMPORAL_STATISTIC='RUNNING AVERAGE'} outputs the running average value 
 
 \subsubsection{Favre Average}
 
-The \ct{TEMPORAL_STATISTIC='FAVRE AVERAGE'} outputs the Favre (density weighted) running average value of the \ct{QUANTITY} over the time period starting at \ct{STATISTICS_START} and ending at \ct{STATISTICS_END}. If the scalar quantity of interest is $\phi$ and the density if $\rho$ and the running average is defined by an overbar (that is, $\overline{\phi}$ is the running average of the scalar), then the Favre average is denoted with a tilde and computed as $\tilde{\phi} = \overline{\rho \phi}/\overline{\rho}$.  This output is not compatible with \ct{INITIAL_VALUE}.
+The \ct{TEMPORAL_STATISTIC='FAVRE AVERAGE'} outputs the Favre (density weighted) running average value of the \ct{QUANTITY} over the time period starting at \ct{STATISTICS_START} and ending at \ct{STATISTICS_END}. If the scalar quantity of interest is $\phi$ and the density is $\rho$ and the running average is defined by an overbar (that is, $\overline{\phi}$ is the running average of the scalar), then the Favre average is denoted with a tilde and computed as $\tilde{\phi} = \overline{\rho \phi}/\overline{\rho}$.  This output is not compatible with \ct{INITIAL_VALUE}.
 
 \subsubsection{Instantaneous Value}
 
@@ -10112,9 +10101,9 @@ You may add a name via \ct{ID} on the \ct{SLCF} as an identifier sent to Smokevi
 \section{Animated Boundary Quantities: The \texorpdfstring{{\tt BNDF}}{BNDF} Namelist Group}
 \label{info:BNDF}
 
-The \ct{BNDF} (``boundary file'') namelist group parameters allows you to record surface quantities at all solid obstructions. As with the \ct{SLCF} group, each quantity is prescribed with a separate \ct{BNDF} line, and the output files are of the form \ct{CHID_n.bf}. No physical coordinates need be specified, however, just \ct{QUANTITY}. See Table \ref{tab:solidoutputquantities}. For certain output quantities, additional parameters need to be specified via the \ct{PROP} namelist group. In such cases, add the character string, \ct{PROP_ID}, to the \ct{BNDF} line to tell FDS where to find the necessary extra information.
+The \ct{BNDF} (``boundary file'') namelist group parameters allows you to record surface quantities at all solid obstructions and solid wall cells on the exterior boundary of the domain. As with the \ct{SLCF} group, each quantity is prescribed with a separate \ct{BNDF} line. The output files are of the form \ct{CHID_n.bf}. A \ct{BNDF} input does not have physical coordinates, it just has a \ct{QUANTITY}, see Table \ref{tab:solidoutputquantities}. For certain output quantities, additional parameters need to be specified via the \ct{PROP} namelist group. In such cases, add the character string, \ct{PROP_ID}, to the \ct{BNDF} line to tell FDS where to find the necessary extra information.
 
-\ct{BNDF} files (Sec.~\ref{out:BNDF}) can become very large, so be careful in prescribing the time interval, \ct{DT_BNDF}, or discrete times, \ct{RAMP_BNDF}, on the \ct{DUMP} line. One way to reduce the size of the output file is to turn off the drawing of boundary information on desired obstructions. On any given \ct{OBST} line, if the string \ct{BNDF_OBST=F} is included, the obstruction is not colored. To turn off all boundary drawing, set \ct{BNDF_DEFAULT=F} on the \ct{MISC} line. Then individual obstructions can be turned back on with \ct{BNDF_OBST=T} on the appropriate \ct{OBST} line. Individual faces of a given obstruction can be controlled via \ct{BNDF_FACE(IOR)}, where \ct{IOR} is the index of orientation (+1 for the positive $x$ direction, -1 for negative, and so on). Another way is to disable \ct{BNDF} output for specific meshes by setting \ct{BNDF_MESH=F} on the \ct{MESH} lines where no \ct{BNDF} output is desired. Disabling output for a \ct{MESH} includes all wall cells at the exterior boundary of that \ct{MESH}.
+\ct{BNDF} files (Sec.~\ref{out:BNDF}) can become very large, so be careful in prescribing the time interval, \ct{DT_BNDF}, or discrete times, \ct{RAMP_BNDF}, on the \ct{DUMP} line. One way to reduce the size of the output file is limit which obstructions output data. If \ct{BNDF_OBST=F} is added to an \ct{OBST} line, no data is output for the obstruction. To turn off all boundary drawing, set \ct{BNDF_DEFAULT=F} on the \ct{MISC} line. Then individual obstructions can be turned back on with \ct{BNDF_OBST=T} on the appropriate \ct{OBST} line. Individual faces of a given obstruction can be controlled via \ct{BNDF_FACE(IOR)}, where \ct{IOR} is the index of orientation (+1 for the positive $x$ direction, -1 for negative, and so on). Another way is to disable \ct{BNDF} output for specific meshes by setting \ct{BNDF_MESH=F} on the \ct{MESH} lines where no \ct{BNDF} output is desired. Disabling output for a \ct{MESH} includes all wall cells at the exterior boundary of that \ct{MESH}.
 
 Normally, FDS averages boundary file data at cell corners. For example, surface temperatures are computed at the center of each surface cell, but they are linearly interpolated to cell corners and output to a file that is read by Smokeview. To prevent this from happening, set \ct{CELL_CENTERED=T} on the \ct{BNDF} line. This forces FDS to output the actual cell-centered data with no averaging. Note that this feature is mainly useful for diagnostics.
 
@@ -10128,7 +10117,7 @@ Sometimes it is useful to render the \ct{QUANTITY} integrated over time. For exa
 \section{Animated Isosurfaces: The \texorpdfstring{{\tt ISOF}}{ISOF} Namelist Group}
 \label{info:ISOF}
 
-The \ct{ISOF} (``ISOsurface File'') namelist group creates three-dimensional animated contours of gas phase scalar quantities. For example, a 300~\unit{\degreeCelsius} temperature isosurface is a 3-D surface on which the gas temperature is 300~\unit{\degreeCelsius}. Three different values of the temperature can be saved via the line:
+The \ct{ISOF} (``ISOsurface File'') namelist group creates three-dimensional animated contours of gas phase scalar quantities. For example, a 300~\unit{\degreeCelsius} temperature isosurface is a 3-D surface on which the gas temperature is 300~\unit{\degreeCelsius}. Up to ten different values of a \ct{QUANTITY} can be saved. For example, three different values of the temperature can be saved via the line:
 \begin{lstlisting}
 &ISOF QUANTITY='TEMPERATURE', VALUE(1)=50., VALUE(2)=200., VALUE(3)=500. /
 \end{lstlisting}
@@ -10142,6 +10131,7 @@ draws a surface where the mixture fraction has a value of 0.05~kg/kg and colors 
 
 Any gas phase quantity can be animated via iso-surfaces, but use caution. To render an iso-surface, the desired quantity must be computed in every mesh cell at every output time step. For quantities like \ct{'TEMPERATURE'}, this is not a problem, as FDS computes it and saves it anyway. However, species volume fractions demand substantial amounts of time to compute at each mesh cell. Remember to include the \ct{SPEC_ID} corresponding to the given \ct{QUANTITY} if necessary.
 
+When outputting \ct{VELOCITY}, \ct{VELO_INDEX}, see Sec.~\ref{info:velocity}, can be used to control the sign of the velocity.
 
 \newpage
 
@@ -10183,8 +10173,6 @@ The \ct{MASS_EXTINCTION_COEFFICIENT} is passed to Smokeview to be used for visua
 FDS outputs 3D smoke quantities as 8 bit integers compressed using run length encoding.  Soot density, HRRPUV or temperatures are first scaled to 8 bit integers (soot density is converted to an opacity first). Repeated integers are replaced by $n$I where $n$ is the number of repeats and I is the value repeated.
 
 You can change the scale of \ct{HRRPUV} via the parameter \ct{HRRPUV_MAX_SMV} (default 1200~\unit{kW/m^3}) on the \ct{DUMP} line. You can change the \ct{TEMPERATURE} bounds via \ct{TEMP_MIN_SMV} and \ct{TEMP_MAX_SMV} (default 20~\unit{\degreeCelsius} and 2000~\unit{\degreeCelsius}).
-
-\newpage
 
 \section{Particle Output Quantities}
 \label{info:part_output}
@@ -10239,11 +10227,12 @@ records the integrated mass flux of {\em all} particles passing through the give
 \label{bucket_test_4_fig}
 \end{figure}
 
-The quantity \ct{'PARTICLE RADIATION LOSS'} reports the net energy emitted and absorbed from a given grid cell by all particles within it, in units of \unit{kW/m^3}. A positive value indicates that emission is greater than absorption.n
+The quantity \ct{'PARTICLE RADIATION LOSS'} reports the net energy emitted and absorbed from a given grid cell by all particles within it, in units of \unit{kW/m^3}. A positive value indicates that emission is greater than absorption.
 
 
 \subsection{Coloring Particles and Droplets in Smokeview}
 \label{particle_colors}
+
 
 The parameter \ct{QUANTITIES} on the \ct{PART} line is an array of character strings indicating which scalar quantities should be used to color particles and droplets in Smokeview. The choices are \\
 \\
@@ -10264,12 +10253,15 @@ The parameter \ct{QUANTITIES} on the \ct{PART} line is an array of character str
 \ct{'PARTICLE RADIATIVE HEAT FLUX'} (\unit{kW/m^2}) \\
 \ct{'PARTICLE CONVECTIVE HEAT FLUX'} (\unit{kW/m^2}) \\
 \ct{'PARTICLE TOTAL HEAT FLUX'} (\unit{kW/m^2}) \\
+\ct{'PARTICLE POWER'} (kW) \\
 \\
 If no \ct{QUANTITIES} are specified and none are selected in Smokeview, then Smokeview will display particles with a single color determined by the color of the \ct{SURF_ID} assigned to the \ct{PART} class, with the exception of water droplets and liquid fuel droplets, which are colored blue and yellow, respectively. If no color is specified on \ct{SURF} then the default solid particle color will revert to black.  You may override the \ct{SURF} color by specifying either \ct{RGB} or \ct{COLOR} on the \ct{PART} line.
 
 The \ct{'PARTICLE TEMPERATURE'} is the surface temperature.  For thermally thin particles, like droplets, this temperature represents the whole particle, but for thermally thick particles it is just the surface temperature.  For in-depth temperature of thermally thick particles you need to use a profile \ct{PROF}, as discussed in Sec.~\ref{info:PROF}.  In practice, you should designate only a small subset of particles (use a separate \ct{PART} line) for monitoring internal temperatures, as the amount of data can become large, and there is no way to visualize this in Smokeview.
 
 The \ct{PARTICLE WEIGHTING FACTOR} describes how many actual particles each of the computational particles represent. The \ct{PARTICLE BULK DENSITY} gives the weighted (total) mass per grid cell volume, which is an important parameter when using particles to represent porous media such as vegetation.
+
+The \ct{PARTICLE POWER} is the net (radiative plus convective) heat transfer rate for the entire particle.
 
 For solid particles with a specified \ct{SURF_ID}, you may specify any of the solid phase output quantities listed in Table~\ref{tab:particleoutputquantities}. If the specified quantity is associated with a species, use the parameter \linebreak[4] \ct{QUANTITIES_SPEC_ID(N)} to specify the species. Here \ct{N} refers to the order of the specified output quantities on the \ct{PART} line.
 
@@ -10350,14 +10342,17 @@ Quantities associated with the overall energy budget are reported in the comma d
 \item \ct{Q_RADI} The thermal radiation {\em into} the domain from the exterior boundary or particles.  $\dot{\bq}_{\rm r}''$ is the \underline{r}adiation heat flux vector (\unit{kW/m^2}). Its divergence represents the net radiative emission from a volume of gas. Typically, \ct{Q_RADI} has a negative value, meaning that a fire or hot gases radiate energy out of the domain. $\dq_{\rm p,r}$ is the \underline{r}adiation absorbed by a droplet or \underline{p}article (kW). This term is added to \ct{Q_RADI} and subtracted from \ct{Q_PART} because it is implicitly included in $\nabla \cdot \dot{\bq}_{\rm r}''$ and needs to be separated off for the purpose of explicitly accounting for it in the energy budget.
 \item \ct{Q_CONV} The flow of sensible enthalpy {\em into} the computational domain. $\dm_{\rm p,\alpha}$ is the production rate of gas species $\alpha$ from a solid \underline{p}article or liquid droplet (kg/s). $h_{\rm s,\alpha}$ is the \underline{s}ensible enthalpy of gas species $\alpha$ (kJ/kg). $\rho$ is the gas density (\unit{kg/m^3}), $\bu$ is the velocity vector (m/s). $h_{\rm s}$ is the \underline{s}ensible enthalpy of the gas. If the gas is flowing out of the domain, $\bu \cdot \d {\bf S}$ is positive.
 \item \ct{Q_COND} The convective heat flux {\em into} the computational domain. $\dq_{\rm c}''$ is the heat \underline{c}onvected from the gas to a surface. If the gas is relatively hot and the surfaces/particles/droplets relatively cool, \ct{Q_COND} is negative. At \ct{OPEN} boundaries, \ct{Q_COND} is $\int k \nabla T \cdot \d {\bf S}$, where $k$ (kW/(m$\cdot$K)) is the turbulent thermal conductivity of the gas and $\nabla T$ is the temperature gradient across the open boundary. $\dq_{\rm p,w}$ is the energy transferred from a solid surface (\underline{w}all) to a droplet or \underline{p}article adhering to it. Notice that it is subtracted off in \ct{Q_PART} because it makes no contribution to the energy of the gas.
+\item \ct{Q_DIFF} The flow of enthalpy {\em into} the computational domain due to the diffusion of species where $\rho D_\alpha \nabla Y_\alpha$ is diffusive flux of species $\alpha$ (kW).
 \item \ct{Q_PRES} The work done by volumetric expansion (kW).
 \item \ct{Q_PART} The rate of energy gained by the gas from liquid droplets or solid particles. $\dq_{\rm p,r}$ is the \underline{r}adiation absorbed by a droplet or \underline{p}article (kW). $\dq_{\rm p,c}$ is the energy transferred via \underline{c}onvection from the gas to a droplet or \underline{p}article (kW). $\dq_{\rm p,w}$ is the energy transferred from a solid surface (\underline{w}all) to a droplet or \underline{p}article adhering to it.
+\item \ct{Q_TOTAL} The sum of all the right hand terms in Eq.~\ref{eqn_enthalpytransport} except for \ct{HRR_OX}, as explained above. Ideally, this sum should equal the term on the left, \ct{Q_ENTH}. 
 \end{itemize}
-An additional column, \ct{Q_TOTAL}, includes the sum of the terms on the right hand side of the equation. Note that this summation does not include \ct{HRR_OX}, as explained above. Ideally, this sum should equal the term on the left, \ct{Q_ENTH}. All terms are reported in units of kW.
 
-The other columns in the \ct{CHID_hrr.csv} file contain the total burning rate of fuel, in units of kg/s, and the zone pressures. Note that the reported value of the burning rate is not adjusted to account for the possibility that each individual material might have a different heat of combustion. For this reason, it is not always the case that the reported total burning rate multiplied by the gas phase heat of combustion is equal to the reported heat release rate.
+All terms are reported in units of kW.
 
-Note that the volume integrations in Eq.~(\ref{eqn_enthalpytransport}) are performed over the entire domain. The differential, $\d V$, is the product of the local grid cell dimensions, $\d x \, \d y \, \d z$. For the special case of two-dimensional cylindrical coordinates, $\d V=r \, \d r \, \d \theta \, \d z$, where $r=x$, $\d r = \d x$, and $\d \theta = \d y$.  In the 2D Cartesian case (1 cell in the $y$ direction, \ct{CYLINDRICAL=.FALSE.}), the cell volumes and areas are divided by $\d y$ so that the column output is a value per unit length (e.g., kW/m).  In the 2D cylindrical case, the cell volumes are divided by $\d y$ (which represents radians in this case) and multiplied by $2\pi$ to account for complete integration in the $\theta$ direction.  The resulting value is nominally the same as the corresponding 3D problem.  An example is shown in Fig.~\ref{fig:test_hrr_2d_cyl}.
+The other columns in the \ct{CHID_hrr.csv} file contain the net flow rate of all tracked species at solid boundaries (i.e., flows specified via \ct{SURF} and not at \ct{OPEN} boundaries} in units of kg/s, and the zone gauge pressures in Pa. Note that the reported value of the burning rate is not adjusted to account for the possibility that each individual material might have a different heat of combustion. For this reason, it is not always the case that the reported total burning rate multiplied by the gas phase heat of combustion is equal to the reported heat release rate.
+
+Note that the volume integrations in Eq.~(\ref{eqn_enthalpytransport}) are performed over the entire domain. The differential, $\d V$, is the product of the local grid cell dimensions, $\d x \, \d y \, \d z$. For the special case of two-dimensional cylindrical coordinates, $\d V=r \, \d r \, \d \theta \, \d z$, where $r=x$, $\d r = \d x$, and $\d \theta = \d y$.  In the 2D Cartesian case (1 cell in the $y$ direction, \ct{CYLINDRICAL=F}), the cell volumes and areas are divided by $\d y$ so that the column output is a value per unit length (e.g., kW/m).  In the 2D cylindrical case, the cell volumes are divided by $\d y$ (which represents radians in this case) and multiplied by $2\pi$ to account for complete integration in the $\theta$ direction.  The resulting value is nominally the same as the corresponding 3D problem.  An example is shown in Fig.~\ref{fig:test_hrr_2d_cyl}.
 
 \begin{figure}[ht]
 \centering
@@ -10378,7 +10373,7 @@ As a test of the energy balance, a sample case called \ct{Pressure_Solver/hallwa
 \subsection{Gas Species Mass}
 \label{info:MASS_FILE}
 
-If you set \ct{MASS_FILE=T} on the \ct{DUMP} line, a file called \ct{CHID_mass.csv} is produced that lists the total mass of all gas species as a function of time. This flag is \ct{F} by default because the calculation of all gas species in all mesh cells is time-consuming. The parameter \ct{DT_MASS} or \ct{RAMP_MASS} controls the frequency of output.
+If you set \ct{MASS_FILE=T} on the \ct{DUMP} line, a file called \ct{CHID_mass.csv} is produced that lists the total mass of all gas species (columnwise primitive species followed by tracked species) as a function of time. This flag is \ct{F} by default because the calculation of all gas species in all mesh cells is time-consuming. The parameter \ct{DT_MASS} or \ct{RAMP_MASS} controls the frequency of output.
 
 
 \subsection{Mass Loss Rates}
@@ -10488,14 +10483,14 @@ The output quantity \ct{THERMOCOUPLE} is the temperature of a modeled thermocoup
    \frac{D_{\rm TC}}{6} \, \rho_{\rm TC} \, c_{\rm TC} \, \frac{\d T_{\rm TC}}{\d t} = \epsilon_{\rm TC} \, (U/4 - \sigma T_{\rm TC}^4) + h(T_{\rm g} - T_{\rm TC})
    \label{TC}
 \ee
-where $\epsilon_{\rm TC}$ is the emissivity of the thermocouple, $U$ is the integrated radiative intensity, $T_{\rm g}$ is the true gas temperature, and $h$ is the heat transfer coefficient to a small sphere, $h=k \, \NU / D_{\rm TC}$. The bead \ct{DIAMETER}, \ct{EMISSIVITY}, \ct{DENSITY}, and \ct{SPECIFIC_HEAT} or \ct{SPECIFIC_HEAT_RAMP} are given on the associated \ct{PROP} line. To over-ride the calculated value of the heat transfer coefficient, set \ct{HEAT_TRANSFER_COEFFICIENT} on the \ct{PROP} line (\unit{W/(m.K)}). The default value for the bead diameter is 0.001~m. The default emissivity is 0.85. The default values for the bead density and specific heat are that for a Type-K thermocouple; 8700~\unit{kg/m^3} and a linear ramp from 0.4515~kJ/kg/K at 20\,\unit{\degreeCelsius} to 0.6010~kJ/kg/K at 1200\,\unit{\degreeCelsius}, respectively. See the discussion on heat transfer to a water droplet in the Technical Reference Guide for details of the convective heat transfer to a small sphere.
+where $\epsilon_{\rm TC}$ is the emissivity of the thermocouple, $U$ is the integrated radiative intensity, $T_{\rm g}$ is the true gas temperature, and $h$ is the heat transfer coefficient to a small sphere, $h=k \, \NU / D_{\rm TC}$. The bead \ct{DIAMETER}, \ct{EMISSIVITY}, \ct{DENSITY}, and \ct{SPECIFIC_HEAT} or \ct{SPECIFIC_HEAT_RAMP} are given on the associated \ct{PROP} line. To over-ride the calculated value of the heat transfer coefficient, set \linebreak[4]\ct{HEAT_TRANSFER_COEFFICIENT} on the \ct{PROP} line (\unit{W/(m.K)}). The default value for the bead diameter is 0.001~m. The default emissivity is 0.85. The default values for the bead density and specific heat are that for a Type-K thermocouple; 8700~\unit{kg/m^3} and a linear ramp from 0.4515~kJ/kg/K at 20\,\unit{\degreeCelsius} to 0.6010~kJ/kg/K at 1200\,\unit{\degreeCelsius}, respectively. See the discussion on heat transfer to a water droplet in the Technical Reference Guide for details of the convective heat transfer to a small sphere.
 
 The above discussion is appropriate for a so-called ``bare bead''  thermocouple, but often thermocouples are shielded or sheathed in various ways to mitigate the effect of thermal radiation. In such cases, there is no obvious bead diameter and there may be multiple metals and air gaps in the construction. Usually, the manufacturer provides a time constant, which is defined as the time required for the sensor to respond to 63.2~\% of its total output signal when suddenly plunged into a warm air stream flowing at 20~m/s. The analysis and testing is typically done at relatively low temperature, in which case the radiation term in Eq.~(\ref{TC}) can be neglected and the time constant, $\tau$, can be defined in terms of effective thermal properties and an effective diameter:
 \be
    \tau = \frac{D_{\rm eff} \, \rho_{\rm eff} \, c_{\rm eff} }{6 \, h}  \quad ; \quad  h=\frac{k \, \NU}{D_{\rm eff}} \quad ; \quad \NU = 2 + 0.6 \, \RE^{1/2} \, \PR^{1/3}  \quad ; \quad
    \RE = \frac{\rho \|\bu\| D_{\rm eff}}{\mu}  \label{TC_tau}
 \ee
-For a given value of the time constant, $\tau$, and effective thermal properties, Eq.~(\ref{TC_tau}) can be solved implicitly for the effective diameter. The \ct{TIME_CONSTANT} is specified on a \ct{PROP} line which is identified by the \ct{DEVC} line using a \ct{PROP_ID}. If you specify the \ct{TIME_CONSTANT}, you can still specify the effective \ct{EMISSIVITY}, \ct{DENSITY}, \ct{SPECIFIC_HEAT} (or \ct{SPECIFIC_HEAT_RAMP}), and \ct{HEAT_TRANSFER_COEFFICIENT} as well, but not the \ct{DIAMETER} because this will be calculated automatically. In most cases, it is sufficient to simply specify the \ct{TIME_CONSTANT}.
+For a given value of the time constant, $\tau$, and effective thermal properties, Eq.~(\ref{TC_tau}) can be solved implicitly for the effective diameter. The \ct{TIME_CONSTANT} is specified on a \ct{PROP} line which is identified by the \ct{DEVC} line using a \ct{PROP_ID}. If you specify the \ct{TIME_CONSTANT}, you can still specify the effective \ct{EMISSIVITY}, \ct{DENSITY}, \ct{SPECIFIC_HEAT} (or \ct{SPECIFIC_HEAT_RAMP}), and \linebreak[4]\ct{HEAT_TRANSFER_COEFFICIENT} as well, but not the \ct{DIAMETER} because this will be calculated automatically. In most cases, it is sufficient to simply specify the \ct{TIME_CONSTANT}.
 
 Figure~\ref{fig:thermocouple_time_constant} shows the results of a simple test case called \ct{thermocouple_time_constant} whose input file is in the \ct{Heat_Transfer} samples folder. Three thermocouples with given time constants of 0.5~s, 3.0~s, and 8.0~s are suddenly subjected to a 20~m/s air stream of 30~\unit{\degreeCelsius}. It is expected that each TC should reach a temperature of 26.32~\unit{\degreeCelsius} at their given time constants.
 \begin{figure}[!ht]
@@ -10591,7 +10586,7 @@ If you want more precise output that includes the diffusive component of the mas
 \label{info:wallflux}
 \label{mass_flux_comparison}
 
-There are three quantities that may be used for recording the mass flux of a particular gas species at a boundary: \ct{'MASS FLUX'}, \ct{'MASS FLUX WALL'}, and \ct{TOTAL MASS FLUX WALL'}. Each takes a \ct{SPEC_ID} if a particular gas species is desired; otherwise the sum of all gas species is given. The difference between the outputs is that \ct{'MASS FLUX'} refers to the generation rate of a gas species or solid material component at a solid boundary, whether it be user-specified or the result of a pyrolysis model. \ct{'MASS FLUX WALL'}, on the other hand, is the actual computed mass flux which might be slightly different than \ct{'MASS FLUX'} due to small numerical error in the normal component of velocity at a solid wall. That is, \ct{'MASS FLUX WALL'} is a direct computation of
+There are three quantities that may be used for recording the mass flux of a particular gas species at a boundary: \ct{'MASS FLUX'}, \ct{'MASS FLUX WALL'}, and \ct{'TOTAL MASS FLUX WALL'}. Each takes a \ct{SPEC_ID} if a particular gas species is desired; otherwise the sum of all gas species is given. The difference between the outputs is that \ct{'MASS FLUX'} refers to the generation rate of a gas species or solid material component at a solid boundary, whether it be user-specified or the result of a pyrolysis model. \ct{'MASS FLUX WALL'}, on the other hand, is the actual computed mass flux which might be slightly different than \ct{'MASS FLUX'} due to small numerical error in the normal component of velocity at a solid wall. That is, \ct{'MASS FLUX WALL'} is a direct computation of
 \be
    \dot{m}_\alpha = \rho Y_\alpha u_n - \rho D_\alpha \partial Y_\alpha / \partial n
 \ee
@@ -10653,15 +10648,16 @@ where $\dot{q}_{\rm inc}''$ is the {\em incident} radiative heat flux, $\epsilon
 
 \item \ct{'CONVECTIVE HEAT FLUX'} The convective component of Eq.~(\ref{net_flux}), $\quad \dq_{\rm c}'' = h_{\rm c} \, (T_{\rm g} - T_{\rm s})$.
 
-\item \ct{'CONVECTIVE HEAT FLUX GAUGE'} The convective component of Eq.~(\ref{gauge_heat_flux}), $\quad \dq_{\rm c,gauge}'' = h_{\rm c} \, (T_{\rm g} - T_{\rm gauge})$.
-
 \item \ct{'INCIDENT HEAT FLUX'} The term $\dq_{\rm inc}''$ in Eq.~(\ref{net_flux}).
 
 \item \ct{'GAUGE HEAT FLUX'} This quantity simulates a measurement made with a water-cooled heat flux gauge:
 \be
-   \dq_{\rm gauge}'' = \epsilon_{\rm gauge} \, \left( \dq_{\rm inc}'' - \sigma \, T_{\rm gauge}^4 \right) + h_{\rm c} \, (T_{\rm g} - T_{\rm gauge})
-   \label{gauge_heat_flux}
+\dq_{\rm gauge}'' = \epsilon_{\rm gauge} \, \left( \dq_{\rm inc}'' - \sigma \, T_{\rm gauge}^4 \right) + h_{\rm c} \, (T_{\rm g} - T_{\rm gauge})
+\label{gauge_heat_flux}
 \ee
+
+\item \ct{'CONVECTIVE HEAT FLUX GAUGE'} The convective component of Eq.~(\ref{gauge_heat_flux}), $\quad \dq_{\rm c,gauge}'' = h_{\rm c} \, (T_{\rm g} - T_{\rm gauge})$.
+
 If the heat flux gauge used in an experiment has a temperature other than ambient or an emissivity other than 1, specify \ct{GAUGE_TEMPERATURE} ($T_{\rm gauge}$, \unit{\degreeCelsius}) and \ct{GAUGE_EMISSIVITY} ($\epsilon_{\rm gauge}$) on the \ct{PROP} line associated with the device:
 \begin{lstlisting}
 &DEVC ID='hf', XYZ=..., IOR=-2, QUANTITY='GAUGE HEAT FLUX', PROP_ID='hfp' /
@@ -10747,7 +10743,7 @@ In fact, FDS creates a Lagrangian particle that records the AST at the desired l
 \subsubsection{Example: AST vs. Surface Temperature}
 \label{adiabatic_surface_temperature}
 
-The test case called \ct{adiabatic_surface_temperature.fds} in the \ct{Radiation} folder simulates a 0.1~mm steel plate being heated by a thermal plume. The plate is perfectly insulated (\ct{BACKING='INSULATED'} on the \ct{SURF} line) and its steady-state temperature should be equivalent to its adiabatic surface temperature or AST. The left plot of Fig.~\ref{adiabatic_surface_temperature_fig} shows the plate temperature rising toward the AST, much as an actual plate thermometer would. The right plot simply shows the AST calculated using the \ct{QUANTITY} \ct{'ADIABATIC SURFACE TEMPERATURE'} applied via a \ct{DEVC} at the plate surface, and the AST calculated using the \ct{QUANTITY} \ct{'ADIABATIC SURFACE TEMPERATURE GAS'} applied via a \ct{DEVC} positioned just in front of the plate. The idea of the latter device would be to record the AST even if the plate were not actually represented in the simulation. For these two recordings of the AST to be identical, the plate \ct{SURF}ace conditions and the AST-Gas \ct{PROP}erties must both include the same explicitly-defined \ct{HEAT_TRANSFER_COEFFICIENT} and \ct{EMISSIVITY}.
+The test case called \ct{adiabatic_surface_temperature.fds} in the \ct{Radiation} folder simulates a 0.1~mm steel plate being heated by a thermal plume. The plate is perfectly insulated (\ct{BACKING='INSULATED'} on the \ct{SURF} line) and its steady-state temperature should be equivalent to its adiabatic surface temperature or AST. The left plot of Fig.~\ref{adiabatic_surface_temperature_fig} shows the plate temperature rising toward the AST, much as an actual plate thermometer would. The right plot simply shows the AST calculated using the \ct{QUANTITY} \ct{'ADIABATIC SURFACE TEMPERATURE'} applied via a \ct{DEVC} at the plate surface, and the AST calculated using the \ct{QUANTITY} \ct{'ADIABATIC SURFACE TEMPERATURE GAS'} applied via a \ct{DEVC} positioned just in front of the plate. The idea of the latter device would be to record the AST even if the plate were not actually represented in the simulation. For these two recordings of the AST to be identical, the plate \ct{SURF}ace conditions and the AST-Gas \ct{PROP}erties must both include the same explicitly-defined \linebreak[4]\ct{HEAT_TRANSFER_COEFFICIENT} and \ct{EMISSIVITY}.
 
 \begin{figure}[ht]
 \includegraphics[width=3in]{SCRIPT_FIGURES/adiabatic_surface_temperature}
@@ -10830,7 +10826,7 @@ By default, the PDPA device output at time $t$ is computed as a time integral be
 \be
    F(t) = \frac{1}{t_{\rm e}-t_{\rm s}} \int_{t_{\rm s}}^{t_{\rm e}} f(t') \, \d t'
 \ee
-but instantaneous values can be obtained by setting \ct{PDPA_INTEGRATE=.FALSE.} on the corresponding \ct{PROP} line, in which case
+but instantaneous values can be obtained by setting \ct{PDPA_INTEGRATE=F} on the corresponding \ct{PROP} line, in which case
 \be
 F(t) \equiv f(t)
 \ee
@@ -10925,8 +10921,8 @@ The following example provides a normalized distribution of droplet volumes:
       PDPA_N=3
       HISTOGRAM=T
       HISTOGRAM_NBINS=30
-      HISTOGRAM_CUMULATIVE=.FALSE.
-      HISTOGRAM_NORMALIZE=.TRUE.
+      HISTOGRAM_CUMULATIVE=F
+      HISTOGRAM_NORMALIZE=T
       HISTOGRAM_LIMITS=0,500e-6 /
 \end{lstlisting}
 
@@ -10970,10 +10966,16 @@ These gas phase output quantities represent the scattering efficiency, averaged 
 
 
 
-\subsection{Output Associated with Thermogravimetric Analysis (TGA)}
-\label{info:material_components}
+\subsection{Additional Wall Outputs}
+\label{info:more_wall_outputs}
 
 In addition to the profile (\ct{PROF}) output, there are various additional quantities that are useful for monitoring reacting surfaces. For example, \ct{'WALL THICKNESS'} gives the overall thickness of the solid surface element. \ct{'SURFACE DENSITY'} gives the overall mass per unit area for the solid surface element, computed as an integral of material density over wall thickness. Both quantities are available both as \ct{DEVC} and \ct{BNDF}. For the quantity \ct{'SURFACE DENSITY'}, you can add a \ct{MATL_ID} to get the surface density of a single component of the solid material.
+
+
+\subsection{Additional Wall Outputs}
+\label{info:thermal_analysis_outputs}
+
+A few special outputs exist to reproduce common measurements made during thermal analysis experiments on materials.
 
 \subsubsection{Thermogravimetric Analysis (TGA) Output}
 
@@ -11125,7 +11127,7 @@ It is sometimes useful to compile probability distribution functions (PDFs) or h
       HISTOGRAM_CUMULATIVE=F
       HISTOGRAM_NORMALIZE=T /
 \end{lstlisting}
-When \ct{HISTOGRAM} is set to \ct{T} on the \ct{PROP} line, normalized histogram bin counts are output to a comma-separated value file (\ct{CHID_hist.csv}). The parameter \ct{HISTOGRAM_NBINS} is the number of bins dividing the quantity range \ct{HISTOGRAM_LIMITS}. Values falling outside the histogram limits are included in the counts of the first and last bins. Cumulative distributions can be output by setting \ct{HISTOGRAM_CUMULATIVE=T}. To output unnormalized counts or a cumulative distribution, set \ct{HISTOGRAM_NORMALIZE=F}.
+When \ct{HISTOGRAM} is set to \ct{T} on the \ct{PROP} line, normalized histogram bin counts are output to a comma-separated value file (\ct{CHID_hist.csv}). The parameter \ct{HISTOGRAM_NBINS} is the number of bins dividing the quantity range \ct{HISTOGRAM_LIMITS}. Values falling outside the histogram limits are included in the counts of the first and last bins. Cumulative distributions can be output by setting \linebreak[4]\ct{HISTOGRAM_CUMULATIVE=T}. To output unnormalized counts or a cumulative distribution, set \ct{HISTOGRAM_NORMALIZE=F}.
 
 The histogram output file contains two-columns for each device. The first column gives the bin center-points, and the second column gives the relative frequency. The parameter \ct{HIDE_COORDINATES} is handy for suppressing the repeated entry of the first column when multiple devices use the same set of histogram parameters.
 
@@ -11134,7 +11136,7 @@ The histogram output file contains two-columns for each device. The first column
 \subsection{Complex Terrain and Related Quantities}
 \label{info:complex_terrain}
 
-Complex terrain for wind and wildland fire simulations can be generated either by using an immersed boundary \ct{GEOM}etry. Visualizing output data on or just above complex terrain can be done in a few different ways.
+Visualizing output data on or just above complex terrain can be done in a two different ways.
 
 The first method is via a ``slice'' file that conforms to the terrain. The following line illustrates how to do it:
 \begin{lstlisting}
@@ -11173,7 +11175,7 @@ If you desire to output the pressure on a point in the wall or viscous stress al
 &DEVC ID='WP', XYZ=..., IOR=..., QUANTITY='WALL PRESSURE', SURF_ID='MySurf' /
 &DEVC ID='WS', XYZ=..., IOR=..., QUANTITY='VISCOUS STRESS WALL ', SURF_ID='MySurf' /
 \end{lstlisting}
-The corresponding distributed forces at said point, projected in a specified direction, can be obtained adding the vector triplet \ct{FORCE_DIRECTION}. You can also integrate these distributed forces to obtain total pressure and viscous forces on a surface. As an example, if you want to compute total forces on faces with \ct{SURF_ID='MySurf'}, within a volume \ct{XB} in the $x$ direction, add:
+The corresponding distributed forces at said point, projected in a specified direction, can be obtained adding the vector triplet \ct{FORCE_DIRECTION}. You can also integrate these distributed forces to obtain total pressure and viscous forces on a surface. As an example, if you want to compute total forces on faces with \linebreak[4]\ct{SURF_ID='MySurf'}, within a volume \ct{XB} in the $x$ direction, add:
 \begin{lstlisting}
 &DEVC ID='PFx', XB=..., QUANTITY='WALL PRESSURE', SURF_ID='MySurf',
       SPATIAL_STATISTIC='SURFACE INTEGRAL', FORCE_DIRECTION=1.,0.,0. /
@@ -11187,7 +11189,7 @@ The corresponding distributed forces at said point, projected in a specified dir
 \label{info:dry}
 
 During actual experiments, species such as CO and CO$_2$ are typically measured ``dry''; that is, the water vapor is removed from the gas sample prior to analysis.  For easier comparison of FDS predictions with measured data,
-you can specify the logical parameter \ct{DRY} on a \ct{DEVC} line that reports the \ct{'MASS FRACTION'} or \ct{'VOLUME FRACTION'} of a species.  For example, the first line reports the actual volume fraction of CO, and the second line reports the output of a gas analyzer in a typical experiment.
+you can specify the logical parameter \ct{DRY=T} (default is \ct{DRY=F}) on a \ct{DEVC} line that reports the \ct{'MASS FRACTION'} or \ct{'VOLUME FRACTION'} of a species.  For example, the first line reports the actual volume fraction of CO, and the second line reports the output of a gas analyzer in a typical experiment.
 
 \begin{lstlisting}
 &DEVC ID='wet CO', XYZ=..., QUANTITY='VOLUME FRACTION', SPEC_ID='CARBON MONOXIDE'/
@@ -11258,7 +11260,7 @@ There are several different output files that have the format of a comma-separat
 \begin{lstlisting}
 -1.2345678E+123
 \end{lstlisting}
-To change the precision of the numbers, use \ct{SIG_FIGS} on the \ct{DUMP} line to indicate the number of significant figures in the mantissa (default is 8). Use \ct{SIG_FIGS_EXP} to change the number of digits in the exponent (default is 3). Keep in mind that the precision of real numbers used internally in an FDS calculation is approximately 12, equivalent to 8 byte or double precision following conventional Fortran rules.
+To change the precision of the numbers, use \ct{SIG_FIGS} on the \ct{DUMP} line to indicate the number of significant figures in the mantissa (default is 8). Use \ct{SIG_FIGS_EXP} to change the number of digits in the exponent (default is 3). Keep in mind that the precision of real numbers used internally in an FDS calculation is approximately 12, equivalent to 8 byte (64 bit) or double precision following conventional Fortran rules.
 
 
 \subsection{\emph{A Posteriori} Mesh Quality Metrics}
@@ -11468,7 +11470,6 @@ These commands tell \ct{fds2ascii} that you want to convert (binary) boundary fi
 \item[Enter orientation: (plus or minus 1, 2 or 3):] For a boundary file, you must designate the orientation of the surfaces you want to print out. +1 means surfaces facing the positive $x$ direction, -2 means negative $y$, and so on.
 \end{description}
 
-
 \newpage
 
 \section{Gas Phase Output Quantities}
@@ -11482,9 +11483,6 @@ For those output quantities that require a species name via \ct{SPEC_ID}, the sp
       SPEC_ID='CARBON MONOXIDE', SPATIAL_STATISTIC='AREA INTEGRAL' /
 \end{lstlisting}
 The \ct{ID} is just a label in the output file. When an output quantity is related to a particular gas species or particle type, you must specify the appropriate \ct{SPEC_ID} or \ct{PART_ID} on the same input line. All output quantity names ought to be in single quotes.
-
-
-\newpage
 
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|}
 \caption[Gas phase output quantities]{Gas phase output quantities.}
@@ -11616,7 +11614,7 @@ $^6$                  \> Requires \ct{REAC_ID}. \\
 \section{Solid Phase Output Quantities}
 \label{info:solidoutputquantities}
 
-Table~\ref{tab:solidoutputquantities} below lists solid phase output quantities. Appropriate sections are cited. The definition of mathematical symbols can be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}. The File Type ``B'' refers to a boundary file, ``D'' refers to the device file, \ct{CHID_devc.csv},  and ``pr'' refers to the profile file, \ct{CHID_prof.csv}.
+Table~\ref{tab:solidoutputquantities} below lists solid phase output quantities. Appropriate sections are cited. The definition of mathematical symbols can be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}. The File Type ``B'' refers to a boundary file, ``D'' refers to the device file, \ct{CHID_devc.csv},  and ``Pr'' refers to the profile file, \ct{CHID_prof.csv}.
 
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|}
 \caption[Solid phase output quantities]{Solid phase output quantities.}
@@ -11664,10 +11662,10 @@ Table~\ref{tab:solidoutputquantities} below lists solid phase output quantities.
 \ct{MPUA}$^2$                                  & Section~\ref{bucket_test_1}                   & \unit{kg/m^2)}     & B,D          \\ \hline
 \ct{MPUA_Z}$^1$                                & Section~\ref{bucket_test_1}                   & \unit{kg/m^2)}     & B,D          \\ \hline
 \ct{NORMAL VELOCITY}                           & Wall normal velocity                          & m/s                & B,D          \\ \hline
-\ct{NORMALIZED HEATING RATE}                   & Section~\ref{info:material_components}        & W/g                & D            \\ \hline
-\ct{NORMALIZED HEAT RELEASE RATE}              & Section~\ref{info:material_components}        & W/g                & D            \\ \hline
-\ct{NORMALIZED MASS}$^4$                       & Section~\ref{info:material_components}        &                    & D            \\ \hline
-\ct{NORMALIZED MASS LOSS RATE}$^4$             & Section~\ref{info:material_components}        & 1/s                & D            \\ \hline
+\ct{NORMALIZED HEATING RATE}                   & Section~\ref{info:thermal_analysis_outputs}        & W/g                & D            \\ \hline
+\ct{NORMALIZED HEAT RELEASE RATE}              & Section~\ref{info:thermal_analysis_outputs}        & W/g                & D            \\ \hline
+\ct{NORMALIZED MASS}$^4$                       & Section~\ref{info:thermal_analysis_outputs}        &                    & D            \\ \hline
+\ct{NORMALIZED MASS LOSS RATE}$^4$             & Section~\ref{info:thermal_analysis_outputs}        & 1/s                & D            \\ \hline
 \ct{OXIDATIVE HRRPUA}                          & Section~\ref{info:reaction_rates}             & \unit{kW/m^2}      & B,D          \\ \hline
 \ct{PRESSURE COEFFICIENT}                      & Section~\ref{info:pressure_coefficient}       &                    & B,D          \\ \hline
 \ct{RADIATIVE HEAT FLUX}                       & Section~\ref{info:heat_flux}                  & \unit{kW/m^2}      & B,D          \\ \hline
@@ -11679,7 +11677,7 @@ Table~\ref{tab:solidoutputquantities} below lists solid phase output quantities.
 \ct{SOLID MASS FRACTION}$^5$                   & Section~\ref{info:DEPTH}                      & \unit{kg/kg}       & D,Pr         \\ \hline
 \ct{SOLID SPECIFIC HEAT}$^4$                   & Section~\ref{info:DEPTH}                      & \unit{kJ/(kg.K)}   & D,Pr         \\ \hline
 \ct{SUBSTEPS}                                  & Section~\ref{info:solid_phase_stability}      &                    & B,D          \\ \hline
-\ct{SURFACE DENSITY}$^4$                       & Section~\ref{info:material_components}        & \unit{kg/m^2)}     & B,D          \\ \hline
+\ct{SURFACE DENSITY}$^4$                       & Section~\ref{info:more_wall_outputs}          & \unit{kg/m^2)}     & B,D          \\ \hline
 \ct{SURFACE DEPOSITION}$^1$                    & Section~\ref{info:deposition}                 & \unit{kg/m^2)}     & B,D          \\ \hline
 \ct{TANGENTIAL VELOCITY}                       & Section~\ref{info:convection}                 & m/s                & B,D          \\ \hline
 \ct{TOTAL MASS FLUX WALL}$^1$                  & Section~\ref{info:wallflux}                   & \unit{kg/(m^2.s)}  & B,D          \\ \hline
@@ -11689,7 +11687,7 @@ Table~\ref{tab:solidoutputquantities} below lists solid phase output quantities.
 \ct{WALL ENTHALPY}                             & $\int \rho_s c_s T \,\d V_s$                  & kJ                 & B,D          \\ \hline
 \ct{WALL PRESSURE}                             & Section~\ref{info:distributed_forces}         & Pa                 & B,D          \\ \hline
 \ct{WALL TEMPERATURE}                          & Surface temperature                           & \unit{\degreeCelsius} & B,D          \\ \hline
-\ct{WALL THICKNESS}                            & Section~\ref{info:material_components}        & m                  & B,D          \\ \hline
+\ct{WALL THICKNESS}                            & Section~\ref{info:more_wall_outputs}          & m                  & B,D          \\ \hline
 \ct{WALL VISCOSITY}                            & Near-wall viscosity, $\mu_w$                  & \unit{kg/(m.s)}    & B,D          \\ \hline
 \end{longtable}
 
@@ -11754,13 +11752,12 @@ Table~\ref{tab:deviceoutputquantities} below lists output quantities associated 
 \ct{WALL CLOCK TIME ITERATIONS}                & Section~\ref{info:TIMING}                     & s              & D            \\ \hline
 \end{xltabular}
 
-
 \newpage
 
 \section{Droplet and Particle Output Quantities}
 \label{info:particleoutputquantities}
 
-Table~\ref{tab:particleoutputquantities} below lists some less often used output quantities. These are mainly used for diagnostic purposes. Explanations for most can be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
+Table~\ref{tab:particleoutputquantities} below lists quantities associated with droplets and solid particles.  The column ``File Type'' lists the allowed output files for the quantities: ``D'' is for Device (\ct{DEVC}), ``I'' is for Iso-surface (\ct{ISOF}), ``P'' is for Plot3D, ``S'' is for Slice (\ct{SLCF}).
 
 \begin{xltabular}{\textwidth}{|p{8cm}|l|X|X|}
 \caption[Particle and droplet output quantities]{Particle and droplet output quantities.}
@@ -11823,17 +11820,17 @@ $^2$                 \> Requires the specification of a particle class using \ct
 $^3$                 \> Requires the specification of a non-zero mass particle class using \ct{PART_ID}. \\
 \end{tabbing}
 
-
+\newpage
 
 \section{Summary of HVAC Output Quantities}
 \label{info:hvacoutputquantities}
 
 \begin{sloppypar}
-Table~\ref{tab:hvacoutputquantities} summarizes the various output quantities for HVAC systems. In the file type column, D indicates a device output specified with a \ct{DEVC} input, and H indicates a Smokeview output specified with an \ct{HVAC} input.
+Table~\ref{tab:hvacoutputquantities} summarizes the various output quantities for HVAC systems. In the file type column, D indicates a device output specified with a \ct{DEVC} input, and H indicates a Smokeview output specified with an \ct{HVAC} input. 
 
-All HVAC output quantities can be selected with a \ct{DEVC} input. Do not specify an \ct{XYZ} or \ct{XB} for HVAC outputs. When using a \ct{DEVC}, quantities for a duct require the specification of a \ct{DUCT_ID}, quantities for a node require the specification of a \ct{NODE_ID}, and quantities for a duct cell (when \ct{HVAC_MASS_TRANSPORT_CELL_L} or \ct{N_CELLS} are specified) require specification of both a \ct{DUCT_ID} and a \ct{CELL_L} (distance along the duct in meters from the first node where the desired cell is located).  Mass and volume fraction outputs also require the specification of a \ct{SPEC_ID}. Fan and aircoil outputs require the \ct{DUCT_ID} of the duct they are located in. Filter outputs require the \ct{NODE_ID} of the node they are located in. The quantity \ct{DUCT ENTHALPY FLOW} applies Eq.~\ref{enthalpy_flow} to the flow in the duct. To have the node output \ct{NODE ENTHALPY} reflect the duct quantity of \ct{DUCT ENTHALPY FLOW} set \ct{RELATIVE=.TRUE} for the node output. The quantity \ct{NODE PRESSURE DIFFERENCE} requires that one specify both elements of the array \ct{NODE_ID}, and the pressure difference is calculated by subtracting the first node from the second.
+When using a \ct{DEVC}, do not specify an \ct{XYZ} or \ct{XB} for HVAC outputs. Instead quantities for a duct require specifying a \ct{DUCT_ID}, quantities for a node require specifying a \ct{NODE_ID}, and quantities for a duct cell (when \ct{HVAC_MASS_TRANSPORT_CELL_L} or \ct{N_CELLS} are specified) require specifying both a \ct{DUCT_ID} and a \ct{CELL_L} (distance along the duct in meters from the first node where the desired cell is located).  Mass and volume fraction outputs also require the specification of a \ct{SPEC_ID}. Fan and aircoil outputs require the \ct{DUCT_ID} of the duct they are located in. Filter outputs require the \ct{NODE_ID} of the node they are located in. The quantity \ct{DUCT ENTHALPY FLOW} applies Eq.~\ref{enthalpy_flow} to the flow in the duct. To have the node output \ct{NODE ENTHALPY} reflect the duct quantity of \ct{DUCT ENTHALPY FLOW} set \ct{RELATIVE=.TRUE} for the node output. The quantity \ct{NODE PRESSURE DIFFERENCE} requires that one specify both elements of the array \ct{NODE_ID}, and the pressure difference is calculated by subtracting the first node from the second.
 
-HVAC output quantities beginning with \ct{DUCT} that are not duct cell quantities and output quantities beginning with \ct{NODE} except for \ct{NODE PRESSURE DIFFERENCE} can also be output to the \ct{CHID.hvac} file that Smokeview uses to visualize duct quantities (file format description in Section~\ref{inout:binhvac}). These are identified in Table~\ref{tab:hvacoutputquantities} as a File Type of H. Smokeview outputs are specified using the \ct{HVAC} namelist. To select duct outputs create a single \ct{HVAC} input with \ct{TYPE_ID='DUCT QUANTITY LIST'}, and to select node outputs create a single \ct{HVAC} input with \ct{TYPE_ID='NODE QUANTITY LIST'}. Specify a list of up to 20 outputs using \ct{QUANTITY}, and if any quantities require a species also specify \ct{QUANTITY_SPEC_ID} for that quantities. For duct outputs, if the duct is divided into cells, then Smokeview outputs are written for each cell. The output interval can be set using \ct{DT_HVAC} on \ct{DUMP}. For example:
+Quantities available for Smokeview output are written to the \ct{CHID.hvac} file that Smokeview uses to visualize duct quantities (file format description in Section~\ref{inout:binhvac}). Smokeview outputs are specified using the \ct{HVAC} namelist. To select duct outputs create a single \ct{HVAC} input with \ct{TYPE_ID='DUCT QUANTITY LIST'}, and to select node outputs create a single \ct{HVAC} input with \ct{TYPE_ID='NODE QUANTITY LIST'}. Specify a list of up to 20 outputs using \ct{QUANTITY}, and if any quantities require a species also specify \ct{QUANTITY_SPEC_ID} for those quantities. For duct outputs, if the duct is divided into cells, then Smokeview outputs are written for each cell. The output interval can be set using \ct{DT_HVAC} on \ct{DUMP}. For example:
 \begin{lstlisting}
 &HVAC TYPE_ID='DUCT QUANTITY LIST',
        QUANTITY='DUCT VELOCITY','DUCT LOSS','DUCT VOLUME FRACTION','DUCT VOLUME FRACTION',
@@ -12182,7 +12179,7 @@ Keyword                 & Type            & Description                         
 \ct{IOR}                & Integer         & Section~\ref{info:DEVC}                                         &       &               \\ \hline
 \ct{LATCH}              & Logical         & Section~\ref{info:basic_control}                                &       & \ct{T}       \\ \hline
 \ct{LP_TAG}             & Integer         & Section~\ref{info:tagging_particles}                            &       &               \\ \hline
-\ct{MATL_ID}            & Character       & Section~\ref{info:material_components}                          &       &               \\ \hline
+\ct{MATL_ID}            & Character       & Section~\ref{info:more_wall_outputs}                          &       &               \\ \hline
 \ct{MOVE_ID}            & Character       & Section~\ref{info:MOVE_ID}                                      &       &               \\ \hline
 \ct{N_INTERVALS}        & Integer         & Section~\ref{info:time_integral}                                &       & 10            \\ \hline
 \ct{NODE_ID}            & Character(2)    & Section~\ref{info:HVAC}                                         &       &               \\ \hline
@@ -13979,7 +13976,7 @@ Keyword             & Type     & Description                      & Units       
 
 \begin{tabbing}
 \hspace{0.4in}  \= \hspace{5.2in} \= \hspace{1in}  \\
-101  \> \ct{Problem with ... line.} \> Chapter~\ref{info:namelists}  \\
+101  \> \ct{Problem with ... line.} \> Chapter~\ref{info:Errors}  \\
 102  \> \ct{Input file ... not found in the current directory.} \> Section~\ref{info:launching}  \\
 103  \> \ct{CATF file ... not found.} \> Section~\ref{info:CATF}  \\
 104  \> \ct{OVERWRITE=F and concatenated file ... exists.} \> Section~\ref{info:OVERWRITE}  \\
@@ -14242,7 +14239,6 @@ Keyword             & Type     & Description                      & Units       
 404  \> \ct{Row ... of ... has a bad complex index.} \> Section~\ref{radiative_part_props}  \\
 407  \> \ct{TABLE ... not found.} \> Section~\ref{info:spraypattern}  \\
      \>                                                                               \>                          \\
-420  \> \ct{SURF ... cannot have both EXTERNAL_FLUX and TMP_GAS_FRONT.} \> Section~\ref{info:simulating_the_cone_calorimeter} \\
 421  \> \ct{SURF ... cannot be applied to a thin obstruction ...} \> Section~\ref{info:thin_obstructions}  \\
 422  \> \ct{VENT ... cannot be applied to a thin obstruction ...} \> Section~\ref{info:thin_obstructions}  \\
 423  \> \ct{HT3D solid must have at least one face exposed ...} \> Section~\ref{info:HT3D_Limitations}  \\
@@ -15255,7 +15251,7 @@ File extension  & Short Description   & Reference    \\ \hline \hline
 \chapter{Predefined Species}
 \label{info:predefined_species}
 
-This appendix lists all predefined species in FDS. If a species name ends in 'p' or 'm', this indicates the positive or negative charge state of that species. If a species ends in 's', this indicates the excited state of that species. This is typically written with a '*' as in CH$^*$. A 'Y in the Liquid column indicates that liquid properties are predefined, and a 'Y' in the Gibbs column indicates that Gibbs energy data is predefined. Two tables are given, one containing species commonly of interest in fire, common toxic species, and reference species; and a second table containing all species.
+This appendix lists all predefined species in FDS. If a species name ends in `p' or `m', this indicates the positive or negative charge state of that species. If a species ends in `s', this indicates the excited state of that species. This is typically written with a '*' as in CH$^*$. A `Y' in the Liquid column indicates that liquid properties are predefined, and a `Y' in the Gibbs column indicates that Gibbs energy data is predefined. Two tables are given, one containing species commonly of interest in fire, common toxic species, and reference species; and a second table containing all species.
 
 \begin{landscape}
       \IfFileExists{spec_table.tex}{\input{spec_table.tex}}{\typeout{Error: Missing file spec_table.tex}}
