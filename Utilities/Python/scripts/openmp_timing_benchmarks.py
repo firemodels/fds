@@ -51,8 +51,8 @@ plt.savefig(pltdir + 'openmp_timing_benchmarks.pdf', format='pdf')
 plt.close()
 
 if time64[3] > 80.:
-    print(f'Matlab Warning: Timing for openmp_test64 out of tolerance. {time64[3]}')
+    print(f'Python Warning: Timing for openmp_test64 out of tolerance. {time64[3]}')
 
 if time128[3] > 80.:
-    print(f'Matlab Warning: Timing for openmp_test128 out of tolerance. {time128[3]}')
+    print(f'Python Warning: Timing for openmp_test128 out of tolerance. {time128[3]}')
 

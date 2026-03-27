@@ -53,7 +53,7 @@ for ii in range(len(geom)):
         fdsplotlib.plot_to_fig(x_data=t_fds, y_data=Ub_fds, figure_handle=fig, marker_style=fds_marker[i], data_label=fds_key[i])
         t_range = np.where(t_fds > 2)[0]
         if abs(np.mean(Ub_fds[t_range]) - Ub) / Ub > 0.01:
-            print(f'Matlab Warning: Ub mean nx {geom[ii]}{nx[i]} = {np.mean(Ub_fds[t_range])}')
+            print(f'Python Warning: Ub mean nx {geom[ii]}{nx[i]} = {np.mean(Ub_fds[t_range])}')
     
     plt.savefig(os.path.join(pltdir, f'ribbed_channel{geom[ii]}Ubulk.pdf'), format='pdf')
     plt.close()
