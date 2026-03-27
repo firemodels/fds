@@ -1841,7 +1841,7 @@ INTEGER  :: NWP_NEW,IZERO,SURF_INDEX,BACKING,NWP,I,NL,N,NN,OBST_INDEX,&
             N_CELLS,ITMP,ITER,BACK_MESH,BACK_INDEX,BACK_WALL_INDEX,FIRST_CELL,LAST_CELL
 CHARACTER(MESSAGE_LENGTH) :: MESSAGE
 LOGICAL :: ISOLATED_THIN_WALL,ISOLATED_THIN_WALL_BACK,REMESH_LAYER(MAX_LAYERS_HT3D),REMESH_CHECK,DIRICHLET_BACK,&
-           CELL_ZERO(MAX_LAYERS_HT3D),TMP_CHECK(MAX_LAYERS_HT3D),CELL_ZERO_CELL(NWP_MAX)
+           CELL_ZERO(MAX_LAYERS_HT3D),TMP_CHECK(MAX_LAYERS_HT3D),CELL_ZERO_CELL(NWP_MAX),FLAT_PLATE
 TYPE(WALL_TYPE), POINTER :: WC,WC_BACK
 TYPE(THIN_WALL_TYPE), POINTER :: TW,TW_BACK
 TYPE(CFACE_TYPE), POINTER :: CFA,CFA_BACK
@@ -1862,6 +1862,7 @@ W_SURF=0._EB
 
 ISOLATED_THIN_WALL = .FALSE.
 ISOLATED_THIN_WALL_BACK = .FALSE.
+FLAT_PLATE = .FALSE.
 
 UNPACK_WALL_PARTICLE: IF (PRESENT(WALL_INDEX)) THEN
 
@@ -1894,6 +1895,10 @@ UNPACK_WALL_PARTICLE: IF (PRESENT(WALL_INDEX)) THEN
    ELSE
       Q_LIQUID_F = B1%Q_CONDENSE
    ENDIF
+
+   ! Indicate if this is a surface (not an edge) of a zero-cell thick flat plate
+
+   IF (OBSTRUCTION(OBST_INDEX)%THIN .AND. .NOT.CELL(CELL_INDEX(BC%II,BC%JJ,BC%KK))%SOLID) FLAT_PLATE = .TRUE.
 
 ELSEIF (PRESENT(THIN_WALL_INDEX)) THEN
 
@@ -2049,7 +2054,6 @@ SUB_TIMESTEP_LOOP: DO
          ONE_D%X(0:NWP),LAYER_DIVIDE,DX_S(1:NWP),RDX_S(0:NWP+1),RDXN_S(0:NWP),DX_WGT_S(0:NWP),DXF,DXB,&
          LAYER_INDEX(0:NWP+1),MF_FRAC(1:NWP),SF%INNER_RADIUS,ONE_D%LAYER_DIVIDE_DEPTH)
    ELSE COMPUTE_GRID
-!      NWP                  = SF%N_CELLS_INI
       DXF                  = SF%DXF
       DXB                  = SF%DXB
       DX_S(1:NWP)          = SF%DX(1:NWP)
@@ -2288,9 +2292,12 @@ SUB_TIMESTEP_LOOP: DO
    ENDIF
 
    ! Add internal radiation and additional heat sources to pyrolysis
+
    Q_S = Q_S + Q_IR + Q_ADD
-   ! If the 3D solver is used, divide Q_S by 3
-   Q_S = Q_S/REAL(SF%HT_DIM,EB)
+
+   ! If the 3D solver is used, apportion the source term Q_S in the various coordinate directions
+
+   IF (SF%HT_DIM>1) Q_S = SF%HT3D_WEIGHT(HT_3D_SWEEP_DIRECTION)*Q_S
 
    ! Explicitly update the temperature field and adjust time step if the change in temperature exceeds DELTA_TMP_MAX
 
@@ -2320,8 +2327,8 @@ SUB_TIMESTEP_LOOP: DO
          CALL PERFORM_PYROLYSIS
          ! Add internal radiation and additional heat sources to pyrolysis
          Q_S = Q_S + Q_IR + Q_ADD
-         ! If the 3D solver is used, divide Q_S by 3
-         Q_S = Q_S/REAL(SF%HT_DIM,EB)
+         ! If the 3D solver is used, apportion the source term in the various coordinate directions
+         IF (SF%HT_DIM>1) Q_S = SF%HT3D_WEIGHT(HT_3D_SWEEP_DIRECTION)*Q_S
       ENDIF
    ENDIF
 
@@ -2335,9 +2342,10 @@ SUB_TIMESTEP_LOOP: DO
    ENDIF
 
    IF (ONE_D%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED .AND. .NOT.PRESENT(THIN_WALL_INDEX)) THEN
-      RDT = 1._EB/(DT_BC*REAL(SF%HT_DIM,EB))
-      IF (PRESENT(WALL_INDEX)) THEN
-         IF (OBSTRUCTION(OBST_INDEX)%THIN .AND. .NOT.CELL(CELL_INDEX(BC%II,BC%JJ,BC%KK))%SOLID) RDT = 1._EB/DT_BC
+      IF (SF%HT_DIM==1 .OR. FLAT_PLATE) THEN
+         RDT = 1._EB/DT_BC  ! Pyrolyzate is not transported to the edge of a thin plate
+      ELSE
+         RDT = SF%HT3D_WEIGHT(HT_3D_SWEEP_DIRECTION)/DT_BC  ! Apply weighted amount to each coordinate direction
       ENDIF
       Q_DOT_G_PP_NET                 = Q_DOT_G_PP_NET             + Q_DOT_G_PP*DT_BC_SUB*RDT
       Q_DOT_O2_PP_NET                = Q_DOT_O2_PP_NET            + Q_DOT_O2_PP*DT_BC_SUB*RDT
