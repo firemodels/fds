@@ -60,11 +60,11 @@ e3 = abs(YL3 - YTILDE3)
 
 tol = 1e-4
 if e1 > tol:
-    print(f'Matlab Warning: e1 = {e1} in Species/favre_test mean cell data')
+    print(f'Python Warning: e1 = {e1} in Species/favre_test mean cell data')
 if e2 > tol:
-    print(f'Matlab Warning: e2 = {e2} in Species/favre_test mean cell data')
+    print(f'Python Warning: e2 = {e2} in Species/favre_test mean cell data')
 if e3 > tol:
-    print(f'Matlab Warning: e3 = {e3} in Species/favre_test mean cell data')
+    print(f'Python Warning: e3 = {e3} in Species/favre_test mean cell data')
 
 # brute force integration for rms
 
@@ -89,11 +89,11 @@ e3 = abs(YRMSL3 - YRMS3)
 
 tol = 1e-2
 if e1 > tol:
-    print(f'Matlab Warning: e1 = {e1} in Species/favre_test rms cell data')
+    print(f'Python Warning: e1 = {e1} in Species/favre_test rms cell data')
 if e2 > tol:
-    print(f'Matlab Warning: e2 = {e2} in Species/favre_test rms cell data')
+    print(f'Python Warning: e2 = {e2} in Species/favre_test rms cell data')
 if e3 > tol:
-    print(f'Matlab Warning: e3 = {e3} in Species/favre_test rms cell data')
+    print(f'Python Warning: e3 = {e3} in Species/favre_test rms cell data')
 
 # interpolated data
 
@@ -141,11 +141,11 @@ e3 = abs(YL3 - YTILDE3)
 
 tol = 1e-4
 if e1 > tol:
-    print(f'Matlab Warning: e1 = {e1} in Species/favre_test mean interpolated data')
+    print(f'Python Warning: e1 = {e1} in Species/favre_test mean interpolated data')
 if e2 > tol:
-    print(f'Matlab Warning: e2 = {e2} in Species/favre_test mean interpolated data')
+    print(f'Python Warning: e2 = {e2} in Species/favre_test mean interpolated data')
 if e3 > tol:
-    print(f'Matlab Warning: e3 = {e3} in Species/favre_test mean interpolated data')
+    print(f'Python Warning: e3 = {e3} in Species/favre_test mean interpolated data')
 
 # brute force integration for rms
 
@@ -170,9 +170,9 @@ e3 = abs(YRMSL3 - YRMS3)
 
 tol = 1e-2
 if e1 > tol:
-    print(f'Matlab Warning: e1 = {e1} in Species/favre_test rms interpolated data')
+    print(f'Python Warning: e1 = {e1} in Species/favre_test rms interpolated data')
 if e2 > tol:
-    print(f'Matlab Warning: e2 = {e2} in Species/favre_test rms interpolated data')
+    print(f'Python Warning: e2 = {e2} in Species/favre_test rms interpolated data')
 if e3 > tol:
-    print(f'Matlab Warning: e3 = {e3} in Species/favre_test rms interpolated data')
+    print(f'Python Warning: e3 = {e3} in Species/favre_test rms interpolated data')
 
