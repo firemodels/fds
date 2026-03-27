@@ -3399,7 +3399,7 @@ where $\rho_{\rm s}$ is the initial sample density, $c_{\rm s}$ is the initial s
 
 The \ct{TGA}, \ct{MCC} or \ct{DSC/STA} output can be multiplied by \ct{X_CONVERSION_FACTOR}, where \ct{X} is \ct{TGA}, \ct{MCC}, or \ct{DSC}, respectively. For example, the \ct{DSC} output assumes that an endothermic reaction is represented by a positive peak, and an exothermic reaction by a negative peak. To flip this around, set \ct{DSC_CONVERSION_FACTOR=-1}.
 
-Details of the output quantities are discussed in Sec.~\ref{info:material_components}. Further details on these measurement techniques and how to interpret them are found in the FDS Verification Guide~\cite{FDS_Verification_Guide}.
+Details of the output quantities are discussed in Sec.~\ref{info:thermal_analysis_outputs}. Further details on these measurement techniques and how to interpret them are found in the FDS Verification Guide~\cite{FDS_Verification_Guide}.
 
 \subsubsection{Example}
 
@@ -10967,6 +10967,12 @@ These gas phase output quantities represent the scattering efficiency, averaged 
 
 In addition to the profile (\ct{PROF}) output, there are various additional quantities that are useful for monitoring reacting surfaces. For example, \ct{'WALL THICKNESS'} gives the overall thickness of the solid surface element. \ct{'SURFACE DENSITY'} gives the overall mass per unit area for the solid surface element, computed as an integral of material density over wall thickness. Both quantities are available both as \ct{DEVC} and \ct{BNDF}. For the quantity \ct{'SURFACE DENSITY'}, you can add a \ct{MATL_ID} to get the surface density of a single component of the solid material.
 
+
+\subsection{Additional Wall Outputs}
+\label{info:thermal_analysis_outputs}
+
+A few special outputs exist to reproduce common measurements made during thermal analysis experiments on materials.
+
 \subsubsection{Thermogravimetric Analysis (TGA) Output}
 
 Thermogravimetric Analysis or TGA is a bench-scale measurement in which a very small solid material sample is heated up at a constant rate. The results of a TGA measurement are presented in the form of a normalized mass and normalized mass loss rate. Analogous quantities can be output from FDS:
@@ -11652,10 +11658,10 @@ Table~\ref{tab:solidoutputquantities} below lists solid phase output quantities.
 \ct{MPUA}$^2$                                  & Section~\ref{bucket_test_1}                   & \unit{kg/m^2)}     & B,D          \\ \hline
 \ct{MPUA_Z}$^1$                                & Section~\ref{bucket_test_1}                   & \unit{kg/m^2)}     & B,D          \\ \hline
 \ct{NORMAL VELOCITY}                           & Wall normal velocity                          & m/s                & B,D          \\ \hline
-\ct{NORMALIZED HEATING RATE}                   & Section~\ref{info:material_components}        & W/g                & D            \\ \hline
-\ct{NORMALIZED HEAT RELEASE RATE}              & Section~\ref{info:material_components}        & W/g                & D            \\ \hline
-\ct{NORMALIZED MASS}$^4$                       & Section~\ref{info:material_components}        &                    & D            \\ \hline
-\ct{NORMALIZED MASS LOSS RATE}$^4$             & Section~\ref{info:material_components}        & 1/s                & D            \\ \hline
+\ct{NORMALIZED HEATING RATE}                   & Section~\ref{info:thermal_analysis_outputs}        & W/g                & D            \\ \hline
+\ct{NORMALIZED HEAT RELEASE RATE}              & Section~\ref{info:thermal_analysis_outputs}        & W/g                & D            \\ \hline
+\ct{NORMALIZED MASS}$^4$                       & Section~\ref{info:thermal_analysis_outputs}        &                    & D            \\ \hline
+\ct{NORMALIZED MASS LOSS RATE}$^4$             & Section~\ref{info:thermal_analysis_outputs}        & 1/s                & D            \\ \hline
 \ct{OXIDATIVE HRRPUA}                          & Section~\ref{info:reaction_rates}             & \unit{kW/m^2}      & B,D          \\ \hline
 \ct{PRESSURE COEFFICIENT}                      & Section~\ref{info:pressure_coefficient}       &                    & B,D          \\ \hline
 \ct{RADIATIVE HEAT FLUX}                       & Section~\ref{info:heat_flux}                  & \unit{kW/m^2}      & B,D          \\ \hline
@@ -11667,7 +11673,7 @@ Table~\ref{tab:solidoutputquantities} below lists solid phase output quantities.
 \ct{SOLID MASS FRACTION}$^5$                   & Section~\ref{info:DEPTH}                      & \unit{kg/kg}       & D,Pr         \\ \hline
 \ct{SOLID SPECIFIC HEAT}$^4$                   & Section~\ref{info:DEPTH}                      & \unit{kJ/(kg.K)}   & D,Pr         \\ \hline
 \ct{SUBSTEPS}                                  & Section~\ref{info:solid_phase_stability}      &                    & B,D          \\ \hline
-\ct{SURFACE DENSITY}$^4$                       & Section~\ref{info:material_components}        & \unit{kg/m^2)}     & B,D          \\ \hline
+\ct{SURFACE DENSITY}$^4$                       & Section~\ref{info:more_wall_outputs}          & \unit{kg/m^2)}     & B,D          \\ \hline
 \ct{SURFACE DEPOSITION}$^1$                    & Section~\ref{info:deposition}                 & \unit{kg/m^2)}     & B,D          \\ \hline
 \ct{TANGENTIAL VELOCITY}                       & Section~\ref{info:convection}                 & m/s                & B,D          \\ \hline
 \ct{TOTAL MASS FLUX WALL}$^1$                  & Section~\ref{info:wallflux}                   & \unit{kg/(m^2.s)}  & B,D          \\ \hline
@@ -11677,7 +11683,7 @@ Table~\ref{tab:solidoutputquantities} below lists solid phase output quantities.
 \ct{WALL ENTHALPY}                             & $\int \rho_s c_s T \,\d V_s$                  & kJ                 & B,D          \\ \hline
 \ct{WALL PRESSURE}                             & Section~\ref{info:distributed_forces}         & Pa                 & B,D          \\ \hline
 \ct{WALL TEMPERATURE}                          & Surface temperature                           & \unit{\degreeCelsius} & B,D          \\ \hline
-\ct{WALL THICKNESS}                            & Section~\ref{info:material_components}        & m                  & B,D          \\ \hline
+\ct{WALL THICKNESS}                            & Section~\ref{info:more_wall_outputs}          & m                  & B,D          \\ \hline
 \ct{WALL VISCOSITY}                            & Near-wall viscosity, $\mu_w$                  & \unit{kg/(m.s)}    & B,D          \\ \hline
 \end{longtable}
 
@@ -12169,7 +12175,7 @@ Keyword                 & Type            & Description                         
 \ct{IOR}                & Integer         & Section~\ref{info:DEVC}                                         &       &               \\ \hline
 \ct{LATCH}              & Logical         & Section~\ref{info:basic_control}                                &       & \ct{T}       \\ \hline
 \ct{LP_TAG}             & Integer         & Section~\ref{info:tagging_particles}                            &       &               \\ \hline
-\ct{MATL_ID}            & Character       & Section~\ref{info:material_components}                          &       &               \\ \hline
+\ct{MATL_ID}            & Character       & Section~\ref{info:more_wall_outputs}                          &       &               \\ \hline
 \ct{MOVE_ID}            & Character       & Section~\ref{info:MOVE_ID}                                      &       &               \\ \hline
 \ct{N_INTERVALS}        & Integer         & Section~\ref{info:time_integral}                                &       & 10            \\ \hline
 \ct{NODE_ID}            & Character(2)    & Section~\ref{info:HVAC}                                         &       &               \\ \hline
@@ -13965,7 +13971,7 @@ Keyword             & Type     & Description                      & Units       
 
 \begin{tabbing}
 \hspace{0.4in}  \= \hspace{5.2in} \= \hspace{1in}  \\
-101  \> \ct{Problem with ... line.} \> Chapter~\ref{info:errors}  \\
+101  \> \ct{Problem with ... line.} \> Chapter~\ref{info:Errors}  \\
 102  \> \ct{Input file ... not found in the current directory.} \> Section~\ref{info:launching}  \\
 103  \> \ct{CATF file ... not found.} \> Section~\ref{info:CATF}  \\
 104  \> \ct{OVERWRITE=F and concatenated file ... exists.} \> Section~\ref{info:OVERWRITE}  \\
