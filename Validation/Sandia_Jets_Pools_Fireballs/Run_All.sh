@@ -5,9 +5,9 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
-$QFDS $DEBUG $QUEUE -p 144 -d $INDIR ethane_pool.fds
-$QFDS $DEBUG $QUEUE -p 144 -d $INDIR ethylene_pool.fds
-$QFDS $DEBUG $QUEUE -p 144 -d $INDIR isopentane_pool.fds
-$QFDS $DEBUG $QUEUE -p 144 -d $INDIR propane_pool.fds
+$QFDS $DEBUG $QUEUE -p 16 -d $INDIR ethane_pool.fds
+$QFDS $DEBUG $QUEUE -p 16 -d $INDIR ethylene_pool.fds
+$QFDS $DEBUG $QUEUE -p 16 -d $INDIR isopentane_pool.fds
+$QFDS $DEBUG $QUEUE -p 16 -d $INDIR propane_pool.fds
 
 echo FDS cases submitted
