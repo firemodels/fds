@@ -18,8 +18,9 @@ This script requires the Excel parsing module 'openpyxl' and the csv reader/writ
 import csv
 from openpyxl import load_workbook
 
-wb = load_workbook('MEPFires_database_comparison_draft.xlsx')
+wb = load_workbook('MEPFires_database_spreadsheet_v2.xlsx')
 
+outdir = '../../../../out/'
 param_file = open('csv2xlsx_parameters.csv','r')
 param_reader = csv.reader(param_file,delimiter=',')
 params = list(param_reader)
@@ -28,7 +29,7 @@ for i in range(0,len(params)):
 
     orig_row = int(params[i][1]) - 1
     orig_col = int(params[i][2]) - 1
-    csv_file = open(params[i][0],'r')
+    csv_file = open(outdir+params[i][0],'r')
     data = list(csv.reader(csv_file,delimiter=','))
     new_row = int(params[i][5])
     new_col = int(params[i][6])
@@ -41,9 +42,8 @@ for i in range(0,len(params)):
         if length > 0:
             _ = ws.cell(row=new_row+counter, column=new_col, value=round(float(data[orig_row+counter][orig_col]),2))
         else:
-            print(counter)
             _ = ws.cell(row=new_row+counter, column=new_col, value=round(float(data[orig_row][orig_col+counter]),2))
 
     csv_file.close()
 
-wb.save('MEPFires_database_comparison_draft_modified.xlsx')
+wb.save('MEPFires_database_spreadsheet_v2_filled.xlsx')
