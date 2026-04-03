@@ -2094,7 +2094,7 @@ TYPE NETWORK_TYPE
    INTEGER, ALLOCATABLE, DIMENSION(:) :: MATRIX_INDEX !< Position of ducts and nodes in solution matrix
 END TYPE NETWORK_TYPE
 
-TYPE(NETWORK_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: NETWORK
+TYPE(NETWORK_TYPE), TARGET :: NETWORK
 
 TYPE DUCTRUN_TYPE
    INTEGER :: N_DUCTS = 0                              !< Number of ducts in ductrun
