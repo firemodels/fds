@@ -4,15 +4,21 @@ Under the sponsorship of the Pipeline and Hazardous Materials Safety Administrat
 
 The experiments included in this database are also included in the FDS validation suite and the results are reported in the FDS Validation Guide. In addition, Sandia has created an Excel spreadsheet with the basic parameters of each experiment, which is included in this directory under the name `MEPFires_database_spreadsheet_v2.xlsx`. Modelers are expected to report their results in the various sheets that are included in the file.
 
-In order to transfer the results of the FDS simulations into the Excel file, this directory contains a Python script (`csv2xlsx.py`) that reads the comma-delimited (`.csv`) FDS output files that reside in the `firemodels/out` repository, and transfers snippets of data into the Excel file. A file called `csv2xlsx_parameters.csv` contains a list of the data snippets to be transferred from the FDS output files to the Excel file. Note that the original Excel file is not changed after running the script; but rather a copy is created called `MEPFires_database_spreadsheet_v2_filled.xlsx` which contains the model results.
+This directory contains a Python script (`csv2xlsx.py`) that reads the comma-delimited (`.csv`) FDS output files that reside in the `firemodels/out` repository, and transfers snippets of data into the Excel file. A file called `csv2xlsx_parameters.csv` contains a list of the data snippets to be transferred from the FDS output files to the Excel file. Note that the original Excel file is not changed after running the script; but rather a copy is created called `MEPFires_database_spreadsheet_v2_filled.xlsx` which contains the model results.
 
 The columns of `csv2xlsx_parameters.csv` are as follows:
 
-A. The full path to the FDS output file
+A. The FDS output file
+
 B. The starting row of the FDS data
+
 C. The starting column of the FDS data
+
 D. The number of values, with a negative sign added if the data is to be read across rather than down
+
 E. The name of the tab in the Excel file where the data is to be copied
+
 F. The starting row of the data
+
 G. The starting column of the data
 
