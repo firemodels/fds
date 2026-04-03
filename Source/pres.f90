@@ -1450,13 +1450,14 @@ INTEGER, INTENT(IN) :: NM, IPZ
 
 ! Local Variables:
 INTEGER :: NRHS,MAXFCT,MNUM,ERROR,I,J,K,ICC,JCC,IIG,JJG,KKG,IOR,IW,IROW,NCELL,ICFACE,IFACE,JFACE,ICVL,ILH,JLH,KLH,IRC
-REAL(EB):: SUM_FH(1:2),MEAN_FH,SUM_XH(1:2),MEAN_XH,DIV_FN_VOL,DIV_FN,IDX,AF,VAL,BCV,DHDN
+REAL(EB):: SUM_FH(1:2),MEAN_FH,SUM_XH(1:2),MEAN_XH,SUM_GAUGE(2),SHIFT_H,DIV_FN_VOL,DIV_FN,IDX,AF,VAL,BCV,DHDN, &
+           VOL,RHO_CC,KRES_CC
 TYPE(ZONE_MESH_TYPE), POINTER :: ZM
 TYPE (WALL_TYPE),  POINTER :: WC
 TYPE (EXTERNAL_WALL_TYPE),  POINTER :: EWC
 TYPE (CFACE_TYPE), POINTER :: CFA
 TYPE (BOUNDARY_COORD_TYPE), POINTER :: BC
-REAL(EB), POINTER, DIMENSION(:,:,:) :: HP
+REAL(EB), POINTER, DIMENSION(:,:,:) :: HP,RHOP
 #ifdef WITH_MKL
 INTEGER :: PHASE, PERM(1)
 #endif
@@ -1786,6 +1787,56 @@ H_INDEFINITE_IF_2 : IF (ZM%MTYPE==SYMM_INDEFINITE ) THEN
       ENDIF
    ENDDO
 ENDIF H_INDEFINITE_IF_2
+
+IF (ZM%MTYPE==SYMM_INDEFINITE) THEN
+   SUM_GAUGE = 0._EB
+   IF (PREDICTOR) THEN
+      RHOP => RHO
+   ELSE
+      RHOP => RHOS
+   ENDIF
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            IF (MUNKH(I,J,K)<=0 .OR. ZONE_MESH(PRESSURE_ZONE(I,J,K))%CONNECTED_ZONE_PARENT/=IPZ) CYCLE
+            VOL = ((1._EB-CYL_FCT)*DY(J) + CYL_FCT*RC(I))*DX(I)*DZ(K)
+            SUM_GAUGE(1) = SUM_GAUGE(1) + VOL*RHOP(I,J,K)*(KRES(I,J,K)+ZM%X_H(MUNKH(I,J,K)))
+            SUM_GAUGE(2) = SUM_GAUGE(2) + VOL*RHOP(I,J,K)
+         ENDDO
+      ENDDO
+   ENDDO
+   DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+      I = CUT_CELL(ICC)%IJK(IAXIS); J = CUT_CELL(ICC)%IJK(JAXIS); K = CUT_CELL(ICC)%IJK(KAXIS)
+      IF (CUT_CELL(ICC)%UNKH(1)<=0 .OR. ZONE_MESH(PRESSURE_ZONE(I,J,K))%CONNECTED_ZONE_PARENT/=IPZ) CYCLE
+      IF(ONE_UNKH_PER_CUTCELL) THEN
+         DO JCC=1,CUT_CELL(ICC)%NCELL
+            IF (PREDICTOR) THEN
+               RHO_CC = CUT_CELL(ICC)%RHO(JCC)
+            ELSE
+               RHO_CC = CUT_CELL(ICC)%RHOS(JCC)
+            ENDIF
+            VOL = CUT_CELL(ICC)%VOLUME(JCC)
+            KRES_CC = CUT_CELL(ICC)%KRES(JCC)
+            SUM_GAUGE(1) = SUM_GAUGE(1) + VOL*RHO_CC*(KRES_CC+ZM%X_H(CUT_CELL(ICC)%UNKH(JCC)))
+            SUM_GAUGE(2) = SUM_GAUGE(2) + VOL*RHO_CC
+         ENDDO
+      ELSE
+         DO JCC=1,CUT_CELL(ICC)%NCELL
+            IF (PREDICTOR) THEN
+               RHO_CC = CUT_CELL(ICC)%RHO(JCC)
+            ELSE
+               RHO_CC = CUT_CELL(ICC)%RHOS(JCC)
+            ENDIF
+            VOL = CUT_CELL(ICC)%VOLUME(JCC)
+            KRES_CC = CUT_CELL(ICC)%KRES(JCC)
+            SUM_GAUGE(1) = SUM_GAUGE(1) + VOL*RHO_CC*(KRES_CC+ZM%X_H(CUT_CELL(ICC)%UNKH(1)))
+            SUM_GAUGE(2) = SUM_GAUGE(2) + VOL*RHO_CC
+         ENDDO
+      ENDIF
+   ENDDO
+   SHIFT_H = SUM_GAUGE(1)/(SUM_GAUGE(2)+TWENTY_EPSILON_EB)
+   ZM%X_H = ZM%X_H - SHIFT_H
+ENDIF
 
 ! WRITE(LU_ERR,*) 'SUM_XH=',SUM(ZM%X_H),SUM(ZM%A_H(1:ZM%IA_H(ZM%NUNKH+1)))
 
@@ -3087,6 +3138,11 @@ END TYPE ZSL_COMM_TYPE
 TYPE(ZSL_COMM_TYPE), ALLOCATABLE, DIMENSION(:) :: ZSL_COMM
 #endif
 
+TYPE H_RESTORE_TYPE
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: H_RESTORE
+END TYPE H_RESTORE_TYPE
+TYPE(H_RESTORE_TYPE), ALLOCATABLE, DIMENSION(:), SAVE :: H_RESTORE_MESHES
+
 ! Matrix types:
 INTEGER, PARAMETER :: SYMM_INDEFINITE       =-2
 INTEGER, PARAMETER :: SYMM_POSITIVE_DEFINITE= 2
@@ -3120,6 +3176,40 @@ END SELECT
 
 END SUBROUTINE COMPUTE_GUARD_CELL_INDEXES
 
+! --------------------------- SAVE_HS_FOR_SETUP ----------------------------------
+
+SUBROUTINE SAVE_HS_FOR_SETUP
+INTEGER :: NM
+CALL DEALLOCATE_H_RESTORE_STORAGE; ALLOCATE(H_RESTORE_MESHES(LOWER_MESH_INDEX:UPPER_MESH_INDEX))
+DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   ALLOCATE(H_RESTORE_MESHES(NM)%H_RESTORE(LBOUND(MESHES(NM)%HS,1):UBOUND(MESHES(NM)%HS,1), &
+                                           LBOUND(MESHES(NM)%HS,2):UBOUND(MESHES(NM)%HS,2), &
+                                           LBOUND(MESHES(NM)%HS,3):UBOUND(MESHES(NM)%HS,3)))
+   H_RESTORE_MESHES(NM)%H_RESTORE = MESHES(NM)%HS
+ENDDO
+END SUBROUTINE SAVE_HS_FOR_SETUP
+
+! --------------------------- RESTORE_HS_AFTER_SETUP -----------------------------
+
+SUBROUTINE RESTORE_HS_AFTER_SETUP
+INTEGER :: NM
+DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   MESHES(NM)%HS = H_RESTORE_MESHES(NM)%H_RESTORE
+ENDDO
+CALL DEALLOCATE_H_RESTORE_STORAGE
+END SUBROUTINE RESTORE_HS_AFTER_SETUP
+
+! --------------------------- DEALLOCATE_H_RESTORE_STORAGE -----------------------
+
+SUBROUTINE DEALLOCATE_H_RESTORE_STORAGE
+INTEGER :: NM
+IF (.NOT.ALLOCATED(H_RESTORE_MESHES)) RETURN
+DO NM=LBOUND(H_RESTORE_MESHES,1),UBOUND(H_RESTORE_MESHES,1)
+   IF (ALLOCATED(H_RESTORE_MESHES(NM)%H_RESTORE)) DEALLOCATE(H_RESTORE_MESHES(NM)%H_RESTORE)
+ENDDO
+DEALLOCATE(H_RESTORE_MESHES)
+END SUBROUTINE DEALLOCATE_H_RESTORE_STORAGE
+
 ! --------------------------- GLMAT_SOLVER -------------------------------------
 
 SUBROUTINE GLMAT_SOLVER(T,DT)
@@ -3138,12 +3228,12 @@ INTEGER :: MAXFCT, MNUM, NRHS, ERROR
 #ifdef WITH_MKL
 INTEGER :: PERM(1), PHASE
 #endif
-INTEGER :: NM, IW, IIG, JJG, KKG, IOR, IROW, I, J, K, ICC
+INTEGER :: NM, IW, IIG, JJG, KKG, IOR, IROW, I, J, K, ICC, JCC
 TYPE (WALL_TYPE), POINTER :: WC
 TYPE (EXTERNAL_WALL_TYPE), POINTER :: EWC
 TYPE (BOUNDARY_COORD_TYPE), POINTER :: BC
-REAL(EB), POINTER, DIMENSION(:,:,:)   :: HP
-REAL(EB) :: SUM_FH(2), SUM_XH(2), MEAN_FH, MEAN_XH
+REAL(EB), POINTER, DIMENSION(:,:,:)   :: HP,RHOP
+REAL(EB) :: SUM_FH(2), SUM_XH(2), SUM_GAUGE(2), MEAN_FH, MEAN_XH, SHIFT_H, VOL, RHO_CC, KRES_CC
 INTEGER :: IERR
 
 ! INTEGER  :: JCOL
@@ -3270,42 +3360,69 @@ IF (ERROR /= 0 .AND. MY_RANK==0) WRITE(LU_ERR,*) 'GLMAT_SOLVER: The following ER
    END SELECT LIBRARY_SELECT
 
    IF (ZSL%MTYPE==SYMM_INDEFINITE) THEN
-      SUM_XH = 0._EB; MEAN_XH = 0._EB
-      WHOLE_DOM_IF2 : IF(.NOT.PRES_ON_WHOLE_DOMAIN) THEN
-         ! Sum H by Pressure Zone:
+      IF ((.NOT.PRES_ON_WHOLE_DOMAIN .OR. N_ZONE<=1) .AND. PERIODIC_TEST/=7) THEN
+         ! In the case of periodic test 7, we don't want to apply the gauge shift assuming P_mean=0, here H_mean=0.
+         ! Apply the physical-pressure gauge directly when it is well-defined.
+         SUM_GAUGE = 0._EB
          DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             CALL POINT_TO_MESH(NM)
+            IF (PREDICTOR) THEN; RHOP => RHO; ELSE; RHOP => RHOS; ENDIF
             DO K=1,KBAR
                DO J=1,JBAR
                   DO I=1,IBAR
                      IF (CCVAR(I,J,K,UNKH)<=0 .OR. ZONE_SOLVE(PRESSURE_ZONE(I,J,K))%CONNECTED_ZONE_PARENT/=IPZ) CYCLE
-                     IROW = CCVAR(I,J,K,UNKH) - ZSL%UNKH_IND(NM_START) ! Local numeration.
-                     SUM_XH(1) = SUM_XH(1) + ZSL%X_H(IROW)
-                     SUM_XH(2) = SUM_XH(2) + 1._EB
+                     IROW = CCVAR(I,J,K,UNKH) - ZSL%UNKH_IND(NM_START)
+                     VOL = ((1._EB-CYL_FCT)*DY(J) + CYL_FCT*RC(I))*DX(I)*DZ(K)
+                     SUM_GAUGE(1) = SUM_GAUGE(1) + VOL*RHOP(I,J,K)*(KRES(I,J,K)+ZSL%X_H(IROW))
+                     SUM_GAUGE(2) = SUM_GAUGE(2) + VOL*RHOP(I,J,K)
                   ENDDO
                ENDDO
             ENDDO
-            ! Add cut-cell region contribution:
             DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-               CC => CUT_CELL(ICC); I = CC%IJK(IAXIS); J = CC%IJK(JAXIS); K = CC%IJK(KAXIS)
+               I = CUT_CELL(ICC)%IJK(IAXIS); J = CUT_CELL(ICC)%IJK(JAXIS); K = CUT_CELL(ICC)%IJK(KAXIS)
                IF (ZONE_SOLVE(PRESSURE_ZONE(I,J,K))%CONNECTED_ZONE_PARENT/=IPZ) CYCLE
-               IROW      = CC%UNKH(1)- ZSL%UNKH_IND(NM_START) ! Local numeration.
-               SUM_XH(1) = SUM_XH(1) + ZSL%X_H(IROW)
-               SUM_XH(2) = SUM_XH(2) + 1._EB
+               IF(ONE_UNKH_PER_CUTCELL) THEN
+                  DO JCC=1,CUT_CELL(ICC)%NCELL
+                     IF (PREDICTOR) THEN
+                        RHO_CC = CUT_CELL(ICC)%RHO(JCC)
+                     ELSE
+                        RHO_CC = CUT_CELL(ICC)%RHOS(JCC)
+                     ENDIF
+                     IROW = CUT_CELL(ICC)%UNKH(JCC) - ZSL%UNKH_IND(NM_START)
+                     VOL = CUT_CELL(ICC)%VOLUME(JCC)
+                     KRES_CC = CUT_CELL(ICC)%KRES(JCC)
+                     SUM_GAUGE(1) = SUM_GAUGE(1) + VOL*RHO_CC*(KRES_CC+ZSL%X_H(IROW))
+                     SUM_GAUGE(2) = SUM_GAUGE(2) + VOL*RHO_CC
+                  ENDDO
+               ELSE
+                  IROW = CUT_CELL(ICC)%UNKH(1) - ZSL%UNKH_IND(NM_START)
+                  DO JCC=1,CUT_CELL(ICC)%NCELL
+                     IF (PREDICTOR) THEN
+                        RHO_CC = CUT_CELL(ICC)%RHO(JCC)
+                     ELSE
+                        RHO_CC = CUT_CELL(ICC)%RHOS(JCC)
+                     ENDIF
+                     VOL = CUT_CELL(ICC)%VOLUME(JCC)
+                     KRES_CC = CUT_CELL(ICC)%KRES(JCC)
+                     SUM_GAUGE(1) = SUM_GAUGE(1) + VOL*RHO_CC*(KRES_CC+ZSL%X_H(IROW))
+                     SUM_GAUGE(2) = SUM_GAUGE(2) + VOL*RHO_CC
+                  ENDDO
+               ENDIF
             ENDDO
          ENDDO
-         IF (N_MPI_PROCESSES>1) CALL MPI_ALLREDUCE(MPI_IN_PLACE,SUM_XH(1),2,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,IERR)
-         ! Compute arithmetic mean by pressure zone:
-         MEAN_XH = SUM_XH(1)/(SUM_XH(2)+TWENTY_EPSILON_EB)
-         ! Substract Mean:
-         ZSL%X_H = ZSL%X_H - MEAN_XH
-      ELSE WHOLE_DOM_IF2
+         IF (N_MPI_PROCESSES>1) CALL MPI_ALLREDUCE(MPI_IN_PLACE,SUM_GAUGE(1),2,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,IERR)
+         SHIFT_H = SUM_GAUGE(1)/(SUM_GAUGE(2)+TWENTY_EPSILON_EB)
+         ZSL%X_H = ZSL%X_H - SHIFT_H
+      ELSE
+         ! Fall back to an algebraic zero-mean representative when no physical gauge is applied. 
+         ! Applies to periodic test 7.
+         SUM_XH = 0._EB; MEAN_XH = 0._EB
          SUM_XH(1) = SUM(ZSL%X_H(1:ZSL%NUNKH_LOCAL))
          IF (N_MPI_PROCESSES>1) CALL MPI_ALLREDUCE(SUM_XH(1),SUM_XH(2),1,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,IERR)
          MEAN_XH = SUM_XH(2)/REAL(ZSL%NUNKH_TOTAL,EB)
          ! Substract Mean:
          ZSL%X_H = ZSL%X_H - MEAN_XH
-      ENDIF WHOLE_DOM_IF2
+      ENDIF
    ENDIF
    ! WRITE(LU_ERR,*) 'SUM_XH=',SUM(X_H),SUM(A_H(1:IA_H(NUNKH_LOCAL+1)))
 
@@ -3457,6 +3574,9 @@ CASE(-1) ! Initialization of EWC_TYPE array:
                              ! on wall cells (i.e. the solution should give the right unique dH/dxn), leave it
                              ! .TRUE. to write out velocity error diagnostics.
 
+  ! Preserve the physical HS field before using it as setup scratch storage.
+  CALL SAVE_HS_FOR_SETUP
+
   ! Copy external wall cells types to HS:
   CALL COPY_CCVAR_IN_HS(IS_WALLT)
 
@@ -3573,6 +3693,9 @@ CASE(3)
 
    ! Dump back to CCVAR UNKH values from HS.
    CALL COPY_HS_IN_CCVAR(UNKH)
+
+   ! Restore the physical HS field after the UNKH exchange has consumed the HS scratch data.
+   CALL RESTORE_HS_AFTER_SETUP
 
    ! 2. For each GASPHASE (cut or regular) face, find global numeration of the volumes
    ! that share it, store a list of areas and centroids for diffussion operator in FV form.
