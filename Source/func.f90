@@ -144,7 +144,7 @@ END SUBROUTINE SHUTDOWN
 !> Return the memory used by the given process at the time of the call. This only works under Linux because
 !> the system file called '/proc/self/status' is queried for the VmRSS value (kB).
 !> The DEVC output QUANTITY 'RAM' outputs this value in units of MB.
-!> For non-linux builds this routine just returns 0 
+!> For non-linux builds this routine just returns 0
 
 SUBROUTINE SYSTEM_MEM_USAGE(VALUE_RSS)
 
@@ -6055,22 +6055,22 @@ SELECT CASE(FC)
       ! Can only have one edge where this is the case without having a corner inside. This edge makes a chord.
       ! Intersection area is the area of the chord.
       IF (X2 <= X0 .AND. X2 > X0-RAD) THEN
-         THETA = 2._EB*ACOS((X0-X2)/RAD)         
+         THETA = 2._EB*ACOS((X0-X2)/RAD)
          CIRCLE_CELL_INTERSECTION_AREA = 0.5_EB*R2*(THETA-SIN(THETA))
          RETURN
       ENDIF
       IF (Y2 <= Y0 .AND. Y2 > Y0-RAD) THEN
-         THETA = 2._EB*ACOS((Y0-Y2)/RAD)         
+         THETA = 2._EB*ACOS((Y0-Y2)/RAD)
          CIRCLE_CELL_INTERSECTION_AREA = 0.5_EB*R2*(THETA-SIN(THETA))
          RETURN
       ENDIF
       IF (X1 >= X0 .AND. X1 < X0+RAD) THEN
-         THETA = 2._EB*ACOS((X1-X0)/RAD)         
+         THETA = 2._EB*ACOS((X1-X0)/RAD)
          CIRCLE_CELL_INTERSECTION_AREA = 0.5_EB*R2*(THETA-SIN(THETA))
          RETURN
       ENDIF
       IF (Y1 >= Y0 .AND. Y1 < Y0+RAD) THEN
-         THETA = 2._EB*ACOS((Y1-Y0)/RAD)         
+         THETA = 2._EB*ACOS((Y1-Y0)/RAD)
          CIRCLE_CELL_INTERSECTION_AREA = 0.5_EB*R2*(THETA-SIN(THETA))
          RETURN
       ENDIF
@@ -6911,5 +6911,84 @@ SUBROUTINE ACCUMULATE_STRING(STRING_SIZE,MYSTR,ACCSTR,ACCSTR_T_LEN,ACCSTR_USE_LE
    WRITE(ACCSTR(ACCSTR_USE_LEN+1:ACCSTR_USE_LEN+MYSTR_LEN),'(A,A)') TRIM(MYSTR),NEW_LINE(' ')
    ACCSTR_USE_LEN=ACCSTR_USE_LEN+MYSTR_LEN
 END SUBROUTINE ACCUMULATE_STRING
+
+
+SUBROUTINE DEFINE_PRES_METHOD(SOLVER)
+
+USE GLOBAL_CONSTANTS, ONLY: PRES_METHOD, PRES_FLAG, CHECK_POISSON, PRES_ON_WHOLE_DOMAIN, GLMAT_VERBOSE, &
+                            ULMAT_SOLVER_LIBRARY, UGLMAT_SOLVER_LIBRARY, MKL_CPARDISO_FLAG, HYPRE_FLAG, &
+                            MKL_PARDISO_FLAG, UGLMAT_FLAG, GLMAT_FLAG, ULMAT_FLAG
+USE COMP_FUNCTIONS, ONLY: SHUTDOWN
+
+CHARACTER(*), INTENT(IN) :: SOLVER
+
+SELECT CASE(TRIM(SOLVER))
+
+   CASE('UGLMAT','UGLMAT PARDISO','UGLMAT HYPRE')
+      PRES_METHOD = 'UGLMAT'
+      PRES_FLAG   = UGLMAT_FLAG
+      PRES_ON_WHOLE_DOMAIN = .FALSE.
+      IF (CHECK_POISSON) GLMAT_VERBOSE=.TRUE.
+      UGLMAT_SOLVER_LIBRARY = HYPRE_FLAG
+      IF (TRIM(SOLVER)=='UGLMAT PARDISO') UGLMAT_SOLVER_LIBRARY = MKL_CPARDISO_FLAG
+
+   CASE('GLMAT','GLMAT PARDISO','GLMAT HYPRE')
+      PRES_METHOD = 'GLMAT'
+      PRES_FLAG   = GLMAT_FLAG
+      PRES_ON_WHOLE_DOMAIN = .TRUE.
+      IF (CHECK_POISSON) GLMAT_VERBOSE=.TRUE.
+      UGLMAT_SOLVER_LIBRARY = HYPRE_FLAG
+      IF (TRIM(SOLVER)=='GLMAT PARDISO') UGLMAT_SOLVER_LIBRARY = MKL_CPARDISO_FLAG
+
+   CASE('ULMAT','ULMAT PARDISO','ULMAT HYPRE')
+      PRES_METHOD = 'ULMAT'
+      PRES_FLAG   = ULMAT_FLAG
+      PRES_ON_WHOLE_DOMAIN = .FALSE.
+      IF (CHECK_POISSON) GLMAT_VERBOSE=.TRUE.
+      ULMAT_SOLVER_LIBRARY = MKL_PARDISO_FLAG
+      IF (TRIM(SOLVER)=='ULMAT HYPRE') ULMAT_SOLVER_LIBRARY = HYPRE_FLAG
+
+   CASE('FFT')
+      ! Nothing to do. By default PRES_FLAG is set to FFT_FLAG in cons.f90
+   CASE DEFAULT
+      ! Here the user added an unknown name to SOLVER, stop:
+      CALL SHUTDOWN('ERROR(371): Pressure solver '//TRIM(SOLVER)//' not known.') ; RETURN
+END SELECT
+
+! If library is not specified and only one library is linked, choose the available library
+#ifndef WITH_MKL
+#ifdef WITH_HYPRE
+IF (PRES_FLAG==ULMAT_FLAG ) ULMAT_SOLVER_LIBRARY =HYPRE_FLAG
+IF (PRES_FLAG==UGLMAT_FLAG .OR. PRES_FLAG==GLMAT_FLAG) UGLMAT_SOLVER_LIBRARY=HYPRE_FLAG
+#endif
+#endif
+#ifndef WITH_HYPRE
+#ifdef WITH_MKL
+IF (PRES_FLAG==ULMAT_FLAG ) ULMAT_SOLVER_LIBRARY =MKL_PARDISO_FLAG
+IF (PRES_FLAG==UGLMAT_FLAG) UGLMAT_SOLVER_LIBRARY=MKL_CPARDISO_FLAG
+#endif
+#endif
+
+! If neither library is specified, throw an error
+#ifndef WITH_MKL
+IF (PRES_FLAG==ULMAT_FLAG .AND. ULMAT_SOLVER_LIBRARY==MKL_PARDISO_FLAG) THEN
+   CALL SHUTDOWN('ERROR: MKL PARDISO selected for ULMAT solver without compiling and linking MKL library.')
+   RETURN
+ELSEIF (PRES_FLAG==UGLMAT_FLAG .AND. UGLMAT_SOLVER_LIBRARY==MKL_CPARDISO_FLAG) THEN
+   CALL SHUTDOWN('ERROR: MKL CLUSTER PARDISO selected for UGLMAT solver without compiling and linking MKL library.')
+   RETURN
+ENDIF
+#endif
+#ifndef WITH_HYPRE
+IF (PRES_FLAG==ULMAT_FLAG .AND. ULMAT_SOLVER_LIBRARY==HYPRE_FLAG) THEN
+   CALL SHUTDOWN('ERROR: HYPRE selected for ULMAT solver without compiling and linking HYPRE library.')
+   RETURN
+ELSEIF (PRES_FLAG==UGLMAT_FLAG .AND. UGLMAT_SOLVER_LIBRARY==HYPRE_FLAG) THEN
+   CALL SHUTDOWN('ERROR: HYPRE selected for UGLMAT solver without compiling and linking HYPRE library.')
+   RETURN
+ENDIF
+#endif
+
+END SUBROUTINE DEFINE_PRES_METHOD
 
 END MODULE MISC_FUNCTIONS
