@@ -23839,11 +23839,7 @@ IF( (T_END-T_BEGIN) < TWENTY_EPSILON_EB) RETURN
 
 CC_IBM = .TRUE.
 
-! If unstructured projection defined set Pressure solver on unstructured grid.
-IF (PRES_FLAG/=UGLMAT_FLAG) THEN
-   PRES_METHOD = 'ULMAT'
-   PRES_FLAG   = ULMAT_FLAG
-ENDIF
+! For unstructured projection define Pressure solver on unstructured grid.
 PRES_ON_WHOLE_DOMAIN = .FALSE.
 IF (ABS(CCVOL_LINK-0.95_EB)<TWENTY_EPSILON_EB) CCVOL_LINK = DEFAULT_VOLFRAC_LINK
 IF (CHECK_POISSON) GLMAT_VERBOSE=.TRUE.
