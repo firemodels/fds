@@ -14478,7 +14478,7 @@ Keyword             & Type     & Description                      & Units       
     \>                                                                                \>                          \\
 901 \> \ct{CTRL ... must have a FUNCTION_TYPE.} \> Section~\ref{info:basic_control} \\
 902 \> \ct{CTRL ... PID controller must be given a TARGET_VALUE.} \> Section~\ref{info:CONTROL_PID} \\
-903 \> \ct{CTRL ... FUNCTION_TYPE not recognized.} \> Section~\ref{info:basic_control} \\
+903 \> \ct{CTRL ... FUNCTION_TYPE not recognized.} \> Section~\ref{info:CTRL} \\
 904 \> \ct{CTRL ... FUNCTION_TYPE=EXTERNAL but no EXTERNAL_FILENAME given.} \> Section~\ref{info:external_control} \\
 905 \> \ct{CTRL ... must have at least one input.} \> Section~\ref{info:CTRL} \\
 906 \> \ct{CTRL ... must have only one input.} \> Section~\ref{info:CTRL} \\
@@ -14532,8 +14532,8 @@ Keyword             & Type     & Description                      & Units       
 1015 \> \ct{Output QUANTITY ... requires a QUANTITY2.} \> Section~\ref{info:gasoutputquantities} \\
 1016 \> \ct{Output QUANTITY ... requires a SPEC_ID.} \> Section~\ref{info:gasoutputquantities} \\
 1017 \> \ct{Output QUANTITY ... SPEC_ID ... not found.} \> Section~\ref{info:gasoutputquantities} \\
-1018 \> \ct{Output QUANTITY ... requires a MATL_ID.} \> Section~\ref{info:gasoutputquantities} \\
-1019 \> \ct{Output QUANTITY ... MATL_ID ... not found.} \> Section~\ref{info:gasoutputquantities} \\
+1018 \> \ct{Output QUANTITY ... requires a MATL_ID.} \> Section~\ref{info:solidoutputquantities} \\
+1019 \> \ct{Output QUANTITY ... MATL_ID ... not found.} \> Section~\ref{info:solidoutputquantities} \\
 1020 \> \ct{Output QUANTITY ... requires a PART_ID.} \> Section~\ref{info:gasoutputquantities} \\
 1021 \> \ct{Output QUANTITY ... PART_ID ... not found.} \> Section~\ref{info:gasoutputquantities} \\
 1022 \> \ct{Output QUANTITY ... requires a DUCT_ID.} \> Section~\ref{info:hvacoutputquantities} \\
@@ -14557,14 +14557,14 @@ Keyword             & Type     & Description                      & Units       
 1040 \> \ct{QUANTITY ... is not appropriate for gas phase.} \> Section~\ref{info:gasoutputquantities} \\
 1041 \> \ct{QUANTITY ... is not appropriate for Plot3D.} \> Section~\ref{info:gasoutputquantities} \\
 1042 \> \ct{QUANTITY ... not found.} \> Section~\ref{info:gasoutputquantities} \\
-1043 \> \ct{PROP_ID ... not found.} \> Section~\ref{info:gasoutputquantities} \\
+1043 \> \ct{PROP_ID ... not found.} \> Section~\ref{info:THERMOCOUPLE} \\
 1044 \> \ct{Cannot set EXTERNAL_FILE=T for a RAMP used for an output clock ...} \> Section~\ref{info:external_control} \\
 1045 \> \ct{QUANTITY ... requires a PART_ID for particles with mass.} \> Section~\ref{tab:particleoutputquantities} \\
 \\
 1050 \> \ct{The file ... does not exist. Set RESTART=.FALSE.} \> Section~\ref{info:restart} \\
 1051 \> \ct{RESTART initial time equals T_END.} \> Section~\ref{info:restart} \\
 1052 \> \ct{On TIME, do not set both RAMP_TIME and RAMP_DT.} \> Section~\ref{info:simulation_time_ramp} \\
-1053 \> \ct{One TIME, if one of DT_EXTERNAL_HEARTBEAT or} \> Section~\ref{info:external_control} \\
+1053 \> \ct{On TIME, if one of DT_EXTERNAL_HEARTBEAT or} \> Section~\ref{info:external_control} \\
      \> \ct{EXTERNAL_HEARTBEAT_FILENAME is set, both must be set.} \\
 \\
 1054 \> \ct{On MULT, must set DX if I_UPPER-I_LOWER>0, etc.} \> Section~\ref{info:MULT} \\
