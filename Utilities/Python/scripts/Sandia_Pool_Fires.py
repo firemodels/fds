@@ -9,9 +9,9 @@ import fdsplotlib
 # Get plot style parameters
 plot_style = fdsplotlib.get_plot_style('fds')
 
-expdir = '../../../exp/Sandia_Jets_Pools_Fireballs/'
-outdir = '../../../out/Sandia_Jets_Pools_Fireballs/'
-figdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Sandia_Jets_Pools_Fireballs/'
+expdir = '../../../exp/Sandia_Pool_Fires/'
+outdir = '../../../out/Sandia_Pool_Fires/'
+figdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Sandia_Pool_Fires/'
 
 E_file = ['ethane_pool.csv','ethylene_pool.csv','propane_pool.csv','isopentane_pool.csv']
 M_file = ['ethane_pool_cat_devc.csv','ethylene_pool_cat_devc.csv','propane_pool_cat_devc.csv','isopentane_pool_cat_devc.csv']
