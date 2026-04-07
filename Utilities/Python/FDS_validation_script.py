@@ -102,7 +102,7 @@ print("Memorial_Tunnel_2...");            safe_run("./scripts/Memorial_Tunnel_2.
 print("NIST_NRC_Parallel_Panels...");     safe_run("./scripts/NIST_NRC_Parallel_Panels.py")
 print("NIST_Pool_Fires...");              safe_run("./scripts/NIST_Pool_Fires.py")
 print("Sandia_Plumes...");                safe_run("./scripts/Sandia_Plumes.py")
-print("Sandia_Pools...");                 safe_run("./scripts/Sandia_Pools.py")
+print("Sandia_Pool_Fires...");            safe_run("./scripts/Sandia_Pool_Fires.py")
 print("Theobald_Hose_Stream...");         safe_run("./scripts/Theobald_Hose_Stream.py")
 print("JIS_Facade...");                   safe_run("./scripts/JIS_Facade_contours.py")
 print("JIS_Facade_exp...");               safe_run("./scripts/JIS_Facade_exp_contours.py")
