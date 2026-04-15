@@ -14,6 +14,7 @@ cantera<3.1
 ruamel.yaml<0.19
 pyfdstools
 bibtexautocomplete
+PySide6
 
 # Local utility packages (imports fdsplotlib)
 -e ../Utilities/Python
