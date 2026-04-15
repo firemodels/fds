@@ -522,8 +522,8 @@ DO NS=1,N_TRACKED_SPECIES
       JMAT(NS, N_TRACKED_SPECIES+1) = JMAT(NS, N_TRACKED_SPECIES+1)  + &
          HS_I(NS2)*JMAT(NS,NS2)
    ENDDO
-   JMAT(NS, N_TRACKED_SPECIES+1) = JMAT(NS, N_TRACKED_SPECIES+1)  + CP_I(NS)*DTMPDT
-   JMAT(NS, N_TRACKED_SPECIES+1) = - JMAT(NS, N_TRACKED_SPECIES+1) / RHO/CP   
+   JMAT(NS, N_TRACKED_SPECIES+1) = -JMAT(NS, N_TRACKED_SPECIES+1)  + CP_I(NS)*DTMPDT
+   JMAT(NS, N_TRACKED_SPECIES+1) = JMAT(NS, N_TRACKED_SPECIES+1) / RHO/CP   
 ENDDO
       
 ! CALCULATE DTDOT/DT
@@ -600,59 +600,8 @@ DO NS=1,N_TRACKED_SPECIES
    JMAT(N_TRACKED_SPECIES+1,NS) = JMAT(N_TRACKED_SPECIES+1,NS) - CVEC(NS)* DUMMY1
 ENDDO
 
-
-! CALL PRINT_JMAT(JMAT)
-
-
 END SUBROUTINE JACOBIAN
 
-
-!> \brief Print the component of jacobian matrix
-!> \param JMAT is the Jacobian matrix.
-SUBROUTINE PRINT_JMAT(JMAT)
-REAL(EB), INTENT(IN) :: JMAT(N_TRACKED_SPECIES+2, N_TRACKED_SPECIES+2)
-INTEGER :: NS, NS2
-
-WRITE(LU_ERR,*)"------------------------------------------------------"
-WRITE(LU_ERR,*)" Printing D[X]DOT/D[X] Jacobian elements...."
-WRITE(LU_ERR,*)"------------------------------------------------------"
-DO NS=1,N_TRACKED_SPECIES
-   DO NS2=1,N_TRACKED_SPECIES
-      IF (ABS(JMAT(NS,NS2)) > 0._EB) THEN
-         WRITE(LU_ERR,'(A,2I4,5A,ES18.6)') "I,J=",NS, NS2, &
-            " D[",TRIM(SPECIES_MIXTURE(NS2)%ID),"]DOT/D[",TRIM(SPECIES_MIXTURE(NS)%ID),"]=",JMAT(NS,NS2)
-      ENDIF   
-   ENDDO   
-ENDDO
-
-WRITE(LU_ERR,*)"------------------------------------------------------"
-WRITE(LU_ERR,*)" Printing D[X]DOT/DT Jacobian elements...."
-WRITE(LU_ERR,*)"------------------------------------------------------"
-DO NS=1,N_TRACKED_SPECIES
-   IF (ABS(JMAT(N_TRACKED_SPECIES+1,NS)) > 0._EB) THEN
-      WRITE(LU_ERR,'(A,2I4,3A,ES18.6)') "I,J=",N_TRACKED_SPECIES+1, NS, &
-         " D[",TRIM(SPECIES_MIXTURE(NS)%ID),"]DOT/D[T]=",JMAT(N_TRACKED_SPECIES+1,NS)
-   ENDIF   
-ENDDO
-
-WRITE(LU_ERR,*)"------------------------------------------------------"
-WRITE(LU_ERR,*)" Printing DTDOT/D[X] Jacobian elements...."
-WRITE(LU_ERR,*)"------------------------------------------------------"
-DO NS=1,N_TRACKED_SPECIES
-   IF (ABS(JMAT(NS, N_TRACKED_SPECIES+1)) > 0._EB) THEN
-      WRITE(LU_ERR,'(A,2I4,3A,ES18.6)') "I,J=",NS, N_TRACKED_SPECIES+1, &
-         " D[T]DOT/D[",TRIM(SPECIES_MIXTURE(NS)%ID),"]=",JMAT(NS, N_TRACKED_SPECIES+1)
-   ENDIF   
-ENDDO
-
-WRITE(LU_ERR,*)"------------------------------------------------------"
-WRITE(LU_ERR,*)" Printing D[T]DOT/DT Jacobian elements...."
-WRITE(LU_ERR,*)"------------------------------------------------------"
-IF (ABS(JMAT(N_TRACKED_SPECIES+1, N_TRACKED_SPECIES+1)) > 0._EB) THEN
-   WRITE(LU_ERR,'(A,2I4,A,ES18.6)') "I,J=",N_TRACKED_SPECIES+1, N_TRACKED_SPECIES+1, &
-      " D[T]DOT/D[T]=",JMAT(N_TRACKED_SPECIES+1, N_TRACKED_SPECIES+1)
-ENDIF 
-END SUBROUTINE PRINT_JMAT
 
 
 !> \brief Calculate DBIDC of reactions 
