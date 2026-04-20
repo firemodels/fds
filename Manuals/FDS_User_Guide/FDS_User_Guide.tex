@@ -8311,7 +8311,7 @@ where n is the time step, $x$ is the instantaneous device output and $\bar{x}$ i
 
 An alternative to \ct{SMOOTHING_FACTOR} is to instead use a \ct{SMOOTHING_TIME} ($\tau_{\rm smooth}$ with units of seconds [s]), which may provide a more intuitive time scale over which the function is to be smoothed.  The two parameters are mathematically related by,
 \be
-\alpha = 1-\frac{\delta t}{\tau_{\rm smooth}} 
+\alpha = 1-\frac{\delta t}{\tau_{\rm smooth}}
 \ee
 where $\delta t$ is the local time step in the simulation.  With a constant \ct{SMOOTHING_TIME} used on the \ct{DEVC} line, the \ct{SMOOTHING_FACTOR} dynamically adjusts with the local time step.
 
@@ -8429,7 +8429,7 @@ For any object for which a \ct{DEVC_ID} can be specified (such as \ct{OBST} or \
 \end{center}
 \end{table}
 
-If you want to design a system of controls and devices that involves multiple changes of state, include the attribute \ct{LATCH=F} on the relevant \ct{DEVC} or \ct{CTRL} lines. By default \ct{LATCH=T} and devices and controls may only change state once, like a sprinkler activating or smoke detector alarming. 
+If you want to design a system of controls and devices that involves multiple changes of state, include the attribute \ct{LATCH=F} on the relevant \ct{DEVC} or \ct{CTRL} lines. By default \ct{LATCH=T} and devices and controls may only change state once, like a sprinkler activating or smoke detector alarming.
 
 If you want a \ct{DEVC} to operate based on the logical state of a \ct{CTRL}, set \ct{QUANTITY='CONTROL'} and set the \ct{CTRL_ID} to the \ct{ID} of the control function. The numerical output in the \ct{CHID_devc.csv} file will be zero when the logical state is \ct{F} and 1 when the logical state is \ct{T}.
 
@@ -10347,7 +10347,7 @@ Quantities associated with the overall energy budget are reported in the comma d
 \item \ct{Q_DIFF} The flow of enthalpy {\em into} the computational domain due to the diffusion of species where $\rho D_\alpha \nabla Y_\alpha$ is diffusive flux of species $\alpha$ (kW).
 \item \ct{Q_PRES} The work done by volumetric expansion (kW).
 \item \ct{Q_PART} The rate of energy gained by the gas from liquid droplets or solid particles. $\dq_{\rm p,r}$ is the \underline{r}adiation absorbed by a droplet or \underline{p}article (kW). $\dq_{\rm p,c}$ is the energy transferred via \underline{c}onvection from the gas to a droplet or \underline{p}article (kW). $\dq_{\rm p,w}$ is the energy transferred from a solid surface (\underline{w}all) to a droplet or \underline{p}article adhering to it.
-\item \ct{Q_TOTAL} The sum of all the right hand terms in Eq.~\ref{eqn_enthalpytransport} except for \ct{HRR_OX}, as explained above. Ideally, this sum should equal the term on the left, \ct{Q_ENTH}. 
+\item \ct{Q_TOTAL} The sum of all the right hand terms in Eq.~\ref{eqn_enthalpytransport} except for \ct{HRR_OX}, as explained above. Ideally, this sum should equal the term on the left, \ct{Q_ENTH}.
 \end{itemize}
 
 All terms are reported in units of kW.
@@ -11265,121 +11265,9 @@ There are several different output files that have the format of a comma-separat
 To change the precision of the numbers, use \ct{SIG_FIGS} on the \ct{DUMP} line to indicate the number of significant figures in the mantissa (default is 8). Use \ct{SIG_FIGS_EXP} to change the number of digits in the exponent (default is 3). Keep in mind that the precision of real numbers used internally in an FDS calculation is approximately 12, equivalent to 8 byte (64 bit) or double precision following conventional Fortran rules.
 
 
-\subsection{\emph{A Posteriori} Mesh Quality Metrics}
-\label{info:meshquality}
+\subsection{Local Cell Reynolds Number}
 
-The quality of a particular simulation is most directly tied to grid resolution.  Three output quantities are discussed here for measuring errors in the velocity and scalar fields.  It should be noted that the link between these metrics and true simulation quality is still in the research phase.  In other words, a good quality score is not sufficient to assure a good simulation (at the present time).
-
-\subsubsection{Measure of Turbulence Resolution}
-
-A scalar quantity referred to as the \emph{measure of turbulence resolution} \cite{Pope:2004} is defined locally as:
-\begin{eqnarray}
-\label{eq:MTR}
-M(\mathbf{x}) = \frac{\left\langle k_{\rm sgs} \right\rangle}{\left\langle \mbox{TKE} \right\rangle + \left\langle k_{\rm sgs} \right\rangle}
-\end{eqnarray}
-Angled brackets denote suitable time-averages.
-
-The turbulent kinetic energy (TKE) must be post processed because we cannot compute the fluctuation until we know the mean. Use the following \ct{DEVC}s to output the three velocity components:
-
-\begin{lstlisting}
-&DEVC ..., QUANTITY='U-VELOCITY' /
-&DEVC ..., QUANTITY='V-VELOCITY' /
-&DEVC ..., QUANTITY='W-VELOCITY' /
-\end{lstlisting}
-TKE is then computed by
-\vskip-.6cm
-\begin{gather}
-  \mbox{TKE} = \mbox{$\frac{1}{2}$} \big( (\tilde{u}-\left\langle \tilde{u} \right\rangle)^2 + (\tilde{v}-\left\langle \tilde{v} \right\rangle)^2 +(\tilde{w}-\left\langle \tilde{w} \right\rangle)^2 \big)
-\end{gather}
-The subgrid kinetic energy is estimated from Deardorff's eddy viscosity model (see \cite{FDS_Math_Guide})
-\begin{align}
-k_{\rm sgs} &\approx ( \mu_t/(\rho C_\nu \Delta) )^2
-\end{align}
-To output an estimate of the subgrid kinetic energy per unit mass use
-\begin{lstlisting}
-&DEVC ..., QUANTITY='SUBGRID KINETIC ENERGY' /
-\end{lstlisting}
-You should then average TKE and $k_{sgs}$ for use in (\ref{eq:MTR}).
-
-The concept behind the measure of turbulence resolution is illustrated in Figure \ref{fig_mtr}. Notice that on the left the difference between the grid signal and the test signal is very small.  On the right, the grid signal is highly turbulent and the corresponding test signal is much smoother.  We infer then that the flow is under-resolved.
-\begin{figure}[ht]
-\centering
-\begin{tabular}{rl}
-\includegraphics[width=3.2in]{FIGURES/mtr_resolved_signal} &
-\includegraphics[width=3.2in]{FIGURES/mtr_unresolved_signal}
-\end{tabular}
-\vskip-0.2cm
-\caption[Examples of the measure of turbulence resolution]{(Left) Resolved signal, $M$ is small. (Right) Unresolved signal, $M$ is close to unity.}
-\label{fig_mtr}
-\end{figure}
-
-For the canonical case of isotropic turbulence Pope actually defines LES such that $M<0.2$.  That is, LES requires resolution of 80\% of the kinetic energy in the flow field (because this puts the grid Nyquist limit within the inertial subrange).  The question remains as to whether this critical value is sufficient or necessary for a given engineering problem.  As shown in Ref.~\cite{McDermott:2010}, maintaining mean values of $M$ near 0.2 indeed provides satisfactory results (simulation results within experimental error bounds) for mean velocities and species concentrations in non-reacting, buoyant plumes.
-
-
-\subsubsection{Wavelet Error Measure}
-\label{wavelets}
-
-A resolution metric that we call the \emph{wavelet error measure} or WEM may be output using, for example,
-
-\begin{lstlisting}
-&SLCF PBY=0, QUANTITY='WAVELET ERROR', QUANTITY2='HRRPUV' /
-\end{lstlisting}
-
-We begin by providing background on the simple Haar wavelet \cite{Nievergelt:1999}.  For a thorough and more sophisticated review of wavelet methods, the reader is referred to Schneider and Vasilyev \cite{Schneider:2010}.
-
-Suppose the scalar function $f(r)$ is sampled at discrete points $r_j$, separated by a distance $h$, giving values $s_j$.  Defining the \emph{unit step function} over the interval $[r_1,r_2]$ by
-\begin{eqnarray}
-\varphi_{[r_1,r_2]} = \left\{ \begin{array}{ll} 1 & \quad \mbox{if} \quad r_1 \le r < r_2 \\ 0 & \quad \mbox{otherwise} \end{array} \right.
-\end{eqnarray}
-the simplest possible reconstruction of the signal is the step function approximation
-\begin{eqnarray}
-f(r) \approx \sum_j s_j \varphi_{[r_j,r_j+h]}(r)
-\end{eqnarray}
-By ``viewing'' the signal at a coarser resolution, say $2h$, an identical reconstruction of the function $f$ over the interval $[r_j,r_j+2h]$ may be obtained from
-\begin{eqnarray}
-\label{eqn_wavelet_decomp}
-f_{[r_j,r_j+2h]}(r) = \underbrace{\frac{s_j+s_{j+1}}{2}}_a \,\varphi_{[r_j,r_j+2h]}(r) + \underbrace{\frac{s_j-s_{j+1}}{2}}_c \,\psi_{[r_j,r_j+2h]}(r)
-\end{eqnarray}
-where $a$ is as the \emph{average} coefficient and $c$ is as the \emph{wavelet} coefficient.  The Haar \emph{mother wavelet} (Figure \ref{fig_haar_mother}) is identified as
-\begin{eqnarray}
-\psi_{[r_1,r_2]}(r) = \left\{ \begin{array}{ll} 1 & \quad \mbox{if} \quad r_1\le r < \frac{1}{2}(r_1+r_2) \\ -1 & \quad \mbox{if} \quad \frac{1}{2}(r_1+r_2)\le r < r_2 \end{array} \right.
-\end{eqnarray}
-
-\begin{figure}[ht]
-\centering
-\includegraphics[width=3.2in]{FIGURES/haar_mother}
-\vskip-0.2cm
-\caption[Haar mother wavelet]{Haar mother wavelet on the interval [0,1].}
-\label{fig_haar_mother}
-\end{figure}
-
-The decomposition of the signal shown in Eq.~(\ref{eqn_wavelet_decomp}) may be repeated at ever coarser resolutions.  The result is a \emph{wavelet transform}. The procedure is entirely analogous to the Fourier transform, but with compact support.  If we look at a 1D signal with $2^m$ points, the repeated application of (\ref{eqn_wavelet_decomp}) results in an $m \times m$ matrix of averages $\mathbf{a}$ with components $a_{ij}$ and an $m \times m$ wavelet coefficient matrix $\mathbf{c}$ with components $c_{ij}$.  Each row $i$ of $\mathbf{a}$ may be reconstructed from the $i+1$ row of $\mathbf{a}$ and $\mathbf{c}$.  Because of this and because small values of the wavelet coefficient matrix may be discarded, dramatic compression of the signal may be obtained.
-
-Here we are interested in using the wavelet analysis to say something about the local level of error due to grid resolution.  Very simply, we ask what can be discerned from a sample of four data points along a line.  Roughly speaking we might expect to see one of the four scenarios depicted in Figure \ref{fig_wavelet_transforms}.  Within each plot window we also show the results of a Haar wavelet transform for that signal.  Looking first at the two top plots, on the left we have a step function and on the right we have a straight line.  Intuitively, we expect large error for the step function and small error for the line.  The following error measure achieves this goal:
-\begin{eqnarray}
-\mbox{WEM}(\mathbf{x},t) = \max_{x,y,z}\left( \frac{|c_{11} + c_{12}| - |c_{21}|}{|a_{21}|} \right)
-\end{eqnarray}
-Note that we have arbitrarily scaled the measure so that a step function leads to WEM of unity.  In practice the transform is performed in all coordinate directions and the max value is reported.  The scalar value may be output to Smokeview at the desired time interval.
-\begin{figure}[ht]
-\centering
-\begin{tabular}{rl}
-\includegraphics[width=3.2in]{FIGURES/haar_step} &
-\includegraphics[width=3.2in]{FIGURES/haar_line} \\
-\includegraphics[width=3.2in]{FIGURES/haar_eddy} &
-\includegraphics[width=3.2in]{FIGURES/haar_extr}
-\end{tabular}
-\vskip-0.2cm
-\caption[Haar wavelet transforms on four typical signals]{Averages and coefficients for local Haar wavelet transforms on four typical signals.}
-\label{fig_wavelet_transforms}
-\end{figure}
-
-Looking now at the two plots on the bottom of Figure \ref{fig_wavelet_transforms}, the signal on the left, which may indicate spurious oscillations or unresolved turbulent motion, leads to $\mbox{WEM} = 2$.  Our measure therefore views this situation as the worst case in a sense.  The signal to the lower right is indicative of an extremum, which actually is easily resolved by most centered spatial schemes and results again in $\mbox{WEM}=0$.
-
-In \cite{McDermott:2010}, the time average of WEM was reported for LES of a non-reacting buoyant plume at three grid resolutions.  From this study, the best advice currently is to maintain average values of WEM less than 0.5.
-
-\subsubsection{Local Cell Reynolds Number}
-
-Additionally, we provide an estimate of the \emph{local cell Reynolds number} given by the ratio of the cell size (LES filter width, $\Delta$) to an estimate of the local Kolmogorov scale, $\eta$ (see \cite{Pope:2000}).  For a DNS, $\Delta/\eta$ should be less than or equal to one. The Kolmogorov scale is computed from its definition:
+An estimate of the \emph{local cell Reynolds number} is given by the ratio of the cell size (LES filter width, $\Delta$) to an estimate of the local Kolmogorov scale, $\eta$ (see \cite{Pope:2000}).  For a DNS, $\Delta/\eta$ should be less than or equal to one. The Kolmogorov scale is computed from its definition:
 \begin{equation}
 \eta \equiv \left(\frac{(\mu/\rho)^3}{\varepsilon}\right)^{1/4}
 \end{equation}
@@ -11393,7 +11281,7 @@ where $\mu_t$ is the turbulent viscosity and $|\tilde{S}|$ is the filtered strai
 &SLCF PBY=0, QUANTITY='CELL REYNOLDS NUMBER' /
 \end{lstlisting}
 
-\subsubsection{Near-Wall Grid Resolution}
+\subsection{Near-Wall Grid Resolution}
 \label{info:yplus}
 
 Large-eddy simulations of boundary layer flows fall into two general categories: LES with near-wall resolution and LES with near-wall modeling (wall functions).  FDS employs the latter.  The wall models used in FDS are law of the wall \cite{Pope:2000}.  For the wall models to function properly, the grid resolution near the wall should fall within a certain range of $y^+$, the non-dimensional distance from the wall expressed in viscous units.  To check this, you may add a boundary file output as follows:
@@ -11828,7 +11716,7 @@ $^3$                 \> Requires the specification of a non-zero mass particle c
 \label{info:hvacoutputquantities}
 
 \begin{sloppypar}
-Table~\ref{tab:hvacoutputquantities} summarizes the various output quantities for HVAC systems. In the file type column, D indicates a device output specified with a \ct{DEVC} input, and H indicates a Smokeview output specified with an \ct{HVAC} input. 
+Table~\ref{tab:hvacoutputquantities} summarizes the various output quantities for HVAC systems. In the file type column, D indicates a device output specified with a \ct{DEVC} input, and H indicates a Smokeview output specified with an \ct{HVAC} input.
 
 When using a \ct{DEVC}, do not specify an \ct{XYZ} or \ct{XB} for HVAC outputs. Instead quantities for a duct require specifying a \ct{DUCT_ID}, quantities for a node require specifying a \ct{NODE_ID}, and quantities for a duct cell (when \ct{HVAC_MASS_TRANSPORT_CELL_L} or \ct{N_CELLS} are specified) require specifying both a \ct{DUCT_ID} and a \ct{CELL_L} (distance along the duct in meters from the first node where the desired cell is located).  Mass and volume fraction outputs also require the specification of a \ct{SPEC_ID}. Fan and aircoil outputs require the \ct{DUCT_ID} of the duct they are located in. Filter outputs require the \ct{NODE_ID} of the node they are located in. The quantity \ct{DUCT ENTHALPY FLOW} applies Eq.~\ref{enthalpy_flow} to the flow in the duct. To have the node output \ct{NODE ENTHALPY} reflect the duct quantity of \ct{DUCT ENTHALPY FLOW} set \ct{RELATIVE=.TRUE} for the node output. The quantity \ct{NODE PRESSURE DIFFERENCE} requires that one specify both elements of the array \ct{NODE_ID}, and the pressure difference is calculated by subtracting the first node from the second.
 
