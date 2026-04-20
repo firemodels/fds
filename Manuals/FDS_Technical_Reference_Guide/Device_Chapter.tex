@@ -11,10 +11,10 @@ FDS predicts the thermal environment resulting from a fire, but it relies on emp
 
 The temperature of the sensing element (or ``link'') of an automatic fire sprinkler is estimated from the differential equation put forth by Heskestad and Bill~\cite{Heskestad:3}, with the addition of a term to account for the cooling of the link by water droplets in the gas stream from previously activated sprinklers
 \be \frac{\d T_l}{\d t} = \frac{\sqrt{|\bu|}}{\hbox{RTI}} (T_g - T_l) -
-   \frac{C}{\hbox{RTI}} (T_l - T_m) - \frac{C_2}{\hbox{RTI}} \beta |\bu|
+   \frac{C}{\hbox{RTI}} (T_l - T_m) - \frac{C_2}{\hbox{RTI}} (T_g - T_l) \beta |\bu|
    \label{actode}
 \ee
-where $\bu$ is the gas velocity, RTI is the response time index, $T_l$ is the link temperature, $T_g$ is the gas temperature in the neighborhood of the link, $T_m$ is the temperature of the sprinkler mount (assumed ambient), and $\beta$ is the volume fraction of (liquid) water in the gas stream. The sensitivity of the sprinkler link is characterized by its RTI value. The amount of heat conducted away from the link by the mount is indicated by the ``C-Factor'', $C$. The RTI and C-Factor are determined experimentally. The constant $C_2$ has been empirically determined by DiMarzo and co-workers~\cite{Ruffino:1,Ruffino:2,Gavelli:1} to be \SI{6e6}{K/(m/s)^{1/2}}, and its value is relatively constant for different types of sprinklers.
+where $\bu$ is the gas velocity, RTI is the response time index, $T_l$ is the link temperature, $T_g$ is the gas temperature in the neighborhood of the link, $T_m$ is the temperature of the sprinkler mount (assumed ambient), and $\beta$ is the volume fraction of (liquid) water in the gas stream. The sensitivity of the sprinkler link is characterized by its RTI value. The amount of heat conducted away from the link by the mount is indicated by the ``C-Factor'', $C$. The RTI and C-Factor are determined experimentally. The constant $C_2$ has been empirically determined based on work of DiMarzo and co-workers~\cite{Ruffino:1,Ruffino:2,Gavelli:1} to be \SI{2.23e5}{(m s)^{-1/2}}, and its value is relatively constant for different types of sprinklers.
 
 The algorithm for heat detector activation is exactly the same as for sprinkler activation, except there is no accounting for conductive losses or droplet cooling. Note that neither the sprinkler nor heat detector models account for thermal radiation.
 
