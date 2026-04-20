@@ -11266,6 +11266,7 @@ To change the precision of the numbers, use \ct{SIG_FIGS} on the \ct{DUMP} line 
 
 
 \subsection{Local Cell Reynolds Number}
+\label{info:meshquality}
 
 An estimate of the \emph{local cell Reynolds number} is given by the ratio of the cell size (LES filter width, $\Delta$) to an estimate of the local Kolmogorov scale, $\eta$ (see \cite{Pope:2000}).  For a DNS, $\Delta/\eta$ should be less than or equal to one. The Kolmogorov scale is computed from its definition:
 \begin{equation}
@@ -11275,10 +11276,12 @@ where $\mu$ is the molecular dynamic viscosity, $\rho$ is the density, and $\var
 \begin{equation}
 \varepsilon = (\mu_t/\rho)|\tilde{S}|^2
 \end{equation}
-where $\mu_t$ is the turbulent viscosity and $|\tilde{S}|$ is the filtered strain invariant (see FDS Tech Guide).
-
+where $\mu_t$ is the turbulent viscosity and $|\tilde{S}|$ is the filtered strain invariant (see FDS Technical Reference Guide).
 \begin{lstlisting}
 &SLCF PBY=0, QUANTITY='CELL REYNOLDS NUMBER' /
+&SLCF PBY=0, QUANTITY='KOLMOGOROV LENGTH SCALE' /
+&SLCF PBY=0, QUANTITY='SUBGRID KINETIC ENERGY' /
+&SLCF PBY=0, QUANTITY='WAVELET ERROR' /
 \end{lstlisting}
 
 \subsection{Near-Wall Grid Resolution}
@@ -14806,17 +14809,31 @@ After the time \ct{T}, the number of node points is given and then the node coor
 \section{3-D Smoke Files ({\tt .s3d})}
 \label{out:SMOKE3D}
 
-3-D smoke files contain alpha values used by Smokeview to draw semi-transparent planes representing smoke and fire. FDS outputs 3-D smoke data at fixed time intervals.  A {\em pseudo-code} representation of the 3-D smoke file is given by:
+3-D smoke files contain data used by Smokeview to render semi-transparent ``clouds'' representing smoke or gas concentration, flames, or temperature. FDS outputs Smoke3D data at fixed time intervals of \ct{DT_SMOKE3D}~s, which by default is \ct{T_END/NFRAMES}. For each of the Smoke3D outputs, there are two output files named:
 \begin{lstlisting}
-WRITE(LU_SMOKE3D) ONE,VERSION,0,NX-1,0,NY-1,0,NZ-1
+CHID_NM_N.s3d
+CHID_NM_N.s3d.sz
+\end{lstlisting}
+where \ct{NM} is the mesh number and \ct{N} is an ordinal index. The first (binary) file contains the actual data and the second (text) file contains size information. At each time step, an entry is added to the size file:
+\begin{lstlisting}
+WRITE(LU_SMOKE3D_SIZE,*) TIME,NCHARS_IN,NCHARS_OUT,MAX_VAL
+\end{lstlisting}
+where \ct{NCHARS_IN} is the original number of values and \ct{NCHARS_OUT} is the number of values in the compressed buffer. The floating point number \ct{MAX_VAL} is the maximum value of the quantity. The 3-D output data is written to \ct{CHID_NM_N.s3d} in the following format:
+\begin{lstlisting}
+WRITE(LU_SMOKE3D) ONE,ZERO,0,IBAR,0,JBAR,0,KBAR
                 .
                 .
-WRITE(LU_SMOKE3D_SIZE,*) TIME,NCHARS_IN,NCHARS_OUT
 WRITE(LU_SMOKE3D) TIME
 WRITE(LU_SMOKE3D) NCHARS_IN,NCHARS_OUT
-IF (NCHARS_OUT > 0) WRITE(LU_SMOKE3D)(BUFFER_OUT(I),I=1,NCHARS_OUT)
+WRITE(LU_SMOKE3D)(BUFFER_OUT(I),I=1,NCHARS_OUT)
 \end{lstlisting}
-The first \ct{ONE}\ is an endian flag.  Smokeview uses this number to determine whether the computer creating the 3-D smoke file and the computer viewing the 3-D smoke file use the same or different byte swap (endian) conventions for storing floating point numbers.  The opacity data is converted from 4 byte floating point numbers to one byte integers then compressed using run-length encoding (RLE). The compressed data is contained in \ct{BUFFER_OUT}.  Run-length encoding is a compression scheme where repeated ``runs'' of data are replaced with a number (number of repeats), and the value repeated. Four or more consecutive identical characters are represented by $\# n c$ where $\#$ is a special character denoting the beginning of a repeated sequence, $n$ is the number of repeats and $c$ is the character repeated.  $n$ can be up to 254 (255 is used to represent the {\em special}\ character). Characters not repeated four or more times are listed as is. For example, the character string {\tt aaaaaabbbbbcc} is encoded as {\tt \#6a\#5bcc}.
+The entries \ct{ONE} and \ct{ZERO} are four byte integers used by Smokeview as endian flags, i.e. Smokeview uses these numbers to determine whether the computer writing the files and the computer viewing the files use the same byte swap (endian) convention for storing floating point numbers. \ct{IBAR}, \ct{JBAR}, and \ct{KBAR} are four byte integer dimensions of mesh \ct{NM}. \ct{TIME} is a four byte real expressing the simulation time when the data is output. The output quantity data, \ct{BUFFER_OUT}, are one byte character representations of the integers between 0 and 254 that are compressed using run-length encoding (RLE). The value of \ct{BUFFER_OUT} depends on the quantity represented:
+\begin{enumerate}
+\item \ct{'HRRPUV'} or Heat Release Rate Per Unit Volume (\unit{kW/m3}) is used to visualize the flames of a fire. The value, $\dot{q}'''$, is expressed as the one byte character representation of the integer truncation of $254 (\dot{q}'''/\dot{q}'''_{\max})$. The default value of $\dot{q}'''_{\max}$ is 1200~\unit{kW/m3} and can be specified via the parameter \ct{HRRPUV_MAX_SMV} on the \ct{DUMP} line.
+\item \ct{'DENSITY'}\footnote{Prior to FDS 6.11, smoke or gas concentration was represented by the expression $\exp(-K_{\rm m} \rho_\alpha \dx)$ where $K_{\rm m}$ is the mass-specific extinction coefficient, $\rho_\alpha$ is the density of gas species $\alpha$, and $\dx$ is the width of a grid cell. For FDS 6.11 forward, the density alone is conveyed via the Smoke3D file and the extinction coefficient is conveyed via the \ct{CHID.smv} file.} (\unit{kg/m3}) of a gas species specified by \ct{SPEC_ID}. For example, smoke is given by \ct{SPEC_ID='SOOT'}. The real number, $\rho_\alpha$, is expressed as a one byte character representation of the nearest integer to $254 (\rho_\alpha / \rho_{\alpha , \max})$, where $\rho_{\alpha , \max}$ is simply the maximum of the density values output at that particular time step.
+\item \ct{'EFFECTIVE FLAME TEMPERATURE'} (\unit{\degreeCelsius}) represents the adjusted temperature in the flaming region. Its four byte real value, $T$, is expressed as the one byte character representation of the integer truncation of $254 \, (T-T_{\min})/(T_{\max}-T_{\min})$. The values of $T_\max$ and $T_\min$ are 2000~\unit{\degreeCelsius} and 20~\unit{\degreeCelsius}, respectively, and can be specified via the parameters \ct{TEMP_MAX_SMV} and \ct{TEMP_MIN_SMV} on the \ct{DUMP} line.
+\end{enumerate}
+The compressed data is contained in \ct{BUFFER_OUT}. Run-length encoding is a compression scheme where repeated ``runs'' of data are replaced with a number (number of repeats), and the value repeated. Four or more consecutive identical characters are represented by $\# n c$ where $\#$ is a special character denoting the beginning of a repeated sequence, $n$ is the number of repeats and $c$ is the character repeated.  $n$ can be up to 254 (255 is used to represent the {\em special}\ character). Characters not repeated four or more times are listed as is. For example, the character string {\tt aaaaaabbbbbcc} is encoded as {\tt \#6a\#5bcc}.
 
 \section{Iso-surface Triangulation Files ({\tt.iso})}
 \label{out:ISO}
