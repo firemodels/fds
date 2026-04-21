@@ -4373,7 +4373,7 @@ indicates that argon and nitrogen are to be injected at rates of 0.1~\unit{kg/(m
 
 When a time-base \ct{RAMP} is evaluated, the time used for the \ct{RAMP} is the time since the item (e.g., \ct{VENT}, \ct{OBST}, \ct{DEVC}) using the \ct{RAMP} became active. This means \ct{RAMP}s use the actual time if the activation time of the item using the \ct{RAMP} is the same as \ct{T_BEGIN} (see ~\ref{info:TIME_Basics}). Otherwise, they are evaluated using the time from when the \ct{RAMP} activates. Therefore, if you are setting \ct{T_BEGIN} in order to test a time-based \ct{CTRL} or \ct{DEVC} that is ultimately linked to a \ct{RAMP}, then you should set \ct{T_BEGIN} to be slightly less than the time the \ct{RAMP} will activate. For example, if you are testing a \ct{VENT} that is to open at 10~s whose \ct{SURF_ID} uses a \ct{RAMP}, then \ct{T_BEGIN} should be set slightly less than 10~s.
 
-FDS takes the specified \ct{T} and \ct{F} values and interpolates them to an array with uniform spacing in \ct{T}. By default 5000 points are used between the minimum and maximum values of \ct{T}. You can change this value by specifying \ct{NUMBER_INTERPOLATION_POINTS} on any \ct{RAMP} line. In most cases, when evaluating a RAMP, the closest array value is used without further interpolation. For example if your range in \ct{T} is from 0 to 1000~s, then the array will be spaced at 0.2~s. If you need to evaluate the ramp at 5.18~s, then FDS will use the value for 5.2~s. If you were to need better time resolution or your RAMP has an important transient that is less than 0.2~s, then increase \ct{NUMBER_INTERPOLATION_POINTS}.
+FDS takes the specified \ct{T} and \ct{F} values and interpolates them to an array with uniform spacing in \ct{T}. By default 5000 points are used between the minimum and maximum values of \ct{T}. You can change this value by specifying \ct{NUMBER_INTERPOLATION_POINTS} on any \ct{RAMP} line. In most cases, when evaluating a \ct{RAMP}, the closest array value is used without further interpolation. For example if your range in \ct{T} is from 0 to 1000~s, then the array will be spaced at 0.2~s. If you need to evaluate the ramp at 5.18~s, then FDS will use the value for 5.2~s. If you were to need better time resolution or your RAMP has an important transient that is less than 0.2~s, then increase \ct{NUMBER_INTERPOLATION_POINTS}. If you want a time-based \ct{RAMP} to cycle, i.e. have it reset to the start when the end time is reached, add \ct{CYCLING=T} to one of the input lines for that \ct{RAMP}.
 
 Table~\ref{tau_table} lists the various quantities that can be controlled by \ct{RAMP}s.
 
@@ -13218,6 +13218,7 @@ Keyword                            & Type          & Description                
 \endhead
 \ct{CTRL_ID}                       & Character     & Section~\ref{info:RAMPDEVC}                 &                       &             \\ \hline
 \ct{CTRL_ID_DEP}                   & Character     & Section~\ref{info:RAMP_DEP_ID}              &                       &             \\ \hline
+\ct{CYCLING}                       & Logical       & Section~\ref{info:RAMP_Time}                &                       &  F          \\ \hline
 \ct{DEVC_ID}                       & Character     & Section~\ref{info:RAMPDEVC}                 &                       &             \\ \hline
 \ct{DEVC_ID_DEP}                   & Character     & Section~\ref{info:RAMP_DEP_ID}              &                       &             \\ \hline
 \ct{EXTERNAL_FILE}                 & Logical       & Section~\ref{info:external_control}         &                       &  F          \\ \hline
@@ -14131,6 +14132,7 @@ Keyword             & Type     & Description                      & Units       
 402  \> \ct{Row ... of ... has a bad wavelength.} \> Section~\ref{radiative_part_props}  \\
 403  \> \ct{Row ... of ... has a bad real index.} \> Section~\ref{radiative_part_props}  \\
 404  \> \ct{Row ... of ... has a bad complex index.} \> Section~\ref{radiative_part_props}  \\
+405  \> \ct{RAMP ... CYCLING is only for time RAMPs.} \> Section~\ref{info:RAMP_Time}  \\
 407  \> \ct{TABLE ... not found.} \> Section~\ref{info:spraypattern}  \\
      \>                                                                               \>                          \\
 421  \> \ct{SURF ... cannot be applied to a thin obstruction ...} \> Section~\ref{info:thin_obstructions}  \\
