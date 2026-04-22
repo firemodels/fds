@@ -3692,21 +3692,28 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
       !$OMP END PARALLEL
    ENDIF
 
-   ! Compute source term KAPPA*4*SIGMA*TMP**4
+   ! Compute source term KFST4_GAS = KAPPA*4*SIGMA*TMP**4
 
    WIDE_BAND_MODEL_IF: IF (WIDE_BAND_MODEL) THEN
 
-      ! Wide band model
-
+      ALPHA_CC = 1._EB
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
                IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE
                IF (CC_IBM) THEN
+                  ALPHA_CC = 1._EB
                   IF (CCVAR(I,J,K,CC_CGSC)==CC_SOLID) CYCLE
+                  IC = CCVAR(I,J,K,CC_IDCC)
+                  IF (IC>0) ALPHA_CC = CUT_CELL(IC)%ALPHA_CC
                ENDIF
                BBF = BLACKBODY_FRACTION(WL_LOW(IBND),WL_HIGH(IBND),TMP(I,J,K))
                KFST4_GAS(I,J,K) = BBF*KAPPA_GAS(I,J,K)*FOUR_SIGMA*TMP(I,J,K)**4
+               IF (CHI_R(I,J,K)*Q(I,J,K)>QR_CLIP) THEN ! Precomputation of quantities for the RTE source term correction
+                  VOL = R(I)*DX(I)*DY(J)*DZ(K)*ALPHA_CC
+                  RAD_Q_SUM = RAD_Q_SUM + (BBF*CHI_R(I,J,K)*Q(I,J,K) + KAPPA_GAS(I,J,K)*UIID(I,J,K,IBND))*VOL
+                  KFST4_SUM = KFST4_SUM + KFST4_GAS(I,J,K)*VOL
+               ENDIF
             ENDDO
          ENDDO
       ENDDO
@@ -3739,24 +3746,10 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
 
                KFST4_GAS(I,J,K) = BBF*KAPPA_GAS(I,J,K)*FOUR_SIGMA*TMP(I,J,K)**4._EB
                IF (CHI_R(I,J,K)*Q(I,J,K)>QR_CLIP) THEN ! Precomputation of quantities for the RTE source term correction
-                     VOL = R(I)*DX(I)*DY(J)*DZ(K)*ALPHA_CC
-                     RAD_Q_SUM = RAD_Q_SUM + (BBF*CHI_R(I,J,K)*Q(I,J,K) + KAPPA_GAS(I,J,K)*UIID(I,J,K,IBND))*VOL
-                     KFST4_SUM = KFST4_SUM + KFST4_GAS(I,J,K)*VOL
+                  VOL = R(I)*DX(I)*DY(J)*DZ(K)*ALPHA_CC
+                  RAD_Q_SUM = RAD_Q_SUM + (BBF*CHI_R(I,J,K)*Q(I,J,K) + KAPPA_GAS(I,J,K)*UIID(I,J,K,IBND))*VOL
+                  KFST4_SUM = KFST4_SUM + KFST4_GAS(I,J,K)*VOL
                ENDIF
-            ENDDO
-         ENDDO
-      ENDDO
-
-      ! Correct the source term in the RTE based on user-specified RADIATIVE_FRACTION on REAC
-
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE
-               IF (CC_IBM) THEN
-                  IF (CCVAR(I,J,K,CC_CGSC)==CC_SOLID) CYCLE
-               ENDIF
-               IF (CHI_R(I,J,K)*Q(I,J,K)>QR_CLIP) KFST4_GAS(I,J,K) = KFST4_GAS(I,J,K)*RTE_SOURCE_CORRECTION_FACTOR
             ENDDO
          ENDDO
       ENDDO
@@ -3802,22 +3795,6 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
          KFST4_SUM = KFST4_SUM + KFST4_SUM_PARTIAL
          !$OMP END CRITICAL
 
-         ! Correct the source term in the RTE based on user-specified RADIATIVE_FRACTION on REAC
-
-         !$OMP DO
-         DO K=1,KBAR
-            DO J=1,JBAR
-               DO I=1,IBAR
-                  IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE
-                  IF (CC_IBM) THEN
-                     IF (CCVAR(I,J,K,CC_CGSC)==CC_SOLID) CYCLE
-                  ENDIF
-                  IF (CHI_R(I,J,K)*Q(I,J,K)>QR_CLIP) KFST4_GAS(I,J,K) = KFST4_GAS(I,J,K)*RTE_SOURCE_CORRECTION_FACTOR
-               ENDDO
-            ENDDO
-         ENDDO
-         !$OMP END DO
-
          !$OMP END PARALLEL
 
       ELSE RTE_SOURCE_CORRECTION_IF  ! OPTICALLY_THIN
@@ -3839,6 +3816,24 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
       ENDIF RTE_SOURCE_CORRECTION_IF
 
    ENDIF WIDE_BAND_MODEL_IF
+
+   ! Correct the source term in the RTE based on user-specified RADIATIVE_FRACTION on REAC
+
+   IF (RTE_SOURCE_CORRECTION) THEN
+      !$OMP PARALLEL DO COLLAPSE(3)
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF (CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE
+               IF (CC_IBM) THEN
+                  IF (CCVAR(I,J,K,CC_CGSC)==CC_SOLID) CYCLE
+               ENDIF
+               IF (CHI_R(I,J,K)*Q(I,J,K)>QR_CLIP) KFST4_GAS(I,J,K) = KFST4_GAS(I,J,K)*RTE_SOURCE_CORRECTION_FACTOR
+            ENDDO
+         ENDDO
+      ENDDO
+      !$OMP END PARALLEL DO
+   ENDIF
 
    ! Add contribution to source term from a user-specified volumetric heat release rate
 
