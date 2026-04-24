@@ -9,9 +9,7 @@ scipy
 seaborn
 pygments
 ipython
-# cantera>=3.1 pulls ruamel.yaml>=0.19 which requires ruamel.yaml.clibz (Python.h)
-cantera<3.1
-ruamel.yaml<0.19
+cantera
 pyfdstools
 bibtexautocomplete
 PySide6

@@ -4925,6 +4925,25 @@ The right plot in Fig.~\ref{fig:ht3d_energy_conservation_8} displays the heat lo
 
 \FloatBarrier
 
+\subsection{Average Temperature of a 3-D Solid}
+\label{ht3d_average_temp}
+
+A solid cube with volume $V=0.216$~\unit{m^3}, specific heat $c_{\rm s}=1.5$~\unit{kJ/(kg.K)}, density $\rho_{\rm s}=500$~\unit{kg/m^3} is given an initial temperature of $T_0=800$~\unit{\degreeCelsius} and allowed to cool. With no radiation, the average interior temperature of the solid is expected to be
+\be
+   \overline{T}(t) = T_0 + \frac{1}{\rho_{\rm s} c_{\rm s} V} \int_0^t \int_A \dot{q}_{\rm c}'' \d A \d t
+\ee
+where the surface heat flux, $\dot{q}_{\rm c}''$, is negative.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ht3d_average_temp}
+\caption[\ct{ht3d_average_temp} test case]{Average interior temperature loss of a cooling cube that has been calculated from the surface heat flux or computed directly via an averaging of interior temperatures.}
+\label{fig:ht3d_average_temp}
+\end{figure}
+
+
+\FloatBarrier
+
 \subsection{Heat Transfer to an I-Beam}
 \label{ht3d_beam_heating}
 

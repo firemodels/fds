@@ -2101,7 +2101,7 @@ END FUNCTION CUNNINGHAM
 
 
 !> \brief Compute the surface (mass or energy) density of a wall cell
-!> \param MODE Indicator of returned quantity (0) kg/m2, (1) kg/m3, (2) kJ/m2, (3) kJ/m3
+!> \param MODE Indicator of returned quantity (0) kg/m2, (1) kg/m3, (2) kJ/m2, (3) kJ/m3, (4) K
 !> \param SF Pointer to SURFACE
 !> \param ONE_D Pointer to BOUNDARY_ONE_D
 !> \param MATL_INDEX (Optional) Index of the material component
@@ -2111,7 +2111,7 @@ REAL(EB) FUNCTION SURFACE_DENSITY(MODE,SF,ONE_D,MATL_INDEX)
 INTEGER, INTENT(IN) :: MODE
 INTEGER, INTENT(IN), OPTIONAL :: MATL_INDEX
 INTEGER :: NWP,II2,N,ITMP
-REAL(EB) :: WGT,R_S(0:NWP_MAX),EPUM,DTMP
+REAL(EB) :: WGT,R_S(0:NWP_MAX),EPUM,DTMP,AVG_TMP
 TYPE(BOUNDARY_ONE_D_TYPE), INTENT(IN), POINTER :: ONE_D
 TYPE(SURFACE_TYPE), INTENT(IN), POINTER :: SF
 TYPE(MATERIAL_TYPE), POINTER :: ML
@@ -2130,14 +2130,16 @@ ELSE THERMALLY_THICK_IF
    ENDIF
 
    SURFACE_DENSITY = 0._EB
+   AVG_TMP = 0._EB             ! average temperature
+   EPUM = 1._EB                ! energy per unit mass
+
    NUMBER_WALL_POINTS_LOOP: DO II2=1,NWP
       AREA_VOLUME_SELECT: SELECT CASE(MODE)
-         CASE(0,2); WGT = ABS(R_S(II2-1)**SF%I_GRAD-R_S(II2)**SF%I_GRAD)/ &
-                          (REAL(SF%I_GRAD,EB)*(SF%INNER_RADIUS+SF%THICKNESS)**(SF%I_GRAD-1))
-         CASE(1,3); WGT = ABS(R_S(II2-1)**SF%I_GRAD-R_S(II2)**SF%I_GRAD)/(SF%INNER_RADIUS+SF%THICKNESS)**SF%I_GRAD
+         CASE(0,2,4); WGT = ABS(R_S(II2-1)**SF%I_GRAD-R_S(II2)**SF%I_GRAD)/ &
+                            (REAL(SF%I_GRAD,EB)*(SF%INNER_RADIUS+SF%THICKNESS)**(SF%I_GRAD-1))
+         CASE(1,3)  ; WGT = ABS(R_S(II2-1)**SF%I_GRAD-R_S(II2)**SF%I_GRAD)/(SF%INNER_RADIUS+SF%THICKNESS)**SF%I_GRAD
       END SELECT AREA_VOLUME_SELECT
 
-      EPUM = 1._EB ! energy per unit mass
       ITMP = MIN(I_MAX_TEMP-1,INT(ONE_D%TMP(II2)))
       DTMP = ONE_D%TMP(II2) - REAL(ITMP,EB)
       IF (PRESENT(MATL_INDEX)) THEN
@@ -2153,12 +2155,16 @@ ELSE THERMALLY_THICK_IF
                CASE(2,3)
                   ML => MATERIAL(N)
                   EPUM = ML%H(ITMP)+DTMP*(ML%H(ITMP+1)-ML%H(ITMP))
+               CASE(4)
+                  AVG_TMP = AVG_TMP + ONE_D%MATL_COMP(N)%RHO(II2)*WGT*ONE_D%TMP(II2)
             END SELECT ENERGY_SELECT_2
             SURFACE_DENSITY = SURFACE_DENSITY + ONE_D%MATL_COMP(N)%RHO(II2)*WGT*EPUM
          ENDDO
       ENDIF
 
    ENDDO NUMBER_WALL_POINTS_LOOP
+
+   IF (MODE==4) SURFACE_DENSITY = AVG_TMP/SURFACE_DENSITY
 
 ENDIF THERMALLY_THICK_IF
 
