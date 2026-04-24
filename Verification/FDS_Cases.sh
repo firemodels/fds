@@ -301,6 +301,7 @@ $QFDS -d Heat_Transfer insulated_steel_pipe.fds
 $QFDS -d Heat_Transfer insulated_steel_pipe_2d.fds
 $QFDS -d Heat_Transfer insulated_steel_plate.fds
 $QFDS -d Heat_Transfer ht1d_pile.fds
+$QFDS -d Heat_Transfer ht3d_average_temp.fds
 $QFDS -d Heat_Transfer ht3d_pile.fds
 $QFDS -d Heat_Transfer ht3d_beam_heating_1.fds
 $QFDS -d Heat_Transfer ht3d_beam_heating_2.fds

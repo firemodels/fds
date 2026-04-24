@@ -3237,7 +3237,7 @@ MAKE_KAPPA_ARRAYS: IF (.NOT.SOLID_PHASE_ONLY .AND. ANY(SPECIES%RADCAL_ID/='null'
 
       ! Set the Mean Beam Length to 10 cm unless the user desires otherwise
 
-      IF (PATH_LENGTH < 0._EB) PATH_LENGTH = 0.1_EB
+      IF (PATH_LENGTH < -TWENTY_EPSILON_EB) PATH_LENGTH = 0.1_EB
       ALLOCATE(SEGMENT_LENGTH_M(1))
       ALLOCATE(TOTAL_PRESSURE_ATM(1))
       ALLOCATE(TEMP_GAS(1))
@@ -3266,7 +3266,7 @@ MAKE_KAPPA_ARRAYS: IF (.NOT.SOLID_PHASE_ONLY .AND. ANY(SPECIES%RADCAL_ID/='null'
          T_LOOP_Z: DO K = 0,N_KAPPA_T
             TEMP_GAS(1) = RTMPMIN + K*(RTMPMAX-RTMPMIN)/N_KAPPA_T
             ! AMEAN will not be calculated close to RADTMP, where it cannot be solved
-            IF (ABS(TEMP_GAS(1)-RADTMP)<=0.4_EB*(RTMPMAX-RTMPMIN)/N_KAPPA_T .AND. PATH_LENGTH > 0.0_EB) THEN
+            IF (ABS(TEMP_GAS(1)-RADTMP)<=0.4_EB*(RTMPMAX-RTMPMIN)/N_KAPPA_T .AND. PATH_LENGTH > TWENTY_EPSILON_EB) THEN
                RCT_SKIP = K
                CYCLE T_LOOP_Z
             ENDIF
@@ -3292,7 +3292,7 @@ MAKE_KAPPA_ARRAYS: IF (.NOT.SOLID_PHASE_ONLY .AND. ANY(SPECIES%RADCAL_ID/='null'
                         PARTIAL_PRESSURES_ATM(14,1) = 1._EB
                   END SELECT
                   CALL SUB_RADCAL(AMEAN,AP0,RADIANCE,TRANSMISSIVITY)
-                  IF (PATH_LENGTH > 0.0_EB) THEN
+                  IF (PATH_LENGTH > TWENTY_EPSILON_EB) THEN
                      RADCAL_SPECIES2KAPPA(NS,J+1,K,IBND) = MIN(AMEAN,AP0)/BBF
                   ELSE ! zero path length
                      RADCAL_SPECIES2KAPPA(NS,J+1,K,IBND) = AP0/BBF

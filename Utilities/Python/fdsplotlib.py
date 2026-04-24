@@ -377,7 +377,7 @@ def dataplot(config_filename, **kwargs):
 
         flip_axis = str(pp.Flip_Axis).strip().lower() in ['yes', 'true', '1']
 
-        x_scaled = np.asarray(x, dtype=float).copy()
+        x_scaled = np.asarray(x, dtype=float).copy()+pp.d1_Ind_Offset
         y_scaled = np.asarray(y, dtype=float).copy()
 
         # ------------------------------------------------------------
@@ -543,7 +543,7 @@ def dataplot(config_filename, **kwargs):
         x, _ = get_data(M, pp.d2_Ind_Col_Name, start_idx)
         y, _ = get_data(M, pp.d2_Dep_Col_Name, start_idx)
 
-        x_scaled = np.asarray(x, dtype=float).copy()
+        x_scaled = np.asarray(x, dtype=float).copy()+pp.d2_Ind_Offset
         y_scaled = np.asarray(y, dtype=float).copy()
 
         # ------------------------------------------------------------
@@ -1733,6 +1733,7 @@ def define_plot_parameters(D, irow, lightweight=False):
         d.d1_Col_Name_Row   = get('d1_Col_Name_Row', 1)
         d.d1_Data_Row       = get('d1_Data_Row', 2)
         d.d1_Ind_Col_Name   = get('d1_Ind_Col_Name')
+        d.d1_Ind_Offset   = get('d1_Ind_Offset',0.0)
         d.d1_Dep_Col_Name   = get('d1_Dep_Col_Name')
         d.d1_Key            = get('d1_Key', '')
         d.d1_Style          = get('d1_Style', '')
@@ -1749,6 +1750,7 @@ def define_plot_parameters(D, irow, lightweight=False):
         d.d2_Col_Name_Row   = get('d2_Col_Name_Row', 1)
         d.d2_Data_Row       = get('d2_Data_Row', 2)
         d.d2_Ind_Col_Name   = get('d2_Ind_Col_Name')
+        d.d2_Ind_Offset   = get('d2_Ind_Offset',0.0)
         d.d2_Dep_Col_Name   = get('d2_Dep_Col_Name')
         d.d2_Key            = get('d2_Key', '')
         d.d2_Style          = get('d2_Style', '')
@@ -1805,6 +1807,7 @@ def define_plot_parameters(D, irow, lightweight=False):
             self.d1_Col_Name_Row      = D.values[irow,D.columns.get_loc('d1_Col_Name_Row')]
             self.d1_Data_Row          = D.values[irow,D.columns.get_loc('d1_Data_Row')]
             self.d1_Ind_Col_Name      = D.values[irow,D.columns.get_loc('d1_Ind_Col_Name')]
+            self.d1_Ind_Offset      = D.values[irow,D.columns.get_loc('d1_Ind_Offset')]
             self.d1_Dep_Col_Name      = D.values[irow,D.columns.get_loc('d1_Dep_Col_Name')]
             self.d1_Key               = D.values[irow,D.columns.get_loc('d1_Key')]
             self.d1_Style             = D.values[irow,D.columns.get_loc('d1_Style')]
@@ -1820,6 +1823,7 @@ def define_plot_parameters(D, irow, lightweight=False):
             self.d2_Col_Name_Row      = D.values[irow,D.columns.get_loc('d2_Col_Name_Row')]
             self.d2_Data_Row          = D.values[irow,D.columns.get_loc('d2_Data_Row')]
             self.d2_Ind_Col_Name      = D.values[irow,D.columns.get_loc('d2_Ind_Col_Name')]
+            self.d2_Ind_Offset      = D.values[irow,D.columns.get_loc('d2_Ind_Offset')]
             self.d2_Dep_Col_Name      = D.values[irow,D.columns.get_loc('d2_Dep_Col_Name')]
             self.d2_Key               = D.values[irow,D.columns.get_loc('d2_Key')]
             self.d2_Style             = D.values[irow,D.columns.get_loc('d2_Style')]
