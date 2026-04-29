@@ -716,13 +716,14 @@ Note: Reports of specific bugs, problems, feature requests, and enhancements sho
 
 The operation of FDS is based on a single (in some cases multiple) ASCII\footnote{ASCII -- American Standard Code for Information Interchange. There are 128 characters that make up the standard ASCII text.} text file containing parameters organized into {\em namelist}\footnote{A {\em namelist} is a Fortran input record.} groups. The input file provides FDS  with all of the necessary information to describe the scenario. The input file is saved with a name such as \ct{job_name.fds}, where \ct{job_name} is any character string that helps to identify the simulation. If this same string is repeated under the \ct{HEAD} namelist group within the input file, then all of the output files associated with the calculation will then have this common prefix name.
 
-There should be no blank spaces in the job name. Instead use the underscore character to represent a space.  Using an underscore characters instead of a space also applies to the general practice of naming directories on your system.
+There should be no blank spaces or periods in the job name. Instead use the underscore character to represent a space.  Using an underscore characters instead of a space also applies to the general practice of naming directories on your system.
 
 Be aware that FDS will simply over-write the output files of a given case if its assigned name is the same. This is convenient when developing an input file because you save on disk space. Just be careful not to overwrite a calculation that you want to keep.
 
 
 
 \section{Namelist Formatting}
+\label{namelist_formatting}
 
 Parameters are specified within the input file by using {\em namelist} formatted records. Each namelist record begins with the ampersand character, \ct{\&}, followed immediately by the name of the namelist group, then a comma-delimited list of the input parameters, and finally a forward slash, \ct{/}. For example, the line
 \begin{lstlisting}
@@ -745,7 +746,7 @@ MATL_MASS_FRACTION(1,1:3)=0.5,0.4,0.1
 \end{lstlisting}
 which means that the first three materials of layer 1 have mass fractions of 0.5, 0.4, and 0.1, respectively. The notation \ct{1:3} means array elements 1 through 3, inclusive.
 
-Note that character strings can be enclosed either by single or double quotation marks. Be careful not to create the input file by pasting text from something other than a simple text editor, in which case the punctuation marks may not transfer properly into the text file.
+Note that character strings can be enclosed either by single or double quotation marks. Be careful not to create the input file by pasting text from something other than a simple text editor, in which case the punctuation marks may not transfer properly into the text file and improper carriage return characters might get embedded in lines of input.
 
 Some text file encodings may not work on all systems. If file reading errors occur and no typographical errors can be found in the input file, try saving the input file using a different encoding. For example, the text file editor Notepad works fine on a Windows PC, but a file edited in Notepad may not work on Linux or macOS because of the difference in line endings between Windows and Unix/Linux operating systems. Other text editors, such as Notepad++, typically work better, but try a simple case first.
 
@@ -2329,7 +2330,7 @@ The \ct{MATL} namelist group is used to define the properties of the materials t
 
 \subsection{Structure of Solid Boundaries}
 
-Material layers and components are specified on the \ct{SURF} line via the array called \ct{MATL_ID(IL,IC)}. The argument \ct{IL} is an integer indicating the layer index, starting at 1, the layer at the exterior boundary. The argument \ct{IC} is an integer indicating the component index. For example, \ct{MATL_ID(2,3)='BRICK'} indicates that the third material component of the second layer is \ct{BRICK}. In practice, the materials are often listed as in the following example:
+Material layers and components are specified on the \ct{SURF} line via the array called \ct{MATL_ID(IL,IC)}. The argument \ct{IL} is an integer indicating the layer index, starting at 1, the layer at the exterior boundary. The argument \ct{IC} is an integer indicating the component index. For example, \ct{MATL_ID(2,3)='BRICK'} indicates that the third material component of the second layer is \ct{BRICK}. The \ct{THICKNESS} inputs apply to each layer in order. In practice, the materials are often listed as in the following example:
 \begin{lstlisting}
 &MATL ID             = 'INSULATOR'
       CONDUCTIVITY   = 0.041
@@ -2390,7 +2391,7 @@ For any solid material, specify its thermal \ct{CONDUCTIVITY} (\unit{W/(m.K)}), 
 \end{lstlisting}
 Notice that with temperature-dependent quantities, the \ct{RAMP} parameter \ct{T} means Temperature, and \ct{F} is the value of either the specific heat or conductivity. In this case, neither \ct{CONDUCTIVITY} nor \ct{SPECIFIC_HEAT} is given on the \ct{MATL} line, but rather the \ct{RAMP} names.
 
-The solid material can be given an \ct{ABSORPTION_COEFFICIENT} (1/m) that allows the radiation to penetrate and absorb into the solid. Correspondingly, the emission of the material is based on the internal temperatures, not just the surface. Materials with an \ct{ABSORPTION_COEFFICIENT} can only be applied to planar surfaces, not cylinders or spheres.
+The solid material can be given an \ct{ABSORPTION_COEFFICIENT} (1/m) that allows the radiation to penetrate and absorb into the solid. Correspondingly, the emission of the material is based on the internal temperatures, not just the surface. Materials with an \ct{ABSORPTION_COEFFICIENT} can only be applied to planar (Cartesian) surfaces, not cylinders or spheres.
 
 
 
@@ -2817,7 +2818,7 @@ FDS has a simple scaling-based pyrolysis model (SPyro) that scales burning rate 
 \item \ct{HRRPUA} (Required) Specified heat release rate per unit area (HRRPUA) for the \ct{SURF} which is multiplied by \ct{RAMP_Q}. Typically, HRRPUA is set to 1.0 \unit{kW/m^2} using this model.
 \item \ct{IGNITION_TEMPERATURE} (Required) Specifies ignition temperature of the material in degrees Celsius.
 \item \ct{INERT_Q_REF} Specifies whether the test data represents an inert test device where pyrolysis occurs without combustion. This flag applies to all specified test data if an array of experimental data is provided. (Default \ct{F})
-\item \ct{RAMP_Q} (Required) Specifies the \ct{ID} of a \ct{RAMP} which contains the experimental data with \ct{T} as time and \ct{F} as the measured HRRPUA in \unit{kW/m^2}. The test data should be adjusted so that 0~s in the ramp represents the time the sample started burning/pyrolyzing in the test. More than one \ct{ID} can be listed.
+\item \ct{RAMP_Q} (Required) Specifies the \ct{ID} of a \ct{RAMP} which contains the experimental data with \ct{T} as time and \ct{F} as the measured HRRPUA in \unit{kW/m^2}. The test data should be adjusted so that 0~s in the ramp represents the time the sample started burning/pyrolyzing in the test, and 0~s must be in the ramp. More than one \ct{ID} can be listed.
 \item \ct{REFERENCE_HEAT_FLUX} (Required) Specifies the radiant heat flux in \unit{kW/m^2} imposed by the test device to the sample prior to the start of pyrolysis, i.e., what a water-cooled heat flux gauge would measure. As many values should be specified as there are \ct{ID} listed for \ct{RAMP_Q}.
 \item \ct{REFERENCE_THICKNESS} Specifies the thickness of the sample in the experiment. If not specified, FDS will assume the experiment was at the same \ct{THICKNESS(1)} defined on the \ct{SURF} line. Note that this is just the combustible portion of the sample and not any insulation or other inert backing materials. (Default \ct{THICKNESS(1)})
 \end{itemize}
@@ -6009,7 +6010,7 @@ To account for subgrid-scale turbulent motions, add \ct{TURBULENT_DISPERSION=T} 
 \label{info:liquid_droplets}
 Lagrangian particles that are not just massless tracers fall into two main categories -- liquid droplets or solid particles. This section describes the former; and the next, the latter.
 
-To define an evaporating liquid droplet, you must specify the name of the gas species created by evaporation via the \ct{SPEC_ID} on the \ct{PART} line.  For example,
+To define an evaporating liquid droplet, you must specify the name of the gas species created by evaporation via the \ct{SPEC_ID} on the \ct{PART} line. This species must be a single species and not a lumped mixture of multiple species.  For example,
 \begin{lstlisting}
 &PART ID='my droplets', SPEC_ID='WATER VAPOR', ... /
 \end{lstlisting}
@@ -7236,6 +7237,7 @@ The heat release rate of burning vegetation is the sum of the combustion of Pyro
 \ee
 
 \subsection{Reaction Rates}
+\label{veg_reaction_rates}
 
 In the referenced papers~\cite{Porterie:2006,Morvan:CF2004,Houssami:2016}, the reaction rates are written in terms of ``bulk'' quantities. For example,  in the paper by Mell et al.~\cite{Mell:2009}, the mass of dry vegetation per unit volume is denoted $\langle m^{\prime\prime\prime}_{\rm dry}\rangle_{V_{\rm b}}$, where the angled brackets denote the explicit LES filtering over the grid cell volume $V_{\rm b}$. However, in FDS the reaction rates are written in terms of the component densities of the composite solid:
 \be
@@ -9724,7 +9726,6 @@ Every device (\ct{DEVC}) records a particular \ct{QUANTITY}. Usually this \ct{QU
 There are two types of \ct{DEVC} output. The first is a time history of the given \ct{QUANTITY} over the course of the simulation. The second is a time-averaged profile consisting of a linear array of point devices. Each is explained below.
 
 \subsection{Gas Phase Quantity at a Single Point}
-\label{info:DEVC_position}
 
 If you just want to record the time history of, say, the temperature at a particular point in the gas, add a line like:
 \begin{lstlisting}
@@ -9735,6 +9736,7 @@ and a column will be added to the output file \ct{CHID_devc.csv} under the label
 In cases where the \ct{QUANTITY} is defined on a cell face, like \ct{'U-VELOCITY'}, FDS chooses the nearest cell face and reports the corresponding value.
 
 \subsection{Solid Phase Quantity at a Single Point}
+\label{info:DEVC_position}
 
 When prescribing a solid phase quantity, be sure to position the device at a solid surface. It is not always obvious where the solid surface is since the mesh does not always align with the input obstruction locations. To help locate the appropriate surface, the parameter \ct{IOR} {\em must} be included when designating a solid phase quantity, except when using one of the spatial statistics options that are described in Sec.~\ref{info:statistics} in which case the output quantity is not associated with just a single point on the surface. If the orientation of the solid surface is in the positive $x$ direction, set \ct{IOR=1}. If it is in the negative $x$ direction, set \ct{IOR=-1}, and so on for the $y$ and $z$ directions. For example, the line
 \begin{lstlisting}
@@ -13877,7 +13879,7 @@ Keyword             & Type     & Description                      & Units       
 104  \> \ct{OVERWRITE=F and concatenated file ... exists.} \> Section~\ref{info:OVERWRITE}  \\
 105  \> \ct{Input file ... has line with ... characters.} \> Section~\ref{info:CATF}  \\
 106  \> \ct{CATF file ... has line with ... characters.} \> Section~\ref{info:CATF}  \\
-107  \> \ct{Hidden carriage return character in line starting with ...} \> Section~\ref{info:input_file_rules}  \\
+107  \> \ct{Hidden carriage return character in line starting with ...} \> Section~\ref{info:namelist_formatting}  \\
 108  \> \ct{No periods allowed in CHID.} \> Section~\ref{info:input_file_rules}  \\
 109  \> \ct{Remove the file ... from the current directory.} \> Section~\ref{info:restart}  \\
 110  \> \ct{All meshes must be CYLINDRICAL ...} \> Section~\ref{info:2D}  \\
@@ -13923,11 +13925,12 @@ Keyword             & Type     & Description                      & Units       
 147  \> \ct{Species ... needs a name (ID=...).} \> Section~\ref{info:SPEC_Basics}  \\
 148  \> \ct{SPEC ... cannot redefine AIR unless ...} \> Section~\ref{info:AIR}  \\
 149  \> \ct{SPEC ... cannot specify both SPECIFIC_HEAT and RAMP_CP.} \> Section~\ref{user_defined_gas_species_props}  \\
-150  \> \ct{SPEC ... cannot specify both SPECIFIC_HEAT_LIQUID ...} \> Section~\ref{user_defined_gas_species_props}  \\
+150  \> \ct{SPEC ... cannot specify both SPECIFIC_HEAT_LIQUID and RAMP_C_L} \> Section~\ref{user_defined_gas_species_props}  \\
 151  \> \ct{SPEC ... cannot specify both CONDUCTIVITY and RAMP_K.} \> Section~\ref{user_defined_gas_species_props}  \\
 152  \> \ct{SPEC ... cannot specify both DIFFUSIVITY and RAMP_D.} \> Section~\ref{user_defined_gas_species_props}  \\
 153  \> \ct{SPEC ... cannot specify both VISCOSITY and RAMP_MU.} \> Section~\ref{user_defined_gas_species_props}  \\
-154  \> \ct{SPEC ... cannot define both REFERENCE_ENTHALPY and ...} \> Section~\ref{user_defined_gas_species_props}  \\
+154  \> \ct{SPEC ... cannot define both REFERENCE_ENTHALPY and} \> Section~\ref{user_defined_gas_species_props}  \\
+     \> \ct{ENTHALPY_OF_FORMATION.} \\
 155  \> \ct{Species ... has the same ID as species ...} \> Section~\ref{info:SPEC_Basics}  \\
 156  \> \ct{Cannot define MASS_FRACTION_0 for a LUMPED ...} \> Section~\ref{info:MASS_FRACTION_0}  \\
 157  \> \ct{SPEC ...: If one of SPECIFIC_HEAT_LIQUID ...} \> Section~\ref{info:liquid_props}  \\
@@ -13955,7 +13958,8 @@ Keyword             & Type     & Description                      & Units       
 180  \> \ct{SPEC ... does not have a SPECIFIC_HEAT_LIQUID ...} \> Section~\ref{info:liquid_props}  \\
 181  \> \ct{SPEC ... does not have a MELTING_TEMPERATURE.} \> Section~\ref{info:liquid_props}  \\
 182  \> \ct{SPEC ... does not have a VAPORIZATION_TEMPERATURE.} \> Section~\ref{info:liquid_props}  \\
-183  \> \ct{SPEC ... MELTING_TEMPERATURE must be less than ...} \> Section~\ref{info:liquid_props}  \\
+183  \> \ct{SPEC ... MELTING_TEMPERATURE must be less than} \> Section~\ref{info:liquid_props}  \\
+     \> \ct{VAPORIZATION_TEMPERATURE.} \\
 184  \> \ct{SPEC ... does not have a HEAT_OF_VAPORIZATION.} \> Section~\ref{info:liquid_props}  \\
 185  \> \ct{SPEC ... does not have a DENSITY_LIQUID.} \> Section~\ref{info:liquid_props}  \\
 187  \> \ct{SPEC ... is used for droplets and does not have liquid props.} \> Section~\ref{info:liquid_props}  \\
@@ -13981,7 +13985,7 @@ Keyword             & Type     & Description                      & Units       
 208  \> \ct{REAC ... THIRD_EFF primitive species ... not found.} \> Section~\ref{info:third_body}  \\
 209  \> \ct{Name of ODE_SOLVER is not recognized.} \> Section~\ref{info:chem_integration}  \\
 210  \> \ct{REAC ... Missing an ENTHALPY_OF_FORMATION.} \> Section~\ref{info:liquid_props}  \\
-212  \> \ct{REAC ... Reversible reaction species ... missing G_F.} \> Section~\ref{info:gibbs_energy}  \\
+212  \> \ct{REAC ... Reversible reaction SPEC ... missing RAMP_G_F.} \> Section~\ref{info:gibbs_energy}  \\
      \>                                                                               \>                                     \\
 213  \> \ct{PART ... cannot have both a specified DIAMETER and a SURF_ID.} \> Section~\ref{info:PART_SURF}  \\
 214  \> \ct{PART ... requires a specified DIAMETER.} \> Section~\ref{info:particle_size}  \\
@@ -14018,7 +14022,7 @@ Keyword             & Type     & Description                      & Units       
 253  \> \ct{MATL ... DENSITY=0.} \> Section~\ref{info:thermal_properties}  \\
 254  \> \ct{MATL ... CONDUCTIVITY=0.} \> Section~\ref{info:thermal_properties}  \\
 255  \> \ct{MATL ... SPECIFIC_HEAT=0.} \> Section~\ref{info:thermal_properties}  \\
-256  \> \ct{MATL ... SURFACE_OXIDATION_MODEL but no OXYGEN.} \> Section~\ref{vegetation_model}  \\
+256  \> \ct{MATL ... SURFACE_OXIDATION_MODEL but no OXYGEN.} \> Section~\ref{veg_reaction_rates}  \\
 257  \> \ct{Residue ... of ... is not defined.} \> Section~\ref{info:solid_pyrolysis}  \\
 258  \> \ct{PARTicle ... corresponding to MATL ... cannot be MASSLESS.} \> Section~\ref{info:solid_pyrolysis}  \\
 259  \> \ct{MATL ... PART_ID ... not defined.} \> Section~\ref{info:solid_pyrolysis}  \\
@@ -14030,7 +14034,7 @@ Keyword             & Type     & Description                      & Units       
 265  \> \ct{MATL ... Sum of NU inputs more than 1.} \> Section~\ref{info:solid_pyrolysis}  \\
 266  \> \ct{REAC ... FUEL ... is not a predefined or tracked species.} \> Section~\ref{info:simple_chemistry}  \\
 267  \> \ct{REAC ... has no consumed species.} \> Section~\ref{info:REAC_Diagnostics}  \\
-268  \> \ct{BACK tracked species ... not found.} \> Section~\ref{info:BACK}  \\
+268  \> \ct{BACK tracked species ... not found.} \> Section~\ref{info:BACKGROUND_SPECIES}  \\
 269  \> \ct{MATL ... The specified pyrolysis parameters result in A >...} \> Section~\ref{info:kinetic_parameters}  \\
      \>                                                                               \>                                     \\
 299  \> \ct{SURF ... has no solid or particle for TGA.} \> Section~\ref{info:TGA_DSC_MCC} \\
@@ -14041,7 +14045,7 @@ Keyword             & Type     & Description                      & Units       
 304  \> \ct{SURF ... One layer only for TGA_ANALYSIS=T.} \> Section~\ref{info:TGA_DSC_MCC}  \\
 305  \> \ct{SURF ... indicates a level set simulation ...} \> Section~\ref{info:level_set}  \\
 306  \> \ct{SURF ... cannot have a specified flux and a MATL_ID.} \> Section~\ref{info:MASS_FLUX}  \\
-307  \> \ct{SURF ... must have a specified THICKNESS for Layer ...} \> Section~\ref{info:SURF_MATL_Basics}  \\
+307  \> \ct{SURF ... must have a specified THICKNESS for Layer ...} \> Section~\ref{info:MATL}  \\
 308  \> \ct{SURF ... needs a RADIUS or THICKNESS.} \> Section~\ref{info:GEOMETRY}  \\
 309  \> \ct{SURF ... BACKING ... not recognized.} \> Section~\ref{info:BACKING}  \\
 310  \> \ct{SURF ... must specify TMP_FRONT for CONVERT_VOLUME_TO_MASS.} \> Section~\ref{info:MASS_FLUX}  \\
@@ -14053,7 +14057,7 @@ Keyword             & Type     & Description                      & Units       
 316  \> \ct{SURF ... N_LAYER_CELLS_MAX must be > 0.} \> Section~\ref{info:solid_phase_stability}  \\
 317  \> \ct{SURF ... Specify either ROUGHNESS or Z_0, not both.} \> Section~\ref{info:WALL_MODEL}  \\
 318  \> \ct{SURF ... MASS_FLUX_TOTAL is only for outflow.} \> Section~\ref{info:MASS_FLUX_TOTAL}  \\
-319  \> \ct{SURF ... must have a MATL_ID.} \> Section~\ref{info:HT3D_Limitations}  \\
+319  \> \ct{SURF ... for use with HT3D must have a MATL_ID.} \> Section~\ref{info:HT3D_Limitations}  \\
 320  \> \ct{SURF ... cannot use both MASS_FLUX and MASS_FRACTION.} \> Section~\ref{info:MASS_FLUX}  \\
 321  \> \ct{SURF ... MASS_FLUX cannot be less than zero.} \> Section~\ref{info:MASS_FLUX}  \\
 322  \> \ct{SURF ... cannot use both MASS_FLUX and VEL.} \> Section~\ref{info:MASS_FLUX}  \\
@@ -14067,7 +14071,7 @@ Keyword             & Type     & Description                      & Units       
 330  \> \ct{SURF ... cannot use background species for MASS_FRACTION.} \> Section~\ref{info:MASS_FLUX}  \\
 331  \> \ct{SURF ... cannot use a RAYLEIGH model with GRAV=0.} \> Section~\ref{info:convection}  \\
 332  \> \ct{SURF ... REFERENCE_HEAT_FLUX requires HRRPUA, ...} \> Section~\ref{info:scaled_burning}  \\
-333  \> \ct{SURF ... MATL_ID ... not found.} \> Section~\ref{info:Leaks}  \\
+333  \> \ct{SURF ... MATL_ID ... not found.} \> Section~\ref{info:MATL}  \\
 334  \> \ct{SURF ... has too many materials.} \> Section~\ref{info:solid_pyrolysis}  \\
 335  \> \ct{SURF ... cannot have a reacting MATL and IGNITION_TEMPERATURE.} \> Section~\ref{info:specified_burning}  \\
 336  \> \ct{SURF ... cannot use both ADIABATIC and NET and CONVECTIVE ...} \> Section~\ref{info:adiabatic}  \\
@@ -14165,7 +14169,7 @@ Keyword             & Type     & Description                      & Units       
 446  \> \ct{SURF REFERENCE_THICKNESS values must increase for each} \> Section~\ref{info:scaled_burning}  \\
      \> \ct{new group of REFERENCE_HEAT_FLUX.} \\
 447  \> \ct{RAMP ... used with REFERENCE_HEAT_FLUX must start at T = 0.} \> Section~\ref{info:scaled_burning}  \\
-448  \> \ct{PROF ... MATL_ID ... not a part of surface type ...} \> Section~\ref{info:solidoutputquantities}  \\
+448  \> \ct{PROF ... MATL_ID ... not a part of surface type ...} \> Section~\ref{info:PROF}  \\
      \>                                                                               \>                          \\
 501 \> \ct{No ID provided ...} \> Section~\ref{info:HVAC}  \\
 502 \> \ct{Invalid TYPE_ID provided ...} \> Section~\ref{info:HVAC}  \\

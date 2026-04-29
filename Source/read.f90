@@ -4719,7 +4719,7 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
             ENDIF
             IF (C<=TWENTY_EPSILON_EB .AND. H<=TWENTY_EPSILON_EB) THEN
                WRITE(MESSAGE,'(A,I0,A)') 'ERROR(192): REAC ',NR,&
-                                         ' Specify fuel chemistry using C and/or H when using simple chemistry'
+                                         ' Fuel must contain C and/or H when using simple chemistry'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
          ENDIF
@@ -5489,7 +5489,7 @@ IF (TRIM(ODE_SOLVER)/='null') THEN
             YP2ZZ(SPECIES_MIXTURE(NS)%SINGLE_SPEC_INDEX) = NS
          ENDDO
       CASE DEFAULT
-         WRITE(MESSAGE,'(A)') 'ERROR(209): Name of ODE_SOLVER is not recognized.'
+         WRITE(MESSAGE,'(A)') 'ERROR(209): COMB name of ODE_SOLVER is not recognized.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
    END SELECT
 ELSE
@@ -5720,8 +5720,8 @@ REAC_LOOP: DO NR=1,N_REACTIONS
    IF (RN%REVERSE) THEN
       DO NS = 1, N_TRACKED_SPECIES
          IF (ABS(RN%NU(NS)) > TWENTY_EPSILON_EB .AND. .NOT. SPECIES_MIXTURE(NS)%EXPLICIT_G_F) THEN
-            WRITE(MESSAGE,'(A,I0,A,A,A)') 'ERROR(212): REAC ',NR,'. Reversible reaction species, ',&
-                                          TRIM(SPECIES_MIXTURE(NS)%ID),' missing G_F.'
+            WRITE(MESSAGE,'(A,I0,A,A,A)') 'ERROR(212): REAC ',NR,'. Reversible reaction SPEC, ',&
+                                          TRIM(SPECIES_MIXTURE(NS)%ID),', missing RAMP_G_F.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
       ENDDO
@@ -8065,7 +8065,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
    IF ((VARIABLE_THICKNESS .OR. HT3D) .AND. THICKNESS(1)<TWENTY_EPSILON_EB) THICKNESS(1) = 0.1_EB
    IF ((VARIABLE_THICKNESS .OR. HT3D) .AND. MATL_ID(1,1)=='null') THEN
       IF (ANY(MASS_FLUX>0._EB) .OR. HRRPUA>0._EB .OR. MLRPUA>0._EB) THEN
-         WRITE (MESSAGE,'(A,A,A)') 'ERROR(319): SURF ',TRIM(SF%ID),' must have a MATL_ID.'
+         WRITE (MESSAGE,'(A,A,A)') 'ERROR(319): SURF ',TRIM(SF%ID),' for use with HT3D must have a MATL_ID.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ELSE
          MATL_ID(1,1) = 'MATERIAL PLACEHOLDER'
