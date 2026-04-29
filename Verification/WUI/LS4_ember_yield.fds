@@ -36,7 +36,6 @@
       DRAG_LAW='DISK'
       SURF_ID='firebrand'
       COLOR='ORANGE'
-      PROP_ID='disk image'
       SAMPLING_FACTOR=1
       QUANTITIES='PARTICLE WEIGHTING FACTOR','PARTICLE TEMPERATURE'/
 
