@@ -7829,6 +7829,18 @@ as shown in Fig.~\ref{sphere_leak_fig}.
 \label{sphere_leak_fig}
 \end{figure}
 
+\subsection{Sprinklers}
+\label{obst_geom_sprk}
+
+This verification case consists of six meshes (6~m by 6~m by 3~m) with a 10~cm grid resolution. Each mesh has a 10~cm high square burner centered on the floor is 0.36~\unit{m^2} in area with an HRRPUA of 2000~\unit{kW/m^2} and a t$^2$ growth time of 120~s. A sprinkler with an RTI of 50~\unit{(m.s)\tothe{1/2}} is placed below the ceiling at a distance of 2.5~m from the center of the burner. Three of the meshes use \ct{OBST} for the burner, and the other three use \ct{GEOM}. The meshes use \ct{SHAPE} and \ct{MULT} (\ct{OBST}) or \ct{MOVE} (\ct{GEOM}) to rotate the burner 0, 20, or 45\unit{\degree}. The six cases should have nominally the same plume and ceiling jet dynamics meaning the sprinklers should have nominally the same temperature rise over time.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[height=2.2in]{../FDS_Verification_Guide/SCRIPT_FIGURES/obst_geom_sprk.pdf}
+	\caption[The \ct{obst_geom_sprk} test case]{Test of plume and ceiling jet dynamics for complex geometry.}
+	\label{fig:geom_restart}
+\end{figure}
+
 \section{Restart Function}
 \label{geom_restart}
 \label{geom_ls_restart}
