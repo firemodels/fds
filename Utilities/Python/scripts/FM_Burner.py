@@ -38,7 +38,7 @@ for i_fuel in range(4):
                 fid.write(f"{XO2_FDS[ii]:5.3f},{eta:6.2f},{chi_r:6.2f}\n")
 
 # --- Second part: Chi_r vs Time for different O2 levels ---
-O2_name = ['20p9', '19p0', '16p8', '15p2']
+O2_name = ['20p9', '16p8', '15p2']
 
 for i_O2 in range(4):
     for fds_resolution in range(3):
