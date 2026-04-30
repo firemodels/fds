@@ -15,8 +15,8 @@ fuel_name = ['C2H4', 'C3H6', 'C3H8', 'CH4']
 res_name = ['2cm', '1cm', '5mm']
 
 # --- First part: XO2, eta, Chi_R ---
-for i_fuel in range(4):
-    for fds_resolution in range(3):
+for i_fuel in range(len(fuel_name)):
+    for fds_resolution in range(len(res_name)):
         dev_file = os.path.join(outdir, f"FM_15cm_Burner_{fuel_name[i_fuel]}_{res_name[fds_resolution]}_devc.csv")
         hrr_file = os.path.join(outdir, f"FM_15cm_Burner_{fuel_name[i_fuel]}_{res_name[fds_resolution]}_hrr.csv")
 
@@ -40,8 +40,8 @@ for i_fuel in range(4):
 # --- Second part: Chi_r vs Time for different O2 levels ---
 O2_name = ['20p9', '16p8', '15p2']
 
-for i_O2 in range(4):
-    for fds_resolution in range(3):
+for i_O2 in range(len(O2_name)):
+    for fds_resolution in range(len(res_name)):
         hrr_file = os.path.join(outdir, f"FM_15cm_Burner_C2H4_{O2_name[i_O2]}_{res_name[fds_resolution]}_hrr.csv")
         HRR = pd.read_csv(hrr_file, header=1)
 
