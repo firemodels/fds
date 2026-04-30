@@ -28,8 +28,8 @@ $QFDS -p 96  $DEBUG $QUEUE -d $INDIR FM_15cm_Burner_C2H4_15p2_1cm.fds
 $QFDS -p 96  $DEBUG $QUEUE -d $INDIR FM_15cm_Burner_C2H4_16p8_1cm.fds
 $QFDS -p 96  $DEBUG $QUEUE -d $INDIR FM_15cm_Burner_C2H4_20p9_1cm.fds
 
-$QFDS -p 768  $DEBUG $QUEUE -d $INDIR FM_15cm_Burner_C2H4_15p2_5mm.fds
-$QFDS -p 768  $DEBUG $QUEUE -d $INDIR FM_15cm_Burner_C2H4_16p8_5mm.fds
-$QFDS -p 768  $DEBUG $QUEUE -d $INDIR FM_15cm_Burner_C2H4_20p9_5mm.fds
+$QFDS -p 180  $DEBUG $QUEUE -d $INDIR FM_15cm_Burner_C2H4_15p2_5mm.fds
+$QFDS -p 180  $DEBUG $QUEUE -d $INDIR FM_15cm_Burner_C2H4_16p8_5mm.fds
+$QFDS -p 180  $DEBUG $QUEUE -d $INDIR FM_15cm_Burner_C2H4_20p9_5mm.fds
 
 echo FDS cases submitted
