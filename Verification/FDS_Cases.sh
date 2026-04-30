@@ -228,7 +228,7 @@ $QFDS -p 4 -d Fires box_burn_away10.fds
 $QFDS -p 4 -d Fires box_burn_away11.fds
 $QFDS -d Fires box_burn_away_2D.fds
 $QFDS -d Fires box_burn_away_2D_residue.fds
-$QFDS -p 4 -d Fires couch.fds
+$QFDS -p 8 -d Fires couch.fds
 $QFDS -d Fires fire_const_gamma.fds
 $QFDS -d Fires spray_burner.fds
 $QFDS -d Fires HoC_Ideal.fds
