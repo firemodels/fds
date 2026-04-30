@@ -7959,7 +7959,7 @@ A sprinkler, known as \ct{'Spr-1'}, is located at a point in space given by \ct{
 \item \ct{C_FACTOR} Conduction Factor in units of \unit{(m/s)\tothe{1/2}}. (Default 0.)
 \item \ct{ACTIVATION_TEMPERATURE} in units of \unit{\degreeCelsius}. (Default 74~\unit{\degreeCelsius})
 \item \ct{INITIAL_TEMPERATURE} of the link in units of \unit{\degreeCelsius}. (Default \ct{TMPA})
-\item \ct{FLOW_RATE} in units of L/min. This parameter is only appropriate for liquid droplets. An alternative is to provide the \ct{K_FACTOR} ($K$) in units of \unit{L/(min.bar\tothe{1/2})} and the \ct{OPERATING_PRESSURE}, the gauge pressure ($p$) at the sprinkler, in units of bar. The flow rate is then given by $K \sqrt{p}$. Note that 1~bar is equivalent to 14.5~psi, 1~gpm (gal/min) is equivalent to 3.785~L/min, 1~\unit{gpm/psi\tothe{1/2}} is equivalent to 14.41~\unit{L/(min.bar\tothe{1/2})}.
+\item \ct{FLOW_RATE} in units of L/min. This parameter is only appropriate for liquid droplets. An alternative is to provide the \ct{K_FACTOR} ($K$) in units of \unit{L/(min.bar\tothe{1/2})} and the \ct{OPERATING_PRESSURE}, the gauge pressure ($p$) at the sprinkler, in units of bar. The flow rate is then given by $K \sqrt{p}$. Note that 1~bar is equivalent to 14.5~psi, 1~gpm (gal/min) is equivalent to 3.785~L/min, 1~\unit{gpm/psi\tothe{1/2}} is equivalent to 14.41~\unit{L/(min.bar\tothe{1/2})}. 
 \item \ct{MASS_FLOW_RATE} in units of kg/s. This parameter can be used instead of \ct{FLOW_RATE} for liquid droplets, but it must be used for solid particles. If \ct{MASS_FLOW_RATE} is specified, the \ct{PARTICLE_VELOCITY} must also be specified.
 \item \ct{OFFSET} Radius (m) of a sphere surrounding the sprinkler where the water droplets are initially placed in the simulation (Default 0.05~m). It is assumed that beyond the \ct{OFFSET} the droplets have completely broken up and are transported independently of each other. The entire spray pattern of the sprinkler need not lie within one mesh, but the volume immediately surrounding the sprinkler itself must lie in one mesh. For very small droplets, consider setting offset to be at least one grid cell away from the sprinkler.
 \item \ct{PARTICLE_VELOCITY}  Initial droplet velocity. (Default 0~m/s)
@@ -7967,7 +7967,7 @@ A sprinkler, known as \ct{'Spr-1'}, is located at a point in space given by \ct{
 \item \ct{SPRAY_ANGLE} A pair of angles (in degrees) through which the droplets are sprayed. The angles outline a conical spray pattern relative to the south pole of the sphere centered at the sprinkler with radius \ct{OFFSET}. For example, \ct{SPRAY_ANGLE=30.,80.} directs the water spray through a band between 30\unit{\degree} and 80\unit{\degree} of the \ct{ORIENTATION} vector, which is (0,0,-1) by default (see Figure~\ref{Sprinkler_Sketch}). Elliptical spray patterns can be specified via a pair of spray angles. For example, \ct{SPRAY_ANGLE(1:2,1)=0.,60.}  and \ct{SPRAY_ANGLE(1:2,2)=0.,30.}, defines a spray pattern with 60 degree angle in the direction of the $x$ axis and a 30 degree angle in the direction of the $y$ axis. From above, the spray pattern resembles an ellipse. \ct{SPRAY_PATTERN_SHAPE} determines how the droplets are distributed within the specified \ct{SPRAY_ANGLE}. Choices are \ct{'UNIFORM'} and \ct{'GAUSSIAN'}. The default distribution is \ct{'GAUSSIAN'}. The parameter \ct{SPRAY_PATTERN_MU} controls the latitude of the maximum density of droplets for the \ct{'GAUSSIAN'} distribution. The width of the distribution is controlled by the parameter \ct{SPRAY_PATTERN_BETA}.
 \item \ct{SPRAY_PATTERN_TABLE} Name of a set of \ct{TABL} lines containing the description of the spray pattern.
 \item \ct{PART_ID} The name of the \ct{PART} line containing properties of the droplets. See Chapter~\ref{info:PART} for additional details.
-\item \ct{PRESSURE_RAMP} The name of the \ct{RAMP} lines specifying the dependence of pipe pressure on the number of active sprinklers and nozzles.
+\item \ct{PRESSURE_RAMP} The name of the \ct{RAMP} lines specifying the dependence of pipe pressure on the number of active sprinklers and nozzles. If only \ct{K_FACTOR} is specified for a sprinkler with a \ct{PRESSURE_RAMP}, then the \ct{K_FACTOR) is assumed to be 10~\unit{gpm/psi\tothe{1/2}}.
 \item \ct{SMOKEVIEW_ID} The name of a drawing of a sprinkler to include in the Smokeview animation.
 \end{itemize}
 
@@ -13066,11 +13066,11 @@ Keyword                           & Type          & Description                 
 Keyword                           & Type          & Description                               & Units                & Default   \\ \hline  \hline
 \endhead
 \ct{ACTIVATION_OBSCURATION}       & Real          & Section~\ref{info:smoke_detector}         & \%/m                  & 3.24                 \\ \hline
-\ct{ACTIVATION_TEMPERATURE}       & Real          & Section~\ref{info:sprinklers}             & \unit{\degreeCelsius} & 74.                  \\ \hline
+\ct{ACTIVATION_TEMPERATURE}       & Real          & Section~\ref{info:sprinklers}             & \unit{\degreeCelsius} &                      \\ \hline
 \ct{ALPHA_C}                      & Real          & Section~\ref{info:smoke_detector}         &                       & 1.8                  \\ \hline
 \ct{ALPHA_E}                      & Real          & Section~\ref{info:smoke_detector}         &                       & 0.                   \\ \hline
-\ct{BETA_C}                       & Real          & Section~\ref{info:smoke_detector}         &                       & 1.                   \\ \hline
-\ct{BETA_E}                       & Real          & Section~\ref{info:smoke_detector}         &                       & 1.                   \\ \hline
+\ct{BETA_C}                       & Real          & Section~\ref{info:smoke_detector}         &                       &                      \\ \hline
+\ct{BETA_E}                       & Real          & Section~\ref{info:smoke_detector}         &                       &                      \\ \hline
 \ct{CALIBRATION_CONSTANT}         & Real          & Section~\ref{info:bidir_probe}            &                       & 0.93                 \\ \hline
 \ct{CHARACTERISTIC_VELOCITY}      & Real          & Section~\ref{info:pressure_coefficient}   & m/s                   & 1.                   \\ \hline
 \ct{C_FACTOR}                     & Real          & Section~\ref{info:sprinklers}             & \unit{(m/s)\tothe{1/2}} & 0.                   \\ \hline
@@ -13087,15 +13087,15 @@ Keyword                           & Type          & Description                 
 \ct{HISTOGRAM}                    & Logical       & Section~\ref{info:histograms}             &                       & F                    \\ \hline
 \ct{HISTOGRAM_CUMULATIVE}         & Logical       & Section~\ref{info:histograms}             &                       & F                    \\ \hline
 \ct{HISTOGRAM_LIMITS(2)}          & Real Array    & Section~\ref{info:histograms}             &                       &                      \\ \hline
-\ct{HISTOGRAM_NBINS}              & Integer       & Section~\ref{info:histograms}             &                       & 10                   \\ \hline
+\ct{HISTOGRAM_NBINS}              & Integer       & Section~\ref{info:histograms}             &                       &                      \\ \hline
 \ct{HISTOGRAM_NORMALIZE}          & Logical       & Section~\ref{info:histograms}             &                       & T                    \\ \hline
 \ct{ID}                           & Character     & Section~\ref{info:PROP}                   &                       &                      \\ \hline
 \ct{INITIAL_TEMPERATURE}          & Real          & Section~\ref{info:sprinklers}             & \unit{\degreeCelsius} & \ct{TMPA}           \\ \hline
-\ct{K_FACTOR}                     & Real          & Section~\ref{info:sprinklers}             & \unit{L/(min.bar^{\ha})} & 1.                \\ \hline
-\ct{LENGTH}                       & Real          & Section~\ref{info:smoke_detector}         & m                     & 1.8                  \\ \hline
+\ct{K_FACTOR}                     & Real          & Section~\ref{info:sprinklers}             & \unit{L/(min.bar^{\ha})} &                   \\ \hline
+\ct{LENGTH}                       & Real          & Section~\ref{info:smoke_detector}         & m                     &                      \\ \hline
 \ct{MASS_FLOW_RATE}               & Real          & Section~\ref{info:sprinklers}             & kg/s                  &                      \\ \hline
 \ct{OFFSET}                       & Real          & Section~\ref{info:sprinklers}             & m                     & 0.05                 \\ \hline
-\ct{OPERATING_PRESSURE}           & Real          & Section~\ref{info:sprinklers}             & bar                   & 1.                   \\ \hline
+\ct{OPERATING_PRESSURE}           & Real          & Section~\ref{info:sprinklers}             & bar                   &                      \\ \hline
 \ct{ORIFICE_DIAMETER}             & Real          & Section~\ref{info:sprinklers}             & m                     & 0.                   \\ \hline
 \ct{PARTICLES_PER_SECOND}         & Integer       & Section~\ref{info:sprinklers}             &                       & 5000                 \\ \hline
 \ct{PARTICLE_VELOCITY}            & Real          & Section~\ref{info:sprinklers}             & m/s                   & 0.                   \\ \hline
@@ -13106,10 +13106,10 @@ Keyword                           & Type          & Description                 
 \ct{PDPA_N}                       & Integer       & Section~\ref{PDPA}                        &                       & 0                    \\ \hline
 \ct{PDPA_NORMALIZE}               & Logical       & Section~\ref{PDPA}                        &                       & \ct{T}              \\ \hline
 \ct{PDPA_RADIUS}                  & Real          & Section~\ref{PDPA}                        & m                     & 0.                   \\ \hline
-\ct{PDPA_START}                   & Real          & Section~\ref{PDPA}                        & s                     & 0.                   \\ \hline
+\ct{PDPA_START}                   & Real          & Section~\ref{PDPA}                        & s                     & \ct{T_BEGIN}         \\ \hline
 \ct{PRESSURE_RAMP}                & Character     & Section~\ref{info:sprinklers}             &                       &                      \\ \hline
 \ct{PROBE_DIAMETER}               & Real          & Section~\ref{info:bidir_probe}            & m                     &  0.0254              \\ \hline
-\ct{P0}                           & Real          & Section~\ref{info:velocity_patch}         & m/s                   &  0.                  \\ \hline
+\ct{P0}                           & Real          & Section~\ref{info:velocity_patch}         & m/s                   &                      \\ \hline
 \ct{PX(3)}                        & Real          & Section~\ref{info:velocity_patch}         & m/s                   &  0.                  \\ \hline
 \ct{PXX(3,3)}                     & Real          & Section~\ref{info:velocity_patch}         & m/s                   &  0.                  \\ \hline
 \ct{QUANTITY}                     & Character     & Section~\ref{info:sprinklers}             &                       &                      \\ \hline
@@ -13122,7 +13122,7 @@ Keyword                           & Type          & Description                 
 \ct{SPECIFIC_HEAT_RAMP}           & Character     & Section~\ref{info:THERMOCOUPLE}           &                       &                     \\ \hline
 \ct{SPRAY_ANGLE(2,2)}             & Real          & Section~\ref{info:sprinklers}             & degrees               & 60.,75.              \\ \hline
 \ct{SPRAY_PATTERN_BETA}           & Real          & Section~\ref{info:sprinklers}             & degrees               & 5.                   \\ \hline
-\ct{SPRAY_PATTERN_MU}             & Real          & Section~\ref{info:sprinklers}             & degrees               & 0.                   \\ \hline
+\ct{SPRAY_PATTERN_MU}             & Real          & Section~\ref{info:sprinklers}             & degrees               &                      \\ \hline
 \ct{SPRAY_PATTERN_SHAPE}          & Character     & Section~\ref{info:sprinklers}             &                       & \ct{'GAUSSIAN'}     \\ \hline
 \ct{SPRAY_PATTERN_TABLE}          & Character     & Section~\ref{info:sprinklers}             &                       &                      \\ \hline
 \ct{TC}                           & Logical       & Section~\ref{info:bidir_probe}            &                       & \ct{T}               \\ \hline
