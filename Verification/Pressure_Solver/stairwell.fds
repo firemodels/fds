@@ -2,7 +2,7 @@
 
 &MISC VERBOSE=T /
 
-&TIME T_END=60. /
+&TIME T_END=50. /
 
 &MESH ID='Level 01 to 05', IJK=59,27,178, XB= 3.5, 9.4, 5.1, 7.8,  7.5, 25.3, MPI_PROCESS=0 /
 &MESH ID='Level 06',       IJK=70,37,35,  XB= 1.1, 8.1, 4.9, 8.6, 25.3, 28.8, MPI_PROCESS=0 /
