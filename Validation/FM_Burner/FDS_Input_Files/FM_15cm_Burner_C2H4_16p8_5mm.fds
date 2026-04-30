@@ -45,19 +45,19 @@
 
 &SURF ID='HOOD_OUTFLOW', COLOR='GREEN', VOLUME_FLOW=0.08 / reported 0.11 m3/s (after makeup air), reduced to create slightly positive pressure
 &GEOM ID='hood', SURF_ID='wall','HOOD_OUTFLOW', CELL_BLOCK_IOR=3, BINARY_FILE='../../../../cad/Case_Studies/FM_Burner/hood.bingeom'/
+&GEOM ID='base', SURF_ID='wall', XB=-0.102,0.102,-0.102,0.102,-0.286,-0.254/
 
-! ! GEOM Vertices: 294 | Faces: 576
-! &GEOM ID='burner' SURF_ID='burner','wall' BINARY_FILE='../../../../cad/Case_Studies/FM_Burner/burner.bingeom' /
+! GEOM Vertices: 294 | Faces: 576
+&GEOM ID='burner' SURF_ID='burner','wall' BINARY_FILE='../../../../cad/Case_Studies/FM_Burner/burner.bingeom' /
 
-&MULT ID='cube array', DX=0.005,DY=0.005, I_UPPER=39,J_UPPER=39 /
-
-&OBST XB=-0.10,-0.095,-0.10,-0.095,-0.254,0.0000
-      MULT_ID='cube array'
-      SURF_IDS='burner','wall','wall'
-      SHAPE='CYLINDER'
-      RADIUS=0.0685
-      HEIGHT=0.254
-      XYZ=0,0,-0.254 /
+! &MULT ID='cube array', DX=0.005,DY=0.005, I_UPPER=39,J_UPPER=39 /
+! &OBST XB=-0.10,-0.095,-0.10,-0.095,-0.254,0.0000
+!       MULT_ID='cube array'
+!       SURF_IDS='burner','wall','wall'
+!       SHAPE='CYLINDER'
+!       RADIUS=0.0685
+!       HEIGHT=0.254
+!       XYZ=0,0,-0.254 /
 
 &VENT DB='ZMIN', SURF_ID='coflow'/
 
