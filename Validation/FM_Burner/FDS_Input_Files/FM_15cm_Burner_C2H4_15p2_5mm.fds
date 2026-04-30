@@ -1,10 +1,26 @@
 &HEAD CHID='FM_15cm_Burner_C2H4_15p2_5mm', TITLE='FM 15 cm ethylene burner'/
 
+! 84 + 96 = 180 total meshes
+
+&MULT ID='m1', DX=0.30,DY=0.30,DZ=0.30,
+      I_LOWER_SKIP=1,I_UPPER_SKIP=2,I_UPPER=3,
+      J_LOWER_SKIP=1,J_UPPER_SKIP=2,J_UPPER=3,
+      K_LOWER_SKIP=1,K_UPPER_SKIP=3,K_UPPER=5 / 96 - 12 = 84 (1 cm)
+&MESH IJK=30,30,30, XB=-0.60,-0.30,-0.60,-0.30,-0.36,-0.06, MULT_ID='m1', COLOR='GRAY' /
+
 &MULT ID='m2', DX=0.15,DY=0.15,DZ=0.15,
-      I_LOWER=-2,I_UPPER=5,
-      J_LOWER=-2,J_UPPER=5,
-      K_LOWER=-2,K_UPPER=9 / 8*8*12=768 mesh (0.5 cm)
-&MESH IJK=32,32,32, XB=-0.30,-0.15,-0.30,-0.15,-0.06,0.09, MULT_ID='m2' /
+      I_LOWER=0,I_UPPER=3,
+      J_LOWER=0,J_UPPER=3,
+      K_LOWER=0,K_UPPER=5 / 96 mesh (0.5 cm)
+&MESH IJK=30,30,30, XB=-0.30,-0.15,-0.30,-0.15,-0.06,0.09, MULT_ID='m2' /
+
+! ! uniform 8*8*12=768 mesh (0.5 cm)
+
+! &MULT ID='m2', DX=0.15,DY=0.15,DZ=0.15,
+!       I_LOWER=-2,I_UPPER=5,
+!       J_LOWER=-2,J_UPPER=5,
+!       K_LOWER=-2,K_UPPER=9 /
+! &MESH IJK=30,30,30, XB=-0.30,-0.15,-0.30,-0.15,-0.06,0.09, MULT_ID='m2' /
 
 &TIME T_END=40. /
 
