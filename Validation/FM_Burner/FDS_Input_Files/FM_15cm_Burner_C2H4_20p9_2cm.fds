@@ -29,7 +29,8 @@
 &GEOM ID='base', SURF_ID='wall', XB=-0.102,0.102,-0.102,0.102,-0.286,-0.254/
 
 ! GEOM Vertices: 294 | Faces: 576
-&GEOM ID='burner' SURF_ID='burner','wall' BINARY_FILE='../../../../cad/Case_Studies/FM_Burner/burner.bingeom' /
+&GEOM ID='burner' MOVE_ID='mv1', SURF_ID='burner','wall' BINARY_FILE='../../../../cad/Case_Studies/FM_Burner/burner.bingeom' /
+&MOVE ID='mv1', DZ=0.0001/
 
 ! &MULT ID='cube array', DX=0.02,DY=0.02, I_UPPER=9,J_UPPER=9 /
 ! &OBST XB=-0.10,-0.08,-0.10,-0.08,-0.254,0.0000
