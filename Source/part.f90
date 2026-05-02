@@ -1416,7 +1416,7 @@ ELSEIF (IN%N_PARTICLES_PER_CELL > 0) THEN TOTAL_OR_PER_CELL
                               IF (DIST<DIST_MIN) THEN
                                  DIST_MIN = DIST
                                  P_VECTOR_MIN = P_VECTOR
-                                 NVEC_MIN = BOUNDARY_COORD(CFACE(CF%CFACE_INDEX(IFACE))%BC_INDEX)%NVEC
+                                 NVEC_MIN = MESHES(NM)%BOUNDARY_COORD(CFACE(CF%CFACE_INDEX(IFACE))%BC_INDEX)%NVEC
                               ENDIF
                            ENDDO CFA_LOOP2
                            IF (DOT_PRODUCT(NVEC_MIN,P_VECTOR_MIN) > TWENTY_EPSILON_EB) EXIT RAND_LOCATION_LOOP
