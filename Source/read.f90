@@ -15787,7 +15787,6 @@ MESH_LOOP: DO NM=1,NMESHES
    REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
    SLCF_LOOP: DO NN=1,N_SLCF_O
       QUANTITY  = 'null'
-      QUANTITY2 = 'null'
       PBX      = -1.E6_EB
       PBY      = -1.E6_EB
       PBZ      = -1.E6_EB
@@ -15968,9 +15967,9 @@ MESH_LOOP: DO NM=1,NMESHES
             SL%RLE = .FALSE.
          ENDIF
          SL%VELO_INDEX = VELO_INDEX
-         CALL GET_QUANTITY_INDEX(SL%SMOKEVIEW_LABEL,SL%SMOKEVIEW_BAR_LABEL,SL%INDEX,SL%INDEX2, &
+         CALL GET_QUANTITY_INDEX(SL%SMOKEVIEW_LABEL,SL%SMOKEVIEW_BAR_LABEL,SL%INDEX,N, &
                                  SL%Y_INDEX,SL%Z_INDEX,I_DUM(1),SL%PART_INDEX,I_DUM(1),I_DUM(2),SL%REAC_INDEX,SL%MATL_INDEX, &
-                                 'SLCF',QUANTITY,QUANTITY2,SPEC_ID,'null',PART_ID,'null','null',REAC_ID,'null',-1._EB,I_DUM(3),&
+                                 'SLCF',QUANTITY,'null',SPEC_ID,'null',PART_ID,'null','null',REAC_ID,'null',-1._EB,I_DUM(3),&
                                  SLICETYPE=SLICETYPE)
 
          ! If the user needs to do a particle flux calculation, detect that here.
@@ -16603,10 +16602,10 @@ DO ND=-N_OUTPUT_QUANTITIES,N_OUTPUT_QUANTITIES
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
 
-      ! QUANTITY2 only works with SLCF at the moment
+      ! QUANTITY2 only works for SLCF appropriate quantities at the moment
 
       IF (.NOT.OUTPUT_QUANTITY(ND)%SLCF_APPROPRIATE) THEN
-          WRITE(MESSAGE,'(3A)')  'ERROR(1014): Output QUANTITY2 ',TRIM(QUANTITY2),' is not appropriate for SLCF.'
+          WRITE(MESSAGE,'(3A)')  'ERROR(1014): Output QUANTITY2 ',TRIM(QUANTITY2),' needs to be a SLCF appropriate quantity.'
           CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
 
