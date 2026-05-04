@@ -66,7 +66,7 @@ fig = fdsplotlib.plot_to_fig(
 fdsplotlib.plot_to_fig(
     x_data=input_vol,
     y_data=random_part_mass,
-    marker_style='ro',
+    marker_style='rs',
     data_label='1000 random particles',
     figure_handle=fig)
 fdsplotlib.plot_to_fig(
