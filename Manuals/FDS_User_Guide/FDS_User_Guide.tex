@@ -2406,6 +2406,8 @@ If a \ct{VENT} is applied to a thermally-thick obstruction with 3-D heat conduct
 
 An alternative back side boundary condition, \ct{BACKING='INSULATED'}, assumes that the solid backs up to a perfectly insulated material, in which case there is no heat transfer to or from the back side. Use of this condition means specifying properties of the inner insulating material is not necessary because it is assumed to be perfectly insulated.
 
+The initial back side temperature can be set with \ct{TMP_BACK}. 
+
 If the wall is assumed to always back up to the ambient, then the attribute \ct{BACKING='VOID'} should be set. You can also set the back side exposing gas temperature to be something other than ambient using \ct{TMP_GAS_BACK}. A \ct{RAMP} for \ct{TMP_GAS_BACK} can be specified with \ct{RAMP_TMP_GAS_BACK}. The backside heat transfer coefficient is computed using a natural convection correlation (see the FDS Tech Guide \cite{FDS_Math_Guide}). Similarly, you can set the front side gas temperature using \ct{TMP_GAS_FRONT} and ramp \ct{RAMP_TMP_GAS_FRONT}. This is useful mainly for diagnostic cases where you want to control the exposing temperature.
 
 The back side emissivity of the surface can be controlled by specifying \ct{EMISSIVITY_BACK} on the \ct{SURF} line. If not specified, the back side emissivity will be calculated during the simulations as a mass-weighted sum of the \ct{MATL} emissivities.
@@ -6116,7 +6118,7 @@ Note also that this feature is subject to mesh dependence. If the mesh cells are
 \subsection{Radiative Properties}
 \label{radiative_part_props}
 
-The radiative properties of water and fuel droplets are determined automatically. For fuel, the properties of heptane are assumed. For other types of particles, the radiative properties can be given by specifying the components of the material refractive index on the corresponding \ct{PART} line, using keywords \ct{REAL_REFRACTIVE_INDEX} and \ct{COMPLEX_REFRACTIVE_INDEX}. Alternatively, wavelength dependent values of these two quantities can be specified using a spectral property table (\ct{TABL}) whose \ct{ID} is indicated on the \ct{PART} line via \ct{RADIATIVE_PROPERTY_TABLE}. Each row of a spectral property table contains three real numbers: wavelength ($\mu$m), and the real and complex components of the refractive index. The real part of the refractive index should be a positive number. If it is greater than 10, the particles are treated as perfectly reflecting spheres. The complex part should be a non-negative number. Values less than $10^{-6}$ are treated as non-absorbing. Below is an example of the use of the spectral property table, listing the properties at wavelengths 1, 5 and 10 $\mu$m.
+The radiative properties of water and fuel droplets are determined automatically. For fuel, the properties of heptane are assumed. For other types of particles, the radiative properties can be given by specifying the components of the material refractive index on the corresponding \ct{PART} line, using keywords \ct{REAL_REFRACTIVE_INDEX} and \ct{COMPLEX_REFRACTIVE_INDEX}. Alternatively, wavelength dependent values of these two quantities can be specified using a spectral property table (\ct{TABL}) whose \ct{ID} is indicated on the \ct{PART} line via \ct{RADIATIVE_PROPERTY_TABLE}. Each row of a spectral property table contains three real numbers input using \ct{TABLE_DATA}: wavelength ($\mu$m), and the real and complex components of the refractive index. The real part of the refractive index should be a positive number. If it is greater than 10, the particles are treated as perfectly reflecting spheres. The complex part should be a non-negative number. Values less than $10^{-6}$ are treated as non-absorbing. Below is an example of the use of the spectral property table, listing the properties at wavelengths 1, 5 and 10 $\mu$m.
 \begin{lstlisting}
     &PART ID='my particles',..., RADIATIVE_PROPERTY_TABLE='radtab' /
     &TABL ID='radtab', TABLE_DATA= 1.0,1.33,0.0001 /
@@ -6873,7 +6875,7 @@ The following input line specifies a southwesterly wind blowing 5~m/s over a rel
 \begin{lstlisting}
     &WIND SPEED=5., Z_REF=3, DIRECTION=225., L=-100., Z_0=0.03 /
 \end{lstlisting}
-Setting a non-zero value of \ct{L} indicates that you want to use Monin-Obukhov profiles. The parameter \ct{SPEED} specifies the wind speed at a distance \ct{Z_REF} (m) above the ground. The default value of \ct{Z_REF} is 10~m. You can change the height of the ground by setting \ct{GROUND_LEVEL}, which is at $z=0$~m by default. It is assumed that the temperature at \ct{Z_REF} is the specified ambient, \ct{TMPA}, unless you specify \ct{TMP_REF} (\unit{\degreeCelsius}). The wind \ct{DIRECTION} follows the usual meteorological convention---a northerly wind has direction of 0\unit{\degree} and blows from north to south, or in the negative $y$ direction in the FDS coordinate system. An easterly wind has a direction of 90\unit{\degree} and blows from east to west, or in the negative $x$ direction. You can vary the direction of the wind in time only, not in space:
+Setting a non-zero value of \ct{L} indicates that you want to use Monin-Obukhov profiles. The roughness is set using \ct{Z_0}. The parameter \ct{SPEED} specifies the wind speed at a distance \ct{Z_REF} (m) above the ground. The default value of \ct{Z_REF} is 10~m. You can change the height of the ground by setting \ct{GROUND_LEVEL}, which is at $z=0$~m by default. It is assumed that the temperature at \ct{Z_REF} is the specified ambient, \ct{TMPA}, unless you specify \ct{TMP_REF} (\unit{\degreeCelsius}). The wind \ct{DIRECTION} follows the usual meteorological convention---a northerly wind has direction of 0\unit{\degree} and blows from north to south, or in the negative $y$ direction in the FDS coordinate system. An easterly wind has a direction of 90\unit{\degree} and blows from east to west, or in the negative $x$ direction. You can vary the direction of the wind in time only, not in space:
 \begin{lstlisting}
     &WIND ..., RAMP_DIRECTION_T='dir' /
 
@@ -7712,7 +7714,7 @@ The parameters for the 13 original Rothermel-Albini fuel models are listed in Ta
 \begin{lstlisting}
     &SURF ID='Wet Brush', VEG_LSET_FUEL_INDEX=5, VEG_LSET_M1=0.06 /
 \end{lstlisting}
-This set of inputs invokes fuel model 5, but it also provides you with a way to change the default moisture content of the dead and live fuel components. \ct{M1}, \ct{M10}, and \ct{M100} set the moisture fraction of the 1~h, 10~h, and 100~h dead fuels, and \ct{MLW} and \ct{MLH} set the moisture fraction of the live woody and herbaceous fuels. The default values of these parameters are listed at the bottom of Table~\ref{tbl:Rothermel}.
+This set of inputs invokes fuel model 5, but it also provides you with a way to change the default moisture content of the dead and live fuel components. \ct{VEG_LSET_M1}, \ct{VEG_LSET_M10}, and \ct{VEG_LSET_M100} set the moisture fraction of the 1~h, 10~h, and 100~h dead fuels, and \ct{VEG_LSET_MLW} and \ct{VEG_LSET_MLH} set the moisture fraction of the live woody and herbaceous fuels. The default values of these parameters are listed at the bottom of Table~\ref{tbl:Rothermel}.
 
 The 13 fuel models can be modified by specifying a different fuel layer height (\ct{VEG_LSET_HT}), fuel load (\ct{VEG_LSET_SURF_LOAD}), and/or fuel packing ratio (\ct{VEG_LSET_BETA}). The modified properties will replace those in Table~\ref{tbl:Rothermel} in the calculation of spread rate following Rothermel-Albini~\cite{Rothermel:1972,Albini:1976}. Note that setting \ct{VEG_LSET_SURF_LOAD} gives the total fuel load and the amount in different size or dead/live categories will be adjusted to maintain the distribution in the original fuel model.
 
@@ -7768,6 +7770,7 @@ It is possible to set a custom fuel for which the spread rate does not vary with
 \end{sidewaystable}
 
 \subsection{Custom Wind Speed Function}
+\label{info:custom_wind}
 The default Rothermel-Albini formulation~\cite{Rothermel:1972,Albini:1976} represents the influence of wind on the head fire spread rate as
 \be
 R = R_{\rm 0} \, (1+\phi_{\rm W})
@@ -8010,7 +8013,7 @@ A sprinkler, known as \ct{'Spr-1'}, is located at a point in space given by \ct{
     \begin{lstlisting}
         &TABL ID='table_id', TABLE_DATA=LAT1,LAT2,LON1,LON2,VELO,FRAC /
     \end{lstlisting}
-    where each \ct{TABL} line for a given \ct{'table_id'} provides information about the spherical distribution of the spray pattern for a specified solid angle. \ct{LAT1} and \ct{LAT2} are the bounds of the solid angle measured in degrees from the south pole (0 is the south pole and 90 is the equator, 180 is the north pole).  Note that this is not the conventional way of specifying a latitude, but rather a convenient system based on the fact that a typical sprinkler sprays water downward, which is why 0 degrees is assigned to the ``south pole,'' or the $-z$ direction. The parameters \ct{LON1} and \ct{LON2} are the bounds of the solid angle (also in degrees), where 0 (or 360) is aligned with the $-x$ axis and 90 is aligned with the $-y$ axis.  \ct{VELO} is the velocity (m/s) of the droplets at their point of insertion. \ct{FRAC} the fraction of the total flow rate of liquid that should emerge from that particular solid angle.
+    where each \ct{TABL} line for a given \ct{'table_id'} provides information about the spherical distribution of the spray pattern for a specified solid angle using \ct{TABLE_DATA}. \ct{LAT1} and \ct{LAT2} are the bounds of the solid angle measured in degrees from the south pole (0 is the south pole and 90 is the equator, 180 is the north pole).  Note that this is not the conventional way of specifying a latitude, but rather a convenient system based on the fact that a typical sprinkler sprays water downward, which is why 0 degrees is assigned to the ``south pole,'' or the $-z$ direction. The parameters \ct{LON1} and \ct{LON2} are the bounds of the solid angle (also in degrees), where 0 (or 360) is aligned with the $-x$ axis and 90 is aligned with the $-y$ axis.  \ct{VELO} is the velocity (m/s) of the droplets at their point of insertion. \ct{FRAC} the fraction of the total flow rate of liquid that should emerge from that particular solid angle.
 
     In the test case called \ct{bucket_test_2}, the spray consists of two jets, each with a velocity of 5~m/s and a combined flow rate of 60~L/min. The sprinkler is set to operate for only 5~s. The first jet contains 0.2 of the total flow, the second, 0.8 of the total. The jets are centered at points 60\unit{\degree} below the ``equator,'' and are separated by 180\unit{\degree}.
     \begin{lstlisting}
@@ -8321,7 +8324,7 @@ Note that each state change of a device is recorded to a log file, see Sec.~\ref
 
 In many fire scenarios, the opening or closing of a door or window can lead to dramatic changes in the course of the fire. Sometimes these actions are taken intentionally, sometimes as a result of the fire. Within the framework of an FDS calculation, these actions are represented by the creation or removal of solid obstacles, or the opening or closing of exterior vents.
 
-Remove or create a solid obstruction by assigning the character string \ct{DEVC_ID} to indicate the name of a \ct{DEVC} \ct{ID} on the \ct{OBST} line that is to be created or removed.  This will direct FDS to remove or create the obstruction when the device changes state to \ct{F} or \ct{T}, respectively. For example, the lines
+Remove or create a solid obstruction by assigning the character string \ct{DEVC_ID} or \ct{CTRL_ID} to indicate the name of a \ct{DEVC} or \ct{CTRL} \ct{ID} on the \ct{OBST} line that is to be created or removed.  This will direct FDS to remove or create the obstruction when the device or control changes state to \ct{F} or \ct{T}, respectively. For example, the lines
 \begin{lstlisting}
     &OBST XB=..., DEVC_ID='det2' /
     &DEVC XYZ=..., ID='det2', INITIAL_STATE=T /
@@ -12850,8 +12853,8 @@ $\Delta t$=\ct{T_END-T_BEGIN}
     \ct{CELL_SIZE}             & Real            & Section~\ref{info:HT3D_Basics}          & m             &               \\ \hline
     \ct{CELL_SIZE_FACTOR}      & Real            & Section~\ref{info:HT3D_Basics}          &               &               \\ \hline
     \ct{COLOR}                 & Character       & Section~\ref{info:colors}               &               &               \\ \hline
-    \ct{CTRL_ID}               & Character       & Section~\ref{info:CTRL}                 &               &               \\ \hline
-    \ct{DEVC_ID}               & Character       & Section~\ref{info:activate_deactivate}  &               &               \\ \hline
+    \ct{CTRL_ID}               & Character       & Section~\ref{info:create_remove}        &               &               \\ \hline
+    \ct{DEVC_ID}               & Character       & Section~\ref{info:create_remove}        &               &               \\ \hline
     \ct{HEIGHT}                & Real            & Section~\ref{info:multobst}             & m             &               \\ \hline
     \ct{ID}                    & Character       & Section~\ref{info:OBST_Basics}          &               &               \\ \hline
     \ct{INTERNAL_HEAT_SOURCE}  & Real            & Section~\ref{info:HT3D_Basics}          & \unit{kW/m^3} & 0.            \\ \hline
@@ -12866,7 +12869,7 @@ $\Delta t$=\ct{T_END-T_BEGIN}
     \ct{PERMIT_HOLE}           & Logical         & Section~\ref{info:HOLE}                 &               & \ct{T}       \\ \hline
     \ct{RADIUS}                & Real            & Section~\ref{info:multobst}             & m             &               \\ \hline
     \ct{RAMP_IHS}              & Character       & Section~\ref{info:HT3D_Basics}          &               &               \\ \hline
-    \ct{REMOVABLE}             & Logical         & Section~\ref{info:HOLE}                 &               & \ct{T}       \\ \hline
+    \ct{REMOVABLE}             & Logical         & Section~\ref{info:REMOVABLE}            &               & \ct{T}       \\ \hline
     \ct{RGB(3)}                & Integer Array   & Section~\ref{info:colors}               &               &               \\ \hline
     \ct{SHAPE}                 & Character       & Section~\ref{info:multobst}             &               &               \\ \hline
     \ct{STRETCH_FACTOR}        & Real            & Section~\ref{info:HT3D_Basics}          &               &               \\ \hline
@@ -13323,7 +13326,6 @@ $\Delta t$=\ct{T_END-T_BEGIN}
     \ct{PART_ID}          & Character         & Section~\ref{info:gasoutputquantities}    &           &                   \\ \hline
     \ct{PBX, PBY, PBZ}    & Real              & Section~\ref{info:SLCF}                   & m         &                   \\ \hline
     \ct{QUANTITY}         & Character         & Section~\ref{info:gasoutputquantities}    &           &                   \\ \hline
-    \ct{QUANTITY2}        & Character         & Section~\ref{info:gasoutputquantities}    &           &                   \\ \hline
     \ct{REAC_ID}          & Character         & Section~\ref{tab:gasoutputquantities}     &           &                   \\ \hline
     \ct{SPEC_ID}          & Character         & Section~\ref{info:gasoutputquantities}    &           &                   \\ \hline
     \ct{VECTOR}           & Logical           & Section~\ref{info:SLCF}                   &           & \ct{F}     \\ \hline
@@ -13378,9 +13380,9 @@ $\Delta t$=\ct{T_END-T_BEGIN}
     \ct{ALT_ID}                      & Character         & Section~\ref{info:SPEC_Basics}          &                   &               \\ \hline
     \ct{BACKGROUND}                  & Logical           & Section~\ref{info:SPEC}                 &                   & \ct{F} \\ \hline
     \ct{BETA_LIQUID}                 & Real              & Section~\ref{thermal_part_props}        & 1/K               &               \\ \hline
-    \ct{C}                           & Real              & Section~\ref{gas_species_props}         &                   &               \\ \hline
+    \ct{C}                           & Real              & Section~\ref{info:FORMULA}              &                   &               \\ \hline
     \ct{COMPLEX_REFRACTIVE_INDEX}    & Real              & Section~\ref{info:condensation}         &                   &  0.01         \\ \hline
-    \ct{CONDUCTIVITY}                & Real              & Section~\ref{gas_species_props}         & \unit{W/(m.K)}    &               \\ \hline
+    \ct{CONDUCTIVITY}                & Real              & Section~\ref{info:CONDUCTIVITY}         & \unit{W/(m.K)}    &               \\ \hline
     \ct{CONDUCTIVITY_LIQUID}         & Real              & Section~\ref{thermal_part_props}        & \unit{W/(m.K)}    &               \\ \hline
     \ct{CONDUCTIVITY_SOLID}          & Real              & Section~\ref{info:deposition}           & \unit{W/(m.K)}    &  0.26         \\ \hline
     \ct{COPY_LUMPED}                 & Logical           & Section~\ref{info:lumped}               &                   & \ct{F} \\ \hline
@@ -13391,8 +13393,8 @@ $\Delta t$=\ct{T_END-T_BEGIN}
     \ct{EPSILONKLJ}                  & Real              & Section~\ref{gas_species_props}         &                   & 0             \\ \hline
     \ct{FIC_CONCENTRATION}           & Real              & Section~\ref{info:FED}                  & ppm               & 0.            \\ \hline
     \ct{FLD_LETHAL_DOSE}             & Real              & Section~\ref{info:FED}                  & ppm$\times$min    & 0.            \\ \hline
-    \ct{FORMULA}                     & Character         & Section~\ref{gas_species_props}         &                   &               \\ \hline
-    \ct{H}                           & Real              & Section~\ref{gas_species_props}         &                   &               \\ \hline
+    \ct{FORMULA}                     & Character         & Section~\ref{info:FORMULA}              &                   &               \\ \hline
+    \ct{H}                           & Real              & Section~\ref{info:FORMULA}              &                   &               \\ \hline
     \ct{HEAT_OF_VAPORIZATION}        & Real              & Section~\ref{thermal_part_props}        & kJ/kg             &               \\ \hline
     \ct{H_V_REFERENCE_TEMPERATURE}   & Real              & Section~\ref{thermal_part_props}        & \unit{\degreeCelsius} &               \\ \hline
     \ct{ID}                          & Character         & Section~\ref{info:SPEC_Basics}          &                   &               \\ \hline
@@ -13405,19 +13407,19 @@ $\Delta t$=\ct{T_END-T_BEGIN}
     \ct{MEAN_DIAMETER}               & Real              & Section~\ref{info:deposition}           & m                 &               \\ \hline
     \ct{MELTING_TEMPERATURE}         & Real              & Section~\ref{thermal_part_props}        & \unit{\degreeCelsius} &               \\ \hline
     \ct{MIN_DIAMETER}                & Real              & Section~\ref{info:agglomeration}        & m                 &               \\ \hline
-    \ct{MW}                          & Real              & Section~\ref{gas_species_props}         & g/mol             & 29.           \\ \hline
-    \ct{N}                           & Real              & Section~\ref{gas_species_props}         &                   &               \\ \hline
+    \ct{MW}                          & Real              & Section~\ref{user_defined_gas_species_props} & g/mol             & 29.           \\ \hline
+    \ct{N}                           & Real              & Section~\ref{info:FORMULA}              &                   &               \\ \hline
     \ct{N_BINS}                      & Integer           & Section~\ref{info:agglomeration}        &                   &               \\ \hline
-    \ct{O}                           & Real              & Section~\ref{gas_species_props}         &                   &               \\ \hline
+    \ct{O}                           & Real              & Section~\ref{info:FORMULA}              &                   &               \\ \hline
     \ct{ODE_ABS_ERROR}               & Real              & Section~\ref{info:chem_integration}     &                   &               \\ \hline
     \ct{ODE_REL_ERROR}               & Real              & Section~\ref{info:chem_integration}     &                   &               \\ \hline
     \ct{POLYNOMIAL}                  & Character         & Section~\ref{info:Enthalpy}             &                   &               \\ \hline
     \ct{POLYNOMIAL_COEFF(:)}         & Real Array        & Section~\ref{info:Enthalpy}             &                   &               \\ \hline
     \ct{POLYNOMIAL_TEMP(:)}          & Real Array        & Section~\ref{info:Enthalpy}             &  K                &               \\ \hline
     \ct{PR_GAS}                      & Real              & Section~\ref{gas_species_props}         &                   & \ct{PR}      \\ \hline
-    \ct{PRIMITIVE}                   & Logical           & Section~\ref{gas_species_props}         &                   &               \\ \hline
-    \ct{RADCAL_ID}                   & Character         & Section~\ref{info:SPEC_advanced}        &                   &               \\ \hline
-    \ct{RAMP_CP}                     & Character         & Section~\ref{gas_species_props}         &                   &               \\ \hline
+    \ct{PRIMITIVE}                   & Logical           & Section~\ref{info:SPEC_advanced}        &                   &               \\ \hline
+    \ct{RADCAL_ID}                   & Character         & Section~\ref{info:radiative_spec_props}  &                   &               \\ \hline
+    \ct{RAMP_CP}                     & Character         & Section~\ref{info:Enthalpy}             &                   &               \\ \hline
     \ct{RAMP_CP_L}                   & Character         & Section~\ref{thermal_part_props}        &                   &               \\ \hline
     \ct{RAMP_D}                      & Character         & Section~\ref{gas_species_props}         &                   &               \\ \hline
     \ct{RAMP_G_F}                    & Character         & Section~\ref{gas_species_props}         &                   &               \\ \hline
@@ -13486,7 +13488,7 @@ $\Delta t$=\ct{T_END-T_BEGIN}
     \ct{EMBER_YIELD}                                      & Real            & Section~\ref{info:ember_generation_surf}  & kg/kg               &                         \\ \hline
     \ct{EMISSIVITY}                                       & Real            & Section~\ref{info:convection}             &                     & 0.9                     \\ \hline
     \ct{EMISSIVITY_BACK}                                  & Real            & Section~\ref{info:BACKING}                &                     &                         \\ \hline
-    \ct{EXTERNAL_FLUX}                                    & Real            & Section~\ref{solid_phase_verification}    & \unit{kW/m^2}       &   \rule{0pt}{2.3ex}     \\ \hline
+    \ct{EXTERNAL_FLUX}                                    & Real            & Section~\ref{info:net_and_convective_heat_flux} & \unit{kW/m^2}       &   \rule{0pt}{2.3ex}     \\ \hline
     \ct{EXTINCTION_TEMPERATURE}                           & Real            & Section~\ref{info:specified_burning}      & \unit{\degreeCelsius} & -273.                 \\ \hline
     \ct{FREE_SLIP}                                        & Logical         & Section~\ref{info:WALL_MODEL}             &                     & \ct{F}                  \\ \hline
     \ct{GEOMETRY}                                         & Character       & Section~\ref{info:GEOMETRY}               &                     & \ct{'CARTESIAN'}        \\ \hline
@@ -13517,7 +13519,7 @@ $\Delta t$=\ct{T_END-T_BEGIN}
     \ct{MASS_PER_VOLUME(:)}                               & Real Array      & Section~\ref{pine_needles}                & \unit{kg/m^3}       & \rule{0pt}{2.3ex}       \\ \hline
     \ct{MASS_TRANSFER_COEFFICIENT}                        & Real            & Section~\ref{info:liquid_fuels}           & m/s                 &                         \\ \hline
     \ct{MATL_ID(:,:)}                                     & Char.~Array     & Section~\ref{info:solid_pyrolysis}        &                     &                         \\ \hline
-    \ct{MATL_MASS_FRACTION(:,:)}                          & Real Array      & Section~\ref{info:solid_pyrolysis}        &                     &                         \\ \hline
+    \ct{MATL_MASS_FRACTION(:,:)}                          & Real Array      & Section~\ref{info:MATL}                   &                     &                         \\ \hline
     \ct{MAXIMUM_SCALING_HEAT_FLUX}                        & Real            & Section~\ref{info:scaled_burning}         & \unit{kW/m^2}       & 1500  \rule{0pt}{2.3ex} \\ \hline
     \ct{MCC_CONVERSION_FACTOR}                            & Real            & Section~\ref{info:TGA_DSC_MCC}            &                     & 1                       \\ \hline
     \ct{MINIMUM_BURNOUT_TIME}                             & Real            & Section~\ref{veg_burnout_time}            & s                   & 1000000                 \\ \hline
@@ -13540,11 +13542,11 @@ $\Delta t$=\ct{T_END-T_BEGIN}
     \ct{PARTICLE_EXTRACTION_VELOCITY}                     & Real            & Section~\ref{info:particle_removal}       & m/s                 &                         \\ \hline
     \ct{PARTICLE_MASS_FLUX}                               & Real            & Section~\ref{info:particle_flux}          & \unit{kg/(m^2.s)}   &   \rule{0pt}{2.3ex}     \\ \hline
     \ct{PARTICLE_SURFACE_DENSITY}                         & Real            & Section~\ref{info:particle_flux}          & \unit{kg/m^2)}      &  \rule{0pt}{2.3ex}      \\ \hline
-    \ct{PART_ID}                                          & Character       & Section~\ref{info:particle_flux}          &                     &                         \\ \hline
-    \ct{PLE}                                              & Real            & Section~\ref{info:stratification}         &                     & 0.3                     \\ \hline
+    \ct{PART_ID}                                          & Character       & Section~\ref{info:controlling_droplets}   &                     &                         \\ \hline
+    \ct{PLE}                                              & Real            & Section~\ref{info:wall_of_wind}           &                     & 0.3                     \\ \hline
     \ct{PROFILE}                                          & Character       & Section~\ref{info:profiles}               &                     &                         \\ \hline
     \ct{RADIUS}                                           & Real            & Section~\ref{info:PART_GEOMETRY}          & m                   &                         \\ \hline
-    \ct{RAMP_EF}                                          & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
+    \ct{RAMP_EF}                                          & Character       & Section~\ref{info:simulating_the_cone_calorimeter} &                     &                         \\ \hline
     \ct{RAMP_HEAT_TRANSFER_COEFFICIENT}                   & Real            & Section~\ref{info:convection}             &                     &                         \\ \hline
     \ct{RAMP_HEAT_TRANSFER_COEFFICIENT_BACK}              & Real            & Section~\ref{info:convection}             &                     &                         \\ \hline
     \ct{RAMP_IHS}                                         & Character       & Section~\ref{info:INTERNAL_HEAT_SOURCE}   &                     &                         \\ \hline
@@ -13571,7 +13573,7 @@ $\Delta t$=\ct{T_END-T_BEGIN}
     \ct{SPEC_ID}                                          & Character       & Section~\ref{info:MASS_FLUX}              &                     &                         \\ \hline
     \ct{SPREAD_RATE}                                      & Real            & Section~\ref{info:spread}                 & m/s                 &                         \\ \hline
     \ct{STRETCH_FACTOR(:)}                                & Real Array      & Section~\ref{info:solid_phase_stability}  &                     & 2.                      \\ \hline
-    \ct{SURFACE_VOLUME_RATIO(:)}                          & Real            & Section~\ref{pine_needles}                & 1/m                 &                         \\ \hline
+    \ct{SURFACE_VOLUME_RATIO(:)}                          & Real            & Section~\ref{info:boundary_fuel_model}    & 1/m                 &                         \\ \hline
     \ct{TAU_EF}                                           & Real            & Section~\ref{info:RAMP_Time}              & s                   & 1.                      \\ \hline
     \ct{TAU_MF(:)}                                        & Real Array      & Section~\ref{info:RAMP_Time}              & s                   & 1.                      \\ \hline
     \ct{TAU_PART}                                         & Real            & Section~\ref{info:RAMP_Time}              & s                   & 1.                      \\ \hline
@@ -13589,13 +13591,13 @@ $\Delta t$=\ct{T_END-T_BEGIN}
     \ct{TGA_HEATING_RATE}                                 & Real            & Section~\ref{info:TGA_DSC_MCC}            & \unit{\degreeCelsius}/min & 5.                      \\ \hline
     \ct{THICKNESS(:)}                                     & Real Array      & Section~\ref{info:SURF_MATL_Basics}       & m                   &                         \\ \hline
     \ct{TIME_STEP_FACTOR}                                 & Real            & Section~\ref{info:solid_phase_stability}  &                     & 10.                     \\ \hline
-    \ct{TMP_BACK}                                         & Real            & Section~\ref{info:dirichlet}              & \unit{\degreeCelsius} &                         \\ \hline
+    \ct{TMP_BACK}                                         & Real            & Section~\ref{info:BACKING}                & \unit{\degreeCelsius} &                         \\ \hline
     \ct{TMP_FRONT}                                        & Real            & Section~\ref{info:specified_temperature}  & \unit{\degreeCelsius} & 20.                     \\ \hline
     \ct{TMP_FRONT_INITIAL}                                & Real            & Section~\ref{info:adiabatic}              & \unit{\degreeCelsius} &                         \\ \hline
     \ct{TMP_GAS_FRONT}                                    & Real            & Section~\ref{info:BACKING}                & \unit{\degreeCelsius} &                         \\ \hline
     \ct{TMP_GAS_BACK}                                     & Real            & Section~\ref{info:BACKING}                & \unit{\degreeCelsius} &                         \\ \hline
     \ct{TMP_INNER}                                        & Real            & Section~\ref{info:TMP_INNER}              & \unit{\degreeCelsius} & 20.                     \\ \hline
-    \ct{TRANSPARENCY}                                     & Real            & Section~\ref{info:colors}                 &                     & 1.                      \\ \hline
+    \ct{TRANSPARENCY}                                     & Real            & Section~\ref{info:TRANSPARENCY}           &                     & 1.                      \\ \hline
     \ct{VARIABLE_THICKNESS}                               & Logical         & Section~\ref{info:ht1d}                   &                     & \ct{F}                 \\ \hline
     \ct{VEG_LSET_BETA}                                    & Real            & Section~\ref{info:level_set}              &                     & 0.01                   \\ \hline
     \ct{VEG_LSET_CHAR_FRACTION}                           & Real            & Section~\ref{info:level_set}              &                     & 0.2                     \\ \hline
@@ -13618,8 +13620,8 @@ $\Delta t$=\ct{T_END-T_BEGIN}
     \ct{VEG_LSET_SURF_LOAD}                               & Real            & Section~\ref{info:level_set}              & \unit{kg/m^2)}      & 1.0 \rule{0pt}{2.3ex}   \\ \hline
     \ct{VEG_LSET_TAN2}                                    & Real            & Section~\ref{info:level_set}              &                     &                         \\ \hline
     \ct{VEG_LSET_WIND_EXP}                                & Real            & Section~\ref{info:level_set}              &                     & 1.                      \\ \hline
-    \ct{VEG_LSET_WIND_HEIGHT}                             & Real            & Section~\ref{info:level_set}              & m                   & 6.1                      \\ \hline
-    \ct{VEG_LSET_WIND_RAMP}                               & Character       & Section~\ref{info:level_set}              &                     &                         \\ \hline
+    \ct{VEG_LSET_WIND_HEIGHT}                             & Real            & Section~\ref{info:custom_wind}            & m                   & 6.1                      \\ \hline
+    \ct{VEG_LSET_WIND_RAMP}                               & Character       & Section~\ref{info:custom_wind}            &                     &                         \\ \hline
     \ct{VEL}                                              & Real            & Section~\ref{info:Velocity_BC}            & m/s                 &                         \\ \hline
     \ct{VEL_BULK}                                         & Real            & Section~\ref{info:profiles}               & m/s                 &                         \\ \hline
     \ct{VEL_GRAD}                                         & Real            & Section~\ref{info:vel_grad}               & 1/s                 &                         \\ \hline
@@ -13628,7 +13630,7 @@ $\Delta t$=\ct{T_END-T_BEGIN}
     \ct{VOLUME_FLOW}                                      & Real            & Section~\ref{info:Velocity_BC}            & \unit{m^3/s}        & \rule{0pt}{2.3ex}       \\ \hline
     \ct{WIDTH}                                            & Real            & Section~\ref{info:PART_GEOMETRY}          & m                   &                         \\ \hline
     \ct{XYZ(3)}                                           & Real Array      & Section~\ref{info:spread}                 & m                   &                         \\ \hline
-    \ct{Z0}                                               & Real            & Section~\ref{info:stratification}         & m                   & 10.                     \\ \hline
+    \ct{Z0}                                               & Real            & Section~\ref{info:wall_of_wind}           & m                   & 10.                     \\ \hline
     \ct{Z_0}                                              & Real            & Section~\ref{info:wind_general}           & m                   & 0.                      \\ \hline
 \end{xltabular}
 
@@ -13655,7 +13657,7 @@ $\Delta t$=\ct{T_END-T_BEGIN}
     Keyword               & Type        & Description                          & Units       & Default   \\ \hline  \hline
     \endhead
     \ct{ID}               & Character   & Section~\ref{info:spraypattern}      &             &     \\ \hline
-    \ct{TABLE_DATA(9)}    & Real Array  & Section~\ref{info:spraypattern}      &             &     \\ \hline
+    \ct{TABLE_DATA(9)}    & Real Array  & Section~\ref{info:TABL},\ref{radiative_part_props} &             &     \\ \hline
 \end{xltabular}
 
 
@@ -13805,8 +13807,8 @@ $\Delta t$=\ct{T_END-T_BEGIN}
     \ct{LAPSE_RATE}                              & Real          & Section~\ref{info:stratification}             & \unit{\degreeCelsius}/m   & 0                 \\ \hline
     \ct{LATITUDE}                                & Real          & Section~\ref{info:coriolis_force}             & degrees       &                   \\ \hline
     \ct{PRESSURE_GRADIENT_FORCE}                 & Real          & Section~\ref{info:force_vector}               & Pa/m          &                   \\ \hline
-    \ct{RAMP_DIRECTION_T}                        & Character     & Section~\ref{info:WIND}                       &               &                   \\ \hline
-    \ct{RAMP_DIRECTION_Z}                        & Character     & Section~\ref{info:WIND}                       &               &                   \\ \hline
+    \ct{RAMP_DIRECTION_T}                        & Character     & Section~\ref{info:wind_ramps}                 &               &                   \\ \hline
+    \ct{RAMP_DIRECTION_Z}                        & Character     & Section~\ref{info:wind_ramps}                 &               &                   \\ \hline
     \ct{RAMP_FVX_T}                              & Character     & Section~\ref{info:force_vector}               &               &                   \\ \hline
     \ct{RAMP_FVY_T}                              & Character     & Section~\ref{info:force_vector}               &               &                   \\ \hline
     \ct{RAMP_FVZ_T}                              & Character     & Section~\ref{info:force_vector}               &               &                   \\ \hline
@@ -13815,7 +13817,7 @@ $\Delta t$=\ct{T_END-T_BEGIN}
     \ct{RAMP_SPEED_Z}                            & Character     & Section~\ref{info:wind_ramps}                 &               &                   \\ \hline
     \ct{RAMP_TMP0_Z}                             & Character     & Section~\ref{info:stratification}             &               &                   \\ \hline
     \ct{SIGMA_THETA}                             & Real          & Section~\ref{info:wind_ramps}                 & degrees       &                   \\ \hline
-    \ct{SPEED}                                   & Real          & Section~\ref{info:WIND}                       & m/s           & 0.                \\ \hline
+    \ct{SPEED}                                   & Real          & Section~\ref{info:wind_ramps}                 & m/s           & 0.                \\ \hline
     \ct{STRATIFICATION}                          & Logical       & Section~\ref{info:stratification}             &               & \ct{T}      \\ \hline
     \ct{TAU_THETA}                               & Real          & Section~\ref{info:wind_ramps}                 & s             & 300               \\ \hline
     \ct{THETA_STAR}                              & Real          & Section~\ref{info:WIND}                       & K             &                   \\ \hline
@@ -14419,7 +14421,7 @@ $\Delta t$=\ct{T_END-T_BEGIN}
     1011 \> \ct{HRRPUV REAC requires a REAC_ID.} \> Section~\ref{info:gasoutputquantities} \\
     1012 \> \ct{REAC_ID ... not found for HRRPUV REAC.} \> Section~\ref{info:gasoutputquantities} \\
     1013 \> \ct{Output QUANTITY2 ... requires a SPEC_ID.} \> Section~\ref{info:gasoutputquantities} \\
-    1014 \> \ct{Output QUANTITY2 ... is not appropriate for SLCF.} \> Section~\ref{info:gasoutputquantities} \\
+    1014 \> \ct{Output QUANTITY2 ... needs to be a SLCF appropriate quantity.} \> Section~\ref{info:gasoutputquantities} \\
     1015 \> \ct{Output QUANTITY ... requires a QUANTITY2.} \> Section~\ref{info:gasoutputquantities} \\
     1016 \> \ct{Output QUANTITY ... requires a SPEC_ID.} \> Section~\ref{info:gasoutputquantities} \\
     1017 \> \ct{Output QUANTITY ... SPEC_ID ... not found.} \> Section~\ref{info:gasoutputquantities} \\
