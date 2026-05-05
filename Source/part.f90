@@ -952,8 +952,8 @@ USE MEMORY_FUNCTIONS, ONLY: ALLOCATE_STORAGE
 INTEGER :: IIP,N_INSERT,I1,J1,K1,I2,J2,K2,N,N_PARTICLES_INSERT,ND,ICC,IFACE,INDCF,I_RAND,N_INSERT_CELLS
 REAL(EB) :: XC1,XC2,YC1,YC2,ZC1,ZC2,X0,Y0,Z0,RR,RRI,HH,INSERT_VOLUME,INPUT_VOLUME,VOLUME_SPLIT_FACTOR,LP_X,LP_Y,LP_Z,RAMP_FACTOR,&
             IN_X1,IN_X2,IN_Y1,IN_Y2,IN_Z1,IN_Z2,IN_X0,IN_Y0,IN_Z0,VCX,VCY,VCZ,MOIST_CONT,FILLED_VOLUME,DIST,DIST_MIN,&
-            P_VECTOR(3),P_VECTOR_MIN(3),NVEC_MIN(3)
-LOGICAL :: CC_VALID
+            INIT_CELL_VOLUME,SOLID_INIT_VOLUME,GAS_CELL_VOLUME,CELL_VOLUME,P_VECTOR(3),P_VECTOR_MIN(3),NVEC_MIN(3)
+LOGICAL :: CELL_VALID
 TYPE (CC_CUTFACE_TYPE), POINTER :: CF
 
 IN => INITIALIZATION(INIT_INDEX)
@@ -1223,17 +1223,17 @@ TOTAL_OR_PER_CELL: IF (IN%N_PARTICLES > 0) THEN
 
          IF (CELL(CELL_INDEX(II,JJ,KK))%SOLID .AND. IN%SHAPE=='LINE') CYCLE INSERT_PARTICLE_LOOP
          ! Check for solid inside GEOM
-         CC_VALID = .TRUE.
+         CELL_VALID = .TRUE.
          IF (CC_IBM) THEN
             IF (CCVAR(II,JJ,KK,CC_CGSC)==CC_SOLID) THEN
-               CC_VALID = .FALSE.
+               CELL_VALID = .FALSE.
             ELSE
                INDCF = CCVAR(II,JJ,KK,CC_IDCF)
                ! If closest CFACE has positive dot-product of normal and centroid-particle vector, location is assumed valid
                IF (INDCF>0) THEN
                   DIST_MIN=HUGE_EB
                   CF => CUT_FACE(INDCF)
-                  CC_VALID = .FALSE.
+                  CELL_VALID = .FALSE.
                   CFA_LOOP1: DO IFACE=1,CF%NFACE
                      P_VECTOR = (/LP_X-CF%XYZCEN(IAXIS,IFACE), LP_Y-CF%XYZCEN(JAXIS,IFACE), LP_Z-CF%XYZCEN(KAXIS,IFACE)/)
                      DIST = NORM2(P_VECTOR)
@@ -1243,11 +1243,11 @@ TOTAL_OR_PER_CELL: IF (IN%N_PARTICLES > 0) THEN
                         NVEC_MIN = MESHES(NM)%BOUNDARY_COORD(CFACE(CF%CFACE_INDEX(IFACE))%BC_INDEX)%NVEC
                      ENDIF
                   ENDDO CFA_LOOP1
-                  IF (DOT_PRODUCT(NVEC_MIN,P_VECTOR_MIN) > TWENTY_EPSILON_EB) CC_VALID=.TRUE.
+                  IF (DOT_PRODUCT(NVEC_MIN,P_VECTOR_MIN) > TWENTY_EPSILON_EB) CELL_VALID=.TRUE.
                ENDIF
             ENDIF
          ENDIF
-         IF (.NOT.CELL(CELL_INDEX(II,JJ,KK))%SOLID .AND. CC_VALID) EXIT CHOOSE_XYZ_LOOP
+         IF (.NOT.CELL(CELL_INDEX(II,JJ,KK))%SOLID .AND. CELL_VALID) EXIT CHOOSE_XYZ_LOOP
 
          ! If cannot find non-solid grid cell, stop searching
 
@@ -1295,8 +1295,8 @@ TOTAL_OR_PER_CELL: IF (IN%N_PARTICLES > 0) THEN
 ELSEIF (IN%N_PARTICLES_PER_CELL > 0) THEN TOTAL_OR_PER_CELL
 
    N_INSERT = 0
-   INSERT_VOLUME = 0._EB
    FILLED_VOLUME = 0._EB
+   SOLID_INIT_VOLUME = 0._EB
    CALL GET_IJK(MIN(X1+MICRON,X2),MIN(Y1+MICRON,Y2),MIN(Z1+MICRON,Z2),NM,XI,YJ,ZK,I1,J1,K1)
    CALL GET_IJK(MAX(X2-MICRON,X1),MAX(Y2-MICRON,Y1),MAX(Z2-MICRON,Z1),NM,XI,YJ,ZK,I2,J2,K2)
    I2 = MIN(I2,IBAR)
@@ -1310,11 +1310,6 @@ ELSEIF (IN%N_PARTICLES_PER_CELL > 0) THEN TOTAL_OR_PER_CELL
    DO KK=K1,K2
       DO JJ=J1,J2
          II_LOOP: DO II=I1,I2
-            CC_VALID = .TRUE.
-            IF (CC_IBM) THEN
-               IF (CCVAR(II,JJ,KK,CC_CGSC)==CC_SOLID) CC_VALID = .FALSE.
-            ENDIF
-            IF (CELL(CELL_INDEX(II,JJ,KK))%SOLID .OR. .NOT.CC_VALID) CYCLE II_LOOP
             IF (IN%SHAPE=='CONE') THEN
                IF (((XC(II)-X0)**2+(YC(JJ)-Y0)**2<(RRI*(1._EB-(ZC(KK)-Z0)/HH))**2) .OR. &
                   ((XC(II)-X0)**2+(YC(JJ)-Y0)**2>(RR*(1._EB-(ZC(KK)-Z0)/HH))**2)) CYCLE II_LOOP
@@ -1323,23 +1318,30 @@ ELSEIF (IN%N_PARTICLES_PER_CELL > 0) THEN TOTAL_OR_PER_CELL
                IF (((XC(II)-X0)**2+(YC(JJ)-Y0)**2<RRI**2) .OR. &
                   ((XC(II)-X0)**2+(YC(JJ)-Y0)**2>RR**2)) CYCLE II_LOOP
             ENDIF
-            ! If local XB intersects with cutcell, estimate this intersection volume
-            VCX = (MIN(X(II),IN_X2)-MAX(X(II-1),IN_X1))
-            VCY = (MIN(Y(JJ),IN_Y2)-MAX(Y(JJ-1),IN_Y1))
-            VCZ = (MIN(Z(KK),IN_Z2)-MAX(Z(KK-1),IN_Z1))
+            ! Exclude overlap volume of INIT and solid regions when calculating PWT
+            ICC = 0
+            CELL_VOLUME = DX(II)*DY(JJ)*DZ(KK)
+            CELL_VALID = .NOT.CELL(CELL_INDEX(II,JJ,KK))%SOLID
             IF (CC_IBM) THEN
+               IF (CCVAR(II,JJ,KK,CC_CGSC)==CC_SOLID) CELL_VALID = .FALSE.
                ICC = CCVAR(II,JJ,KK,CC_IDCC)
-               ! Approximate intersection as min of the two volumes
-               IF (ICC>0) THEN
-                  INSERT_VOLUME = INSERT_VOLUME + MIN(VCX*VCY*VCZ,SUM(CUT_CELL(ICC)%VOLUME(:)))
-                  FILLED_VOLUME = FILLED_VOLUME + SUM(CUT_CELL(ICC)%VOLUME(:))
-               ELSE
-                  INSERT_VOLUME = INSERT_VOLUME + VCX*VCY*VCZ
-                  FILLED_VOLUME = FILLED_VOLUME + DX(II)*DY(JJ)*DZ(KK)
-               ENDIF
+            ENDIF
+            IF (.NOT.CELL_VALID .OR. ICC>0) THEN
+               VCX = MIN(X(II),IN_X2)-MAX(X(II-1),IN_X1)
+               VCY = MIN(Y(JJ),IN_Y2)-MAX(Y(JJ-1),IN_Y1)
+               VCZ = MIN(Z(KK),IN_Z2)-MAX(Z(KK-1),IN_Z1)
+               INIT_CELL_VOLUME = VCX*VCY*VCZ
+            ENDIF
+            IF (.NOT.CELL_VALID) THEN
+               SOLID_INIT_VOLUME = SOLID_INIT_VOLUME + INIT_CELL_VOLUME
+               CYCLE II_LOOP
+            ENDIF
+            IF (ICC>0) THEN
+               GAS_CELL_VOLUME = SUM(CUT_CELL(ICC)%VOLUME(:))
+               SOLID_INIT_VOLUME = SOLID_INIT_VOLUME + INIT_CELL_VOLUME*MAX(0._EB,1._EB-GAS_CELL_VOLUME/CELL_VOLUME)
+               FILLED_VOLUME = FILLED_VOLUME + GAS_CELL_VOLUME
             ELSE
-               INSERT_VOLUME = INSERT_VOLUME + VCX*VCY*VCZ
-               FILLED_VOLUME = FILLED_VOLUME + DX(II)*DY(JJ)*DZ(KK)
+               FILLED_VOLUME = FILLED_VOLUME + CELL_VOLUME
             ENDIF
             N_INSERT_CELLS = N_INSERT_CELLS + 1
 
@@ -1441,6 +1443,7 @@ ELSEIF (IN%N_PARTICLES_PER_CELL > 0) THEN TOTAL_OR_PER_CELL
          ENDDO II_LOOP
       ENDDO
    ENDDO
+   INSERT_VOLUME = MAX(0._EB,INSERT_VOLUME-SOLID_INIT_VOLUME)
 
 ENDIF TOTAL_OR_PER_CELL
 
