@@ -4833,7 +4833,7 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
             ENDIF
             IF (C<=TWENTY_EPSILON_EB .AND. H<=TWENTY_EPSILON_EB) THEN
                WRITE(MESSAGE,'(A,I0,A)') 'ERROR(192): REAC ',NR,&
-                                         ' Specify fuel chemistry using C and/or H when using simple chemistry'
+                                         ' Fuel must contain C and/or H when using simple chemistry'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
          ENDIF
@@ -5603,7 +5603,7 @@ IF (TRIM(ODE_SOLVER)/='null') THEN
             YP2ZZ(SPECIES_MIXTURE(NS)%SINGLE_SPEC_INDEX) = NS
          ENDDO
       CASE DEFAULT
-         WRITE(MESSAGE,'(A)') 'ERROR(209): Name of ODE_SOLVER is not recognized.'
+         WRITE(MESSAGE,'(A)') 'ERROR(209): COMB name of ODE_SOLVER is not recognized.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
    END SELECT
 ELSE
@@ -5834,8 +5834,8 @@ REAC_LOOP: DO NR=1,N_REACTIONS
    IF (RN%REVERSE) THEN
       DO NS = 1, N_TRACKED_SPECIES
          IF (ABS(RN%NU(NS)) > TWENTY_EPSILON_EB .AND. .NOT. SPECIES_MIXTURE(NS)%EXPLICIT_G_F) THEN
-            WRITE(MESSAGE,'(A,I0,A,A,A)') 'ERROR(212): REAC ',NR,'. Reversible reaction species, ',&
-                                          TRIM(SPECIES_MIXTURE(NS)%ID),' missing G_F.'
+            WRITE(MESSAGE,'(A,I0,A,A,A)') 'ERROR(212): REAC ',NR,'. Reversible reaction SPEC, ',&
+                                          TRIM(SPECIES_MIXTURE(NS)%ID),', missing RAMP_G_F.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
       ENDDO
@@ -8179,7 +8179,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
    IF ((VARIABLE_THICKNESS .OR. HT3D) .AND. THICKNESS(1)<TWENTY_EPSILON_EB) THICKNESS(1) = 0.1_EB
    IF ((VARIABLE_THICKNESS .OR. HT3D) .AND. MATL_ID(1,1)=='null') THEN
       IF (ANY(MASS_FLUX>0._EB) .OR. HRRPUA>0._EB .OR. MLRPUA>0._EB) THEN
-         WRITE (MESSAGE,'(A,A,A)') 'ERROR(319): SURF ',TRIM(SF%ID),' must have a MATL_ID.'
+         WRITE (MESSAGE,'(A,A,A)') 'ERROR(319): SURF ',TRIM(SF%ID),' for use with HT3D must have a MATL_ID.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ELSE
          MATL_ID(1,1) = 'MATERIAL PLACEHOLDER'
@@ -14426,12 +14426,12 @@ DEVICE_LOOP: DO N=1,N_DEVC
          SDV%Y2 = MIN(DV%Y2,M%YF)
          SDV%Z1 = MAX(DV%Z1,M%ZS)
          SDV%Z2 = MIN(DV%Z2,M%ZF)
-         SDV%I1 =   FLOOR( GINV(SDV%X1-M%XS,1,NM)*M%RDXI * ONE_P_EPS ) + 1
-         SDV%I2 = CEILING( GINV(SDV%X2-M%XS,1,NM)*M%RDXI * ONE_M_EPS )
-         SDV%J1 =   FLOOR( GINV(SDV%Y1-M%YS,2,NM)*M%RDETA * ONE_P_EPS ) + 1
-         SDV%J2 = CEILING( GINV(SDV%Y2-M%YS,2,NM)*M%RDETA * ONE_M_EPS )
-         SDV%K1 =   FLOOR( GINV(SDV%Z1-M%ZS,3,NM)*M%RDZETA * ONE_P_EPS ) + 1
-         SDV%K2 = CEILING( GINV(SDV%Z2-M%ZS,3,NM)*M%RDZETA * ONE_M_EPS )
+         SDV%I1 = NINT( GINV(SDV%X1-M%XS,1,NM)*M%RDXI   ) + 1
+         SDV%I2 = NINT( GINV(SDV%X2-M%XS,1,NM)*M%RDXI   )
+         SDV%J1 = NINT( GINV(SDV%Y1-M%YS,2,NM)*M%RDETA  ) + 1
+         SDV%J2 = NINT( GINV(SDV%Y2-M%YS,2,NM)*M%RDETA  )
+         SDV%K1 = NINT( GINV(SDV%Z1-M%ZS,3,NM)*M%RDZETA ) + 1
+         SDV%K2 = NINT( GINV(SDV%Z2-M%ZS,3,NM)*M%RDZETA )
          IF (SDV%I1>SDV%I2) SDV%I1 = SDV%I2
          IF (SDV%J1>SDV%J2) SDV%J1 = SDV%J2
          IF (SDV%K1>SDV%K2) SDV%K1 = SDV%K2
@@ -15853,7 +15853,7 @@ SUBROUTINE READ_SLCF
 
 REAL(EB) :: MAXIMUM_VALUE,MINIMUM_VALUE
 REAL(EB) :: AGL_SLICE
-INTEGER :: N,N1,NN,NM,MESH_NUMBER,N_SLCF_O,NITER,ITER,VELO_INDEX,GEOM_INDEX,N_UNIQUE_SLCF,IOR
+INTEGER :: N,N1,NN,NM,MESH_NUMBER,N_SLCF_O,NITER,ITER,VELO_INDEX,GEOM_INDEX,N_UNIQUE_SLCF,IOR,IND2
 LOGICAL :: VECTOR,CELL_CENTERED,DEBUG,CULL_SLICE,DRY
 CHARACTER(LABEL_LENGTH) :: QUANTITY,QUANTITY_TMP,SPEC_ID,PART_ID,QUANTITY2,PROP_ID,REAC_ID,SLICETYPE
 CHARACTER(200) :: SLCF_NAME
@@ -15865,7 +15865,7 @@ TYPE (SLICE_TYPE), POINTER :: SL
 INTEGER :: INDEX,INDEX2,Y_INDEX,Z_INDEX,PART_INDEX,REAC_INDEX,MATL_INDEX
 CHARACTER(LABEL_LENGTH) :: SMOKEVIEW_LABEL,SMOKEVIEW_BAR_LABEL
 NAMELIST /SLCF/ AGL_SLICE,CELL_CENTERED,DB,DRY,FYI,DEBUG,ID,MAXIMUM_VALUE,MESH_NUMBER,&
-                MINIMUM_VALUE,PART_ID,PBX,PBY,PBZ,PROP_ID,QUANTITY,QUANTITY2,REAC_ID,RLE_MIN,RLE_MAX,SLICETYPE,&
+                MINIMUM_VALUE,PART_ID,PBX,PBY,PBZ,QUANTITY,REAC_ID,RLE_MIN,RLE_MAX,SLICETYPE,&
                 SPEC_ID,VECTOR,VELO_INDEX,XB
 
 MESH_LOOP: DO NM=1,NMESHES
@@ -15949,7 +15949,6 @@ MESH_LOOP: DO NM=1,NMESHES
 
    SLCF_LOOP: DO NN=1,N_SLCF_O
       QUANTITY  = 'null'
-      QUANTITY2 = 'null'
       PBX      = -1.E6_EB
       PBY      = -1.E6_EB
       PBZ      = -1.E6_EB
@@ -16177,9 +16176,9 @@ MESH_LOOP: DO NM=1,NMESHES
             SL%RLE = .FALSE.
          ENDIF
          SL%VELO_INDEX = VELO_INDEX
-         CALL GET_QUANTITY_INDEX(SL%SMOKEVIEW_LABEL,SL%SMOKEVIEW_BAR_LABEL,SL%INDEX,SL%INDEX2, &
+         CALL GET_QUANTITY_INDEX(SL%SMOKEVIEW_LABEL,SL%SMOKEVIEW_BAR_LABEL,SL%INDEX,IND2, &
                                  SL%Y_INDEX,SL%Z_INDEX,I_DUM(1),SL%PART_INDEX,I_DUM(1),I_DUM(2),SL%REAC_INDEX,SL%MATL_INDEX, &
-                                 'SLCF',QUANTITY,QUANTITY2,SPEC_ID,'null',PART_ID,'null','null',REAC_ID,'null',-1._EB,I_DUM(3),&
+                                 'SLCF',QUANTITY,'null',SPEC_ID,'null',PART_ID,'null','null',REAC_ID,'null',-1._EB,I_DUM(3),&
                                  SLICETYPE=SLICETYPE)
 
          ! If the user needs to do a particle flux calculation, detect that here.
@@ -16208,12 +16207,6 @@ MESH_LOOP: DO NM=1,NMESHES
          SL%CELL_CENTERED = CELL_CENTERED
          SL%DEBUG         = DEBUG
 
-         ! Check if the slcf PROPERTY exists (for FED_ACTIVITY input)
-
-         SL%PROP_INDEX = 0
-         IF (PROP_ID /='null') THEN
-            CALL GET_PROPERTY_INDEX(SL%PROP_INDEX,'SLCF',PROP_ID)
-         ENDIF
          SL%SLCF_NAME = SLCF_NAME
          !MESHES(1)%ALL_SLICE_QUANTITIES(N) = TRIM(SL%SMOKEVIEW_LABEL(1:30))
       ENDDO VECTORLOOP
@@ -16973,10 +16966,10 @@ DO ND=-N_OUTPUT_QUANTITIES,N_OUTPUT_QUANTITIES
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
 
-      ! QUANTITY2 only works with SLCF at the moment
+      ! QUANTITY2 only works for SLCF appropriate quantities at the moment
 
       IF (.NOT.OUTPUT_QUANTITY(ND)%SLCF_APPROPRIATE) THEN
-          WRITE(MESSAGE,'(3A)')  'ERROR(1014): Output QUANTITY2 ',TRIM(QUANTITY2),' is not appropriate for SLCF.'
+          WRITE(MESSAGE,'(3A)')  'ERROR(1014): Output QUANTITY2 ',TRIM(QUANTITY2),' needs to be a SLCF appropriate quantity.'
           CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
 

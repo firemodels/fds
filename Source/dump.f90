@@ -6791,12 +6791,12 @@ QUANTITY_LOOP: DO IQ=1,NQT
    ELSE
       SL => SLICE(IQ)
       IND  = SL%INDEX
-      IND2 = SL%INDEX2
+      IND2 = 0
       Y_INDEX = SL%Y_INDEX
       Z_INDEX = SL%Z_INDEX
       PART_INDEX = SL%PART_INDEX
       VELO_INDEX = SL%VELO_INDEX
-      PROP_INDEX = SL%PROP_INDEX
+      PROP_INDEX = 0
       REAC_INDEX = SL%REAC_INDEX
       MATL_INDEX = SL%MATL_INDEX
       I1  = SL%I1
@@ -7388,12 +7388,12 @@ UNIQUE_LOOPA: DO IQ=1,MESHES(1)%N_UNIQUE_SLCF
       ! Pack data for parallel write
       SL => SLICE(SLICEIND)
       IND  = SL%INDEX
-      IND2 = SL%INDEX2
+      IND2 = 0
       Y_INDEX = SL%Y_INDEX
       Z_INDEX = SL%Z_INDEX
       PART_INDEX = SL%PART_INDEX
       VELO_INDEX = SL%VELO_INDEX
-      PROP_INDEX = SL%PROP_INDEX
+      PROP_INDEX = 0
       REAC_INDEX = SL%REAC_INDEX
       MATL_INDEX = SL%MATL_INDEX
       I1  = SL%I1
@@ -8749,9 +8749,6 @@ IND_SELECT: SELECT CASE(IND)
 
    CASE(51)  ! RESOLVED KINETIC ENERGY (per unit mass)
       GAS_PHASE_OUTPUT_RES = KRES(II,JJ,KK)
-
-   CASE(52)  ! WAVELET ERROR (wavelet error measure)
-      GAS_PHASE_OUTPUT_RES = WAVELET_ERROR_MEASURE(II,JJ,KK,IND2,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,DT,NM)
 
    CASE(53)  ! CELL U
       III = MAX(1,MIN(II,IBAR))
@@ -12560,96 +12557,6 @@ DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 ENDDO
 
 END SUBROUTINE COMPUTE_PARTICLE_FLUXES
-
-
-REAL(EB) FUNCTION WAVELET_ERROR_MEASURE(II,JJ,KK,IND,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,DT,NM)
-REAL(EB), INTENT(IN) :: DT
-INTEGER, INTENT(IN) :: II,JJ,KK,IND,NM,VELO_INDEX,Y_INDEX,Z_INDEX,PART_INDEX
-REAL(EB) :: SS(4)
-
-! wavelet error measure
-WAVELET_ERROR_MEASURE = 0._EB
-
-SS(1) = GAS_PHASE_OUTPUT(T_BEGIN,DT,NM,MAX(0,II-2),JJ,KK,              IND,0,Y_INDEX,Z_INDEX,0,PART_INDEX,VELO_INDEX,0,0,0,0)
-SS(2) = GAS_PHASE_OUTPUT(T_BEGIN,DT,NM,MAX(0,II-1),JJ,KK,              IND,0,Y_INDEX,Z_INDEX,0,PART_INDEX,VELO_INDEX,0,0,0,0)
-SS(3) = GAS_PHASE_OUTPUT(T_BEGIN,DT,NM,II,JJ,KK,                       IND,0,Y_INDEX,Z_INDEX,0,PART_INDEX,VELO_INDEX,0,0,0,0)
-SS(4) = GAS_PHASE_OUTPUT(T_BEGIN,DT,NM,MIN(MESHES(NM)%IBP1,II+1),JJ,KK,IND,0,Y_INDEX,Z_INDEX,0,PART_INDEX,VELO_INDEX,0,0,0,0)
-WAVELET_ERROR_MEASURE = WAVELET_ERROR(SS)
-
-IF (.NOT.TWO_D) THEN
-   SS(1) = GAS_PHASE_OUTPUT(T_BEGIN,DT,NM,II,MAX(0,JJ-2),KK,              IND,0,Y_INDEX,Z_INDEX,0,PART_INDEX,VELO_INDEX,0,0,0,0)
-   SS(2) = GAS_PHASE_OUTPUT(T_BEGIN,DT,NM,II,MAX(0,JJ-1),KK,              IND,0,Y_INDEX,Z_INDEX,0,PART_INDEX,VELO_INDEX,0,0,0,0)
-   SS(3) = GAS_PHASE_OUTPUT(T_BEGIN,DT,NM,II,JJ,KK,                       IND,0,Y_INDEX,Z_INDEX,0,PART_INDEX,VELO_INDEX,0,0,0,0)
-   SS(4) = GAS_PHASE_OUTPUT(T_BEGIN,DT,NM,II,MIN(MESHES(NM)%JBP1,JJ+1),KK,IND,0,Y_INDEX,Z_INDEX,0,PART_INDEX,VELO_INDEX,0,0,0,0)
-   WAVELET_ERROR_MEASURE = MAX(WAVELET_ERROR_MEASURE,WAVELET_ERROR(SS))
-ENDIF
-
-SS(1) = GAS_PHASE_OUTPUT(T_BEGIN,DT,NM,II,JJ,MAX(0,KK-2),              IND,0,Y_INDEX,Z_INDEX,0,PART_INDEX,VELO_INDEX,0,0,0,0)
-SS(2) = GAS_PHASE_OUTPUT(T_BEGIN,DT,NM,II,JJ,MAX(0,KK-1),              IND,0,Y_INDEX,Z_INDEX,0,PART_INDEX,VELO_INDEX,0,0,0,0)
-SS(3) = GAS_PHASE_OUTPUT(T_BEGIN,DT,NM,II,JJ,KK,                       IND,0,Y_INDEX,Z_INDEX,0,PART_INDEX,VELO_INDEX,0,0,0,0)
-SS(4) = GAS_PHASE_OUTPUT(T_BEGIN,DT,NM,II,JJ,MIN(MESHES(NM)%KBP1,KK+1),IND,0,Y_INDEX,Z_INDEX,0,PART_INDEX,VELO_INDEX,0,0,0,0)
-WAVELET_ERROR_MEASURE = MAX(WAVELET_ERROR_MEASURE,WAVELET_ERROR(SS))
-
-END FUNCTION WAVELET_ERROR_MEASURE
-
-
-REAL(EB) FUNCTION WAVELET_ERROR(S)
-
-INTEGER, PARAMETER :: M=2 ! only need two level transform, but could be generalized
-REAL(EB), INTENT(IN) :: S(2*M)
-REAL(EB) :: SS(2*M),A(M,M)=0._EB,C(M,M)=0._EB,C1,C2,SMIN,SMAX,DS
-INTEGER :: I,J,K,N
-
-! Comments: This function generates a normalized error measure WAVELET_ERROR based on coefficients
-! from a simple Haar wavelet transform.  The function requires the input of 4 scalar values.  The
-! error is estimated at the point of the value S(3) based on a piece-wise constant reconstruction
-! of the underlying function.  For example...
-!
-!     |<---------- interval --------->|
-!
-!            S(2)
-!             o-------       S(4)
-!    S(1)                     o-------
-!     o-------
-!                    S(3)
-!                     o-------
-!                     ^
-!                     |
-!             error computed here
-
-! normalize signal
-SMAX=MAXVAL(S)
-SMIN=MINVAL(S)
-DS=SMAX-SMIN
-IF (DS<1.E-6) THEN
-   WAVELET_ERROR = 0._EB
-   RETURN
-ELSE
-   SS=(S-SMIN)/DS
-ENDIF
-
-! discrete Haar wavelet transform
-N=M
-DO I=1,M
-   DO J=1,N
-      K=2*J-1
-      IF (I==1) THEN
-         A(I,J) = 0.5_EB*(SS(K)+SS(K+1))
-         C(I,J) = 0.5_EB*(SS(K)-SS(K+1))
-      ELSE
-         A(I,J) = 0.5_EB*(A(I-1,K)+A(I-1,K+1))
-         C(I,J) = 0.5_EB*(A(I-1,K)-A(I-1,K+1))
-      ENDIF
-   ENDDO
-   N=N/2;
-ENDDO
-
-C1 = SUM(C(1,:))
-C2 = SUM(C(2,:))
-
-WAVELET_ERROR = ABS(C1-C2)
-
-END FUNCTION WAVELET_ERROR
 
 
 !> \brief Back out k_sgs (subgrid kinetic energy per unit mass) from Deardorff eddy viscosity
