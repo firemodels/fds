@@ -646,8 +646,7 @@ REAL(EB), ALLOCATABLE, DIMENSION(:) :: DSUM,USUM,PSUM
 INTEGER :: LEVEL_SET_MODE=0               !< Indicator of the type of level set calculation to be done
 LOGICAL :: LEVEL_SET_COUPLED_FIRE=.TRUE.  !< Indicator for fire and wind level set coupling
 LOGICAL :: LEVEL_SET_COUPLED_WIND=.TRUE.  !< Indicator for fire and wind level set coupling
-LOGICAL :: LEVEL_SET_ELLIPSE=.TRUE.       !< Indicator of Richards elliptical level set formulation
-LOGICAL :: LSET_TAN2
+LOGICAL :: LEVEL_SET_ELLIPSE=.TRUE.       !< Placeholder for future level set spread formulations
 
 ! Parameters for Terrain and Wind simulation needs
 
