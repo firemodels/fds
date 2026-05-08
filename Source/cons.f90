@@ -448,6 +448,7 @@ INTEGER :: ZETA_0_RAMP_INDEX=0                                      !< Ramp inde
 LOGICAL :: OUTPUT_CHEM_IT=.FALSE.
 LOGICAL :: REAC_SOURCE_CHECK=.FALSE.
 LOGICAL :: COMPUTE_ADIABATIC_FLAME_TEMPERATURE=.FALSE.              !< Report adiabatic flame temperature per REAC in LU_OUTPUT
+LOGICAL :: VARIABLE_CFT=.FALSE.                                     !< Experimental critical flame temp concept
 
 REAL(EB) :: RSUM0                                     !< Initial specific gas constant, \f$ R \sum_i Z_{i,0}/W_i \f$
 
