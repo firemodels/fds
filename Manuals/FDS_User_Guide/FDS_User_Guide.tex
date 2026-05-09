@@ -425,9 +425,6 @@ There are different implementations of MPI, much like there are different Fortra
 
 MPI and OpenMP can be used together. For example, 4 MPI processes can be assigned to 4 different computers, and each MPI process can be supported by, say, 8 OpenMP threads, assuming each computer has 8 cores. Most of the speed up is achieved by the MPI. For a reasonably fast network, you can expect 4 MPI processes to speed up the computation time by a factor of about 0.9 times 4. The OpenMP can provide an extra factor up to about 2, regardless of the number of cores used beyond about 4.
 
-
-\newpage
-
 \section{Launching an FDS Job}
 \label{info:launching}
 
@@ -901,9 +898,6 @@ The first thing to do when setting up an input file is to give the job a name.  
 \item \ct{TITLE} is a string of 255 characters or less that describes the simulation. It is simply a descriptive text that is passed to various output files.
 \end{description}
 
-
-\newpage
-
 \section{Simulation Time}
 \label{info:TIME}
 
@@ -978,8 +972,6 @@ warms up a compartment to a nearly equilibrium state at which point time-average
 \ct{TIME_SHRINK_FACTOR} does not reduce the time for the flow and gas temperature fields to develop; however, these often develop much faster than the wall temperature profile.
 
 Note that when \ct{TIME_SHRINK_FACTOR} is used a device with \ct{QUANTITY='TIME'} or a device or control function with a \ct{DELAY} will have those values adjusted by the value of \ct{TIME_SHRINK_FACTOR}.  For example if a 10~s \ct{DELAY} is specified for a \ct{CTRL} input with a \ct{TIME_SHRINK_FACTOR} of 10, then FDS will adjust the \ct{DELAY} to 1~s. However, use of time based device or control functions that change the simulation implies a non-steady scenario where the use of \ct{TIME_SHRINK_FACTOR} may no longer be appropriate.
-
-\newpage
 
 \section{Computational Meshes}
 \label{info:MESH}
@@ -1235,8 +1227,6 @@ The default boundary condition for all solid surfaces is that of a smooth inert 
 If only this boundary condition is needed, there is no need to add any \ct{SURF} lines to the input file. If additional boundary conditions are desired, they are to be listed one boundary condition at a time. Each \ct{SURF} line consists of an identification string \ct{ID='...'} to allow references to it by an obstruction or vent. Thus, on each \ct{OBST} and \ct{VENT} line that are to be described below, the character string \ct{SURF_ID='...'} indicates the \ct{ID} of the \ct{SURF} line containing the desired boundary condition parameters. If a particular \ct{SURF} line is to be applied as the default boundary condition, set \ct{DEFAULT=T} on the \ct{SURF} line.
 
 
-\newpage
-
 \section{Creating Rectilinear Obstructions}
 \label{info:OBST}
 
@@ -1357,8 +1347,6 @@ In rare cases, you might not want to allow a \ct{VENT} to be attached to a parti
 
 
 \ifcompgeom
-
-\newpage
 
 \section{Creating Unstructured Geometry (Beta)}
 \label{info:GEOM}
@@ -1700,7 +1688,6 @@ One current limitation of the unstructured geometry algorithm is that a Cartesia
 
 \fi
 
-\newpage
 
 \section{Applying Surface Properties}
 \label{info:VENT}
@@ -1814,9 +1801,6 @@ Smokeview can help identify where two \ct{VENT}s overlap, assuming each has a un
 
 If an error message appears requesting that the orientation of a vent should be specified, first check to make sure that the vent is a plane; that is, that two of its six coordinates are the same. If the vent is a plane, then the orientation is usually determined automatically. However, if the \ct{VENT} is attached to a thin obstruction; that is, an obstruction that is zero cells thick, then you must specify an orientation index, \ct{IOR}, to indicate in which of the two normal directions the \ct{VENT} faces. If the normal direction of the \ct{VENT} is in the positive $x$ direction, for example, set \ct{IOR=1}. If the normal direction is in the negative $x$ direction, set \ct{IOR=-1}. For the $y$ or $z$ direction, use the number $\pm 2$ or $\pm 3$, respectively. Setting \ct{IOR} may sometimes solve the problem, but there are situations where it is not possible to automatically detect the vent orientation or that the vent is completely detached from a solid surface, in which case you should rework the \ct{VENT} parameters.
 
-\newpage
-
-
 \section{Coloring Obstructions, Geometry, Vents, Surfaces, and Meshes}
 
 Assigning objects a meaningful color or pattern is useful when visualizing the results of a simulation. There are two ways to do this in FDS. Either assign a single color, or assign a texture map, which is an image of your choosing.
@@ -1927,8 +1911,6 @@ For geometries that are spheres, the parameter \ct{TEXTURE_MAPPING='SPHERICAL'} 
 \end{figure}
 
 
-
-\newpage
 
 \section{Repeated Objects: The \texorpdfstring{{\tt MULT}}{MULT} Namelist Group (Table \ref{tbl:MULT})}
 \label{info:MULT}
@@ -2322,9 +2304,6 @@ A common boundary condition for diagnostic simulations is to force all surfaces 
 Note that \ct{TMP_FRONT_INITIAL} sets the initial temperature of the surface and has few other uses except for this particular application. If the surface is not \ct{ADIABATIC} and it has material properties, use \ct{TMP_INNER} to set the surface and interior temperature.
 
 Also note that no solid surface is truly adiabatic; thus, the specification of an adiabatic boundary condition should be used for diagnostic purposes only. Actual fire simulations can develop numerical instabilities if \ct{ADIABATIC} surfaces are used because the wall temperature and radiation fields are not updated simultaneously. If a droplet lands on an \ct{ADIABATIC} surface, no heat transfer will be predicted between the droplet and the surface. This is because the high heat transfer rates associated with droplets can lead to nonsensical wall temperatures when trying to enforce the adiabatic condition which are then likely to result in runtime errors or numerical instabilities.
-
-
-\newpage
 
 \section{One-Dimensional Heat Conduction in Solids}
 \label{info:MATL}
@@ -3682,9 +3661,6 @@ Using the boundary file output quantity \ct{'MASS FLUX'} might help to visualize
     &BNDF QUANTITY='MASS FLUX', CELL_CENTERED=T /
 \end{lstlisting}
 
-
-\newpage
-
 \section{HVAC Systems}
 \label{info:HVAC}
 
@@ -4049,8 +4025,6 @@ To apply localized leakage to \ct{GEOM}, the process is similar. \ct{NODE_ID} on
     VENT2_ID='LEAK OUT',GEOM2=T,AREA=0.01/
 \end{lstlisting}
 Here the use of \ct{GEOM2=T} indicates that \ct{VENT2_ID} is a \ct{NODE_ID} on \ct{SURF}.
-
-\newpage
 
 \section{Sealed Compartments, Leakage, and Void Spaces}
 \label{info:ZONE}
@@ -4581,10 +4555,6 @@ Fuels compatible with the simple chemistry approach to defining reactions can us
 \begin{lstlisting}
     &SPEC ID='ETHYLENE GLYCOL', C=2, H=6, O=2/
 \end{lstlisting}
-As another example, the following would redefine \ct{SOOT} to have a 10\,\% hydrogen atom fraction. When using simple chemistry add \ct{LUMPED_COMPONENT_ONLY=T} if you are not using any of the aerosol behaviors in FDS.
-\begin{lstlisting}
-    &SPEC ID='SOOT', C=0.9, H=0.1/
-\end{lstlisting}
 
 \subsubsection{Conductivity}
 \label{info:CONDUCTIVITY}
@@ -4767,9 +4737,11 @@ By default, duplicate species are considered to be a lumped species and not a pr
 
 \subsection{Soot}
 \label{info:SOOT}
-The predefined species of \ct{SOOT'} is defined with with \ct{FORMULA='C'}. To specify soot that contains other atoms, use \ct{FORMULA}. If new thermo-physical properties are not specified, define the \ct{FORMULA} to keep the molecular weight near 12~g/mol, i.e \ct{FORMULA='C0.85H1.7'} rather than \ct{FORMULA='C10H20'}.
-
-\newpage
+The predefined species of \ct{SOOT'} is defined with with \ct{FORMULA='C'}. To specify soot that contains other elements, use \ct{FORMULA}. For example, the following would redefine \ct{SOOT} to include a 10\,\% hydrogen atom fraction. 
+\begin{lstlisting}
+    &SPEC ID='SOOT', FORMULA='C0.9H0.1'/
+\end{lstlisting}
+If new thermo-physical properties are not specified, define the \ct{FORMULA} to keep the molecular weight near 12~g/mol, i.e \ct{FORMULA='C0.85H1.7'} rather than \ct{FORMULA='C10H20'}. The inputs \ct{C},\ct{H},\ct{O}, and \ct{N} can also be used if those are the only elements present. When using simple chemistry add \ct{LUMPED_COMPONENT_ONLY=T} if you are not using any of the aerosol behaviors in FDS.
 
 \section{Specifying Lumped Species (Mixtures of Primitive Species)}
 \label{info:lumped}
@@ -5139,8 +5111,6 @@ There may be special circumstances where you would like to specify that a locali
     AIT_EXCLUSION_ZONE(1:6,2)=..., AIT_EXCLUSION_ZONE_TEMPERATURE(2)=3000./
 \end{lstlisting}
 
-\newpage
-
 \section{Complex Stoichiometry}
 \label{info:REAC_Diagnostics}
 
@@ -5422,10 +5392,6 @@ For example, if the reaction defines the complete combustion of methane using pr
     &REAC FUEL='METHANE', EQUATION ='CH4+2*O2=CO2+2*H2O' /
     &REAC FUEL='METHANE', EQUATION ='METHANE+2*O2=CO2+2*H2O' /
 \end{lstlisting}
-
-
-
-\newpage
 
 \section{Finite Rate Combustion}
 \label{info:finite}
@@ -6655,8 +6621,6 @@ Note that the \ct{PART} input must contain \ct{ORIENTATION} as this signals to F
     \label{fig:part_orientation_ramp}
 \end{figure}
 
-\newpage
-
 \section{Particle Removal}
 \label{info:particle_removal}
 
@@ -7418,9 +7382,6 @@ The particle therefore loses 0.2410~kJ.
     \label{char_oxidation_2_fig}
 \end{figure}
 
-
-\newpage
-
 \section{Lagrangian Particle Model}
 \label{info:vegetation}
 \label{pine_needles}
@@ -7698,11 +7659,6 @@ The resulting vegetation temperatures are shown in Fig.~\ref{ground_vegetation_c
     \caption[Results of the \ct{ground_vegetation_conv} test case]{Temperature of convectively heated vegetation of two different sizes. (Left) $\sigma_{\rm v}=3000$~\unit{\per\meter}. (Right) $\sigma_{\rm v}=1500$~\unit{\per\meter}.}
     \label{ground_vegetation_conv_fig}
 \end{figure}
-
-
-\newpage
-
-
 
 \section{Level Set Model for Wildland Fire Spread}
 \label{info:level_set}
@@ -9526,9 +9482,6 @@ In this example, many different types of obstructions are randomly positioned wi
 \end{figure}
 
 
-
-\newpage
-
 \section{Baroclinic Vorticity}
 \label{baroclinic_torque}
 
@@ -9587,10 +9540,6 @@ This case demonstrates the use of baroclinic correction for an axially-symmetric
     \label{helium_plume}
 \end{figure}
 
-
-
-
-\newpage
 
 \section{Pressure Considerations in Long Tunnels}
 \label{tunnel_solver}
