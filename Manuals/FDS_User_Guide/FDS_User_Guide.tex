@@ -4581,7 +4581,10 @@ Fuels compatible with the simple chemistry approach to defining reactions can us
 \begin{lstlisting}
     &SPEC ID='ETHYLENE GLYCOL', C=2, H=6, O=2/
 \end{lstlisting}
-
+As another example, the following would redefine \ct{SOOT} to have a 10\,\% hydrogen atom fraction. When using simple chemistry add \ct{LUMPED_COMPONENT_ONLY=T} if you are not using any of the aerosol behaviors in FDS.
+\begin{lstlisting}
+    &SPEC ID='SOOT', C=0.9, H=0.1/
+\end{lstlisting}
 
 \subsubsection{Conductivity}
 \label{info:CONDUCTIVITY}
@@ -4859,7 +4862,7 @@ For the simple chemistry model, each reaction is assumed to be of the form:
 \nu_{\COTWO} \; \mathrm{CO_2} + \nu_{\HTWOO} \; \mathrm{H_2O} +
 \nu_{\CO}   \; \mathrm{CO}   + \nu_{\rm S} \; \mathrm{Soot} + \nu_{\HCN} \; \mathrm{HCN} +
 \nu_{\NTWO} \; \mathrm{N_2} \ee
-You need only specify the chemical formula of the fuel along with the yields of CO ($y_{\CO}$), soot ($y_{\rm S}$), and HCN ($y_{\HCN}$) and the volume fraction of hydrogen in the soot ($X_\Hy$). FDS will use that information and calculate the stoichiometric coefficients automatically as follows where $W$ is the molecular weight and F indicates the fuel species:
+You need only specify the chemical formula of the fuel along with the yields of CO ($y_{\CO}$), soot ($y_{\rm S}$), and HCN ($y_{\HCN}$) and the volume fraction of hydrogen in the soot ($X_\Hy$). The chemical formula and the soot hydrogen fraction, if a non-zero value is desired, are defined using \ct{SPEC}, see~\ref{info:FORMULA}. FDS will use that information and calculate the stoichiometric coefficients automatically as follows where $W$ is the molecular weight and F indicates the fuel species:
 \begin{eqnarray*}
     \nu_{\OTWO}    &=& \nu_{\COTWO} + \frac{\nu_{\CO}}{2} + \frac{\nu_{\HTWOO}}{2} - \frac{\hbox{z}}{2}   \\
     \nu_{\COTWO}   &=& \hbox{x} - \nu_{\CO} - \nu_{\HCN} - (1-X_\Hy) \, \nu_{\rm S} \\
@@ -4888,7 +4891,7 @@ A few sample \ct{REAC} lines are given here.
 \begin{lstlisting}
     &REAC FUEL = 'METHANE' /
 \end{lstlisting}
-In this case, there is no need for a \ct{FORMULA} or atom count because the \ct{FUEL} is listed in Appendix~\ref{info:predefined_species}. It is assumed that the soot and CO yields are zero.  FDS will compute the yields of product species and the heat of combustion based upon predefined values.
+In this case, there is no need for a \ct{SPEC} because the \ct{FUEL} is listed in Appendix~\ref{info:predefined_species}. It is assumed that the soot and CO yields are zero.  FDS will compute the yields of product species and the heat of combustion based upon predefined values.
 \begin{lstlisting}
     &REAC FUEL         = 'PROPANE'
     SOOT_YIELD         = 0.01
