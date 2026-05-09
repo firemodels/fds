@@ -4679,7 +4679,7 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
 
    RN => REACTION(NR)
 
-   IF (C > 0._EB .OR. H > 0._EB .OR. O > 0._EB .OR. H > 0.EB) THEN
+   IF (C > 0._EB .OR. H > 0._EB .OR. O > 0._EB .OR. H > 0._EB) THEN
        WRITE(MESSAGE,'(A)') 'WARNING: Recommend using SPEC to define FUEL chemistry for REAC'
          IF (MY_RANK==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
    ENDIF  
