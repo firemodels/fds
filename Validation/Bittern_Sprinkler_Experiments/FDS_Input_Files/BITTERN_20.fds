@@ -10,11 +10,13 @@ Ambient temperature
 
 Reaction
 
-&REAC FUEL='POLYURETHANE',
+&SPEC ID='POLYURETHANE',
       C=1.0,
       H=1.8,
       O=0.35,
-      N=0.06,
+      N=0.06/
+
+&REAC FUEL='POLYURETHANE',
       SOOT_YIELD=0.227,
       HEAT_OF_COMBUSTION=20400,
       RADIATIVE_FRACTION=0.46/
@@ -120,11 +122,11 @@ Fire definition
 
 Obstructions
 
-&OBST ID='CHAIR', XB=7.7,8.1,0.1,0.6,0.0,0.65, SURF_IDS='FIRE','INERT','INERT'/ 
+&OBST ID='CHAIR', XB=7.7,8.1,0.1,0.6,0.0,0.65, SURF_IDS='FIRE','INERT','INERT'/
 
 Vents
 
-&VENT ID='FLOOR', SURF_ID='CONCRETE', MB='ZMIN' / 
+&VENT ID='FLOOR', SURF_ID='CONCRETE', MB='ZMIN' /
 
 Door leakage
 
