@@ -110,7 +110,7 @@ fdsplotlib.plot_to_fig(x_data=Qstar[2:16], y_data=Hasemi_and_Tokunaga[2:16], mar
 fdsplotlib.plot_to_fig(x_data=Qstar, y_data=Cetegen, marker_style='b-', figure_handle=fig, data_label='Cetegen')
 fdsplotlib.plot_to_fig(x_data=Qstar, y_data=Delichatsios, marker_style='y-', figure_handle=fig, data_label='Delichatsios')
 fdsplotlib.plot_to_fig(x_data=Qstar, y_data=np.max(L_99[:, :3], axis=1), marker_style='r--', figure_handle=fig, data_label='Max FDS 99 %')
-fdsplotlib.plot_to_fig(x_data=Qstar, y_data=np.min(L_95[:, :3], axis=1), marker_style='b--', figure_handle=fig, data_label='Min FDS 99 %')
+fdsplotlib.plot_to_fig(x_data=Qstar, y_data=np.min(L_95[:, :3], axis=1), marker_style='b--', figure_handle=fig, data_label='Min FDS 95 %')
 
 plt.savefig(pltdir + 'Flame_Height2.pdf', format='pdf')
 
