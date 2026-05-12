@@ -9,10 +9,8 @@
 &MISC TMPA= 24., P_INF= 101186   /
 
 Heat of Combustion from PRS-DI-D3 Specification
-&REAC FUEL='TETRA-PROPYLENE'
+&REAC FYI='TETRA-PROPYLENE',FUEL='DODECANE'
       HEAT_OF_COMBUSTION = 40000.
-      C = 12.
-      H = 26.
       SOOT_YIELD=0.0433
       CO_YIELD = 0.025 /
 

@@ -1,18 +1,18 @@
 &HEAD CHID='stairwell', TITLE='Test of stairwell pressurization' /
 
-&MISC VERBOSE=T /
-
 &TIME T_END=50. /
 
 &MESH ID='Level 01 to 05', IJK=59,27,178, XB= 3.5, 9.4, 5.1, 7.8,  7.5, 25.3, MPI_PROCESS=0 /
-&MESH ID='Level 06',       IJK=70,37,35,  XB= 1.1, 8.1, 4.9, 8.6, 25.3, 28.8, MPI_PROCESS=0 /
-&MESH ID='Level 07',       IJK=54,37,22,  XB= 1.1, 6.5, 4.9, 8.6, 28.8, 31.0, MPI_PROCESS=0 /
-&MESH ID='Level B5 to 00', IJK=61,26,285, XB= 0.0, 6.1, 0.0, 2.6,-23.9,  4.6, MPI_PROCESS=1 /
-&MESH ID='MESH02',         IJK=17,81,30,  XB= 6.4, 8.1,-1.3, 6.8,-23.9,-20.9, MPI_PROCESS=2 /
-&MESH ID='MESH',           IJK=49,173,30, XB=-5.2,-0.3,-7.0,10.3,-23.9,-20.9, MPI_PROCESS=2 /
-&MESH ID='Level 00',       IJK=76,51,34,  XB= 6.1,13.7,-0.8, 4.3,  0.0,  3.4, MPI_PROCESS=2 /
-&MESH ID='Level M0',       IJK=82,78,29,  XB= 0.3, 8.5, 0.0, 7.8,  4.6,  7.5, MPI_PROCESS=3 /
-&MESH ID='MESH01',         IJK=67,77,30,  XB=-0.3, 6.4, 2.6,10.3,-23.9,-20.9, MPI_PROCESS=3 /
+&MESH ID='Level 06',       IJK=70,37,35,  XB= 1.1, 8.1, 4.9, 8.6, 25.3, 28.8, MPI_PROCESS=1 /
+&MESH ID='Level 07',       IJK=54,37,22,  XB= 1.1, 6.5, 4.9, 8.6, 28.8, 31.0, MPI_PROCESS=1 /
+&MESH ID='Level B5 to 00', IJK=61,26,95,  XB= 0.0, 6.1, 0.0, 2.6,-23.9,-14.4, MPI_PROCESS=2 /
+&MESH ID='Level B5 to 00', IJK=61,26,95,  XB= 0.0, 6.1, 0.0, 2.6,-14.4, -4.9, MPI_PROCESS=3 /
+&MESH ID='Level B5 to 00', IJK=61,26,95,  XB= 0.0, 6.1, 0.0, 2.6, -4.9,  4.6, MPI_PROCESS=4 /
+&MESH ID='MESH02',         IJK=17,81,30,  XB= 6.4, 8.1,-1.3, 6.8,-23.9,-20.9, MPI_PROCESS=5 /
+&MESH ID='MESH',           IJK=49,173,30, XB=-5.2,-0.3,-7.0,10.3,-23.9,-20.9, MPI_PROCESS=6 /
+&MESH ID='Level 00',       IJK=76,51,34,  XB= 6.1,13.7,-0.8, 4.3,  0.0,  3.4, MPI_PROCESS=7 /
+&MESH ID='Level M0',       IJK=82,78,29,  XB= 0.3, 8.5, 0.0, 7.8,  4.6,  7.5, MPI_PROCESS=8 /
+&MESH ID='MESH01',         IJK=67,77,30,  XB=-0.3, 6.4, 2.6,10.3,-23.9,-20.9, MPI_PROCESS=9 /
 
 &PRES CHECK_POISSON=T, MAX_PRESSURE_ITERATIONS=50, VELOCITY_TOLERANCE=0.01 /
 
