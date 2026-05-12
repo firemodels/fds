@@ -10,7 +10,7 @@ verdir = '../../Verification/'
 resdir = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/Scatterplots/'
 resfile = resdir + 'fds_timing_stats.csv'
 
-with open(resfile, 'w') as f:
+with open(resfile, 'w', newline='\n') as f:
     f.write('FDS Case,Wall Clock Time (s),CPU Time (s),Number of Cells,Number of Time Steps,Performance Metric (1e-6)\n')
 
 with open(verdir + 'FDS_Cases.sh', 'r') as casefile:

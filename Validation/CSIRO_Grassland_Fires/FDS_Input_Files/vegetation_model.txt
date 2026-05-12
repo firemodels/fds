@@ -1,4 +1,6 @@
-&REAC FUEL='FUEL VAPOR', C=2.10, H=6.20, O=2.16, SOOT_YIELD=0.01, HEAT_OF_COMBUSTION=17425., IDEAL=T /
+&SPEC ID='FUEL VAPOR', C=2.10, H=6.20, O=2.16/
+
+&REAC FUEL='FUEL VAPOR', SOOT_YIELD=0.01, HEAT_OF_COMBUSTION=17425., IDEAL=T /
 
 &SPEC ID='WATER VAPOR' /
 
@@ -20,7 +22,7 @@
       SPECIFIC_HEAT_RAMP    = 'c_v'
       SURFACE_OXIDATION_MODEL = T
       A                  = 465.
-      E                  = 68000. 
+      E                  = 68000.
       SPEC_ID               = 'PRODUCTS','AIR'
       NU_SPEC               = 8.13,-7.17
       MATL_ID               = 'ASH'
