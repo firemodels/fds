@@ -64,7 +64,7 @@
 \usepackage[section]{placeins}
 \usepackage{scrextend}
 \usepackage{needspace}
-\usepackage[backend=biber, style=phys, sorting=none, backref=true, giveninits=true, maxbibnames=99]{biblatex}
+\usepackage[backend=biber, style=numeric-comp, sorting=none, backref=true, giveninits=true, maxbibnames=99]{biblatex}
 \ExecuteBibliographyOptions[report]{doi=true, url=true}
 \renewbibmacro{in:}{}
 \DeclareFieldFormat{titlecase}{#1}
@@ -112,7 +112,19 @@
         pdfpagemode=UseNone,
         bookmarksopen=true,
         plainpages=false,
+        hypertexnames=true,
         verbose]{hyperref}
+
+% Needed to fix page back ref links
+\makeatletter
+\hypersetup{pageanchor=false}
+
+\let\FDS@orig@pagenumbering\pagenumbering
+\renewcommand*{\pagenumbering}[1]{%
+  \hypersetup{pageanchor=true}%
+  \FDS@orig@pagenumbering{#1}%
+}
+\makeatother
 
 % The Following commented code makes the ``Draft'' watermark on each page.
 %\usepackage{eso-pic}
@@ -163,7 +175,7 @@ Chandan Paul
 
 \newcommand{\logosigs}{
 \begin{minipage}[b]{6.25in}
-\parbox[b]{.5\textwidth}{\flushleft{\includegraphics[height=1in]{../Bibliography/FSRI_blk_logo_Lockup}}}
+\parbox[b]{.5\textwidth}{\flushleft{\includegraphics[height=0.8in]{../Bibliography/FSRI_blk_logo_Lockup}}}
 \hfill
 \parbox[b]{.5\textwidth}{\flushright{\includegraphics[height=1in]{../Bibliography/nistident_flright_vec}}}
 \end{minipage}
