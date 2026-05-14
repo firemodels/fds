@@ -2621,7 +2621,7 @@ Combining the two directions, the discrete Laplacian at cell $(i,j)$ is
 \draw[gray!60, thin] (gyB.north) -- (1,0);  % bottom face
 
 \end{tikzpicture}
-\caption{Construction of the discrete Laplacian of $H$ on a two–dimensional staggered grid. Pressure gradients are evaluated at cell faces and differenced back to the cell center to form the five–point stencil.}
+\caption[The discrete Laplacian on a two–dimensional staggered grid]{Construction of the discrete Laplacian of $H$ on a two–dimensional staggered grid. Pressure gradients are evaluated at cell faces and differenced back to the cell center to form the five–point stencil.}
 \label{fig:laplacian_staggered}
 \end{figure}
 
@@ -2814,7 +2814,7 @@ Notice that this changes the diagonal coefficient of $H_{i,\mathrm{JBAR}}$ (from
 \end{scope}
 
 \end{tikzpicture}
-\caption{Imposition of a Dirichlet boundary condition using a single ghost cell in FDS. The ghost value is eliminated using the prescribed boundary value, resulting in a modification of the diagonal entry of the discrete Laplacian and the right hand side.}
+\caption[Dirichlet boundary condition using a single ghost cell in FDS]{Imposition of a Dirichlet boundary condition using a single ghost cell in FDS. The ghost value is eliminated using the prescribed boundary value, resulting in a modification of the diagonal entry of the discrete Laplacian and the right hand side.}
 \label{fig:dirichlet_bc_fds}
 \end{figure}
 
@@ -2965,7 +2965,7 @@ where $\frac{\partial H}{\partial n}|_{\mathrm{BC},j}$ exactly controls the norm
 \end{scope}
 
 \end{tikzpicture}
-\caption{Imposition of a Neumann boundary condition using a ghost cell in FDS. The ghost value is defined to enforce a prescribed normal gradient at the boundary. Elimination of the ghost cell removes one neighbor contribution, resulting in a change of the diagonal entry of the discrete Laplacian from $-4$ to $-3$.  The RHS is augmented per Eq.~(X).}
+\caption[Neumann boundary condition using a ghost cell in FDS]{Imposition of a Neumann boundary condition using a ghost cell in FDS. The ghost value is defined to enforce a prescribed normal gradient at the boundary. Elimination of the ghost cell removes one neighbor contribution, resulting in a change of the diagonal entry of the discrete Laplacian from $-4$ to $-3$.  The RHS is augmented per Eq.~(X).}
 \label{fig:neumann_bc_fds}
 \end{figure}
 
@@ -3038,7 +3038,7 @@ At a refinement interface, one coarse cell face connects to multiple fine cell f
     \draw[<->, gray] (2.25,-0.8) -- (3,-0.8);
     \node[gray] at (2.625,-1.1) {$\delta x_F/2$};
 \end{tikzpicture}
-\caption{2D view of coarse-fine interface showing cell centroids (blue dots) and flux couplings (green arrows). The interface (red dashed line) separates the coarse mesh from the fine mesh.}
+\caption[2D view of coarse-fine interface]{2D view of coarse-fine interface showing cell centroids (blue dots) and flux couplings (green arrows). The interface (red dashed line) separates the coarse mesh from the fine mesh.}
 \label{fig:coarse_fine_interface}
 \end{figure}
 
@@ -3148,7 +3148,7 @@ At refinement interfaces, we have:
     \node[anchor=west] at (2.5,1.0) {\small \textcolor{green!60!black}{$\bullet$} Fine cell centers};
 
 \end{tikzpicture}
-\caption{Guard cell interpolation at 2:1 refinement interface. The fine cells have half the width
+\caption[Guard cell interpolation at 2:1 refinement interface]{Guard cell interpolation at 2:1 refinement interface. The fine cells have half the width
 of the coarse cell ($\Delta x_f = \Delta x_c/2$). The coarse guard cell (red dashed boundary)
 overlaps two fine cells. The guard cell centroid (red dot) is located at $\Delta x_c/2$ from the
 interface, which corresponds to the left edge of the fine cells (gray dotted line).}

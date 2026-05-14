@@ -2846,13 +2846,7 @@ MAXFCT = 1
 MNUM   = 1
 
 ! Set level MSG to 1 for factorization:
-IF (CHECK_POISSON) THEN
-   MSGLVL = 1
-   SELECT CASE(ULMAT_SOLVER_LIBRARY)
-      CASE(MKL_PARDISO_FLAG); IF(MY_RANK==0) WRITE(LU_ERR,*) 'ULMAT : PARDISO factorization for MESH,ZONE=',NM,IPZ,ZM%NUNKH
-      CASE(HYPRE_FLAG);       IF(MY_RANK==0) WRITE(LU_ERR,*) 'HYPRE : Matrix and Solver setup for MESH,ZONE=',NM,IPZ,ZM%NUNKH
-   END SELECT
-ENDIF
+IF (CHECK_POISSON) MSGLVL = 1
 ERROR = 0 ! initialize error flag
 
 ! Each MPI process builds its local set of rows.

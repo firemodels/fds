@@ -3712,7 +3712,7 @@ TYPE (OMESH_TYPE), POINTER :: M2,M3
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UP,UP2,VP,VP2,WP,WP2
 LOGICAL, SAVE :: INITIALIZE_CC_SCALARS_FORC=.TRUE.
 
-INTEGER :: EP,INPE,INT_NPE_LO,INT_NPE_HI,VIND,ICELL,IEDGE,IFEP,IW,IIO,JJO,KKO
+INTEGER :: EP,INPE,INT_NPE_LO,INT_NPE_HI,VIND,ICELL,IEDGE,IFEP
 REAL(EB) :: TNOW,TINTP
 
 ! For solid phase only return. All variables exchanged currently here are gas-phase.
@@ -4513,35 +4513,22 @@ RECV_MESH_LOOP: DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          IF (CODE==1 .AND. M2%NICC_R(1)>0) THEN
             NQT2 = 4+N_TOTAL_SCALARS
             LL   = 0
-            ! Copy-cut cell scalar quantities from MESHES(NOM)%OMESH(NM) cells to MESHES(NM) (i.e. other mesh) cut-cells:
-            ! Use External wall cell loop:
-            EXTERNAL_WALL_LOOP_1 : DO IW=1,M%N_EXTERNAL_WALL_CELLS
-               WC=>M%WALL(IW)
-               EWC=>M%EXTERNAL_WALL(IW)
-               BC=>M%BOUNDARY_COORD(WC%BC_INDEX)
-               IF (.NOT.(WC%BOUNDARY_TYPE == INTERPOLATED_BOUNDARY)) CYCLE EXTERNAL_WALL_LOOP_1
-               IF (EWC%NOM/=NM) CYCLE EXTERNAL_WALL_LOOP_1
-               IF (M%CCVAR(BC%II,BC%JJ,BC%KK,CC_CGSC) /= CC_CUTCFE) CYCLE EXTERNAL_WALL_LOOP_1
-               DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
-                  DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
-                     DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
-                       ICC   = MESHES(NM)%CCVAR(IIO,JJO,KKO,CC_IDCC)
-                       IF (ICC > 0) THEN
-                          DO JCC=1,MESHES(NM)%CUT_CELL(ICC)%NCELL
-                             LL = LL + 1
-                             MESHES(NM)%CUT_CELL(ICC)%RHOS(JCC) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+1)
-                             MESHES(NM)%CUT_CELL(ICC)%TMP(JCC)  = M2%REAL_RECV_PKG11(NQT2*(LL-1)+2)
-                             MESHES(NM)%CUT_CELL(ICC)%RSUM(JCC) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+3)
-                             MESHES(NM)%CUT_CELL(ICC)%D(JCC)    = M2%REAL_RECV_PKG11(NQT2*(LL-1)+4)
-                             DO NN=1,N_TOTAL_SCALARS
-                                MESHES(NM)%CUT_CELL(ICC)%ZZS(NN,JCC) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+4+NN)
-                             ENDDO
-                          ENDDO
-                       ENDIF
-                     ENDDO
+            ! Unpack from sender-validated ICC_UNKZ_CC_R list (avoids stale CCVAR for ghost cut-cells
+            ! rejected by the sender's validation pass).
+            DO ICC1=1,M2%NICC_R(1)
+               ICC = M2%ICC_UNKZ_CC_R(ICC1)
+               IF (ICC < 1) CYCLE
+               DO JCC=1,MESHES(NM)%CUT_CELL(ICC)%NCELL
+                  LL = LL + 1
+                  MESHES(NM)%CUT_CELL(ICC)%RHOS(JCC) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+1)
+                  MESHES(NM)%CUT_CELL(ICC)%TMP(JCC)  = M2%REAL_RECV_PKG11(NQT2*(LL-1)+2)
+                  MESHES(NM)%CUT_CELL(ICC)%RSUM(JCC) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+3)
+                  MESHES(NM)%CUT_CELL(ICC)%D(JCC)    = M2%REAL_RECV_PKG11(NQT2*(LL-1)+4)
+                  DO NN=1,N_TOTAL_SCALARS
+                     MESHES(NM)%CUT_CELL(ICC)%ZZS(NN,JCC) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+4+NN)
                   ENDDO
                ENDDO
-            ENDDO EXTERNAL_WALL_LOOP_1
+            ENDDO
          ENDIF
 
          IF((CODE==1 .OR. CODE==4) .AND. M2%NFCC_R(2)>0) THEN
@@ -4636,36 +4623,22 @@ RECV_MESH_LOOP: DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          IF (CODE==4 .AND. M2%NICC_R(1)>0) THEN
             NQT2 = 4+N_TOTAL_SCALARS
             LL   = 0
-            ! Copy-cut cell scalar quantities from MESHES(NOM)%OMESH(NM) cells to MESHES(NM) (i.e. other mesh) cut-cells:
-            ! Use External wall cell loop:
-            EXTERNAL_WALL_LOOP_2 : DO IW=1,M%N_EXTERNAL_WALL_CELLS
-               WC=>M%WALL(IW)
-               IF (.NOT.(WC%BOUNDARY_TYPE == INTERPOLATED_BOUNDARY)) CYCLE EXTERNAL_WALL_LOOP_2
-               BC=>M%BOUNDARY_COORD(WC%BC_INDEX)
-               EWC=>M%EXTERNAL_WALL(IW)
-               IF (EWC%NOM/=NM) CYCLE EXTERNAL_WALL_LOOP_2
-               IF (M%CCVAR(BC%II,BC%JJ,BC%KK,CC_CGSC) /= CC_CUTCFE) &
-                  CYCLE EXTERNAL_WALL_LOOP_2
-               DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
-                  DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
-                     DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
-                       ICC   = MESHES(NM)%CCVAR(IIO,JJO,KKO,CC_IDCC)
-                       IF (ICC > 0) THEN
-                          DO JCC=1,MESHES(NM)%CUT_CELL(ICC)%NCELL
-                             LL = LL + 1
-                             MESHES(NM)%CUT_CELL(ICC)%RHO(JCC)  = M2%REAL_RECV_PKG11(NQT2*(LL-1)+1)
-                             MESHES(NM)%CUT_CELL(ICC)%TMP(JCC)  = M2%REAL_RECV_PKG11(NQT2*(LL-1)+2)
-                             MESHES(NM)%CUT_CELL(ICC)%RSUM(JCC) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+3)
-                             MESHES(NM)%CUT_CELL(ICC)%DS(JCC)   = M2%REAL_RECV_PKG11(NQT2*(LL-1)+4)
-                             DO NN=1,N_TOTAL_SCALARS
-                                MESHES(NM)%CUT_CELL(ICC)%ZZ(NN,JCC) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+4+NN)
-                             ENDDO
-                          ENDDO
-                       ENDIF
-                     ENDDO
+            ! Unpack from sender-validated ICC_UNKZ_CC_R list (avoids stale CCVAR for ghost cut-cells
+            ! rejected by the sender's validation pass).
+            DO ICC1=1,M2%NICC_R(1)
+               ICC = M2%ICC_UNKZ_CC_R(ICC1)
+               IF (ICC < 1) CYCLE
+               DO JCC=1,MESHES(NM)%CUT_CELL(ICC)%NCELL
+                  LL = LL + 1
+                  MESHES(NM)%CUT_CELL(ICC)%RHO(JCC)  = M2%REAL_RECV_PKG11(NQT2*(LL-1)+1)
+                  MESHES(NM)%CUT_CELL(ICC)%TMP(JCC)  = M2%REAL_RECV_PKG11(NQT2*(LL-1)+2)
+                  MESHES(NM)%CUT_CELL(ICC)%RSUM(JCC) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+3)
+                  MESHES(NM)%CUT_CELL(ICC)%DS(JCC)   = M2%REAL_RECV_PKG11(NQT2*(LL-1)+4)
+                  DO NN=1,N_TOTAL_SCALARS
+                     MESHES(NM)%CUT_CELL(ICC)%ZZ(NN,JCC) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+4+NN)
                   ENDDO
                ENDDO
-            ENDDO EXTERNAL_WALL_LOOP_2
+            ENDDO
          ENDIF
 
          IF (CODE==6 .AND. M2%NFCC_R(1)>0) THEN
@@ -4780,13 +4753,12 @@ CONTAINS
 SUBROUTINE FILL_GCCUTCELL_SPECIES
 
 
-REAL(EB):: PRFCT, VCELL, RHO_CC, TMP_CC, RSUM_CC, D_CC, ZZ_CC(1:N_TOTAL_SCALARS), VOL
-TYPE (OMESH_TYPE), POINTER :: OM
+REAL(EB):: VCELL, RHO_CC, TMP_CC, RSUM_CC, D_CC, ZZ_CC(1:N_TOTAL_SCALARS), VOL
 TYPE(CC_CUTCELL_TYPE), POINTER :: OCC
-INTEGER :: NM,NOM,NN,ICC,JCC,IW,IIO,JJO,KKO
+INTEGER :: NM,NOM,NN,ICC,ICC1,JCC,IW,IIO,JJO,KKO
+LOGICAL :: VALID_SOURCE_CC
 
 ! Here inject OMESH cut-cell info obtained in MESH_CC_EXCHANGE into ghost-cell cc containers:
-PRFCT = 0._EB; IF (PREDICTOR) PRFCT = 1._EB
 MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    CALL POINT_TO_MESH(NM)
    EXTERNAL_WALL_LOOP : DO IW=1,N_EXTERNAL_WALL_CELLS
@@ -4797,34 +4769,61 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       IF (CCVAR(BC%II,BC%JJ,BC%KK,CC_CGSC) /= CC_CUTCFE) CYCLE EXTERNAL_WALL_LOOP
       ! Do volume average to a cell container for ghost cell II,JJ,KK:
       NOM = EWC%NOM
-      OM  => MESHES(NM)%OMESH(NOM)
       RHO_CC=0._EB; TMP_CC=0._EB; RSUM_CC=0._EB; D_CC=0._EB; ZZ_CC(1:N_TOTAL_SCALARS)=0._EB; VOL=0._EB
       DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
          DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
             DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
               IF (MESHES(NOM)%CELL(MESHES(NOM)%CELL_INDEX(IIO,JJO,KKO))%SOLID) CYCLE
               ICC   = MESHES(NOM)%CCVAR(IIO,JJO,KKO,CC_IDCC)
-              IF (ICC > 0) THEN ! Cut-cells:
+              ! For remote NOM, only accept the cut-cell entry if it appears in the sender-validated
+              ! ICC_UNKZ_CC_R list. Otherwise the OMESH cut-cell scalars haven't been filled by
+              ! MESH_CC_EXCHANGE and reading them would mix in stale/zero state.
+              VALID_SOURCE_CC = ICC > 0 .AND. (PROCESS(NOM)==MY_RANK .OR. NM==NOM)
+              IF (ICC > 0 .AND. .NOT.VALID_SOURCE_CC .AND. ALLOCATED(MESHES(NM)%OMESH(NOM)%ICC_UNKZ_CC_R)) THEN
+                 DO ICC1=1,MESHES(NM)%OMESH(NOM)%NICC_R(1)
+                    IF (MESHES(NM)%OMESH(NOM)%ICC_UNKZ_CC_R(ICC1)==ICC) THEN
+                       VALID_SOURCE_CC = .TRUE.
+                       EXIT
+                    ENDIF
+                 ENDDO
+              ENDIF
+              IF (VALID_SOURCE_CC) THEN ! Cut-cells:
                  OCC => MESHES(NOM)%CUT_CELL(ICC)
                  DO JCC=1,OCC%NCELL
                     VCELL   = OCC%VOLUME(JCC)
-                    RHO_CC  = RHO_CC  + (PRFCT *OCC%RHOS(JCC) + (1._EB-PRFCT)*OCC%RHO(JCC))*VCELL
                     TMP_CC  = TMP_CC  + OCC%TMP(JCC)*VCELL
                     RSUM_CC = RSUM_CC + OCC%RSUM(JCC)*VCELL
-                    D_CC    = D_CC    + (PRFCT *OCC%D(JCC) + (1._EB-PRFCT)*OCC%DS(JCC))*VCELL
-                    DO NN=1,N_TOTAL_SCALARS
-                       ZZ_CC(NN) = ZZ_CC(NN) + (PRFCT *OCC%ZZS(NN,JCC) + (1._EB-PRFCT)*OCC%ZZ(NN,JCC))*VCELL
-                    ENDDO
+                    IF (PREDICTOR) THEN
+                       RHO_CC = RHO_CC + OCC%RHOS(JCC)*VCELL
+                       D_CC   = D_CC   + OCC%D(JCC)*VCELL
+                       DO NN=1,N_TOTAL_SCALARS
+                          ZZ_CC(NN) = ZZ_CC(NN) + OCC%ZZS(NN,JCC)*VCELL
+                       ENDDO
+                    ELSE
+                       RHO_CC = RHO_CC + OCC%RHO(JCC)*VCELL
+                       D_CC   = D_CC   + OCC%DS(JCC)*VCELL
+                       DO NN=1,N_TOTAL_SCALARS
+                          ZZ_CC(NN) = ZZ_CC(NN) + OCC%ZZ(NN,JCC)*VCELL
+                       ENDDO
+                    ENDIF
                     VOL     = VOL  + VCELL
                  ENDDO
-              ELSEIF(MESHES(NOM)%CCVAR(IIO,JJO,KKO,CC_CGSC) == CC_GASPHASE) THEN ! Regular cell:
+              ELSEIF(MESHES(NOM)%CCVAR(IIO,JJO,KKO,CC_CGSC) == CC_GASPHASE .OR. ICC > 0) THEN ! Regular cell or unvalidated remote cut-cell.
                  VCELL = MESHES(NOM)%DX(IIO)*MESHES(NOM)%DY(JJO)*MESHES(NOM)%DZ(KKO)
-                 RHO_CC  = RHO_CC + (PRFCT*RHOS(BC%II,BC%JJ,BC%KK) + (1._EB-PRFCT)*RHO(BC%II,BC%JJ,BC%KK))*VCELL
                  TMP_CC  = TMP_CC + TMP(BC%II,BC%JJ,BC%KK)*VCELL
-                 D_CC    = D_CC   + (PRFCT*D(BC%II,BC%JJ,BC%KK) + (1._EB-PRFCT)*DS(BC%II,BC%JJ,BC%KK))*VCELL
-                 DO NN=1,N_TOTAL_SCALARS
-                 ZZ_CC(NN)=ZZ_CC(NN)+(PRFCT*ZZS(BC%II,BC%JJ,BC%KK,NN)+(1._EB-PRFCT)*ZZ(BC%II,BC%JJ,BC%KK,NN))*VCELL
-                 ENDDO
+                 IF (PREDICTOR) THEN
+                    RHO_CC = RHO_CC + RHOS(BC%II,BC%JJ,BC%KK)*VCELL
+                    D_CC   = D_CC   + D(BC%II,BC%JJ,BC%KK)*VCELL
+                    DO NN=1,N_TOTAL_SCALARS
+                       ZZ_CC(NN) = ZZ_CC(NN) + ZZS(BC%II,BC%JJ,BC%KK,NN)*VCELL
+                    ENDDO
+                 ELSE
+                    RHO_CC = RHO_CC + RHO(BC%II,BC%JJ,BC%KK)*VCELL
+                    D_CC   = D_CC   + DS(BC%II,BC%JJ,BC%KK)*VCELL
+                    DO NN=1,N_TOTAL_SCALARS
+                       ZZ_CC(NN) = ZZ_CC(NN) + ZZ(BC%II,BC%JJ,BC%KK,NN)*VCELL
+                    ENDDO
+                 ENDIF
                  VOL     = VOL + VCELL
               ENDIF
             ENDDO
@@ -19338,7 +19337,7 @@ INTEGER, ALLOCATABLE, DIMENSION(:) :: REQ0,REQ0DUM
 #else
 TYPE (MPI_REQUEST), ALLOCATABLE, DIMENSION(:) :: REQ0,REQ0DUM
 #endif
-INTEGER :: N_REQ0, NICC_R, ICC, ICC1, NCELL, JCC, NICF_R, ICF
+INTEGER :: N_REQ0, NICC_R, ICC, ICC1, NCELL, JCC, NICF_R, ICF, NICC_VALID, NUNKZ_VALID
 INTEGER, ALLOCATABLE, DIMENSION(:) :: NCC_SV
 INTEGER :: ISTR,IEND,JSTR,JEND,KSTR,KEND,IIO,JJO,KKO,IOR,IW,N_INT,IIOF,JJOF,KKOF,X1AXIS
 LOGICAL :: ALL_FLG
@@ -19582,48 +19581,118 @@ DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       ELSE
          M2 => MESHES(NOM)%OMESH(NM)
          M2%ICC_UNKZ_CC_S(1:3*M2%NICC_S(1)) = M3%ICC_UNKZ_CC_R(1:3*M3%NICC_R(1))
-         ! Here write the ICC into ICC_UNKZ_CC_S for OMESH NM:
-         M => MESHES(NOM); DO ICC1=1,M2%NICC_S(1)
-            IIO=M2%ICC_UNKZ_CC_S(3*ICC1-2)
-            JJO=M2%ICC_UNKZ_CC_S(3*ICC1-1)
-            KKO=M2%ICC_UNKZ_CC_S(3*ICC1  )
-            M2%ICC_UNKZ_CC_S(ICC1) = M%CCVAR(IIO,JJO,KKO,CC_IDCC)
-         ENDDO
-         ALLOCATE(INT1D(1:M2%NICC_S(1))); INT1D(1:M2%NICC_S(1)) = M2%ICC_UNKZ_CC_S(1:M2%NICC_S(1))
-         CALL MOVE_ALLOC(FROM=INT1D,TO=M2%ICC_UNKZ_CC_S)
       ENDIF
    ENDDO
 ENDDO
 IF ((N_REQ0>0) .AND. (N_MPI_PROCESSES>1)) CALL MPI_WAITALL(N_REQ0,REQ0(1:N_REQ0),MPI_STATUSES_IGNORE,IERR)
 
+DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   M => MESHES(NM)
+   DO NOM=1,NMESHES
+      M3 => MESHES(NM)%OMESH(NOM)
+      IF (.NOT.ALLOCATED(M3%ICC_UNKZ_CC_S)) CYCLE
+      NICC_VALID  = 0
+      NUNKZ_VALID = 0
+      DO ICC1=1,M3%NICC_S(1)
+         IIO = M3%ICC_UNKZ_CC_S(3*ICC1-2)
+         JJO = M3%ICC_UNKZ_CC_S(3*ICC1-1)
+         KKO = M3%ICC_UNKZ_CC_S(3*ICC1  )
+         ICC = M%CCVAR(IIO,JJO,KKO,CC_IDCC)
+         IF (ICC<1 .OR. M%CCVAR(IIO,JJO,KKO,CC_CGSC)/=CC_CUTCFE) CYCLE
+         NICC_VALID = NICC_VALID + 1
+         M3%ICC_UNKZ_CC_S(3*NICC_VALID-2:3*NICC_VALID) = (/ IIO, JJO, KKO /)
+         NUNKZ_VALID = NUNKZ_VALID + M%CUT_CELL(ICC)%NCELL
+      ENDDO
+      M3%NICC_S(1) = NICC_VALID
+      M3%NICC_S(2) = NUNKZ_VALID
+   ENDDO
+ENDDO
+
+! Exchange the sender-validated cut-cell counts back to the receivers.
+N_REQ0 = 0
 DO NM=1,NMESHES
    DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       M2 => MESHES(NOM)%OMESH(NM)
-      IF (N_MPI_PROCESSES>1 .AND. NM/=NOM .AND. PROCESS(NM)/=MY_RANK .AND. M2%NICC_S(1)>0) THEN
-         ! Here write the ICC into ICC_UNKZ_CC_S for OMESH NM:
-         M => MESHES(NOM); DO ICC1=1,M2%NICC_S(1)
-            IIO=M2%ICC_UNKZ_CC_S(3*ICC1-2)
-            JJO=M2%ICC_UNKZ_CC_S(3*ICC1-1)
-            KKO=M2%ICC_UNKZ_CC_S(3*ICC1  )
-            M2%ICC_UNKZ_CC_S(ICC1) = M%CCVAR(IIO,JJO,KKO,CC_IDCC)
-         ENDDO
-         ALLOCATE(INT1D(1:M2%NICC_S(1))); INT1D(1:M2%NICC_S(1)) = M2%ICC_UNKZ_CC_S(1:M2%NICC_S(1))
-         CALL MOVE_ALLOC(FROM=INT1D,TO=M2%ICC_UNKZ_CC_S)
+      IF (N_MPI_PROCESSES>1 .AND. NM/=NOM .AND. PROCESS(NM)/=MY_RANK .AND. M2%NICC_R(1)>0) THEN
+         N_REQ0 = N_REQ0 + 1; CALL CHECK_REQ0_SIZE
+         CALL MPI_IRECV(M2%NICC_R(1),2,MPI_INTEGER,PROCESS(NM),NM,MPI_COMM_WORLD,REQ0(N_REQ0),IERR)
       ENDIF
+   ENDDO
+ENDDO
+DO NM=1,NMESHES
+   CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)
+   IF (PROCESS(NM)/=MY_RANK) CYCLE
+   DO NOM=1,NMESHES
+      IF (NM/=NOM .AND. .NOT.MESHES(NM)%CONNECTED_MESH(NOM)) CYCLE
+      M3 => MESHES(NM)%OMESH(NOM)
+      IF (.NOT.ALLOCATED(M3%ICC_UNKZ_CC_S)) CYCLE
+      IF (N_MPI_PROCESSES>1 .AND. NM/=NOM .AND. PROCESS(NOM)/=MY_RANK) THEN
+         N_REQ0 = N_REQ0 + 1; CALL CHECK_REQ0_SIZE
+         CALL MPI_ISEND(M3%NICC_S(1),2,MPI_INTEGER,PROCESS(NOM),NM,MPI_COMM_WORLD,REQ0(N_REQ0),IERR)
+      ELSE
+         IF(.NOT. ALLOCATED(MESHES(NOM)%OMESH)) CYCLE
+         M2 => MESHES(NOM)%OMESH(NM)
+         M2%NICC_R(1:2) = M3%NICC_S(1:2)
+      ENDIF
+   ENDDO
+ENDDO
+IF ((N_REQ0>0) .AND. (N_MPI_PROCESSES>1)) CALL MPI_WAITALL(N_REQ0,REQ0(1:N_REQ0),MPI_STATUSES_IGNORE,IERR)
+
+! Exchange the compacted cut-cell coordinate list back to the receivers.
+N_REQ0 = 0
+DO NM=1,NMESHES
+   DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+      M2 => MESHES(NOM)%OMESH(NM)
+      IF (N_MPI_PROCESSES>1 .AND. NM/=NOM .AND. PROCESS(NM)/=MY_RANK .AND. ALLOCATED(M2%ICC_UNKZ_CC_R)) THEN
+         N_REQ0 = N_REQ0 + 1; CALL CHECK_REQ0_SIZE
+         CALL MPI_IRECV(M2%ICC_UNKZ_CC_R(1),3*M2%NICC_R(1),MPI_INTEGER,PROCESS(NM),NM,MPI_COMM_WORLD,REQ0(N_REQ0),IERR)
+      ENDIF
+   ENDDO
+ENDDO
+DO NM=1,NMESHES
+   CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)
+   IF (PROCESS(NM)/=MY_RANK) CYCLE
+   DO NOM=1,NMESHES
+      IF (NM/=NOM .AND. .NOT.MESHES(NM)%CONNECTED_MESH(NOM)) CYCLE
+      M3 => MESHES(NM)%OMESH(NOM)
+      IF (.NOT.ALLOCATED(M3%ICC_UNKZ_CC_S)) CYCLE
+      IF (N_MPI_PROCESSES>1 .AND. NM/=NOM .AND. PROCESS(NOM)/=MY_RANK) THEN
+         N_REQ0 = N_REQ0 + 1; CALL CHECK_REQ0_SIZE
+         CALL MPI_ISEND(M3%ICC_UNKZ_CC_S(1),3*M3%NICC_S(1),MPI_INTEGER,PROCESS(NOM),NM,MPI_COMM_WORLD,REQ0(N_REQ0),IERR)
+      ELSE
+         IF(.NOT. ALLOCATED(MESHES(NOM)%OMESH)) CYCLE
+         M2 => MESHES(NOM)%OMESH(NM)
+         IF (M2%NICC_R(1)>0) M2%ICC_UNKZ_CC_R(1:3*M2%NICC_R(1)) = M3%ICC_UNKZ_CC_S(1:3*M3%NICC_S(1))
+      ENDIF
+   ENDDO
+ENDDO
+IF ((N_REQ0>0) .AND. (N_MPI_PROCESSES>1)) CALL MPI_WAITALL(N_REQ0,REQ0(1:N_REQ0),MPI_STATUSES_IGNORE,IERR)
+
+! Convert compacted coordinate lists to local ICC indices on sender and receiver.
+DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   M => MESHES(NM)
+   DO NOM=1,NMESHES
+      M3 => MESHES(NM)%OMESH(NOM)
+      IF (M3%NICC_S(1)<1) CYCLE
+      DO ICC1=1,M3%NICC_S(1)
+         IIO = M3%ICC_UNKZ_CC_S(3*ICC1-2)
+         JJO = M3%ICC_UNKZ_CC_S(3*ICC1-1)
+         KKO = M3%ICC_UNKZ_CC_S(3*ICC1  )
+         M3%ICC_UNKZ_CC_S(ICC1) = M%CCVAR(IIO,JJO,KKO,CC_IDCC)
+      ENDDO
    ENDDO
 ENDDO
 DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    DO NOM=1,NMESHES
       M3 => MESHES(NM)%OMESH(NOM)
       IF (M3%NICC_R(1)<1) CYCLE
-      M => MESHES(NOM); DO ICC1=1,M3%NICC_R(1)
-         IIO=M3%ICC_UNKZ_CC_R(3*ICC1-2)
-         JJO=M3%ICC_UNKZ_CC_R(3*ICC1-1)
-         KKO=M3%ICC_UNKZ_CC_R(3*ICC1  )
+      M => MESHES(NOM)
+      DO ICC1=1,M3%NICC_R(1)
+         IIO = M3%ICC_UNKZ_CC_R(3*ICC1-2)
+         JJO = M3%ICC_UNKZ_CC_R(3*ICC1-1)
+         KKO = M3%ICC_UNKZ_CC_R(3*ICC1  )
          M3%ICC_UNKZ_CC_R(ICC1) = M%CCVAR(IIO,JJO,KKO,CC_IDCC)
       ENDDO
-      ALLOCATE(INT1D(1:M3%NICC_R(1))); INT1D(1:M3%NICC_R(1)) = M3%ICC_UNKZ_CC_R(1:M3%NICC_R(1))
-      CALL MOVE_ALLOC(FROM=INT1D,TO=M3%ICC_UNKZ_CC_R)
    ENDDO
 ENDDO
 
@@ -19802,49 +19871,21 @@ DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    NCC_SV(:)=0
    CALL POINT_TO_MESH(NM)
    ! Loop over cut-cells:
-   EXTERNAL_WALL_LOOP_2 : DO IW=1,N_EXTERNAL_WALL_CELLS
-      WC=>WALL(IW)
-      EWC=>EXTERNAL_WALL(IW)
-      BC=>BOUNDARY_COORD(WC%BC_INDEX)
-      IF (.NOT.(WC%BOUNDARY_TYPE == INTERPOLATED_BOUNDARY .OR. &
-                WC%BOUNDARY_TYPE == MIRROR_BOUNDARY) ) CYCLE EXTERNAL_WALL_LOOP_2
-      IF ( WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY ) THEN
-         IF (CCVAR(BC%II,BC%JJ,BC%KK,CC_CGSC) /= CC_CUTCFE) CYCLE EXTERNAL_WALL_LOOP_2
-         NOM = EWC%NOM
-         DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
-            DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
-               DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
-                 ICC   = MESHES(NOM)%CCVAR(IIO,JJO,KKO,CC_IDCC)
-                 IF (ICC > 0) THEN
-                    DO JCC=1,MESHES(NOM)%CUT_CELL(ICC)%NCELL
-                       NCC_SV(NOM)=NCC_SV(NOM)+1
-                       MESHES(NOM)%CUT_CELL(ICC)%UNKZ(JCC) = M%OMESH(NOM)%UNKZ_CC_R(NCC_SV(NOM))
-                    ENDDO
-                 ENDIF
-               ENDDO
-            ENDDO
+   DO NOM=1,NMESHES
+      M3 => M%OMESH(NOM)
+      IF (M3%NICC_R(1)<1) CYCLE
+      ! Walk the sender-validated ICC_UNKZ_CC_R list directly. This matches exactly the
+      ! ordering and count used by the sender to fill UNKZ_CC_R, eliminating any reliance
+      ! on local CCVAR for indexing into the buffer.
+      DO ICC1=1,M3%NICC_R(1)
+         ICC = M3%ICC_UNKZ_CC_R(ICC1)
+         IF (ICC < 1) CYCLE
+         DO JCC=1,MESHES(NOM)%CUT_CELL(ICC)%NCELL
+            NCC_SV(NOM)=NCC_SV(NOM)+1
+            MESHES(NOM)%CUT_CELL(ICC)%UNKZ(JCC) = M3%UNKZ_CC_R(NCC_SV(NOM))
          ENDDO
-      ELSEIF ( WC%BOUNDARY_TYPE==MIRROR_BOUNDARY ) THEN
-         IIO = BC%IIG; JJO = BC%JJG; KKO = BC%KKG
-         IF (CCVAR(BC%II,BC%JJ,BC%KK,CC_CGSC) /= CC_CUTCFE) CYCLE EXTERNAL_WALL_LOOP_2
-         ! CYCLE if OBJECT face is in the Mirror Boundary, normal out into ghost-cell:
-         SELECT CASE(BC%IOR)
-         CASE( IAXIS); IF(FCVAR(IIO-1,JJO  ,KKO  ,CC_FGSC,IAXIS) == CC_SOLID) CYCLE EXTERNAL_WALL_LOOP_2
-         CASE(-IAXIS); IF(FCVAR(IIO  ,JJO  ,KKO  ,CC_FGSC,IAXIS) == CC_SOLID) CYCLE EXTERNAL_WALL_LOOP_2
-         CASE( JAXIS); IF(FCVAR(IIO  ,JJO-1,KKO  ,CC_FGSC,JAXIS) == CC_SOLID) CYCLE EXTERNAL_WALL_LOOP_2
-         CASE(-JAXIS); IF(FCVAR(IIO  ,JJO  ,KKO  ,CC_FGSC,JAXIS) == CC_SOLID) CYCLE EXTERNAL_WALL_LOOP_2
-         CASE( KAXIS); IF(FCVAR(IIO  ,JJO  ,KKO-1,CC_FGSC,KAXIS) == CC_SOLID) CYCLE EXTERNAL_WALL_LOOP_2
-         CASE(-KAXIS); IF(FCVAR(IIO  ,JJO  ,KKO  ,CC_FGSC,KAXIS) == CC_SOLID) CYCLE EXTERNAL_WALL_LOOP_2
-         END SELECT
-         NOM = NM; ICC = MESHES(NOM)%CCVAR(IIO,JJO,KKO,CC_IDCC)
-         IF (ICC > 0) THEN
-            DO JCC=1,MESHES(NOM)%CUT_CELL(ICC)%NCELL
-               NCC_SV(NOM)=NCC_SV(NOM)+1
-               MESHES(NOM)%CUT_CELL(ICC)%UNKZ(JCC) = M%OMESH(NOM)%UNKZ_CC_R(NCC_SV(NOM))
-            ENDDO
-         ENDIF
-      ENDIF
-   ENDDO EXTERNAL_WALL_LOOP_2
+      ENDDO
+   ENDDO
 ENDDO
 DEALLOCATE(NCC_SV)
 
@@ -22285,10 +22326,13 @@ INTEGER, INTENT(INOUT) :: NUNKH_LC(LOWER_MESH_INDEX:UPPER_MESH_INDEX)
 INTEGER :: ICC, JCC, I, J, K
 
 FLAG12_COND : IF (FLAG12) THEN
-   ! Initialize Cut-cell unknown numbers as undefined.
-   DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-      CUT_CELL(ICC)%UNKH(:) = CC_UNDEFINED
-   ENDDO
+   ! Initialize once before the pressure-zone loop assigns per-zone cut-cell unknowns.
+   ! Reinitializing on each IPZ pass would erase unknowns assigned to earlier zones.
+   IF (IPZ==0) THEN
+      DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+         CUT_CELL(ICC)%UNKH(:) = CC_UNDEFINED
+      ENDDO
+   ENDIF
    DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
       CC => CUT_CELL(ICC); I=CC%IJK(IAXIS); J=CC%IJK(JAXIS); K=CC%IJK(KAXIS); IF(CELL(CELL_INDEX(I,J,K))%SOLID) CYCLE
       IF(ZONE_SOLVE(PRESSURE_ZONE(I,J,K))%CONNECTED_ZONE_PARENT/=IPZ ) CYCLE
