@@ -1,12 +1,12 @@
 &HEAD CHID='Cardboard_DW_20', TITLE='Corrugated Cardboard Gasification'/
 
-&MESH IJK=3,3,3, XB=-0.15,0.15,-0.15,0.15,0.0,0.3 / 
+&MESH IJK=3,3,3, XB=-0.15,0.15,-0.15,0.15,0.0,0.3 /
 
 &MISC Y_O2_INFTY=0.01, SOLID_PHASE_ONLY=.TRUE., TMPA = 57. /
 
 &TIME T_END=600, WALL_INCREMENT=1, DT=0.05 /
 
-&REAC FUEL ='CB GAS', C=1., H=4., SOOT_YIELD=0. /
+&REAC FYI ='CB GAS', FUEL='METHANE'/
 
 &RAMP ID='k_LB_int', T=107., F=0.0541 /
 &RAMP ID='k_LB_int', T=127., F=0.0548 /
@@ -231,6 +231,6 @@
 
 &DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='BURNING RATE', ID='MLR', CONVERSION_FACTOR=1000., UNITS='g/m2/s' /
 
-&TAIL / 
+&TAIL /
 
 

@@ -1,4 +1,4 @@
-&HEAD CHID='burn78_120D_21S_40L', TITLE='USFS Deep Fuel Beds burn78 - 120 cm deep - 21 degree slope - 40 cm spacing' / 
+&HEAD CHID='burn78_120D_21S_40L', TITLE='USFS Deep Fuel Beds burn78 - 120 cm deep - 21 degree slope - 40 cm spacing' /
 !In EXP this run is clasified as a successful burn.
 
 ! &MESH IJK=30,20,20, XB=-3,9,-3,3,0,6/ single coarse mesh for testing
@@ -21,7 +21,8 @@
 &DUMP DT_DEVC=0.5,DT_PART=0.5 /
 &MISC SIMULATION_MODE='LES', HUMIDITY=75.2,TMPA=21.89 /
 
-&REAC FUEL='FUEL VAPOR', C=2.10, H=6.20, O=2.16, SOOT_YIELD=0.01, HEAT_OF_COMBUSTION=17425. /
+&SPEC ID='FUEL VAPOR', C=2.10, H=6.20, O=2.16/
+&REAC FUEL='FUEL VAPOR', SOOT_YIELD=0.01, HEAT_OF_COMBUSTION=17425. /
 
 &SPEC ID='WATER VAPOR' /
 
@@ -42,7 +43,7 @@
 &CATF OTHER_FILES = 'vegetation_model.txt' /
 
 &PART ID='EXCELSIOR', SAMPLING_FACTOR=1, SURF_ID='wet vegetation'
-      QUANTITIES='PARTICLE TEMPERATURE','PARTICLE MASS','PARTICLE DIAMETER', STATIC=T 
+      QUANTITIES='PARTICLE TEMPERATURE','PARTICLE MASS','PARTICLE DIAMETER', STATIC=T
       EMBER_PARTICLE=T, EMBER_DENSITY_THRESHOLD=300, EMBER_VELOCITY_THRESHOLD=0 /
 
 - Vegetative fuel array

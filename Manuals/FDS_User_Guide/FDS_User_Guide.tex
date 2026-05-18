@@ -425,9 +425,6 @@ There are different implementations of MPI, much like there are different Fortra
 
 MPI and OpenMP can be used together. For example, 4 MPI processes can be assigned to 4 different computers, and each MPI process can be supported by, say, 8 OpenMP threads, assuming each computer has 8 cores. Most of the speed up is achieved by the MPI. For a reasonably fast network, you can expect 4 MPI processes to speed up the computation time by a factor of about 0.9 times 4. The OpenMP can provide an extra factor up to about 2, regardless of the number of cores used beyond about 4.
 
-
-\newpage
-
 \section{Launching an FDS Job}
 \label{info:launching}
 
@@ -901,9 +898,6 @@ The first thing to do when setting up an input file is to give the job a name.  
 \item \ct{TITLE} is a string of 255 characters or less that describes the simulation. It is simply a descriptive text that is passed to various output files.
 \end{description}
 
-
-\newpage
-
 \section{Simulation Time}
 \label{info:TIME}
 
@@ -978,8 +972,6 @@ warms up a compartment to a nearly equilibrium state at which point time-average
 \ct{TIME_SHRINK_FACTOR} does not reduce the time for the flow and gas temperature fields to develop; however, these often develop much faster than the wall temperature profile.
 
 Note that when \ct{TIME_SHRINK_FACTOR} is used a device with \ct{QUANTITY='TIME'} or a device or control function with a \ct{DELAY} will have those values adjusted by the value of \ct{TIME_SHRINK_FACTOR}.  For example if a 10~s \ct{DELAY} is specified for a \ct{CTRL} input with a \ct{TIME_SHRINK_FACTOR} of 10, then FDS will adjust the \ct{DELAY} to 1~s. However, use of time based device or control functions that change the simulation implies a non-steady scenario where the use of \ct{TIME_SHRINK_FACTOR} may no longer be appropriate.
-
-\newpage
 
 \section{Computational Meshes}
 \label{info:MESH}
@@ -1235,8 +1227,6 @@ The default boundary condition for all solid surfaces is that of a smooth inert 
 If only this boundary condition is needed, there is no need to add any \ct{SURF} lines to the input file. If additional boundary conditions are desired, they are to be listed one boundary condition at a time. Each \ct{SURF} line consists of an identification string \ct{ID='...'} to allow references to it by an obstruction or vent. Thus, on each \ct{OBST} and \ct{VENT} line that are to be described below, the character string \ct{SURF_ID='...'} indicates the \ct{ID} of the \ct{SURF} line containing the desired boundary condition parameters. If a particular \ct{SURF} line is to be applied as the default boundary condition, set \ct{DEFAULT=T} on the \ct{SURF} line.
 
 
-\newpage
-
 \section{Creating Rectilinear Obstructions}
 \label{info:OBST}
 
@@ -1357,8 +1347,6 @@ In rare cases, you might not want to allow a \ct{VENT} to be attached to a parti
 
 
 \ifcompgeom
-
-\newpage
 
 \section{Creating Unstructured Geometry (Beta)}
 \label{info:GEOM}
@@ -1700,7 +1688,6 @@ One current limitation of the unstructured geometry algorithm is that a Cartesia
 
 \fi
 
-\newpage
 
 \section{Applying Surface Properties}
 \label{info:VENT}
@@ -1740,7 +1727,7 @@ There are four reserved \ct{SURF_ID}'s that may be applied to a \ct{VENT} -- \ct
 
 The first special \ct{VENT} is invoked by the parameter \ct{SURF_ID='OPEN'}. This \ct{VENT} denotes a passive opening to the outside, and it can only be applied to the exterior boundary of the computational domain. By default, FDS assumes that the exterior boundary of the computational domain (the \ct{XB}s on the \ct{MESH} line where they are not adjacent to another \ct{MESH}) is a solid wall. To create a totally or partially open domain, use \ct{OPEN} vents on the exterior mesh boundaries. It is sometimes convenient to specify doors or windows that open out to the exterior of the computational domain by simply specifying it to be \ct{OPEN}. However, keep in mind that the pressure boundary condition on such an opening is imperfect, and it is recommended that if the flow through the doorway or window is important, you should extend the domain a few meters beyond the doorway or window. You would still have to use the \ct{OPEN} boundary on the extended region to open up one or more sides of the computational domain, but these openings would be far enough away from the modeled door or window that they would not affect the flow pattern.
 
-By default, it is assumed that ambient conditions exist beyond the \ct{'OPEN'} vent. However, in some cases, you may want to alter this assumption, for example, the temperature. If you assume a temperature other than ambient, specify \ct{TMP_EXTERIOR} along with \ct{SURF_ID='OPEN'}. You can modify the time history of this parameter using a ramp function, \ct{TMP_EXTERIOR_RAMP} (see Section~\ref{info:RAMP_Time} for details about time/temperature ramps). Use this option cautiously -- in many situations if you want to describe the exterior of a building, it is better to include the exterior explicitly in your calculation because the flow in and out of the doors and windows will be more naturally captured. See Sec.~\ref{info:stackeffect} for more details. If you want to specify a non-ambient pressure at the \ct{OPEN} boundary, see Sec.~\ref{info:pressure_boundary}.
+By default, it is assumed that ambient conditions exist beyond the \ct{'OPEN'} vent. However, in some cases, you may want to alter this assumption, for example, the temperature. If you assume a temperature other than ambient, specify \ct{TMP_EXTERIOR} along with \ct{SURF_ID='OPEN'}. You can modify the time history of this parameter using a ramp function, \ct{TMP_EXTERIOR_RAMP} (see Eq.~(\ref{temp_time_ramp}) as an example). Use this option cautiously -- in many situations if you want to describe the exterior of a building, it is better to include the exterior explicitly in your calculation because the flow in and out of the doors and windows will be more naturally captured. See Sec.~\ref{info:stackeffect} for more details. If you want to specify a non-ambient pressure at the \ct{OPEN} boundary, see Sec.~\ref{info:pressure_boundary}.
 
 The \ct{OPEN} pressure boundary condition is most stable for flows that are predominantly normal  to the vent, either mostly in or mostly out.  This is because the prescribed pressure at an \ct{OPEN} boundary is ill-conditioned (a small perturbation to the input may lead to large change in the output) if the flow is parallel to the vent.  Suppose, for example, that an outdoor flow is 10 m/s in the $x$ direction and $\pm 0.001$ m/s in the $z$ direction with an \ct{OPEN} top boundary.  The kinetic energy of this flow is roughly $k=50$ \unit{m^2/s^2}.  When the vertical velocity is positive (+0.001 m/s) then the prescribed boundary condition for the stagnation pressure is set to $\cH = k = 50$ \unit{m^2/s^2}.  But when the vertical velocity is negative (-0.001 m/s) then $\cH = 0$ (see \cite{FDS_Tech_Guide}).  For this reason, \ct{OPEN} vents should be used with care in outdoor applications.  See Section \ref{info:WIND} for an alternative approach.
 
@@ -1813,9 +1800,6 @@ Unlike most of the entries in the input file, the order that you specify \ct{VEN
 Smokeview can help identify where two \ct{VENT}s overlap, assuming each has a unique \ct{COLOR}. Because Smokeview draws \ct{VENT}s on top of each other, areas of overlap will have a grainy, awkward appearance that changes pattern as you move the scene. In situations where you desire the overlap for the sake of convenience, you might want to slightly adjust the coordinates of the preferred \ct{VENT} so that it is slightly offset from the solid surface. Make the offset less than about a tenth of a cell dimension so that FDS snaps it to its desired location. Then, by toggling the ``q'' key in Smokeview, you can eliminate the grainy color overlap by showing the \ct{VENT} exactly where you specified it, as opposed to where FDS repositioned it. This trick also works where the faces of two obstructions overlap.
 
 If an error message appears requesting that the orientation of a vent should be specified, first check to make sure that the vent is a plane; that is, that two of its six coordinates are the same. If the vent is a plane, then the orientation is usually determined automatically. However, if the \ct{VENT} is attached to a thin obstruction; that is, an obstruction that is zero cells thick, then you must specify an orientation index, \ct{IOR}, to indicate in which of the two normal directions the \ct{VENT} faces. If the normal direction of the \ct{VENT} is in the positive $x$ direction, for example, set \ct{IOR=1}. If the normal direction is in the negative $x$ direction, set \ct{IOR=-1}. For the $y$ or $z$ direction, use the number $\pm 2$ or $\pm 3$, respectively. Setting \ct{IOR} may sometimes solve the problem, but there are situations where it is not possible to automatically detect the vent orientation or that the vent is completely detached from a solid surface, in which case you should rework the \ct{VENT} parameters.
-
-\newpage
-
 
 \section{Coloring Obstructions, Geometry, Vents, Surfaces, and Meshes}
 
@@ -1927,8 +1911,6 @@ For geometries that are spheres, the parameter \ct{TEXTURE_MAPPING='SPHERICAL'} 
 \end{figure}
 
 
-
-\newpage
 
 \section{Repeated Objects: The \texorpdfstring{{\tt MULT}}{MULT} Namelist Group (Table \ref{tbl:MULT})}
 \label{info:MULT}
@@ -2322,9 +2304,6 @@ A common boundary condition for diagnostic simulations is to force all surfaces 
 Note that \ct{TMP_FRONT_INITIAL} sets the initial temperature of the surface and has few other uses except for this particular application. If the surface is not \ct{ADIABATIC} and it has material properties, use \ct{TMP_INNER} to set the surface and interior temperature.
 
 Also note that no solid surface is truly adiabatic; thus, the specification of an adiabatic boundary condition should be used for diagnostic purposes only. Actual fire simulations can develop numerical instabilities if \ct{ADIABATIC} surfaces are used because the wall temperature and radiation fields are not updated simultaneously. If a droplet lands on an \ct{ADIABATIC} surface, no heat transfer will be predicted between the droplet and the surface. This is because the high heat transfer rates associated with droplets can lead to nonsensical wall temperatures when trying to enforce the adiabatic condition which are then likely to result in runtime errors or numerical instabilities.
-
-
-\newpage
 
 \section{One-Dimensional Heat Conduction in Solids}
 \label{info:MATL}
@@ -3682,9 +3661,6 @@ Using the boundary file output quantity \ct{'MASS FLUX'} might help to visualize
     &BNDF QUANTITY='MASS FLUX', CELL_CENTERED=T /
 \end{lstlisting}
 
-
-\newpage
-
 \section{HVAC Systems}
 \label{info:HVAC}
 
@@ -4050,8 +4026,6 @@ To apply localized leakage to \ct{GEOM}, the process is similar. \ct{NODE_ID} on
 \end{lstlisting}
 Here the use of \ct{GEOM2=T} indicates that \ct{VENT2_ID} is a \ct{NODE_ID} on \ct{SURF}.
 
-\newpage
-
 \section{Sealed Compartments, Leakage, and Void Spaces}
 \label{info:ZONE}
 
@@ -4343,12 +4317,16 @@ FDS limits the number of \ct{RAMP}s that can be specified in the input file. Thi
 \section{Time-Dependent Functions}
 \label{info:RAMP_Time}
 
-At the start of any calculation, the temperature is ambient everywhere, the flow velocity is zero everywhere, nothing is burning, and the mass fractions of all species are uniform. You can control the rate at which things turn on, or turn off, by specifying time histories either with pre-defined functions or with user-defined functions.  The parameters \ct{TAU_Q}, \ct{TAU_T}, and \ct{TAU_V} indicate that the heat release rate (\ct{HRRPUA}); surface temperature (\ct{TMP_FRONT}); and/or normal velocity (\ct{VEL}, \ct{VOLUME_FLOW}), or \ct{MASS_FLUX_TOTAL} are to ramp up to their prescribed values as follows, using the heat release rate, $\dot{Q}(t)$, as an example:
+At the start of any simulation, the temperature is ambient everywhere, the flow velocity is zero everywhere, nothing is burning, and the mass fractions of all species are uniform. You can control various time histories either with pre-defined functions or with user-defined functions, referred to as ``time ramps.'' For example, the heat release rate, $\dot{Q}(t)$, can be ramped up from zero as follows:
 \begin{equation}
     \dot Q(t) = \left\{ \begin{array}{ll} \dot Q_0 \, \left( t/\tau \right)^2      &  (\tau < 0) \\[.1in]
-        \dot Q_0 \, \tanh \left( t/\tau \right)  &  (\tau > 0) \end{array} \right.
+                                          \dot Q_0 \, \tanh \left( t/\tau \right)  &  (\tau > 0) \end{array} \right.
 \end{equation}
-$\dot Q_0$ is the user-specified heat release rate. If the fire ramps up following a $t$-squared curve, then it remains constant after \ct{TAU_Q} seconds.  These rules apply to \ct{TAU_T} and \ct{TAU_V} as well. The default value for all \ct{TAU}s is 1~s\footnote{You can change the default ramp-up time by setting \ct{TAU_DEFAULT} on the \ct{MISC} line.}.  If something other than a tanh or $t$-squared ramp up is desired, then a user-defined function can be input. To do this, set \ct{RAMP_Q}, \ct{RAMP_T} or \ct{RAMP_V} equal to a character string designating the ramp function to use for that particular surface type, then somewhere in the input file generate lines of the form:
+where $\dot{Q}_0$ is the user-specified heat release rate and $\tau$ is a time-scale with a default value of 1~s that can be specified via \ct{TAU_Q} on the \ct{SURF} line. The parameter \ct{TAU_T} controls the surface temperature (\ct{TMP_FRONT}) and \ct{TAU_V} controls the normal velocity (\ct{VEL}), volume flow (\ct{VOLUME_FLOW}), or total mass flux (\ct{MASS_FLUX_TOTAL}).
+
+If the fire ramps up following a $t$-squared curve, then it remains constant after |\ct{TAU_Q}| seconds.  These rules apply to \ct{TAU_T} and \ct{TAU_V} as well. The default value for all \ct{TAU}s is 1~s\footnote{You can change the default ramp-up time by setting \ct{TAU_DEFAULT} on the \ct{MISC} line.}.  
+
+If something other than a tanh or $t$-squared ramp up is desired, then a user-defined function can be input. To do this, set \ct{RAMP_Q}, \ct{RAMP_T} or \ct{RAMP_V} equal to a character string designating the ramp function to use for that particular surface type, then somewhere in the input file generate lines of the form:
 \begin{lstlisting}
     &RAMP ID='rampname1', T= 0.0, F=0.0 /
     &RAMP ID='rampname1', T= 5.0, F=0.5 /
@@ -4369,7 +4347,7 @@ Here, \ct{T} is the time, and \ct{F} indicates the fraction of the heat release 
 \end{lstlisting}
 Use \ct{TAU_T} or \ct{RAMP_T} to control the ramp-ups for surface temperature. The surface temperature at time $t$, $T(t)$, is
 \be
-T(t) = T_0 + f(t) \left( T_{\rm f} - T_0 \right)
+T(t) = T_0 + f(t) \left( T_{\rm f} - T_0 \right)  \label{temp_time_ramp}
 \ee
 where $f(t)$ is the result of evaluating the \ct{RAMP_T} at time $t$, $T_0$ is the ambient temperature, and $T_{\rm f}$ is specified via \ct{TMP_FRONT} on the same \ct{SURF} line as \ct{RAMP_T}. Use \ct{TAU_MF(N)} or \ct{RAMP_MF(N)} to control the ramp-ups for either the mass fraction or mass flux of species \ct{N}. For example:
 \begin{lstlisting}
@@ -4582,7 +4560,6 @@ Fuels compatible with the simple chemistry approach to defining reactions can us
     &SPEC ID='ETHYLENE GLYCOL', C=2, H=6, O=2/
 \end{lstlisting}
 
-
 \subsubsection{Conductivity}
 \label{info:CONDUCTIVITY}
 
@@ -4764,9 +4741,11 @@ By default, duplicate species are considered to be a lumped species and not a pr
 
 \subsection{Soot}
 \label{info:SOOT}
-The predefined species of \ct{SOOT'} is defined with with \ct{FORMULA='C'}. To specify soot that contains other atoms, use \ct{FORMULA}. If new thermo-physical properties are not specified, define the \ct{FORMULA} to keep the molecular weight near 12~g/mol, i.e \ct{FORMULA='C0.85H1.7'} rather than \ct{FORMULA='C10H20'}.
-
-\newpage
+The predefined species of \ct{SOOT'} is defined with with \ct{FORMULA='C'}. To specify soot that contains other elements, use \ct{FORMULA}. For example, the following would redefine \ct{SOOT} to include a 10\,\% hydrogen atom fraction. 
+\begin{lstlisting}
+    &SPEC ID='SOOT', FORMULA='C0.9H0.1'/
+\end{lstlisting}
+If new thermo-physical properties are not specified, define the \ct{FORMULA} to keep the molecular weight near 12~g/mol, i.e \ct{FORMULA='C0.85H1.7'} rather than \ct{FORMULA='C10H20'}. The inputs \ct{C},\ct{H},\ct{O}, and \ct{N} can also be used if those are the only elements present. When using simple chemistry add \ct{LUMPED_COMPONENT_ONLY=T} if you are not using any of the aerosol behaviors in FDS.
 
 \section{Specifying Lumped Species (Mixtures of Primitive Species)}
 \label{info:lumped}
@@ -4859,7 +4838,7 @@ For the simple chemistry model, each reaction is assumed to be of the form:
 \nu_{\COTWO} \; \mathrm{CO_2} + \nu_{\HTWOO} \; \mathrm{H_2O} +
 \nu_{\CO}   \; \mathrm{CO}   + \nu_{\rm S} \; \mathrm{Soot} + \nu_{\HCN} \; \mathrm{HCN} +
 \nu_{\NTWO} \; \mathrm{N_2} \ee
-You need only specify the chemical formula of the fuel along with the yields of CO ($y_{\CO}$), soot ($y_{\rm S}$), and HCN ($y_{\HCN}$) and the volume fraction of hydrogen in the soot ($X_\Hy$). FDS will use that information and calculate the stoichiometric coefficients automatically as follows where $W$ is the molecular weight and F indicates the fuel species:
+You need only specify the chemical formula of the fuel along with the yields of CO ($y_{\CO}$), soot ($y_{\rm S}$), and HCN ($y_{\HCN}$) and the volume fraction of hydrogen in the soot ($X_\Hy$). The chemical formula and the soot hydrogen fraction, if a non-zero value is desired, are defined using \ct{SPEC}, see~\ref{info:FORMULA}. FDS will use that information and calculate the stoichiometric coefficients automatically as follows where $W$ is the molecular weight and F indicates the fuel species:
 \begin{eqnarray*}
     \nu_{\OTWO}    &=& \nu_{\COTWO} + \frac{\nu_{\CO}}{2} + \frac{\nu_{\HTWOO}}{2} - \frac{\hbox{z}}{2}   \\
     \nu_{\COTWO}   &=& \hbox{x} - \nu_{\CO} - \nu_{\HCN} - (1-X_\Hy) \, \nu_{\rm S} \\
@@ -4888,7 +4867,7 @@ A few sample \ct{REAC} lines are given here.
 \begin{lstlisting}
     &REAC FUEL = 'METHANE' /
 \end{lstlisting}
-In this case, there is no need for a \ct{FORMULA} or atom count because the \ct{FUEL} is listed in Appendix~\ref{info:predefined_species}. It is assumed that the soot and CO yields are zero.  FDS will compute the yields of product species and the heat of combustion based upon predefined values.
+In this case, there is no need for a \ct{SPEC} because the \ct{FUEL} is listed in Appendix~\ref{info:predefined_species}. It is assumed that the soot and CO yields are zero.  FDS will compute the yields of product species and the heat of combustion based upon predefined values.
 \begin{lstlisting}
     &REAC FUEL         = 'PROPANE'
     SOOT_YIELD         = 0.01
@@ -5135,8 +5114,6 @@ There may be special circumstances where you would like to specify that a locali
     &REAC ..., AIT_EXCLUSION_ZONE(1:6,1)=..., AIT_EXCLUSION_ZONE_TEMPERATURE(1)=3000.
     AIT_EXCLUSION_ZONE(1:6,2)=..., AIT_EXCLUSION_ZONE_TEMPERATURE(2)=3000./
 \end{lstlisting}
-
-\newpage
 
 \section{Complex Stoichiometry}
 \label{info:REAC_Diagnostics}
@@ -5419,10 +5396,6 @@ For example, if the reaction defines the complete combustion of methane using pr
     &REAC FUEL='METHANE', EQUATION ='CH4+2*O2=CO2+2*H2O' /
     &REAC FUEL='METHANE', EQUATION ='METHANE+2*O2=CO2+2*H2O' /
 \end{lstlisting}
-
-
-
-\newpage
 
 \section{Finite Rate Combustion}
 \label{info:finite}
@@ -5900,6 +5873,10 @@ The absorption coefficient is a function of gas composition and temperature. In 
 \subsubsection{Path Length}
 
 For a given gas temperature and species composition, RadCal computes a single effective absorption coefficient that is independent of wavelength. To calculate this coefficient, a user-specified \ct{PATH_LENGTH} (m) is needed. Its default value is 0.1~m. The choice of \ct{PATH_LENGTH} can be based on the physical size of the fire, the compartment, or the overall computational domain, depending on the application. The default value has been chosen to capture accurately radiation heat transfer in and around the fire itself. A useful ``rule of thumb'' for this length scale is $4V/A$, where $V$ is the volume of the region of interest and $A$ is the encompassing surface area. This region might be the volume occupied by the fire itself or a flashed-over compartment. Alternatively, if the application involves calculating the heat flux to distant targets, a more appropriate \ct{PATH_LENGTH} might be the distance from the fire to the target. A sensitivity analysis should be done in any case to determine how the chosen \ct{PATH_LENGTH} affects the predicted values.
+
+\subsubsection{Radiation temperature}
+
+The effective absorption coefficient depends on two terms: the absorption (or transmission) of incident radiation through a gas layer, and the emission of the gas layer itself. The calculation of the transmission term assumes that the spectral distribution of the incident (incoming) radiation has the form of Planck function, which depends on the assumed temperature of the radiation source. In RadCal, this temperature is assigned to a {\em wall temperature}. As the temperature of the radiation source, incident in any given location of the domain, cannot be known, it must be assumed. This assumed radiation temperature can be specified using \ct{RADTMP} input. Normally, it should correspond to the effective radiation temperature of flames. The default value is 900~\unit{\degreeCelsius}.
 
 \subsubsection{Fuel Species}
 
@@ -6651,8 +6628,6 @@ Note that the \ct{PART} input must contain \ct{ORIENTATION} as this signals to F
     \caption[Results of the \ct{part_orientation_ramp} case]{Particle radiative flux for \ct{part_orientation_ramp} case.}
     \label{fig:part_orientation_ramp}
 \end{figure}
-
-\newpage
 
 \section{Particle Removal}
 \label{info:particle_removal}
@@ -7415,9 +7390,6 @@ The particle therefore loses 0.2410~kJ.
     \label{char_oxidation_2_fig}
 \end{figure}
 
-
-\newpage
-
 \section{Lagrangian Particle Model}
 \label{info:vegetation}
 \label{pine_needles}
@@ -7695,11 +7667,6 @@ The resulting vegetation temperatures are shown in Fig.~\ref{ground_vegetation_c
     \caption[Results of the \ct{ground_vegetation_conv} test case]{Temperature of convectively heated vegetation of two different sizes. (Left) $\sigma_{\rm v}=3000$~\unit{\per\meter}. (Right) $\sigma_{\rm v}=1500$~\unit{\per\meter}.}
     \label{ground_vegetation_conv_fig}
 \end{figure}
-
-
-\newpage
-
-
 
 \section{Level Set Model for Wildland Fire Spread}
 \label{info:level_set}
@@ -9523,9 +9490,6 @@ In this example, many different types of obstructions are randomly positioned wi
 \end{figure}
 
 
-
-\newpage
-
 \section{Baroclinic Vorticity}
 \label{baroclinic_torque}
 
@@ -9584,10 +9548,6 @@ This case demonstrates the use of baroclinic correction for an axially-symmetric
     \label{helium_plume}
 \end{figure}
 
-
-
-
-\newpage
 
 \section{Pressure Considerations in Long Tunnels}
 \label{tunnel_solver}
@@ -13663,14 +13623,9 @@ Keyword                                               & Type            & Descri
 \ct{VEG_LSET_MLH}                                     & Real            & Section~\ref{info:level_set}              &                     & 0.70                    \\ \hline
 \ct{VEG_LSET_QCON}                                    & Real            & Section~\ref{info:level_set}              & \unit{kW/m^2}       & 0. \rule{0pt}{2.3ex}    \\ \hline
 \ct{VEG_LSET_ROS_00}                                  & Real            & Section~\ref{info:level_set}              & m/s                 & 0                       \\ \hline
-\ct{VEG_LSET_ROS_BACK}                                & Real            & Section~\ref{info:level_set}              & m/s                 & 0                       \\ \hline
-\ct{VEG_LSET_ROS_FLANK}                               & Real            & Section~\ref{info:level_set}              & m/s                 & 0                       \\ \hline
-\ct{VEG_LSET_ROS_HEAD}                                & Real            & Section~\ref{info:level_set}              & m/s                 & 0                       \\ \hline
 \ct{VEG_LSET_ROS_FIXED}                               & Logical         & Section~\ref{info:level_set}              &                     & \ct{F}                  \\ \hline
 \ct{VEG_LSET_SIGMA}                                   & Real            & Section~\ref{info:level_set}              & 1/m                 & 5000                    \\ \hline
 \ct{VEG_LSET_SURF_LOAD}                               & Real            & Section~\ref{info:level_set}              & \unit{kg/m^2)}      & 1.0 \rule{0pt}{2.3ex}   \\ \hline
-\ct{VEG_LSET_TAN2}                                    & Real            & Section~\ref{info:level_set}              &                     &                         \\ \hline
-\ct{VEG_LSET_WIND_EXP}                                & Real            & Section~\ref{info:level_set}              &                     & 1                       \\ \hline
 \ct{VEG_LSET_WIND_HEIGHT}                             & Real            & Section~\ref{info:custom_wind}            & m                   & 6.1                      \\ \hline
 \ct{VEG_LSET_WIND_RAMP}                               & Character       & Section~\ref{info:custom_wind}            &                     &                         \\ \hline
 \ct{VEL}                                              & Real            & Section~\ref{info:Velocity_BC}            & m/s                 &                         \\ \hline

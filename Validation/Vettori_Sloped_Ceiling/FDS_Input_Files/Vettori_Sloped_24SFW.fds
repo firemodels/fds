@@ -16,16 +16,11 @@
 
 %%Burner Surface ID
 &SURF ID='BURNER'
- HRRPUA=2930.0 
+ HRRPUA=2930.0
  RAMP_Q='FAST'/
 
-
-
-
 &REAC FUEL='METHANE'
-    SOOT_YIELD=0.01 
-	C = 1
-	H = 4 /
+    SOOT_YIELD=0.01 /
 
 %%Sloped Roof
 &OBST XB=0.0,7.3,5.4,5.5,2.5,2.6, SURF_ID='GYPSUM_BOARD', MULT_ID = 'ROOF' /
@@ -57,7 +52,7 @@
 	THICKNESS     = .0127 /
 
 %%Fast fire growth rate ramp
-&RAMP ID='FAST',T=   0.0, F=0.000 /		
+&RAMP ID='FAST',T=   0.0, F=0.000 /
 &RAMP ID='FAST',T=   5.0, F=0.054 /
 &RAMP ID='FAST',T=  10.0, F=0.071 /
 &RAMP ID='FAST',T=  15.0, F=0.104 /
@@ -80,7 +75,7 @@
 &RAMP ID='FAST',T= 100.0, F=0.998 /
 
 %%Slow fire growth rate ramp
-&RAMP ID='SLOW',T=   0.0, F=0.000 /	
+&RAMP ID='SLOW',T=   0.0, F=0.000 /
 &RAMP ID='SLOW',T=   5.0, F=0.006 /
 &RAMP ID='SLOW',T=  10.0, F=0.009 /
 &RAMP ID='SLOW',T=  15.0, F=0.012 /
@@ -199,7 +194,7 @@
 &DEVC XYZ=1.85, 4.25, 2.40,    ID='TC_4_4',   QUANTITY='TEMPERATURE' /
 &DEVC XYZ=1.85, 4.25, 1.5,     ID='TC_4_5',   QUANTITY='TEMPERATURE' /
 
-&DEVC ID='Acts', XYZ=1.0,1.0,1.0, QUANTITY='ACTUATED SPRINKLERS' / 
+&DEVC ID='Acts', XYZ=1.0,1.0,1.0, QUANTITY='ACTUATED SPRINKLERS' /
 
 &DUMP DT_DEVC=4., SIG_FIGS=4, SIG_FIGS_EXP=2 /
 

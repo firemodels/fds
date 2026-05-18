@@ -893,6 +893,10 @@ MAIN_LOOP: DO
       ENDIF
    ENDDO
 
+   ! If an obstruction was created or removed and all radiation angles were updated, return to normal radiation updates
+
+   UPDATE_ALL_ANGLES = .FALSE.
+
    ! Start the computation of the divergence term.
 
    CALL INITIALIZE_DIVERGENCE_INTEGRALS
