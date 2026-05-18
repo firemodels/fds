@@ -4583,10 +4583,6 @@ IF (N_RADF>0 .AND. T>=RADF_CLOCK(RADF_COUNTER(NM))) THEN
 
 ENDIF
 
-! UPDATE_ALL_ANGLES is a one-time only logical. If needed again, it will be reset again.
-
-UPDATE_ALL_ANGLES = .FALSE.
-
 END SUBROUTINE RADIATION_FVM
 
 
