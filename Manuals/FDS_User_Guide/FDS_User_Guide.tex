@@ -11258,6 +11258,7 @@ There are several useful \ct{DEVC} \ct{QUANTITY}'s that can help monitor the per
 \item \ct{'CPU TIME'} Elapsed CPU time since the start of the simulation, in seconds.
 \item \ct{'ITERATION'} Number of time steps completed at the given time of the simulation.
 \item \ct{'NUMBER OF PARTICLES'} Number of Lagrangian particles for the \ct{MESH} in which the \ct{DEVC} is located.
+\item \ct{'TOTAL NUMBER OF PARTICLES'} Total number of Lagrangian particles in the whole domain.
 \item \ct{'TIME STEP'} Duration of a simulation time step, $\delta t$, in seconds.
 \item \ct{'VN MAX'} The maximum value of the VN (Von Neumann) number, a secondary constraint on the time step, for the mesh in which the device is located. By default, the time step is chosen so that the VN number remains below 1. If you want to see the VN number in each grid cell, use a slice (\ct{SLCF}) file with \ct{QUANTITY='VN'} and \ct{CELL_CENTERED=T}.
 \item \ct{'WALL CLOCK TIME'} Elapsed wall clock time since the start of the simulation, in seconds.
@@ -11649,6 +11650,7 @@ Table~\ref{tab:deviceoutputquantities} below lists output quantities associated 
 \ct{THERMOCOUPLE}                              & Section~\ref{info:THERMOCOUPLE}               & \unit{\degreeCelsius} & D            \\ \hline
 \ct{TIME}                                      & Simulation time                               & s              & D            \\ \hline
 \ct{TIME STEP}                                 & Section~\ref{info:TIMING}                     & s              & D            \\ \hline
+\ct{TOTAL NUMBER OF PARTICLES}                 & Section~\ref{info:TIMING}                     &                & D            \\ \hline
 \ct{TRANSMISSION}                              & Section~\ref{info:beam_detector}              & \%/m           & D            \\ \hline
 \ct{UPPER TEMPERATURE}                         & Section~\ref{info:layerheight}                & \unit{\degreeCelsius} & D            \\ \hline
 \ct{WALL CLOCK TIME}                           & Section~\ref{info:TIMING}                     & s              & D            \\ \hline
