@@ -29,7 +29,7 @@ Carbon Monoxide Concentration,Measured Change in Volume Fraction,Predicted Chang
 Entrainment,Measured Mass Flow Rate (kg/s),Predicted Mass Flow Rate (kg/s),0.01,1,0.03 0.95,EastOutside,1.5,10,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/Scatterplots/FDS_Entrainment
 Extinction Time,Measured Time (s),Predicted Time (s),10,5000,0.03 0.95,EastOutside,1.5,10,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/Scatterplots/FDS_Extinction_Time
 Species Concentration,Measured Change in Volume Fraction (%),Predicted Change in Volume Fraction (%),1,100,0.03 0.95,EastOutside,1.5,8,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/Scatterplots/FDS_Species_Concentration
-Smoke Obscuration,Measured Obscuration (%/m),Predicted Obscuration (%/m),1,100,0.03 0.95,EastOutside,1.5,20,no,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/Scatterplots/FDS_Smoke_Obscuration
+Smoke Obscuration,Measured Obscuration (%/m),Predicted Obscuration (%/m),1,100,0.03 0.95,EastOutside,1.5,7,no,linear,FDS_Validation_Guide/SCRIPT_FIGURES/Scatterplots/FDS_Smoke_Obscuration
 Mass Flow Rate,Measured Mass Flow Rate (kg/s),Predicted Mass Flow Rate (kg/s),0.01,1,0.03 0.95,EastOutside,1.5,8,no,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/Scatterplots/FDS_Convective_Heat_Flux
 Atmospheric Dispersion,Measured Concentration (%),Predicted Concentration (%),0.1,100,0.03 0.95,EastOutside,1.5,50,no,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/Scatterplots/FDS_Atmospheric_Dispersion
 Minimum Extinguishing Concentration,Measured MEC (mol/mol),Predicted MEC (mol/mol),0.05,1,0.03 0.95,,1,6,no,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/Scatterplots/FDS_Minimum_Extinguishing_Concentration
