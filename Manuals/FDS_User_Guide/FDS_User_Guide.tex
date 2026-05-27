@@ -4934,12 +4934,17 @@ If the reaction is under defined, FDS will return an error at the start of the c
 \label{multiple_reac_n_simple}
 
 The default simple chemistry single-step combustion model has a two-step option. This option is invoked by setting \ct{N_SIMPLE_CHEMISTRY_REACTIONS} to 2 on the \ct{REAC} line for each simple chemistry reaction where two-steps are desired. All of the other parameters that are appropriate for the default single-step model are still applicable. The two-step scheme takes all of the carbon in the fuel molecule and converts it to CO and Soot in the first step, and then oxidizes most of the CO and Soot to form CO$_2$ in the second step. During the first step, the hydrogen in the fuel molecule forms either H$_2$ or H$_2$O, and the nitrogen in the fuel molecule forms either HCN or N$_2$.
-\begin{eqnarray}
-    \mathrm{C_xH_yO_zN_v} + \nu_{\text{\tiny \OTWO ,1}} \; \mathrm{O_2} &\longrightarrow& \underbrace{ \nu_{\mathrm{\tiny H_2,1}} \! \mathrm{H_2} + \nu_{\text{\tiny \HTWOO,1}} \! \mathrm{H_2O} + \nu_{\text{\tiny \CO ,1}} \! \mathrm{CO}   + \nu_{\text{\tiny S,1}} \! \mathrm{Soot} + \nu_{\text{\tiny \HCN,1}} \! \mathrm{HCN} +
-        \nu_{\text{\tiny \NTWO ,1}} \!  \mathrm{N_2} }_{\rm Int.~Products} \\[0.1in]
-    \mathrm{Int.~Products} + \nu_{\text{\tiny \OTWO,2}} \! \mathrm{O_2} &\longrightarrow& \nu_{\text{\tiny \COTWO}} \! \mathrm{CO_2} + \nu_{\text{\tiny \HTWOO ,2}} \! \mathrm{H_2O} + \nu_{\text{\tiny \CO ,2}} \! \mathrm{CO}   + \nu_{\text{\tiny S,2}} \, \mathrm{Soot} + \nu_{\text{\tiny \HCN,2}} \, \mathrm{HCN} +
+\begin{align}
+\mathrm{C_xH_yO_zN_v} + \nu_{\text{\tiny \OTWO ,1}} \; \mathrm{O_2} + \nu_{\text{\tiny \NTWO ,1}} \; \mathrm{N_2}
+&\longrightarrow \underbrace{ \nu_{\mathrm{\tiny H_2,1}} \! \mathrm{H_2} + \nu_{\text{\tiny \HTWOO,1}} \! \mathrm{H_2O} + \nu_{\text{\tiny \CO ,1}} \! \mathrm{CO}   + \nu_{\text{\tiny S,1}} \! \mathrm{Soot} + \nu_{\text{\tiny \HCN,1}} \! \mathrm{HCN} +
+        \nu_{\text{\tiny \NTWO ,1}} \!  \mathrm{N_2} }_{\rm Int.~Products}
+\\
+\mathrm{Int.~Products} + \nu_{\text{\tiny \OTWO,2}} \! \mathrm{O_2} + \nu_{\text{\tiny \NTWO ,2}} \; \mathrm{N_2}
+&\longrightarrow \nu_{\text{\tiny \COTWO}} \! \mathrm{CO_2} + \nu_{\text{\tiny \HTWOO ,2}} \! \mathrm{H_2O} + \nu_{\text{\tiny \CO ,2}} \! \mathrm{CO}   + \nu_{\text{\tiny S,2}} \, \mathrm{Soot} + \nu_{\text{\tiny \HCN,2}} \, \mathrm{HCN} +
     \nu_{\text{\tiny \NTWO ,2}} \! \mathrm{N_2}
-\end{eqnarray}
+\end{align}
+
+
 By default, in the first step, two out of three carbon atoms in the fuel are converted to CO. There is not yet a solid basis for this assumption, and the distribution of carbon to CO and Soot can be changed via the parameter \ct{FUEL_C_TO_CO_FRACTION} on the \ct{REAC} line. Also by default one out of five nitrogen atoms in the fuel are converted to HCN. This value is based on testing of nitrogen containing fuels over a range of equivalence ratios \cite{IAFSS:Purser} and can be changed via the parameter \ct{FUEL_N_TO_HCN_FRACTION}. In addition, a fraction of the hydrogen in the fuel molecule can form H$_2$ in the first step. The controlling parameter is called \ct{FUEL_H_TO_H2_FRACTION} and it is zero by default because this chemistry is not well understood and has been added to the two-step scheme as a placeholder for future research.
 
 Note that the parameters \ct{CO_YIELD}, \ct{SOOT_YIELD}, and \ct{HCN_YIELD} retain their meanings from the single-step simple chemistry model; that is, they represent the {\em post-flame} yields of these species. Essentially, the two-step model acknowledges the fact that CO and Soot are present at much higher concentrations within the flame envelope than their post-flame yields would suggest.
