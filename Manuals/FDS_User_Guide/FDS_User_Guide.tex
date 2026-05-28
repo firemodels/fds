@@ -2960,10 +2960,8 @@ where $T_{{\rm p},i}$ and $r_{{\rm p},i}/Y_{{\rm s},i}(0)$ are the reference tem
 
 There are many cases where it is only possible to estimate the \ct{REFERENCE_TEMPERATURE} ($T_{\rm p}$) of a particular reaction because micro-scale calorimetry data is unavailable. In such cases, an additional parameter can be specified to help fine tune the shape of the reaction rate curve, assuming some sort of measurement or estimate has been made to indicate at what temperature, and over what temperature range, the reaction takes place. The \ct{PYROLYSIS_RANGE} ($\Delta T$) is the approximate width (in degrees Celsius or Kelvin) of the normalized mass loss rate curve, assuming its shape to be roughly triangular. Its default value is 80~\unit{\degreeCelsius}. Using these input parameters, an estimate is made of the peak reaction rate, $r_{{\rm p},i}$, with which $E_{i,1}$, then $A_{i,1}$, are calculated.
 \be
-\frac{r_{{\rm p},i}}{Y_{{\rm s},i}(0)} = \frac{2 \, \dot{T}} {\Delta T} \, (1-\nu_{{\rm s},i}) \label{r_p}
+\frac{r_{{\rm p},i}}{Y_{{\rm s},i}(0)} = \frac{2 \, \dot{T}} {\Delta T} \label{r_p}
 \ee
-The parameter, $\nu_{{\rm s},i}$, is the yield of solid residue.
-
 When in doubt about the values of these various parameters, just specify the \ct{REFERENCE_TEMPERATURE}. Note that FDS will automatically calculate $A$ and $E$ using the above formulae. Do not specify $A$ and $E$ if you specify the \linebreak[3] \ct{REFERENCE_TEMPERATURE}, and do not specify \ct{PYROLYSIS_RANGE} if you specify \ct{REFERENCE_RATE}. For the material decomposition shown in Fig.~\ref{pyrolysis}, the \ct{MATL} would have the form:
 \begin{lstlisting}
     &MATL ID                 = 'My Fuel'
