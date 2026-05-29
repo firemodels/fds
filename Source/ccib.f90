@@ -14282,16 +14282,21 @@ ORIENTATION_LOOP: DO IS=1,3
             END SELECT
             IF (N_SOLID_CELLS_ON_EDGE==1) CORNER_EDGE=.TRUE.
 
-            NU = MU_FACE/RHO_FACE
-            CALL WALL_MODEL(SLIP_FACTOR,U_TAU,Y_PLUS,NU,SF%ROUGHNESS,DXN_STRM_UB,VEL_GAS-VEL_T)
-            ! Finally OMEGA, TAU:
-            ! SLIP_COEF = -1, no slip,   VEL_GHOST = 2*VEL_T - VEL_GAS
-            ! SLIP_COEF =  0, half slip, VEL_GHOST = VEL_T
-            ! SLIP_COEF =  1, free slip, VEL_GHOST = VEL_GAS
-            IF (CORNER_EDGE) SLIP_FACTOR = 0 ! corner (done to match VELOCITY_BC)
-            VEL_GHOST = VEL_T + SLIP_FACTOR*(VEL_GAS-VEL_T)
-            DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/(2._EB*DXN_STRM_UB)
-            MU_DUIDXJ(ICD_SGN) = RHO_FACE*U_TAU**2 * SIGN(1._EB,DUIDXJ(ICD_SGN))
+            IF (CORNER_EDGE .AND. CC_EDGE%EDGE_IN_MESH(ICD_SGN)) THEN
+               ! Match VELOCITY_BC internal corner: no WALL_MODEL, no-slip ghost, laminar stress
+               VEL_GHOST = 2._EB*VEL_T - VEL_GAS
+               DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/(2._EB*DXN_STRM_UB)
+               MU_DUIDXJ(ICD_SGN) = MUA*DUIDXJ(ICD_SGN)
+            ELSE
+               NU = MU_FACE/RHO_FACE
+               CALL WALL_MODEL(SLIP_FACTOR,U_TAU,Y_PLUS,NU,SF%ROUGHNESS,DXN_STRM_UB,VEL_GAS-VEL_T)
+               ! SLIP_COEF = -1, no slip,   VEL_GHOST = 2*VEL_T - VEL_GAS
+               ! SLIP_COEF =  0, half slip, VEL_GHOST = VEL_T
+               ! SLIP_COEF =  1, free slip, VEL_GHOST = VEL_GAS
+               VEL_GHOST = VEL_T + SLIP_FACTOR*(VEL_GAS-VEL_T)
+               DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/(2._EB*DXN_STRM_UB)
+               MU_DUIDXJ(ICD_SGN) = RHO_FACE*U_TAU**2 * SIGN(1._EB,DUIDXJ(ICD_SGN))
+            ENDIF
             ALTERED_GRADIENT(ICD_SGN) = .TRUE.
          CASE (BOUNDARY_FUEL_MODEL_BC)
             U1_T = 0._EB; U2_T = 0._EB
