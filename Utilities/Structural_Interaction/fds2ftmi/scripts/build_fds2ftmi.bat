@@ -31,7 +31,7 @@ del *.pdf
 :: Compile fds_win_64
 cd %FDS_GITROOT%\Build\impi_intel_win_openmp
 set OMP_NUM_THREADS=2
-::echo Y | make_fds.bat
+echo Y | make_fds.bat
 
 :: Print the FDS revision number on User Guide
 cd %FDS2FTMI_DIR%
