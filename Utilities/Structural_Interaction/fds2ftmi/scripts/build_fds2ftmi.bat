@@ -23,16 +23,15 @@ cd %FDS2FTMI_DIR%\examples\simple_panel_hot
 del *.csv 
 cd %FDS2FTMI_DIR%\examples\h_profile
 del *.csv 
+cd %FDS2FTMI_DIR%\examples\h_profile_geom
+del *.csv 
 cd %FIREBOT_DIR%\SCRIPT_FIGURES
 del *.pdf
 
 :: Compile fds_win_64
 cd %FDS_GITROOT%\Build\impi_intel_win_openmp
-echo Y | make_fds.bat
-
-:: Compile fds2ftmi_win_64
-cd %FDS2FTMI_DIR%\intel_win
-echo Y | make_fds2ftmi.bat
+set OMP_NUM_THREADS=2
+::echo Y | make_fds.bat
 
 :: Print the FDS revision number on User Guide
 cd %FDS2FTMI_DIR%
@@ -47,16 +46,21 @@ cd %FDS2FTMI_DIR%\examples\simple_panel_hot
 call simple_panel_hot.bat
 cd %FDS2FTMI_DIR%\examples\h_profile
 call h_profile.bat
+cd %FDS2FTMI_DIR%\examples\h_profile_geom
+call h_profile.bat
 
 :: Run python scripts
 cd %FIREBOT_DIR%
 python generate_plots.py
+python compare_mapping.py ..\examples\h_profile\h_profile_ftmi.txt ..\examples\h_profile_geom\h_profile_ftmi.txt
+python plot_results_comparison.py  ..\examples\h_profile\h_profile.csv ..\examples\h_profile_geom\h_profile.csv
+python update_verification_stats.py ..\examples\h_profile\h_profile.csv ..\examples\h_profile_geom\h_profile.csv
 
 :: Compile User Guide
 cd %FDS2FTMI_DIR%
 set TEXINPUTS=%TEXINPUTS%:.:../../../Manuals/LaTeX_Style_Files/
 pdflatex fds2ftmi_user_guide.tex
-bibtex fds2ftmi_user_guide
+biber fds2ftmi_user_guide
 pdflatex fds2ftmi_user_guide.tex
 
 :: Revert the FDS revision number on User Guide

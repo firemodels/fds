@@ -1,0 +1,9 @@
+/batch
+!
+/filname,h_profile_T_ansys,0
+/input,h_profile_T,ans
+/output,ansys_output,dat
+/prep7
+/input,../../scripts/ansys2ftmi_shell,geom
+finish
+!
