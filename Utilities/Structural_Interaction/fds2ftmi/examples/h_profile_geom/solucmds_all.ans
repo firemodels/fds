@@ -1,0 +1,983 @@
+allsel
+/solu
+
+antype,0
+nlgeom,on
+solcontrol,on
+autots,1
+outres,basic,last
+eqslv,-1
+RESCONTRL,DEFINE,ALL,LAST,1
+stabilize,off,
+pred,off,,off
+NEQIT, 50, 
+TIME,.01
+TUNIF,20,   
+TREF,20,
+
+
+/solu					
+time,			0.01		
+nsubst,5,0,0
+solve					
+finish					
+
+/solu					
+ANTYPE,STATIC,RESTART,			1	,LAST,CONTINUE 	
+time,			30		
+deltim,1,0.001,2.5					
+ldread,temp,,,			30	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			2	,LAST,CONTINUE 	
+time,			60		
+deltim,1,0.001,2.5					
+ldread,temp,,,			60	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			3	,LAST,CONTINUE 	
+time,			90		
+deltim,1,0.001,2.5					
+ldread,temp,,,			90	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			4	,LAST,CONTINUE 	
+time,			120		
+deltim,1,0.001,2.5					
+ldread,temp,,,			120	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			5	,LAST,CONTINUE 	
+time,			150		
+deltim,1,0.001,2.5					
+ldread,temp,,,			150	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			6	,LAST,CONTINUE 	
+time,			180		
+deltim,1,0.001,2.5					
+ldread,temp,,,			180	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			7	,LAST,CONTINUE 	
+time,			210		
+deltim,1,0.001,2.5					
+ldread,temp,,,			210	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			8	,LAST,CONTINUE 	
+time,			240		
+deltim,1,0.001,2.5					
+ldread,temp,,,			240	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			9	,LAST,CONTINUE 	
+time,			270		
+deltim,1,0.001,2.5					
+ldread,temp,,,			270	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			10	,LAST,CONTINUE 	
+time,			300		
+deltim,1,0.001,2.5					
+ldread,temp,,,			300	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			11	,LAST,CONTINUE 	
+time,			330		
+deltim,1,0.001,2.5					
+ldread,temp,,,			330	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			12	,LAST,CONTINUE 	
+time,			360		
+deltim,1,0.001,2.5					
+ldread,temp,,,			360	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			13	,LAST,CONTINUE 	
+time,			390		
+deltim,1,0.001,2.5					
+ldread,temp,,,			390	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			14	,LAST,CONTINUE 	
+time,			420		
+deltim,1,0.001,2.5					
+ldread,temp,,,			420	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			15	,LAST,CONTINUE 	
+time,			450		
+deltim,1,0.001,2.5					
+ldread,temp,,,			450	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			16	,LAST,CONTINUE 	
+time,			480		
+deltim,1,0.001,2.5					
+ldread,temp,,,			480	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			17	,LAST,CONTINUE 	
+time,			510		
+deltim,1,0.001,2.5					
+ldread,temp,,,			510	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			18	,LAST,CONTINUE 	
+time,			540		
+deltim,1,0.001,2.5					
+ldread,temp,,,			540	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			19	,LAST,CONTINUE 	
+time,			570		
+deltim,1,0.001,2.5					
+ldread,temp,,,			570	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			20	,LAST,CONTINUE 	
+time,			600		
+deltim,1,0.001,2.5					
+ldread,temp,,,			600	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			21	,LAST,CONTINUE 	
+time,			630		
+deltim,1,0.001,2.5					
+ldread,temp,,,			630	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			22	,LAST,CONTINUE 	
+time,			660		
+deltim,1,0.001,2.5					
+ldread,temp,,,			660	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			23	,LAST,CONTINUE 	
+time,			690		
+deltim,1,0.001,2.5					
+ldread,temp,,,			690	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			24	,LAST,CONTINUE 	
+time,			720		
+deltim,1,0.001,2.5					
+ldread,temp,,,			720	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			25	,LAST,CONTINUE 	
+time,			750		
+deltim,1,0.001,2.5					
+ldread,temp,,,			750	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			26	,LAST,CONTINUE 	
+time,			780		
+deltim,1,0.001,2.5					
+ldread,temp,,,			780	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			27	,LAST,CONTINUE 	
+time,			810		
+deltim,1,0.001,2.5					
+ldread,temp,,,			810	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			28	,LAST,CONTINUE 	
+time,			840		
+deltim,1,0.001,2.5					
+ldread,temp,,,			840	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			29	,LAST,CONTINUE 	
+time,			870		
+deltim,1,0.001,2.5					
+ldread,temp,,,			870	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			30	,LAST,CONTINUE 	
+time,			900		
+deltim,1,0.001,2.5					
+ldread,temp,,,			900	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			31	,LAST,CONTINUE 	
+time,			930		
+deltim,1,0.001,2.5					
+ldread,temp,,,			930	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			32	,LAST,CONTINUE 	
+time,			960		
+deltim,1,0.001,2.5					
+ldread,temp,,,			960	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			33	,LAST,CONTINUE 	
+time,			990		
+deltim,1,0.001,2.5					
+ldread,temp,,,			990	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			34	,LAST,CONTINUE 	
+time,			1020		
+deltim,1,0.001,2.5					
+ldread,temp,,,			1020	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			35	,LAST,CONTINUE 	
+time,			1050		
+deltim,1,0.001,2.5					
+ldread,temp,,,			1050	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			36	,LAST,CONTINUE 	
+time,			1080		
+deltim,1,0.001,2.5					
+ldread,temp,,,			1080	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			37	,LAST,CONTINUE 	
+time,			1110		
+deltim,1,0.001,2.5					
+ldread,temp,,,			1110	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			38	,LAST,CONTINUE 	
+time,			1140		
+deltim,1,0.001,2.5					
+ldread,temp,,,			1140	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			39	,LAST,CONTINUE 	
+time,			1170		
+deltim,1,0.001,2.5					
+ldread,temp,,,			1170	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			40	,LAST,CONTINUE 	
+time,			1200		
+deltim,1,0.001,2.5					
+ldread,temp,,,			1200	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			41	,LAST,CONTINUE 	
+time,			1230		
+deltim,1,0.001,2.5					
+ldread,temp,,,			1230	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			42	,LAST,CONTINUE 	
+time,			1260		
+deltim,1,0.001,2.5					
+ldread,temp,,,			1260	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			43	,LAST,CONTINUE 	
+time,			1290		
+deltim,1,0.001,2.5					
+ldread,temp,,,			1290	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			44	,LAST,CONTINUE 	
+time,			1320		
+deltim,1,0.001,2.5					
+ldread,temp,,,			1320	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			45	,LAST,CONTINUE 	
+time,			1350		
+deltim,1,0.001,2.5					
+ldread,temp,,,			1350	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			46	,LAST,CONTINUE 	
+time,			1380		
+deltim,1,0.001,2.5					
+ldread,temp,,,			1380	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			47	,LAST,CONTINUE 	
+time,			1410		
+deltim,1,0.001,2.5					
+ldread,temp,,,			1410	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			48	,LAST,CONTINUE 	
+time,			1440		
+deltim,1,0.001,2.5					
+ldread,temp,,,			1440	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			49	,LAST,CONTINUE 	
+time,			1470		
+deltim,1,0.001,2.5					
+ldread,temp,,,			1470	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			50	,LAST,CONTINUE 	
+time,			1500		
+deltim,1,0.001,2.5					
+ldread,temp,,,			1500	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			51	,LAST,CONTINUE 	
+time,			1530		
+deltim,1,0.001,2.5					
+ldread,temp,,,			1530	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			52	,LAST,CONTINUE 	
+time,			1560		
+deltim,1,0.001,2.5					
+ldread,temp,,,			1560	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			53	,LAST,CONTINUE 	
+time,			1590		
+deltim,1,0.001,2.5					
+ldread,temp,,,			1590	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			54	,LAST,CONTINUE 	
+time,			1620		
+deltim,1,0.001,2.5					
+ldread,temp,,,			1620	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			55	,LAST,CONTINUE 	
+time,			1650		
+deltim,1,0.001,2.5					
+ldread,temp,,,			1650	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			56	,LAST,CONTINUE 	
+time,			1680		
+deltim,1,0.001,2.5					
+ldread,temp,,,			1680	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			57	,LAST,CONTINUE 	
+time,			1710		
+deltim,1,0.001,2.5					
+ldread,temp,,,			1710	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			58	,LAST,CONTINUE 	
+time,			1740		
+deltim,1,0.001,2.5					
+ldread,temp,,,			1740	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			59	,LAST,CONTINUE 	
+time,			1770		
+deltim,1,0.001,2.5					
+ldread,temp,,,			1770	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			60	,LAST,CONTINUE 	
+time,			1800		
+deltim,1,0.001,2.5					
+ldread,temp,,,			1800	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			61	,LAST,CONTINUE 	
+time,			1830		
+deltim,1,0.001,2.5					
+ldread,temp,,,			1830	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			62	,LAST,CONTINUE 	
+time,			1860		
+deltim,1,0.001,2.5					
+ldread,temp,,,			1860	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			63	,LAST,CONTINUE 	
+time,			1890		
+deltim,1,0.001,2.5					
+ldread,temp,,,			1890	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			64	,LAST,CONTINUE 	
+time,			1920		
+deltim,1,0.001,2.5					
+ldread,temp,,,			1920	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			65	,LAST,CONTINUE 	
+time,			1950		
+deltim,1,0.001,2.5					
+ldread,temp,,,			1950	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			66	,LAST,CONTINUE 	
+time,			1980		
+deltim,1,0.001,2.5					
+ldread,temp,,,			1980	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			67	,LAST,CONTINUE 	
+time,			2010		
+deltim,1,0.001,2.5					
+ldread,temp,,,			2010	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			68	,LAST,CONTINUE 	
+time,			2040		
+deltim,1,0.001,2.5					
+ldread,temp,,,			2040	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			69	,LAST,CONTINUE 	
+time,			2070		
+deltim,1,0.001,2.5					
+ldread,temp,,,			2070	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			70	,LAST,CONTINUE 	
+time,			2100		
+deltim,1,0.001,2.5					
+ldread,temp,,,			2100	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			71	,LAST,CONTINUE 	
+time,			2130		
+deltim,1,0.001,2.5					
+ldread,temp,,,			2130	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			72	,LAST,CONTINUE 	
+time,			2160		
+deltim,1,0.001,2.5					
+ldread,temp,,,			2160	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			73	,LAST,CONTINUE 	
+time,			2190		
+deltim,1,0.001,2.5					
+ldread,temp,,,			2190	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			74	,LAST,CONTINUE 	
+time,			2220		
+deltim,1,0.001,2.5					
+ldread,temp,,,			2220	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			75	,LAST,CONTINUE 	
+time,			2250		
+deltim,1,0.001,2.5					
+ldread,temp,,,			2250	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			76	,LAST,CONTINUE 	
+time,			2280		
+deltim,1,0.001,2.5					
+ldread,temp,,,			2280	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			77	,LAST,CONTINUE 	
+time,			2310		
+deltim,1,0.001,2.5					
+ldread,temp,,,			2310	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			78	,LAST,CONTINUE 	
+time,			2340		
+deltim,1,0.001,2.5					
+ldread,temp,,,			2340	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			79	,LAST,CONTINUE 	
+time,			2370		
+deltim,1,0.001,2.5					
+ldread,temp,,,			2370	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			80	,LAST,CONTINUE 	
+time,			2400		
+deltim,1,0.001,2.5					
+ldread,temp,,,			2400	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			81	,LAST,CONTINUE 	
+time,			2430		
+deltim,1,0.001,2.5					
+ldread,temp,,,			2430	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			82	,LAST,CONTINUE 	
+time,			2460		
+deltim,1,0.001,2.5					
+ldread,temp,,,			2460	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			83	,LAST,CONTINUE 	
+time,			2490		
+deltim,1,0.001,2.5					
+ldread,temp,,,			2490	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			84	,LAST,CONTINUE 	
+time,			2520		
+deltim,1,0.001,2.5					
+ldread,temp,,,			2520	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			85	,LAST,CONTINUE 	
+time,			2550		
+deltim,1,0.001,2.5					
+ldread,temp,,,			2550	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			86	,LAST,CONTINUE 	
+time,			2580		
+deltim,1,0.001,2.5					
+ldread,temp,,,			2580	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			87	,LAST,CONTINUE 	
+time,			2610		
+deltim,1,0.001,2.5					
+ldread,temp,,,			2610	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			88	,LAST,CONTINUE 	
+time,			2640		
+deltim,1,0.001,2.5					
+ldread,temp,,,			2640	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			89	,LAST,CONTINUE 	
+time,			2670		
+deltim,1,0.001,2.5					
+ldread,temp,,,			2670	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			90	,LAST,CONTINUE 	
+time,			2700		
+deltim,1,0.001,2.5					
+ldread,temp,,,			2700	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			91	,LAST,CONTINUE 	
+time,			2730		
+deltim,1,0.001,2.5					
+ldread,temp,,,			2730	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			92	,LAST,CONTINUE 	
+time,			2760		
+deltim,1,0.001,2.5					
+ldread,temp,,,			2760	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			93	,LAST,CONTINUE 	
+time,			2790		
+deltim,1,0.001,2.5					
+ldread,temp,,,			2790	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			94	,LAST,CONTINUE 	
+time,			2820		
+deltim,1,0.001,2.5					
+ldread,temp,,,			2820	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			95	,LAST,CONTINUE 	
+time,			2850		
+deltim,1,0.001,2.5					
+ldread,temp,,,			2850	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			96	,LAST,CONTINUE 	
+time,			2880		
+deltim,1,0.001,2.5					
+ldread,temp,,,			2880	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			97	,LAST,CONTINUE 	
+time,			2910		
+deltim,1,0.001,2.5					
+ldread,temp,,,			2910	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			98	,LAST,CONTINUE 	
+time,			2940		
+deltim,1,0.001,2.5					
+ldread,temp,,,			2940	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			99	,LAST,CONTINUE 	
+time,			2970		
+deltim,1,0.001,2.5					
+ldread,temp,,,			2970	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			100	,LAST,CONTINUE 	
+time,			3000		
+deltim,1,0.001,2.5					
+ldread,temp,,,			3000	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			101	,LAST,CONTINUE 	
+time,			3030		
+deltim,1,0.001,2.5					
+ldread,temp,,,			3030	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			102	,LAST,CONTINUE 	
+time,			3060		
+deltim,1,0.001,2.5					
+ldread,temp,,,			3060	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			103	,LAST,CONTINUE 	
+time,			3090		
+deltim,1,0.001,2.5					
+ldread,temp,,,			3090	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			104	,LAST,CONTINUE 	
+time,			3120		
+deltim,1,0.001,2.5					
+ldread,temp,,,			3120	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			105	,LAST,CONTINUE 	
+time,			3150		
+deltim,1,0.001,2.5					
+ldread,temp,,,			3150	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			106	,LAST,CONTINUE 	
+time,			3180		
+deltim,1,0.001,2.5					
+ldread,temp,,,			3180	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			107	,LAST,CONTINUE 	
+time,			3210		
+deltim,1,0.001,2.5					
+ldread,temp,,,			3210	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			108	,LAST,CONTINUE 	
+time,			3240		
+deltim,1,0.001,2.5					
+ldread,temp,,,			3240	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			109	,LAST,CONTINUE 	
+time,			3270		
+deltim,1,0.001,2.5					
+ldread,temp,,,			3270	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			110	,LAST,CONTINUE 	
+time,			3300		
+deltim,1,0.001,2.5					
+ldread,temp,,,			3300	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			111	,LAST,CONTINUE 	
+time,			3330		
+deltim,1,0.001,2.5					
+ldread,temp,,,			3330	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			112	,LAST,CONTINUE 	
+time,			3360		
+deltim,1,0.001,2.5					
+ldread,temp,,,			3360	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			113	,LAST,CONTINUE 	
+time,			3390		
+deltim,1,0.001,2.5					
+ldread,temp,,,			3390	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			114	,LAST,CONTINUE 	
+time,			3420		
+deltim,1,0.001,2.5					
+ldread,temp,,,			3420	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			115	,LAST,CONTINUE 	
+time,			3450		
+deltim,1,0.001,2.5					
+ldread,temp,,,			3450	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			116	,LAST,CONTINUE 	
+time,			3480		
+deltim,1,0.001,2.5					
+ldread,temp,,,			3480	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			117	,LAST,CONTINUE 	
+time,			3510		
+deltim,1,0.001,2.5					
+ldread,temp,,,			3510	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			118	,LAST,CONTINUE 	
+time,			3540		
+deltim,1,0.001,2.5					
+ldread,temp,,,			3540	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			119	,LAST,CONTINUE 	
+time,			3570		
+deltim,1,0.001,2.5					
+ldread,temp,,,			3570	,,THeNAME,rth	
+solve					
+finish					
+					
+/solu					
+ANTYPE,STATIC,RESTART,			120	,LAST,CONTINUE 	
+time,			3600		
+deltim,1,0.001,2.5					
+ldread,temp,,,			3600	,,THeNAME,rth	
+solve					
+finish					

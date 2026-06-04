@@ -1,6 +1,6 @@
-../../../../../Build/impi_intel_linux/fds_impi_intel_linux simple_panel_hot.fds 
+mpiexec -n 1 ../../../../../Build/impi_intel_linux/fds_impi_intel_linux simple_panel_hot.fds 
 %ANSYS% -b nolist -j simple_panel_hot_ansys -i read_geometry_hot.ans
-../../intel_linux/fds2ftmi_linux simple_panel_hot 0.05 2 0 600 2 0 0 1 simple_panel_hot_to_ansys 
+python3 ../../source/pyfds2ftmi.py --chid simple_panel_hot --cell 0.05 --var 2 --code ansys --file simple_panel_hot_to_ansys.dat 
 %ANSYS% -b nolist -j simple_panel_hot_ansys -i run_simple_panel_hot.ans 
 %ANSYS% -b nolist -j simple_panel_hot_ansys -i plot_hot.ans 
 export DISPLAY=localhost:0.0 #
