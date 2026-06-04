@@ -9,9 +9,9 @@ display150 -d POSTSCRIPT -j h_profile_M_ansys #
 epstopdf --outfile=h_profile_temp.pdf pscr000.eps  # 
 epstopdf --outfile=h_profile_temp3d.pdf pscr001.eps  # 
 epstopdf --outfile=h_profile_disp_15x.pdf pscr002.eps  # 
-mv h_profile_temp.pdf ../../scripts/SCRIPT_FIGURES/h_profile_temp.pdf #
-mv h_profile_temp3d.pdf ../../scripts/SCRIPT_FIGURES/h_profile_temp3d.pdf #
-mv h_profile_disp_15x.pdf ../../scripts/SCRIPT_FIGURES/h_profile_disp_15x.pdf #
+mv h_profile_temp.pdf ../../scripts/SCRIPT_FIGURES/h_profile_geom_temp.pdf #
+mv h_profile_temp3d.pdf ../../scripts/SCRIPT_FIGURES/h_profile_geom_temp3d.pdf #
+mv h_profile_disp_15x.pdf ../../scripts/SCRIPT_FIGURES/h_profile_geom_disp_15x.pdf #
 mv "h_profile_to_ansys.dat" "h_profile_ftmi.txt" #
 rm *.lock #
 rm *.dat #
