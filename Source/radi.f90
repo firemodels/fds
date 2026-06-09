@@ -2754,16 +2754,18 @@ END MODULE MIEV
 MODULE RAD
 
 USE PRECISION_PARAMETERS
+USE GEOMETRY_FUNCTIONS
 USE GLOBAL_CONSTANTS
 USE OUTPUT_CLOCKS, ONLY: RADF_CLOCK,RADF_COUNTER
 USE MESH_POINTERS
 USE RADCONS
 USE RADCAL_VAR
 
+
 IMPLICIT NONE (TYPE,EXTERNAL)
 PRIVATE
 
-PUBLIC INIT_RADIATION,COMPUTE_RADIATION,BLACKBODY_FRACTION
+PUBLIC INIT_RADIATION,COMPUTE_RADIATION,BLACKBODY_FRACTION,CALCULATE_DIRECTION_COEFFICIENTS,INTERPOLATE_IL
 
 REAL(EB) :: TYY_FAC
 INTEGER :: N_KAPPA_T=44                             !< Number of temperature points in absorption coefficient look-up table
@@ -2804,11 +2806,9 @@ USE COMP_FUNCTIONS, ONLY: SHUTDOWN
 USE MIEV
 USE RADCAL_CALC
 USE WSGG_ARRAYS
-REAL(EB) :: THETAUP,THETALOW,PHIUP,PHILOW,F_THETA,PLANCK_C2,KSI,LT,RCRHO,YY,BBF,AP0,AMEAN,RADIANCE,TRANSMISSIVITY,&
-            THETA,PHI,DLO,XX
-INTEGER  :: N,I,J,K,IPC,IZERO,NN,NI,II,JJ,IIM,JJM,IBND,NS,NRA,NSB,RADCAL_TEMP(16)=0,RCT_SKIP=-1,IO
+REAL(EB) :: PLANCK_C2,KSI,LT,RCRHO,YY,BBF,AP0,AMEAN,RADIANCE,TRANSMISSIVITY,XX
+INTEGER  :: N,I,J,K,IPC,IZERO,NN,NI,II,JJ,IIM,JJM,IBND,NS,NRA,NSB,RADCAL_TEMP(16)=0,RCT_SKIP=-1
 TYPE (LAGRANGIAN_PARTICLE_CLASS_TYPE), POINTER :: LPC
-REAL(EB), ALLOCATABLE, DIMENSION(:) :: COSINE_ARRAY
 TYPE (RAD_FILE_TYPE), POINTER :: RF
 TYPE (SPECIES_TYPE), POINTER :: SS
 
@@ -2832,9 +2832,17 @@ ALLOCATE(DLY(1:NRA),STAT=IZERO)
 CALL ChkMemErr('RADI','DLY',IZERO)
 ALLOCATE(DLZ(1:NRA),STAT=IZERO)
 CALL ChkMemErr('RADI','DLZ',IZERO)
+ALLOCATE(MERI_COMP(1:NRA),STAT=IZERO)
+CALL ChkMemErr('RADI','MERI_COMP',IZERO)
+ALLOCATE(AZIM_COMP(1:NRA),STAT=IZERO)
+CALL ChkMemErr('RADI','AZIM_COMP',IZERO)
+ALLOCATE(AXIS_COMP(1:NRA),STAT=IZERO)
+CALL ChkMemErr('RADI','AXIS_COMP',IZERO)
 IF (CYLINDRICAL) THEN
    ALLOCATE(DLB(1:NRA),STAT=IZERO)
    CALL ChkMemErr('RADI','DLB',IZERO)
+   ALLOCATE(DLB_COMP(1:NRA),STAT=IZERO)
+   CALL ChkMemErr('RADI','DLB_COMP',IZERO)
 ENDIF
 ALLOCATE(DLN(-3:3,1:NRA),STAT=IZERO)
 CALL ChkMemErr('RADI','DLN',IZERO)
@@ -2842,80 +2850,18 @@ ALLOCATE(DLM(1:NRA,3),STAT=IZERO)
 CALL ChkMemErr('RADI','DLM',IZERO)
 ALLOCATE(DLANG(3,1:NRA),STAT=IZERO)
 CALL ChkMemErr('RADI','DLANG',IZERO)
+ALLOCATE(DLANG_OLD(3,1:NRA),STAT=IZERO)
+CALL ChkMemErr('RADI','DLANG_OLD',IZERO)
+ALLOCATE(DLANG_LOCAL(3,1:NRA),STAT=IZERO)
+CALL ChkMemErr('RADI','DLANG_LOCAL',IZERO)
+
+! Set for ray rotation
+ALLOW_RANDOM_RADIATION_ROTATION = RANDOMIZE_RADIATION_DIRECTIONS .AND. .NOT.CYLINDRICAL .AND. .NOT.TWO_D
 
 ! Determine mean direction normals and sweeping orders
 ! as described in the FDS Tech. Ref. Guide Vol. 1 Sec. 6.2.2.
 
-N = 0
-DO I=1,NRT
-   DO J=1,NRP(I)
-      N = N + 1
-      THETALOW  = PI*REAL(I-1)/REAL(NRT)
-      THETAUP   = PI*REAL(I)/REAL(NRT)
-      F_THETA   = 0.5_EB*(THETAUP-THETALOW  - COS(THETAUP)*SIN(THETAUP) + COS(THETALOW)*SIN(THETALOW))
-      THETA = 0.5_EB*(THETAUP+THETALOW)
-      IF (CYLINDRICAL) THEN
-         PHILOW = PI*REAL(J-1)/REAL(NRP(I))
-         PHIUP  = PI*REAL(J)/REAL(NRP(I))
-      ELSEIF (TWO_D) THEN
-         PHILOW = TWOPI*REAL(J-1)/REAL(NRP(I)) + PIO2
-         PHIUP  = TWOPI*REAL(J)/REAL(NRP(I))   + PIO2
-      ELSE
-         PHILOW = TWOPI*REAL(J-1)/REAL(NRP(I))
-         PHIUP  = TWOPI*REAL(J)/REAL(NRP(I))
-      ENDIF
-      PHI=0.5_EB*(PHILOW+PHIUP)
-      RSA(N) = (PHIUP-PHILOW)*(COS(THETALOW)-COS(THETAUP))
-      IF (CYLINDRICAL) THEN
-         DLX(N) =  (SIN(PHIUP)-SIN(PHILOW)) *F_THETA
-         DLY(N) =  (-SIN(DPHI0/2.)*(SIN(PHIUP)-SIN(PHILOW))  +COS(DPHI0/2.)*(COS(PHILOW)-COS(PHIUP)))*F_THETA
-         DLB(N) =  (-SIN(DPHI0/2.)*(SIN(PHIUP)-SIN(PHILOW))  -COS(DPHI0/2.)*(COS(PHILOW)-COS(PHIUP)))*F_THETA
-         DLZ(N)    = 0.5_EB*(PHIUP-PHILOW)   * ((SIN(THETAUP))**2-(SIN(THETALOW))**2)
-         DLANG(1,N)  = SIN(THETA)*COS(PHI)
-         DLANG(2,N)  = SIN(THETA)*SIN(PHI)
-         DLANG(3,N)  = COS(THETA)
-         IF (N==1000000) WRITE(LU_ERR,'(A)') 'This line should never get executed. It is here only to prevent optimization.'
-      ELSEIF (TWO_D) THEN
-         DLX(N) = (SIN(PHIUP)-SIN(PHILOW))*F_THETA
-         DLY(N) = 0._EB
-         DLZ(N) = (COS(PHILOW)-COS(PHIUP))*F_THETA
-         DLANG(1,N)  = COS(PHI)
-         DLANG(2,N)  = 0._EB
-         DLANG(3,N)  = SIN(PHI)
-      ELSE
-         DLX(N) = (SIN(PHIUP)-SIN(PHILOW))*F_THETA
-         DLY(N) = (COS(PHILOW)-COS(PHIUP))*F_THETA
-         DLZ(N)    = 0.5_EB*(PHIUP-PHILOW)      * ((SIN(THETAUP))**2-(SIN(THETALOW))**2)
-         DLANG(1,N)  = SIN(THETA)*COS(PHI)
-         DLANG(2,N)  = SIN(THETA)*SIN(PHI)
-         DLANG(3,N)  = COS(THETA)
-      ENDIF
-   ENDDO
-ENDDO
-
-! Set (wall normal)*(angle vector) value
-
-DO N = 1,NRA
-   DLN( 0,N) = 0._EB !prevent undefined variable errors
-   DLN(-1,N) = -DLX(N)
-   DLN( 1,N) =  DLX(N)
-   DLN(-2,N) = -DLY(N)
-   DLN( 2,N) =  DLY(N)
-   DLN(-3,N) = -DLZ(N)
-   DLN( 3,N) =  DLZ(N)
-ENDDO
-
-! In axially symmetric case, each angle represents two symmetric angles. So weight the intensities by two.
-
-WEIGH_CYL = 1._EB
-IF (CYLINDRICAL) THEN
-   WEIGH_CYL = 2._EB
-   ! Wall direction cosines are only used for flux integrations, so they can by multiplied in advance.
-   DLN = WEIGH_CYL * DLN
-ENDIF
-
 ! Calculate mirroring matrix
-
 N = 0
 DO I=1,NRT
    DO J=1,NRP(I)
@@ -3384,15 +3330,198 @@ DO IPC=1,N_LAGRANGIAN_CLASSES
    IF (LPC%LIQUID_DROPLET) CALL MEAN_CROSS_SECTIONS(PARTICLE_CLASS=IPC)
 ENDDO
 
+! Calculate angle specific variables
+CALL CALCULATE_FVM_ANGLES()
+
+! Allocate array needed by angle-specific RADF output files
+
+DO N=1,N_RADF
+   RF => RAD_FILE(N)
+   ALLOCATE(RF%IL_SAVE(RF%I1:RF%I2,RF%J1:RF%J2,RF%K1:RF%K2,NUMBER_RADIATION_ANGLES))
+ENDDO
+
+END SUBROUTINE INIT_RADIATION
+
+!> \brief Precomputes angle-dependent quantities for the finite-volume
+!> radiation solver that will remain same even with random rotation.
+
+SUBROUTINE CALCULATE_FVM_ANGLES()
+
+REAL(EB) :: THETAUP,THETALOW,PHIUP,PHILOW,F_THETA,THETA,PHI
+INTEGER  :: NRA,N,I,J
+
+NRA = NUMBER_RADIATION_ANGLES
+
+N = 0
+DO I=1,NRT
+   DO J=1,NRP(I)
+      N = N + 1
+      THETALOW  = PI*REAL(I-1)/REAL(NRT)
+      THETAUP   = PI*REAL(I)/REAL(NRT)
+      F_THETA   = 0.5_EB*(THETAUP-THETALOW  - COS(THETAUP)*SIN(THETAUP) + COS(THETALOW)*SIN(THETALOW))
+      THETA = 0.5_EB*(THETAUP+THETALOW)
+      IF (CYLINDRICAL) THEN
+         PHILOW = PI*REAL(J-1)/REAL(NRP(I))
+         PHIUP  = PI*REAL(J)/REAL(NRP(I))
+      ELSEIF (TWO_D) THEN
+         PHILOW = TWOPI*REAL(J-1)/REAL(NRP(I)) + PIO2
+         PHIUP  = TWOPI*REAL(J)/REAL(NRP(I))   + PIO2
+      ELSE
+         PHILOW = TWOPI*REAL(J-1)/REAL(NRP(I))
+         PHIUP  = TWOPI*REAL(J)/REAL(NRP(I))
+      ENDIF
+      PHI=0.5_EB*(PHILOW+PHIUP)
+      RSA(N) = (PHIUP-PHILOW)*(COS(THETALOW)-COS(THETAUP))
+      IF (CYLINDRICAL) THEN
+         MERI_COMP(N) =  (SIN(PHIUP)-SIN(PHILOW)) *F_THETA
+         AZIM_COMP(N) =  (-SIN(DPHI0/2.)*(SIN(PHIUP)-SIN(PHILOW))  +COS(DPHI0/2.)*(COS(PHILOW)-COS(PHIUP)))*F_THETA
+         DLB_COMP(N)  =  (-SIN(DPHI0/2.)*(SIN(PHIUP)-SIN(PHILOW))  -COS(DPHI0/2.)*(COS(PHILOW)-COS(PHIUP)))*F_THETA
+         AXIS_COMP(N) = 0.5_EB*(PHIUP-PHILOW)   * ((SIN(THETAUP))**2-(SIN(THETALOW))**2)
+         DLANG_LOCAL(1,N)  = SIN(THETA)*COS(PHI)
+         DLANG_LOCAL(2,N)  = SIN(THETA)*SIN(PHI)
+         DLANG_LOCAL(3,N)  = COS(THETA)
+         IF (N==1000000) WRITE(LU_ERR,'(A)') 'This line should never get executed. It is here only to prevent optimization.'
+      ELSEIF (TWO_D) THEN
+         MERI_COMP(N) = (SIN(PHIUP)-SIN(PHILOW))*F_THETA
+         AZIM_COMP(N) = 0._EB
+         AXIS_COMP(N) = (COS(PHILOW)-COS(PHIUP))*F_THETA
+         DLANG_LOCAL(1,N)  = COS(PHI)
+         DLANG_LOCAL(2,N)  = 0._EB
+         DLANG_LOCAL(3,N)  = SIN(PHI)
+      ELSE
+         MERI_COMP(N)=(SIN(PHIUP)-SIN(PHILOW))*F_THETA
+         AZIM_COMP(N)=(COS(PHILOW)-COS(PHIUP))*F_THETA
+         AXIS_COMP(N)=0.5_EB*(PHIUP-PHILOW)      * ((SIN(THETAUP))**2-(SIN(THETALOW))**2) 
+         DLANG_LOCAL(1,N) = SIN(THETA)*COS(PHI)
+         DLANG_LOCAL(2,N) = SIN(THETA)*SIN(PHI)
+         DLANG_LOCAL(3,N) = COS(THETA)
+      ENDIF
+   ENDDO
+ENDDO
+END SUBROUTINE CALCULATE_FVM_ANGLES
+
+
+
+!> \Calculate direction coefficients for with and without random rotations
+SUBROUTINE CALCULATE_DIRECTION_COEFFICIENTS()
+USE COMP_FUNCTIONS, ONLY : CURRENT_TIME
+
+INTEGER  :: NRA,N,I,J,IO,IERR
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: COSINE_ARRAY
+REAL(EB) :: TNOW,AXIS(3),MERIDIAN(3), AZIMUTH(3),E1(3),E2(3),REF(3),PSI,DLO,MAGTMP,RNDNUM(3)
+
+TNOW=CURRENT_TIME()
+
+NRA = NUMBER_RADIATION_ANGLES
+
+IF (ALLOW_RANDOM_RADIATION_ROTATION) THEN
+   IF (MY_RANK == 0) THEN
+       CALL RANDOM_NUMBER(RNDNUM)
+   ENDIF
+   CALL MPI_BCAST(RNDNUM, 3, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, IERR) !broadcast the random number array
+
+   CALL GENERATE_RANDOM_UNIT_VECTOR(RNDNUM(1:2),AXIS)
+   PSI = RNDNUM(3)
+
+   PSI = TWOPI*PSI
+   REF = (/0._EB,0._EB,1._EB/)
+   IF (ABS(DOT_PRODUCT(AXIS,REF)) > ONE_M_EPS) THEN
+      REF = (/1._EB,0._EB,0._EB/)
+   ENDIF
+
+   ! e1 = REF x AXIS
+   E1(1) = REF(2)*AXIS(3) - REF(3)*AXIS(2)
+   E1(2) = REF(3)*AXIS(1) - REF(1)*AXIS(3)
+   E1(3) = REF(1)*AXIS(2) - REF(2)*AXIS(1)
+   MAGTMP = SQRT(DOT_PRODUCT(E1,E1))
+   E1 = E1/MAGTMP
+
+   ! e2 = AXIS x e1
+   E2(1) = AXIS(2)*E1(3) - AXIS(3)*E1(2)
+   E2(2) = AXIS(3)*E1(1) - AXIS(1)*E1(3)
+   E2(3) = AXIS(1)*E1(2) - AXIS(2)*E1(1)
+
+   MAGTMP = SQRT(DOT_PRODUCT(E2,E2))
+   E2 = E2/MAGTMP
+
+   ! Random spin around axis
+   MERIDIAN = COS(PSI)*E1 + SIN(PSI)*E2
+   MAGTMP = SQRT(DOT_PRODUCT(MERIDIAN,MERIDIAN))
+   MERIDIAN = MERIDIAN/MAGTMP
+
+   ! AZIMUTH = AXIS x MERIDIAN
+   AZIMUTH(1) = AXIS(2)*MERIDIAN(3) - AXIS(3)*MERIDIAN(2)
+   AZIMUTH(2) = AXIS(3)*MERIDIAN(1) - AXIS(1)*MERIDIAN(3)
+   AZIMUTH(3) = AXIS(1)*MERIDIAN(2) - AXIS(2)*MERIDIAN(1)
+
+   MAGTMP = SQRT(DOT_PRODUCT(AZIMUTH,AZIMUTH))
+   AZIMUTH = AZIMUTH/MAGTMP
+
+ELSE
+   ! No random rotation
+   MERIDIAN = (/1._EB, 0._EB, 0._EB/)
+   AZIMUTH  = (/0._EB, 1._EB, 0._EB/)
+   AXIS     = (/0._EB, 0._EB, 1._EB/)
+ENDIF
+
+N = 0
+DO I=1,NRT
+   DO J=1,NRP(I)
+      N = N + 1
+      IF (CYLINDRICAL) THEN
+         DLX(N) =  MERI_COMP(N)
+         DLY(N) =  AZIM_COMP(N)
+         DLB(N) =  DLB_COMP(N)
+         DLZ(N) =  AXIS_COMP(N)
+         DLANG(1,N)  = DLANG_LOCAL(1,N)
+         DLANG(2,N)  = DLANG_LOCAL(2,N)
+         DLANG(3,N)  = DLANG_LOCAL(3,N)
+         IF (N==1000000) WRITE(LU_ERR,'(A)') 'This line should never get executed. It is here only to prevent optimization.'
+      ELSEIF (TWO_D) THEN
+         DLX(N) = MERI_COMP(N)
+         DLY(N) = AZIM_COMP(N)
+         DLZ(N) = AXIS_COMP(N)
+         DLANG(1,N)  = DLANG_LOCAL(1,N)
+         DLANG(2,N)  = DLANG_LOCAL(2,N)
+         DLANG(3,N)  = DLANG_LOCAL(3,N)
+      ELSE ! Right now random rotation is allowed only for 3D
+         DLX(N) = MERI_COMP(N)*MERIDIAN(1)+AZIM_COMP(N)*AZIMUTH(1)+AXIS_COMP(N)*AXIS(1)
+         DLY(N) = MERI_COMP(N)*MERIDIAN(2)+AZIM_COMP(N)*AZIMUTH(2)+AXIS_COMP(N)*AXIS(2)
+         DLZ(N) = MERI_COMP(N)*MERIDIAN(3)+AZIM_COMP(N)*AZIMUTH(3)+AXIS_COMP(N)*AXIS(3)
+         DLANG_OLD(:,N)=DLANG(:,N)
+         DLANG(:,N) = DLANG_LOCAL(1,N)*MERIDIAN(:) + DLANG_LOCAL(2,N)*AZIMUTH(:) + DLANG_LOCAL(3,N)*AXIS(:)
+      ENDIF
+   ENDDO
+ENDDO
+
+! In axially symmetric case, each angle represents two symmetric angles. So weight the intensities by two.
+WEIGH_CYL = 1._EB
+IF (CYLINDRICAL) THEN
+   WEIGH_CYL = 2._EB
+   ! Wall direction cosines are only used for flux integrations, so they can by multiplied in advance.
+   DLN = WEIGH_CYL * DLN
+ENDIF
+
+! Set (wall normal)*(angle vector) value
+DO N = 1,NRA
+   DLN( 0,N) = 0._EB !prevent undefined variable errors
+   DLN(-1,N) = -DLX(N)
+   DLN( 1,N) =  DLX(N)
+   DLN(-2,N) = -DLY(N)
+   DLN( 2,N) =  DLY(N)
+   DLN(-3,N) = -DLZ(N)
+   DLN( 3,N) =  DLZ(N)
+ENDDO
+
+
 ! Determine angle factors for Lagrangian particles with ORIENTATION
 ! COSINE_ARRAY holds the cosines of the angles formed by the orientation vector and the radiation directions.
 ! DLO is the integral of the orientation vector dotted with the directional solid angle of the radiation directions.
 ! VIEW_ANGLE_FACTOR is the reduction of the radiation due to a view angle less than 180, like a narrow field of view radiometer.
-
 IF (SOLID_PARTICLES) THEN
-   ALLOCATE(COSINE_ARRAY(1:NRA))
-   ALLOCATE(NEAREST_RADIATION_ANGLE(N_ORIENTATION_VECTOR))
-   ALLOCATE(VIEW_ANGLE_FACTOR(N_ORIENTATION_VECTOR))
+   IF (.NOT. ALLOCATED(COSINE_ARRAY)) ALLOCATE(COSINE_ARRAY(1:NRA))
+   IF (.NOT. ALLOCATED(NEAREST_RADIATION_ANGLE)) ALLOCATE(NEAREST_RADIATION_ANGLE(N_ORIENTATION_VECTOR))
+   IF (.NOT. ALLOCATED(VIEW_ANGLE_FACTOR)) ALLOCATE(VIEW_ANGLE_FACTOR(N_ORIENTATION_VECTOR))
    VIEW_ANGLE_FACTOR = 0._EB
    DO IO=1,N_ORIENTATION_VECTOR
       DLO = 0._EB
@@ -3406,17 +3535,114 @@ IF (SOLID_PARTICLES) THEN
       NEAREST_RADIATION_ANGLE(IO) = MINLOC(COSINE_ARRAY,DIM=1)
       VIEW_ANGLE_FACTOR(IO) = PI/DLO
    ENDDO
-   DEALLOCATE(COSINE_ARRAY)
 ENDIF
+T_USED(9)=T_USED(9)+CURRENT_TIME()-TNOW
 
-! Allocate array needed by angle-specific RADF output files
+END SUBROUTINE CALCULATE_DIRECTION_COEFFICIENTS
 
-DO N=1,N_RADF
-   RF => RAD_FILE(N)
-   ALLOCATE(RF%IL_SAVE(RF%I1:RF%I2,RF%J1:RF%J2,RF%K1:RF%K2,NUMBER_RADIATION_ANGLES))
+!> \Interpolate wall face and mesh interface intensities.
+SUBROUTINE INTERPOLATE_IL()
+USE COMP_FUNCTIONS, ONLY : CURRENT_TIME
+
+INTEGER, PARAMETER :: N_INTP=4 ! Number of neighbouring intensitiies for interpolation
+
+INTEGER :: NRA,NM,NNN,LL,I_INTP
+REAL(EB) :: TNOW,COSANG(NUMBER_RADIATION_ANGLES), DUMMY(NUMBER_RADIATION_ANGLES)
+INTEGER :: NNEW,NOLD,IBND,IW,NOM
+INTEGER :: IDX(NUMBER_RADIATION_ANGLES,N_INTP)
+
+REAL(EB) :: W(NUMBER_RADIATION_ANGLES,N_INTP)
+REAL(EB) :: DIST,WSUM
+TYPE(WALL_TYPE), POINTER :: WC
+TYPE(BOUNDARY_RADIA_TYPE), POINTER :: BR
+REAL(EB) :: ILW_OLD(NUMBER_RADIATION_ANGLES)
+TYPE (OMESH_TYPE), POINTER :: M2
+
+TNOW=CURRENT_TIME()
+
+NRA = NUMBER_RADIATION_ANGLES
+
+DO NNEW=1,NRA
+   ! Compute angular proximity between the new direction and all old directions.
+   DO NOLD=1,NRA
+      COSANG(NOLD) = DOT_PRODUCT(DLANG(:,NNEW), &
+                               DLANG_OLD(:,NOLD))
+   ENDDO
+
+   ! Find N_INTP nearest neighbors
+   DUMMY(:) = COSANG(:)
+   DO I_INTP=1,N_INTP
+      IDX(NNEW,I_INTP) = MAXLOC(DUMMY,DIM=1)
+      DUMMY(IDX(NNEW,I_INTP)) = -HUGE(1._EB)
+   ENDDO
+
+   ! Inverse-distance-squared weighting. distance ~ (1-cos(theta))
+   WSUM = 0._EB
+   DO I_INTP=1,N_INTP
+      DIST = MAX(1._EB-COSANG(IDX(NNEW,I_INTP)),TWO_EPSILON_EB)
+      W(NNEW,I_INTP) = 1._EB/(DIST*DIST)
+      WSUM = WSUM + W(NNEW,I_INTP)
+   ENDDO
+   W(NNEW,:) = W(NNEW,:)/WSUM
 ENDDO
 
-END SUBROUTINE INIT_RADIATION
+DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   CALL POINT_TO_MESH(NM)
+
+   ! Interpolate intensity
+   DO IW = 1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+      WC => WALL(IW)
+      BR => BOUNDARY_RADIA(WC%BR_INDEX)
+      DO IBND = 1,NUMBER_SPECTRAL_BANDS
+         ILW_OLD = BR%BAND(IBND)%ILW(:)
+         BR%BAND(IBND)%ILW(:) = 0._EB
+         DO I_INTP=1,N_INTP
+            BR%BAND(IBND)%ILW(:) = BR%BAND(IBND)%ILW(:) + W(:,I_INTP)*ILW_OLD(IDX(:,I_INTP))*RSA(IDX(:,I_INTP))
+         ENDDO
+         BR%BAND(IBND)%ILW(:) = BR%BAND(IBND)%ILW(:)/RSA(:)
+      ENDDO
+   ENDDO
+
+   !Interpolate neighbouring mesh cell intensities 
+   DO NNN=1,N_NEIGHBORING_MESHES
+      NOM = NEIGHBORING_MESH(NNN)
+      M2 => OMESH(NOM)
+      IF (M2%NIC_R>0) THEN
+         M2%IL_R_OLD = M2%IL_R
+         M2%IL_R = 0._EB
+         DO LL=1,M2%NIC_R
+            DO IBND=1,NUMBER_SPECTRAL_BANDS
+               DO I_INTP=1,N_INTP
+                   M2%IL_R(LL,:,IBND) = M2%IL_R(LL,:,IBND) + W(:,I_INTP)*M2%IL_R_OLD(LL,IDX(:,I_INTP),IBND)*RSA(IDX(:,I_INTP))
+               ENDDO
+               M2%IL_R(LL,:,IBND) = M2%IL_R(LL,:,IBND)/RSA(:)
+            ENDDO
+         ENDDO
+      ENDIF
+   ENDDO
+ENDDO
+T_USED(9)=T_USED(9)+CURRENT_TIME()-TNOW
+
+END SUBROUTINE INTERPOLATE_IL
+
+
+SUBROUTINE GENERATE_RANDOM_UNIT_VECTOR(RNDNUM,VEC)
+REAL(EB), INTENT(IN) ::RNDNUM(2)
+REAL(EB), INTENT(OUT) :: VEC(3)
+REAL(EB) :: U,V
+REAL(EB) :: THETA, PHI
+
+U = RNDNUM(1)
+V = RNDNUM(2)
+
+THETA = ACOS(1._EB - 2._EB*U)
+PHI   = TWOPI*V
+
+VEC(1) = SIN(THETA)*COS(PHI)
+VEC(2) = SIN(THETA)*SIN(PHI)
+VEC(3) = COS(THETA)
+
+END SUBROUTINE GENERATE_RANDOM_UNIT_VECTOR
 
 
 !> \brief Compute radiative source term and transfer.
@@ -3437,7 +3663,6 @@ REAL(EB) :: TNOW
 TNOW=CURRENT_TIME()
 
 CALL POINT_TO_MESH(NM)
-
 IF (RADIATION) THEN
    RADIATION_COMPLETED(NM) = .FALSE.
    CALL RADIATION_FVM
@@ -3932,7 +4157,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
          BR => BOUNDARY_RADIA(WC%BR_INDEX)
          INRAD_W(IW) = SUM(-DLN(BC%IOR,:)*BR%BAND(IBND)%ILW(:), 1, DLN(BC%IOR,:)<0._EB)
       ENDDO
-
+      
       DO ICF = INTERNAL_CFACE_CELLS_LB+1,INTERNAL_CFACE_CELLS_LB+N_INTERNAL_CFACE_CELLS
          CFA => CFACE(ICF)
          BR  => BOUNDARY_RADIA(CFA%BR_INDEX)
@@ -4268,6 +4493,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
 
                      A_SUM = AXD + AYD + AZD + AFD
                      AIU_SUM = AXU*ILXU + AYU*ILYU + AZU*ILZU + AILFU
+
                      IF (SOLID_PARTICLES) IL_UP(I,J,K) = MAX(0._EB,AIU_SUM/A_SUM)
                      RAP = 1._EB/(A_SUM + EXTCOE(I,J,K)*VC*RSA(N))
                      IL(I,J,K) = MAX(0._EB, RAP * (AIU_SUM + VC*RSA(N)*RFPI* &
@@ -4333,7 +4559,8 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                BC => BOUNDARY_COORD(WC%BC_INDEX)
                IF (DLN(BC%IOR,N)>=0._EB) CYCLE WALL_LOOP3     ! outgoing
                BR => BOUNDARY_RADIA(WC%BR_INDEX)
-               BR%BAND(IBND)%ILW(ANGLE_INC_COUNTER) = BR%BAND(IBND)%ILW(ANGLE_INC_COUNTER) - DLN(BC%IOR,N)*IL(BC%IIG,BC%JJG,BC%KKG)
+               BR%BAND(IBND)%ILW(ANGLE_INC_COUNTER) = BR%BAND(IBND)%ILW(ANGLE_INC_COUNTER) &
+                                                      - DLN(BC%IOR,N)*IL(BC%IIG,BC%JJG,BC%KKG)
             ENDDO WALL_LOOP3
             !$OMP END DO
             !$OMP END PARALLEL
@@ -4455,6 +4682,8 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
          ENDIF
          B1%Q_RAD_IN  = B1%Q_RAD_IN + B1%EMISSIVITY*(INRAD_W(IW)+BBFA*EFLUX)
       ENDDO
+
+      
 
       DO ICF=INTERNAL_CFACE_CELLS_LB+1,INTERNAL_CFACE_CELLS_LB+N_INTERNAL_CFACE_CELLS
          CFA => CFACE(ICF)
@@ -4582,6 +4811,10 @@ IF (N_RADF>0 .AND. T>=RADF_CLOCK(RADF_COUNTER(NM))) THEN
    RADF_COUNTER(NM) = RADF_COUNTER(NM) + 1
 
 ENDIF
+
+! UPDATE_ALL_ANGLES is a one-time only logical. If needed again, it will be reset again.
+
+UPDATE_ALL_ANGLES = .FALSE.
 
 END SUBROUTINE RADIATION_FVM
 
