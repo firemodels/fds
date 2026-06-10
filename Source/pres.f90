@@ -3077,7 +3077,7 @@ MODULE GLOBMAT_SOLVER
 USE PRECISION_PARAMETERS
 USE GLOBAL_CONSTANTS
 USE MESH_POINTERS
-USE COMPLEX_GEOMETRY, ONLY : CALL_FOR_GLMAT, CC_CGSC,CC_FGSC, CC_UNKH, CC_NCVARS,         &
+USE COMPLEX_GEOMETRY, ONLY : CALL_FOR_GLMAT, CC_CGSC,CC_FGSC, CC_UNKH, CC_NCVARS, CC_IDCC, &
                              NM_START,IPARM,NNZ_ROW_H,CALL_FROM_GLMAT_SETUP
 USE CC_SCALARS, ONLY :   GET_H_CUTFACES, GET_BOUNDFACE_GEOM_INFO_H, ADD_INPLACE_NNZ_H_WHLDOM, &
                          COPY_CC_MUNKH_TO_UNKH, COPY_CC_UNKH_TO_HS
@@ -3169,6 +3169,34 @@ CASE(-KAXIS); II_NOM = IIO; JJ_NOM = JJO; KK_NOM = KKO - 1
 END SELECT
 
 END SUBROUTINE COMPUTE_GUARD_CELL_INDEXES
+
+! --------------------------- REG_INTERP_WALL_DISTANCES -----------------------
+
+SUBROUTINE REG_INTERP_WALL_DISTANCES(IOR,IIG,JJG,KKG,NOM,IIO,JJO,KKO,D_INT,D_EXT)
+
+INTEGER, INTENT(IN) :: IOR,IIG,JJG,KKG,NOM,IIO,JJO,KKO
+REAL(EB), INTENT(OUT) :: D_INT,D_EXT
+INTEGER :: X1AXIS,ICC_EXT,IO,IO2
+REAL(EB) :: XF,XFN,XCN
+TYPE(MESH_TYPE), POINTER :: M2
+
+! Distances are computed in each mesh's OWN frame so the result is correct for both physically
+! adjacent (refinement) seams and periodic wrap-around seams (single- or multi-mesh).
+M2 => MESHES(NOM); X1AXIS = ABS(IOR)
+IO  = MERGE(1,0,IOR>0)   ! Local seam-face index shift: low boundary (IOR>0) uses the cell's low face.
+IO2 = 1 - IO             ! Neighbor seam-face is on the opposite side of the neighbor cell.
+SELECT CASE(X1AXIS)
+CASE(IAXIS); XF=X(IIG-IO); D_INT=ABS(XC(IIG)-XF); XFN=M2%X(IIO-IO2); XCN=M2%XC(IIO)
+CASE(JAXIS); XF=Y(JJG-IO); D_INT=ABS(YC(JJG)-XF); XFN=M2%Y(JJO-IO2); XCN=M2%YC(JJO)
+CASE(KAXIS); XF=Z(KKG-IO); D_INT=ABS(ZC(KKG)-XF); XFN=M2%Z(KKO-IO2); XCN=M2%ZC(KKO)
+END SELECT
+IF (CC_IBM) THEN
+   ICC_EXT = M2%CCVAR(IIO,JJO,KKO,CC_IDCC)
+   IF (ICC_EXT>0) XCN = M2%CUT_CELL(ICC_EXT)%XYZCEN(X1AXIS,1)
+ENDIF
+D_EXT = ABS(XCN-XFN)
+
+END SUBROUTINE REG_INTERP_WALL_DISTANCES
 
 ! --------------------------- SAVE_HS_FOR_SETUP ----------------------------------
 
@@ -3523,13 +3551,14 @@ END SUBROUTINE GLMAT_SOLVER
 SUBROUTINE GLMAT_SOLVER_SETUP(STAGE_FLAG)
 
 USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
+USE COMPLEX_GEOMETRY, ONLY: CC_FGSC,CC_CUTCFE
 
 INTEGER, INTENT(IN) :: STAGE_FLAG
 
 ! Local Variables:
 LOGICAL :: SUPPORTED_MESH=.TRUE.
-LOGICAL :: FINE_INTERPOLATED_FLG, FINE_SOLID_FLG
-INTEGER :: NM,IW,IIO,JJO,KKO,II_NOM,JJ_NOM,KK_NOM
+LOGICAL :: FINE_INTERPOLATED_FLG, FINE_SOLID_FLG, GAS_CUTFACE_FLG
+INTEGER :: NM,IW,IIO,JJO,KKO,II_NOM,JJ_NOM,KK_NOM,IIF,JJF,KKF,X1AXIS
 TYPE(WALL_TYPE), POINTER :: WC
 TYPE(BOUNDARY_COORD_TYPE), POINTER :: BC
 TYPE(EXTERNAL_WALL_TYPE), POINTER :: EWC
@@ -3603,7 +3632,22 @@ CASE(0)
                   ENDDO
                ENDDO
             ENDDO
-            IF(FINE_INTERPOLATED_FLG .AND. FINE_SOLID_FLG) WC%BOUNDARY_TYPE = SOLID_BOUNDARY
+            IF(FINE_INTERPOLATED_FLG .AND. FINE_SOLID_FLG) THEN
+               GAS_CUTFACE_FLG = .FALSE.
+               IF (CC_IBM) THEN
+                  X1AXIS = ABS(BC%IOR)
+                  IIF = BC%II; JJF = BC%JJ; KKF = BC%KK
+                  IF (BC%IOR<0) THEN
+                     SELECT CASE(X1AXIS)
+                     CASE(IAXIS); IIF = IIF-1
+                     CASE(JAXIS); JJF = JJF-1
+                     CASE(KAXIS); KKF = KKF-1
+                     END SELECT
+                  ENDIF
+                  GAS_CUTFACE_FLG = (FCVAR(IIF,JJF,KKF,CC_FGSC,X1AXIS) == CC_CUTCFE)
+               ENDIF
+               IF (.NOT.GAS_CUTFACE_FLG) WC%BOUNDARY_TYPE = SOLID_BOUNDARY
+            ENDIF
          ENDIF
       ENDIF
    ENDDO
@@ -3640,17 +3684,32 @@ CASE(1)
             ENDIF
          ELSEIF(WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) THEN
             IF(ALLOCATED(OMESH(EWC%NOM)%EWC_TYPE) .AND. EWC%AREA_RATIO<0.9_EB) THEN 
-               ! Only fine mesh side checked for SOLID_BOUNDARY coarse side faces.
-               DO KKO = EWC%KKO_MIN, EWC%KKO_MAX
-                  DO JJO = EWC%JJO_MIN, EWC%JJO_MAX
-                     DO IIO = EWC%IIO_MIN, EWC%IIO_MAX
-                        ! Compute guard cell location in neighboring mesh
-                        CALL COMPUTE_GUARD_CELL_INDEXES(BC%IOR, IIO, JJO, KKO, II_NOM, JJ_NOM, KK_NOM)
-                        IF(OMESH(EWC%NOM)%EWC_TYPE(II_NOM,JJ_NOM,KK_NOM) == SOLID_BOUNDARY) &
-                           WC%BOUNDARY_TYPE = SOLID_BOUNDARY
+               GAS_CUTFACE_FLG = .FALSE.
+               IF (CC_IBM) THEN
+                  X1AXIS = ABS(BC%IOR)
+                  IIF = BC%II; JJF = BC%JJ; KKF = BC%KK
+                  IF (BC%IOR<0) THEN
+                     SELECT CASE(X1AXIS)
+                     CASE(IAXIS); IIF = IIF-1
+                     CASE(JAXIS); JJF = JJF-1
+                     CASE(KAXIS); KKF = KKF-1
+                     END SELECT
+                  ENDIF
+                  GAS_CUTFACE_FLG = (FCVAR(IIF,JJF,KKF,CC_FGSC,X1AXIS) == CC_CUTCFE)
+               ENDIF
+               IF (.NOT.GAS_CUTFACE_FLG) THEN
+                  ! Only fine mesh side checked for SOLID_BOUNDARY coarse side faces.
+                  DO KKO = EWC%KKO_MIN, EWC%KKO_MAX
+                     DO JJO = EWC%JJO_MIN, EWC%JJO_MAX
+                        DO IIO = EWC%IIO_MIN, EWC%IIO_MAX
+                           ! Compute guard cell location in neighboring mesh
+                           CALL COMPUTE_GUARD_CELL_INDEXES(BC%IOR, IIO, JJO, KKO, II_NOM, JJ_NOM, KK_NOM)
+                           IF(OMESH(EWC%NOM)%EWC_TYPE(II_NOM,JJ_NOM,KK_NOM) == SOLID_BOUNDARY) &
+                              WC%BOUNDARY_TYPE = SOLID_BOUNDARY
+                        ENDDO
                      ENDDO
                   ENDDO
-               ENDDO
+               ENDIF
             ENDIF
          ENDIF
       ENDDO
@@ -3883,7 +3942,7 @@ TYPE (WALL_TYPE), POINTER :: WC
 TYPE (BOUNDARY_COORD_TYPE), POINTER :: BC
 TYPE (EXTERNAL_WALL_TYPE), POINTER :: EWC
 LOGICAL :: FLG
-REAL(EB) :: H_EXTERNAL_MEAN, DX_INT, DX_EXT, WEIGHT_INT, WEIGHT_EXT, NCELLS_EXT, H_FACE
+REAL(EB) :: H_EXTERNAL_MEAN, DX_INT, DX_EXT, WEIGHT_INT, WEIGHT_EXT, NCELLS_EXT, H_FACE, SUM_D_EXT
 
 IF (CC_IBM) CALL_FOR_GLMAT = .FALSE.
 
@@ -3925,23 +3984,18 @@ PREDCORR_LOOP : IF (PREDICTOR) THEN
             IF (ANY( (/CCVAR(IIG,JJG,KKG,CC_CGSC),CCVAR(II,JJ,KK,CC_CGSC)/) /= IS_GASPHASE )) CYCLE EXTERNAL_WALL_LOOP_1
          ENDIF
 
-         ! GRID REFINEMENT: Compute mean H accounting for boundary types
-         H_EXTERNAL_MEAN = 0._EB
-         NCELLS_EXT = 0._EB
+         ! GRID REFINEMENT: Compute mean H and averaged coarse D_EXT
+         H_EXTERNAL_MEAN = 0._EB; SUM_D_EXT = 0._EB; NCELLS_EXT = 0._EB
          DO KKO = EWC%KKO_MIN, EWC%KKO_MAX
             DO JJO = EWC%JJO_MIN, EWC%JJO_MAX
                DO IIO = EWC%IIO_MIN, EWC%IIO_MAX
                   IF(.NOT.PRES_ON_WHOLE_DOMAIN .AND. OM%MUNKH(IIO,JJO,KKO) <= 0) CYCLE
-                  
-                  ! Compute guard cell location in neighboring mesh based on IOR
+                  CALL REG_INTERP_WALL_DISTANCES(IOR,IIG,JJG,KKG,NOM,IIO,JJO,KKO,DX_INT,DX_EXT)
+                  SUM_D_EXT = SUM_D_EXT + DX_EXT
                   CALL COMPUTE_GUARD_CELL_INDEXES(IOR, IIO, JJO, KKO, II_NOM, JJ_NOM, KK_NOM)
-                  
-                  ! Check boundary type and use appropriate value
                   IF (OM%EWC_TYPE(II_NOM,JJ_NOM,KK_NOM) == INTERPOLATED_BOUNDARY) THEN
-                     ! Use actual external cell value (gradient continuity)
                      H_EXTERNAL_MEAN = H_EXTERNAL_MEAN + OM%H(IIO,JJO,KKO)
                   ELSE
-                     ! Use internal cell value (zero gradient assumption)
                      H_EXTERNAL_MEAN = H_EXTERNAL_MEAN + H(IIG,JJG,KKG)
                   ENDIF
                   NCELLS_EXT = NCELLS_EXT + 1._EB
@@ -3949,21 +4003,7 @@ PREDCORR_LOOP : IF (PREDICTOR) THEN
             ENDDO
          ENDDO
          H_EXTERNAL_MEAN = H_EXTERNAL_MEAN / NCELLS_EXT
-         
-         ! Get cell sizes for distance-weighted interpolation
-         SELECT CASE(IOR)
-         CASE( IAXIS,-IAXIS)
-            DX_INT = DX(IIG)
-            DX_EXT = MESHES(NOM)%DX(EWC%IIO_MIN)
-         CASE( JAXIS,-JAXIS)
-            DX_INT = DY(JJG)
-            DX_EXT = MESHES(NOM)%DY(EWC%JJO_MIN)
-         CASE( KAXIS,-KAXIS)
-            DX_INT = DZ(KKG)
-            DX_EXT = MESHES(NOM)%DZ(EWC%KKO_MIN)
-         END SELECT
-         
-         ! Distance-weighted interpolation at face, then extrapolation to guard cell center
+         DX_EXT = SUM_D_EXT / NCELLS_EXT
          WEIGHT_EXT = DX_INT / (DX_INT + DX_EXT)
          WEIGHT_INT = DX_EXT / (DX_INT + DX_EXT)
          H_FACE = WEIGHT_INT * H(IIG,JJG,KKG) + WEIGHT_EXT * H_EXTERNAL_MEAN
@@ -4010,23 +4050,18 @@ ELSE ! PREDCORR_LOOP
             IF (ANY( (/CCVAR(IIG,JJG,KKG,CC_CGSC),CCVAR(II,JJ,KK,CC_CGSC)/) /= IS_GASPHASE )) CYCLE EXTERNAL_WALL_LOOP_2
          ENDIF
 
-         ! GRID REFINEMENT: Compute mean HS accounting for boundary types
-         H_EXTERNAL_MEAN = 0._EB
-         NCELLS_EXT = 0._EB
+         ! GRID REFINEMENT: Compute mean HS and averaged coarse D_EXT
+         H_EXTERNAL_MEAN = 0._EB; SUM_D_EXT = 0._EB; NCELLS_EXT = 0._EB
          DO KKO = EWC%KKO_MIN, EWC%KKO_MAX
             DO JJO = EWC%JJO_MIN, EWC%JJO_MAX
                DO IIO = EWC%IIO_MIN, EWC%IIO_MAX
                   IF(.NOT.PRES_ON_WHOLE_DOMAIN .AND. OM%MUNKH(IIO,JJO,KKO) <= 0) CYCLE
-                  
-                  ! Compute guard cell location in neighboring mesh based on IOR
+                  CALL REG_INTERP_WALL_DISTANCES(IOR,IIG,JJG,KKG,NOM,IIO,JJO,KKO,DX_INT,DX_EXT)
+                  SUM_D_EXT = SUM_D_EXT + DX_EXT
                   CALL COMPUTE_GUARD_CELL_INDEXES(IOR, IIO, JJO, KKO, II_NOM, JJ_NOM, KK_NOM)
-                  
-                  ! Check boundary type and use appropriate value
                   IF (OM%EWC_TYPE(II_NOM,JJ_NOM,KK_NOM) == INTERPOLATED_BOUNDARY) THEN
-                     ! Use actual external cell value (gradient continuity)
                      H_EXTERNAL_MEAN = H_EXTERNAL_MEAN + OM%HS(IIO,JJO,KKO)
                   ELSE
-                     ! Use internal cell value (zero gradient assumption)
                      H_EXTERNAL_MEAN = H_EXTERNAL_MEAN + HS(IIG,JJG,KKG)
                   ENDIF
                   NCELLS_EXT = NCELLS_EXT + 1._EB
@@ -4034,21 +4069,7 @@ ELSE ! PREDCORR_LOOP
             ENDDO
          ENDDO
          H_EXTERNAL_MEAN = H_EXTERNAL_MEAN / NCELLS_EXT
-         
-         ! Get cell sizes for distance-weighted interpolation
-         SELECT CASE(IOR)
-         CASE( IAXIS,-IAXIS)
-            DX_INT = DX(IIG)
-            DX_EXT = MESHES(NOM)%DX(EWC%IIO_MIN)
-         CASE( JAXIS,-JAXIS)
-            DX_INT = DY(JJG)
-            DX_EXT = MESHES(NOM)%DY(EWC%JJO_MIN)
-         CASE( KAXIS,-KAXIS)
-            DX_INT = DZ(KKG)
-            DX_EXT = MESHES(NOM)%DZ(EWC%KKO_MIN)
-         END SELECT
-         
-         ! Distance-weighted interpolation at face, then extrapolation to guard cell center
+         DX_EXT = SUM_D_EXT / NCELLS_EXT
          WEIGHT_EXT = DX_INT / (DX_INT + DX_EXT)
          WEIGHT_INT = DX_EXT / (DX_INT + DX_EXT)
          H_FACE = WEIGHT_INT * HS(IIG,JJG,KKG) + WEIGHT_EXT * H_EXTERNAL_MEAN
@@ -4852,22 +4873,6 @@ IPZ_LOOP : DO IPZ=0,N_ZONE_GLOBMAT
          M2 => MESHES(NOM)
          OM => OMESH(NOM)
          
-         ! Distance from internal cell center to boundary face (half cell width):
-         SELECT CASE(IOR)
-         CASE( IAXIS)
-            DX_INT = 0.5_EB * DXN(IIG-1)
-         CASE(-IAXIS)
-            DX_INT = 0.5_EB * DXN(IIG)
-         CASE( JAXIS)
-            DX_INT = 0.5_EB * DYN(JJG-1)
-         CASE(-JAXIS)
-            DX_INT = 0.5_EB * DYN(JJG)
-         CASE( KAXIS)
-            DX_INT = 0.5_EB * DZN(KKG-1)
-         CASE(-KAXIS)
-            DX_INT = 0.5_EB * DZN(KKG)
-         END SELECT
-         
          ! Loop over ALL cells in the neighboring mesh that share this boundary face:
          DO KKO = EWC%KKO_MIN, EWC%KKO_MAX
             DO JJO = EWC%JJO_MIN, EWC%JJO_MAX
@@ -4927,15 +4932,8 @@ IPZ_LOOP : DO IPZ=0,N_ZONE_GLOBMAT
                   ! Use the MINIMUM area (actual contact/intersection area):
                   AF = MIN(AF_INT, AF_EXT)
                   
-                  ! Distance from boundary face to external cell center (half cell width):
-                  SELECT CASE(IOR)
-                  CASE( IAXIS, -IAXIS)
-                     DX_EXT = 0.5_EB * M2%DXN(IIO)
-                  CASE( JAXIS, -JAXIS)
-                     DX_EXT = 0.5_EB * M2%DYN(JJO)
-                  CASE( KAXIS, -KAXIS)
-                     DX_EXT = 0.5_EB * M2%DZN(KKO)
-                  END SELECT
+                  ! Centroid-to-seam-face distances, each computed in its own mesh frame.
+                  CALL REG_INTERP_WALL_DISTANCES(IOR,IIG,JJG,KKG,NOM,IIO,JJO,KKO,DX_INT,DX_EXT)
                   
                   ! Inverse of total distance between cell centers:
                   IDX = 1._EB / (DX_INT + DX_EXT)
