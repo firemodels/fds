@@ -3,8 +3,8 @@ The case is meant as a teaching tool and to test functionality.
 
 &HEAD CHID='couch', TITLE='Single Couch Test Case'  /
 
-&MESH IJK=25,25,24, XB=0.0,2.5,0.0,2.5,0.0,2.4, MULT_ID='mesh' /
-&MULT ID='mesh', DX=2.5, DY=2.5, I_UPPER=1, J_UPPER=1 /
+&MESH IJK=25,25,12, XB=0.0,2.5,0.0,2.5,0.0,1.2, MULT_ID='mesh' /
+&MULT ID='mesh', DX=2.5, DY=2.5, DZ=1.2, I_UPPER=1, J_UPPER=1, K_UPPER=1 /
 
 &TIME T_END=600. /
 

@@ -264,7 +264,8 @@ IF (SOLID_PARTICLES) THEN
 
       IF (LPC%SOLID_PARTICLE) THEN
          CALL CALCULATE_ZZ_F(T,DT,PARTICLE_INDEX=IP)
-         IF (CORRECTOR) CALL DEPOSIT_PARTICLE_MASS(LP,LPC)  ! Add the particle off-gas to the gas phase mesh
+         IF (CORRECTOR .AND. .NOT.LPC%MASSLESS_TARGET) &
+            CALL DEPOSIT_PARTICLE_MASS(LP,LPC)  ! Add the particle off-gas to the gas phase mesh
       ENDIF
 
    ENDDO PARTICLE_LOOP
@@ -3536,7 +3537,9 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Loop over all materials in the cell (alpha subsc
 
    ! Optional limiting of mass loss rate based on specified fuel burnout time
 
-   IF (SF%MINIMUM_BURNOUT_TIME<1.E5_EB) RHO_DOT = MIN(RHO_DOT,SF%LAYER_DENSITY(LAYER_INDEX)/SF%MINIMUM_BURNOUT_TIME)
+   IF (SF%MINIMUM_BURNOUT_TIME<1.E5_EB) THEN
+      RHO_DOT_REAC(1:ML%N_REACTIONS) = MIN(RHO_DOT_REAC(1:ML%N_REACTIONS),SF%LAYER_DENSITY(LAYER_INDEX)/SF%MINIMUM_BURNOUT_TIME)
+   ENDIF
 
    REACTION_LOOP_2:DO J=1,ML%N_REACTIONS
 

@@ -503,7 +503,7 @@ Bidirectional Probes
 
 Smoke Obscuration/Concentration
 
-&DEVC XYZ=21.10, 0.50, 3.60, QUANTITY='DENSITY', SPEC_ID='SOOT', UNITS='mg/m3', CONVERSION_FACTOR=1.E6, ID='Smoke Concentration' /
+&DEVC XB=20.90,21.50, 0.20, 0.74, 3.62, 3.62, QUANTITY='TRANSMISSION', ID='Trans' /
 
 Compartment Pressure
 

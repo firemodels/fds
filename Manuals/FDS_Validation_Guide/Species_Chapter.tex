@@ -792,9 +792,7 @@ Mean and rms soot volume fraction measurements were made above a 13.7~cm (inner)
 \end{sidewaysfigure}
 
 
-
 \clearpage
-
 
 \subsection{FM/FPRF Data Center Experiments}
 \label{FM Smoke Concentration}
@@ -814,12 +812,12 @@ Results of the low exhaust rate (78 ACH) and high exhaust rate (265 ACH) tests f
 \label{FM_FPRF_Datacenter_Smoke}
 \end{figure}
 
+
 \clearpage
 
 \subsection{NIST/NRC Experiments}
-\label{Smoke Concentration}
 
-The figures on the following pages contain comparisons of measured and predicted smoke concentration at one measuring station in the upper layer. The experiments are divided into two. Figure~\ref{smoke_closed} displays the results of the experiments in which the compartment door was closed. Figure~\ref{smoke_open} displays the results of the experiments in which the compartment door was open. The results are significantly different---the simulations of the closed door experiments predict smoke concentrations that are more than twice that of the experiments. The reason for this is that FDS has not accounted for the agglomeration and deposition of the smoke on the walls, something that is far more important when the compartment is not well-ventilated.
+The figures on the following pages contain comparisons of measured and predicted smoke transmission along an 80~cm path in an upper corner of the test compartment. The experiments are divided into two. Figure~\ref{smoke_closed} displays the results of the experiments in which the compartment door was closed. Figure~\ref{smoke_open} displays the results of the experiments in which the compartment door was open. The results are significantly different---the simulations of the closed door experiments predict significantly less transmission. The most likely reason for this is that FDS has not accounted for the agglomeration and deposition of the smoke on the walls, something that is far more important when the compartment is not well-ventilated.
 
 \newpage
 
@@ -834,7 +832,7 @@ The figures on the following pages contain comparisons of measured and predicted
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_13_Smoke} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_16_Smoke}
 \end{tabular*}
-\caption[NIST/NRC experiments, smoke concentration, closed door experiments]{NIST/NRC experiments, smoke concentration, closed door experiments.}
+\caption[NIST/NRC experiments, smoke transmission, closed door experiments]{NIST/NRC experiments, smoke transmission, closed door experiments.}
 \label{smoke_closed}
 \end{figure}
 
@@ -847,21 +845,14 @@ The figures on the following pages contain comparisons of measured and predicted
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_15_Smoke} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC/NIST_NRC_18_Smoke}
 \end{tabular*}
-\caption[NIST/NRC experiments, smoke concentration, open door experiments]{NIST/NRC experiments, smoke concentration, open door experiments.}
+\caption[NIST/NRC experiments, smoke transmission, open door experiments]{NIST/NRC experiments, smoke transmission, open door experiments.}
 \label{smoke_open}
 \end{figure}
 
 
-\begin{figure}[p]
-\centering
-\includegraphics[height=4.0in]{SCRIPT_FIGURES/Scatterplots/FDS_Smoke_Concentration}
-\caption[Summary of smoke concentration predictions]{Summary of smoke concentration predictions.}
-\end{figure}
-
 \clearpage
 
 \subsection{FAA Cargo Compartments}
-\label{Smoke Obscuration}
 
 Beam obscuration measurements were made at different locations within the compartment (see Fig.~\ref{FAA_Cargo_probe_locations}). The data is presented below in terms of percent transmission per meter, $100(I/I_0)^{1/L}$, where $I$ is the light intensity and $L$ is the beam pathlength in units of meters.
 
@@ -877,11 +868,21 @@ Beam obscuration measurements were made at different locations within the compar
 \caption[FAA Cargo Compartments experiments, smoke obscuration]{FAA Cargo Compartments experiments, smoke obscuration.}
 \end{figure}
 
-\newpage
+\clearpage
 
-\begin{figure}[p]
+\subsection{Summary, Smoke Concentration and Obscuration}
+\label{Smoke Concentration}
+\label{Smoke Obscuration}
+
+\begin{figure}[!h]
 \centering
-\includegraphics[height=4.0in]{SCRIPT_FIGURES/Scatterplots/FDS_Smoke_Obscuration}
+\includegraphics[height=3.5in]{SCRIPT_FIGURES/Scatterplots/FDS_Smoke_Concentration}
+\caption[Summary of smoke concentration predictions]{Summary of smoke concentration predictions.}
+\end{figure}
+
+\begin{figure}[!h]
+\centering
+\includegraphics[height=3.5in]{SCRIPT_FIGURES/Scatterplots/FDS_Smoke_Obscuration}
 \caption[Summary of smoke obscuration predictions]{Summary of smoke obscuration predictions.}
 \end{figure}
 

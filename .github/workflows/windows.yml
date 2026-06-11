@@ -26,10 +26,8 @@ permissions:
 env:
   # update urls for oneapi packages according to
   # https://github.com/oneapi-src/oneapi-ci/blob/master/.github/workflows/build_all.yml
-  WINDOWS_BASEKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/1f18901e-877d-469d-a41a-a10f11b39336/intel-oneapi-base-toolkit-2025.3.0.372_offline.exe
-  WINDOWS_BASEKIT_COMPONENTS: intel.oneapi.win.mkl.devel
-  WINDOWS_HPCKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/3a871580-f839-46ed-aeae-685084127279/intel-oneapi-hpc-toolkit-2025.3.0.378_offline.exe
-  WINDOWS_HPCKIT_COMPONENTS: intel.oneapi.win.ifort-compiler:intel.oneapi.win.mpi.devel
+  WINDOWS_TOOLKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/bae85ab1-cfcd-4251-8d42-a0c27949ea33/intel-oneapi-toolkit-2026.0.0.193_offline.exe
+  WINDOWS_TOOLKIT_COMPONENTS: intel.oneapi.win.ifort-compiler:intel.oneapi.win.mpi.devel:intel.oneapi.win.mkl.devel
 
 
 jobs:
@@ -53,23 +51,15 @@ jobs:
       uses: actions/cache@v5
       with:
         path: C:\Program Files (x86)\Intel\oneAPI\
-        key: install-${{ env.WINDOWS_BASEKIT_URL }}-${{ env.WINDOWS_BASEKIT_COMPONENTS }}-${{ env.WINDOWS_HPCKIT_URL }}-${{ env.WINDOWS_HPCKIT_COMPONENTS }}
-    - name: install oneapi mkl
+        key: install-${{ env.WINDOWS_TOOLKIT_URL }}-${{ env.WINDOWS_TOOLKIT_COMPONENTS }}
+    - name: install oneapi compiler, mpi, mkl
       if: steps.cache-install.outputs.cache-hit != 'true'
       run: |
-        curl.exe --output %TEMP%\webimage_base.exe --url %WINDOWS_BASEKIT_URL% --retry 5 --retry-delay 5
-        start /b /wait %TEMP%\webimage_base.exe -s -x -f webimage_base_extracted --log extract_base.log
-        del %TEMP%\webimage_base.exe
-        webimage_base_extracted\bootstrapper.exe -s --action install --components=%WINDOWS_BASEKIT_COMPONENTS% --eula=accept -p=NEED_VS2017_INTEGRATION=0 -p=NEED_VS2019_INTEGRATION=0 --log-dir=.
-        rd /s/q "webimage_base_extracted"
-    - name: install oneapi compiler, mpi
-      if: steps.cache-install.outputs.cache-hit != 'true'
-      run: |
-        curl.exe --output %TEMP%\webimage_hpc.exe --url %WINDOWS_HPCKIT_URL% --retry 5 --retry-delay 5
-        start /b /wait %TEMP%\webimage_hpc.exe -s -x -f webimage_hpc_extracted --log extract_hpc.log
-        del %TEMP%\webimage_hpc.exe
-        webimage_hpc_extracted\bootstrapper.exe -s --action install --components=%WINDOWS_HPCKIT_COMPONENTS% --eula=accept -p=NEED_VS2017_INTEGRATION=0 -p=NEED_VS2019_INTEGRATION=0 --log-dir=.
-        rd /s/q "webimage_hpc_extracted"
+        curl.exe --output %TEMP%\webimage.exe --url %WINDOWS_TOOLKIT_URL% --retry 5 --retry-delay 5
+        start /b /wait %TEMP%\webimage.exe -s -x -f webimage_extracted --log extract.log
+        del %TEMP%\webimage.exe
+        webimage_extracted\bootstrapper.exe -s --action install --components=%WINDOWS_TOOLKIT_COMPONENTS% --eula=accept -p=NEED_VS2017_INTEGRATION=0 -p=NEED_VS2019_INTEGRATION=0 --log-dir=.
+        rd /s/q "webimage_extracted"
 
     - name: build fds debug
       run: |

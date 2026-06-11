@@ -71,8 +71,8 @@ The character string, \ct{SMOKEVIEW_ID}, on the \ct{PROP} line associates an FDS
 
 The appearance of Smokeview objects may be modified using data specified with the array of character strings called \ct{SMOKEVIEW_PARAMETERS} on the \ct{PROP} line. For example, the input lines
 \begin{lstlisting}
-&PROP ID='ballprops', SMOKEVIEW_ID='ball',
-      SMOKEVIEW_PARAMETERS(1:6)='R=255','G=0','B=0','DX=0.5','DY=0.25','DZ=0.1' /
+&PROP ID='ballprops', SMOKEVIEW_ID='ball', SMOKEVIEW_PARAMETERS(1:6)=
+'R=255','G=0','B=0','DX=0.5','DY=0.25','DZ=0.1' /
 &DEVC XYZ=0.5,0.8,1.5, QUANTITY='TEMPERATURE', PROP_ID='ballprops' /
 \end{lstlisting}
 create an ellipsoid colored red with $x$, $y$, and $z$ axis diameters of 0.5~m and 0.25~m and 0.1~m, respectively. Note that these parameters are enclosed within single quotes because they are character strings passed to Smokeview.
@@ -177,8 +177,10 @@ active vent\\
 
 Lagrangian particles, like water droplets or small solid particles, are represented in Smokeview as tiny points. However, it is possible to draw Lagrangian particles in other ways, such as those depicted in Table~\ref{tab:devices_dynamic2}. For example, the following lines define particles that represent segments of electrical cables that are 10~cm long with a diameter of 1.24~cm:
 \begin{lstlisting}
-&PART ID='cables', QUANTITIES(1)='PARTICLE TEMPERATURE', ..., PROP_ID='cable image' /
-&PROP ID='cable image', SMOKEVIEW_ID='tube', SMOKEVIEW_PARAMETERS='L=0.1','D=0.0124' /
+&PART ID='cables', QUANTITIES(1)='PARTICLE TEMPERATURE', ...,
+PROP_ID='cable image' /
+&PROP ID='cable image', SMOKEVIEW_ID='tube',
+SMOKEVIEW_PARAMETERS='L=0.1','D=0.0124' /
 \end{lstlisting}
 By default, the cables are colored black, but you can specify your own default color using the parameters \ct{R}, \ct{G}, and \ct{B}. In addition, you can color the particles according to the listed \ct{QUANTITIES} on the \ct{PART} line. Menus in Smokeview allow you to toggle between the various color options.
 

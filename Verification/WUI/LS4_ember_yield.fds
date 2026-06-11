@@ -6,12 +6,14 @@
 &MISC LEVEL_SET_MODE=4/
 &RADI RADIATION=F/
 
+&SPEC ID='WOOD FUEL VAPOR'
+      O          = 2.5
+      C          = 3.4
+      H          = 6.2 /
+
 &REAC FUEL='WOOD FUEL VAPOR'
       FYI='Ritchie, et al., 5th IAFSS, C_3.4 H_6.2 O_2.5'
       SOOT_YIELD = 0.02
-      O          = 2.5
-      C          = 3.4
-      H          = 6.2
       HEAT_OF_COMBUSTION = 17260. /
 
 &VENT DB='XMIN', SURF_ID='OPEN' /
@@ -36,7 +38,6 @@
       DRAG_LAW='DISK'
       SURF_ID='firebrand'
       COLOR='ORANGE'
-      PROP_ID='disk image'
       SAMPLING_FACTOR=1
       QUANTITIES='PARTICLE WEIGHTING FACTOR','PARTICLE TEMPERATURE'/
 
