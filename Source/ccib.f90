@@ -271,7 +271,7 @@ REAL(EB), INTENT(INOUT), POINTER, DIMENSION(:,:,:) :: HP
 ! Local Variables:
 INTEGER :: IW, II, JJ, KK, IIG, JJG, KKG, ICC, ICC_GHOST, ICC_INT, NOM, IIO, JJO, KKO, IOR, ICC_EXT
 INTEGER :: X1AXIS, ICF_EXT, ISHF(IAXIS:KAXIS)
-REAL(EB) :: H_INT, D_INT, D_GHOST, D_EXT, X_FACE, SUM_FLUX, A_INT, A_EXT, H_EXT, H_GHOST
+REAL(EB) :: H_INT, D_INT, D_GHOST, D_EXT, X_FACE, XFN, SUM_FLUX, A_INT, A_EXT, H_EXT, H_GHOST
 TYPE (WALL_TYPE), POINTER :: WC
 TYPE (BOUNDARY_COORD_TYPE), POINTER :: BC
 TYPE (EXTERNAL_WALL_TYPE), POINTER :: EWC
@@ -368,24 +368,30 @@ ELSE
                IF (PREDICTOR) THEN; H_EXT = OM%H(IIO,JJO,KKO)
                ELSE;                H_EXT = OM%HS(IIO,JJO,KKO)
                ENDIF
+               ! Neighbor seam-face index in NOM's own frame (opposite side of cell IIO,JJO,KKO).
+               ISHF(IAXIS:KAXIS) = 0; IF(IOR < 0) ISHF(X1AXIS) = -1
                SELECT CASE(X1AXIS)
                CASE(1)
-                  A_EXT = MESHES(NOM)%DY(JJO) * MESHES(NOM)%DZ(KKO)
-                  IF (ICC_EXT > 0) THEN; D_EXT = ABS(MESHES(NOM)%CUT_CELL(ICC_EXT)%XYZCEN(IAXIS,1) - X_FACE)
-                  ELSE;                  D_EXT = ABS(MESHES(NOM)%XC(IIO) - X_FACE)
+                  A_EXT = MESHES(NOM)%DY(JJO) * MESHES(NOM)%DZ(KKO); XFN = MESHES(NOM)%X(IIO+ISHF(IAXIS))
+                  IF (ICC_EXT > 0) THEN; D_EXT = ABS(MESHES(NOM)%CUT_CELL(ICC_EXT)%XYZCEN(IAXIS,1) - XFN)
+                  ELSE;                  D_EXT = ABS(MESHES(NOM)%XC(IIO) - XFN)
                   ENDIF
                CASE(2)
-                  A_EXT = MESHES(NOM)%DX(IIO) * MESHES(NOM)%DZ(KKO)
-                  IF (ICC_EXT > 0) THEN; D_EXT = ABS(MESHES(NOM)%CUT_CELL(ICC_EXT)%XYZCEN(JAXIS,1) - X_FACE)
-                  ELSE;                  D_EXT = ABS(MESHES(NOM)%YC(JJO) - X_FACE)
+                  A_EXT = MESHES(NOM)%DX(IIO) * MESHES(NOM)%DZ(KKO); XFN = MESHES(NOM)%Y(JJO+ISHF(JAXIS))
+                  IF (ICC_EXT > 0) THEN; D_EXT = ABS(MESHES(NOM)%CUT_CELL(ICC_EXT)%XYZCEN(JAXIS,1) - XFN)
+                  ELSE;                  D_EXT = ABS(MESHES(NOM)%YC(JJO) - XFN)
                   ENDIF
                CASE(3)
-                  A_EXT = MESHES(NOM)%DX(IIO) * MESHES(NOM)%DY(JJO)
-                  IF (ICC_EXT > 0) THEN; D_EXT = ABS(MESHES(NOM)%CUT_CELL(ICC_EXT)%XYZCEN(KAXIS,1) - X_FACE)
-                  ELSE;                  D_EXT = ABS(MESHES(NOM)%ZC(KKO) - X_FACE)
+                  A_EXT = MESHES(NOM)%DX(IIO) * MESHES(NOM)%DY(JJO); XFN = MESHES(NOM)%Z(KKO+ISHF(KAXIS))
+                  IF (ICC_EXT > 0) THEN; D_EXT = ABS(MESHES(NOM)%CUT_CELL(ICC_EXT)%XYZCEN(KAXIS,1) - XFN)
+                  ELSE;                  D_EXT = ABS(MESHES(NOM)%ZC(KKO) - XFN)
                   ENDIF
                END SELECT
-               ISHF(IAXIS:KAXIS) = 0; IF(IOR < 0) ISHF(X1AXIS) = -1
+               ! Refinement seam only: match GET_H_MATRIX_CC sub-face selection (skip solid/no-unknown partners). 
+               IF (WC%BOUNDARY_TYPE == INTERPOLATED_BOUNDARY) THEN
+                  IF (ALLOCATED(OM%MUNKH)) THEN; IF (OM%MUNKH(IIO,JJO,KKO) < 1) CYCLE; ENDIF
+                  IF (MESHES(NOM)%FCVAR(IIO+ISHF(IAXIS),JJO+ISHF(JAXIS),KKO+ISHF(KAXIS),CC_FGSC,X1AXIS) == CC_SOLID) CYCLE
+               ENDIF
                ICF_EXT = MESHES(NOM)%FCVAR(IIO+ISHF(IAXIS),JJO+ISHF(JAXIS),KKO+ISHF(KAXIS),CC_IDCF,X1AXIS)
                IF (ICF_EXT > 0) A_EXT = SUM(MESHES(NOM)%CUT_FACE(ICF_EXT)%AREA(1:MESHES(NOM)%CUT_FACE(ICF_EXT)%NFACE))
                IF (EWC%AREA_RATIO < 0.99_EB) A_EXT = A_INT
@@ -20107,7 +20113,7 @@ INTEGER, INTENT(IN) :: NM,NM1,IPZ
 INTEGER :: X1AXIS,IFACE,ICF,I,J,K,IND(LOW_IND:HIGH_IND),IND_LOC(LOW_IND:HIGH_IND),ILOC,JLOC,JCOL,IROW, &
            LOCROW,LOCROW_1,LOCROW_2,IW,NOM,IIO,JJO,KKO,ICC_EXT,IND_INT,IND_EXT,ICFO,ISHF(IAXIS:KAXIS), &
            ICC,II,JJ,KK,IIG,JJG,KKG
-REAL(EB) :: AF,IDX,BIJ,KFACE(2,2),X_FACE,D_INT,D_EXT,AF_EXT
+REAL(EB) :: AF,IDX,BIJ,KFACE(2,2),X_FACE,XFN,D_INT,D_EXT,AF_EXT
 TYPE(CC_CUTFACE_TYPE), POINTER :: CF
 TYPE(CC_RCFACE_TYPE), POINTER :: RCF
 TYPE(EXTERNAL_WALL_TYPE), POINTER :: EWC
@@ -20227,24 +20233,30 @@ DO ICF = 1,MESHES(NM)%N_CUTFACE_MESH
                DO IIO = EWC%IIO_MIN, EWC%IIO_MAX
                   ICC_EXT = MESHES(NOM)%CCVAR(IIO,JJO,KKO,CC_IDCC)
                   IND_EXT = OMESH(NOM)%MUNKH(IIO,JJO,KKO)
+                  ! Neighbor seam-face index in NOM's own frame (opposite side of cell IIO,JJO,KKO).
+                  ISHF(IAXIS:KAXIS) = 0; IF(BOUNDARY_COORD(WC%BC_INDEX)%IOR < 0) ISHF(X1AXIS) = -1
                   SELECT CASE(X1AXIS)
                   CASE(IAXIS)
                         AF_EXT = MESHES(NOM)%DY(JJO) * MESHES(NOM)%DZ(KKO)
-                        D_EXT = ABS(MESHES(NOM)%XC(IIO) - X_FACE)
+                        XFN = MESHES(NOM)%X(IIO+ISHF(IAXIS)); D_EXT = ABS(MESHES(NOM)%XC(IIO) - XFN)
                   CASE(JAXIS)
                         AF_EXT = MESHES(NOM)%DX(IIO) * MESHES(NOM)%DZ(KKO)
-                        D_EXT = ABS(MESHES(NOM)%YC(JJO) - X_FACE)
+                        XFN = MESHES(NOM)%Y(JJO+ISHF(JAXIS)); D_EXT = ABS(MESHES(NOM)%YC(JJO) - XFN)
                   CASE(KAXIS)
                         AF_EXT = MESHES(NOM)%DX(IIO) * MESHES(NOM)%DY(JJO)
-                        D_EXT = ABS(MESHES(NOM)%ZC(KKO) - X_FACE)
+                        XFN = MESHES(NOM)%Z(KKO+ISHF(KAXIS)); D_EXT = ABS(MESHES(NOM)%ZC(KKO) - XFN)
                   END SELECT
                   IF (ICC_EXT > 0) THEN
                      ! Note: IND_EXT comes from OMESH(NOM)%MUNKH which was populated
                      ! via COPY_CC_MUNKH_TO_UNKH from communicated HS data
-                     D_EXT = ABS(MESHES(NOM)%CUT_CELL(ICC_EXT)%XYZCEN(X1AXIS,1) - X_FACE)
+                     D_EXT = ABS(MESHES(NOM)%CUT_CELL(ICC_EXT)%XYZCEN(X1AXIS,1) - XFN)
                   ENDIF
                   ! Check for cut-face in NOM
-                  ISHF(IAXIS:KAXIS) = 0; IF(BOUNDARY_COORD(WC%BC_INDEX)%IOR < 0) ISHF(X1AXIS) = -1
+                  ! Refinement seam only (see GET_H_GUARD_CUTCELL for PERIODIC note):
+                  IF (WC%BOUNDARY_TYPE == INTERPOLATED_BOUNDARY) THEN
+                     IF (IND_EXT < 1) CYCLE
+                     IF (MESHES(NOM)%FCVAR(IIO+ISHF(IAXIS),JJO+ISHF(JAXIS),KKO+ISHF(KAXIS),CC_FGSC,X1AXIS) == CC_SOLID) CYCLE
+                  ENDIF
                   ICFO = MESHES(NOM)%FCVAR(IIO+ISHF(IAXIS),JJO+ISHF(JAXIS),KKO+ISHF(KAXIS),CC_IDCF,X1AXIS)
                   IF (ICFO > 0) AF_EXT = SUM(MESHES(NOM)%CUT_FACE(ICFO)%AREA(1:MESHES(NOM)%CUT_FACE(ICFO)%NFACE))
                   IF (EWC%AREA_RATIO < 0.99_EB) AF_EXT = AF
@@ -20364,24 +20376,30 @@ DO IW = 1, N_EXTERNAL_WALL_CELLS
          DO IIO = EWC%IIO_MIN, EWC%IIO_MAX
             ICC_EXT = MESHES(NOM)%CCVAR(IIO,JJO,KKO,CC_IDCC)
             IND_EXT = OMESH(NOM)%MUNKH(IIO,JJO,KKO)
+            ! Neighbor seam-face index in NOM's own frame (opposite side of cell IIO,JJO,KKO).
+            ISHF(IAXIS:KAXIS) = 0; IF (BC%IOR < 0) ISHF(X1AXIS) = -1
             SELECT CASE(X1AXIS)
                CASE(IAXIS)
                   AF_EXT = MESHES(NOM)%DY(JJO) * MESHES(NOM)%DZ(KKO)
-                  D_EXT = ABS(MESHES(NOM)%XC(IIO) - X_FACE)
+                  XFN = MESHES(NOM)%X(IIO+ISHF(IAXIS)); D_EXT = ABS(MESHES(NOM)%XC(IIO) - XFN)
                CASE(JAXIS)
                   AF_EXT = MESHES(NOM)%DX(IIO) * MESHES(NOM)%DZ(KKO)
-                  D_EXT = ABS(MESHES(NOM)%YC(JJO) - X_FACE)
+                  XFN = MESHES(NOM)%Y(JJO+ISHF(JAXIS)); D_EXT = ABS(MESHES(NOM)%YC(JJO) - XFN)
                CASE(KAXIS)
                   AF_EXT = MESHES(NOM)%DX(IIO) * MESHES(NOM)%DY(JJO)
-                  D_EXT = ABS(MESHES(NOM)%ZC(KKO) - X_FACE)
+                  XFN = MESHES(NOM)%Z(KKO+ISHF(KAXIS)); D_EXT = ABS(MESHES(NOM)%ZC(KKO) - XFN)
             END SELECT
             IF (ICC_EXT > 0) THEN
                ! Note: IND_EXT comes from OMESH(NOM)%MUNKH which was populated
                ! via COPY_CC_MUNKH_TO_UNKH from communicated HS data
-               D_EXT = ABS(MESHES(NOM)%CUT_CELL(ICC_EXT)%XYZCEN(X1AXIS,1) - X_FACE)
+               D_EXT = ABS(MESHES(NOM)%CUT_CELL(ICC_EXT)%XYZCEN(X1AXIS,1) - XFN)
             ENDIF
             ! Check for cut-face in NOM
-            ISHF(IAXIS:KAXIS) = 0; IF (BC%IOR < 0) ISHF(X1AXIS) = -1
+            ! Refinement seam only (see GET_H_GUARD_CUTCELL for PERIODIC note):
+            IF (WC%BOUNDARY_TYPE == INTERPOLATED_BOUNDARY) THEN
+               IF (IND_EXT < 1) CYCLE
+               IF (MESHES(NOM)%FCVAR(IIO+ISHF(IAXIS),JJO+ISHF(JAXIS),KKO+ISHF(KAXIS),CC_FGSC,X1AXIS) == CC_SOLID) CYCLE
+            ENDIF
             ICFO = MESHES(NOM)%FCVAR(IIO+ISHF(IAXIS),JJO+ISHF(JAXIS),KKO+ISHF(KAXIS),CC_IDCF,X1AXIS)
             IF (ICFO > 0) AF_EXT = SUM(MESHES(NOM)%CUT_FACE(ICFO)%AREA(1:MESHES(NOM)%CUT_FACE(ICFO)%NFACE))
             IF (EWC%AREA_RATIO < 0.99_EB) AF_EXT = AF
