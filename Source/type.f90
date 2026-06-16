@@ -1439,6 +1439,21 @@ TYPE CC_CUTCELL_TYPE
 END TYPE CC_CUTCELL_TYPE
 
 
+!> \brief Mesh-owned GCELL storage in SoA form.
+!! One GCELL slot IG = one connected gas polyhedron in the active complex-geometry region.
+
+TYPE CC_GCELL_TYPE
+   INTEGER :: N = 0
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: CELL_TYPE !< (1:N) CC_GCELL_CUT or CC_GCELL_REG.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:) :: IJK       !< (IAXIS:KAXIS,1:N) host Cartesian cell indices.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: ICC       !< (1:N) CUT_CELL index (0 if regular cell).
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: JCC       !< (1:N) sub-cell index within CUT_CELL (0 if regular).
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: STATUS    !< (1:N) active / blocked.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   :: VOLUME    !< (1:N) cached volume.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: XYZCEN    !< (IAXIS:KAXIS,1:N) cached centroid.
+END TYPE CC_GCELL_TYPE
+
+
 !> \brief Regular faces type that contains indexes for construction of H Poisson discretization matrix.
 
 TYPE CC_REGFACE_TYPE
