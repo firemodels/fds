@@ -4820,6 +4820,109 @@ KAPPA_SOOT = SOOT_MASS_CONCENTRATION*(1232.4_EB+0.591552_EB*(TTMP-2000._EB))
 
 END FUNCTION KAPPA_SOOT
 
+!comecei a implementar
+
+REAL(EB) FUNCTION GET_SLW_SINGLE_CJ(ccj0,ccj1)
+   
+   IMPLICIT NONE
+   REAL(EB),INTENT(IN) :: ccj0,ccj1
+   GET_SLW_SINGLE_CJ= SRQT(ccj0*ccj1)                               !For now, only this approach
+                                                                        !has been implemented   
+END FUNCTION GET_SLW_SINGLE_CJ
+
+SUBROUTINE GET_SLW_CJ(CMIN,CMAX,NGG,CCJ,CCJ_SUP)
+   
+   !-----------------------------------------------------------------
+   !Declaration of variables
+   !-----------------------------------------------------------------
+   IMPLICIT NONE
+   INTEGER,INTENT(IN) :: NGG
+   INTEGER :: II
+   REAL(EB),DIMENSION(:),INTENT(OUT):: CCJ,CCJ_SUP
+   REAL(EB),INTENT(IN) :: CMIN,CMAX
+   
+   !-----------------------------------------------------------------
+   !Computing the suplementar cross-sections
+   !-----------------------------------------------------------------
+   DO II=1,NGG
+      CCJ_SUP(II) = CMIN*(CMAX/CMIN)**&
+                              (REAL(II,EB)/REAL(NGG,EB))
+   ENDDO
+      
+   !-----------------------------------------------------------------
+   !Computing the gray gas absorption cross-sections
+   !-----------------------------------------------------------------
+   CCJ(1)= SQRT(CCJ_SUP(1)*CMIN)
+   DO II=2,NGG
+      CCJ(II)= GET_SLW_SINGLE_CJ(CCJ_SUP(II-1),CCJ_SUP(II))
+   ENDDO
+      
+END SUBROUTINE GET_SLW_CJ
+
+
+SUBROUTINE GET_SLW_FJ(NGG,FFJ,FFJ_SUP)
+   
+      !-----------------------------------------------------------------
+      !Declaration of variables
+      !-----------------------------------------------------------------
+      USE COMP_FUNCTIONS, ONLY: SHUTDOWN
+      USE MATH_FUNCTIONS, ONLY: QUAD_GAUSS_LEGENDRE,&
+                                QUAD_GAUSS_CHEBYSHEV 
+      IMPLICIT NONE
+      INTEGER,INTENT(IN) :: NGG
+      INTEGER :: II,KK
+      REAL(EB):: FMAX,FMIN,SUM_W
+      REAL(EB),DIMENSION(:) :: FFJ,FFJ_SUP 
+      REAL(EB):: X_I(1:NGG),W_I(1:NGG) 
+   
+      !-----------------------------------------------------------------
+      !Setting bounds for the supplementar ALBDF
+      !-----------------------------------------------------------------
+      FMIN = SLW_FMIN
+      FMAX = SLW_FMAX
+   
+      !-----------------------------------------------------------------
+      !Get the quadrature with standard bounds (-1 to 1)
+      !-----------------------------------------------------------------
+      IF (TRIM(SLW_QUADRATURE).EQ.'GAUSS_LEGENDRE') THEN
+         CALL QUAD_GAUSS_LEGENDRE(-1._EB,1._EB,NGG,X_I,W_I)
+      ELSEIF(TRIM(SLW_QUADRATURE).EQ.'GAUSS_CHEBYSHEV') THEN                !By default, use the 
+         CALL QUAD_GAUSS_CHEBYSHEV(NGG,'EVEN-RANK',X_I,W_I)             !even GC quadrature
+      ELSEIF (TRIM(SLW_QUADRATURE).EQ.'GAUSS_CHEBYSHEV-EVEN') THEN
+         CALL QUAD_GAUSS_CHEBYSHEV(NGG,'EVEN-RANK',X_I,W_I)
+      ELSEIF (TRIM(SLW_QUADRATURE).EQ.'GAUSS_CHEBYSHEV-odd') THEN
+         CALL QUAD_GAUSS_CHEBYSHEV(NGG,'ODD-RANK',X_I,W_I)
+      ELSE
+         CALL SHUTDOWN('PROBLEM IN THE SPECIFICATION OF SLW_QUADRATURE') 
+      ENDIF
+      
+      !-----------------------------------------------------------------
+      !Adjusting the quadrature limits
+      !-----------------------------------------------------------------
+      DO II=1,NGG
+         X_I(II) = 0.5_EB*X_I(II) + 0.5_EB
+         W_I(II) = 0.5_EB*W_I(II)
+      ENDDO
+      
+      !-----------------------------------------------------------------
+      !Computing the ALBDFs
+      !-----------------------------------------------------------------
+      DO II=1,NGG
+         SUM_W = 0._EB
+         DO KK=1,II
+            SUM_W = SUM_W + W_I(KK)
+         ENDDO
+         FFJ_SUP(II) = FMIN + (FMAX - FMIN)*SUM_W                        !Supplementar
+         FFJ(II) = FMIN + X_I(II)*(FMAX - FMIN)
+      ENDDO
+
+   END SUBROUTINE GET_SLW_CJ
+
+
+
+
+
+
 
 END MODULE RAD
 
