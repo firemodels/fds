@@ -1039,6 +1039,12 @@ TYPE OMESH_TYPE
    TYPE (STORAGE_TYPE) :: WALL_SEND_BUFFER,WALL_RECV_BUFFER
    TYPE (STORAGE_TYPE) :: THIN_WALL_SEND_BUFFER,THIN_WALL_RECV_BUFFER
 
+   ! Cross-mesh BACK CFACE exchange (exposed backing of immersed geometry CFACEs):
+   TYPE (STORAGE_TYPE) :: CFACE_SEND_BUFFER,CFACE_RECV_BUFFER
+   INTEGER :: N_CFACE_QUERY=0,N_CFACE_QUERY_DIM=0
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: CFACE_QUERY_XYZ   !< Back-face intersection points (3,N) that NM needs NOM to resolve
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: CFACE_QUERY_FRONT !< Front CFACE index (in NM) associated with each query
+
    ! CC_IBM data exchange arrays:
    INTEGER :: NICC_S(2)=0, NICC_R(2)=0, NICF_S(2)=0, NICF_R(2)=0, NLKF_S=0, NLKF_R=0, &
               NFCC_S(2)=0, NFCC_R(2)=0, NCC_INT_R=0, NFEP_R(5)=0, NFEP_R_G=0
