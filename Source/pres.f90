@@ -3136,7 +3136,7 @@ USE PRECISION_PARAMETERS
 USE GLOBAL_CONSTANTS
 USE MESH_POINTERS
 USE COMPLEX_GEOMETRY, ONLY : CALL_FOR_GLMAT, CC_CGSC,CC_FGSC, CC_UNKH, CC_NCVARS, CC_IDCC, &
-                             NM_START,IPARM,NNZ_ROW_H,CALL_FROM_GLMAT_SETUP
+                             NM_START,CALL_FROM_GLMAT_SETUP
 USE CC_SCALARS, ONLY :   GET_H_CUTFACES, GET_BOUNDFACE_GEOM_INFO_H, ADD_INPLACE_NNZ_H_WHLDOM, &
                          COPY_CC_MUNKH_TO_UNKH, COPY_CC_UNKH_TO_HS
 
@@ -3170,7 +3170,11 @@ INTEGER :: CGSC=IS_CGSC, UNKH=IS_UNKH, NCVARS=IS_NCVARS
 ! Define CC pointers:
 TYPE(CC_CUTCELL_TYPE), POINTER :: CC
 
-! Pardiso or Sparse cluster solver message level:
+
+! Pardiso or Sparse cluster solver IPARM and message level:
+#ifdef WITH_MKL
+INTEGER, ALLOCATABLE :: IPARM( : )
+#endif
 INTEGER, SAVE :: MSGLVL = 0  ! 0 no messages, 1 print statistical information
 
 ! Factor to drop DY in cylindrical axisymmetric coordinates.
@@ -3875,9 +3879,7 @@ CASE(3)
    ! fields on each mesh:
    CALL GET_BOUNDFACE_GEOM_INFO_H
 
-   ! 6. Get nonzeros graph of the Poisson matrix, defined as:
-   !    - NNZ_D_MAT_H(1:NUNKH_LOCAL) Number of nonzeros on per matrix row.
-   !    - JD_MAT_H(1:NNZ_ROW_H,1:NUNKH_LOCAL) Column location of nonzeros, global numeration.
+   ! 6. Get nonzeros graph of the Poisson matrix:
    CALL GET_MATRIXGRAPH_H_WHLDOM ! Define the Graph of the Matrix for Gasphase cells on whole domain.
 
    ! 7. Build discrete Laplace operator matrix:

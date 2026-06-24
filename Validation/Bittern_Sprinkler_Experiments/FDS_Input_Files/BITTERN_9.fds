@@ -71,7 +71,7 @@ Materials and surfaces
       EMISSIVITY=0.5/
 
 &SURF ID='GYPSUM BOARD', DEFAULT=.TRUE.
-      RGB=242.0,237.0,237.0,
+      RGB=242,237,237,
       MATL_ID='GYPSUM BOARD',
       THICKNESS=0.01/
 

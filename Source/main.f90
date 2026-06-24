@@ -39,7 +39,7 @@ USE CC_SCALARS,   ONLY: CC_SET_DATA,CC_END_STEP,CC_DENSITY,CC_RHO0W_INTERP,     
                         CCCOMPUTE_RADIATION,CC_NO_FLUX,CC_COMPUTE_VELOCITY_ERROR, &
                         CC_NO_FLUX,CC_COMPUTE_VELOCITY_ERROR,FINISH_CC,        &
                         INIT_CUTCELL_DATA,MESH_CC_EXCHANGE,ROTATED_CUBE_ANN_SOLN, &
-                        CC_RESTORE_UVW_UNLINKED
+                        CC_RESTORE_UVW_UNLINKED,INITIALIZE_BACK_CFACE_EXCHANGE
 USE OPENMP_FDS
 #ifdef WITHOUT_MPIF08
 USE MPI
@@ -60,7 +60,7 @@ IMPLICIT NONE (TYPE,EXTERNAL)
 
 ! Miscellaneous declarations
 
-LOGICAL  :: EX=.FALSE.,DIAGNOSTICS,CTRL_STOP_STATUS,CHECK_FREEZE_VELOCITY=.TRUE.,EXTERNAL_FAIL
+LOGICAL  :: EX=.FALSE.,DIAGNOSTICS,CTRL_STOP_STATUS,CHECK_FREEZE_VELOCITY=.TRUE.,EXTERNAL_FAIL,FIRST_RESTART_TIME_STEP
 INTEGER  :: LO10,NM,IZERO,ANG_INC_COUNTER
 REAL(EB) :: T,DT,TNOW
 REAL :: CPUTIME
@@ -323,6 +323,11 @@ CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)
 CALL INITIALIZE_BACK_WALL_EXCHANGE(2)
 
 IF (MY_RANK==0 .AND. VERBOSE) CALL VERBOSE_PRINTOUT('Completed INITIALIZE_BACK_WALL_EXCHANGE')
+
+IF (CC_IBM) THEN
+   CALL INITIALIZE_BACK_CFACE_EXCHANGE
+   IF (MY_RANK==0 .AND. VERBOSE) CALL VERBOSE_PRINTOUT('Completed INITIALIZE_BACK_CFACE_EXCHANGE')
+ENDIF
 
 CALL STOP_CHECK(1)
 
@@ -647,17 +652,27 @@ T_USED(1) = WALL_CLOCK_START_ITERATIONS
 
 INITIALIZATION_PHASE = .FALSE.
 
+! If the simulation is restarted, there are some tasks to do during the first time step of the restarted simulation
+
+IF (RESTART) THEN
+   FIRST_RESTART_TIME_STEP = .TRUE.
+ELSE
+   FIRST_RESTART_TIME_STEP = .FALSE.
+ENDIF
+
+! Special feature allowing the user to delay the gas phase CFD simulation until a specified UNFREEZE_TIME
+
 IF (UNFREEZE_TIME > 0._EB) THEN 
    FREEZE_VELOCITY=.TRUE. 
    SOLID_PHASE_ONLY=.TRUE.
    LOCK_TIME_STEP=.TRUE.
 ENDIF
 
-IF (MY_RANK==0 .AND. VERBOSE) CALL VERBOSE_PRINTOUT('Starting the time-stepping')
-
 !***********************************************************************************************************************************
 !                                                   MAIN TIMESTEPPING LOOP
 !***********************************************************************************************************************************
+
+IF (MY_RANK==0 .AND. VERBOSE) CALL VERBOSE_PRINTOUT('Starting the time-stepping')
 
 MAIN_LOOP: DO
 
@@ -685,10 +700,12 @@ MAIN_LOOP: DO
 
    IF ((T+DT+DT_END_FILL)>T_END) DT = MAX(T_END-T+TWENTY_EPSILON_EB,DT_END_MINIMUM)
 
-   ! Determine when to dump out diagnostics to the .out file
+   ! Determine if diagnostics should be dumped to the .out file at the end of this time step
 
    LO10 = INT(LOG10(REAL(MAX(1,ABS(ICYC)),EB)))
    IF (MOD(ICYC,10**LO10)==0 .OR. MOD(ICYC,DIAGNOSTICS_INTERVAL)==0 .OR. (T+DT)>=T_END) DIAGNOSTICS = .TRUE.
+
+   ! Determine if a delayed gas phase simulation should be started
 
    IF ((UNFREEZE_TIME > 0._EB).AND.(T>UNFREEZE_TIME)) THEN 
       FREEZE_VELOCITY=.FALSE.
@@ -1154,6 +1171,8 @@ MAIN_LOOP: DO
    IF (MY_RANK==0 .AND. VERBOSE) CALL VERBOSE_PRINTOUT('End of time step')
 
    IF (T>=T_END .AND. ICYC>0) EXIT MAIN_LOOP
+
+   FIRST_RESTART_TIME_STEP = .FALSE.
 
 ENDDO MAIN_LOOP
 
@@ -3729,7 +3748,7 @@ RECV_MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             IW = OS%ITEM_INDEX(I)
             WC => MESHES(NOM)%WALL(IW)
             CALL PACK_WALL(NOM,OS,WC,OS%SURF_INDEX(I),RC,IC,LC,UNPACK_IT=.TRUE.,COUNT_ONLY=.FALSE.,&
-                           CHECK_BOUNDS=INITIALIZATION_PHASE)
+                           CHECK_BOUNDS=(INITIALIZATION_PHASE.OR.FIRST_RESTART_TIME_STEP))
          ENDDO
       ENDIF RECEIVE_BACK_WALL
 
@@ -3740,7 +3759,7 @@ RECV_MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             IW = OS%ITEM_INDEX(I)
             TW => MESHES(NOM)%THIN_WALL(IW)
             CALL PACK_THIN_WALL(NOM,OS,TW,OS%SURF_INDEX(I),RC,IC,LC,UNPACK_IT=.TRUE.,COUNT_ONLY=.FALSE.,&
-                                CHECK_BOUNDS=INITIALIZATION_PHASE)
+                                CHECK_BOUNDS=(INITIALIZATION_PHASE.OR.FIRST_RESTART_TIME_STEP))
          ENDDO
       ENDIF RECEIVE_BACK_THIN_WALL
 
