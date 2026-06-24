@@ -7995,14 +7995,17 @@ DEVICE_LOOP: DO N=1,N_DEVC
                            CASE('AREA INTEGRAL','AREA')
                               IF (DV%SPATIAL_STATISTIC=='AREA') VALUE=1._EB
                               IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) THEN
+                                 AREA = 0._EB
                                  IF (CFACE_AREA>TWENTY_EPSILON_EB) THEN
                                     AREA = CFACE_AREA
                                  ELSE
-                                    SELECT CASE (ABS(DV%IOR_ASSUMED))
-                                       CASE(1); AREA=RC(I)*DY(J)*DZ(K)
-                                       CASE(2); AREA=DX(I)*DZ(K)
-                                       CASE(3); AREA=DX(I)*RC(I)*DY(J)
-                                    END SELECT
+                                    IF (.NOT.CELL(CELL_INDEX(I,J,K))%SOLID) THEN
+                                       SELECT CASE (ABS(DV%IOR_ASSUMED))
+                                          CASE(1); AREA=RC(I)*DY(J)*DZ(K)
+                                          CASE(2); AREA=DX(I)*DZ(K)
+                                          CASE(3); AREA=DX(I)*RC(I)*DY(J)
+                                       END SELECT
+                                    ENDIF
                                  ENDIF
                                  SDV%VALUE_1 = SDV%VALUE_1 + AREA*VALUE
                               ENDIF
