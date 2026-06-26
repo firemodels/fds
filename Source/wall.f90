@@ -722,15 +722,14 @@ METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
 
    CASE (SPECIFIED_TEMPERATURE) METHOD_OF_HEAT_TRANSFER
 
-      IF (ABS(B1%T_IGN-T_BEGIN) <= SPACING(B1%T_IGN) .AND. SF%RAMP(TIME_TEMP)%INDEX>=1) THEN
-         TSI = T
-      ELSE
-         TSI = T - B1%T_IGN
-      ENDIF
-
-      IF (B1%U_NORMAL>TWENTY_EPSILON_EB) THEN
+      IF (B1%U_NORMAL>TWENTY_EPSILON_EB .AND. .NOT.ANY(SF%LEAK_PATH>0)) THEN
          B1%TMP_F = B1%TMP_G
       ELSEIF (SF%TMP_FRONT>0._EB) THEN
+         IF (ABS(B1%T_IGN-T_BEGIN) <= SPACING(B1%T_IGN) .AND. SF%RAMP(TIME_TEMP)%INDEX>=1) THEN
+            TSI = T
+         ELSE
+            TSI = T - B1%T_IGN
+         ENDIF
          B1%TMP_F = TMP_0(BC%KKG) + &
                     EVALUATE_RAMP(TSI,SF%RAMP(TIME_TEMP)%INDEX,TAU=SF%RAMP(TIME_TEMP)%TAU)*(SF%TMP_FRONT-TMP_0(BC%KKG))
       ELSE
@@ -1139,16 +1138,15 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
 
    CASE (SPECIFIED_MASS_FRACTION) METHOD_OF_MASS_TRANSFER
 
-      IF (ABS(B1%T_IGN-T_BEGIN)<SPACING(B1%T_IGN) .AND. ANY(SF%RAMP(1:N_TRACKED_SPECIES)%INDEX>=1)) THEN
-         IF (PREDICTOR) TSI = T + DT
-         IF (CORRECTOR) TSI = T
-      ELSE
-         IF (PREDICTOR) TSI = T + DT - B1%T_IGN
-         IF (CORRECTOR) TSI = T      - B1%T_IGN
-      ENDIF
-
       IF (B1%U_NORMAL_S<0._EB) THEN  ! If there is a non-zero velocity into the domain, assign appropriate species
                                      ! mass fractions to the face
+         IF (ABS(B1%T_IGN-T_BEGIN)<SPACING(B1%T_IGN) .AND. ANY(SF%RAMP(1:N_TRACKED_SPECIES)%INDEX>=1)) THEN
+            IF (PREDICTOR) TSI = T + DT
+            IF (CORRECTOR) TSI = T
+         ELSE
+            IF (PREDICTOR) TSI = T + DT - B1%T_IGN
+            IF (CORRECTOR) TSI = T      - B1%T_IGN
+         ENDIF
          DO N=2,N_TRACKED_SPECIES
             ZZ_GET(N) = SPECIES_MIXTURE(N)%ZZ0 + EVALUATE_RAMP(TSI,SF%RAMP(N)%INDEX,TAU=SF%RAMP(N)%TAU)* &
                            (SF%MASS_FRACTION(N)-SPECIES_MIXTURE(N)%ZZ0)
