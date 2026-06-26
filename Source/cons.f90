@@ -855,11 +855,8 @@ REAL(EB), ALLOCATABLE, DIMENSION(:)   :: DLZ                !< Mean z-component 
 REAL(EB), ALLOCATABLE, DIMENSION(:)   :: MERI_COMP          !< x-component of the control angle vector w.r.t rotating x-axis
 REAL(EB), ALLOCATABLE, DIMENSION(:)   :: AZIM_COMP          !< y-component of the control angle vector w.r.t rotating y-axis
 REAL(EB), ALLOCATABLE, DIMENSION(:)   :: AXIS_COMP          !< z-component of the control angle vector w.r.t rotating z-axis
-
-
 REAL(EB), ALLOCATABLE, DIMENSION(:)   :: DLB                !< Mean bottom component of RAYN vector (cylindrical case)
 REAL(EB), ALLOCATABLE, DIMENSION(:)   :: DLB_COMP           !< Mean bottom component of RAYN vector (cylindrical case)
-
 REAL(EB), ALLOCATABLE, DIMENSION(:)   :: RSA                !< Array of solid angles
 
 INTEGER, ALLOCATABLE, DIMENSION(:,:)  :: DLM                !< Mirroring indices
