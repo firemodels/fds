@@ -98,73 +98,7 @@ check_compile_fds()
    fi
 }
 
-# Compile debug version of fds2ftmi
-compile_fds2ftmi_db()
-{
-   # Clean and compile FDS2ftmi debug
-   cd $FDS_GITROOT/Utilities/Structural_Interaction/fds2ftmi/intel_linux_db
-   make -f ../makefile clean &> /dev/null
-   ./make_fds2ftmi.sh &> $OUTPUT_DIR/stage2a_ftmi
-}
 
-check_compile_fds2ftmi_db()
-{
-   # Check for errors in FDS debug compilation
-   cd $FDS_GITROOT/Utilities/Structural_Interaction/fds2ftmi/intel_linux_db
-   if [ -e "fds2ftmi_linux_db" ]
-   then
-      stage2a_ftmi_success=true
-   else
-      echo "Errors from Stage 2a_ftmi - Compile and inspect FDS2ftmi debug:" >> $ERROR_LOG
-      cat ${FIREBOT_DIR}/output/stage2a_ftmi >> $ERROR_LOG
-      echo "" >> $ERROR_LOG
-   fi
-
-   # Check for compiler warnings/remarks
-   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage2a_ftmi` == "" ]]
-   then
-      # Continue along
-      :
-   else
-      echo "Warnings from Stage 2a_ftmi - Compile and inspect FDS2ftmi debug:" >> $WARNING_LOG
-      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage2a_ftmi >> $WARNING_LOG
-      echo "" >> $WARNING_LOG
-   fi
-}
-
-# Compile release version of fds2ftmi
-compile_fds2ftmi()
-{
-   # Clean and compile FDS2ftmi debug
-   cd $FDS_GITROOT/Utilities/Structural_Interaction/fds2ftmi/intel_linux
-   make -f ../makefile clean &> /dev/null
-   ./make_fds2ftmi.sh &> $OUTPUT_DIR/stage4a_ftmi
-}
-
-check_compile_fds2ftmi()
-{
-   # Check for errors in FDS debug compilation
-   cd $FDS_GITROOT/Utilities/Structural_Interaction/fds2ftmi/intel_linux
-   if [ -e "fds2ftmi_linux" ]
-   then
-      stage4a_ftmi_success=true
-   else
-      echo "Errors from Stage 4a_ftmi - Compile FDS2ftmi release:" >> $ERROR_LOG
-      cat ${FIREBOT_DIR}/output/stage4a_ftmi >> $ERROR_LOG
-      echo "" >> $ERROR_LOG
-   fi
-
-   # Check for compiler warnings/remarks
-   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage4a_ftmi | grep -v 'performing multi-file optimizations' | grep -v 'generating object file'` == "" ]]
-   then
-      # Continue along
-      :
-   else
-      echo "Warnings from Stage 4a_ftmi - Compile FDS2ftmi release:" >> $WARNING_LOG
-      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage4a_ftmi | grep -v 'performing multi-file optimizations' | grep -v 'generating object file' >> $WARNING_LOG
-      echo "" >> $WARNING_LOG
-   fi
-}
 
 # Functions to check for an available Ansys license
 
@@ -216,11 +150,7 @@ check_compile_fds_db
 compile_fds
 check_compile_fds
 
-# Compile and check debug and release versions
-compile_fds2ftmi_db
-check_compile_fds2ftmi_db
-compile_fds2ftmi
-check_compile_fds2ftmi
+
 
 # Check Ansys license status
 wait_ansys_lic=0
@@ -235,16 +165,22 @@ cd $FDS2FTMI_DIR/examples/simple_panel_hot
 # h_profile
 cd $FDS2FTMI_DIR/examples/h_profile
 ./h_profile.sh
+# h_profile_geom
+cd $FDS2FTMI_DIR/examples/h_profile_geom
+./h_profile.sh
 
 # Run Verification plots
 cd $FDS2FTMI_DIR/scripts
 python generate_plots.py
+python compare_mapping.py ../examples/h_profile/h_profile_ftmi.txt ../examples/h_profile_geom/h_profile_ftmi.txt
+python plot_results_comparison.py  ../examples/h_profile/h_profile.csv ../examples/h_profile_geom/h_profile.csv
+python update_verification_stats.py ../examples/h_profile/h_profile.csv ../examples/h_profile_geom/h_profile.csv
 
 # Build Guide
 cd $FDS2FTMI_DIR
 export TEXINPUTS=$TEXINPUTS:.:../../../Manuals/LaTeX_Style_Files/
 pdflatex fds2ftmi_user_guide.tex
-bibtex fds2ftmi_user_guide
+biber fds2ftmi_user_guide
 pdflatex fds2ftmi_user_guide.tex
 
 # Revert the FDS revision number on User Guide

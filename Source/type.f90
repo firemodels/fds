@@ -1039,6 +1039,12 @@ TYPE OMESH_TYPE
    TYPE (STORAGE_TYPE) :: WALL_SEND_BUFFER,WALL_RECV_BUFFER
    TYPE (STORAGE_TYPE) :: THIN_WALL_SEND_BUFFER,THIN_WALL_RECV_BUFFER
 
+   ! Cross-mesh BACK CFACE exchange (exposed backing of immersed geometry CFACEs):
+   TYPE (STORAGE_TYPE) :: CFACE_SEND_BUFFER,CFACE_RECV_BUFFER
+   INTEGER :: N_CFACE_QUERY=0,N_CFACE_QUERY_DIM=0
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: CFACE_QUERY_XYZ   !< Back-face intersection points (3,N) that NM needs NOM to resolve
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: CFACE_QUERY_FRONT !< Front CFACE index (in NM) associated with each query
+
    ! CC_IBM data exchange arrays:
    INTEGER :: NICC_S(2)=0, NICC_R(2)=0, NICF_S(2)=0, NICF_R(2)=0, NLKF_S=0, NLKF_R=0, &
               NFCC_S(2)=0, NFCC_R(2)=0, NCC_INT_R=0, NFEP_R(5)=0, NFEP_R_G=0
@@ -1437,6 +1443,21 @@ TYPE CC_CUTCELL_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)    :: DEL_RHO_D_DEL_Z_VOL !< Cut-cells DEL_RHO_D_DEL_Z * VOL
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)    :: U_DOT_DEL_RHO_Z_VOL !< Cut-cells U_DOT_DEL_RHO_Z * VOL
 END TYPE CC_CUTCELL_TYPE
+
+
+!> \brief Mesh-owned GCELL storage in SoA form.
+!! One GCELL slot IG = one connected gas polyhedron in the active complex-geometry region.
+
+TYPE CC_GCELL_TYPE
+   INTEGER :: N = 0
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: CELL_TYPE !< (1:N) CC_GCELL_CUT or CC_GCELL_REG.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:) :: IJK       !< (IAXIS:KAXIS,1:N) host Cartesian cell indices.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: ICC       !< (1:N) CUT_CELL index (0 if regular cell).
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: JCC       !< (1:N) sub-cell index within CUT_CELL (0 if regular).
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: STATUS    !< (1:N) active / blocked.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   :: VOLUME    !< (1:N) cached volume.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: XYZCEN    !< (IAXIS:KAXIS,1:N) cached centroid.
+END TYPE CC_GCELL_TYPE
 
 
 !> \brief Regular faces type that contains indexes for construction of H Poisson discretization matrix.

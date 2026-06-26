@@ -12,7 +12,7 @@ from matplotlib import rcParams
 from scipy import integrate
 
 # Getting SVN number 
-GIT=
+GIT=''
 
 # Help to find the fonts properly!
 # You can find the list of fonts installed on the system with:
@@ -106,10 +106,10 @@ plt.close()
 # calculating error
 x = np.abs(fds_result['Time'])
 y = np.abs(fds_result['AST2'])
-fds_ast=integrate.trapz(y,x)
+fds_ast = integrate.trapezoid(y, x)
 x2 = np.abs(ansys_result['Time'])
 y2 = np.abs(ansys_result['AST2'])
-ansys_ast=integrate.trapz(y2,x2)
+ansys_ast=integrate.trapezoid(y2,x2)
 result=abs(1-(ansys_ast/fds_ast))
 tolerance=0.01
 if abs(result)<=tolerance:
