@@ -342,6 +342,7 @@ $QFDS -d HVAC ashrae7_quadratic.fds
 $QFDS -d HVAC ashrae7_table.fds
 $QFDS -d HVAC door_crack.fds
 $QFDS -d HVAC fan_test.fds
+$QFDS -d HVAC fan_test_2.fds
 $QFDS -d HVAC qfan_test.fds
 $QFDS -d HVAC qfan_multi.fds
 $QFDS -d HVAC HVAC_aircoil.fds

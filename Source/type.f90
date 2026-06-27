@@ -2083,6 +2083,7 @@ TYPE FAN_TYPE
    REAL(EB) :: MAX_PRES                !< Maximum fan pressure (Pa) used for FAN_TYPE=2
    REAL(EB) :: OFF_LOSS=1._EB          !< Flow loss through fan when it is not running
    REAL(EB) :: TAU=0._EB               !< t2 or tanh time constant for spinning up fan speed
+   REAL(EB) :: CURVE_TEMP              !< Temperature basis for fan curve
    CHARACTER(LABEL_LENGTH) :: ID       !< Name of fan
    CHARACTER(LABEL_LENGTH) :: FAN_RAMP !< Name of RAMP containing fan curve
 END TYPE FAN_TYPE

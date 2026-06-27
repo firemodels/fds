@@ -3814,6 +3814,7 @@ Below are sample inputs for the three types of fans supported by FDS.
 \end{lstlisting}
 where:
 \begin{itemize}
+    \item \ct{CURVE_TEMP} is the temperature the fan curve is based upon. FDS assumes a default value of \SI{20}{\degreeCelsius}.
     \item \ct{LOSS} is the loss coefficient for flow through the fan when it is not operational. FDS assumes a default value of 1.
     \item \ct{MAX_FLOW} is the maximum volumetric flow of the fan in \unit{m^3/s}.  This input activates a quadratic fan model. Value must be > 0.
     \item \ct{MAX_PRESSURE} is the stall pressure of the fan in units of Pa.  This input activates a quadratic fan model. Value must be > 0.
@@ -3859,6 +3860,8 @@ Figure~\ref{fig:Fan_Curve} displays the fan curves for the inputs shown above.  
         \label{fig:Fan_Curve}
     \end{center}
 \end{figure}
+
+FDS will automatically adjust the pressures of the fan curve to reflect the fan affinity law for density. This law states that the fan curve will shift in proportion to the ratio of the current duct density to the as tested duct density. The as tested duct density is computed assuming air as the gas, standard pressure, and \ct{CURVE_TEMP}.
 
 \subsubsection{Jet Fans}
 
@@ -12397,6 +12400,7 @@ Keyword                      & Type          & Description                      
 \ct{COOLANT_SPECIFIC_HEAT}   & Real          & Section~\ref{info:HVACaircoil}                                           & \unit{kJ/(kg.K)} &               \\ \hline
 \ct{COOLANT_TEMPERATURE}     & Real          & Section~\ref{info:HVACaircoil}                                           & \unit{\degreeCelsius} &  \ct{TMPA}       \\ \hline
 \ct{CTRL_ID}                 & Character     & Sections~\ref{info:HVACduct}                                             &                  &                \\ \hline
+\ct{CURVE_TEMP}              & Real A        & Sections~\ref{info:HVACfan}                                              & \unit{\degreeCelsius} & 20.             \\ \hline
 \ct{DAMPER}                  & Logical       & Sections~\ref{info:HVACduct}, \ref{info:HVACdamper}                      &                  & \ct{F}  \\ \hline
 \ct{DEVC_ID}                 & Character     & Sections ~\ref{info:HVACduct}                                            &                  &                \\ \hline
 \ct{DIAMETER}                & Real          & Section~\ref{info:HVACduct}                                              &  m               &                \\ \hline
