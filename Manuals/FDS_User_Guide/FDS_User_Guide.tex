@@ -5856,6 +5856,8 @@ where $N_\Omega$ should be between 5 and 10.
 
 The frequency of calls to the radiation solver can be changed from every 3 time steps with an integer called \ct{TIME_STEP_INCREMENT}. The increment over which the angles are updated can be changed from 5 with the integer called \ct{ANGLE_INCREMENT}. If \ct{TIME_STEP_INCREMENT} and \ct{ANGLE_INCREMENT} are both set to 1, the radiation field is completely updated in a single time step, but the cost of the calculation increases significantly. By default, the radiation transport equation is fully updated every 15 time steps. Given the relatively small time steps typically dictated by the CFL constraint, 15 time steps is usually still a relatively short interval of time. Increasing the temporal resolution of the radiation solver rarely adds to the overall accuracy of the calculation. Spatial resolution is far more important.
 
+Additionally, to mitigate ray effects in the wall radiative heat flux, the option \ct{RANDOMIZE_RADIATION_DIRECTIONS} randomly rotates the local meridian ($x$), azimuthal ($y$), and axial ($z$) coordinate system used to define the angular coordinates $\theta$ and $\phi$. If \ct{RANDOMIZE_RADIATION_DIRECTIONS} is true, this rotation is performed after each complete sweep of the angular directions.
+
 If you are using multiple meshes, the radiation solver cannot transfer energy from mesh to mesh within a single time step. If you notice an obvious delay in the propagation of radiative intensity from one mesh to another, you can increase the number of times the radiative intensity is updated within a single time step using \ct{RADIATION_ITERATIONS}, which is 1 by default. You rarely need to do this, unless it is obvious from the animation of various slice files.
 
 The radiation solver is called before the start of the calculation to establish the radiation field in the event that you specify something to have a non-ambient temperature initially. By default, the radiation and wall boundary routines are iterated three times to establish thermal equilibrium. To change the number of iterations, set \ct{INITIAL_RADIATION_ITERATIONS} on the \ct{RADI} line.
@@ -13210,6 +13212,7 @@ Keyword                            & Type         & Description                 
 \ct{RADIATION}                     & Logical      & Section~\ref{info:radiation_off}     &                 & \ct{T}   \\ \hline
 \ct{RADIATION_ITERATIONS}          & Integer      & Section~\ref{info:RADI_Resolution}   &                 & 1              \\ \hline
 \ct{RADTMP}                        & Real         & Section~\ref{info:RADI_Two_Phase}    & \unit{\degreeCelsius} & 900            \\ \hline
+\ct{RANDOMIZE_RADIATION_DIRECTIONS}& Logical      & Section~\ref{info:RADI_Resolution}   &                 & \ct{F}  \\ \hline
 \ct{TIME_STEP_INCREMENT}           & Integer      & Section~\ref{info:RADI_Resolution}   &                 & 3\,(3D),2\,(2D) \\ \hline
 \ct{WIDE_BAND_MODEL}               & Logical      & Section~\ref{info:RADI_Wide_Band}    &                 & \ct{F}  \\ \hline
 \ct{WSGG_MODEL}                    & Logical      & Section~\ref{info:RADI_WSGG}         &                 & \ct{F}  \\ \hline
