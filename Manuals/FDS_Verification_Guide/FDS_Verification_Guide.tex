@@ -6810,7 +6810,7 @@ The sample case \ct{HVAC_filter} demonstrates the use of the filter input.  A 1~
 \section{HVAC Fans}
 \label{fan_test}
 
-This case tests a quadratic fan using the default approach to finding the fan operation point. Two compartments share a common wall. Both compartments are considered as separate ``pressure zones.'' Two, 0.04~m$^2$ HVAC ducts are defined.  One duct has a quadratic fan with a maximum volumetric flow of 0.16~\unit{m^3/s} and a stall pressure of 10~Pa. The second is an open duct with a flow loss of 10. The volume flow through the fans is obtained from the equation below:
+This pair of cases tests a quadratic fan using the default approach to finding the fan operation point. The cases are identical except for the ambient temperature which is  \SI{313.15}{\degreeCelsius} (twice the normal temperature in Kelvin) in the second case. Two compartments share a common wall. Both compartments are considered as separate ``pressure zones.'' Two, 0.04~m$^2$ HVAC ducts are defined.  One duct has a quadratic fan with a maximum volumetric flow of 0.16~\unit{m^3/s} and a stall pressure of 10~Pa. The second is an open duct with a flow loss of 10. The volume flow through the fans is obtained from the equation below:
 \be
    \dot{V}_{\hbox{\footnotesize fan}} = \dot{V}_{\hbox{\footnotesize max}} \; \hbox{sign} (\Delta p_{\hbox{\footnotesize max}}-\Delta p) \sqrt{ \frac{ |\Delta p - \Delta p_{\hbox{\footnotesize max}}|}{\Delta p_{\hbox{\footnotesize max}} } }  \label{fan_curve2}
 \ee
@@ -6818,18 +6818,18 @@ $\dot{V}_{\hbox{\footnotesize max}}=0.16$~\unit{m^3/s} is the maximum output of 
 \be
    \dot{V}_{\hbox{\footnotesize fan}}=A_{\hbox{\footnotesize duct}} \sqrt{\frac{2 \Delta p}{\rho K}}
 \ee
-Setting the above equation equal to Eq.~(\ref{fan_curve2}), the pressure drop can be determined:
+Setting the above equation equal to Eq.~(\ref{fan_curve2}), the pressure drop can be determined for the first case:
 \be
    \sqrt{\frac {2 |p_2-p_1|}{ (1.2 \; \hbox{\unit{kg/m^3}}) 10}} (0.04 \; \hbox{m}^2) = (0.16 \; \hbox{\unit{m^3/s}})  \; \sqrt{ \frac{ |p_1-p_2-10 \; \hbox{Pa}|}{10 \; \hbox{Pa}}  }
 \ee
-The solution is $p_2=4.5$~Pa and $p_1=-4.5$~Pa (see Fig.~\ref{fan_test_fig}). Note that the sign of the volume flow in the duct indicates whether the flow is moving from the first node to the second (positive) or the second node to the first (negative). This convention can make these types of calculations a bit tricky.
+The solution is $p_2=4.5$~Pa and $p_1=-4.5$~Pa (see Fig.~\ref{fan_test_fig}). Note that the sign of the volume flow in the duct indicates whether the flow is moving from the first node to the second (positive) or the second node to the first (negative). This convention can make these types of calculations a bit tricky. In the second case, fan affinity laws apply, and the fan curve is expected to shift by the ratio of the current duct density to the density the fan was tested at (default is  \SI{20}{\degreeCelsius}). This means the expected pressure is half that in the first case. The volume flow should not change. 
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/fan_test_Pressure} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/fan_test_Volume_Flow}
 \end{tabular*}
-\caption[Results of the \ct{fan_test} case]{Compartment pressure and volume flow for the \ct{fan_test} case.}
+\caption[Results of the \ct{fan_test} case]{Compartment pressure and volume flow for the \ct{fan_test} and \ct{fan_test_2} cases.}
 \label{fan_test_fig}
 \end{figure}
 
