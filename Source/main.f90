@@ -917,7 +917,7 @@ MAIN_LOOP: DO
 
    DO ITER=1,RADIATION_ITERATIONS
       IF (RADIATION .AND. ALLOW_RANDOM_RADIATION_ROTATION .AND. ITER==1) THEN
-         START_NEW_ANGLE_CYCLE = MOD(MESHES(LOWER_MESH_INDEX)%RAD_CALL_COUNTER-1, & ! -1 because we already called it once duing initialization.
+         START_NEW_ANGLE_CYCLE = MOD(MAX(MESHES(LOWER_MESH_INDEX)%RAD_CALL_COUNTER-1,0), & ! -1 because we already called it once duing initialization.
                                  ANGLE_INCREMENT*TIME_STEP_INCREMENT)==0 
          IF (START_NEW_ANGLE_CYCLE) THEN
             CALL CALCULATE_DIRECTION_COEFFICIENTS()

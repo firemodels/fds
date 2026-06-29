@@ -2805,7 +2805,7 @@ USE MIEV
 USE RADCAL_CALC
 USE WSGG_ARRAYS
 REAL(EB) :: PLANCK_C2,KSI,LT,RCRHO,YY,BBF,AP0,AMEAN,RADIANCE,TRANSMISSIVITY,XX
-INTEGER  :: N,I,J,K,IPC,IZERO,NN,NI,II,JJ,IIM,JJM,IBND,NS,NRA,NSB,RADCAL_TEMP(16)=0,RCT_SKIP=-1
+INTEGER  :: N,I,J,K,IPC,IZERO,IBND,NS,NRA,NSB,RADCAL_TEMP(16)=0,RCT_SKIP=-1
 TYPE (LAGRANGIAN_PARTICLE_CLASS_TYPE), POINTER :: LPC
 TYPE (RAD_FILE_TYPE), POINTER :: RF
 TYPE (SPECIES_TYPE), POINTER :: SS
@@ -2855,59 +2855,6 @@ CALL ChkMemErr('RADI','DLANG_LOCAL',IZERO)
 
 ! Set for ray rotation
 ALLOW_RANDOM_RADIATION_ROTATION = RANDOMIZE_RADIATION_DIRECTIONS .AND. .NOT.CYLINDRICAL .AND. .NOT.TWO_D
-
-! Determine mean direction normals and sweeping orders
-! as described in the FDS Tech. Ref. Guide Vol. 1 Sec. 6.2.2.
-
-! Calculate mirroring matrix
-N = 0
-DO I=1,NRT
-   DO J=1,NRP(I)
-      N = N + 1
-      DO K=1,3
-         IF (TWO_D .AND. .NOT.CYLINDRICAL) THEN
-            SELECT CASE(K)
-               CASE(1)             ! X-surfaces
-                  IIM = 1
-                  JJM = NRP(I) - J + 1
-               CASE(2)             ! Y-surfaces
-                  IIM = 1
-                  JJM = J
-               CASE(3)             ! Z-surfaces
-                  IIM = 1
-                  JJM = NRP(I)/2 - J + 1
-            END SELECT
-            JJM = MODULO(JJM,NRP(I))
-            IF (JJM==0) JJM = NRP(I)
-         ELSE
-            SELECT CASE(K)
-               CASE(1)             ! X-surfaces
-                  IIM = I
-                  JJM = NRP(I)/2 - J + 1
-               CASE(2)             ! Y-surfaces
-                  IIM = I
-                  JJM = NRP(I) - J + 1
-               CASE(3)             ! Z-surfaces
-                  IIM = NRT - I + 1
-                  JJM = J
-            END SELECT
-            IIM = MODULO(IIM,NRT)
-            JJM = MODULO(JJM,NRP(I))
-            IF (IIM==0) IIM = NRT
-            IF (JJM==0) JJM = NRP(I)
-         ENDIF
-
-         NN = 0
-         DO II = 1,IIM
-            DO JJ = 1,NRP(II)
-               NN = NN + 1
-               IF ((II==IIM).AND.(JJ==JJM)) NI = NN
-            ENDDO
-         ENDDO
-         DLM(N,K) = NI
-      ENDDO
-   ENDDO
-ENDDO
 
 !-----------------------------------------------------
 !
@@ -3346,7 +3293,7 @@ END SUBROUTINE INIT_RADIATION
 SUBROUTINE CALCULATE_FVM_ANGLES()
 
 REAL(EB) :: THETAUP,THETALOW,PHIUP,PHILOW,F_THETA,THETA,PHI
-INTEGER  :: NRA,N,I,J
+INTEGER  :: NRA,N,I,J,K,IIM,JJM,NN,II,JJ,NI
 
 NRA = NUMBER_RADIATION_ANGLES
 
@@ -3396,15 +3343,67 @@ DO I=1,NRT
       ENDIF
    ENDDO
 ENDDO
+
+! Calculate mirroring matrix
+N = 0
+DO I=1,NRT
+   DO J=1,NRP(I)
+      N = N + 1
+      DO K=1,3
+         IF (TWO_D .AND. .NOT.CYLINDRICAL) THEN
+            SELECT CASE(K)
+               CASE(1)             ! X-surfaces
+                  IIM = 1
+                  JJM = NRP(I) - J + 1
+               CASE(2)             ! Y-surfaces
+                  IIM = 1
+                  JJM = J
+               CASE(3)             ! Z-surfaces
+                  IIM = 1
+                  JJM = NRP(I)/2 - J + 1
+            END SELECT
+            JJM = MODULO(JJM,NRP(I))
+            IF (JJM==0) JJM = NRP(I)
+         ELSE
+            SELECT CASE(K)
+               CASE(1)             ! X-surfaces
+                  IIM = I
+                  JJM = NRP(I)/2 - J + 1
+               CASE(2)             ! Y-surfaces
+                  IIM = I
+                  JJM = NRP(I) - J + 1
+               CASE(3)             ! Z-surfaces
+                  IIM = NRT - I + 1
+                  JJM = J
+            END SELECT
+            IIM = MODULO(IIM,NRT)
+            JJM = MODULO(JJM,NRP(I))
+            IF (IIM==0) IIM = NRT
+            IF (JJM==0) JJM = NRP(I)
+         ENDIF
+
+         NN = 0
+         DO II = 1,IIM
+            DO JJ = 1,NRP(II)
+               NN = NN + 1
+               IF ((II==IIM).AND.(JJ==JJM)) NI = NN
+            ENDDO
+         ENDDO
+         DLM(N,K) = NI
+      ENDDO
+   ENDDO
+ENDDO
+
 END SUBROUTINE CALCULATE_FVM_ANGLES
 
 
 
 !> \Calculate direction coefficients for with and without random rotations
+!> as described in the FDS Tech. Ref. Guide Vol. 1 Sec. 6.2.2.
 SUBROUTINE CALCULATE_DIRECTION_COEFFICIENTS()
 USE COMP_FUNCTIONS, ONLY : CURRENT_TIME
 
-INTEGER  :: NRA,N,I,J,IO,IERR
+INTEGER  :: NRA,N,IO,I,IERR
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: COSINE_ARRAY
 REAL(EB) :: TNOW,AXIS(3),MERIDIAN(3), AZIMUTH(3),E1(3),E2(3),REF(3),PSI,DLO,MAGTMP,RNDNUM(3)
 
@@ -3462,35 +3461,27 @@ ELSE
    AXIS     = (/0._EB, 0._EB, 1._EB/)
 ENDIF
 
-N = 0
-DO I=1,NRT
-   DO J=1,NRP(I)
-      N = N + 1
-      IF (CYLINDRICAL) THEN
-         DLX(N) =  MERI_COMP(N)
-         DLY(N) =  AZIM_COMP(N)
-         DLB(N) =  DLB_COMP(N)
-         DLZ(N) =  AXIS_COMP(N)
-         DLANG(1,N)  = DLANG_LOCAL(1,N)
-         DLANG(2,N)  = DLANG_LOCAL(2,N)
-         DLANG(3,N)  = DLANG_LOCAL(3,N)
-         IF (N==1000000) WRITE(LU_ERR,'(A)') 'This line should never get executed. It is here only to prevent optimization.'
-      ELSEIF (TWO_D) THEN
-         DLX(N) = MERI_COMP(N)
-         DLY(N) = AZIM_COMP(N)
-         DLZ(N) = AXIS_COMP(N)
-         DLANG(1,N)  = DLANG_LOCAL(1,N)
-         DLANG(2,N)  = DLANG_LOCAL(2,N)
-         DLANG(3,N)  = DLANG_LOCAL(3,N)
-      ELSE ! Right now random rotation is allowed only for 3D
-         DLX(N) = MERI_COMP(N)*MERIDIAN(1)+AZIM_COMP(N)*AZIMUTH(1)+AXIS_COMP(N)*AXIS(1)
-         DLY(N) = MERI_COMP(N)*MERIDIAN(2)+AZIM_COMP(N)*AZIMUTH(2)+AXIS_COMP(N)*AXIS(2)
-         DLZ(N) = MERI_COMP(N)*MERIDIAN(3)+AZIM_COMP(N)*AZIMUTH(3)+AXIS_COMP(N)*AXIS(3)
-         DLANG_OLD(:,N)=DLANG(:,N)
-         DLANG(:,N) = DLANG_LOCAL(1,N)*MERIDIAN(:) + DLANG_LOCAL(2,N)*AZIMUTH(:) + DLANG_LOCAL(3,N)*AXIS(:)
-      ENDIF
+
+IF (CYLINDRICAL) THEN
+   DLX(1:NRA) = MERI_COMP(1:NRA)
+   DLY(1:NRA) = AZIM_COMP(1:NRA)
+   DLB(1:NRA) = DLB_COMP(1:NRA)
+   DLZ(1:NRA) = AXIS_COMP(1:NRA)
+   DLANG(1:3,1:NRA) = DLANG_LOCAL(1:3,1:NRA)
+ELSEIF (TWO_D) THEN
+   DLX(1:NRA) = MERI_COMP(1:NRA)
+   DLY(1:NRA) = AZIM_COMP(1:NRA)
+   DLZ(1:NRA) = AXIS_COMP(1:NRA)
+   DLANG(1:3,1:NRA) = DLANG_LOCAL(1:3,1:NRA)
+ELSE ! Right now random rotation is allowed only for 3D
+   DLX(1:NRA) = MERI_COMP(1:NRA)*MERIDIAN(1)+AZIM_COMP(1:NRA)*AZIMUTH(1)+AXIS_COMP(1:NRA)*AXIS(1)
+   DLY(1:NRA) = MERI_COMP(1:NRA)*MERIDIAN(2)+AZIM_COMP(1:NRA)*AZIMUTH(2)+AXIS_COMP(1:NRA)*AXIS(2)
+   DLZ(1:NRA) = MERI_COMP(1:NRA)*MERIDIAN(3)+AZIM_COMP(1:NRA)*AZIMUTH(3)+AXIS_COMP(1:NRA)*AXIS(3)
+   DLANG_OLD(:,1:NRA)=DLANG(:,1:NRA)
+   DO I =1,3
+      DLANG(I,1:NRA) = MERIDIAN(I)*DLANG_LOCAL(1,1:NRA) + AZIMUTH(I)*DLANG_LOCAL(2,1:NRA)+ AXIS(I)*DLANG_LOCAL(3,1:NRA)
    ENDDO
-ENDDO
+ENDIF
 
 ! In axially symmetric case, each angle represents two symmetric angles. So weight the intensities by two.
 WEIGH_CYL = 1._EB
