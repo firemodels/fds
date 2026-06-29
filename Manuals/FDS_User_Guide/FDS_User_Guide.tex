@@ -3814,6 +3814,7 @@ Below are sample inputs for the three types of fans supported by FDS.
 \end{lstlisting}
 where:
 \begin{itemize}
+    \item \ct{CURVE_TEMP} is the temperature the fan curve is based upon. FDS assumes a default value of \SI{20}{\degreeCelsius}.
     \item \ct{LOSS} is the loss coefficient for flow through the fan when it is not operational. FDS assumes a default value of 1.
     \item \ct{MAX_FLOW} is the maximum volumetric flow of the fan in \unit{m^3/s}.  This input activates a quadratic fan model. Value must be > 0.
     \item \ct{MAX_PRESSURE} is the stall pressure of the fan in units of Pa.  This input activates a quadratic fan model. Value must be > 0.
@@ -3859,6 +3860,8 @@ Figure~\ref{fig:Fan_Curve} displays the fan curves for the inputs shown above.  
         \label{fig:Fan_Curve}
     \end{center}
 \end{figure}
+
+FDS will automatically adjust the pressures of the fan curve to reflect the fan affinity law for density. This law states that the fan curve will shift in proportion to the ratio of the current duct density to the as tested duct density. The as tested duct density is computed assuming air as the gas, standard pressure, and \ct{CURVE_TEMP}.
 
 \subsubsection{Jet Fans}
 
@@ -5852,6 +5855,8 @@ The requirements for accurate angular resolution have been studied by Kim and Tr
 where $N_\Omega$ should be between 5 and 10.
 
 The frequency of calls to the radiation solver can be changed from every 3 time steps with an integer called \ct{TIME_STEP_INCREMENT}. The increment over which the angles are updated can be changed from 5 with the integer called \ct{ANGLE_INCREMENT}. If \ct{TIME_STEP_INCREMENT} and \ct{ANGLE_INCREMENT} are both set to 1, the radiation field is completely updated in a single time step, but the cost of the calculation increases significantly. By default, the radiation transport equation is fully updated every 15 time steps. Given the relatively small time steps typically dictated by the CFL constraint, 15 time steps is usually still a relatively short interval of time. Increasing the temporal resolution of the radiation solver rarely adds to the overall accuracy of the calculation. Spatial resolution is far more important.
+
+Additionally, to mitigate ray effects in the wall radiative heat flux, the option \ct{RANDOMIZE_RADIATION_DIRECTIONS} randomly rotates the local meridian ($x$), azimuthal ($y$), and axial ($z$) coordinate system used to define the angular coordinates $\theta$ and $\phi$. If \ct{RANDOMIZE_RADIATION_DIRECTIONS} is true, this rotation is performed after each complete sweep of the angular directions.
 
 If you are using multiple meshes, the radiation solver cannot transfer energy from mesh to mesh within a single time step. If you notice an obvious delay in the propagation of radiative intensity from one mesh to another, you can increase the number of times the radiative intensity is updated within a single time step using \ct{RADIATION_ITERATIONS}, which is 1 by default. You rarely need to do this, unless it is obvious from the animation of various slice files.
 
@@ -12395,6 +12400,7 @@ Keyword                      & Type          & Description                      
 \ct{COOLANT_SPECIFIC_HEAT}   & Real          & Section~\ref{info:HVACaircoil}                                           & \unit{kJ/(kg.K)} &               \\ \hline
 \ct{COOLANT_TEMPERATURE}     & Real          & Section~\ref{info:HVACaircoil}                                           & \unit{\degreeCelsius} &  \ct{TMPA}       \\ \hline
 \ct{CTRL_ID}                 & Character     & Sections~\ref{info:HVACduct}                                             &                  &                \\ \hline
+\ct{CURVE_TEMP}              & Real A        & Sections~\ref{info:HVACfan}                                              & \unit{\degreeCelsius} & 20.             \\ \hline
 \ct{DAMPER}                  & Logical       & Sections~\ref{info:HVACduct}, \ref{info:HVACdamper}                      &                  & \ct{F}  \\ \hline
 \ct{DEVC_ID}                 & Character     & Sections ~\ref{info:HVACduct}                                            &                  &                \\ \hline
 \ct{DIAMETER}                & Real          & Section~\ref{info:HVACduct}                                              &  m               &                \\ \hline
@@ -13206,6 +13212,7 @@ Keyword                            & Type         & Description                 
 \ct{RADIATION}                     & Logical      & Section~\ref{info:radiation_off}     &                 & \ct{T}   \\ \hline
 \ct{RADIATION_ITERATIONS}          & Integer      & Section~\ref{info:RADI_Resolution}   &                 & 1              \\ \hline
 \ct{RADTMP}                        & Real         & Section~\ref{info:RADI_Two_Phase}    & \unit{\degreeCelsius} & 900            \\ \hline
+\ct{RANDOMIZE_RADIATION_DIRECTIONS}& Logical      & Section~\ref{info:RADI_Resolution}   &                 & \ct{F}  \\ \hline
 \ct{TIME_STEP_INCREMENT}           & Integer      & Section~\ref{info:RADI_Resolution}   &                 & 3\,(3D),2\,(2D) \\ \hline
 \ct{WIDE_BAND_MODEL}               & Logical      & Section~\ref{info:RADI_Wide_Band}    &                 & \ct{F}  \\ \hline
 \ct{WSGG_MODEL}                    & Logical      & Section~\ref{info:RADI_WSGG}         &                 & \ct{F}  \\ \hline

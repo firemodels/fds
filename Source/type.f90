@@ -1025,7 +1025,7 @@ END TYPE SURFACE_TYPE
 TYPE (SURFACE_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: SURFACE
 
 TYPE OMESH_TYPE
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: MU,RHO,RHOS,TMP,U,V,W,US,VS,WS,H,HS,FVX,FVY,FVZ,D,DS,KRES,IL_S,IL_R,Q
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: MU,RHO,RHOS,TMP,U,V,W,US,VS,WS,H,HS,FVX,FVY,FVZ,D,DS,KRES,IL_S,IL_R,IL_R_OLD,Q
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: ZZ,ZZS
    INTEGER, ALLOCATABLE, DIMENSION(:) :: IIO_R,JJO_R,KKO_R,IOR_R,IIO_S,JJO_S,KKO_S,IOR_S
    INTEGER :: I_MIN_R=-10,I_MAX_R=-10,J_MIN_R=-10,J_MAX_R=-10,K_MIN_R=-10,K_MAX_R=-10,NIC_R=0, &
@@ -2083,6 +2083,7 @@ TYPE FAN_TYPE
    REAL(EB) :: MAX_PRES                !< Maximum fan pressure (Pa) used for FAN_TYPE=2
    REAL(EB) :: OFF_LOSS=1._EB          !< Flow loss through fan when it is not running
    REAL(EB) :: TAU=0._EB               !< t2 or tanh time constant for spinning up fan speed
+   REAL(EB) :: CURVE_TEMP              !< Temperature basis for fan curve
    CHARACTER(LABEL_LENGTH) :: ID       !< Name of fan
    CHARACTER(LABEL_LENGTH) :: FAN_RAMP !< Name of RAMP containing fan curve
 END TYPE FAN_TYPE
