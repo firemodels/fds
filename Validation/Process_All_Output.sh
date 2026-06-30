@@ -97,6 +97,7 @@ PROCESS BRE_Spray
 PROCESS Bryant_Doorway
 PROCESS CAROLFIRE
 PROCESS Casara_Arts_Ribbed_Channel
+PROCESS CERTEC_Pool_Fires
 PROCESS Convection
 PROCESS Crown_Fires
 PROCESS CSIRO_Grassland_Fires
