@@ -6779,13 +6779,16 @@ The second duct is placed in the upper half of the compartment and is assigned a
 \section{HVAC Dampers}
 \label{HVAC_damper}
 
-The \ct{HVAC_damper} example case is a simple duct network of three ducts connected by a tee.  A damper is present in one of the ducts and linked to a \ct{DEVC} that will change state at 10~s.  With the damper open, the respective duct flow speeds should be 3~m/s, 1~m/s, and 2~m/s.  When the damper closes, the respective duct flow speeds should be 3~m/s, 3~m/s, and~0 m/s.  Results of this are shown in Fig.~\ref{fig:HVAC_damper}.
+The \ct{HVAC_damper} example case is a simple duct network of three ducts connected by a tee.  A damper is present in one of the ducts and linked to a \ct{DEVC} that will change state at 10~s.  With the damper open, the respective duct velocities should be 3~m/s, 1~m/s, and 2~m/s.  When the damper closes, the respective duct velocities should be 3~m/s, 3~m/s, and~0 m/s.  With the damper open, the wall velocities should be 0.75~m/s for the inlet and -0.25~m/s for the two outlets. After the damper closes, the inlet should stay the same, and ducts 1 and 3 should repectively become -0.75~m/s and 0~m/s. Results of this are shown in Fig.~\ref{fig:HVAC_damper}.
 
-\begin{figure}[!ht]
-\centering
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_damper}
-\caption[Example case \ct{HVAC_damper}]{Simple duct network with a damper, case \ct{HVAC_damper}.}
-\label{fig:HVAC_damper}
+\begin{figure}[ht]
+    \noindent
+    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+        \includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_damper_duct} &
+        \includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_damper_wall}
+    \end{tabular*}
+    \caption[Example case \ct{HVAC_damper}]{Simple duct network with a damper, case \ct{HVAC_damper}.}
+    \label{fig:HVAC_damper}
 \end{figure}
 
 
