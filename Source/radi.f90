@@ -3483,14 +3483,6 @@ ELSE ! Right now random rotation is allowed only for 3D
    ENDDO
 ENDIF
 
-! In axially symmetric case, each angle represents two symmetric angles. So weight the intensities by two.
-WEIGH_CYL = 1._EB
-IF (CYLINDRICAL) THEN
-   WEIGH_CYL = 2._EB
-   ! Wall direction cosines are only used for flux integrations, so they can by multiplied in advance.
-   DLN = WEIGH_CYL * DLN
-ENDIF
-
 ! Set (wall normal)*(angle vector) value
 DO N = 1,NRA
    DLN( 0,N) = 0._EB !prevent undefined variable errors
@@ -3502,6 +3494,13 @@ DO N = 1,NRA
    DLN( 3,N) =  DLZ(N)
 ENDDO
 
+! In axially symmetric case, each angle represents two symmetric angles. So weight the intensities by two.
+WEIGH_CYL = 1._EB
+IF (CYLINDRICAL) THEN
+   WEIGH_CYL = 2._EB
+   ! Wall direction cosines are only used for flux integrations, so they can by multiplied in advance.
+   DLN = WEIGH_CYL * DLN
+ENDIF
 
 ! Determine angle factors for Lagrangian particles with ORIENTATION
 ! COSINE_ARRAY holds the cosines of the angles formed by the orientation vector and the radiation directions.
@@ -3537,7 +3536,7 @@ INTEGER, PARAMETER :: N_INTP=4 ! Number of neighbouring intensitiies for interpo
 
 INTEGER :: NRA,NM,NNN,LL,I_INTP
 REAL(EB) :: TNOW,COSANG(NUMBER_RADIATION_ANGLES), DUMMY(NUMBER_RADIATION_ANGLES)
-INTEGER :: NNEW,NOLD,IBND,IW,NOM
+INTEGER :: NNEW,NOLD,IBND,IW,NOM,ICF
 INTEGER :: IDX(NUMBER_RADIATION_ANGLES,N_INTP)
 
 REAL(EB) :: W(NUMBER_RADIATION_ANGLES,N_INTP)
@@ -3546,6 +3545,7 @@ TYPE(WALL_TYPE), POINTER :: WC
 TYPE(BOUNDARY_RADIA_TYPE), POINTER :: BR
 REAL(EB) :: ILW_OLD(NUMBER_RADIATION_ANGLES)
 TYPE (OMESH_TYPE), POINTER :: M2
+TYPE(CFACE_TYPE), POINTER :: CFA
 
 TNOW=CURRENT_TIME()
 
@@ -3582,6 +3582,19 @@ DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    DO IW = 1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       WC => WALL(IW)
       BR => BOUNDARY_RADIA(WC%BR_INDEX)
+      DO IBND = 1,NUMBER_SPECTRAL_BANDS
+         ILW_OLD = BR%BAND(IBND)%ILW(:)
+         BR%BAND(IBND)%ILW(:) = 0._EB
+         DO I_INTP=1,N_INTP
+            BR%BAND(IBND)%ILW(:) = BR%BAND(IBND)%ILW(:) + W(:,I_INTP)*ILW_OLD(IDX(:,I_INTP))*RSA(IDX(:,I_INTP))
+         ENDDO
+         BR%BAND(IBND)%ILW(:) = BR%BAND(IBND)%ILW(:)/RSA(:)
+      ENDDO
+   ENDDO
+
+   DO ICF = INTERNAL_CFACE_CELLS_LB+1,INTERNAL_CFACE_CELLS_LB+N_INTERNAL_CFACE_CELLS
+      CFA => CFACE(ICF)
+      BR  => BOUNDARY_RADIA(CFA%BR_INDEX)
       DO IBND = 1,NUMBER_SPECTRAL_BANDS
          ILW_OLD = BR%BAND(IBND)%ILW(:)
          BR%BAND(IBND)%ILW(:) = 0._EB
