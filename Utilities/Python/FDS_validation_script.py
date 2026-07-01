@@ -38,6 +38,7 @@ print("Crown_Fires...");                  safe_run("./scripts/Crown_Fires.py")
 print("Ranz_Marshall...");                safe_run("./scripts/Ranz_Marshall.py")
 print("Phoenix_LNG_Fires...");            safe_run("./scripts/Phoenix_LNG_Fires.py")
 print("Sandia_Plumes_TKE...");            safe_run("./scripts/Sandia_Plumes_TKE.py")
+print("Sandia_Pool_Fires...");            safe_run("./scripts/Sandia_Pool_Fires.py")
 
 # Dataplot and scatplot options
 
@@ -96,16 +97,15 @@ print("catchpole_spread_rates...");       safe_run("./scripts/catchpole_spread_r
 print("FHWA_Tunnel...");                  safe_run("./scripts/FHWA_Tunnel.py")
 print("FM_FPRF_Datacenter...");           safe_run("./scripts/FM_FPRF_Datacenter.py")
 print("Heskestad_Flame_Height_2...");     safe_run("./scripts/Heskestad_Flame_Height_2.py")
+print("JIS_Facade...");                   safe_run("./scripts/JIS_Facade_contours.py")
+print("JIS_Facade_exp...");               safe_run("./scripts/JIS_Facade_exp_contours.py")
 print("McCaffrey_Plume...");              safe_run("./scripts/McCaffrey_Plume.py")
 print("Memorial_Tunnel...");              safe_run("./scripts/Memorial_Tunnel.py")
 print("Memorial_Tunnel_2...");            safe_run("./scripts/Memorial_Tunnel_2.py")
 print("NIST_NRC_Parallel_Panels...");     safe_run("./scripts/NIST_NRC_Parallel_Panels.py")
 print("NIST_Pool_Fires...");              safe_run("./scripts/NIST_Pool_Fires.py")
 print("Sandia_Plumes...");                safe_run("./scripts/Sandia_Plumes.py")
-print("Sandia_Pool_Fires...");            safe_run("./scripts/Sandia_Pool_Fires.py")
 print("Theobald_Hose_Stream...");         safe_run("./scripts/Theobald_Hose_Stream.py")
-print("JIS_Facade...");                   safe_run("./scripts/JIS_Facade_contours.py")
-print("JIS_Facade_exp...");               safe_run("./scripts/JIS_Facade_exp_contours.py")
 print("USFS_Deep_Fuel_Beds...");          safe_run("./scripts/USFS_Deep_Fuel_Beds.py")
 print("Wu_Bakar_Tunnels...");             safe_run("./scripts/Wu_Bakar_Tunnels.py")
 
