@@ -845,7 +845,6 @@ REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: DLN                !< Wall-normal matri
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: DLANG              !< Angles
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: DLANG_OLD          !< Angles in previous rotation
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: DLANG_LOCAL        !< Angles in rotating axis system
-REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: ORIENTATION_FACTOR !< Fraction of radiation angle corresponding to a particular direction
 REAL(EB), ALLOCATABLE, DIMENSION(:)   :: BBFRAC             !< Fraction of blackbody radiation
 REAL(EB), ALLOCATABLE, DIMENSION(:)   :: WL_LOW             !< Lower wavelength limit of the spectral band
 REAL(EB), ALLOCATABLE, DIMENSION(:)   :: WL_HIGH            !< Upper wavelength limit of the spectral band
@@ -858,6 +857,7 @@ REAL(EB), ALLOCATABLE, DIMENSION(:)   :: AXIS_COMP          !< z-component of th
 REAL(EB), ALLOCATABLE, DIMENSION(:)   :: DLB                !< Mean bottom component of RAYN vector (cylindrical case)
 REAL(EB), ALLOCATABLE, DIMENSION(:)   :: DLB_COMP           !< Mean bottom component of RAYN vector (cylindrical case)
 REAL(EB), ALLOCATABLE, DIMENSION(:)   :: RSA                !< Array of solid angles
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: DLO_ORIENTATION    !< COS of orientation vector w.r.t fvm angle vectors
 
 INTEGER, ALLOCATABLE, DIMENSION(:,:)  :: DLM                !< Mirroring indices
 INTEGER, ALLOCATABLE, DIMENSION(:)    :: NRP                !< Number of radiation phi angles at each theta band
