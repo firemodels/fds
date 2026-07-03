@@ -535,6 +535,8 @@ three spatial directions are known, and the intensity $I_{ijk}^l$ can be solved 
 all the upwind intensities are determined from solid or gas phase boundaries. In theory, iterations are needed if the reflections
 or scattering are important, or if the scenario is optically very thick. Currently, no iterations are made.
 
+To mitigate ray effects in the wall radiative heat flux, an option is implemented to randomly rotate the local meridian ($x$), azimuthal ($y$), and axial ($z$) coordinate system at each selected time step with respect to which the angular coordinates, $\theta$ and $\phi$ are evaluated. When random rotation is enabled, the discrete angular integration coefficients (e.g., $D_{xu}^l$) are no longer exactly symmetric with respect to the mesh faces. Consequently, the sum of $D_{xu}^l$ (and the corresponding coefficients for the other coordinate directions) over a face may deviate slightly from the theoretical value of $\pi$.
+
 \subsection{Spatial Discretization in Cut Cells}
 
 In the case of complex geometry where irregular cut-cells may exist (see Sec.~\ref{sec:unstructured_geometry}) an unstructured version of the RTE in Eq.~\ref{RTEdiscrete3} is adopted
