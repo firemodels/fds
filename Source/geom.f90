@@ -5440,7 +5440,7 @@ INTEGER, PARAMETER :: GLOBAL_DELTA_CELL = 100
 INTEGER, PARAMETER :: GLOBAL_DELTA_EDGE = 3*GLOBAL_DELTA_CELL
 INTEGER, PARAMETER :: GLOBAL_DELTA_FACE = 3*GLOBAL_DELTA_CELL
 
-INTEGER, PARAMETER :: LINSEARCH_LIMIT = 13  ! LINSEARCH_LIMIT-1 is the maximum size of array for linear search O(n). 
+INTEGER, PARAMETER :: LINSEARCH_LIMIT = 13  ! LINSEARCH_LIMIT-1 is the maximum size of array for linear search O(n).
                                             ! If Array larger -> binary search O(log(n)).
 
 ! Interpolation stencil threshold. Interpolation stencils will be defined if distance
@@ -6480,9 +6480,10 @@ TYPE(BOUNDARY_COORD_TYPE), POINTER :: BC,WC_BC
 TYPE(BOUNDARY_PROP1_TYPE), POINTER :: B1,WC_B1
 INTEGER :: IBOD, IWSEL, ICC, JCC
 
-INTEGER :: IG, TRI, WSELEM(NOD1:NOD3), NOM, IIO, JJO, KKO, ICFACE, IOR, X1AXIS
+INTEGER :: IG, TRI, WSELEM(NOD1:NOD3), NOM, IIO, JJO, KKO, ICFACE, IOR, X1AXIS, IWSEL_BACK
 REAL(EB):: XP(IAXIS:KAXIS),RDIR(IAXIS:KAXIS),V1(IAXIS:KAXIS),V2(IAXIS:KAXIS),V3(IAXIS:KAXIS),POS(IAXIS:KAXIS)
-LOGICAL :: IS_INTERSECT=.FALSE.
+REAL(EB):: POS_CUR(IAXIS:KAXIS),DIST_BACK,DIST_CUR,NBACK(IAXIS:KAXIS),DIAG_CELL
+LOGICAL :: IS_INTERSECT=.FALSE.,IS_INTERSECT_CUR
 TYPE (SURFACE_TYPE), POINTER :: SF
 TYPE (WALL_TYPE), POINTER :: WC
 TYPE (MESH_TYPE), POINTER :: M
@@ -6592,11 +6593,14 @@ CASE(INTEGER_TWO) ! Assign AREA_ADJUST for CFACE, BCs information for CFACE.
 
    ! Case of exposed Backing we need to find CFACE_INDEX of BACK CFACE.
    IF (SF%BACKING==EXPOSED .AND. SF%THERMAL_BC_INDEX==THERMALLY_THICK) THEN
+      NOM=0; IWSEL_BACK=0; IS_INTERSECT=.FALSE.
       IG  = CF%BODTRI(1,IFACE)
       TRI = CF%BODTRI(2,IFACE)
       IF (VALID_GEOMETRY_FACE_DONOR(IG,TRI)) THEN
          XP(IAXIS:KAXIS)  = (/ BC%X, BC%Y, BC%Z /) ! CFACE centroid location.
          RDIR(IAXIS:KAXIS)= - GEOMETRY(IG)%FACES_NORMAL(IAXIS:KAXIS,TRI) ! Normal into the body.
+         ! Cast the inward ray against all other triangles and keep the CLOSEST forward intersection.
+         DIST_BACK    = 1._EB/TWENTY_EPSILON_EB
          TRI_LOOP : DO IWSEL=1,GEOMETRY(IG)%N_FACES
             IF (IWSEL==TRI) CYCLE
             WSELEM(NOD1:NOD3) = GEOMETRY(IG)%FACES(NODS_WSEL*(IWSEL-1)+1:NODS_WSEL*IWSEL)
@@ -6605,44 +6609,50 @@ CASE(INTEGER_TWO) ! Assign AREA_ADJUST for CFACE, BCs information for CFACE.
             V2(IAXIS:KAXIS)  = GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD2)-1)+1:MAX_DIM*WSELEM(NOD2))
             V3(IAXIS:KAXIS)  = GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD3)-1)+1:MAX_DIM*WSELEM(NOD3))
 
-            ! Search for intersection point in POS(IAXIS:KAXIS):
-            CALL RAY_TRIANGLE_INTERSECT_PT(V1,V2,V3,XP,RDIR,IS_INTERSECT,POS)
+            ! Only consider EXIT faces (where the inward ray leaves the solid).
+            IF (DOT_PRODUCT(RDIR(IAXIS:KAXIS),GEOMETRY(IG)%FACES_NORMAL(IAXIS:KAXIS,IWSEL)) <= TWENTY_EPSILON_EB) CYCLE TRI_LOOP
 
-            IF (IS_INTERSECT) EXIT TRI_LOOP
+            ! Search for intersection point in POS_CUR(IAXIS:KAXIS):
+            CALL RAY_TRIANGLE_INTERSECT_PT(V1,V2,V3,XP,RDIR,IS_INTERSECT_CUR,POS_CUR)
+
+            IF (IS_INTERSECT_CUR) THEN
+               DIST_CUR = (POS_CUR(IAXIS)-XP(IAXIS))**2 + (POS_CUR(JAXIS)-XP(JAXIS))**2 + &
+                          (POS_CUR(KAXIS)-XP(KAXIS))**2
+               IF (DIST_CUR < DIST_BACK) THEN
+                  DIST_BACK    = DIST_CUR
+                  POS          = POS_CUR
+                  IS_INTERSECT = .TRUE.
+                  IWSEL_BACK   = IWSEL  ! Back GEOMETRY triangle the ray struck; its normal orients the back CFACE search.
+               ENDIF
+            ENDIF
 
          ENDDO TRI_LOOP
-      ELSE
-         IS_INTERSECT = .FALSE.
       ENDIF
 
+      ! Link a back CFACE only when an intersection was found and the distance in excess of the SURF THICKNESS
+      ! is within one cell diagonal; for longer distances (or no hit) leave the backing 'VOID'.
       IF (IS_INTERSECT) THEN
+         DIAG_CELL = SQRT(DX(BC%IIG)**2 + DY(BC%JJG)**2 + DZ(BC%KKG)**2)
+         IF (NORM2(XP-POS) - SF%THICKNESS <= DIAG_CELL) THEN
+            ! We Found an intersection with IWSEL in position POS(IAXIS:KAXIS):
+            ! Back GEOMETRY triangle normal used to orient the back CFACE search (same-mesh and cross-mesh):
+            NBACK(IAXIS:KAXIS) = GEOMETRY(IG)%FACES_NORMAL(IAXIS:KAXIS,IWSEL_BACK)
 
-         ! Check that the distance in excess of the SURF THICKNESS is less than the cell diagonal size:
-         ! For longer distances from CFACE to BACK CFACE BC is 'VOID'.
-         IF(NORM2(XP-POS) - SF%THICKNESS > SQRT(DX(BC%IIG)**2 + DY(BC%JJG)**2 + DZ(BC%KKG)**2)) RETURN
+            ! Find indexes and mesh of cell containing intersection point:
+            CALL SEARCH_OTHER_MESHES(POS(IAXIS),POS(JAXIS),POS(KAXIS),NOM,IIO,JJO,KKO)
 
-         ! We Found an intersection with IWSEL in position POS(IAXIS:KAXIS):
-         ! Find indexes and mesh of cell containing intersection point:
-         CALL SEARCH_OTHER_MESHES(POS(IAXIS),POS(JAXIS),POS(KAXIS),NOM,IIO,JJO,KKO)
-
-         ! Intersection point lies outside of the computational domain: treat backing as VOID.
-         IF (NOM==0) RETURN
-
-         ! If the back CFACE lies in a different mesh than the front CFACE, defer to INITIALIZE_BACK_CFACE_EXCHANGE.
-         IF (NOM/=NM) THEN
-            IF (CFA%OD_INDEX>0) CALL ADD_BACK_CFACE_QUERY(NM,NOM,CFACE_INDEX,POS)
-            RETURN
+            IF (NOM/=0 .AND. NOM/=NM) THEN
+               ! Back CFACE lies in a different mesh: defer to INITIALIZE_BACK_CFACE_EXCHANGE.
+               IF (CFA%OD_INDEX>0) CALL ADD_BACK_CFACE_QUERY(NM,NOM,CFACE_INDEX,POS,NBACK)
+            ELSEIF (NOM==NM) THEN
+               ! Back CFACE is in the same (local) mesh: resolve its index now, excluding the front CFACE itself.
+               ICFACE = GET_BACK_CFACE_INDEX(NM,IIO,JJO,KKO,POS,ICF,IFACE,NBACK)
+               IF (ICFACE>0 .AND. CFA%OD_INDEX>0) THEN
+                  M%BOUNDARY_ONE_D(CFA%OD_INDEX)%BACK_MESH  = NM
+                  M%BOUNDARY_ONE_D(CFA%OD_INDEX)%BACK_INDEX = ICFACE
+               ENDIF
+            ENDIF
          ENDIF
-
-         ! Back CFACE is in the same (local) mesh: resolve its index now, excluding the front CFACE itself.
-         ICFACE = GET_BACK_CFACE_INDEX(NM,IIO,JJO,KKO,POS,ICF,IFACE)
-         IF (ICFACE>0 .AND. CFA%OD_INDEX>0) THEN
-            M%BOUNDARY_ONE_D(CFA%OD_INDEX)%BACK_MESH  = NM
-            M%BOUNDARY_ONE_D(CFA%OD_INDEX)%BACK_INDEX = ICFACE
-         ENDIF
-
-      ELSE ! Did not find intersection with other triangles. Leave VOID BC.
-         RETURN
       ENDIF
 
    ENDIF
@@ -6731,58 +6741,76 @@ END SUBROUTINE INIT_CFACE_CELL
 
 
 ! ----------------------- ADD_BACK_CFACE_QUERY -----------------------------
-SUBROUTINE ADD_BACK_CFACE_QUERY(NM,NOM,FRONT_CFACE,POS)
+SUBROUTINE ADD_BACK_CFACE_QUERY(NM,NOM,FRONT_CFACE,POS,NBACK)
 
 INTEGER, INTENT(IN) :: NM,NOM,FRONT_CFACE
-REAL(EB), INTENT(IN) :: POS(IAXIS:KAXIS)
+REAL(EB), INTENT(IN) :: POS(IAXIS:KAXIS),NBACK(IAXIS:KAXIS)
 INTEGER :: N,NDIM
-REAL(EB), ALLOCATABLE :: XYZ_DUMMY(:,:)
+REAL(EB), ALLOCATABLE :: XYZ_DUMMY(:,:),NBACK_DUMMY(:,:)
 INTEGER,  ALLOCATABLE :: FRONT_DUMMY(:)
 
 ASSOCIATE(M3=>MESHES(NM)%OMESH(NOM))
 IF (.NOT.ALLOCATED(M3%CFACE_QUERY_XYZ)) THEN
    M3%N_CFACE_QUERY_DIM = 64
    ALLOCATE(M3%CFACE_QUERY_XYZ(IAXIS:KAXIS,M3%N_CFACE_QUERY_DIM))
+   ALLOCATE(M3%CFACE_QUERY_NBACK(IAXIS:KAXIS,M3%N_CFACE_QUERY_DIM))
    ALLOCATE(M3%CFACE_QUERY_FRONT(M3%N_CFACE_QUERY_DIM))
    M3%N_CFACE_QUERY = 0
 ENDIF
 IF (M3%N_CFACE_QUERY+1 > M3%N_CFACE_QUERY_DIM) THEN  ! Grow the query arrays.
    NDIM = M3%N_CFACE_QUERY_DIM
    ALLOCATE(XYZ_DUMMY(IAXIS:KAXIS,NDIM))  ; XYZ_DUMMY   = M3%CFACE_QUERY_XYZ(IAXIS:KAXIS,1:NDIM)
+   ALLOCATE(NBACK_DUMMY(IAXIS:KAXIS,NDIM)); NBACK_DUMMY = M3%CFACE_QUERY_NBACK(IAXIS:KAXIS,1:NDIM)
    ALLOCATE(FRONT_DUMMY(NDIM))            ; FRONT_DUMMY = M3%CFACE_QUERY_FRONT(1:NDIM)
-   DEALLOCATE(M3%CFACE_QUERY_XYZ,M3%CFACE_QUERY_FRONT)
+   DEALLOCATE(M3%CFACE_QUERY_XYZ,M3%CFACE_QUERY_NBACK,M3%CFACE_QUERY_FRONT)
    M3%N_CFACE_QUERY_DIM = 2*NDIM
    ALLOCATE(M3%CFACE_QUERY_XYZ(IAXIS:KAXIS,M3%N_CFACE_QUERY_DIM))
+   ALLOCATE(M3%CFACE_QUERY_NBACK(IAXIS:KAXIS,M3%N_CFACE_QUERY_DIM))
    ALLOCATE(M3%CFACE_QUERY_FRONT(M3%N_CFACE_QUERY_DIM))
-   M3%CFACE_QUERY_XYZ(IAXIS:KAXIS,1:NDIM) = XYZ_DUMMY
-   M3%CFACE_QUERY_FRONT(1:NDIM)           = FRONT_DUMMY
-   DEALLOCATE(XYZ_DUMMY,FRONT_DUMMY)
+   M3%CFACE_QUERY_XYZ(IAXIS:KAXIS,1:NDIM)   = XYZ_DUMMY
+   M3%CFACE_QUERY_NBACK(IAXIS:KAXIS,1:NDIM) = NBACK_DUMMY
+   M3%CFACE_QUERY_FRONT(1:NDIM)             = FRONT_DUMMY
+   DEALLOCATE(XYZ_DUMMY,NBACK_DUMMY,FRONT_DUMMY)
 ENDIF
 N = M3%N_CFACE_QUERY + 1
 M3%N_CFACE_QUERY = N
-M3%CFACE_QUERY_XYZ(IAXIS:KAXIS,N) = POS(IAXIS:KAXIS)
-M3%CFACE_QUERY_FRONT(N)           = FRONT_CFACE
+M3%CFACE_QUERY_XYZ(IAXIS:KAXIS,N)   = POS(IAXIS:KAXIS)
+M3%CFACE_QUERY_NBACK(IAXIS:KAXIS,N) = NBACK(IAXIS:KAXIS)
+M3%CFACE_QUERY_FRONT(N)             = FRONT_CFACE
 END ASSOCIATE
 
 END SUBROUTINE ADD_BACK_CFACE_QUERY
 
 ! ----------------------- GET_BACK_CFACE_INDEX -----------------------------
-INTEGER FUNCTION GET_BACK_CFACE_INDEX(NOM,IIO,JJO,KKO,POS,ICF_EXCLUDE,IFACE_EXCLUDE)
+INTEGER FUNCTION GET_BACK_CFACE_INDEX(NOM,IIO,JJO,KKO,POS,ICF_EXCLUDE,IFACE_EXCLUDE,NBACK)
 
 INTEGER, INTENT(IN) :: NOM,IIO,JJO,KKO,ICF_EXCLUDE,IFACE_EXCLUDE
 REAL(EB), INTENT(IN) :: POS(IAXIS:KAXIS)
-INTEGER :: IIV(3),JJV(3),KKV(3),III,JJJ,KKK,II,JJ,KK,ICF2,JCF22,ICFF,JCFF,ICF3,JCF3
-REAL(EB) :: DIST,DIST2
-LOGICAL :: BACK_CFACE_FOUND
+REAL(EB), INTENT(IN), OPTIONAL :: NBACK(IAXIS:KAXIS) ! Normal of the back GEOMETRY triangle the ray struck, used to filter orientation.
+INTEGER :: IIV(3),JJV(3),KKV(3),III,JJJ,KKK,II,JJ,KK,ICF2,JCF22,ICFF,JCFF,ICF3,JCF3,ICFF_ANY,JCFF_ANY,ICAND,IWCAND
+REAL(EB) :: DIST,DIST2,DIST_ANY,RD(IAXIS:KAXIS),RDN,ALIGN
+LOGICAL :: BACK_CFACE_FOUND,BACK_CFACE_FOUND_ANY,USE_ORIENT
+REAL(EB), PARAMETER :: ALIGN_MIN = 0.5_EB ! Accept a back CFACE only if n_cand . n_backtri >= this val.
 
 GET_BACK_CFACE_INDEX = 0
 IF (NOM<1) RETURN
 IF (.NOT.ALLOCATED(MESHES(NOM)%CCVAR)) RETURN
 
+! Enable the orientation filter only when the back triangle normal is provided.
+USE_ORIENT = .FALSE.
+IF (PRESENT(NBACK)) THEN
+   RDN = NORM2(NBACK)
+   IF (RDN > TWENTY_EPSILON_EB) THEN
+      RD(IAXIS:KAXIS) = NBACK(IAXIS:KAXIS)/RDN
+      USE_ORIENT = .TRUE.
+   ENDIF
+ENDIF
+
 IIV(1:3) = (/ IIO, MAX(IIO-1,1), MIN(IIO+1,MESHES(NOM)%IBAR) /)
 JJV(1:3) = (/ JJO, MAX(JJO-1,1), MIN(JJO+1,MESHES(NOM)%JBAR) /)
 KKV(1:3) = (/ KKO, MAX(KKO-1,1), MIN(KKO+1,MESHES(NOM)%KBAR) /)
-DIST = 1._EB/TWENTY_EPSILON_EB; ICFF=0; JCFF=0; BACK_CFACE_FOUND=.FALSE.
+DIST = 1._EB/TWENTY_EPSILON_EB; ICFF=0; JCFF=0; BACK_CFACE_FOUND=.FALSE.   ! Best orientation-consistent pick.
+DIST_ANY = 1._EB/TWENTY_EPSILON_EB; ICFF_ANY=0; JCFF_ANY=0; BACK_CFACE_FOUND_ANY=.FALSE. ! Nearest-centroid fallback.
 DO KKK=1,3
    KK=KKV(KKK)
    DO JJJ=1,3
@@ -6797,7 +6825,24 @@ DO KKK=1,3
                DIST2 = (POS(IAXIS) - MESHES(NOM)%CUT_FACE(ICF2)%XYZCEN(IAXIS,JCF22))**2._EB + &
                        (POS(JAXIS) - MESHES(NOM)%CUT_FACE(ICF2)%XYZCEN(JAXIS,JCF22))**2._EB + &
                        (POS(KAXIS) - MESHES(NOM)%CUT_FACE(ICF2)%XYZCEN(KAXIS,JCF22))**2._EB
-               IF (DIST2<DIST) THEN
+               ! Candidate donor GEOMETRY triangle normal, SIGNED-aligned with the back triangle normal.
+               ALIGN = -2._EB
+               IF (USE_ORIENT) THEN
+                  IF (ALLOCATED(MESHES(NOM)%CUT_FACE(ICF2)%BODTRI)) THEN
+                     ICAND  = MESHES(NOM)%CUT_FACE(ICF2)%BODTRI(1,JCF22)
+                     IWCAND = MESHES(NOM)%CUT_FACE(ICF2)%BODTRI(2,JCF22)
+                     IF (ICAND>=1 .AND. IWCAND>=1) THEN
+                        IF (IWCAND<=GEOMETRY(ICAND)%N_FACES) &
+                           ALIGN = DOT_PRODUCT(GEOMETRY(ICAND)%FACES_NORMAL(IAXIS:KAXIS,IWCAND),RD(IAXIS:KAXIS))
+                     ENDIF
+                  ENDIF
+               ENDIF
+               ! Nearest-centroid candidate (used if no orientation-consistent face is found):
+               IF (DIST2<DIST_ANY) THEN
+                  DIST_ANY = DIST2; ICFF_ANY = ICF2; JCFF_ANY = JCF22; BACK_CFACE_FOUND_ANY = .TRUE.
+               ENDIF
+               ! Orientation-consistent candidate: donor normal must face the same way as the back triangle normal.
+               IF (USE_ORIENT .AND. DIST2<DIST .AND. ALIGN>=ALIGN_MIN) THEN
                   DIST = DIST2; ICFF = ICF2; JCFF = JCF22; BACK_CFACE_FOUND = .TRUE.
                ENDIF
             ENDDO
@@ -6805,6 +6850,10 @@ DO KKK=1,3
       ENDDO
    ENDDO
 ENDDO
+! Fall back to the nearest-centroid CFACE if no orientation-consistent back face was found.
+IF (.NOT.BACK_CFACE_FOUND) THEN
+   ICFF = ICFF_ANY; JCFF = JCFF_ANY; BACK_CFACE_FOUND = BACK_CFACE_FOUND_ANY
+ENDIF
 ! Loop NOM CUT_FACE array to find BACKING CFACE index:
 IF (BACK_CFACE_FOUND) THEN
    DO ICF3=1,MESHES(NOM)%N_CUTFACE_MESH
