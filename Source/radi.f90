@@ -2774,7 +2774,7 @@ REAL(EB) :: KAPPA_X_FAC,LOG_KAPPA_X_FAC             !< Scaling factor for absorp
 REAL(EB) :: KAPPA_C_FAC,LOG_KAPPA_C_FAC             !< Scaling factor for soot coefficient look-up table
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: Y2RADCAL_SPECIES !< Primitive species mapping to radcal species
 REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: RADCAL_SPECIES2KAPPA ! Absorption coefficient look-up table
-REAL(EB), ALLOCATABLE, DIMENSION(:) :: KAPPA_COND  !< Array to remove condensed species from absorption coefficient look-up 
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: KAPPA_COND  !< Array to remove condensed species from absorption coefficient look-up
 INTEGER :: N_RADCAL_ARRAY_SIZE                     !< Number of radcal species present
 INTEGER :: RADCAL_SPECIES_INDEX(16)                !< Mapping of radcal species present to radcal calling function
 CHARACTER(LABEL_LENGTH) :: RADCAL_SPECIES_ID(16)='NULL'!< Name of radcal species
@@ -3093,7 +3093,7 @@ MAKE_KAPPA_ARRAYS: IF (.NOT.SOLID_PHASE_ONLY .AND. ANY(SPECIES%RADCAL_ID/='null'
    END DO GET_RADCAL_SPECIES
 
    BUILD_KAPPA_ARRAY: IF (N_RADCAL_ARRAY_SIZE>0) THEN
-      
+
       KAPPA_X_FAC = (KAPPA_X_MAX/KAPPA_X_MIN)**(1._EB/(N_KAPPA_X-1))
       LOG_KAPPA_X_FAC = LOG(KAPPA_X_FAC)
       KAPPA_C_FAC = (KAPPA_C_MAX/KAPPA_C_MIN)**(1._EB/(N_KAPPA_X-1))
@@ -3106,7 +3106,7 @@ MAKE_KAPPA_ARRAYS: IF (.NOT.SOLID_PHASE_ONLY .AND. ANY(SPECIES%RADCAL_ID/='null'
       ALLOCATE(KAPPA_COND(N_TRACKED_SPECIES),STAT=IZERO)
       CALL ChkMemErr('RADI','KAPPA_COND',IZERO)
       KAPPA_COND = 1._EB
-      
+
       DO NS=1,N_TRACKED_SPECIES
          IF (SPECIES_MIXTURE(NS)%EVAPORATION_SMIX_INDEX>0) THEN
             CALL MEAN_CROSS_SECTIONS(SMIX_INDEX=NS)
@@ -3339,7 +3339,7 @@ DO I=1,NRT
       ELSE
          MERI_COMP(N)=(SIN(PHIUP)-SIN(PHILOW))*F_THETA
          AZIM_COMP(N)=(COS(PHILOW)-COS(PHIUP))*F_THETA
-         AXIS_COMP(N)=0.5_EB*(PHIUP-PHILOW)      * ((SIN(THETAUP))**2-(SIN(THETALOW))**2) 
+         AXIS_COMP(N)=0.5_EB*(PHIUP-PHILOW)      * ((SIN(THETAUP))**2-(SIN(THETALOW))**2)
          DLANG_LOCAL(1,N) = SIN(THETA)*COS(PHI)
          DLANG_LOCAL(2,N) = SIN(THETA)*SIN(PHI)
          DLANG_LOCAL(3,N) = COS(THETA)
@@ -3628,7 +3628,7 @@ DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       ENDIF
    ENDDO
 
-   !Interpolate neighbouring mesh cell intensities 
+   !Interpolate neighbouring mesh cell intensities
    DO NNN=1,N_NEIGHBORING_MESHES
       NOM = NEIGHBORING_MESH(NNN)
       M2 => OMESH(NOM)
@@ -3710,11 +3710,12 @@ USE MIEV
 USE MATH_FUNCTIONS, ONLY : INTERPOLATE1D
 USE TRAN, ONLY : GET_IJK
 USE COMPLEX_GEOMETRY, ONLY : CC_CGSC,CC_SOLID
+USE CC_SCALARS, ONLY : GET_CFACE_RAD_NVEC
 USE PHYSICAL_FUNCTIONS, ONLY : GET_VOLUME_FRACTION, GET_MASS_FRACTION
 REAL(EB) :: RAP, AX, AXU, AXD, AY, AYU, AYD, AZ, AZU, AZD, VC, RU, RD, RP, AFD, &
             ILXU, ILYU, ILZU, QVAL, BBF, BBFA, NCSDROP, RSA_RAT,EFLUX,SOOT_MASS_FRACTION, &
             AIU_SUM,A_SUM,VOL,VC1,AY1,AZ1,DLO,COS_DLO,AILFU, &
-            RAD_Q_SUM_PARTIAL,KFST4_SUM_PARTIAL,ALPHA_CC,SUMILW
+            RAD_Q_SUM_PARTIAL,KFST4_SUM_PARTIAL,ALPHA_CC,SUMILW,NVECL(3)
 
 INTEGER  :: N,NN,IIG,JJG,KKG,I,J,K,IW,ICF,II,JJ,KK,IOR,IC,IWUP,IWDOWN, &
             ISTART, IEND, ISTEP, JSTART, JEND, JSTEP, &
@@ -4188,9 +4189,10 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
          CFA => CFACE(ICF)
          BR  => BOUNDARY_RADIA(CFA%BR_INDEX)
          BC  => BOUNDARY_COORD(CFA%BC_INDEX)
+         NVECL = GET_CFACE_RAD_NVEC(CFA)
          DO N=1,NRA
             DLA = (/DLX(N),DLY(N),DLZ(N)/)
-            DLF = DOT_PRODUCT(BC%NVEC,DLA) ! face normal * radiation angle
+            DLF = DOT_PRODUCT(NVECL,DLA) ! face normal * radiation angle
             IF (DLF<0._EB) INRAD_F(ICF) = INRAD_F(ICF) - DLF*BR%BAND(IBND)%ILW(N)
          ENDDO
       ENDDO
@@ -4294,7 +4296,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                BR  => BOUNDARY_RADIA(CFA%BR_INDEX)
                BC => BOUNDARY_COORD(CFA%BC_INDEX)
                B1 => BOUNDARY_PROP1(CFA%B1_INDEX)
-               DLF = DOT_PRODUCT(BC%NVEC,DLA) ! face normal * radiation angle
+               DLF = DOT_PRODUCT(GET_CFACE_RAD_NVEC(CFA),DLA) ! face normal * radiation angle
                IF (DLF<0._EB) CYCLE CFACE_LOOP1
                BR%BAND(IBND)%ILW(N) = OUTRAD_F(ICF) + RPI*(1._EB-B1%EMISSIVITY)*INRAD_F(ICF)
             ENDDO CFACE_LOOP1
@@ -4472,7 +4474,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                            DO IFACE=1,CF%NFACE
                               CFA => CFACE(CF%CFACE_INDEX(IFACE))
                               BC => BOUNDARY_COORD(CFA%BC_INDEX)
-                              DLF = DOT_PRODUCT(BC%NVEC,DLA) ! face normal * radiation angle
+                              DLF = DOT_PRODUCT(GET_CFACE_RAD_NVEC(CFA),DLA) ! face normal * radiation angle
                               IF (DLF>0._EB) THEN ! upwind
                                  BR  => BOUNDARY_RADIA(CFA%BR_INDEX)
                                  AILFU = AILFU + DLF*CFA%AREA*BR%BAND(IBND)%ILW(N)
@@ -4595,7 +4597,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                CFA => CFACE(ICF)
                IF (CFA%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE CFACE_LOOP2
                BC => BOUNDARY_COORD(CFA%BC_INDEX)
-               DLF = DOT_PRODUCT(BC%NVEC,DLA) ! face normal * radiation angle
+               DLF = DOT_PRODUCT(GET_CFACE_RAD_NVEC(CFA),DLA) ! face normal * radiation angle
                IF (DLF>=0._EB) CYCLE CFACE_LOOP2      ! outgoing
                BR  => BOUNDARY_RADIA(CFA%BR_INDEX)
                BC => BOUNDARY_COORD(CFA%BC_INDEX)
@@ -4607,7 +4609,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                CFA => CFACE(ICF)
                IF (CFA%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE CFACE_LOOP3
                BC => BOUNDARY_COORD(CFA%BC_INDEX)
-               DLF = DOT_PRODUCT(BC%NVEC,DLA) ! face normal * radiation angle
+               DLF = DOT_PRODUCT(GET_CFACE_RAD_NVEC(CFA),DLA) ! face normal * radiation angle
                IF (DLF>=0._EB) CYCLE CFACE_LOOP3      ! outgoing
                BR  => BOUNDARY_RADIA(CFA%BR_INDEX)
                BC => BOUNDARY_COORD(CFA%BC_INDEX)
