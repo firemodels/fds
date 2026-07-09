@@ -1855,10 +1855,6 @@ INTEGER, PARAMETER :: EYE3(1:3,1:3)=RESHAPE( (/1,0,0, 0,1,0, 0,0,1 /), (/3,3/) )
 
 PART_UVWMAX = 0._EB
 
-IF (MESHES(NM)%NLP==0) RETURN
-
-! Set the CPU timer and point to the current mesh variables
-
 TNOW=CURRENT_TIME()
 CALL POINT_TO_MESH(NM)
 
@@ -1867,6 +1863,8 @@ IF (PARTICLE_DRAG) THEN
    FVY_D = 0._EB
    FVZ_D = 0._EB
 ENDIF
+
+IF (MESHES(NM)%NLP==0) RETURN
 
 IF (CC_IBM) CALL CUTFACE_VELOCITIES(NM,U,V,W,CUTFACES=.TRUE.)
 
@@ -2563,6 +2561,8 @@ PARTICLE_LOOP: DO IP=1,NLP
 ENDDO PARTICLE_LOOP
 
 IF (CC_IBM) CALL CUTFACE_VELOCITIES(NM,U,V,W,CUTFACES=.FALSE.)
+
+IF (PARTICLE_DRAG) CALL CLIP_PARTICLE_DRAG(DT,NM)
 
 ! Remove out-of-bounds particles
 
@@ -4570,20 +4570,17 @@ END SUBROUTINE PARTICLE_RUNNING_AVERAGES
 END SUBROUTINE PARTICLE_MASS_ENERGY_TRANSFER
 
 
-!> \brief Add PARTICLE momentum as a force term in momentum equation
-!> \param DT Current time step (s)
+!> \brief Clip particle drag fluxes to plus/minus abs(u)/dt
+!> \param DT Time step size (s)
 !> \param NM Current mesh number
 
-SUBROUTINE PARTICLE_MOMENTUM_TRANSFER(DT,NM)
+SUBROUTINE CLIP_PARTICLE_DRAG(DT,NM)
 
-USE CC_SCALARS, ONLY: CUTFACE_VELOCITIES
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: DT
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW
 REAL(EB) :: RDT,UODT,VODT,WODT
 INTEGER :: I,J,K
-
-IF (MESHES(NM)%NLP==0) RETURN
 
 CALL POINT_TO_MESH(NM)
 
@@ -4599,10 +4596,7 @@ ELSE
    WW => WS
 ENDIF
 
-IF (CC_IBM) CALL CUTFACE_VELOCITIES(NM,UU,VV,WW,CUTFACES=.TRUE.)
-
-! Add summed particle accelerations to the momentum equation. Limit the value to plus/minus abs(u)/dt to prevent a sudden
-! change in gas direction.
+! Limit drag flux to plus/minus abs(u)/dt to prevent a sudden change in gas direction.
 
 DO K=0,KBAR
    DO J=0,JBAR
@@ -4610,14 +4604,164 @@ DO K=0,KBAR
          UODT = ABS(UU(I,J,K)*RDT)
          VODT = ABS(VV(I,J,K)*RDT)
          WODT = ABS(WW(I,J,K)*RDT)
-         FVX(I,J,K) = FVX(I,J,K) + MIN(UODT,MAX(-UODT,FVX_D(I,J,K)))
-         FVY(I,J,K) = FVY(I,J,K) + MIN(VODT,MAX(-VODT,FVY_D(I,J,K)))
-         FVZ(I,J,K) = FVZ(I,J,K) + MIN(WODT,MAX(-WODT,FVZ_D(I,J,K)))
+         FVX_D(I,J,K) = MIN(UODT,MAX(-UODT,FVX_D(I,J,K)))
+         FVY_D(I,J,K) = MIN(VODT,MAX(-VODT,FVY_D(I,J,K)))
+         FVZ_D(I,J,K) = MIN(WODT,MAX(-WODT,FVZ_D(I,J,K)))
       ENDDO
    ENDDO
 ENDDO
 
-IF (CC_IBM) CALL CUTFACE_VELOCITIES(NM,UU,VV,WW,CUTFACES=.FALSE.)
+END SUBROUTINE CLIP_PARTICLE_DRAG
+
+
+!> \brief Add PARTICLE momentum as a force term in momentum equation
+!> \param DT Current time step (s)
+!> \param NM Current mesh number
+
+SUBROUTINE PARTICLE_MOMENTUM_TRANSFER(NM)
+
+INTEGER, INTENT(IN) :: NM
+INTEGER :: NOM,II,JJ,KK,IOR,IW,IIO,JJO,KKO
+REAL(EB) :: DA_OTHER,FVX_OTHER,FVY_OTHER,FVZ_OTHER
+TYPE (OMESH_TYPE), POINTER :: OM
+TYPE (MESH_TYPE), POINTER :: M2
+TYPE(WALL_TYPE), POINTER :: WC
+TYPE(EXTERNAL_WALL_TYPE), POINTER :: EWC
+TYPE(BOUNDARY_COORD_TYPE), POINTER :: BC
+
+CALL POINT_TO_MESH(NM)
+
+! Add area-weighted particle drag from neighboring meshes at interpolated boundaries.
+
+IF (NMESHES>1 .AND. CORRECTOR) THEN
+
+   EXTERNAL_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
+
+      WC=>WALL(IW)
+      EWC=>EXTERNAL_WALL(IW)
+      IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE EXTERNAL_WALL_LOOP
+
+      BC => BOUNDARY_COORD(WC%BC_INDEX)
+      II  = BC%II
+      JJ  = BC%JJ
+      KK  = BC%KK
+      IOR = BC%IOR
+      NOM = EWC%NOM
+      OM => OMESH(NOM)
+      M2 => MESHES(NOM)
+
+      DA_OTHER = 0._EB
+
+      SELECT CASE(ABS(IOR))
+         CASE(1)
+            DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
+               DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
+                  DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
+                     DA_OTHER = DA_OTHER + M2%DY(JJO)*M2%DZ(KKO)
+                  ENDDO
+               ENDDO
+            ENDDO
+         CASE(2)
+            DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
+               DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
+                  DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
+                     DA_OTHER = DA_OTHER + M2%DX(IIO)*M2%DZ(KKO)
+                  ENDDO
+               ENDDO
+            ENDDO
+         CASE(3)
+            DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
+               DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
+                  DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
+                     DA_OTHER = DA_OTHER + M2%DX(IIO)*M2%DY(JJO)
+                  ENDDO
+               ENDDO
+            ENDDO
+      END SELECT
+
+      SELECT CASE(IOR)
+
+         CASE( 1)
+
+            FVX_OTHER = 0._EB
+            DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
+               DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
+                  DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
+                     FVX_OTHER = FVX_OTHER + OM%FVX_D(IIO,JJO,KKO)*M2%DY(JJO)*M2%DZ(KKO)/DA_OTHER
+                  ENDDO
+               ENDDO
+            ENDDO
+            FVX_D(0,JJ,KK) = FVX_D(0,JJ,KK) + FVX_OTHER
+
+         CASE(-1)
+
+            FVX_OTHER = 0._EB
+            DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
+               DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
+                  DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
+                     FVX_OTHER = FVX_OTHER + OM%FVX_D(IIO-1,JJO,KKO)*M2%DY(JJO)*M2%DZ(KKO)/DA_OTHER
+                  ENDDO
+               ENDDO
+            ENDDO
+            FVX_D(IBAR,JJ,KK) = FVX_D(IBAR,JJ,KK) + FVX_OTHER
+
+         CASE( 2)
+
+            FVY_OTHER = 0._EB
+            DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
+               DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
+                  DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
+                     FVY_OTHER = FVY_OTHER + OM%FVY_D(IIO,JJO,KKO)*M2%DX(IIO)*M2%DZ(KKO)/DA_OTHER
+                  ENDDO
+               ENDDO
+            ENDDO
+            FVY_D(II,0,KK) = FVY_D(II,0,KK) + FVY_OTHER
+
+         CASE(-2)
+
+            FVY_OTHER = 0._EB
+            DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
+               DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
+                  DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
+                     FVY_OTHER = FVY_OTHER + OM%FVY_D(IIO,JJO-1,KKO)*M2%DX(IIO)*M2%DZ(KKO)/DA_OTHER
+                  ENDDO
+               ENDDO
+            ENDDO
+            FVY_D(II,JBAR,KK) = FVY_D(II,JBAR,KK) + FVY_OTHER
+
+         CASE( 3)
+
+            FVZ_OTHER = 0._EB
+            DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
+               DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
+                  DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
+                     FVZ_OTHER = FVZ_OTHER + OM%FVZ_D(IIO,JJO,KKO)*M2%DX(IIO)*M2%DY(JJO)/DA_OTHER
+                  ENDDO
+               ENDDO
+            ENDDO
+            FVZ_D(II,JJ,0) = FVZ_D(II,JJ,0) + FVZ_OTHER
+
+         CASE(-3)
+
+            FVZ_OTHER = 0._EB
+            DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
+               DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
+                  DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
+                     FVZ_OTHER = FVZ_OTHER + OM%FVZ_D(IIO,JJO,KKO-1)*M2%DX(IIO)*M2%DY(JJO)/DA_OTHER
+                  ENDDO
+               ENDDO
+            ENDDO
+            FVZ_D(II,JJ,KBAR) = FVZ_D(II,JJ,KBAR) + FVZ_OTHER
+
+      END SELECT
+
+   ENDDO EXTERNAL_WALL_LOOP
+
+ENDIF
+
+FVX = FVX + FVX_D
+FVY = FVY + FVY_D
+FVZ = FVZ + FVZ_D
 
 END SUBROUTINE PARTICLE_MOMENTUM_TRANSFER
 
