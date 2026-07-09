@@ -2635,6 +2635,27 @@ IF (VTK_DIR/=RESULTS_DIR) THEN
    ENDIF
 ENDIF
 
+! Track working directory for use when using paraview as a remot server
+IF (MY_RANK==0) THEN
+#ifdef _WIN32
+   CALL EXECUTE_COMMAND_LINE('cd > workingdir.txt')
+#else
+   CALL EXECUTE_COMMAND_LINE('pwd > workingdir.txt')
+#endif
+   OPEN(LU_WDIR, FILE="workingdir.txt", STATUS="OLD", ACTION="READ")
+   READ(LU_WDIR, '(A)') WORKING_DIR
+   CLOSE(LU_WDIR)
+   INQUIRE(FILE='workingdir.txt',EXIST=EX)
+   IF (.NOT.EX) THEN
+      CALL SHUTDOWN('FAILED TO IDENTIFY WORKING DIRECTORY.')
+   ENDIF
+#ifdef _WIN32
+   CALL EXECUTE_COMMAND_LINE('del workingdir.txt')
+#else
+   CALL EXECUTE_COMMAND_LINE('rm workingdir.txt')
+#endif
+ENDIF
+
 
 END SUBROUTINE READ_DUMP
 
