@@ -1043,6 +1043,7 @@ TYPE OMESH_TYPE
    TYPE (STORAGE_TYPE) :: CFACE_SEND_BUFFER,CFACE_RECV_BUFFER
    INTEGER :: N_CFACE_QUERY=0,N_CFACE_QUERY_DIM=0
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: CFACE_QUERY_XYZ   !< Back-face intersection points (3,N) that NM needs NOM to resolve
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: CFACE_QUERY_NBACK !< Back GEOMETRY triangle normal (3,N) used to orient the back CFACE search
    INTEGER,  ALLOCATABLE, DIMENSION(:)   :: CFACE_QUERY_FRONT !< Front CFACE index (in NM) associated with each query
 
    ! CC_IBM data exchange arrays:
@@ -2158,7 +2159,7 @@ TYPE HVAC_QUANTITY_TYPE
    CHARACTER(LABEL_LENGTH) :: SMOKEVIEW_LABEL !< Smokeview label for QUANTITY
    CHARACTER(LABEL_LENGTH) :: SMOKEVIEW_BAR_LABEL !< Smokeview colorbar label for QUANTITY
    CHARACTER(LABEL_LENGTH) :: UNITS !< Units for QUANTITY
-   LOGICAL :: DRY !< Remove water vapor before computing a mass or volume fraction 
+   LOGICAL :: DRY !< Remove water vapor before computing a mass or volume fraction
 END TYPE HVAC_QUANTITY_TYPE
 
 
