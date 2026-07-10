@@ -330,7 +330,7 @@ The FDS manuals are typeset using \LaTeX, specifically, pdf\LaTeX. The \LaTeX\ f
 
 Currently, FDS and Smokeview make use of GitHub, a free service to support software development for open source applications. GitHub uses Git version control software. Under this system a centralized repository containing all project files resides on an external server.   A record of version number when a specific file was last changed is maintained. As an open source program, any individual can obtain a copy of the repository or retrieve specific versions of the repository.
 
-Both FDS and Smokeview live within a GitHub \emph{organization} called ``Fire Models''.  The current location of the organization is available through the \emph{View on Github} button at \href{https://pages.nist.gov/fds-smv} {\ct{https://pages.nist.gov/fds-smv}}.  The repositories that are used by the FDS and Smokeview projects contain more than 6000 configuration items and are listed below along with a brief description:
+Both FDS and Smokeview live within a GitHub \emph{organization} called ``Fire Models'' with the URL: \href{https://github.com/firemodels} {\ct{https://github.com/firemodels}}.  The current location of the organization is available through the \emph{View on Github} button at \href{https://pages.nist.gov/fds-smv} {\ct{https://pages.nist.gov/fds-smv}}.  The repositories that are used by the FDS and Smokeview projects are listed below along with a brief description:
 \begin{tabbing}
 fds \hspace{0.5in} \= FDS source code, verification and validation tests, wikis, and documentation \\
 smv                \> Smokeview source code, integration tests, and documentation \\
@@ -547,7 +547,8 @@ NIST management approval is required prior to destruction of old or out-of-date 
 
 \section{Securing the FDS/Smokeview Installation Files}
 
-FDS and Smokeview installation files are built on NIST managed computers with access limited to only those associated with the FDS/Smokeview project. Each bundle file and the bundle itself is scanned for viruses and malware. The bundle is not made available if the scan identifies a suspicious signature. A SHA256 hash code is also generated for each bundle file so that one may verify that files have not been altered. A list of these hash codes and the status of the virus scan is stored in a separate file with the suffix \ct{_manifest.html} and made available along with the bundle.
+FDS and Smokeview installation files are built on NIST managed computers with access limited to only those associated with the FDS/Smokeview project. Each bundle file and the bundle itself is scanned for viruses and malware. The bundle is not made available if the scan identifies a suspicious signature. A SHA256 hash code is generated for each bundle file automatically by GitHub.
+
 
 
 
