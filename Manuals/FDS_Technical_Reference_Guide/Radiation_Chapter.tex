@@ -573,8 +573,6 @@ where the local direction cosines $(\mu_{\mathrm{mer},l},\mu_{\mathrm{azi},l},\m
 
 When rotation is enabled, the discrete angular integration coefficients (e.g., $D_{xu}^l$) are no longer exactly symmetric with respect to the mesh faces. Consequently, the summation of $D_{xu}^l$ (and the corresponding coefficients for the other coordinate directions) over a face deviates slightly from the theoretical value of $\pi$. For the default discretization of 100 solid angles, these deviations are typically very small and decrease further as the angular resolution is increased.
 
-\tdplotsetmaincoords{70}{120}
-
 \newcommand{\DrawFDSSphere}[1]{%
    \pgfmathsetmacro{\ang}{#1}
 
