@@ -573,14 +573,180 @@ where the local direction cosines $(\mu_{\mathrm{mer},l},\mu_{\mathrm{azi},l},\m
 
 When rotation is enabled, the discrete angular integration coefficients (e.g., $D_{xu}^l$) are no longer exactly symmetric with respect to the mesh faces. Consequently, the summation of $D_{xu}^l$ (and the corresponding coefficients for the other coordinate directions) over a face deviates slightly from the theoretical value of $\pi$. For the default discretization of 100 solid angles, these deviations are typically very small and decrease further as the angular resolution is increased.
 
-\begin{figure}[ht]
+\tdplotsetmaincoords{70}{120}
+
+\newcommand{\DrawFDSSphere}[1]{%
+   \pgfmathsetmacro{\ang}{#1}
+
+   % Sphere
+   \shade[ball color=blue!10] (0,0) circle (1);
+   \draw[thick] (0,0) circle (1);
+
+   % Latitude lines
+   \foreach \i in {0,...,\NRT}
+   {
+     \pgfmathsetmacro{\theta}{180*\i/\NRT}
+
+     \draw[blue!60, thick]
+     plot[
+         variable=\phi,
+         domain=0:360,
+         samples=150,
+         smooth
+     ]
+     (
+     {
+         (sin(\theta)*sin(\phi))*cos(\ang)
+         +(cos(\theta))*sin(\ang)
+     },
+     {
+        -(sin(\theta)*sin(\phi))*sin(\ang)
+         +(cos(\theta))*cos(\ang)
+     }
+     );
+   }
+
+   % Longitude lines
+   \foreach \i in {0,...,7}
+   {
+     \pgfmathsetmacro{\thetaLow}{180*\i/\NRT}
+     \pgfmathsetmacro{\thetaHigh}{180*(\i+1)/\NRT}
+
+     \pgfmathsetmacro{\nphiRaw}{
+         0.5*\NRA*(cos(\thetaLow)-cos(\thetaHigh))
+     }
+
+     \pgfmathtruncatemacro{\nphi}{
+         max(4,4*round(\nphiRaw/4))
+     }
+
+     \foreach \j in {0,...,\numexpr\nphi-1\relax}
+     {
+         \pgfmathsetmacro{\phi}{360*\j/\nphi}
+
+         \draw[red!60, thick]
+         plot[
+             variable=\theta,
+             domain=\thetaLow:\thetaHigh,
+             samples=30,
+             smooth
+         ]
+         (
+         {
+             (sin(\theta)*sin(\phi))*cos(\ang)
+             +(cos(\theta))*sin(\ang)
+         },
+         {
+            -(sin(\theta)*sin(\phi))*sin(\ang)
+             +(cos(\theta))*cos(\ang)
+         }
+         );
+     }
+   }
+
+   %-----------------------------------
+   % Axes
+   %-----------------------------------
+
+   \ifnum\ang=0
+
+       % No rotation: y=y', z=z'
+       \draw[->, very thick, black]
+           (0,0) -- (1.45,0)
+           node[right] {$y,y'$};
+
+       \draw[->, very thick, black]
+           (0,0) -- (0,1.45)
+           node[above] {$z,z'$};
+
+   \else
+
+       %-----------------------------------
+       % Default fixed axes
+       %-----------------------------------
+
+       \draw[->, thick, black]
+           (0,0) -- (1.45,0)
+           node[right] {$y$};
+
+       \draw[->, thick, black]
+           (0,0) -- (0,1.45)
+           node[above] {$z$};
+
+
+       %-----------------------------------
+       % Rotated axes
+       %-----------------------------------
+
+       \draw[->, very thick, red]
+           (0,0) --
+           ({1.45*cos(\ang)},
+            {-1.45*sin(\ang)})
+           node[pos=1.05, right] {$y'$};
+
+       \draw[->, very thick, red]
+           (0,0) --
+           ({1.45*sin(\ang)},
+            {1.45*cos(\ang)})
+           node[pos=1.05, above] {$z'$};
+
+   \fi
+
+
+   %-----------------------------------
+   % X-axis (out of page)
+   %-----------------------------------
+
+   \draw[thick] (0,0) circle (0.05);
+   \fill (0,0) circle (0.015);
+   \node[below left] at (0,0) {$x,x'$};
+
+}
+
+\begin{figure}[htbp]
 \centering
-\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}cc}
-\includegraphics[height=3in]{FIGURES/RAD_FVM_ANGLES_DEFAULT} &
-\includegraphics[height=3in]{FIGURES/RAD_FVM_ANGLES_45DEG} \\[0.3cm]
-\includegraphics[height=3in]{FIGURES/RAD_FVM_ANGLES_135DEG} &
-\includegraphics[height=3in]{FIGURES/RAD_FVM_ANGLES_225DEG}
-\end{tabular*}
+
+\begin{tikzpicture}[scale=2.3]
+
+\def\NRA{100}
+\pgfmathtruncatemacro{\NRT}{
+    2*round(0.5*1.17*\NRA^(1/2.26))
+}
+
+%-------------------------
+% Top left
+%-------------------------
+\begin{scope}[shift={(0,4)}]
+    \DrawFDSSphere{0}
+    \node at (0,-1.65) {(a) $0^\circ$};
+\end{scope}
+
+%-------------------------
+% Top right
+%-------------------------
+\begin{scope}[shift={(3.5,4)}]
+    \DrawFDSSphere{45}
+    \node at (0,-1.65) {(b) $45^\circ$};
+\end{scope}
+
+%-------------------------
+% Bottom left
+%-------------------------
+\begin{scope}[shift={(0,0)}]
+    \DrawFDSSphere{135}
+    \node at (0,-1.65) {(c) $135^\circ$};
+\end{scope}
+
+%-------------------------
+% Bottom right
+%-------------------------
+\begin{scope}[shift={(3.5,0)}]
+    \DrawFDSSphere{225}
+    \node at (0,-1.65) {(d) $225^\circ$};
+\end{scope}
+
+\end{tikzpicture}
+
 \caption[Finite volume method angular discretization]{Finite volume method angular discretization with the default 100 discrete directions (which turned out to be 104). The angular discretization consists of 8 divisions in the polar angle $\theta$, with the corresponding number of divisions in the azimuthal angle $\phi$ given by [4, 12, 16, 20, 20, 16, 12, 4]. Top left: default angular discretization without rotation. Top right: $45^\circ$ clockwise rotation of the azimuthal ($y'$) and axial ($z'$) coordinate axes in the $YZ$ plane, relative to which the angular discretization is performed. Bottom left: $125^\circ$ clockwise rotation. Bottom right: $225^\circ$ clockwise rotation.}
 \label{fig:FVMAngularRotation}
 \end{figure}
