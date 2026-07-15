@@ -538,8 +538,8 @@ three spatial directions are known, and the intensity $I_{ijk}^l$ can be solved 
 all the upwind intensities are determined from solid or gas phase boundaries. In theory, iterations are needed if the reflections
 or scattering are important, or if the scenario is optically very thick. Currently, no iterations are made.
 
-\textbf{Random rotation of anglular directions:}
-To mitigate ray effects in the predicted wall radiative heat flux, an option is implemented to randomly rotate the local meridional ($x'$), azimuthal ($y'$), and axial ($z'$) coordinate system at selected time steps. The angular coordinates, $\theta$ and $\phi$, are then evaluated with respect to this rotated coordinate system. Figure~\ref{fig:FVMAngularRotation} illustrates the angular discretization for several rotations of the local coordinate system, where the azimuthal ($y'$) and axial ($z'$) axes are rotated in the $YZ$ plane while the meridional ($x'$) axis remains unchanged. During a simulation with random rotation enabled, the local coordinate system is assigned a new random orientation at each selected time step. As a result, rays originating from a source intersect distant target surfaces from different discrete directions over time, and the time-averaged wall radiative heat flux exhibits substantially reduced ray effects.
+\textbf{Random rotation of angular directions:}
+To mitigate ray effects in the predicted wall radiative heat flux, the local meridional ($x'$), azimuthal ($y'$), and axial ($z'$) coordinate system may be randomly rotated at selected time steps. The angular coordinates, $\theta$ and $\phi$, are then evaluated with respect to the rotated coordinate system. Figure~\ref{fig:FVMAngularRotation} illustrates the angular discretization for several orientations of the local coordinate system. In this example, the azimuthal ($y'$) and axial ($z'$) axes are rotated in the $YZ$ plane, while the meridional ($x'$) axis remains unchanged. When random rotation is enabled, a new random orientation of the local coordinate system is assigned at each selected time step. Consequently, rays originating from a source intersect distant target surfaces along different discrete directions over time. This variation improves the effective angular coverage and substantially reduces ray effects in the time-averaged wall radiative heat flux. Figure~\ref{fig:rad_rand_rot_cube_hit} demonstrates this effect for an angular discretization containing 24 discrete directions. After 100 random rotations, the ray-intersection locations provide nearly uniform coverage of the enclosure surfaces. Increasing the number of rotations to 500 produces still more uniform surface coverage.
 
 With this rotation, the angular coordinates $\theta$ and $\phi$ are defined with respect to the rotated coordinate system $(x',y',z')$. Let the unit vectors of the rotated meridional, azimuthal, and axial axes be denoted by $\mathbf{v}_{\mathrm{mer}}$, $\mathbf{v}_{\mathrm{azi}}$, and $\mathbf{v}_{\mathrm{axi}}$, respectively. Then, for the $l$th discrete direction with local direction cosines $(\mu_{\mathrm{mer},l},\mu_{\mathrm{azi},l},\mu_{\mathrm{axi},l})$, the corresponding direction vector in the global Cartesian coordinate system is given by
 
@@ -747,6 +747,14 @@ When rotation is enabled, the discrete angular integration coefficients (e.g., $
 
 \caption[Finite volume method angular discretization]{Finite volume method angular discretization with the default 100 discrete directions (which turned out to be 104). The angular discretization consists of 8 divisions in the polar angle $\theta$, with the corresponding number of divisions in the azimuthal angle $\phi$ given by [4, 12, 16, 20, 20, 16, 12, 4]. Top left: default angular discretization without rotation. Top right: $45^\circ$ clockwise rotation of the azimuthal ($y'$) and axial ($z'$) coordinate axes in the $YZ$ plane, relative to which the angular discretization is performed. Bottom left: $125^\circ$ clockwise rotation. Bottom right: $225^\circ$ clockwise rotation.}
 \label{fig:FVMAngularRotation}
+\end{figure}
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[height=5in]{FIGURES/Rad_rand_rot_cube_hit}
+\caption[Random rotation of radiation angles]{Distribution of radiation-ray hit locations on the surfaces of a $20 \times 20 \times 20 \, \mathrm{m}^3$ cubic enclosure for varying numbers of random rotations of the angular distribution, with the rays emitted from a spherical source (radius = 1 m) at the enclosure center. Each color represents the rays generated during one random rotation. Increasing the number of rotations improves the spatial uniformity of the surface coverage and reduces directional bias associated with a fixed angular discretization.}
+\label{fig:rad_rand_rot_cube_hit}
+\end{center}
 \end{figure}
 
 
