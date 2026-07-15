@@ -573,7 +573,7 @@ where the local direction cosines $(\mu_{\mathrm{mer},l},\mu_{\mathrm{azi},l},\m
 
 When rotation is enabled, the discrete angular integration coefficients (e.g., $D_{xu}^l$) are no longer exactly symmetric with respect to the mesh faces. Consequently, the summation of $D_{xu}^l$ (and the corresponding coefficients for the other coordinate directions) over a face deviates slightly from the theoretical value of $\pi$. For the default discretization of 100 solid angles, these deviations are typically very small and decrease further as the angular resolution is increased.
 
-\newcommand{\DrawFDSSphere}[1]{%
+\newcommand{\DrawRADFVMSphere}[1]{%
    \pgfmathsetmacro{\ang}{#1}
 
    % Sphere
@@ -715,7 +715,7 @@ When rotation is enabled, the discrete angular integration coefficients (e.g., $
 % Top left
 %-------------------------
 \begin{scope}[shift={(0,4)}]
-    \DrawFDSSphere{0}
+    \DrawRADFVMSphere{0}
     \node at (0,-1.65) {(a) $0^\circ$};
 \end{scope}
 
@@ -723,7 +723,7 @@ When rotation is enabled, the discrete angular integration coefficients (e.g., $
 % Top right
 %-------------------------
 \begin{scope}[shift={(3.5,4)}]
-    \DrawFDSSphere{45}
+    \DrawRADFVMSphere{45}
     \node at (0,-1.65) {(b) $45^\circ$};
 \end{scope}
 
@@ -731,7 +731,7 @@ When rotation is enabled, the discrete angular integration coefficients (e.g., $
 % Bottom left
 %-------------------------
 \begin{scope}[shift={(0,0)}]
-    \DrawFDSSphere{135}
+    \DrawRADFVMSphere{135}
     \node at (0,-1.65) {(c) $135^\circ$};
 \end{scope}
 
@@ -739,7 +739,7 @@ When rotation is enabled, the discrete angular integration coefficients (e.g., $
 % Bottom right
 %-------------------------
 \begin{scope}[shift={(3.5,0)}]
-    \DrawFDSSphere{225}
+    \DrawRADFVMSphere{225}
     \node at (0,-1.65) {(d) $225^\circ$};
 \end{scope}
 
