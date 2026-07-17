@@ -8211,15 +8211,17 @@ READ_SURF_LOOP: DO N=0,N_SURF
    ENDIF
 
    ! Level set vegetation fire spread specific
+   ! VEG_LSET_FUEL_INDEX: -1=undefined, 0=custom Rothermel from layer props, 1-13=Albini fuel models
 
    VEG_LSET_SPREAD = .FALSE.
-   IF (VEG_LSET_IGNITE_TIME < 1.E6_EB .OR. VEG_LSET_FUEL_INDEX>0 .OR. VEG_LSET_ROS_00>0._EB) VEG_LSET_SPREAD = .TRUE.
+   ! SURF_LOAD without ROS_00/index implies custom fuel (index 0)
+   IF (VEG_LSET_FUEL_INDEX<0 .AND. VEG_LSET_ROS_00<=0._EB .AND. VEG_LSET_SURF_LOAD>0._EB) VEG_LSET_FUEL_INDEX = 0
+   IF (VEG_LSET_IGNITE_TIME < 1.E6_EB .OR. VEG_LSET_FUEL_INDEX>=0 .OR. VEG_LSET_ROS_00>0._EB) VEG_LSET_SPREAD = .TRUE.
    IF (VEG_LSET_SPREAD .AND. LEVEL_SET_MODE==0) THEN
       WRITE(MESSAGE,'(A,A,A)') 'ERROR(305): SURF ',TRIM(ID),' indicates a level set simulation, but LEVEL_SET_MODE not set on MISC.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
-   IF (VEG_LSET_FUEL_INDEX>0 .AND. LEVEL_SET_COUPLED_FIRE) HRRPUA = 1._EB  ! HRRPUA to be set properly later
-   IF (VEG_LSET_ROS_00    >0 .AND. LEVEL_SET_COUPLED_FIRE) HRRPUA = 1._EB
+   IF ((VEG_LSET_FUEL_INDEX>=0 .OR. VEG_LSET_ROS_00>0._EB) .AND. LEVEL_SET_COUPLED_FIRE) HRRPUA = 1._EB  ! set properly later
 
    SF%VEG_LSET_SPREAD       = VEG_LSET_SPREAD
    SF%VEG_LSET_ROS_00       = VEG_LSET_ROS_00       ! no-wind, no-slope RoS (m/s), Rothermel model
@@ -8261,8 +8263,8 @@ READ_SURF_LOOP: DO N=0,N_SURF
       END SELECT
    ENDIF
 
-   ! Set defaults for custom fuel model (for indexed fuels they are either user-specified or calculated later)
-   IF (SF%VEG_LSET_FUEL_INDEX==0._EB) THEN
+   ! Defaults for undefined fuel properties (set elsewhere for indexed fuels)
+   IF (SF%VEG_LSET_FUEL_INDEX<=0) THEN
       IF (SF%VEG_LSET_SIGMA<0._EB) SF%VEG_LSET_SIGMA = 50._EB
       IF (SF%VEG_LSET_HT<0._EB) SF%VEG_LSET_HT = 0.2_EB
       IF (SF%VEG_LSET_SURF_LOAD<0._EB) SF%VEG_LSET_SURF_LOAD = 1.0_EB
@@ -9191,7 +9193,7 @@ VEG_LSET_M10            = 0.04_EB
 VEG_LSET_M100           = 0.05_EB
 VEG_LSET_MLW            = 0.70_EB
 VEG_LSET_MLH            = 0.70_EB
-VEG_LSET_FUEL_INDEX     = 0
+VEG_LSET_FUEL_INDEX     = -1  ! -1=undefined, 0=custom Rothermel, 1-13=Albini models
 VEG_LSET_SURF_LOAD      = -1.0_EB !kg/m^2
 VEG_LSET_FIREBASE_TIME  = -1.0_EB
 VEG_LSET_CHAR_FRACTION  = 0.20_EB
