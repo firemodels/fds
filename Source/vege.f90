@@ -46,17 +46,18 @@ CALL POINT_TO_MESH(NM)
 
 M => MESHES(NM)
 
-! Loop through all SURFace types and find level set cases that need a calculated RoS
+! Loop through all SURFace types and find level set cases that need a calculated RoS.
+! VEG_LSET_FUEL_INDEX: -1=undefined (user ROS_00), 0=custom Rothermel, 1-13=Albini models.
 
 DO SURF_INDEX=0,N_SURF
    SF => SURFACE(SURF_INDEX)
-   IF (SF%VEG_LSET_SPREAD .AND. SF%VEG_LSET_FUEL_INDEX>0) THEN
+   IF (.NOT.SF%VEG_LSET_SPREAD) CYCLE
+   IF (SF%VEG_LSET_FUEL_INDEX>=0) THEN
       SF%VEG_LSET_ROS_00 = ROS_NO_WIND_NO_SLOPE(SF%VEG_LSET_FUEL_INDEX,SURF_INDEX)
-   ENDIF
-   IF (SF%VEG_LSET_SPREAD .AND. SF%VEG_LSET_FUEL_INDEX==0) THEN
-     SF%BURN_DURATION = SF%VEG_LSET_FIREBASE_TIME
-     IF (LEVEL_SET_COUPLED_FIRE) SF%MASS_FLUX(REACTION(1)%FUEL_SMIX_INDEX) = &
-       (1._EB-SF%VEG_LSET_CHAR_FRACTION)*SF%VEG_LSET_SURF_LOAD/SF%VEG_LSET_FIREBASE_TIME
+   ELSE
+      SF%BURN_DURATION = SF%VEG_LSET_FIREBASE_TIME
+      IF (LEVEL_SET_COUPLED_FIRE) SF%MASS_FLUX(REACTION(1)%FUEL_SMIX_INDEX) = &
+        (1._EB-SF%VEG_LSET_CHAR_FRACTION)*SF%VEG_LSET_SURF_LOAD/SF%VEG_LSET_FIREBASE_TIME
    ENDIF
 ENDDO
 
@@ -1008,6 +1009,11 @@ mlw = SF%VEG_LSET_MLW
 mlh = SF%VEG_LSET_MLH
 
 SELECT CASE(ROTHERMEL_FUEL_INDEX)
+   CASE(0)  ! Custom homogeneous fuel from SURF layer properties
+      w0d1=SF%VEG_LSET_SURF_LOAD ; w0d2=0._EB ; w0d3=0._EB ; w0lh=0._EB ; w0lw=0._EB
+      svd1=SF%VEG_LSET_SIGMA*100._EB  ! stored as 1/cm; Rothermel formulas use 1/m
+      svd2=358._EB ; svd3=98._EB ; svlh=4921._EB ; svlw=4921._EB
+      mx=0.15_EB ; depth=SF%VEG_LSET_HT ; rhop=512._EB ; heat=18607._EB ; st=0.0555_EB ; se=0.01_EB
    CASE(1)  ! 'Short Grass'
       w0d1=0.1659     ; w0d2=0.        ; w0d3=0.        ; w0lh=0.        ; w0lw=0.     ! dry mass per unit area (kg/m2)
       svd1=11483.     ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921.  ! surface area to volume (1/m)
@@ -1074,6 +1080,8 @@ IF (SF%VEG_LSET_SURF_LOAD>0._EB) THEN
    w0lh = SF%VEG_LSET_SURF_LOAD/w0*w0lh
    w0lw = SF%VEG_LSET_SURF_LOAD/w0*w0lw
    w0 = (w0d1 + w0d2 + w0d3 + w0lh + w0lw)
+ELSE
+   SF%VEG_LSET_SURF_LOAD = w0
 ENDIF
 
 ! Auxiliary functions

@@ -3342,6 +3342,7 @@ SURFLOOP: DO N=0,N_SURF
       WRITE(LU_OUTPUT,'(A,ES10.3)') '     Packing Ratio               ', SF%VEG_LSET_BETA
       WRITE(LU_OUTPUT,'(A,ES10.3)') '     Surface Area/Volume (1/m)   ', SF%VEG_LSET_SIGMA*100.  ! Convert from 1/cm to 1/m
       WRITE(LU_OUTPUT,'(A,ES10.3)') '     Fuel Depth (m)              ', SF%VEG_LSET_HT
+      WRITE(LU_OUTPUT,'(A,ES10.3)') '     Fuel Load (kg/m2)           ', SF%VEG_LSET_SURF_LOAD
    ENDIF
 
 ENDDO SURFLOOP
