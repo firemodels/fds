@@ -239,6 +239,7 @@ $QFDS -d Fires tmp_lower_limit_default.fds
 $QFDS -d Fires tunnel_const_gamma.fds
 $QFDS -d Fires tunnel_linear_cp.fds
 $QFDS -p 8 -d Fires circular_burner.fds
+$QFDS -d Fires ftp.fds
 
 $QFDS -d Flowfields divergence_test_1.fds
 $QFDS -d Flowfields divergence_test_2.fds
