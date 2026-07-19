@@ -2845,6 +2845,29 @@ The example, \ct{spyro_cone_demo.fds}, demonstrating the scaling behavior is sho
     \label{fig:spyro_cone_demo}
 \end{figure}
 
+\subsection{Flux-Time Product Model}
+\label{info:flux_time_product}
+\label{flux_time}
+
+Typical results from cone calorimeter tests at varying heat flux suggest that the ignition temperature is not a constant but rather varies with the exposure. An alternative approach to \ct{IGNITION_TEMPERATURE} on \ct{SURF} is the flux-time product model~\cite{Lopes:1}. This model integrates the incident flux, $\dot{q}''_{inc}$, that is in excess over a critical flux, $\dot{q}''_{cr}$ (\ct{FLUX_Q_CR}), using a power law (\ct{FTP_N}). Ignition happens when the integral exceeds a critical value, ${FTP}_{cr}$ (\ct{FLUX_CR}).
+\be
+{FTP}_{cr} = \int_{0}^{t} \delta \left(\dot{q}''_{inc}(t') - \dot{q}''_{cr} \right)^n \d t'
+\label{ftp_model}
+\ee
+\be
+    \delta =
+    \begin{cases}
+        1 & \text{if } \dot{q}''_{inc}(t') > \dot{q}''_{cr} \\
+        0 & \text{if } \dot{q}''_{inc}(t') \le \dot{q}''_{cr}
+    \end{cases}
+\ee
+Figure~\ref{fig:ftp} shows an example of a surface with $\dot{q}''_{inc}$=\SI{25}{kW/m^2} with a 2.5~s ramp, $\dot{q}''_{cr}$=\SI{25}{kW/m^2}, and  ${FTP}_{cr}$=\SI{100}{kJ/m^2} that after ignition burns at \SI{1000}{kW/m^2}.
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=3.2in]{SCRIPT_FIGURES/ftp}
+    \caption[Example of flux-time product model]{Example of flux-time product model.}
+    \label{fig:ftp}
+\end{figure}
 
 \section{Complex Pyrolysis Models}
 \label{info:solid_pyrolysis}
@@ -13427,6 +13450,9 @@ Keyword                          & Type              & Description              
 \ct{FIC_CONCENTRATION}           & Real              & Section~\ref{info:FED}                  & ppm               & 0             \\ \hline
 \ct{FLD_LETHAL_DOSE}             & Real              & Section~\ref{info:FED}                  & ppm$\times$min    & 0             \\ \hline
 \ct{FORMULA}                     & Character         & Section~\ref{info:FORMULA}              &                   &               \\ \hline
+\ct{FTP_CR}                      & Real              & Section~\ref{info:flux_time_product}    & \unit{kJ/m^2}     &               \\ \hline
+\ct{FTP_N}                       & Real              & Section~\ref{info:flux_time_product}    &                   & 1             \\ \hline
+\ct{FTP_Q_CR}                    & Real              & Section~\ref{info:flux_time_product}    & \unit{kW/m^2}     &               \\ \hline
 \ct{H}                           & Real              & Section~\ref{info:FORMULA}              &                   &               \\ \hline
 \ct{HEAT_OF_VAPORIZATION}        & Real              & Section~\ref{thermal_part_props}        & kJ/kg             &               \\ \hline
 \ct{H_V_REFERENCE_TEMPERATURE}   & Real              & Section~\ref{thermal_part_props}        & \unit{\degreeCelsius} &               \\ \hline
