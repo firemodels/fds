@@ -4821,15 +4821,24 @@ KAPPA_SOOT = SOOT_MASS_CONCENTRATION*(1232.4_EB+0.591552_EB*(TTMP-2000._EB))
 END FUNCTION KAPPA_SOOT
 
 !comecei a implementar
-
+!====================================================================
+!Function to define the absorption cross-section 
+!of a gas from its supplementar cross-sections
+!OKAY
+!====================================================================
 REAL(EB) FUNCTION GET_SLW_SINGLE_CJ(ccj0,ccj1)
    
    IMPLICIT NONE
    REAL(EB),INTENT(IN) :: ccj0,ccj1
-   GET_SLW_SINGLE_CJ= SRQT(ccj0*ccj1)                               !For now, only this approach
+   GET_SLW_SINGLE_CJ= SRQT(ccj0*ccj1)                                   !For now, only this approach
                                                                         !has been implemented   
 END FUNCTION GET_SLW_SINGLE_CJ
 
+!====================================================================
+!Subroutine to define the main and supplementar
+!absorption cross-sections for all gray gases
+!OKAY
+!====================================================================
 SUBROUTINE GET_SLW_CJ(CMIN,CMAX,NGG,CCJ,CCJ_SUP)
    
    !-----------------------------------------------------------------
@@ -4859,7 +4868,10 @@ SUBROUTINE GET_SLW_CJ(CMIN,CMAX,NGG,CCJ,CCJ_SUP)
       
 END SUBROUTINE GET_SLW_CJ
 
-
+!====================================================================
+!Function to define the ALDBFs divisions (for RC-SLW)
+!OKAY
+!====================================================================
 SUBROUTINE GET_SLW_FJ(NGG,FFJ,FFJ_SUP)
    
       !-----------------------------------------------------------------
@@ -4916,10 +4928,118 @@ SUBROUTINE GET_SLW_FJ(NGG,FFJ,FFJ_SUP)
          FFJ(II) = FMIN + X_I(II)*(FMAX - FMIN)
       ENDDO
 
-   END SUBROUTINE GET_SLW_CJ
+   END SUBROUTINE GET_SLW_FJ
 
+   !====================================================================
+   !Function to compute the gray gas 
+   !absorption coefficient in the SLW model
+   !OKAY
+   !====================================================================
+   real(dp) function slw_kappa_func(ttmp,press,mole_frac,ccj,&
+                                    compute_cj,mixing_method)
+   
+      !-----------------------------------------------------------------
+      !Declaration of variables
+      !-----------------------------------------------------------------
+      use comp_functions, only: shutdown
+      use GLOBAL_CONSTANTS, only: R0
+      implicit none
+      character(*),optional,intent(in) :: mixing_method
+      real(eb),parameter :: atm_pa=101325._eb
+      character(200) :: mixing_method_aux
+      real(eb),intent(in) :: ttmp,press,ccj,mole_frac
+      real(eb) :: mol_density,molm
+      logical,optional :: compute_cj
+      logical :: reverse
 
+      !-----------------------------------------------------------------
+      !Set up parameters
+      !-----------------------------------------------------------------
+      !Set up optional parameter for the reverse calculation
+      reverse = .false.; if (present(compute_cj)) reverse = compute_cj  
+  
+      !Set up optional parameter for the mixing method
+      mixing_method_aux = trim(slw_mixture_method)
+      if (present(mixing_method)) mixing_method_aux = trim(mixing_method)
+      mol_density = atm_pa*press/(ttmp*R0)                              !Mole density
 
+      !-----------------------------------------------------------------
+      !Particularize the calculation depending on the mixture method
+      !-----------------------------------------------------------------
+      select case(trim(mixing_method_aux))   
+         case('one_species')
+            molm = mol_density*mole_frac
+            
+         case('multiplication')
+            molm = mol_density
+   
+         case('superposition')
+            molm = mol_density
+
+         case('multiple_integration')
+            molm = mol_density*mole_frac
+         
+         case('albdf_precombined')
+            molm = mol_density
+            
+         case default
+
+            call shutdown('Problem in the specification of&
+                          & slw_mixture_method')
+      endselect
+
+      !-----------------------------------------------------------------
+      !Finish up the calculation
+      !-----------------------------------------------------------------
+      if (reverse) then                                                 !Compute cj from kappaj = ccj
+         slw_kappa_func = ccj/molm
+      else                                                              !Compute kappaj from cj = ccj (default)
+         slw_kappa_func = molm*ccj
+      endif
+         
+   endfunction slw_kappa_func
+
+   !====================================================================
+   !Function to compute the gray gas 
+   !weighting coefficient in the SLW model
+   !====================================================================
+   real(dp) function slw_a_func(ttmp,xxs,ttsource,ccj_sup1,ccj_sup0,&
+                                bslw_band_index)
+      
+      !-----------------------------------------------------------------
+      !Declaration of variables
+      !-----------------------------------------------------------------
+      implicit none
+      integer,optional :: bslw_band_index
+      integer :: ipb
+      real(dp),intent(in) :: ttmp,ttsource,xxs(:),ccj_sup1
+      real(dp),optional :: ccj_sup0
+      real(dp) :: F1,F0
+      logical :: slw_twindow
+      
+      !-----------------------------------------------------------------
+      !Set up flags
+      !-----------------------------------------------------------------
+      ipb = 1; if (present(bslw_band_index)) ipb = bslw_band_index      !Set up optional parameter
+      slw_twindow = .false.; if(.not.present(ccj_sup0)) &               !Check if the gas is a transparent window
+                                                   slw_twindow = .true.
+
+      !-----------------------------------------------------------------
+      !Compute ALBDFs
+      !-----------------------------------------------------------------
+!      F1 = albdf_mix(ttmp,xxs,ttsource,ccj_sup1,ipb)
+      if (slw_twindow) then
+         F0 = 0._dp
+      else
+!         F0 = albdf_mix(ttmp,xxs,ttsource,ccj_sup0,ipb)
+      endif
+
+      !-----------------------------------------------------------------
+      !Apply the definition of the weighting coefficient
+      !-----------------------------------------------------------------
+      slw_a_func =  F1 - F0
+            
+   endfunction slw_a_func
 
 
 
