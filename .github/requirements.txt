@@ -14,6 +14,11 @@ pyfdstools
 bibtexautocomplete
 PySide6
 
+# added for bundle scripts
+pyinstaller
+dmgbuild
+pillow
+
 # Local utility packages (imports fdsplotlib)
 -e ../Utilities/Python
 
