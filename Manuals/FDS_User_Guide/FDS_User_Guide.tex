@@ -3618,13 +3618,25 @@ The no-slip condition implies that the continuum tangential gas velocity at a su
 \subsection{Synthetic Turbulence Inflow Boundary Conditions}
 \label{info:synthetic_turbulence}
 
-Real flows of low-viscosity fluids like air are rarely perfectly stationary in time or uniform in space---they are turbulent (to some degree). Of course, the turbulence characteristics of the flow may have a significant impact on mixing and other behaviors, so the specification of nominally constant and uniform boundary conditions may be insufficient.  To address this issue, FDS employs a synthetic eddy method (SEM)\footnote{SEM may not be used for HVAC vents, which are strict mass flux boundaries.}.  Refer to Jarrin \cite{Jarrin:2008} for a detailed description. In brief, ``eddies'' are injected into the flow at random positions on the boundary and advect with the mean flow over a short distance near the boundary equivalent to the maximum eddy length scale.  Once the eddy passes through this region it is recycled at the inlet of the boundary with a new random position and length scale. The eddies are idealized as velocity perturbations over a spherical region in space with a diameter (eddy length scale) selected from a uniform random distribution. The selection procedures guarantee that prescribed first and second-order statistics (including Reynolds stresses) are satisfied.
+Real flows of low-viscosity fluids like air are rarely perfectly stationary in time or uniform in space---they are turbulent (to some degree). Turbulence at an inflow boundary can have a significant impact on mixing and other behaviors, so nominally constant and uniform velocity boundary conditions may be insufficient. To address this, FDS provides a Divergence-Free Synthetic Eddy Method (DFSEM) based on Poletto et al.~\cite{Poletto:2013}. The formulation descends from the Synthetic Eddy Method (SEM) of Jarrin~\cite{Jarrin:2008}, but constructs the fluctuating velocity field so that it is divergence-free.
 
-Synthetic turbulence is invoked by setting the number of eddies, \ct{N_EDDY}, the characteristic eddy length scale, \ct{L_EDDY}, and either the root mean square (RMS)
-velocity fluctuation, \ct{VEL_RMS}, or the Reynolds stress tensor components, \ct{REYNOLDS_STRESS(3,3)} on the \ct{VENT} line.  In Fig.~\ref{fig:sem_profiles} we show examples using SEM for flat, parabolic, atmospheric, and ramp profiles with 10 \% turbulence intensity (see the \ct{sem_*} test series in the Turbulence verification subdirectory).  The input lines for the atmospheric case are (see Section \ref{info:stratification} for further discussion of profile parameters).
+In brief, a set of synthetic ``eddies'' is maintained in a box that extends one characteristic length scale both upstream and downstream of the vent face. Eddies are placed at random locations, assigned random intensities consistent with a prescribed Reynolds stress, and advected with the bulk mean inflow. When an eddy leaves the box it is recycled upstream with a new random position and intensity. At each time step the divergence-free velocity contribution of every eddy that overlaps the vent is added to the prescribed mean velocity. On multi-mesh cases the undivided vent (and therefore the eddy box) is shared by all mesh segments of that vent.
+
+DFSEM is invoked on a \ct{VENT} by setting \ct{N_EDDY}~$>0$ together with a length scale and a stress specification:\footnote{The Synthetic Eddy Method may not be used for HVAC vents, which are strict mass flux boundaries.}
+\begin{itemize}
+\item \ct{N_EDDY} is the number of synthetic eddies. Larger values improve statistical uniformity of the inlet fluctuations at greater cost.
+\item \ct{L_EDDY} is the characteristic eddy length scale (m). This is the length scale in the major principal-stress direction; the two minor scales are set from \ct{EDDY_GAMMA2} as described below.
+\item \ct{EDDY_GAMMA2} is an integer from 1 to 8 (default 1) controlling anisotropy of the eddy length scales. With $\gamma^2=\hbox{\tt EDDY\_GAMMA2}$, the minor length scales are $\sigma_2=\sigma_3=\hbox{\tt L\_EDDY}/\gamma$. The default $\gamma^2=1$ gives isotropic length scales. Larger values produce more elongated eddies aligned with the major principal-stress direction.
+\item \ct{TURBULENCE_INTENSITY} is the dimensionless intensity $I=u^\prime/U=v^\prime/U=w^\prime/U$, where $U$ is the \emph{local} mean speed at the eddy center. This produces isotropic fluctuations which are scaled by any velocity profiles on the \ct{VENT} face.
+\item \ct{REYNOLDS_STRESS(3,3)} is the dimensional Reynolds stress tensor (\unit{m^2/s^2}). Use this instead of \ct{TURBULENCE_INTENSITY} when the fluctuations are anisotropic. The tensor is symmetric; only the lower triangular part needs to be specified. The absolute stresses will be reproduced over the whole \ct{VENT}, regardless of velocity profiles.
+\end{itemize}
+
+Either \ct{TURBULENCE_INTENSITY} or \ct{REYNOLDS_STRESS} must be provided (not both). Only \ct{XB} or \ct{DB} may be used to locate a DFSEM vent; \ct{MB}, \ct{PBX}, \ct{PBY}, and \ct{PBZ} are not permitted, so that the eddy-box extents are unambiguous on multi-mesh cases.
+
+Figure~\ref{fig:sem_profiles} shows examples for flat, parabolic, atmospheric, and ramp mean profiles with 10~\% turbulence intensity (see the \ct{sem_*} cases in the Turbulence verification subdirectory). The atmospheric case is:
 \begin{lstlisting}
     &SURF ID='inlet', VEL=-1, PROFILE='ATMOSPHERIC', Z0=0.5, PLE=0.3 /
-    &VENT MB='XMIN', SURF_ID='inlet', N_EDDY=100, L_EDDY=0.2, VEL_RMS=.1 /
+    &VENT DB='XMIN', SURF_ID='inlet', N_EDDY=100, L_EDDY=0.2, TURBULENCE_INTENSITY=.1 /
 \end{lstlisting}
 
 \begin{figure}[ht]
@@ -3638,37 +3650,25 @@ velocity fluctuation, \ct{VEL_RMS}, or the Reynolds stress tensor components, \c
     \label{fig:sem_profiles}
 \end{figure}
 
-Note that the Reynolds stress is symmetric and only the lower triangular part needs to be specified.  The RMS velocity fluctuation is isotropic (equivalent for each component). Thus, \ct{VEL_RMS} $\equiv \sqrt{2k/3}$, where $k\equiv \langle\frac{1}{2}u_i^\prime u_i^\prime\rangle$ is the turbulent kinetic energy per unit mass. Below is an example illustrating the equivalence between the RMS velocity fluctuation and the diagonal components of the Reynolds stress. Note that if \ct{VEL_RMS} is specified, this is equivalent to
+An anisotropic example using dimensional Reynolds stresses and elongated eddies is:
 \begin{lstlisting}
-    REYNOLDS_STRESS(1,1) = VEL_RMS**2
-    REYNOLDS_STRESS(2,2) = VEL_RMS**2
-    REYNOLDS_STRESS(3,3) = VEL_RMS**2
+    &VENT XB=... , SURF_ID='WIND', N_EDDY=500, L_EDDY=6, EDDY_GAMMA2=4,
+         REYNOLDS_STRESS(1,1)=2.16,  REYNOLDS_STRESS(1,2)=0.,   REYNOLDS_STRESS(1,3)=-0.47,
+         REYNOLDS_STRESS(2,1)=0.,    REYNOLDS_STRESS(2,2)=1.53, REYNOLDS_STRESS(2,3)=0.,
+         REYNOLDS_STRESS(3,1)=-0.47, REYNOLDS_STRESS(3,2)=0.,   REYNOLDS_STRESS(3,3)=4.259 /
 \end{lstlisting}
-and all other components of \ct{REYNOLDS_STRESS} are zero. If the fluctuations are not isotropic, then the Reynolds stresses must be specified component-wise.
-
-In Chapter 7 of Jarrin's thesis~\cite{Jarrin:2008}, he introduces the Modified Synthetic Eddy Method in which the eddy length scales are anisotropic. This allows more realistic characterization of stream-wise vortices in a turbulent boundary layer. To specify the length scales corresponding to the $\sigma_{ij}$ values in Jarrin's Eq.~(7.1) use \ct{L_EDDY_IJ(3,3)}.  Here is an example with random values for the eddy length scales and Reynolds stress components:
-
-\begin{lstlisting}
-    &VENT XB=... , SURF_ID='WIND', N_EDDY=500,
-    L_EDDY_IJ(1,1)=21.,  L_EDDY_IJ(1,2)=6.22, L_EDDY_IJ(1,3)=4.23
-    L_EDDY_IJ(2,1)=2.35, L_EDDY_IJ(2,2)=5.66, L_EDDY_IJ(2,3)=2.50
-    L_EDDY_IJ(3,1)=5.42, L_EDDY_IJ(3,2)=0.78, L_EDDY_IJ(3,3)=1.01
-    REYNOLDS_STRESS(1,1)=2.16,  REYNOLDS_STRESS(1,2)=0.,   REYNOLDS_STRESS(1,3)=-0.47
-    REYNOLDS_STRESS(2,1)=0.,    REYNOLDS_STRESS(2,2)=1.53, REYNOLDS_STRESS(2,3)=0.
-    REYNOLDS_STRESS(3,1)=-0.47, REYNOLDS_STRESS(3,2)=0.,   REYNOLDS_STRESS(3,3)=4.259 /
-\end{lstlisting}
+For this stress tensor the principal values are approximately $\lambda=(4.36,\,2.06,\,1.53)$~\unit{m^2/s^2}. The value of \ct{EDDY_GAMMA2} gives an eddy length scale ratio of 2:1:1 between the major and minor principal components.
 
 \subsubsection*{Synthetic Turbulence at OPEN Boundaries}
 \label{info:sem_open}
 
-For wind simulations (see Sec.~\ref{info:WIND}) it may be necessary to add a degree of inflow turbulence in order to match atmospheric conditions without drastically increasing the size of the computational domain.  The Synthetic Eddy Method of Jarrin \cite{Jarrin:2008} may be invoked on the \ct{VENT} line with an \ct{'OPEN'} boundary.  This should be used in conjunction with a \ct{WIND} line to specify the mean wind field.  For example,
-
+For wind simulations (see Sec.~\ref{info:WIND}) it may be necessary to add inflow turbulence in order to match atmospheric conditions without drastically increasing the size of the computational domain. The Synthetic Eddy Method may be invoked on an \ct{'OPEN'} \ct{VENT} together with a \ct{WIND} line for the mean wind field. For example,
 \begin{lstlisting}
     &WIND SPEED=10, DIRECTION=270, ... /
-    &VENT DB='XMIN', SURF_ID='OPEN', N_EDDY=500, L_EDDY=3, VEL_RMS=1 /
+    &VENT DB='XMIN', SURF_ID='OPEN', N_EDDY=500, L_EDDY=3, TURBULENCE_INTENSITY=0.1 /
 \end{lstlisting}
 
-Figure \ref{fig:sem_open_wind} shows results from a demonstration case (\ct{sem_open_wind.fds}).  In this case the mean wind speed is 10~m/s at 10~m elevation with a Monin-Obukhov length of $-667$~m (unstably stratified) and an aerodynamic roughness of $z_0=0.022$~m.  The ground temperature is set to 20~\unit{\degreeCelsius} and the ambient temperature is set to 19.18~\unit{\degreeCelsius} based on the Monin-Obukhov profile.  The rms velocity fluctuation at the inlet is set to 1 m/s. The lateral boundaries are \ct{'PERIODIC'}.  The inflow, outflow, and top boundary conditions are set to \ct{'OPEN'}.  Note that a special OPEN boundary condition for WIND has been developed, which is discussed in the FDS Tech Guide \cite{FDS_Math_Guide}.
+Figure~\ref{fig:sem_open_wind} shows results from a demonstration case (\ct{sem_open_wind.fds}). The mean wind speed is 10~m/s at 10~m elevation with a Monin-Obukhov length of $-667$~m (unstably stratified) and an aerodynamic roughness of $z_0=0.022$~m. The ground temperature is set to 20~\unit{\degreeCelsius} and the ambient temperature is set to 19.18~\unit{\degreeCelsius} based on the Monin-Obukhov profile. The turbulence intensity at the inlet is 10~\% of the local wind speed. The lateral boundaries are \ct{'PERIODIC'}. The inflow, outflow, and top boundaries are \ct{'OPEN'}. The special OPEN boundary treatment used with \ct{WIND} is discussed in the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 
 \begin{figure}[ht]
     \begin{tabular*}{\textwidth}{lr}
@@ -13803,11 +13803,11 @@ Keyword                   & Type              & Description                     
 \ct{DB}                   & Character         & Section~\ref{info:VENT_Basics}                            &               &                     \\ \hline
 \ct{DEVC_ID}              & Character         & Section~\ref{info:activate_deactivate}                    &               &                     \\ \hline
 \ct{DYNAMIC_PRESSURE}     & Real              & Section~\ref{info:pressure_boundary}                      & Pa            & 0                   \\ \hline
+\ct{EDDY_GAMMA2}          & Integer           & Section~\ref{info:synthetic_turbulence}                   &               & 1                   \\ \hline
 \ct{GEOM}                 & Logical           & Section~\ref{info:level_set}                              &               &  \ct{F}            \\ \hline
 \ct{ID}                   & Character         & Section~\ref{info:VENT_Basics}                            &               &                     \\ \hline
 \ct{IOR}                  & Integer           & Section~\ref{info:VENT_Trouble}                           &               &                     \\ \hline
 \ct{L_EDDY}               & Real              & Section~\ref{info:synthetic_turbulence}                   & m             & 0                   \\ \hline
-\ct{L_EDDY_IJ(3,3)}       & Real Array        & Section~\ref{info:synthetic_turbulence}                   & m             & 0                   \\ \hline
 \ct{MB}                   & Character         & Section~\ref{info:VENT_Basics}                            &               &                     \\ \hline
 \ct{MULT_ID}              & Character         & Section~\ref{info:MULT}                                   &               &                     \\ \hline
 \ct{N_EDDY}               & Integer           & Section~\ref{info:synthetic_turbulence}                   &               & 0                   \\ \hline
@@ -13824,8 +13824,8 @@ Keyword                   & Type              & Description                     
 \ct{TMP_EXTERIOR}         & Real              & Section~\ref{info:Special_VENTS}                          & \unit{\degreeCelsius} &                     \\ \hline
 \ct{TMP_EXTERIOR_RAMP}    & Character         & Section~\ref{info:Special_VENTS}                          &               &                     \\ \hline
 \ct{TRANSPARENCY}         & Real              & Section~\ref{info:colors}                                 &               &   1                 \\ \hline
+\ct{TURBULENCE_INTENSITY} & Real              & Section~\ref{info:synthetic_turbulence}                   &               & 0                   \\ \hline
 \ct{UVW(3)}               & Real Array        & Section~\ref{info:HVAClouvers}                            &               &                     \\ \hline
-\ct{VEL_RMS}              & Real              & Section~\ref{info:synthetic_turbulence}                   & m/s           & 0                   \\ \hline
 \ct{XB(6)}                & Real Array        & Section~\ref{info:VENT_Basics}                            & m             &                     \\ \hline
 \ct{XYZ(3)}               & Real Array        & Section~\ref{info:spread}                                 & m             &                     \\ \hline
 \end{xltabular}
@@ -14370,7 +14370,7 @@ Keyword             & Type     & Description                      & Units       
 813 \> \ct{VENT ... cannot be controlled by a device.} \> Section~\ref{info:Special_VENTS} \\
 814 \> \ct{VENT ... requires center point XYZ.} \> Section~\ref{sec:circvents} \\
 815 \> \ct{VENT ... L_EDDY = 0 in Synthetic Eddy Method.} \> Section~\ref{info:synthetic_turbulence} \\
-816 \> \ct{VENT ... VEL_RMS = 0 in Synthetic Eddy Method.} \> Section~\ref{info:synthetic_turbulence} \\
+816 \> \ct{VENT ... TURBULENCE_INTENSITY or REYNOLDS_STRESS required for Synthetic Eddy Method.} \> Section~\ref{info:synthetic_turbulence} \\
 817 \> \ct{VENT ... Synthetic Eddy Method not permitted with HVAC.} \> Section~\ref{info:synthetic_turbulence} \\
 818 \> \ct{VENT ... is not attached or may require ...} \> Section~\ref{info:VENT_Trouble} \\
 819 \> \ct{VENT ... is OPEN, MIRROR OR PERIODIC ... exterior boundary.} \> Section~\ref{info:Special_VENTS} \\
