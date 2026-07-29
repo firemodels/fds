@@ -3763,6 +3763,14 @@ ENDIF
 WRITE_RADIATION: IF (RADIATION .AND. ALLOCATED(RSA)) THEN
    WRITE(LU_OUTPUT,'(//A/)')   ' Radiation Model Information'
    WRITE(LU_OUTPUT,'(A,I4)')   '   Number of control angles ', NUMBER_RADIATION_ANGLES
+   SELECT CASE (RAD_DIFF_SCHEME)
+      CASE (1)
+         WRITE(LU_OUTPUT,'(A)')    '   Differencing scheme      STEP'
+      CASE (2)
+         WRITE(LU_OUTPUT,'(A)')    '   Differencing scheme      DIAMOND'
+      CASE (3)
+         WRITE(LU_OUTPUT,'(A)')    '   Differencing scheme      EXPONENTIAL'
+   END SELECT
    WRITE(LU_OUTPUT,'(A,I4)')   '   Time step increment      ', TIME_STEP_INCREMENT
    WRITE(LU_OUTPUT,'(A,I4)')   '   Angle increment          ', ANGLE_INCREMENT
    IF (CYLINDRICAL .OR. .NOT.TWO_D) THEN
