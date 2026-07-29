@@ -2656,6 +2656,15 @@ centerline of the room, and two horizontal arrays located 8.4~cm above the floor
 
 Sandia National Laboratories conducted experiments in support of siting requirements for Liquefied Natural Gas (LNG) facilities~\cite{Luketa:11078}. The experiments involved jet fires, pool fires, fireballs, and concrete walls that could serve as thermal barriers. The fuels tested include ethane, ethylene, propane, and isopentane. The jet fires are considered moderate in scale with projected flame lengths up to 17.3~m and exit mass flow rates up to 2.3~kg/s. The pool fires and fireballs are considered large scale with a pool diameter of 5~m and maximum effective diameter up to 78~m, respectively. Measurements for the fire experiments include flame geometry, heat flux external to the fire, surface emissive power, and in the case of fireballs, rise height and duration. Data was also collected for model parameter inputs such as atmospheric conditions that include wind speed, wind direction, temperature, pressure, and relative humidity, as well as the conditions of the fuel supply.
 
+\subsubsection{Modeling Notes}
+
+These experiments are included in a database~cite{Luketa:19311} developed by Sandia National Laboratories to validate fire models that are used to assess the hazards of fuels used at liquefied natural gas (LNG) facilities. The cited document provides nominal values for test parameters such as fuel burning rates, weather conditions, and instrument locations. The FDS simulations employ default input parameters with the following exceptions:
+\begin{itemize}
+\item Because heat flux is an important predicted quantity and the distances are large, 600 radiation angles are used instead of the default 100. Also, the pathlength used in the calculation of radiation absorption coefficients is set to 100~m rather than the default value of 0.1~m. This is needed to accurately compute the absorption of thermal radiation by atmospheric carbon dioxide and water vapor. 
+\item The jet fires are modeled with Lagrangian particles that mimic liquid fuel droplets projected at high pressure from a 1.6~cm hole at the end of a pipe. The test report states that the fuels exit the pipe as a gas/liquid mixture, in which case it is difficult to know the exit velocity exactly. Thus, it is assumed that 1000~$\mu$m droplets exit the pipe via a narrow cone at the reported temperature with a velocity of 100~m/s and with the reported fuel mass flow rate. There is no droplet break-up model used. 
+\item To account for various obstructions in the vicinity of the fire, a ground surface ``sand-grain'' \ct{ROUGHNESS} of 0.5~m is specified.
+\end{itemize}
+
 
 
 \section{Sandia Methane Burner}
