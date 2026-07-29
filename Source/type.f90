@@ -1542,9 +1542,11 @@ TYPE VENTS_TYPE
                TMP_EXTERIOR=-1000._EB,DYNAMIC_PRESSURE=0._EB,UVW(3)=-1.E12_EB,RADIUS=-1._EB
    LOGICAL :: ACTIVATED=.TRUE.,GEOM=.FALSE.,AREA_ADJUST=.TRUE.,DRAW=.TRUE.
    CHARACTER(LABEL_LENGTH) :: DEVC_ID='null',CTRL_ID='null',ID='null'
-   ! turbulent inflow (experimental)
+   ! Divergence-Free Synthetic Eddy Method (DFSEM; Poletto et al. 2013)
    INTEGER :: N_EDDY=0
-   REAL(EB) :: R_IJ(3,3)=0._EB,A_IJ(3,3)=0._EB,SIGMA_IJ(3,3)=0._EB,EDDY_BOX_VOLUME=0._EB, &
+   REAL(EB) :: TURBULENCE_INTENSITY=0._EB !< I=u'/U=v'/U=w'/U; U=local mean at eddy; R~I^2 U^2 via amplitudes
+   REAL(EB) :: R_IJ(3,3)=0._EB,EDDY_BOX_VOLUME=0._EB, &
+              L_EDDY(3)=0._EB,EDDY_C1=0._EB,EDDY_C2=1._EB,DFSEM_ROT(3,3)=0._EB, &
                X_EDDY_MIN=0._EB,X_EDDY_MAX=0._EB, &
                Y_EDDY_MIN=0._EB,Y_EDDY_MAX=0._EB, &
                Z_EDDY_MIN=0._EB,Z_EDDY_MAX=0._EB

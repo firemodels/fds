@@ -12088,9 +12088,9 @@ USE CONTROL_VARIABLES, ONLY : CONTROL
 USE MISC_FUNCTIONS, ONLY: PROCESS_MESH_NEIGHBORHOOD
 
 INTEGER :: N,N_TOTAL,NM,NNN,IOR,I1,I2,J1,J2,K1,K2,RGB(3),N_EDDY,II,JJ,KK,OBST_INDEX,N_EXPLICIT,N_IMPLICIT_VENTS,I_MODE,&
-           N_ORIGINAL_VENTS,IC0,IC1,IC
+           N_ORIGINAL_VENTS,IC0,IC1,IC,EDDY_GAMMA2
 REAL(EB) :: SPREAD_RATE,TRANSPARENCY,XYZ(3),TMP_EXTERIOR,DYNAMIC_PRESSURE,XB_USER(6),XB_MESH(6), &
-            REYNOLDS_STRESS(3,3),L_EDDY,VEL_RMS,L_EDDY_IJ(3,3),UVW(3),RADIUS
+            REYNOLDS_STRESS(3,3),TURBULENCE_INTENSITY,UVW(3),RADIUS,L_EDDY
 CHARACTER(LABEL_LENGTH) :: ID,DEVC_ID,CTRL_ID,SURF_ID,PRESSURE_RAMP,TMP_EXTERIOR_RAMP,MULT_ID,OBST_ID
 CHARACTER(25) :: COLOR
 TYPE(MULTIPLIER_TYPE), POINTER :: MR
@@ -12101,10 +12101,11 @@ TYPE IMPLICIT_VENT_TYPE
    CHARACTER(LABEL_LENGTH) :: MB='null',SURF_ID='null',ID='null'
 END TYPE
 TYPE(IMPLICIT_VENT_TYPE), ALLOCATABLE, DIMENSION(:) :: IMPLICIT_VENT
-NAMELIST /VENT/ AREA_ADJUST,COLOR,CTRL_ID,DB,DEVC_ID,DYNAMIC_PRESSURE,FYI,GEOM,ID,IOR,L_EDDY,L_EDDY_IJ, &
+NAMELIST /VENT/ AREA_ADJUST,COLOR,CTRL_ID,DB,DEVC_ID,DYNAMIC_PRESSURE,FYI,EDDY_GAMMA2,GEOM,ID,IOR, &
                 MB,MULT_ID,N_EDDY,OBST_ID,OUTLINE,PBX,PBY,PBZ,PRESSURE_RAMP,RADIUS,REYNOLDS_STRESS, &
+                TURBULENCE_INTENSITY,L_EDDY, &
                 RGB,SPREAD_RATE,SURF_ID,TEXTURE_ORIGIN,TMP_EXTERIOR,TMP_EXTERIOR_RAMP,TRANSPARENCY, &
-                UVW,VEL_RMS,XB,XYZ
+                UVW,XB,XYZ
 
 ! For a given MPI process, only read and process VENTs in the MESHes it controls or the MESH's immediate neighbors
 
@@ -12229,7 +12230,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
             WRITE(MESSAGE,'(3A)') 'ERROR(807): VENT ',TRIM(ID),' cannot use MULT_ID because it uses DB.'
             CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
          ENDIF
-         XB = (/XS,XF,YS,YF,ZS,ZF/)
+         XB = (/XS_MIN,XF_MAX,YS_MIN,YF_MAX,ZS_MIN,ZF_MAX/)
          SELECT CASE (DB)
             CASE('XMIN') ; XB(1:2) = XS_MIN+TWENTY_EPSILON_EB
             CASE('XMAX') ; XB(1:2) = XF_MAX-TWENTY_EPSILON_EB
@@ -12241,6 +12242,15 @@ MESH_LOOP_1: DO NM=1,NMESHES
                WRITE(MESSAGE,'(3A)') 'ERROR(808): VENT ',TRIM(ID),' must set DB to XMIN, XMAX, YMIN, YMAX, ZMIN, or ZMAX.'
                CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
          END SELECT
+      ENDIF
+
+      ! DFSEM: MB and PBX/PBY/PBZ are mesh-relative and can assign the same
+      ! TOTAL_INDEX to segments with different planes or tangential extents.
+      ! Require XB or DB so the undivided eddy box is unambiguous.
+      IF (N_EDDY>0 .AND. (MB/='null' .OR. PBX>-1.E5_EB .OR. PBY>-1.E5_EB .OR. PBZ>-1.E5_EB)) THEN
+         WRITE(MESSAGE,'(3A)') 'ERROR: VENT ',TRIM(ID), &
+            ' with N_EDDY>0 must use XB or DB (not MB, PBX, PBY, or PBZ) to avoid ambiguity.'
+         CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
       ENDIF
 
       ! Check that the vent is properly specified
@@ -12549,41 +12559,57 @@ MESH_LOOP_1: DO NM=1,NMESHES
                VT%DYNAMIC_PRESSURE = DYNAMIC_PRESSURE
                IF (PRESSURE_RAMP/='null') CALL GET_RAMP_INDEX(PRESSURE_RAMP,'TIME',VT%PRESSURE_RAMP_INDEX)
 
-               ! Synthetic Eddy Method
+               ! Divergence-Free Synthetic Eddy Method (DFSEM; Poletto et al. 2013)
 
                VT%N_EDDY = N_EDDY
-               IF (L_EDDY>TWENTY_EPSILON_EB) THEN
-                  VT%SIGMA_IJ = L_EDDY
-               ELSE
-                  VT%SIGMA_IJ = L_EDDY_IJ ! Modified SEM (Jarrin, Ch. 7)
-                  VT%SIGMA_IJ = MAX(VT%SIGMA_IJ,1.E-10_EB)
-               ENDIF
-               IF (VEL_RMS>0._EB) THEN
-                  VT%R_IJ=0._EB
-                  VT%R_IJ(1,1)=VEL_RMS**2
-                  VT%R_IJ(2,2)=VEL_RMS**2
-                  VT%R_IJ(3,3)=VEL_RMS**2
-               ELSE
-                  VT%R_IJ = REYNOLDS_STRESS
-                  VT%R_IJ = MAX(VT%R_IJ,1.E-10_EB)
-               ENDIF
-
-               ! Check SEM parameters
-
                IF (N_EDDY>0) THEN
                   SYNTHETIC_EDDY_METHOD = .TRUE.
-                  IF (ANY(VT%SIGMA_IJ<TWENTY_EPSILON_EB)) THEN
+                  IF (L_EDDY<=TWENTY_EPSILON_EB) THEN
                      WRITE(MESSAGE,'(3A)') 'ERROR(815): VENT ',TRIM(ID),' L_EDDY = 0 in Synthetic Eddy Method.'
                      CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                   ENDIF
-                  IF (ALL(ABS(VT%R_IJ)<TWENTY_EPSILON_EB)) THEN
-                     WRITE(MESSAGE,'(3A)') 'ERROR(816): VENT ',TRIM(ID),' VEL_RMS = 0 in Synthetic Eddy Method.'
-                     CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
+                  IF (TURBULENCE_INTENSITY>0._EB) THEN
+                     ! I = u'/U = v'/U = w'/U with U the local mean speed at the eddy.
+                     VT%TURBULENCE_INTENSITY = TURBULENCE_INTENSITY
+                     VT%R_IJ = 0._EB
+                     VT%R_IJ(1,1) = TURBULENCE_INTENSITY**2
+                     VT%R_IJ(2,2) = TURBULENCE_INTENSITY**2
+                     VT%R_IJ(3,3) = TURBULENCE_INTENSITY**2
+                  ELSE
+                     VT%TURBULENCE_INTENSITY = 0._EB
+                     VT%R_IJ = REYNOLDS_STRESS
+                     VT%R_IJ = MAX(VT%R_IJ,1.E-10_EB)
+                     IF (ALL(ABS(REYNOLDS_STRESS)<TWENTY_EPSILON_EB)) THEN
+                        WRITE(MESSAGE,'(3A)') 'ERROR(816): VENT ',TRIM(ID),&
+                           ' TURBULENCE_INTENSITY or REYNOLDS_STRESS required for Synthetic Eddy Method.'
+                        CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
+                     ENDIF
                   ENDIF
                   IF (TRIM(SURF_ID)=='HVAC') THEN
                      WRITE(MESSAGE,'(3A)') 'ERROR(817): VENT ',TRIM(ID),' Synthetic Eddy Method not permitted with HVAC.'
                      CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                   ENDIF
+                  ! L_EDDY is interpreted in principal-stress coordinates:
+                  ! sigma_1 = L_EDDY (dominant stress direction), with sigma_2=sigma_3=sigma_1/gamma,
+                  ! gamma = sqrt(EDDY_GAMMA2).
+                  ! C2 from Poletto et al. 2013 Table 1, indexed by gamma^2.
+                  IF (EDDY_GAMMA2<1 .OR. EDDY_GAMMA2>8) THEN
+                     WRITE(MESSAGE,'(3A)') 'ERROR: VENT ',TRIM(ID), &
+                        ' EDDY_GAMMA2 must be an integer from 1 to 8.'
+                     CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
+                  ENDIF
+                  SELECT CASE(EDDY_GAMMA2)
+                     CASE(1); VT%EDDY_C2 = 2.0_EB
+                     CASE(2); VT%EDDY_C2 = 1.875_EB
+                     CASE(3); VT%EDDY_C2 = 1.737_EB
+                     CASE(4); VT%EDDY_C2 = 1.75_EB
+                     CASE(5); VT%EDDY_C2 = 0.91_EB
+                     CASE(6); VT%EDDY_C2 = 0.825_EB
+                     CASE(7); VT%EDDY_C2 = 0.806_EB
+                     CASE(8); VT%EDDY_C2 = 1.5_EB
+                  END SELECT
+                  VT%L_EDDY = L_EDDY/SQRT(REAL(EDDY_GAMMA2,EB))
+                  VT%L_EDDY(1) = L_EDDY
                ENDIF
 
                ! Check if the VENT is attached to a specific OBST
@@ -12829,11 +12855,11 @@ DYNAMIC_PRESSURE  = 0._EB
 GEOM              = .FALSE.
 ID                = 'null'
 IOR               = 0
-L_EDDY            = 0._EB
-L_EDDY_IJ         = 0._EB
 MB                = 'null'
 MULT_ID           = 'null'
 N_EDDY            = 0
+L_EDDY       = 0._EB
+EDDY_GAMMA2      = 1
 OBST_ID           = 'null'
 OUTLINE           = .FALSE.
 PBX               = -1.E6_EB
@@ -12850,7 +12876,7 @@ TMP_EXTERIOR      = -1000.
 TMP_EXTERIOR_RAMP = 'null'
 TRANSPARENCY      = 1._EB
 UVW               = -1.E12_EB
-VEL_RMS           = 0._EB
+TURBULENCE_INTENSITY = 0._EB
 XYZ               = -1.E6_EB
 XB                = -1.E6_EB
 

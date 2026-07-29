@@ -2320,13 +2320,15 @@ EDGE_LOOP: DO IE=1,EDGE_COUNT(NM)
                   RAMP_T = EVALUATE_RAMP(TSI,SF%RAMP(TIME_VELO)%INDEX,TAU=SF%RAMP(TIME_VELO)%TAU)
                   IF (SF%VEL < 0._EB) THEN
                      IF (SF%RAMP(VELO_PROF_Z)%INDEX>0) PROFILE_FACTOR = EVALUATE_RAMP(ZC(KK),SF%RAMP(VELO_PROF_Z)%INDEX)
-                     IF (IEC==1 .OR. (IEC==2 .AND. ICD==2)) VEL_T = RAMP_T*(PROFILE_FACTOR*(SF%VEL_T(2) + VEL_EDDY))
-                     IF (IEC==3 .OR. (IEC==2 .AND. ICD==1)) VEL_T = RAMP_T*(PROFILE_FACTOR*(SF%VEL_T(1) + VEL_EDDY))
+                     IF (SF%PROFILE/=0 .AND. ABS(SF%VEL)>TWENTY_EPSILON_EB) &
+                        PROFILE_FACTOR = ABS(0.5_EB*(WCM_B1%U_NORMAL_0+WCP_B1%U_NORMAL_0)/SF%VEL)
+                     IF (IEC==1 .OR. (IEC==2 .AND. ICD==2)) VEL_T = RAMP_T*(PROFILE_FACTOR*SF%VEL_T(2) + VEL_EDDY)
+                     IF (IEC==3 .OR. (IEC==2 .AND. ICD==1)) VEL_T = RAMP_T*(PROFILE_FACTOR*SF%VEL_T(1) + VEL_EDDY)
                   ELSEIF (SF%VEL > 0._EB) THEN
                      IF (SF%PROFILE/=0) PROFILE_FACTOR = ABS(0.5_EB*(WCM_B1%U_NORMAL_0+WCP_B1%U_NORMAL_0)/SF%VEL)
                      IF (SF%RAMP(VELO_PROF_Z)%INDEX>0) PROFILE_FACTOR = EVALUATE_RAMP(ZC(KK),SF%RAMP(VELO_PROF_Z)%INDEX)
-                     IF (IEC==1 .OR. (IEC==2 .AND. ICD==2)) VEL_T = RAMP_T*PROFILE_FACTOR*VEL_EDDY
-                     IF (IEC==3 .OR. (IEC==2 .AND. ICD==1)) VEL_T = RAMP_T*PROFILE_FACTOR*VEL_EDDY
+                     IF (IEC==1 .OR. (IEC==2 .AND. ICD==2)) VEL_T = RAMP_T*VEL_EDDY
+                     IF (IEC==3 .OR. (IEC==2 .AND. ICD==1)) VEL_T = RAMP_T*VEL_EDDY
                   ELSE  ! User-specified VEL_T but with VEL=0
                      IF (IEC==1 .OR. (IEC==2 .AND. ICD==2)) VEL_T = RAMP_T*SF%VEL_T(2)
                      IF (IEC==3 .OR. (IEC==2 .AND. ICD==1)) VEL_T = RAMP_T*SF%VEL_T(1)
