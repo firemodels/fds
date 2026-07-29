@@ -507,6 +507,7 @@ INTEGER :: NUMBER_RADIATION_ANGLES=0                       !< Number of solid an
 INTEGER :: ANGLE_INCREMENT=0                               !< Indicates how many radiation angles are updated in one time step
 INTEGER :: RADIATION_ITERATIONS=1                          !< Number of times to repeat radiation solve in a single time step
 INTEGER :: INITIAL_RADIATION_ITERATIONS                    !< Number of radiation solves before time stepping starts
+INTEGER :: RAD_DIFF_SCHEME=1                         !< FVM spatial differencing: 1=STEP, 2=DIAMOND, 3=EXPONENTIAL
 
 REAL(EB) :: RTE_SOURCE_CORRECTION_FACTOR=1._EB   !< Multiplicative factor used in correcting RTE source term
 REAL(EB) :: RAD_Q_SUM=0._EB   !< \f$ \sum_{ijk} \left( \chi_{\rm r} \dot{q}_{ijk}''' + \kappa_{ijk} U_{ijk} \right) V_{ijk} \f$

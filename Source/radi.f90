@@ -3701,7 +3701,6 @@ T_USED(9)=T_USED(9)+CURRENT_TIME()-TNOW
 
 CONTAINS
 
-
 !> \brief Finite Volume Method of radiation transport
 
 SUBROUTINE RADIATION_FVM
@@ -3709,24 +3708,27 @@ SUBROUTINE RADIATION_FVM
 USE MIEV
 USE MATH_FUNCTIONS, ONLY : INTERPOLATE1D
 USE TRAN, ONLY : GET_IJK
-USE COMPLEX_GEOMETRY, ONLY : CC_CGSC,CC_SOLID
+USE COMPLEX_GEOMETRY, ONLY : CC_CGSC,CC_SOLID,CC_IDCC
 USE CC_SCALARS, ONLY : GET_CFACE_RAD_NVEC
 USE PHYSICAL_FUNCTIONS, ONLY : GET_VOLUME_FRACTION, GET_MASS_FRACTION
 REAL(EB) :: RAP, AX, AXU, AXD, AY, AYU, AYD, AZ, AZU, AZD, VC, RU, RD, RP, AFD, &
             ILXU, ILYU, ILZU, QVAL, BBF, BBFA, NCSDROP, RSA_RAT,EFLUX,SOOT_MASS_FRACTION, &
             AIU_SUM,A_SUM,VOL,VC1,AY1,AZ1,DLO,COS_DLO,AILFU, &
-            RAD_Q_SUM_PARTIAL,KFST4_SUM_PARTIAL,ALPHA_CC,SUMILW,NVECL(3)
+            RAD_Q_SUM_PARTIAL,KFST4_SUM_PARTIAL,ALPHA_CC,FWX,FWY,FWZ,PLX(3),SUMILW,NVECL(3),&
+            FWXD,FWYD,FWZD
 
 INTEGER  :: N,NN,IIG,JJG,KKG,I,J,K,IW,ICF,II,JJ,KK,IOR,IC,IWUP,IWDOWN, &
             ISTART, IEND, ISTEP, JSTART, JEND, JSTEP, &
             KSTART, KEND, KSTEP, NSTART, NEND, NSTEP, &
-            I_UIID, N_UPDATES, IBND, NOM, ARRAY_INDEX,NRA, &
-            IMIN, JMIN, KMIN, IMAX, JMAX, KMAX, N_SLICE, M_IJK, IJK, LL,IO
+            I_UIID, N_UPDATES, IBND, NOM, ARRAY_INDEX, NRA, &
+            IMIN, JMIN, KMIN, IMAX, JMAX, KMAX, N_SLICE, M_IJK, IJK, LL, NEG_ITER, IO
 INTEGER  :: IADD,IFACE,INDCF
 INTEGER, ALLOCATABLE :: IJK_SLICE(:,:)
+LOGICAL :: NEGATIVE_MASK(3), APPLY_ALT_SCHEME
 REAL(EB) :: XID,YJD,ZKD,KAPPA_PART_SINGLE,DLF,DLA(3),TSI,TMP_EXTERIOR,TEMP_ORIENTATION(3),&
             COS_DLO_ARR(NUMBER_RADIATION_ANGLES)
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_GET
+REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: ILDX,ILDY,ILDZ
 INTEGER :: IID,JJD,KKD,IP
 LOGICAL :: UPDATE_INTENSITY, IS_PARTICLE_ORIENTATION_RAMP
 REAL(EB), POINTER, DIMENSION(:,:,:) :: IL,UIIOLD,KAPPA_PART,KFST4_PART,EXTCOE,SCAEFF,SCAEFF_G,IL_UP
@@ -3753,6 +3755,12 @@ REAL(EB), ALLOCATABLE, DIMENSION(:) :: Z_ARRAY
 ALLOCATE(Z_ARRAY(N_TRACKED_SPECIES))
 
 ALLOCATE( IJK_SLICE(3, IBAR*KBAR) )
+
+IF (RAD_DIFF_SCHEME>1) THEN
+   ALLOCATE(ILDX(0:IBP1,0:JBP1,0:KBP1))
+   ALLOCATE(ILDY(0:IBP1,0:JBP1,0:KBP1))
+   ALLOCATE(ILDZ(0:IBP1,0:JBP1,0:KBP1))
+ENDIF
 
 KFST4_GAS  => WORK1
 IL         => WORK2
@@ -4340,6 +4348,12 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                KMAX = KSTART
             ENDIF
 
+            IF (RAD_DIFF_SCHEME>1) THEN
+               ILDX=IL
+               ILDY=IL
+               ILDZ=IL
+            ENDIF
+
             GEOMETRY2: IF (CYLINDRICAL) THEN  ! Sweep in axisymmetric geometry
                J = 1
                CKLOOP: DO K=KSTART,KEND,KSTEP
@@ -4432,7 +4446,8 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                   !$OMP& PRIVATE(I, J, K, AY1, AX, VC1, AZ1, IC, ILXU, ILYU, AILFU, &
                   !$OMP& ILZU, VC, AY, AZ, AXU, AYU, AZU, AXD, AYD, AZD, AFD, &
                   !$OMP& IW, WC, BR, CF, CFA, BC, DLF, A_SUM, AIU_SUM, RAP, &
-                  !$OMP& ICF, INDCF, IADD, IFACE )
+                  !$OMP& ICF, INDCF, IADD, IFACE, FWX, FWY, FWZ, FWXD, FWYD, FWZD, &
+                  !$OMP& PLX, NEGATIVE_MASK, NEG_ITER, APPLY_ALT_SCHEME )
 
                   SLICE_LOOP: DO IJK = 1, M_IJK
                      I = IJK_SLICE(1,IJK)
@@ -4443,9 +4458,15 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                      AX  = DY(J) * DZ(K) * ABS(DLX(N))
                      VC1 = DY(J) * DZ(K)
                      AZ1 = DY(J) * ABS(DLZ(N))
-                     ILXU  = IL(I-ISTEP,J,K)
-                     ILYU  = IL(I,J-JSTEP,K)
-                     ILZU  = IL(I,J,K-KSTEP)
+                     IF (RAD_DIFF_SCHEME==1) THEN
+                        ILXU = IL(I-ISTEP,J,K)
+                        ILYU = IL(I,J-JSTEP,K)
+                        ILZU = IL(I,J,K-KSTEP)
+                     ELSE
+                        ILXU = ILDX(I-ISTEP,J,K)
+                        ILYU = ILDY(I,J-JSTEP,K)
+                        ILZU = ILDZ(I,J,K-KSTEP)
+                     ENDIF
                      IC = CELL_INDEX(I,J,K)
                      IF (IC/=0) THEN
                         IF (CELL(IC)%SOLID) CYCLE SLICE_LOOP
@@ -4519,19 +4540,114 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                         ENDIF
                      ENDIF
 
-                     A_SUM = AXD + AYD + AZD + AFD
-                     AIU_SUM = AXU*ILXU + AYU*ILYU + AZU*ILZU + AILFU
+                     ! Higher-order schemes everywhere except gas cut-cells (STEP weights there)
+                     APPLY_ALT_SCHEME = RAD_DIFF_SCHEME>1
+                     IF (CC_IBM) THEN
+                        IF (CCVAR(I,J,K,CC_IDCC)>0) APPLY_ALT_SCHEME = .FALSE.
+                     ENDIF
 
-                     IF (SOLID_PARTICLES) IL_UP(I,J,K) = MAX(0._EB,AIU_SUM/A_SUM)
-                     RAP = 1._EB/(A_SUM + EXTCOE(I,J,K)*VC*RSA(N))
-                     IL(I,J,K) = MAX(0._EB, RAP * (AIU_SUM + VC*RSA(N)*RFPI* &
-                                     ( KFST4_GAS(I,J,K) + KFST4_PART(I,J,K) + RSA_RAT*&
-                                     (SCAEFF(I,J,K)+SCAEFF_G(I,J,K))*UIIOLD(I,J,K) ) ) )
+                     IF (.NOT.APPLY_ALT_SCHEME) THEN
+
+                        A_SUM = AXD + AYD + AZD + AFD
+                        AIU_SUM = AXU*ILXU + AYU*ILYU + AZU*ILZU + AILFU
+                        IF (SOLID_PARTICLES) IL_UP(I,J,K) = MAX(0._EB,AIU_SUM/A_SUM)
+                        RAP = 1._EB/(A_SUM + EXTCOE(I,J,K)*VC*RSA(N))
+                        IL(I,J,K) = MAX(0._EB, RAP * (AIU_SUM + VC*RSA(N)*RFPI* &
+                                    ( KFST4_GAS(I,J,K) + KFST4_PART(I,J,K) + RSA_RAT*&
+                                    (SCAEFF(I,J,K)+SCAEFF_G(I,J,K))*UIIOLD(I,J,K) ) ) )
+                        IF (RAD_DIFF_SCHEME>1) THEN
+                           ILDX(I,J,K) = IL(I,J,K)
+                           ILDY(I,J,K) = IL(I,J,K)
+                           ILDZ(I,J,K) = IL(I,J,K)
+                        ENDIF
+
+                     ELSE
+
+                        SELECT CASE(RAD_DIFF_SCHEME)
+                           CASE (2) ! DIAMOND
+                              FWX = 2.0_EB; FWY = 2.0_EB; FWZ = 2.0_EB
+                           CASE (3) ! EXPONENTIAL
+                              ! Optical depth tau=kappa*dx/|mu| (0 if kappa=0). If |mu|~0 and kappa>0, set tau=inf.
+                              PLX = 0._EB
+                              IF (ABS(DLANG(1,N)) > TWO_EPSILON_EB) THEN
+                                 PLX(1) = EXTCOE(I,J,K)*DX(I)/ABS(DLANG(1,N))
+                              ELSEIF (EXTCOE(I,J,K) > TWENTY_EPSILON_EB) THEN
+                                 PLX(1) = HUGE_EB
+                              ENDIF
+                              IF (ABS(DLANG(2,N)) > TWO_EPSILON_EB) THEN
+                                 PLX(2) = EXTCOE(I,J,K)*DY(J)/ABS(DLANG(2,N))
+                              ELSEIF (EXTCOE(I,J,K) > TWENTY_EPSILON_EB) THEN
+                                 PLX(2) = HUGE_EB
+                              ENDIF
+                              IF (ABS(DLANG(3,N)) > TWO_EPSILON_EB) THEN
+                                 PLX(3) = EXTCOE(I,J,K)*DZ(K)/ABS(DLANG(3,N))
+                              ELSEIF (EXTCOE(I,J,K) > TWENTY_EPSILON_EB) THEN
+                                 PLX(3) = HUGE_EB
+                              ENDIF
+                              IF (PLX(1) < TWENTY_EPSILON_EB) THEN; FWX = 0.5_EB
+                              ELSE; FWX = MIN(1._EB, 1._EB/(1._EB-EXP(-PLX(1)))-1._EB/PLX(1)); ENDIF
+                              IF (PLX(2) < TWENTY_EPSILON_EB) THEN; FWY = 0.5_EB
+                              ELSE; FWY = MIN(1._EB, 1._EB/(1._EB-EXP(-PLX(2)))-1._EB/PLX(2)); ENDIF
+                              IF (PLX(3) < TWENTY_EPSILON_EB) THEN; FWZ = 0.5_EB
+                              ELSE; FWZ = MIN(1._EB, 1._EB/(1._EB-EXP(-PLX(3)))-1._EB/PLX(3)); ENDIF
+                              FWX = 1._EB/FWX; FWY = 1._EB/FWY; FWZ = 1._EB/FWZ
+                        END SELECT
+
+                        A_SUM = AXD*FWX + AYD*FWY + AZD*FWZ + AFD
+                        AIU_SUM = AXU*FWX*ILXU + AYU*FWY*ILYU + AZU*FWZ*ILZU + AILFU
+                        IF (SOLID_PARTICLES) IL_UP(I,J,K) = MAX(0._EB,AIU_SUM/A_SUM)
+                        RAP = 1._EB/(A_SUM + EXTCOE(I,J,K)*VC*RSA(N))
+                        IL(I,J,K) = MAX(0._EB, RAP * (AIU_SUM + VC*RSA(N)*RFPI* &
+                                    ( KFST4_GAS(I,J,K) + KFST4_PART(I,J,K) + RSA_RAT*&
+                                    (SCAEFF(I,J,K)+SCAEFF_G(I,J,K))*UIIOLD(I,J,K) ) ) )
+
+                        ! Set downwind intensities
+                        ILDX(I,J,K) = FWX*IL(I,J,K) - (FWX - 1._EB)*ILXU
+                        ILDY(I,J,K) = FWY*IL(I,J,K) - (FWY - 1._EB)*ILYU
+                        ILDZ(I,J,K) = FWZ*IL(I,J,K) - (FWZ - 1._EB)*ILZU
+
+                        ! Check for negative intensities and apply corrections (persistent masks)
+                        NEGATIVE_MASK = .FALSE.
+                        FWXD = FWX; FWYD = FWY; FWZD = FWZ
+                        DO NEG_ITER = 1, 3
+                           NEGATIVE_MASK(1) = NEGATIVE_MASK(1) .OR. (ILDX(I,J,K) < 0._EB)
+                           NEGATIVE_MASK(2) = NEGATIVE_MASK(2) .OR. (ILDY(I,J,K) < 0._EB)
+                           NEGATIVE_MASK(3) = NEGATIVE_MASK(3) .OR. (ILDZ(I,J,K) < 0._EB)
+
+                           IF (.NOT.ANY(NEGATIVE_MASK)) EXIT
+
+                           ! Apply corrections based on mask
+                           IF (NEGATIVE_MASK(1)) THEN
+                              ILDX(I,J,K) = 0._EB
+                              FWX = 1._EB; FWXD = 0._EB
+                           ENDIF
+                           IF (NEGATIVE_MASK(2)) THEN
+                              ILDY(I,J,K) = 0._EB
+                              FWY = 1._EB; FWYD = 0._EB
+                           ENDIF
+                           IF (NEGATIVE_MASK(3)) THEN
+                              ILDZ(I,J,K) = 0._EB
+                              FWZ = 1._EB; FWZD = 0._EB
+                           ENDIF
+
+                           A_SUM = AXD*FWXD + AYD*FWYD + AZD*FWZD + AFD
+                           AIU_SUM = AXU*FWX*ILXU + AYU*FWY*ILYU + AZU*FWZ*ILZU + AILFU
+                           IF (SOLID_PARTICLES) IL_UP(I,J,K) = MAX(0._EB,AIU_SUM/A_SUM)
+                           RAP = 1._EB/(A_SUM + EXTCOE(I,J,K)*VC*RSA(N))
+                           IL(I,J,K) = MAX(0._EB, RAP * (AIU_SUM + VC*RSA(N)*RFPI* &
+                                       ( KFST4_GAS(I,J,K) + KFST4_PART(I,J,K) + RSA_RAT*&
+                                       (SCAEFF(I,J,K)+SCAEFF_G(I,J,K))*UIIOLD(I,J,K) ) ) )
+                           IF (.NOT.NEGATIVE_MASK(1)) ILDX(I,J,K) = FWX*IL(I,J,K) - (FWX - 1._EB)*ILXU
+                           IF (.NOT.NEGATIVE_MASK(2)) ILDY(I,J,K) = FWY*IL(I,J,K) - (FWY - 1._EB)*ILYU
+                           IF (.NOT.NEGATIVE_MASK(3)) ILDZ(I,J,K) = FWZ*IL(I,J,K) - (FWZ - 1._EB)*ILZU
+                        ENDDO
+
+                     ENDIF
 
                   ENDDO SLICE_LOOP
                   !$OMP END PARALLEL DO
 
-               ENDDO IPROP_LOOP
+                ENDDO IPROP_LOOP
 
             ENDIF GEOMETRY2
 
@@ -4563,20 +4679,31 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             !$OMP PARALLEL PRIVATE(IOR, IIG, JJG, KKG, WC, BC, BR)
             !$OMP DO SCHEDULE(GUIDED)
             WALL_LOOP2: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-               WC => WALL(IW)
-               IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP2
-               IF (WC%BOUNDARY_TYPE==OPEN_BOUNDARY) CYCLE WALL_LOOP2
-               BC => BOUNDARY_COORD(WC%BC_INDEX)
-               BR => BOUNDARY_RADIA(WC%BR_INDEX)
-               IOR = BC%IOR
-               IF (TWO_D .AND. .NOT.CYLINDRICAL  .AND. ABS(IOR)==2) CYCLE WALL_LOOP2  ! 2-D non cylindrical
-               IF (DLN(IOR,N)>=0._EB) CYCLE WALL_LOOP2     ! outgoing
-               IIG = BC%IIG
-               JJG = BC%JJG
-               KKG = BC%KKG
-               INRAD_W(IW) = INRAD_W(IW) + DLN(IOR,N) * BR%BAND(IBND)%ILW(N) ! update incoming rad, step 1
-               BR%BAND(IBND)%ILW(N) = IL(IIG,JJG,KKG)
-               INRAD_W(IW) = INRAD_W(IW) - DLN(IOR,N) * BR%BAND(IBND)%ILW(N) ! update incoming rad, step 2
+                WC => WALL(IW)
+                   IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP2
+                   IF (WC%BOUNDARY_TYPE==OPEN_BOUNDARY) CYCLE WALL_LOOP2
+                   BC => BOUNDARY_COORD(WC%BC_INDEX)
+                   BR => BOUNDARY_RADIA(WC%BR_INDEX)
+                   IOR = BC%IOR
+                   IF (TWO_D .AND. .NOT.CYLINDRICAL  .AND. ABS(IOR)==2) CYCLE WALL_LOOP2  ! 2-D non cylindrical
+                   IF (DLN(IOR,N)>=0._EB) CYCLE WALL_LOOP2     ! outgoing
+                   IIG = BC%IIG
+                   JJG = BC%JJG
+                   KKG = BC%KKG
+                   INRAD_W(IW) = INRAD_W(IW) + DLN(IOR,N) * BR%BAND(IBND)%ILW(N) ! update incoming rad, step 1
+                   BR%BAND(IBND)%ILW(N) = IL(IIG,JJG,KKG)
+                   ! Use downwind face value if relevant (cut-cells store ILD=IL)
+                   IF (RAD_DIFF_SCHEME>1) THEN
+                      SELECT CASE(ABS(IOR))
+                         CASE(1)
+                            BR%BAND(IBND)%ILW(N) = ILDX(IIG,JJG,KKG)
+                         CASE(2)
+                            BR%BAND(IBND)%ILW(N) = ILDY(IIG,JJG,KKG)
+                         CASE(3)
+                            BR%BAND(IBND)%ILW(N) = ILDZ(IIG,JJG,KKG)
+                      END SELECT
+                   ENDIF
+                INRAD_W(IW) = INRAD_W(IW) - DLN(IOR,N) * BR%BAND(IBND)%ILW(N) ! update incoming rad, step 2
             ENDDO WALL_LOOP2
             !$OMP END DO
 
@@ -4634,6 +4761,16 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                IF (M2%NIC_S==0) CYCLE INTERPOLATION_LOOP
                OTHER_WALL_LOOP: DO LL=1,M2%NIC_S
                   M2%IL_S(LL,N,IBND) = IL(M2%IIO_S(LL),M2%JJO_S(LL),M2%KKO_S(LL))
+                  IF (RAD_DIFF_SCHEME>1) THEN
+                     SELECT CASE(ABS(M2%IOR_S(LL)))
+                        CASE(1)
+                           M2%IL_S(LL,N,IBND) = ILDX(M2%IIO_S(LL),M2%JJO_S(LL),M2%KKO_S(LL))
+                        CASE(2)
+                           M2%IL_S(LL,N,IBND) = ILDY(M2%IIO_S(LL),M2%JJO_S(LL),M2%KKO_S(LL))
+                        CASE(3)
+                           M2%IL_S(LL,N,IBND) = ILDZ(M2%IIO_S(LL),M2%JJO_S(LL),M2%KKO_S(LL))
+                     END SELECT
+                  ENDIF
                ENDDO OTHER_WALL_LOOP
             ENDDO INTERPOLATION_LOOP
 
@@ -4832,6 +4969,7 @@ IF (SOLID_PARTICLES .AND. UPDATE_INTENSITY) THEN
 ENDIF
 
 DEALLOCATE(IJK_SLICE)
+IF (ALLOCATED(ILDX)) DEALLOCATE(ILDX,ILDY,ILDZ)
 
 ! Write out intensities to the radiation file (RADF)
 
@@ -4938,7 +5076,6 @@ ENDDO
 END SUBROUTINE ADD_VOLUMETRIC_HEAT_SOURCE
 
 END SUBROUTINE COMPUTE_RADIATION
-
 
 REAL(EB) FUNCTION BLACKBODY_FRACTION(L1,L2,TEMP)
 
