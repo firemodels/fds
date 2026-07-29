@@ -62,6 +62,7 @@ cd OMP_Scaling_Tests;  ./Run_All.sh $OPTIONS; cd ..
 cd Phoenix_LNG_Fires;  ./Run_All.sh $OPTIONS; cd ..
 cd Pool_Fires;  ./Run_All.sh $OPTIONS; cd ..
 cd Purdue_Flames;  ./Run_All.sh $OPTIONS; cd ..
+cd Sandia_Fireballs;  ./Run_All.sh $OPTIONS; cd ..
 cd Sandia_Jet_Fires;  ./Run_All.sh $OPTIONS; cd ..
 cd Sandia_Methane_Burner;  ./Run_All.sh $OPTIONS; cd ..
 cd Sandia_Plumes;  ./Run_All.sh $OPTIONS; cd ..
