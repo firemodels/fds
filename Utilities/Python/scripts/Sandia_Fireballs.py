@@ -41,7 +41,7 @@ for i in range(3):
     
     # Read second CSV file, skip first two rows, and extract the max value into array M
     df2 = pd.read_csv(outdir + M_file[i], skiprows=2)
-    M = df2.iloc[:, 4:].max().values
+    M = df2.iloc[:, 6:].max().values
     
     # Remove NaN values by creating a mask for valid (non-NaN) values in both arrays
     # Ensure both arrays have the same length by taking the minimum length
