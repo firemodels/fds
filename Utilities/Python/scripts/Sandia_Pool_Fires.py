@@ -16,7 +16,7 @@ figdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Sandia_Pool_Fires/'
 E_file = ['ethane_pool.csv','ethylene_pool.csv','propane_pool.csv','isopentane_pool.csv']
 M_file = ['ethane_pool_cat_devc.csv','ethylene_pool_cat_devc.csv','propane_pool_cat_devc.csv','isopentane_pool_cat_devc.csv']
 
-marker = ['ko','ro','go','bo']
+marker = ['ko','ro','bo','go']
 label  = ['Ethane','Ethylene','Propane','Isopentane']
 
 git_file =  os.path.join(outdir, f'ethane_pool_cat_git.txt')
