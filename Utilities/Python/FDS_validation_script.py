@@ -37,6 +37,8 @@ print("JIS_Facade_filter...");            safe_run("./scripts/JIS_Facade_filter.
 print("Crown_Fires...");                  safe_run("./scripts/Crown_Fires.py")
 print("Ranz_Marshall...");                safe_run("./scripts/Ranz_Marshall.py")
 print("Phoenix_LNG_Fires...");            safe_run("./scripts/Phoenix_LNG_Fires.py")
+print("Sandia_Fireballs...");             safe_run("./scripts/Sandia_Fireballs.py")
+print("Sandia_Jet_Fires...");             safe_run("./scripts/Sandia_Jet_Fires.py")
 print("Sandia_Plumes_TKE...");            safe_run("./scripts/Sandia_Plumes_TKE.py")
 print("Sandia_Pool_Fires...");            safe_run("./scripts/Sandia_Pool_Fires.py")
 

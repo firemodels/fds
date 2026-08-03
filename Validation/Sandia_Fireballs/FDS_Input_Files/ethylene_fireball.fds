@@ -1,0 +1,36 @@
+&HEAD CHID='ethylene_fireball', TITLE='Sandia Fireballs' /
+
+&TIME T_BEGIN=-10., T_END=20. /
+&DUMP DT_HRR=0.1, DT_DEVC=0.1 /
+
+&MESH IJK=40,40,40, XB=-50,-10,-20,20,0,40, MULT_ID='mesh' /
+&MULT ID='mesh', DX=40., DY=40., DZ=40., I_UPPER=3, J_LOWER=-1, J_UPPER=2, K_UPPER=5 /
+
+&WIND SPEED=0.87, Z_REF=2., DIRECTION=54.9,  L=-500., Z_0=0.1 /
+
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+
+&RADI NUMBER_RADIATION_ANGLES=600, PATH_LENGTH=100. /
+
+&REAC FUEL ='ETHYLENE',
+      SOOT_YIELD=0.01,
+      RADIATIVE_FRACTION=0.34 /
+
+&VENT XB=-1.0,1.0,-1.0,1.0,0.,0., SURF_ID='INJECTION' /
+
+&SURF ID='INJECTION', MASS_FLUX(1)=288.3, SPEC_ID(1)='ETHYLENE', TMP_FRONT=-59.4, RAMP_MF(1)='fuel', COLOR='RED', NO_SLIP=T /
+
+&RAMP ID='fuel', T= 0.00, F=0.0 /
+&RAMP ID='fuel', T= 0.20, F=0.0 /
+&RAMP ID='fuel', T= 0.21, F=1.0 /
+&RAMP ID='fuel', T= 1.21, F=1.0 /
+&RAMP ID='fuel', T= 1.22, F=0.0 /
+
+&CATF OTHER_FILES='fireball_devices.txt' /
+
+&TAIL /
+

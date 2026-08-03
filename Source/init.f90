@@ -3453,14 +3453,14 @@ END SUBROUTINE INIT_THIN_WALL_CELL
 
 SUBROUTINE SET_DENSITY_AND_MASS_FRACTIONS_AT_WALL(NM,IW,TT)
 
-USE PHYSICAL_FUNCTIONS, ONLY: GET_MASS_FRACTION,GET_SPECIFIC_GAS_CONSTANT
+USE PHYSICAL_FUNCTIONS, ONLY: GET_MASS_FRACTION,GET_SPECIFIC_GAS_CONSTANT,SURFACE_VELOCITY_PROFILE_FACTOR
 USE CONTROL_VARIABLES, ONLY : CONTROL
 USE COMP_FUNCTIONS, ONLY: SHUTDOWN
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 INTEGER, INTENT(IN) :: NM,IW
 REAL(EB), INTENT(IN) :: TT
 INTEGER :: IERR,ICG
-REAL(EB) :: T_ACTIVATE,PX,PY,PZ,RR,RSUM_F,DELTA,R1,DIST,TSI
+REAL(EB) :: T_ACTIVATE,RSUM_F,DIST,TSI
 REAL(EB) :: ZZ_GET(1:N_TRACKED_SPECIES)
 TYPE(MESH_TYPE), POINTER :: M
 TYPE(WALL_TYPE), POINTER :: WC
@@ -3578,91 +3578,12 @@ PROCESS_VENT: IF (WC%VENT_INDEX>0) THEN
 
    ! Special velocity profiles
 
-   PARABOLIC_IF: IF (SF%PROFILE==PARABOLIC_PROFILE) THEN
-      SELECT CASE(ABS(BC%IOR))
-         CASE(1)
-            IF (VT%RADIUS>0._EB) THEN
-               RR = (M%YC(BC%JJ)-VT%Y0)**2 + (M%ZC(BC%KK)-VT%Z0)**2
-               B1%U_NORMAL_0 = B1%U_NORMAL_0*(VT%RADIUS**2-RR)/VT%RADIUS**2
-            ELSE
-               PY = 4._EB*(M%YC(BC%JJ)-VT%Y1_ORIG)*(VT%Y2_ORIG-M%YC(BC%JJ))/(VT%Y2_ORIG-VT%Y1_ORIG)**2
-               PZ = 4._EB*(M%ZC(BC%KK)-VT%Z1_ORIG)*(VT%Z2_ORIG-M%ZC(BC%KK))/(VT%Z2_ORIG-VT%Z1_ORIG)**2
-               B1%U_NORMAL_0 = B1%U_NORMAL_0*PY*PZ
-            ENDIF
-         CASE(2)
-            IF (VT%RADIUS>0._EB) THEN
-               RR = (M%XC(BC%II)-VT%X0)**2 + (M%ZC(BC%KK)-VT%Z0)**2
-               B1%U_NORMAL_0 = B1%U_NORMAL_0*(VT%RADIUS**2-RR)/VT%RADIUS**2
-            ELSE
-               PX = 4._EB*(M%XC(BC%II)-VT%X1_ORIG)*(VT%X2_ORIG-M%XC(BC%II))/(VT%X2_ORIG-VT%X1_ORIG)**2
-               PZ = 4._EB*(M%ZC(BC%KK)-VT%Z1_ORIG)*(VT%Z2_ORIG-M%ZC(BC%KK))/(VT%Z2_ORIG-VT%Z1_ORIG)**2
-               B1%U_NORMAL_0 = B1%U_NORMAL_0*PX*PZ
-            ENDIF
-         CASE(3)
-            IF (VT%RADIUS>0._EB) THEN
-               RR = (M%XC(BC%II)-VT%X0)**2 + (M%YC(BC%JJ)-VT%Y0)**2
-               B1%U_NORMAL_0 = B1%U_NORMAL_0*(VT%RADIUS**2-RR)/VT%RADIUS**2
-            ELSE
-               PX = 4._EB*(M%XC(BC%II)-VT%X1_ORIG)*(VT%X2_ORIG-M%XC(BC%II))/(VT%X2_ORIG-VT%X1_ORIG)**2
-               PY = 4._EB*(M%YC(BC%JJ)-VT%Y1_ORIG)*(VT%Y2_ORIG-M%YC(BC%JJ))/(VT%Y2_ORIG-VT%Y1_ORIG)**2
-               IF (CYLINDRICAL) THEN
-                  B1%U_NORMAL_0 = B1%U_NORMAL_0*PX
-               ELSE
-                  B1%U_NORMAL_0 = B1%U_NORMAL_0*PX*PY
-               ENDIF
-            ENDIF
-      END SELECT
-      IF (ABS(SF%VOLUME_FLOW)>=TWENTY_EPSILON_EB) THEN   ! Match desired volume flow
-         IF (VT%RADIUS>0._EB) THEN
-            B1%U_NORMAL_0 = B1%U_NORMAL_0*2._EB
-         ELSE
-            B1%U_NORMAL_0 = B1%U_NORMAL_0*9._EB/4._EB
-         ENDIF
-      ENDIF
-   ENDIF PARABOLIC_IF
-
-   IF (SF%PROFILE==BOUNDARY_LAYER_PROFILE) THEN
-
-      ! Currently only set up for circular vents
-
-      SELECT CASE(ABS(BC%IOR))
-         CASE(1)
-            IF (VT%RADIUS>0._EB) THEN
-               DELTA = VT%RADIUS - SQRT( VT%RADIUS**2*(2._EB*ABS(SF%VEL_BULK/SF%VEL)-1._EB) )
-               R1 = VT%RADIUS - DELTA
-               RR = SQRT( (M%YC(BC%JJ)-VT%Y0)**2 + (M%ZC(BC%KK)-VT%Z0)**2 )
-               IF (RR>R1 .AND. RR<=VT%RADIUS .AND. DELTA>TWENTY_EPSILON_EB) THEN
-                  B1%U_NORMAL_0 = B1%U_NORMAL_0*(1._EB - ((RR-R1)/DELTA)**2 )
-               ENDIF
-            ENDIF
-         CASE(2)
-            IF (VT%RADIUS>0._EB) THEN
-               DELTA = VT%RADIUS - SQRT( VT%RADIUS**2*(2._EB*ABS(SF%VEL_BULK/SF%VEL)-1._EB) )
-               R1 = VT%RADIUS - DELTA
-               RR = SQRT( (M%XC(BC%II)-VT%X0)**2 + (M%ZC(BC%KK)-VT%Z0)**2 )
-               IF (RR>R1 .AND. RR<=VT%RADIUS .AND. DELTA>TWENTY_EPSILON_EB) THEN
-                  B1%U_NORMAL_0 = B1%U_NORMAL_0*(1._EB - ((RR-R1)/DELTA)**2 )
-               ENDIF
-            ENDIF
-         CASE(3)
-            IF (VT%RADIUS>0._EB) THEN
-               DELTA = VT%RADIUS - SQRT( VT%RADIUS**2*(2._EB*ABS(SF%VEL_BULK/SF%VEL)-1._EB) )
-               R1 = VT%RADIUS - DELTA
-               RR = SQRT( (M%XC(BC%II)-VT%X0)**2 + (M%YC(BC%JJ)-VT%Y0)**2 )
-               IF (RR>R1 .AND. RR<=VT%RADIUS .AND. DELTA>TWENTY_EPSILON_EB) THEN
-                  B1%U_NORMAL_0 = B1%U_NORMAL_0*(1._EB - ((RR-R1)/DELTA)**2 )
-               ENDIF
-            ENDIF
-      END SELECT
-   ENDIF
-
    IF (SF%PROFILE==ATMOSPHERIC_PROFILE) THEN
       IF (M%ZC(BC%KK)<GROUND_LEVEL) THEN
          CALL SHUTDOWN('ERROR(433): SURF '//TRIM(SF%ID)//' cannot be applied below GROUND_LEVEL.',PROCESS_0_ONLY=.FALSE.)
          IERR = 1
          RETURN
       ENDIF
-      B1%U_NORMAL_0 = B1%U_NORMAL_0*((M%ZC(BC%KK)-GROUND_LEVEL)/SF%Z0)**SF%PLE
    ENDIF
 
    IF (SF%PROFILE==RAMP_PROFILE) THEN
@@ -3673,26 +3594,23 @@ PROCESS_VENT: IF (WC%VENT_INDEX>0) THEN
                IERR = 1
                RETURN
             ENDIF
-            B1%U_NORMAL_0 = B1%U_NORMAL_0*EVALUATE_RAMP(M%YC(BC%JJ),SF%RAMP(VELO_PROF_Y)%INDEX,TAU=1._EB)
-            B1%U_NORMAL_0 = B1%U_NORMAL_0*EVALUATE_RAMP(M%ZC(BC%KK),SF%RAMP(VELO_PROF_Z)%INDEX,TAU=1._EB)
          CASE(2)
             IF (SF%RAMP(VELO_PROF_Y)%ID/='null') THEN
                CALL SHUTDOWN('ERROR(435): RAMP_V_Y assigned to SURF '//TRIM(SF%ID),PROCESS_0_ONLY=.FALSE.)
                IERR = 1
                RETURN
             ENDIF
-            B1%U_NORMAL_0 = B1%U_NORMAL_0*EVALUATE_RAMP(M%XC(BC%II),SF%RAMP(VELO_PROF_X)%INDEX,TAU=1._EB)
-            B1%U_NORMAL_0 = B1%U_NORMAL_0*EVALUATE_RAMP(M%ZC(BC%KK),SF%RAMP(VELO_PROF_Z)%INDEX,TAU=1._EB)
          CASE(3)
             IF (SF%RAMP(VELO_PROF_Z)%ID/='null') THEN
                CALL SHUTDOWN('ERROR(436): RAMP_V_Z assigned to SURF '//TRIM(SF%ID),PROCESS_0_ONLY=.FALSE.)
                IERR = 1
                RETURN
             ENDIF
-            B1%U_NORMAL_0 = B1%U_NORMAL_0*EVALUATE_RAMP(M%XC(BC%II),SF%RAMP(VELO_PROF_X)%INDEX,TAU=1._EB)
-            B1%U_NORMAL_0 = B1%U_NORMAL_0*EVALUATE_RAMP(M%YC(BC%JJ),SF%RAMP(VELO_PROF_Y)%INDEX,TAU=1._EB)
       END SELECT
    ENDIF
+
+   IF (SF%PROFILE/=0) B1%U_NORMAL_0 = B1%U_NORMAL_0 * &
+      SURFACE_VELOCITY_PROFILE_FACTOR(SF,VT,BC%IOR,M%XC(BC%II),M%YC(BC%JJ),M%ZC(BC%KK))
 
    ! Check if fire spreads radially over this vent
 

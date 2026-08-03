@@ -46,17 +46,18 @@ CALL POINT_TO_MESH(NM)
 
 M => MESHES(NM)
 
-! Loop through all SURFace types and find level set cases that need a calculated RoS
+! Loop through all SURFace types and find level set cases that need a calculated RoS.
+! VEG_LSET_FUEL_INDEX: -1=undefined (user ROS_00), 0=custom Rothermel, 1-13=Albini models.
 
 DO SURF_INDEX=0,N_SURF
    SF => SURFACE(SURF_INDEX)
-   IF (SF%VEG_LSET_SPREAD .AND. SF%VEG_LSET_FUEL_INDEX>0) THEN
+   IF (.NOT.SF%VEG_LSET_SPREAD) CYCLE
+   IF (SF%VEG_LSET_FUEL_INDEX>=0) THEN
       SF%VEG_LSET_ROS_00 = ROS_NO_WIND_NO_SLOPE(SF%VEG_LSET_FUEL_INDEX,SURF_INDEX)
-   ENDIF
-   IF (SF%VEG_LSET_SPREAD .AND. SF%VEG_LSET_FUEL_INDEX==0) THEN
-     SF%BURN_DURATION = SF%VEG_LSET_FIREBASE_TIME
-     IF (LEVEL_SET_COUPLED_FIRE) SF%MASS_FLUX(REACTION(1)%FUEL_SMIX_INDEX) = &
-       (1._EB-SF%VEG_LSET_CHAR_FRACTION)*SF%VEG_LSET_SURF_LOAD/SF%VEG_LSET_FIREBASE_TIME
+   ELSE
+      SF%BURN_DURATION = SF%VEG_LSET_FIREBASE_TIME
+      IF (LEVEL_SET_COUPLED_FIRE) SF%MASS_FLUX(REACTION(1)%FUEL_SMIX_INDEX) = &
+        (1._EB-SF%VEG_LSET_CHAR_FRACTION)*SF%VEG_LSET_SURF_LOAD/SF%VEG_LSET_FIREBASE_TIME
    ENDIF
 ENDDO
 
@@ -312,12 +313,13 @@ END SUBROUTINE INITIALIZE_LEVEL_SET_FIRESPREAD_2
 SUBROUTINE LEVEL_SET_FIRESPREAD(T,DT,NM)
 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
+USE PHYSICAL_FUNCTIONS, ONLY: GET_WIND_AT_HEIGHT
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T,DT
 INTEGER :: IIG,IW,JJG,IC,OUTPUT_INDEX
 INTEGER :: KDUM,KWIND,ICF,IKT
 REAL(EB) :: UMF_TMP,PHX,PHY,MAG_PHI,PHI_S,PHI_W_X,PHI_W_Y,UMF_X,UMF_Y,ROS_MAG,UMF_MAG,&
-            WIND_FACTOR,SIN_THETA,COS_THETA,THETA,ZWIND(2),U_Z(2),V_Z(2),REF_WIND_HEIGHT
+            WIND_FACTOR,ZWIND(2),U_Z(2),V_Z(2),REF_WIND_HEIGHT,WW
 
 T_NOW = CURRENT_TIME()
 
@@ -357,26 +359,7 @@ DO JJG=1,JBAR
 
       ELSE IF_CFD_COUPLED  ! The wind velocity is specified by the user
 
-         ! Evaluate time and height varying profiles, using 6.1 m reference height
-         IF (I_RAMP_DIRECTION_T/=0 .OR. I_RAMP_DIRECTION_Z/=0) THEN
-            IF (I_RAMP_DIRECTION_T==0) THEN
-               THETA=EVALUATE_RAMP(REF_WIND_HEIGHT,I_RAMP_DIRECTION_Z)*DEG2RAD
-            ELSEIF (I_RAMP_DIRECTION_Z==0) THEN
-               THETA=EVALUATE_RAMP(T,I_RAMP_DIRECTION_T)*DEG2RAD
-             ELSE
-               THETA=(EVALUATE_RAMP(REF_WIND_HEIGHT,I_RAMP_DIRECTION_Z)+&
-                  EVALUATE_RAMP(T,I_RAMP_DIRECTION_T))*DEG2RAD
-             ENDIF
-            SIN_THETA = -SIN(THETA)
-            COS_THETA = -COS(THETA)
-         ELSE
-            SIN_THETA = 1._EB
-            COS_THETA = 1._EB
-         ENDIF
-         U_LS(IIG,JJG) = U0*EVALUATE_RAMP(REF_WIND_HEIGHT,I_RAMP_SPEED_Z)*&
-            EVALUATE_RAMP(T,I_RAMP_SPEED_T)*SIN_THETA
-         V_LS(IIG,JJG) = V0*EVALUATE_RAMP(REF_WIND_HEIGHT,I_RAMP_SPEED_Z)*&
-            EVALUATE_RAMP(T,I_RAMP_SPEED_T)*COS_THETA
+         CALL GET_WIND_AT_HEIGHT(T,REF_WIND_HEIGHT,U_LS(IIG,JJG),V_LS(IIG,JJG),WW)
 
       ENDIF IF_CFD_COUPLED
 
@@ -1008,6 +991,11 @@ mlw = SF%VEG_LSET_MLW
 mlh = SF%VEG_LSET_MLH
 
 SELECT CASE(ROTHERMEL_FUEL_INDEX)
+   CASE(0)  ! Custom homogeneous fuel from SURF layer properties
+      w0d1=SF%VEG_LSET_SURF_LOAD ; w0d2=0._EB ; w0d3=0._EB ; w0lh=0._EB ; w0lw=0._EB
+      svd1=SF%VEG_LSET_SIGMA*100._EB  ! stored as 1/cm; Rothermel formulas use 1/m
+      svd2=358._EB ; svd3=98._EB ; svlh=4921._EB ; svlw=4921._EB
+      mx=0.15_EB ; depth=SF%VEG_LSET_HT ; rhop=512._EB ; heat=18607._EB ; st=0.0555_EB ; se=0.01_EB
    CASE(1)  ! 'Short Grass'
       w0d1=0.1659     ; w0d2=0.        ; w0d3=0.        ; w0lh=0.        ; w0lw=0.     ! dry mass per unit area (kg/m2)
       svd1=11483.     ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921.  ! surface area to volume (1/m)
@@ -1074,6 +1062,8 @@ IF (SF%VEG_LSET_SURF_LOAD>0._EB) THEN
    w0lh = SF%VEG_LSET_SURF_LOAD/w0*w0lh
    w0lw = SF%VEG_LSET_SURF_LOAD/w0*w0lw
    w0 = (w0d1 + w0d2 + w0d3 + w0lh + w0lw)
+ELSE
+   SF%VEG_LSET_SURF_LOAD = w0
 ENDIF
 
 ! Auxiliary functions
