@@ -3677,6 +3677,33 @@ It was suspected that fire plume behavior and response of detection devices in a
 
 
 
+\section{Utiskul Compartment}
+\label{Utiskul_Compartment_Description}
+
+Hu and Utiskul conducted experiments and analysis aimed at characterizing the dynamics of compartment fires under poorly ventilated conditions~\cite{Hu:2005,Hu:2007}. The study considers four cases corresponding to different values of the global equivalence ratio. The experimental utilized a 40~cm by 40~cm by 40~cm compartment with two horizontal vents of equal size located at the top and bottom of one of the compartment walls. The vent width varied between 2~cm and 40~cm; the vent height varied between 1~cm and 3~cm. The fire was fueled by a circular heptane pan located at the center of the compartment floor. The compartment was instrumented with sensors and probes that provided the time history of the fuel mass loss rate, local temperatures, surface heat fluxes, and floor and ceiling-level concentrations of O$_2$, CO$_2$ and CO. Table~\ref{Hu_Summary} summarizes the four experiments.
+
+\begin{table}[h!]
+\centering
+\caption[Summary of the Hu/Utiskul experiments]{Summary of the Hu/Utiskul experiments.}
+\begin{tabular}{|c|c|c|c|}
+\hline
+Case    & Vent Dimensions (cm)  & Pan Diameter (cm)  & Fire Regime                                           \\ \hline \hline
+1       & 3 $\times$ 40         & 9.5                & steady; well-ventilated; flame stabilized on burner   \\ \hline
+2       & 1 $\times$ 40         & 19                 & steady; under-ventilated; flame stabilized at vents   \\ \hline
+3       & 3 $\times$ 10         & 9.5                & unsteady; under-ventilated; oscillating flame         \\ \hline
+4       & 1 $\times$ 2          & 9.5                & unsteady; under-ventilated; flame extinction          \\ \hline
+\end{tabular}
+\label{Hu_Summary}
+\end{table}
+
+\subsubsection{Modeling Notes}
+
+In the simulations of the experiments, it is assumed that the combustion of n-heptane can be simplified to two fast reactions, the first converting fuel to CO and soot, and the second converting CO and soot to CO$_2$. By default, 2/3 of the carbon in the fuel is converted to CO in the first step, the remaining 1/3 to soot. The heats of combustion for the reactions are calculated directly from the heats of formation of the individual molecules. The measured fuel mass loss rate was specified in the simulations.
+
+In the simulations, the model geometry included the compartment interior plus a comparable volume at the exterior to allow for a natural flow into and out of the compartment.
+
+
+
 \section{UWO Wind Tunnel Experiments}
 \label{UWO_Wind_Tunnel_Description}
 
