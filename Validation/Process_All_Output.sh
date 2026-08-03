@@ -194,6 +194,7 @@ PROCESS USCG_HAI
 PROCESS USFS_Catchpole
 PROCESS USFS_Corsica
 PROCESS USN_Hangars
+PROCESS Utiskul_Compartment
 PROCESS UWO_Wind_Tunnel
 PROCESS Vettori_Flat_Ceiling
 PROCESS Vettori_Sloped_Ceiling
