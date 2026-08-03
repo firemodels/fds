@@ -9,21 +9,21 @@ import fdsplotlib
 # Get plot style parameters
 plot_style = fdsplotlib.get_plot_style('fds')
 
-expdir = '../../../exp/Sandia_Pool_Fires/'
-outdir = '../../../out/Sandia_Pool_Fires/'
-figdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Sandia_Pool_Fires/'
+expdir = '../../../exp/Sandia_Fireballs/'
+outdir = '../../../out/Sandia_Fireballs/'
+figdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Sandia_Fireballs/'
 
-E_file = ['ethane_pool.csv','ethylene_pool.csv','propane_pool.csv','isopentane_pool.csv']
-M_file = ['ethane_pool_cat_devc.csv','ethylene_pool_cat_devc.csv','propane_pool_cat_devc.csv','isopentane_pool_cat_devc.csv']
+E_file = ['ethane_fireball.csv','ethylene_fireball.csv','isopentane_fireball.csv']
+M_file = ['ethane_fireball_cat_devc.csv','ethylene_fireball_cat_devc.csv','isopentane_fireball_cat_devc.csv']
 
-marker = ['ko','ro','bo','go']
-label  = ['Ethane','Ethylene','Propane','Isopentane']
+marker = ['ko','ro','go']
+label  = ['Ethane','Ethylene','Isopentane']
 
-git_file =  os.path.join(outdir, f'ethane_pool_cat_git.txt')
+git_file =  os.path.join(outdir, f'ethane_fireball_cat_git.txt')
 version_string = fdsplotlib.get_version_string(git_file)
 
-fig = fdsplotlib.plot_to_fig([0,50],[0,50], marker_style='k-',
-                             x_min=0, x_max=50, y_min=0, y_max=50,
+fig = fdsplotlib.plot_to_fig([0,80],[0,80], marker_style='k-',
+                             x_min=0, x_max=80, y_min=0, y_max=80,
                              figure_size=(plot_style['Scat_Paper_Width'],plot_style['Scat_Paper_Height']),
                              plot_size=(plot_style['Scat_Plot_Width'],plot_style['Scat_Plot_Height']),
                              plot_origin=(plot_style['Scat_Plot_X'],plot_style['Scat_Plot_Y']),
@@ -33,18 +33,15 @@ fig = fdsplotlib.plot_to_fig([0,50],[0,50], marker_style='k-',
                              y_label='Predicted Heat Flux (kW/m²)'
                              )
 
-for i in range(4):
+for i in range(3):
 
     # Read first CSV file and extract second column into array E
     df1 = pd.read_csv(expdir + E_file[i], skiprows=0)
     E = df1.iloc[:,1].values  # Second column (index 1)
-    #col1 = df1.iloc[:,1].values  # Second column (index 1)
-    #col2 = df1.iloc[:,2].values  # Third column (index 2)
-    #E = np.concatenate([col1, col2])  # Combine both columns into single array
     
-    # Read second CSV file, skip first two rows, and extract last row into array M
+    # Read second CSV file, skip first two rows, and extract the max value into array M
     df2 = pd.read_csv(outdir + M_file[i], skiprows=2)
-    M = df2.iloc[-1,1:].values  # Last row, all columns
+    M = df2.iloc[:, 6:].max().values
     
     # Remove NaN values by creating a mask for valid (non-NaN) values in both arrays
     # Ensure both arrays have the same length by taking the minimum length
@@ -68,6 +65,6 @@ for i in range(4):
     df.to_csv(expdir + label[i] + '.csv', index=False)
 
 # Save as PDF
-fig_file =  os.path.join(figdir, f'Sandia_Pools.pdf')
+fig_file =  os.path.join(figdir, f'Sandia_Fireballs.pdf')
 fig.savefig(fig_file, format='pdf')
 
