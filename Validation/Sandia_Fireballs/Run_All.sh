@@ -5,8 +5,8 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
-$QFDS $DEBUG $QUEUE -p 96 -d $INDIR ethane_fireball.fds
-$QFDS $DEBUG $QUEUE -p 96 -d $INDIR ethylene_fireball.fds
-$QFDS $DEBUG $QUEUE -p 96 -d $INDIR isopentane_fireball.fds
+$QFDS $DEBUG $QUEUE -p 112 -d $INDIR ethane_fireball.fds
+$QFDS $DEBUG $QUEUE -p 112 -d $INDIR ethylene_fireball.fds
+$QFDS $DEBUG $QUEUE -p 112 -d $INDIR isopentane_fireball.fds
 
 echo FDS cases submitted
