@@ -8455,6 +8455,11 @@ For any object for which a \ct{DEVC_ID} can be specified (such as \ct{OBST} or \
             \ct{ATAN}                        & The arctangent of the \ct{INPUT} \\ \hline
             \ct{MAX}                         & Maximum value of the \ct{INPUT}s \\ \hline
             \ct{MIN}                         & Minimum value of the \ct{INPUT}s \\ \hline
+            \ct{GREATER THAN}                & Changes state if the first \ct{INPUT} is greater than the second \\ \hline
+            \ct{LESS THAN}                   & Changes state if the first \ct{INPUT} is less than the second \\ \hline
+            \ct{EQUALS}                      & Changes state if the first \ct{INPUT} is equal to the second \\ \hline
+            \ct{STEADY}                      & Changes state if the \ct{INPUT}'s current value equals its prior value\\ \hline
+            \ct{MEMORY}                      & If the first \ct{INPUT} is \ct{T} it stores the value of the second \ct{INPUT} \\ \hline
             \ct{PID}                         & A Proportional-Integral-Derivative control for the \ct{INPUT}\\ \hline
             \ct{PERCENTILE}                  & Calculate the user-specified percentile for a function \\ \hline
             \ct{EXTERNAL}                    & External file control, see Section~\ref{info:external_control} \\ \hline
@@ -8601,6 +8606,33 @@ The control functions that perform simple math operations (\ct{SUM},  \ct{SUBTRA
     &CTRL ID='multiplier', FUNCTION_TYPE='POWER',
     INPUT_ID='SPEED SENSOR','CONSTANT', CONSTANT=2., SETPOINT=10.,
     TRIP_DIRECTION=1 /
+\end{lstlisting}
+
+\subsection{Control Function: Comparison Operations}
+\label{info:CONTROL_COMPARE}
+
+This group of control functions (\ct{GREATER THAN}, \ct{LESS THAN}, and \ct{EQUALS} compare the first two inputs and output \ct{T} if the comparison is true and \ct{F} if the comparison is false. Either of the inputs can have a constant value specified as one of their inputs. This is done by specifying one of the \ct{INPUT_ID}s as \ct{'CONSTANT'} and providing the value using the input \ct{CONSTANT}.
+
+\subsection{Control Function: \texorpdfstring{{\tt STEADY}}{STEADY}}
+\label{info:CONTROL_STEADY}
+
+The \ct{STEADY} control function compares the value of the \ct{INPUT} for the current time step to the value from the prior time step. If the two are equal, the logical state of the function will be \ct{T}. For example, the following takes the maximum of a series of devices. During periods of time where the maximum changes the \ct{'NEW MAX'} function will be \ct{F} and the \ct{TIME DEVC} will update to the current simulation time. During periods of time where the maximum is the same the \ct{'NEW MAX'} function will be \ct{T} and the \ct{TIME DEVC} will stop updating.
+\begin{lstlisting}
+    &CTRL ID='MAX VAL',FUNCTION_TYPE='MAX',INPUT_ID='DEVC 1','DEVC 2',...,/
+    &CTRL ID='NEW MAX', FUNCTION_TYPE='STEADY',INPUT_ID='MAX VAL',LATCH=F/
+    &DEVC ID='MAX TIME',QUANTITY='TIME',XYZ=...,NO_UPDATE_CTRL_ID='NEW MAX'/
+    INPUT_ID='SPEED SENSOR','TEMPERATURE'/
+\end{lstlisting}
+
+\subsection{Control Function: \texorpdfstring{{\tt MEMORY}}{MEMORY}}
+\label{info:CONTROL_MEMORY}
+
+The \ct{MEMORY} control function allows you to store a value. When the first \ct{INPUT} is \ct{T}, the function will store the value of the second \ct{INPUT}. The initial value stored in memory can be specified using \ct{CONSTANT}. For example, the following lines will store the velocity when the temperature exceeds 200 \unit{\degreeCelsius}.  In this case since the default value for \ct{LATCH} is \ct{T}, only one value will be stored. Setting \ct{LATCH=F} will cause the value to be updated every time the first \ct{INPUT} is \ct{T}. The logical state of this function takes on the state of the first \ct{INPUT}.
+\begin{lstlisting}
+    &DEVC ID='SPEED SENSOR', XYZ=..., QUANTITY='VELOCITY' /
+    &DEVC ID='TEMPERATURE', XYZ=..., QUANTITY='TEMPERATURE',SETPOINT=200. /
+    &CTRL ID='store temperature', FUNCTION_TYPE='MEMORY',
+    INPUT_ID='SPEED SENSOR','TEMPERATURE'/
 \end{lstlisting}
 
 
@@ -13455,9 +13487,6 @@ Keyword                          & Type              & Description              
 \ct{FIC_CONCENTRATION}           & Real              & Section~\ref{info:FED}                  & ppm               & 0             \\ \hline
 \ct{FLD_LETHAL_DOSE}             & Real              & Section~\ref{info:FED}                  & ppm$\times$min    & 0             \\ \hline
 \ct{FORMULA}                     & Character         & Section~\ref{info:FORMULA}              &                   &               \\ \hline
-\ct{FTP_CR}                      & Real              & Section~\ref{info:flux_time_product}    & \unit{kJ/m^2}     &               \\ \hline
-\ct{FTP_N}                       & Real              & Section~\ref{info:flux_time_product}    &                   & 1             \\ \hline
-\ct{FTP_Q_CR}                    & Real              & Section~\ref{info:flux_time_product}    & \unit{kW/m^2}     &               \\ \hline
 \ct{H}                           & Real              & Section~\ref{info:FORMULA}              &                   &               \\ \hline
 \ct{HEAT_OF_VAPORIZATION}        & Real              & Section~\ref{thermal_part_props}        & kJ/kg             &               \\ \hline
 \ct{H_V_REFERENCE_TEMPERATURE}   & Real              & Section~\ref{thermal_part_props}        & \unit{\degreeCelsius} &               \\ \hline
@@ -13555,6 +13584,9 @@ Keyword                                               & Type            & Descri
 \ct{EXTERNAL_FLUX}                                    & Real            & Section~\ref{info:net_and_convective_heat_flux} & \unit{kW/m^2}       &   \rule{0pt}{2.3ex}     \\ \hline
 \ct{EXTINCTION_TEMPERATURE}                           & Real            & Section~\ref{info:specified_burning}      & \unit{\degreeCelsius} & -273.15               \\ \hline
 \ct{FREE_SLIP}                                        & Logical         & Section~\ref{info:WALL_MODEL}             &                     & \ct{F}                  \\ \hline
+\ct{FTP_CR}                                           & Real            & Section~\ref{info:flux_time_product}      & \unit{kJ/m^2}       &                         \\ \hline
+\ct{FTP_N}                                            & Real            & Section~\ref{info:flux_time_product}      &                     & 1                       \\ \hline
+\ct{FTP_Q_CR}                                         & Real            & Section~\ref{info:flux_time_product}      & \unit{kW/m^2}       &                         \\ \hline
 \ct{GEOMETRY}                                         & Character       & Section~\ref{info:GEOMETRY}               &                     & \ct{'CARTESIAN'}        \\ \hline
 \ct{HEAT_OF_VAPORIZATION}                             & Real            & Section~\ref{info:specified_burning}      & kJ/kg               &                         \\ \hline
 \ct{HEAT_TRANSFER_COEFFICIENT}                        & Real            & Section~\ref{info:convection}             & \unit{W/(m^2.K)}    &   \rule{0pt}{2.3ex}     \\ \hline
