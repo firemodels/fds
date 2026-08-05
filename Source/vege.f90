@@ -1143,6 +1143,7 @@ mfdead = hnmd/hnd
 ! Moisture of extinction of living fuel [R(88),Albini,p.89]
 
 mxlive = 2.9*bigW*(1.0 - (mfdead/mx)) - 0.226
+mxlive = MAX(mxlive,mx) ! Ensure mxlive is at least mx
 
 ! Moisture ratios [R(65,66)]
 
@@ -1153,6 +1154,10 @@ else
 endif
 
 rmd = swmd/(swd*mx)
+
+! Limit moisture ratios to 1.0
+rmd = MIN(rmd,1._EB)
+rml = MIN(rml,1._EB)
 
 ! Moisture damping coefficients [R(64)]
 
