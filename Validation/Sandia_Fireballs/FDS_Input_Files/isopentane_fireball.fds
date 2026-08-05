@@ -1,7 +1,6 @@
 &HEAD CHID='isopentane_fireball', TITLE='Sandia Fireballs' /
 
 &TIME T_BEGIN=-10., T_END=20. /
-&DUMP DT_HRR=0.1, DT_DEVC=0.1 /
 
 &MESH IJK=40,40,40, XB=-50,-10,-20,20,0,40, MULT_ID='mesh' /
 &MULT ID='mesh', DX=40., DY=40., DZ=40., I_UPPER=3, J_LOWER=-1, J_UPPER=2, K_UPPER=6 /
