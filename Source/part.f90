@@ -2537,6 +2537,11 @@ PARTICLE_LOOP: DO IP=1,NLP
                      BC%Z =  BC%Z - 0.2_EB*DZ(BC%KKG)
                END SELECT
             ENDIF
+            IF (LPC%LIQUID_DROPLET .AND. LPC%DRIP_DIAMETER>0._EB) THEN  ! change the droplet radius
+               LP%PWT    = LP%PWT*(LP%RADIUS/(0.5_EB*LPC%DRIP_DIAMETER))**3
+               LP%RADIUS = 0.5_EB*LPC%DRIP_DIAMETER
+               LP%MASS   = FOTHPI*LPC%DENSITY*LP%RADIUS**3
+            ENDIF
             BC%IOR = 0
             LP%WALL_INDEX = 0
          ENDIF
