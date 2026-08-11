@@ -240,10 +240,25 @@ def dataplot(config_filename, **kwargs):
     logging.getLogger('matplotlib.font_manager').setLevel(logging.ERROR)
 
     _csv_cache = {}
-    def read_csv_cached(path, **kwargs):
-        if path not in _csv_cache:
-            _csv_cache[path] = pd.read_csv(path, **kwargs)
-        return _csv_cache[path].copy()
+    def data_columns_from_specs(*specs):
+        columns = set()
+        for spec in specs:
+            for part in str(spec or '').split('|'):
+                for column in part.split('+'):
+                    column = column.strip()
+                    if column:
+                        columns.add(column)
+        return columns
+
+    def read_csv_cached(path, usecols=None, **kwargs):
+        usecols_key = tuple(sorted(usecols)) if usecols else None
+        cache_key = (path, usecols_key)
+        if cache_key not in _csv_cache:
+            if usecols:
+                wanted = set(usecols)
+                kwargs['usecols'] = lambda column: str(column).strip() in wanted
+            _csv_cache[cache_key] = pd.read_csv(path, **kwargs)
+        return _csv_cache[cache_key].copy()
 
     configdir = kwargs.get('configdir', '')
     revision = kwargs.get('revision', '')
@@ -328,6 +343,25 @@ def dataplot(config_filename, **kwargs):
     if verbose:
         print(f"[dataplot] {'Running in fast_mode' if fast_mode else 'Running in full mode'}")
 
+    usecols_by_path = {}
+    for pos in range(len(C)):
+        pp = define_plot_parameters(C, pos, lightweight=fast_mode)
+        if pp.switch_id == 's':
+            continue
+        if otest_active and pp.switch_id != 'o':
+            continue
+        if pp.switch_id not in ['d', 'f', 'g', 'o']:
+            continue
+
+        exp_path = expdir + pp.d1_Filename
+        cmp_path = cmpdir + pp.d2_Filename
+        usecols_by_path.setdefault(exp_path, set()).update(
+            data_columns_from_specs(pp.d1_Ind_Col_Name, pp.d1_Dep_Col_Name)
+        )
+        usecols_by_path.setdefault(cmp_path, set()).update(
+            data_columns_from_specs(pp.d2_Ind_Col_Name, pp.d2_Dep_Col_Name)
+        )
+
     for pos, row in enumerate(C.itertuples(index=False, name=None)):
 
         csv_rownum = int(row[col_orig_idx]) + header_rows + 1
@@ -365,7 +399,10 @@ def dataplot(config_filename, **kwargs):
             Save_csv_rownum.append(None)
 
         # ---------------------- LOAD EXP ----------------------
-        E = read_csv_cached(expdir + pp.d1_Filename,
+        exp_path = expdir + pp.d1_Filename
+        cmp_path = cmpdir + pp.d2_Filename
+        E = read_csv_cached(exp_path,
+                            usecols=usecols_by_path.get(exp_path),
                             header=int(pp.d1_Col_Name_Row - 1),
                             sep=',', engine='python', quotechar='"',
                             skip_blank_lines=True).dropna(how='all')
@@ -522,7 +559,8 @@ def dataplot(config_filename, **kwargs):
                 Save_Measured_Quantity[-1] = []
 
         # ---------------------- LOAD MODEL ----------------------
-        M = read_csv_cached(cmpdir + pp.d2_Filename,
+        M = read_csv_cached(cmp_path,
+                            usecols=usecols_by_path.get(cmp_path),
                             header=int(pp.d2_Col_Name_Row - 1),
                             sep=',', engine='python', quotechar='"',
                             skip_blank_lines=True).dropna(how='all')
@@ -624,7 +662,8 @@ def dataplot(config_filename, **kwargs):
                 base_stat, idx_first_stat, idx_second_stat = _parse_stat_xy_local(metric_str)
 
                 # Load experimental again for alignment (safe; cached)
-                E = read_csv_cached(expdir + pp.d1_Filename,
+                E = read_csv_cached(exp_path,
+                                    usecols=usecols_by_path.get(exp_path),
                                     header=int(pp.d1_Col_Name_Row - 1),
                                     sep=',', engine='python', quotechar='"',
                                     skip_blank_lines=True).dropna(how='all')
@@ -2705,5 +2744,4 @@ def set_ticks_like_matlab(fig):
 
     for axis in ['top','bottom','left','right']:
         ax.spines[axis].set_linewidth(0.5)
-
 

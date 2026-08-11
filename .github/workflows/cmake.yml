@@ -2,7 +2,7 @@ name: cmake
 env:
   # update urls for oneapi packages according to
   # https://github.com/oneapi-src/oneapi-ci/blob/master/.github/workflows/build_all.yml
-  WINDOWS_TOOLKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/bae85ab1-cfcd-4251-8d42-a0c27949ea33/intel-oneapi-toolkit-2026.0.0.193_offline.exe
+  WINDOWS_TOOLKIT_URL: https://registrationcenter-download.intel.com/akdlm/IRC_NAS/4144bec3-82ce-4672-bd71-5c93a79cd5e7/intel-oneapi-toolkit-2026.1.0.191_offline.exe
   WINDOWS_TOOLKIT_COMPONENTS: intel.oneapi.win.ifort-compiler:intel.oneapi.win.mpi.devel:intel.oneapi.win.mkl.devel
 
 on:
@@ -63,7 +63,7 @@ jobs:
         apt-get -y install -y git gcc make cmake sudo environment-modules
 
     # # Setup OneAPI, icx is necessary for third-party libs
-    # - uses: rscohn2/setup-oneapi@v0
+    # - uses: marcfehling/setup-oneapi@v0
     #   if: endsWith(matrix.compiler_mpi, '_intelmpi') !=  true
     #   with:
     #     components: |
@@ -72,7 +72,7 @@ jobs:
     #       mkl
 
     # Setup OneAPI, icx is necessary for third-party libs
-    - uses: rscohn2/setup-oneapi@v0
+    - uses: marcfehling/setup-oneapi@v0
       # if: endsWith(matrix.compiler_mpi, '_intelmpi')
       with:
         components: |
