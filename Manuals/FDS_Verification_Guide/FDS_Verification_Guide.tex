@@ -6134,6 +6134,7 @@ This simple case tests the particle transport scheme in the absence of drag. A 1
 \label{cannon_ball_fig}
 \end{figure}
 
+\FloatBarrier
 
 \subsection{Particles Swept Up in a Free Stream}
 
@@ -6147,6 +6148,8 @@ Consider a 1~m square duct that is 10~m long.  The boundary conditions are perio
 \label{fig_fluid_part_mom}
 \end{figure}
 
+
+\FloatBarrier
 
 \subsection{Particles Slowing Down a Gas Flow}
 \label{particle_drag}
@@ -6188,6 +6191,8 @@ Checking this quantity is useful for confirming the \ct{PARTICLE DRAG FORCE X/Y/
 \end{figure}
 
 
+\FloatBarrier
+
 \subsection{Stationary Spherical Particles in a Duct}
 \label{sphere_drag_1}
 \label{sphere_drag_2}
@@ -6208,6 +6213,8 @@ In a second test case, consider a single 10~m long, 1~m square duct. Spherical p
 \label{sphere_drag_fig}
 \end{figure}
 
+
+\FloatBarrier
 
 \subsection{Drag Caused by Vegetation}
 \label{vegetation_drag_1}
@@ -6256,6 +6263,8 @@ The results are shown in the right hand plot of Fig.~\ref{vegetation_drag_fig} f
 \end{figure}
 
 
+\FloatBarrier
+
 \subsubsection{Particle Drag Near Surfaces}
 \label{sec:particle_drag_near_surfaces}
 
@@ -6268,6 +6277,8 @@ This test series examines the drag force experienced by a static particle near a
 \label{fig:part_drag_profile}
 \end{figure}
 
+
+\FloatBarrier
 
 \subsection{Mesh Screen in a Duct}
 \label{screen_drag_1}
@@ -6285,6 +6296,8 @@ where $K$ and $Y$ are empirical constants defined in the FDS User's Guide, the p
 \caption[Sample cases \ct{screen_drag}]{Outputs of the \ct{screen_drag} test cases compared with analytical solutions.  Left 2~m/s inlet, right 20~m/s inlet.  The three cases represent different values of \ct{FREE_AREA_FRACTION} (0.1, 0.4, and 0.8) within the channel.}
 \label{screen_drag_plots}
 \end{figure}
+
+\FloatBarrier
 
 \subsection{Flow through Porous Media}
 \label{porous_media}
@@ -6304,6 +6317,7 @@ where ${\rm K}=1 \times 10^{-7}$~m$^2$ and ${\rm Y}=0.1$ in all three coordinate
 
 
 
+\FloatBarrier
 
 \subsection{Particle Terminal Velocity}
 
@@ -6331,6 +6345,7 @@ The $L_\infty$ (maximum) error of the FDS computed terminal velocity and positio
 
 
 
+\FloatBarrier
 
 
 \subsection{Particle Trajectory}
@@ -6396,6 +6411,7 @@ $\beta=m'''/\rho_{\rm p}$ is the ``packing ratio,'' the vegetation mass per unit
 \label{vegetation_absorb_fig}
 \end{figure}
 
+\FloatBarrier
 
 \subsection{Heating a Metal Sphere via Radiation and Convection}
 \label{particle_heating_convection}
@@ -6448,7 +6464,7 @@ Figure~\ref{water_evaporation_1_plots} displays
 the average enthalpy, humidity, density, temperature, pressure, and mass of water vapor within the box.
 The solid horizontal lines denote the expected steady-state values.
 
-\begin{figure}[p]
+\begin{figure}[h]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/water_evaporation_1_enthalpy} &
@@ -6471,7 +6487,7 @@ In the second case, the dimensions of the box are 40~cm on a side, and the initi
 air temperature is 500~\unit{\degreeCelsius}. There is only one fictitiously large water droplet in the box whose diameter is 10~cm and whose temperature is 20~\unit{\degreeCelsius}.
 The initial mass fraction of water vapor is 0. It is expected that the water will evaporate until the air in the box is saturated. The analytical solution for the stationary state is derived from the first law of thermodynamics and the Clausius-Clapeyron equation by assuming that the liquid water temperature is equal to air temperature at the steady state. Results are shown in Fig.~\ref{water_evaporation_2_plots}.
 
-\begin{figure}[p]
+\begin{figure}[h]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/water_evaporation_2_enthalpy} &
@@ -6496,7 +6512,7 @@ and the total mass of water droplets is 0.1~kg. The initial mass fraction of wat
 As in the second case, the analytical solution for the stationary state derives from the first principle of thermodynamics and the Clausius-Clapeyron equation
 by assuming that the liquid water temperature is equal to air temperature at the stationary state.  Results are shown in Fig.~\ref{water_evaporation_3_plots}.
 
-\begin{figure}[p]
+\begin{figure}[h]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/water_evaporation_3_enthalpy} &
@@ -6626,6 +6642,8 @@ In the test case called \ct{Sprinklers_and_Sprays/geom_sprk_mass.fds}, two ident
 \label{geom_sprk_mass_fig}
 \end{figure}
 
+\FloatBarrier
+
 \subsection{Obstructions of Different Orientations}
 \label{geom_particle_cascade_2}
 
@@ -6637,6 +6655,7 @@ In the test case called \ct{Complex_Geometry/geom_particle_cascade_2.fds}, four 
 \label{geom_particle_cascade_2_fig}
 \end{figure}
 
+\FloatBarrier
 
 \subsection{Adiabatic Surface Temperature}
 \label{AST_spray}
@@ -6648,6 +6667,8 @@ This test case is a modified version of \ct{Radiation/adiabatic_surface_temperat
 \caption[The \ct{adiabatic_surface_temperature_spray} test case]{Adiabatic and true surface temperatures under radiative heating (0 - 50 s), heating and spray  cooling (50-100 s) and only spray cooling (100-150 s).}
 \label{adiabatic_surf_temp_spray}
 \end{figure}
+
+\FloatBarrier
 
 \subsection{Droplet Movement on Solid Surfaces with MPI}
 \label{cascadempi}
@@ -6662,6 +6683,7 @@ This test case is a modified version of \ct{cascade} (see FDS User's Guide \cite
 \end{figure}
 
 
+\FloatBarrier
 
 \section{Flow Rate and Pipe Networks}
 \label{flow_rate_2}
@@ -6678,6 +6700,7 @@ In this test case four sprinklers are placed in a room.  The first three sprinkl
 \end{figure}
 
 
+\FloatBarrier
 
 \section{Turbulent Dispersion}
 \label{turbulent_dispersion}
