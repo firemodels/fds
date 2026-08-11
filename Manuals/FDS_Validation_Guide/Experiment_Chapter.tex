@@ -3044,6 +3044,21 @@ Test    & Width     & Height        & $\dot{Q}$  & Location     & Test  & Width 
 Fires fueled by methanol and propane ranging from 5.6~kW to 16.8~kW were conducted in a 1:20 reduced-scale tunnel at Southwest Jiaotong University, Chengdu, China~\cite{Wang:TUST2019}. The tunnel was 0.45~m wide, 0.23~m high and 20.8~m long. The burner was located at the center of the tunnel and both ends were open. Temperatures and gas concentrations (i.e., O$_2$, CO and CO$_2$) were measured. The results showed that both methanol and propane fires self-extinguished in the 20.8~m long tunnel within approximately 10~min, except for the 5.6~kW methanol fire. The larger the heat release rate, the faster the self-extinction of the fire. The oxygen concentrations in the 20.8~m long tunnel decreased to approximately 12~\% except for the 5.6~kW methanol fire, which remained well above the limiting oxygen concentration.  Self-extinction was not observed for fires of the same heat release rates in a 10~m long tunnel of the same cross section. The oxygen concentrations in the 10~m long tunnel decreased to approximately 17~\%.  In the long tunnel with large fire sizes, the smoke layer descended to the floor, inhibiting the supply of fresh air reaching the fire.
 
 
+\section{TAMU Jet Fires}
+\label{TAMU_Jet_Fires_Description}
+
+Propane jet fire experiments were conducted at Texas A\&M University (TAMU)~\cite{Zhang:IEC2015}. Measurements included heat flux to nearby targets and flame length. For the experiments considered here, tests 16-19, gaseous propane was ejected horizontally through a 1.91~cm diameter nozzle. 
+
+\subsubsection{Modeling Notes}
+
+The simulations are performed with a spatial resolution of 2~cm, which is not fine enough to resolve the nozzle flow. However, to match the thrust of the actual nozzle, $F_1$, air is added to the propane stream in the simulation:
+\be
+   F_1 \equiv \frac{\dot{m}_{\rm p}^2}{\rho_{\rm p}\, A_1}
+   = \frac{(\dot{m}_{\rm p}+\dot{m}_{\rm a})\left(\frac{\dot{m}_{\rm p}}{\rho_{\rm p}}+\frac{\dot{m}_{\rm a}}{\rho_{\rm a}}\right)}{A_{2}} \equiv F_2 \label{thrust_match}
+\ee
+where $\dot{m}_{\rm p}$ is the mass flow rate of propane, $\dot{m}_{\rm a}$ is the mass flow rate of added air, $A_1$ is the area of the actual nozzle, $A_2$ is the area of the simulated nozzle, $\rho_{\rm p}$ is the density of propane, and $\rho_{\rm a}$ is the density of air. Equation~\ref{thrust_match} leads to a quadratic equation for $\dot{m}_{\rm a}$.
+
+
 \section{Theobald Hose Stream Experiments}
 \label{Theobald_Description}
 

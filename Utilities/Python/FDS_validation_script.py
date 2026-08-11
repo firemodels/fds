@@ -41,6 +41,7 @@ print("Sandia_Fireballs...");             safe_run("./scripts/Sandia_Fireballs.p
 print("Sandia_Jet_Fires...");             safe_run("./scripts/Sandia_Jet_Fires.py")
 print("Sandia_Plumes_TKE...");            safe_run("./scripts/Sandia_Plumes_TKE.py")
 print("Sandia_Pool_Fires...");            safe_run("./scripts/Sandia_Pool_Fires.py")
+print("TAMU_Jet_Fires...");               safe_run("./scripts/TAMU_Jet_Fires.py")
 
 # Dataplot and scatplot options
 

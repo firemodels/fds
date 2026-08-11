@@ -1,0 +1,7 @@
+&HEAD CHID='TAMU_T19c', TITLE='Texas A&M University Propane Jet Fire Experiments' /
+
+&SURF ID='jet', NO_SLIP=T, SPEC_ID(1)='PROPANE', MASS_FLUX(1)=100, SPEC_ID(2)='AIR', MASS_FLUX(2)=12.5 /
+
+&CATF OTHER_FILES='jet_devices.txt' /
+
+&TAIL /
