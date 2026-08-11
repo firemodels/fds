@@ -6697,13 +6697,13 @@ Modeling fire suppression by water has three principal components: transporting 
 
 When a liquid\footnote{Solid particles do not stick to solid surfaces by default like liquid droplets. However, you can make solid particles act like liquid droplets by setting \ct{ADHERE_TO_SOLID=1} on the \ct{PART} line.} droplet strikes a solid surface\footnote{If you do not want droplets to accumulate on solid surfaces, set \ct{ADHERE_TO_SOLID=-1} on the \ct{PART} line. It is normally 1 for liquid droplets.}, it sticks and is reassigned a new speed and direction. If the surface is horizontal, the direction is randomly chosen. If vertical, the direction is downward. The parameters \ct{HORIZONTAL_VELOCITY} and \ct{VERTICAL_VELOCITY} on the \ct{PART} line allow you to control the speed at which droplets move horizontally or vertically (downward). The defaults are 0.2~m/s and 0.5~m/s, respectively.
 
-When a liquid droplet hits a solid surface, it transfers heat over the area of the cross section of a hemisphere of equal volume. When enough liquid pools on the surface to form a layer, the area governing heat transfer is based on the film, not the individual droplet. The diameter of the droplet, once a film layer is formed, is not important because it is assumed to mix with other droplets forming the film. However, when the droplet leaves the solid surface in the form of a ``drip,'' it reforms into a droplet, and its new diameter can be specified via \ct{SURFACE_DIAMETER} on the \ct{PART} line in units of $\mu$m.
+When a liquid droplet hits a solid surface, it transfers heat over the area of the cross section of a hemisphere of equal volume. You can adjust the size of the droplet when it impacts a solid surface via the parameter \ct{SURFACE_DIAMETER} on the \ct{PART} line in units of $\mu$m. When enough liquid droplets pool on the surface to form a layer, the area governing heat transfer is based on the film, not the individual droplet. That is, the diameter of the droplet, once a film layer is formed, is not important because it is assumed to mix with other droplets forming the film. However, when the droplet leaves the solid surface in the form of a ``drip,'' it reforms into a droplet, and its new diameter can be specified via \ct{DRIP_DIAMETER} on the \ct{PART} line in units of $\mu$m. Both \ct{SURFACE_DIAMETER} and \ct{DRIP_DIAMETER} are $-1$ by default, meaning that it is assumed that the droplet does not change its diameter unless specified by the user.
 
 The heat transfer between the solid surface and the liquid film layer makes use of an empirical turbulent heat transfer correlation that is a function of the properties of the liquid and the user-specified \ct{HORIZONTAL_VELOCITY} or \ct{VERTICAL_VELOCITY}. Details can be found in the FDS Technical Reference Guide chapter, ``Lagrangian Particles,'' section ``Heating and Evaporation of Liquid Droplets.'' Alternatively, you may specify a constant value on the \ct{PART} line, \ct{HEAT_TRANSFER_COEFFICIENT_SOLID}, in units of \unit{W/m^2.K}.
 
 There are some applications, like the suppression of racked storage commodity fires, where it is useful to allow water droplets to move horizontally along the underside of a solid object. It is difficult to model this phenomenon precisely because it involves surface tension, surface porosity and absorption, and complicated geometry. However, a way to capture some of the effect is to set \ct{ALLOW_UNDERSIDE_PARTICLES=T} on the \ct{SURF} line(s). It is normally \ct{F}. Also, note that when droplets hit obstructions, the vertical direction is assumed to coincide with the $z$ axis, regardless of any change to the gravity vector, \ct{GVEC}. To stop particles or droplets from ``sticking'' to surfaces, set \ct{ALLOW_SURFACE_PARTICLES=F} on the \ct{SURF} line.
 
-A useful sample case to demonstrate various features of droplet motion on solid obstructions is the test case called \ct{Sprinklers_and_Sprays/cascade.fds}. The image to the left in Fig.~\ref{cascade_image} shows 1~L of water droplets cascading down the sides of an array of boxes. The plot to the right checks that the total water mass is conserved. Note that some of the water evaporates into the compartment that initially has zero humidity.
+A useful sample case to demonstrate various features of droplet motion on solid obstructions is the test case called \ct{Sprinklers_and_Sprays/cascade.fds}. The image to the left in Fig.~\ref{cascade_image} shows 1~L of water droplets cascading down the sides of an array of boxes. The plot to the right checks that the total water mass is conserved. Note that some of the water evaporates into the compartment that initially has zero humidity. Also, the \ct{SURFACE_DIAMETER} is set to 2000~$\mu$m and the \ct{DRIP_DIAMETER} is set to 500~$\mu$m, meaning that the droplets are resized as they land on, or drip off, solid surfaces.
 
 \begin{figure}[ht]
     \includegraphics[height=3in]{SCRIPT_FIGURES/cascade_image}
@@ -7759,7 +7759,7 @@ In this second option, you create your own custom fuel type as follows:
 \end{lstlisting}
 \ct{VEG_LSET_ROS_00} is the no-wind, no-slope rate of spread for the given fuel model. \ct{VEG_LSET_SIGMA} (\unit{\per\meter}) and \ct{VEG_LSET_BETA} are the average surface-to-volume ratio ($\sigma$) and packing ratio ($\beta$) of the underlying vegetation. \ct{VEG_LSET_HT} (m) is the height of the vegetation. When the fire front arrives at a given surface cell, fuel vapors are generated at a rate given by
 \be
-\dot{m}_{\rm f}'' = (1-\nu_{\rm char}) \frac{m_{\rm f}''}{\delta t} \; {\rm kg}/({\rm m}^2 \cdot {\rm s})  \quad ; \quad \delta t = \frac{75600}{\sigma} \; \unit{s}
+\dot{m}_{\rm f}'' = (1-\nu_{\rm char}) \frac{m_{\rm f}''}{\delta t} \; {\rm kg}/({\rm m}^2 \cdot {\rm s})  \quad ; \quad \delta t = \frac{75600}{\sigma} \; \unit{s} \label{eq:ls_mlr}
 \ee
 Here, $m_{\rm f}''$ is the dry fuel loading in units of \unit{kg/m^2} (\ct{VEG_LSET_SURF_LOAD}, default 1.0~\unit{kg/m^2}); $\nu_{\rm char}$ is the char fraction (\ct{VEG_LSET_CHAR_FRACTION}, default 0.2); and $\delta t$ is the duration of the fire at a given location. The expression for the burn duration is given by Albini~\cite{Albini:1976}, but you can enter your own burn duration using \ct{VEG_LSET_FIREBASE_TIME} (s).
 
@@ -7848,7 +7848,7 @@ Bova et al.~\cite{Bova:IJWF2015} compare the level set calculation that has been
 \subsubsection{Examples of Coupled Level Set Calculations}
 \label{level_set_fuel_model_1}
 
-In this example, \ct{WUI/level_set_fuel_model_1.fds}, a fire is ignited directly in the center of a square patch of flat terrain, $L=1000$~m on a side, with no wind. \ct{VEG_LSET_FUEL_INDEX=1} (Short Grass) is selected as the vegetation type. The simulation is performed on a uniform mesh with $\dx=25$~m grid cells. For this type of vegetation, the mass loss rate is calculated to be $\dot{m}''=0.00955$~\unit{kg/m^2.s}, the heat of combustion is assumed to be $\Delta H=18607$~kJ/kg, and the local duration of burning is calculated to be $\Delta t=6.584$~s. These values are all reported in the file \ct{level_set_fuel_model_1.out}. After 10~h of simulation, the fire sweeps over the entire domain, consuming $\dot{m}'' L^2 \Delta t \approx 62877$~kg of vegetation. The left hand side of Fig.~\ref{level_set_fuel_model_1_fig} displays the fire intensity (burning rate) after 5~h, and the right hand side displays the integrated mass loss. Note that in this case the rate of spread is ${\rm ROS} \approx 0.03$~m/s, which means that the fire front crosses a single grid cell in approximately $\dx/{\rm ROS} \approx 830$~s, a much greater time period than the vegetation burning time, $\Delta t$. To ensure a relatively smooth fire front and burning rate, the mass loss rate and burning duration are adjusted by dividing and multiplying these values, respectively, by $\dx/{\rm ROS}$.
+In this example, \ct{WUI/level_set_fuel_model_1.fds}, a fire is ignited directly in the center of a square patch of flat terrain, $L=1000$~m on a side, with no wind and a uniform mesh with $\dx=25$~m grid cells. \ct{VEG_LSET_FUEL_INDEX=1} (Short Grass) is selected as the vegetation type. For this type of vegetation, the fuel load is $m''=0.1659$~\unit{kg/m^2} and the burning rate is determined from Eq.~\ref{eq:ls_mlr} (with a burning duration of $\Delta t=6.584$~s). These values are all reported in the file \ct{level_set_fuel_model_1.out}. Given the default char yield of 0.2, the total mass consumed after the fire has spread over the full domain should be $(1-\nu_{\rm char}) m'' L^2 \approx 132720$~kg. The left hand side of Fig.~\ref{level_set_fuel_model_1_fig} displays the fire intensity (burning rate) after 5~h, and the right hand side displays the integrated mass loss. Note that in this case the rate of spread is ${\rm ROS} \approx 0.03$~m/s, which means that the fire front crosses a single grid cell in approximately $\dx/{\rm ROS} \approx 830$~s, a much greater time period than the vegetation burning time, $\Delta t$. To ensure a relatively smooth fire front and burning rate, the mass loss rate and burning duration are adjusted following a mass conserving scheme described in the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 
 \begin{figure}[ht]
     \includegraphics[trim=.5in 0 .5in 0, clip, height=2.4in]{SCRIPT_FIGURES/level_set_fuel_model_1.png}
@@ -8455,6 +8455,11 @@ For any object for which a \ct{DEVC_ID} can be specified (such as \ct{OBST} or \
             \ct{ATAN}                        & The arctangent of the \ct{INPUT} \\ \hline
             \ct{MAX}                         & Maximum value of the \ct{INPUT}s \\ \hline
             \ct{MIN}                         & Minimum value of the \ct{INPUT}s \\ \hline
+            \ct{GREATER THAN}                & Changes state if the first \ct{INPUT} is greater than the second \\ \hline
+            \ct{LESS THAN}                   & Changes state if the first \ct{INPUT} is less than the second \\ \hline
+            \ct{EQUALS}                      & Changes state if the first \ct{INPUT} is equal to the second \\ \hline
+            \ct{STEADY}                      & Changes state if the \ct{INPUT}'s current value equals its prior value\\ \hline
+            \ct{MEMORY}                      & If the first \ct{INPUT} is \ct{T} it stores the value of the second \ct{INPUT} \\ \hline
             \ct{PID}                         & A Proportional-Integral-Derivative control for the \ct{INPUT}\\ \hline
             \ct{PERCENTILE}                  & Calculate the user-specified percentile for a function \\ \hline
             \ct{EXTERNAL}                    & External file control, see Section~\ref{info:external_control} \\ \hline
@@ -8601,6 +8606,33 @@ The control functions that perform simple math operations (\ct{SUM},  \ct{SUBTRA
     &CTRL ID='multiplier', FUNCTION_TYPE='POWER',
     INPUT_ID='SPEED SENSOR','CONSTANT', CONSTANT=2., SETPOINT=10.,
     TRIP_DIRECTION=1 /
+\end{lstlisting}
+
+\subsection{Control Function: Comparison Operations}
+\label{info:CONTROL_COMPARE}
+
+This group of control functions (\ct{GREATER THAN}, \ct{LESS THAN}, and \ct{EQUALS} compare the first two inputs and output \ct{T} if the comparison is true and \ct{F} if the comparison is false. Either of the inputs can have a constant value specified as one of their inputs. This is done by specifying one of the \ct{INPUT_ID}s as \ct{'CONSTANT'} and providing the value using the input \ct{CONSTANT}.
+
+\subsection{Control Function: \texorpdfstring{{\tt STEADY}}{STEADY}}
+\label{info:CONTROL_STEADY}
+
+The \ct{STEADY} control function compares the value of the \ct{INPUT} for the current time step to the value from the prior time step. If the two are equal, the logical state of the function will be \ct{T}. For example, the following takes the maximum of a series of devices. During periods of time where the maximum changes the \ct{'NEW MAX'} function will be \ct{F} and the \ct{TIME DEVC} will update to the current simulation time. During periods of time where the maximum is the same the \ct{'NEW MAX'} function will be \ct{T} and the \ct{TIME DEVC} will stop updating.
+\begin{lstlisting}
+    &CTRL ID='MAX VAL',FUNCTION_TYPE='MAX',INPUT_ID='DEVC 1','DEVC 2',...,/
+    &CTRL ID='NEW MAX', FUNCTION_TYPE='STEADY',INPUT_ID='MAX VAL',LATCH=F/
+    &DEVC ID='MAX TIME',QUANTITY='TIME',XYZ=...,NO_UPDATE_CTRL_ID='NEW MAX'/
+    INPUT_ID='SPEED SENSOR','TEMPERATURE'/
+\end{lstlisting}
+
+\subsection{Control Function: \texorpdfstring{{\tt MEMORY}}{MEMORY}}
+\label{info:CONTROL_MEMORY}
+
+The \ct{MEMORY} control function allows you to store a value. When the first \ct{INPUT} is \ct{T}, the function will store the value of the second \ct{INPUT}. The initial value stored in memory can be specified using \ct{CONSTANT}. For example, the following lines will store the velocity when the temperature exceeds 200 \unit{\degreeCelsius}.  In this case since the default value for \ct{LATCH} is \ct{T}, only one value will be stored. Setting \ct{LATCH=F} will cause the value to be updated every time the first \ct{INPUT} is \ct{T}. The logical state of this function takes on the state of the first \ct{INPUT}.
+\begin{lstlisting}
+    &DEVC ID='SPEED SENSOR', XYZ=..., QUANTITY='VELOCITY' /
+    &DEVC ID='TEMPERATURE', XYZ=..., QUANTITY='TEMPERATURE',SETPOINT=200. /
+    &CTRL ID='store temperature', FUNCTION_TYPE='MEMORY',
+    INPUT_ID='SPEED SENSOR','TEMPERATURE'/
 \end{lstlisting}
 
 
@@ -12994,6 +13026,7 @@ Keyword                                    & Type        & Description          
 \ct{DISTRIBUTION}                          & Character   & Section~\ref{info:particle_size}                                &                   & \ct{'ROSIN...'}      \\ \hline
 \ct{DRAG_COEFFICIENT(3)}                   & Real Array  & Section~\ref{info:particle_drag}                                &                   &                       \\ \hline
 \ct{DRAG_LAW}                              & Character   & Section~\ref{info:particle_drag}                                &                   & \ct{'SPHERE'}        \\ \hline
+\ct{DRIP_DIAMETER}                         & Real        & Section~\ref{info:surface_droplets}                             & \unit{\micro m}   &                      \\ \hline
 \ct{EVAP_MODEL}                            & Character   & Section~\ref{info:liquid_droplets}                              &                   & RM B-num             \\ \hline
 \ct{EMBER_DENSITY_THRESHOLD}               & Real        & Section~\ref{info:ember_generation_part}                        &                   &                       \\ \hline
 \ct{EMBER_PARTICLE}                        & Logical     & Section~\ref{info:ember_generation_part}                        &                   & \ct{F}               \\ \hline
@@ -13462,9 +13495,6 @@ Keyword                          & Type              & Description              
 \ct{FIC_CONCENTRATION}           & Real              & Section~\ref{info:FED}                  & ppm               & 0             \\ \hline
 \ct{FLD_LETHAL_DOSE}             & Real              & Section~\ref{info:FED}                  & ppm$\times$min    & 0             \\ \hline
 \ct{FORMULA}                     & Character         & Section~\ref{info:FORMULA}              &                   &               \\ \hline
-\ct{FTP_CR}                      & Real              & Section~\ref{info:flux_time_product}    & \unit{kJ/m^2}     &               \\ \hline
-\ct{FTP_N}                       & Real              & Section~\ref{info:flux_time_product}    &                   & 1             \\ \hline
-\ct{FTP_Q_CR}                    & Real              & Section~\ref{info:flux_time_product}    & \unit{kW/m^2}     &               \\ \hline
 \ct{H}                           & Real              & Section~\ref{info:FORMULA}              &                   &               \\ \hline
 \ct{HEAT_OF_VAPORIZATION}        & Real              & Section~\ref{thermal_part_props}        & kJ/kg             &               \\ \hline
 \ct{H_V_REFERENCE_TEMPERATURE}   & Real              & Section~\ref{thermal_part_props}        & \unit{\degreeCelsius} &               \\ \hline
@@ -13562,6 +13592,9 @@ Keyword                                               & Type            & Descri
 \ct{EXTERNAL_FLUX}                                    & Real            & Section~\ref{info:net_and_convective_heat_flux} & \unit{kW/m^2}       &   \rule{0pt}{2.3ex}     \\ \hline
 \ct{EXTINCTION_TEMPERATURE}                           & Real            & Section~\ref{info:specified_burning}      & \unit{\degreeCelsius} & -273.15               \\ \hline
 \ct{FREE_SLIP}                                        & Logical         & Section~\ref{info:WALL_MODEL}             &                     & \ct{F}                  \\ \hline
+\ct{FTP_CR}                                           & Real            & Section~\ref{info:flux_time_product}      & \unit{kJ/m^2}       &                         \\ \hline
+\ct{FTP_N}                                            & Real            & Section~\ref{info:flux_time_product}      &                     & 1                       \\ \hline
+\ct{FTP_Q_CR}                                         & Real            & Section~\ref{info:flux_time_product}      & \unit{kW/m^2}       &                         \\ \hline
 \ct{GEOMETRY}                                         & Character       & Section~\ref{info:GEOMETRY}               &                     & \ct{'CARTESIAN'}        \\ \hline
 \ct{HEAT_OF_VAPORIZATION}                             & Real            & Section~\ref{info:specified_burning}      & kJ/kg               &                         \\ \hline
 \ct{HEAT_TRANSFER_COEFFICIENT}                        & Real            & Section~\ref{info:convection}             & \unit{W/(m^2.K)}    &   \rule{0pt}{2.3ex}     \\ \hline

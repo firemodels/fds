@@ -56,9 +56,10 @@ DO SURF_INDEX=0,N_SURF
       SF%VEG_LSET_ROS_00 = ROS_NO_WIND_NO_SLOPE(SF%VEG_LSET_FUEL_INDEX,SURF_INDEX)
    ELSE
       SF%BURN_DURATION = SF%VEG_LSET_FIREBASE_TIME
-      IF (LEVEL_SET_COUPLED_FIRE) SF%MASS_FLUX(REACTION(1)%FUEL_SMIX_INDEX) = &
-        (1._EB-SF%VEG_LSET_CHAR_FRACTION)*SF%VEG_LSET_SURF_LOAD/SF%VEG_LSET_FIREBASE_TIME
    ENDIF
+   ! Mass flux of fuel vapor: (1-x_char)*SURF_LOAD/FIREBASE_TIME
+   IF (LEVEL_SET_COUPLED_FIRE) SF%MASS_FLUX(REACTION(1)%FUEL_SMIX_INDEX) = &
+      (1._EB-SF%VEG_LSET_CHAR_FRACTION)*SF%VEG_LSET_SURF_LOAD/SF%VEG_LSET_FIREBASE_TIME
 ENDDO
 
 ! Level set values (Phi). PHI1_LS is the first-order accurate estimate at the next time step.
@@ -1145,6 +1146,7 @@ mfdead = hnmd/hnd
 ! Moisture of extinction of living fuel [R(88),Albini,p.89]
 
 mxlive = 2.9*bigW*(1.0 - (mfdead/mx)) - 0.226
+mxlive = MAX(mxlive,mx) ! Ensure mxlive is at least mx
 
 ! Moisture ratios [R(65,66)]
 
@@ -1155,6 +1157,10 @@ else
 endif
 
 rmd = swmd/(swd*mx)
+
+! Limit moisture ratios to 1.0
+rmd = MIN(rmd,1._EB)
+rml = MIN(rml,1._EB)
 
 ! Moisture damping coefficients [R(64)]
 
@@ -1205,10 +1211,6 @@ bigIr = gamma*heat*etas*etaM
 
 IF (SF%VEG_LSET_FIREBASE_TIME<0._EB) SF%VEG_LSET_FIREBASE_TIME = 756._EB/SF%VEG_LSET_SIGMA   ! Albini (Eq. 14)
 SF%BURN_DURATION = SF%VEG_LSET_FIREBASE_TIME
-
-IF (LEVEL_SET_COUPLED_FIRE) THEN
-   SF%MASS_FLUX(REACTION(1)%FUEL_SMIX_INDEX) = bigIr/heat
-ENDIF
 
 ! Rate of spread [R(52)] and the rate of spread in the absence of wind and with no slope.
 
