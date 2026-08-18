@@ -10155,8 +10155,7 @@ The parameters for a \ct{PROF} line are listed in Table~\ref{tbl:PROF}. For a wa
 For a particle, there are two options. The first is to use \ct{INIT_ID} to reference the \ct{INIT} line used to place the particle within the domain:
 \begin{lstlisting}
     &INIT ID='my particle', XYZ=..., N_PARTICLES=1, PART_ID='...' /
-    &PROF ID='T-2', INIT_ID='my particle',
-    QUANTITY='INSIDE WALL TEMPERATURE' /
+    &PROF ID='T-2', INIT_ID='my particle', QUANTITY='INSIDE WALL TEMPERATURE' /
 \end{lstlisting}
 The second option is to use \ct{LP_TAG} to specify the particle using its unique identifying tag\footnote{Each droplet or particle has a unique integer identifier. To find it, open the case in Smokeview, load the particles, right click, ``Files/Data/Coloring,'' ``Particles,'' ``Settings,'' and click the box labeled ``Show selected particle tag.'' Then click on the desired particle.}. Once you have determined the tag, add the following line to the input file:
 \begin{lstlisting}
@@ -10165,6 +10164,8 @@ The second option is to use \ct{LP_TAG} to specify the particle using its unique
 Note that you must specify the \ct{PART_ID} so that the appropriate inner noding structure can be determined. With either option for designating a particle, do not specify \ct{XYZ} or \ct{IOR} on the \ct{PROF} line.
 
 The \ct{QUANTITY} is the physical quantity to record. Each \ct{PROF} line creates a separate file. The first number in each row is the time at which the profile is extracted. The second number is the number of ``nodes,'' $n$, which is the number of solid phase cells plus 1. The next $n$ values are the node coordinates, running from 0 at the surface to the full \ct{THICKNESS} at the end. The next $n$ numbers are the values of the \ct{QUANTITY} at the node points. The first of these values is located at the surface. If you specify \ct{CELL_CENTERED=T}, the \ct{QUANTITY} values will be recorded at $n$ interior cell centers rather than cell boundaries. The \ct{ID} is an optional input which, if provided, is used in the file header.
+
+To choose your own discrete locations for where the data is recorded, add the parameter \ct{DEPTHS} to the \ct{PROF} line followed by a list of non-negative depths (m) at which the temperatures are to be recorded. 
 
 There is a second optional format. If you specify \ct{FORMAT_INDEX=2} on the \ct{PROF} line, the resulting file will contain columns containing only the final set of node coordinates and quantity values. This is handy for displaying a steady-state temperature profile.
 
@@ -13123,6 +13124,7 @@ Keyword                   & Type              & Description                  & U
 Keyword                   & Type              & Description                  & Units      & Default   \\ \hline  \hline
 \endhead
 \ct{CELL_CENTERED}        & Logical           & Section~\ref{info:PROF}      &            & \ct{F}  \\ \hline
+\ct{DEPTHS}               & Real Array        & Section~\ref{info:PROF}      &            &       \\ \hline
 \ct{FORMAT_INDEX}         & Integer           & Section~\ref{info:PROF}      &            & 1     \\ \hline
 \ct{ID}                   & Character         & Section~\ref{info:PROF}      &            &       \\ \hline
 \ct{INIT_ID}              & Character         & Section~\ref{info:PROF}      &            &       \\ \hline
