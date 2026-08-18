@@ -993,64 +993,55 @@ md3 = SF%VEG_LSET_M100
 mlw = SF%VEG_LSET_MLW
 mlh = SF%VEG_LSET_MLH
 
+! These size-class SAVs (1/m) are the same for all fuel models: 10-h, 100-h, live herbaceous, live woody
+svd2=358._EB ; svd3=98._EB ; svlh=4921._EB ; svlw=4921._EB
+! These thermophysical properties are the same for all fuel models
+st=0.0555_EB ; se=0.01_EB ; heat=18607._EB ; rhop=512._EB
+
 SELECT CASE(ROTHERMEL_FUEL_INDEX)
-   CASE(0)  ! Custom homogeneous fuel from SURF layer properties
+   CASE(0)  ! Custom homogeneous fuel from SURF layer properties (assumes single dead fuel class)
       w0d1=SF%VEG_LSET_SURF_LOAD ; w0d2=0._EB ; w0d3=0._EB ; w0lh=0._EB ; w0lw=0._EB
-      svd1=SF%VEG_LSET_SIGMA*100._EB  ! stored as 1/cm; Rothermel formulas use 1/m
-      svd2=358._EB ; svd3=98._EB ; svlh=4921._EB ; svlw=4921._EB
-      mx=0.15_EB ; depth=SF%VEG_LSET_HT ; rhop=512._EB ; heat=18607._EB ; st=0.0555_EB ; se=0.01_EB
+      svd1=SF%VEG_LSET_SIGMA*100._EB; mx=0.3_EB ; depth=SF%VEG_LSET_HT 
+      md2=0._EB ; md3=0._EB ; mlh=0._EB ; mlw=0._EB
    CASE(1)  ! 'Short Grass'
-      w0d1=0.1659     ; w0d2=0.        ; w0d3=0.        ; w0lh=0.        ; w0lw=0.     ! dry mass per unit area (kg/m2)
-      svd1=11483.     ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921.  ! surface area to volume (1/m)
-      mx=0.12         ; depth=0.3048   ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
+      w0d1=0.1659     ; w0d2=0.        ; w0d3=0.        ; w0lh=0.        ; w0lw=0.
+      svd1=11483.     ; mx=0.12        ; depth=0.3048   
    CASE(2)  ! 'Timbergrass'
       w0d1=0.448      ; w0d2=0.224     ; w0d3=0.112     ; w0lh=0.112     ; w0lw=0.
-      svd1=9842.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921.
-      mx=0.15         ; depth=0.3048   ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
+      svd1=9842.      ; mx=0.15        ; depth=0.3048   
    CASE(3)  ! 'Tall Grass'
       w0d1=0.675      ; w0d2=0.        ; w0d3=0.        ; w0lh=0.        ; w0lw=0.
-      svd1=4921.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921.
-      mx=0.25         ; depth=0.762    ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
+      svd1=4921.      ; mx=0.25        ; depth=0.762   
    CASE(4)  ! 'Chaparral'
       w0d1=1.123      ; w0d2=0.899     ; w0d3=0.448     ; w0lh=1.123     ; w0lw=0.
-      svd1=6562.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921.
-      mx=0.20         ; depth=1.829    ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
+      svd1=6562.      ; mx=0.20        ; depth=1.829   
    CASE(5)  ! 'Brush'
       w0d1=0.224      ; w0d2=0.112     ; w0d3=0.        ; w0lh=0.        ; w0lw=0.448
-      svd1=6562.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921.
-      mx=0.20         ; depth=0.6096   ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
+      svd1=6562.      ; mx=0.20        ; depth=0.6096  
    CASE(6)  ! 'Dormant Brush'
       w0d1=0.336      ; w0d2=0.56      ; w0d3=0.448     ; w0lh=0.        ; w0lw=0.
-      svd1=5741.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921.
-      mx=0.25         ; depth=0.762    ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
+      svd1=5741.      ; mx=0.25        ; depth=0.762   
    CASE(7)  ! 'Southern Rough'
       w0d1=0.255      ; w0d2=0.419     ; w0d3=0.336     ; w0lh=0.        ; w0lw=0.083
-      svd1=5741.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921.
-      mx=0.40         ; depth=0.762    ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
+      svd1=5741.      ; mx=0.40        ; depth=0.762   
    CASE(8)  ! 'Closed Timber Litter'
       w0d1=0.336      ; w0d2=0.224     ; w0d3=0.56      ; w0lh=0.        ; w0lw=0.
-      svd1=6562.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921.
-      mx=0.30         ; depth=0.06096  ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
+      svd1=6562.      ; mx=0.30        ; depth=0.06096 
    CASE(9)  ! ID='Hardwood Litter'
       w0d1=0.655      ; w0d2=0.092     ; w0d3=0.034     ; w0lh=0.        ; w0lw=0.
-      svd1=8202.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921.
-      mx=0.25         ; depth=0.06096  ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
+      svd1=8202.      ; mx=0.25        ; depth=0.06096 
    CASE(10)  ! 'Timber'
       w0d1=0.675      ; w0d2=0.448     ; w0d3=1.123     ; w0lh=0.        ; w0lw=0.448
-      svd1=6562.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921.
-      mx=0.25         ; depth=0.3048   ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
+      svd1=6562.      ; mx=0.25        ; depth=0.3048  
    CASE(11)  ! 'Light Slash'
       w0d1=0.336      ; w0d2=1.011     ; w0d3=1.235     ; w0lh=0.        ; w0lw=0.
-      svd1=4921.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921.
-      mx=0.15         ; depth=0.3048   ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
+      svd1=4921.      ; mx=0.15        ; depth=0.3048  
    CASE(12)  ! ID='Medium Slash'
       w0d1=0.899      ; w0d2=3.145     ; w0d3=3.706     ; w0lh=0.        ; w0lw=0.
-      svd1=4921.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921.
-      mx=0.20         ; depth=0.70104  ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
+      svd1=4921.      ; mx=0.20        ; depth=0.70104 
    CASE(13)  ! 'Heavy Slash'
       w0d1=1.571      ; w0d2=5.165     ; w0d3=6.288     ; w0lh=0.        ; w0lw=0.
-      svd1=4921.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921.
-      mx=0.25         ; depth=0.9144   ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
+      svd1=4921.      ; mx=0.25        ; depth=0.9144  
 END SELECT
 
 IF (SF%VEG_LSET_HT>0._EB) depth = SF%VEG_LSET_HT
