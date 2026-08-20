@@ -33,7 +33,7 @@
       E(1) = 1.41E5
       EMISSIVITY=0.95
       DENSITY= 1350.
-      SPEC_ID='GAS'
+      SPEC_ID='METHANE'
       NU_SPEC= 0.55
       MATL_ID='KYDEX_int'
       NU_MATL=0.45
@@ -48,7 +48,7 @@
       E(1) = 1.74E5
       EMISSIVITY=0.95
       DENSITY= 100.
-      SPEC_ID='GAS'
+      SPEC_ID='METHANE'
       NU_SPEC= 0.69
       MATL_ID='KYDEX_char'
       NU_MATL=0.31
