@@ -15,7 +15,7 @@
       E(1) = 1.88E5
       EMISSIVITY=0.95
       DENSITY= 1160.
-      SPEC_ID='CB GAS'
+      SPEC_ID='METHANE'
       NU_SPEC= 0.985
       MATL_ID='PMMA char'
       NU_MATL=0.015
