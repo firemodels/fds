@@ -15,7 +15,7 @@
       E(1) = 2.19E5
       EMISSIVITY=0.95
       DENSITY= 1050.
-      SPEC_ID='CB GAS'
+      SPEC_ID='METHANE'
       NU_SPEC= 0.977
       MATL_ID='ABS char'
       NU_MATL=0.023
