@@ -39,7 +39,7 @@
       EMISSIVITY    =  0.8
       CONDUCTIVITY  =  0.1 /
 
-&SPEC ID=''Mixed Polymers',
+&SPEC ID='Mixed Polymers',
       C = 1.
       H = 12.2/
 
