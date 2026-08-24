@@ -268,51 +268,56 @@ DO NN=1,N_HVAC_READ
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
          IF (DIAMETER < 0._EB .AND. AREA < 0._EB .AND. PERIMETER < 0._EB) THEN
-            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR(505): Duct has no AREA, DIAMETER, or PERIMTER. Duct ID:',TRIM(ID),&
+            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR(505): Duct has no AREA, DIAMETER, or PERIMEER. Duct ID:',TRIM(ID),&
                                         ', HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
-         IF (AREA < 0._EB) THEN
-            IF (DIAMETER < 0._EB) THEN
-               WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR(506): Duct without AREA has no DIAMETER. Duct ID:',TRIM(ID),&
-                                           ', HVAC line number:',NN
+         IF (SQUARE) ROUND = .FALSE.
+         IF (.NOT. ROUND .AND. .NOT. SQUARE) ROUND = .TRUE.
+         ROUNDIF: IF (ROUND) THEN
+            IF ( (AREA > 0._EB .AND. (DIAMETER > 0._EB .OR. PERIMETER > 0._EB)) .OR. &
+                 (DIAMETER > 0._EB .AND. (AREA > 0._EB .OR. PERIMETER > 0._EB)) .OR. &
+                 (PERIMETER > 0._EB .AND. (DIAMETER > 0._EB .OR. AREA > 0._EB))) THEN
+               WRITE(MESSAGE,'(A,A,A,A,I5)') 'ERROR(506): ROUND duct can only have one of AREA, DIAMETER, or PERIMITER set.',&
+                  ' Duct ID:',TRIM(ID),', HVAC line number:',NN
                CALL SHUTDOWN(MESSAGE); RETURN
             ENDIF
-            IF (SQUARE) THEN
-               AREA = DIAMETER**2
-               PERIMETER = 4._EB*DIAMETER
-            ELSEIF (ROUND) THEN
-               AREA = 0.25_EB*PI*DIAMETER**2
-               PERIMETER = PI*DIAMETER
+            IF (DIAMETER > 0._EB) THEN
+               AREA = PI * 0.25_EB * DIAMETER**2
+               PERIMETER = PI * DIAMETER
+            ELSEIF (AREA > 0._EB) THEN
+               DIAMETER = SQRT(AREA*RPI)*2
+               PERIMETER = PI * DIAMETER
             ELSE
-               IF (PERIMETER < 0._EB) THEN
-                  WRITE(MESSAGE,'(A,A,A,I5)') &
-                     'ERROR(507): If both ROUND and SQUARE are FALSE, Duct with DIAMETER must also have PERIMETER. Duct ID:',&
-                     TRIM(ID),', HVAC line number:',NN
-                  CALL SHUTDOWN(MESSAGE); RETURN
+               DIAMETER = PERIMTER * RPI
+               AREA = PI * 0.25_EB * DIAMETER**2
+            ENDIF               
+         ELSE ROUNDIF
+            IF (DIAMETER > 0._EB .AND. AREA > 0._EB .AND. PERIMETER > 0._EB) THEN
+               WRITE(MESSAGE,'(A,A,A,A,I5)') 'ERROR(507): SQUARE duct cannot have all of AREA, DIAMETER, or PERIMITER set.',&
+                  ' Duct ID:',TRIM(ID),', HVAC line number:',NN
+            ENDIF
+            IF (DIAMETER > 0._EB) THEN
+               IF (AREA > 0._EB) THEN
+                  PERIMTER = 4._EB*AREA/DIAMETER
+               ELSEIF (PERIMTER > 0._EB) THEN
+                  AREA = DIAMETER * PERIMTER * 0.25_EB
+               ELSE
+                  AREA = DIAMETER**2
+                  PERIMTER = 4._EB*DIAMETER
                ENDIF
-               AREA = 0.25_EB*DIAMETER*PERIMETER
-            ENDIF
-         ELSEIF (AREA > 0._EB) THEN
-            IF (DIAMETER >  0._EB .AND. PERIMETER >  0._EB) THEN
-               WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR(508): Duct cannot input both PERIMETER and DIAMETER with AREA. Duct ID:',&
-                  TRIM(ID),', HVAC line number:',NN
-               CALL SHUTDOWN(MESSAGE); RETURN
-            ENDIF
-            IF (SQUARE) THEN
+            ELSEIF (PERIMETER > 0._EB) THEN
+               IF (AREA > 0._EB) THEN
+                  DIAMETER = 4._EB*AREA/PERIMETER
+               ELSE
+                  DIAMETER = 0.25_EB*PERIMETER
+                  AREA = DIAMETER**2
+               ENDIF
+            ELSE
                DIAMETER = SQRT(AREA)
                PERIMETER = 4._EB*DIAMETER
-            ELSEIF (ROUND) THEN
-               DIAMETER = SQRT(4._EB*AREA/PI)
-               PERIMETER = PI*DIAMETER
-            ELSE
-               IF (DIAMETER > 0._EB) THEN
-                  PERIMETER = 4._EB*AREA/DIAMETER
-               ELSE
-                  DIAMETER = 4._EB*AREA/PERIMETER
-               ENDIF
             ENDIF
-         ENDIF
+         ENDIF ROUNDIF
          DU%AREA_INITIAL = AREA
          DU%AREA = AREA
          DU%DIAMETER = DIAMETER
