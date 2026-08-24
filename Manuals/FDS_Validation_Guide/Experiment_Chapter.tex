@@ -2652,6 +2652,19 @@ centerline of the room, and two horizontal arrays located 8.4~cm above the floor
 \label{Restivo_Drawing}
 \end{figure}
 
+
+\section{RISE Materials}
+\label{RISE_Materials_Description}
+
+The Research Insitutes of Sweden (RISE) maintains a database of public measurement data from fire tests in various method and areas as well as from specific research projects~\cite{RISE:Fire_Database}.
+The database contains cone calorimeter experiments from 156 combinations of materials and different thicknesses.
+A total of 74 materials tested at multiple heat fluxes with with sufficient information on the materials tested are included in validation of the scaling-based pyrolysis model.
+
+\subsubsection{Modeling Notes}
+
+This database does not provide thermal properties of the materials. Thermal conductivity, specific heat capacity, and ignition temperature for these materials are specified based on data available in the literature~\cite{SFPE:Tewarson}.
+
+
 \section{Sandia Jets, Pools, and Fireballs}
 \label{Sandia_Jets_Pools_and_Fireballs_Description}
 
@@ -2892,17 +2905,17 @@ A second set of simulations is run at the same two spatial resolutions, but in t
 Comparisons of the simulations with measurements can be found in Sec.~\ref{Smyth_Reactions}.
 
 
-\section{RISE Materials}
-\label{RISE_Materials_Description}
 
-The Research Insitutes of Sweden (RISE) maintains a database of public measurement data from fire tests in various method and areas as well as from specific research projects~\cite{RISE:Fire_Database}.
-The database contains cone calorimeter experiments from 156 combinations of materials and different thicknesses.
-A total of 74 materials tested at multiple heat fluxes with with sufficient information on the materials tested are included in validation of the scaling-based pyrolysis model.
+\section{SNL Walls}
+\label{SNL_Walls_Description}
+
+Sandia National Laboratories (SNL) conducted a variety of experiments aimed at assessing hazards associated with the siting of Liquefied Natural Gas (LNG) facilities~\cite{Luketa:11078}. Per U.S. federal regulations of the Pipeline and Hazardous Materials Safety Administration (PHMSA), models must first be approved for use for such analysis. Part of the approval process involves comparison to experimental data as provided in a Model Evaluation Protocol (MEP) that includes large-scale pool fires, jet fires, and fireballs for LNG and processing fuels stored at facilities.
+
+In addition to the fire experiments, Sandia performed experiments on two types of barrier walls, one made of concrete and the other of masonry blocks. For both, a steel sheet that was offset 5~cm (2~in) from a 1.6~m (64~in) by 1.6~m by 20~cm (8~in) thick wall was heated by an external source, and surface and internal temperatures were recorded as a function of time. The concrete wall consisted of two 7.6~cm (3~in) slabs with a 5~cm (2~in) slab of insulation board sandwiched in between. The masonry wall consisted of a single layer of 41~cm (16~in) by 20~cm (8~in) by 20~cm blocks with the interior cavity filled with perlite, a lightweight, porous volcanic rock.
 
 \subsubsection{Modeling Notes}
 
-This database does not provide thermal properties of the materials. Thermal conductivity, specific heat capacity, and ignition temperature for these materials are specified based on data available in the literature~\cite{SFPE:Tewarson}.
-
+The FDS simulations are performed using the three-dimensional solid heat transfer algorithm. The components of the walls are approximated using 1.27~cm (0.5~in) grid cells, and the heat conduction calculation is carried out with 2~mm spacing. The steel shroud temperature is specified as a function of time. To speed up the simulations, the specific heat of all materials is reduced by a factor of 20 in order to reduce the time simulated by a factor of 20. 
 
 
 
