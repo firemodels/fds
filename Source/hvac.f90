@@ -289,7 +289,7 @@ DO NN=1,N_HVAC_READ
                DIAMETER = SQRT(AREA*RPI)*2
                PERIMETER = PI * DIAMETER
             ELSE
-               DIAMETER = PERIMTER * RPI
+               DIAMETER = PERIMETER * RPI
                AREA = PI * 0.25_EB * DIAMETER**2
             ENDIF               
          ELSE ROUNDIF
@@ -299,12 +299,12 @@ DO NN=1,N_HVAC_READ
             ENDIF
             IF (DIAMETER > 0._EB) THEN
                IF (AREA > 0._EB) THEN
-                  PERIMTER = 4._EB*AREA/DIAMETER
-               ELSEIF (PERIMTER > 0._EB) THEN
-                  AREA = DIAMETER * PERIMTER * 0.25_EB
+                  PERIMETER = 4._EB*AREA/DIAMETER
+               ELSEIF (PERIMETER > 0._EB) THEN
+                  AREA = DIAMETER * PERIMETER * 0.25_EB
                ELSE
                   AREA = DIAMETER**2
-                  PERIMTER = 4._EB*DIAMETER
+                  PERIMETER = 4._EB*DIAMETER
                ENDIF
             ELSEIF (PERIMETER > 0._EB) THEN
                IF (AREA > 0._EB) THEN
