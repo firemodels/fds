@@ -1,3 +1,11 @@
+&REAC ID                 = 'Reaction2',
+      FUEL               = 'WOOD',
+      FORMULA            = 'C1H1.8O0.6'
+      CO_YIELD           = 0.0080,
+      SOOT_YIELD         = 0.0059,
+      HEAT_OF_COMBUSTION = 21600,
+      AUTO_IGNITION_TEMPERATURE=450/
+
 &SURF ID='PLYWOOD',
       COLOR='RED',
       HRRPUA=1.0,
