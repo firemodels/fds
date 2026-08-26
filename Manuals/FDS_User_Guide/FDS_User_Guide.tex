@@ -3759,13 +3759,13 @@ where:
     \item \ct{REVERSE}  is a logical parameter that when \ct{T} indicates that the specified \ct{FAN_ID} blows from the second node to the first. \ct{REVERSE} has no effect on \ct{VOLUME_FLOW} or \ct{MASS_FLOW} as a duct input. If \ct{VOLUME_FLOW} or \ct{MASS_FLOW} is specified for a duct and the reverse flow direction is needed, change the sign of the input to negative.
     \item \ct{ROUGHNESS} is the absolute roughness in m of the duct that is used to compute the friction factor for the duct. If \ct{ROUGHNESS} is not set, the HVAC solver will not compute the friction factor and the wall friction will be zero - if this is the case you may want to account for wall friction losses in \ct{LOSS}. "Perfectly smooth" ducts and pipes still have wall losses and therefore setting \ct{ROUGHNESS} to zero will tell the HVAC solver to compute the minimum friction factor (which is non-zero) - this is not the same as leaving \ct{ROUGHNESS} unset.
     \item \ct{ROUND} flag indicating a round duct. The default value is \ct{T}.
-    \item \ct{SQUARE} flag indicating a square duct.
+    \item \ct{SQUARE} flag indicating a square or rectangular duct.
     \item \ct{VOLUME_FLOW} is a fixed flow rate in \unit{m^3/s} through the duct.  Only specify one of \ct{MASS_FLOW} or \ct{VOLUME_FLOW}. If you specify \ct{VOLUME_FLOW}, its value in time either using the characteristic time, \ct{TAU_VF},  to define a tanh (\ct{TAU_VF}>0) or t$^2$ ramp (\ct{TAU_VF}<0); or \ct{RAMP_ID} to specify the flow over time.  \ct{VOLUME_FLOW} cannot be controlled by a device or control function. This can, however, be cone using a constant volume flow \ct{FAN}.
     \item \ct{WAYPOINTS} is an array of coordinates in m that define the path a duct takes. Currently this only used for Smokeview visualization of the HVAC network. Up to 30 \ct{WAYPOINTS} can be defined. For example: \ct{WAYPOINTS(1,1:3)=1,1,1, WAYPOINTS(2,1:3)=2,2,2} as part of a duct input would mean the duct starts at the first node, then goes to the point (1,1,1), then to (2,2,2), and finally to the second node.
 \end{itemize}
 Note that only one of \ct{AIRCOIL_ID}, \ct{DAMPER}, or \ct{FAN_ID} should be specified for a duct.  Also note that if one of these is specified, but no device or control function is provided, then the item will be assumed to be on or open as appropriate.
 
-If \ct{ROUND} or \ct{SQUARE} is set, then only one of \ct{AREA}, \ct{DIAMETER}, or \ct{PERIMETER} should be set. Otherwise two of the three are required.
+Setting \ct{SQUARE=T} will force \ct{ROUND=F}. If \ct{ROUND=T}, then only one of \ct{AREA}, \ct{DIAMETER}, or \ct{PERIMETER} should be set. If \ct{SQUARE=T} and only one duct dimension is given, then the duct is assumed to have a square cross-section. Otherwise two of the three are required.
 
 To reduce the computational cost of the HVAC solver, a duct should be considered as any length of duct that connects two items that must be defined as nodes (i.e., a connection to the FDS domain, a filter, or a location where more than two ducts join).  That is, a duct should be considered as any portion of the HVAC system where flow can only be in one direction at given point in time (flow can reverse direction over time).  For example the top of Figure~\ref{fig:HVAC_Simplify} shows a segment of an HVAC system where flow from a tee goes through an expansion fitting, two elbows, an expansion fitting, and a straight length of duct before it terminates as a connection to the FDS domain.
 
@@ -10155,8 +10155,7 @@ The parameters for a \ct{PROF} line are listed in Table~\ref{tbl:PROF}. For a wa
 For a particle, there are two options. The first is to use \ct{INIT_ID} to reference the \ct{INIT} line used to place the particle within the domain:
 \begin{lstlisting}
     &INIT ID='my particle', XYZ=..., N_PARTICLES=1, PART_ID='...' /
-    &PROF ID='T-2', INIT_ID='my particle',
-    QUANTITY='INSIDE WALL TEMPERATURE' /
+    &PROF ID='T-2', INIT_ID='my particle', QUANTITY='INSIDE WALL TEMPERATURE' /
 \end{lstlisting}
 The second option is to use \ct{LP_TAG} to specify the particle using its unique identifying tag\footnote{Each droplet or particle has a unique integer identifier. To find it, open the case in Smokeview, load the particles, right click, ``Files/Data/Coloring,'' ``Particles,'' ``Settings,'' and click the box labeled ``Show selected particle tag.'' Then click on the desired particle.}. Once you have determined the tag, add the following line to the input file:
 \begin{lstlisting}
@@ -10165,6 +10164,8 @@ The second option is to use \ct{LP_TAG} to specify the particle using its unique
 Note that you must specify the \ct{PART_ID} so that the appropriate inner noding structure can be determined. With either option for designating a particle, do not specify \ct{XYZ} or \ct{IOR} on the \ct{PROF} line.
 
 The \ct{QUANTITY} is the physical quantity to record. Each \ct{PROF} line creates a separate file. The first number in each row is the time at which the profile is extracted. The second number is the number of ``nodes,'' $n$, which is the number of solid phase cells plus 1. The next $n$ values are the node coordinates, running from 0 at the surface to the full \ct{THICKNESS} at the end. The next $n$ numbers are the values of the \ct{QUANTITY} at the node points. The first of these values is located at the surface. If you specify \ct{CELL_CENTERED=T}, the \ct{QUANTITY} values will be recorded at $n$ interior cell centers rather than cell boundaries. The \ct{ID} is an optional input which, if provided, is used in the file header.
+
+To choose your own discrete locations for where the data is recorded, add the parameter \ct{DEPTHS} to the \ct{PROF} line followed by a list of non-negative depths (m) at which the temperatures are to be recorded. 
 
 There is a second optional format. If you specify \ct{FORMAT_INDEX=2} on the \ct{PROF} line, the resulting file will contain columns containing only the final set of node coordinates and quantity values. This is handy for displaying a steady-state temperature profile.
 
@@ -13130,6 +13131,7 @@ Keyword                   & Type              & Description                  & U
 Keyword                   & Type              & Description                  & Units      & Default   \\ \hline  \hline
 \endhead
 \ct{CELL_CENTERED}        & Logical           & Section~\ref{info:PROF}      &            & \ct{F}  \\ \hline
+\ct{DEPTHS}               & Real Array        & Section~\ref{info:PROF}      &            &       \\ \hline
 \ct{FORMAT_INDEX}         & Integer           & Section~\ref{info:PROF}      &            & 1     \\ \hline
 \ct{ID}                   & Character         & Section~\ref{info:PROF}      &            &       \\ \hline
 \ct{INIT_ID}              & Character         & Section~\ref{info:PROF}      &            &       \\ \hline
@@ -14269,11 +14271,9 @@ Keyword             & Type     & Description                      & Units       
 502 \> \ct{Invalid TYPE_ID provided ...} \> Section~\ref{info:HVAC}  \\
 503 \> \ct{Must have both DUCTs and NODEs in the input file.} \> Section~\ref{info:HVAC}  \\
 504 \> \ct{Duct has no ID ...} \> Section~\ref{info:HVAC}  \\
-505 \> \ct{Duct has no AREA, DIAMETER, or PERIMETER ...} \> Section~\ref{info:HVACduct}  \\
-506 \> \ct{Duct without AREA has no DIAMETER ...} \> Section~\ref{info:HVACduct}  \\
-507 \> \ct{If both ROUND and SQUARE are FALSE, Duct with DIAMETER must} \> Section~\ref{info:HVACduct} \\
-\> \ct{also have PERIMETER ...}   \\
-508 \> \ct{Duct cannot input both PERIMETER and DIAMETER with AREA ...} \> Section~\ref{info:HVACduct}  \\
+505 \> \ct{Duct has no AREA, DIAMETER, or PERIMETER ...}  \> Section~\ref{info:HVACduct} \\
+506 \> \ct{ROUND duct can only have one of AREA, DIAMETER, ...}  \> Section~\ref{info:HVACduct} \\
+507 \> \ct{SQUARE duct cannot have all of AREA, DIAMETER, ...} \> Section~\ref{info:HVACduct}\\ 
 509 \> \ct{Can only specify one of CTRL_ID or DEVC_ID. ...} \> Section~\ref{info:HVACduct}  \\
 510 \> \ct{Duct can only have one of damper, fan or aircoil ...} \> Section~\ref{info:HVACduct}  \\
 511 \> \ct{Duct has fan specified but no fans have been defined ...} \> Section~\ref{info:HVACduct}  \\
