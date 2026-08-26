@@ -631,6 +631,9 @@ In the experiment, the test section extended 400~mm beyond the vegetation layer.
 
 The U.S.~Federal Aviation Administration (FAA) has sponsored experiments and modeling of smoke transport within aircraft storage compartments~\cite{FAA-AR-03-49,FAA-AR-07-27}. Two types of compartments were used; one from a Boeing~707 and one from a McDonnell Douglas DC-10. The 707 compartment was 6.7~m in length, 3.2~m in width, and 1.4~m in height. The DC-10 compartment was 14~m in length, 4.4~m in width, and 1.7~m in height. The fire for all experiments was fueled by a 0.1~m by 0.1~m tray of plastic resin producing a peak HRR of 5~kW~\cite{FAA-AR-06-21}. The long walls of the compartments were barrel-shaped to conform to the shape of the aircraft fuselage. The fire was placed in different locations, and measurements of gas and ceiling temperature, heat flux, gas concentration, and smoke obscuration were made at a variety of locations, mostly near the ceiling.
 
+\subsubsection{Modeling Notes}
+
+The reaction and fuel species were derived from cone calorimeter data of the plastic resin tray. The cone data for heat release rate; mass loss rate; and production rates of CO, CO$_2$, and soot were integrated over the simulation duration of 180~s. These were used to determine the soot and CO yields and the heat of combustion. The plastic resin tray was a mixture of five plastic types. The fuel definition assumed that each plastic was present in an equal amount by mass. Generic chemical formulas for each plastic were used to create a representative chemical formula of the mixture. This formula had its carbon content reduced to account for char formation until the total carbon yield in the gas phase matched that for the cone data.
 
 \section{FAA Polymers}
 \label{FAA_Polymers_Description}
@@ -1769,7 +1772,7 @@ No.    &  Type         &  Formula        & HRR (kW)    &  Size (m$^2$) &  Openin
 \subsection{NIST Full-Scale Enclosure Experiments, 2008}
 \label{NIST_FSE_2008_Description}
 
-The NIST FSE (2008) Experiments were conducted in an ISO~9705 compartment~\cite{Lock:1}. The compartment was 2.4~m wide by 3.6~m long by 2.4~m high with a 2~m high door at one end (Fig.~\ref{NIST_FSE_2008_Drawing}). The door width varied between 0.1~m and 0.8~m. The experiments were designed to study the effects of fuel type, fuel distribution, and vent size on under-ventilated compartment fires. Twenty-seven of the thirty experiments were simulated, which included 7 different fuels, 3 fuel sources, and 4 ventilation openings. The three experiments not simulated had several malfunctions of equipment such that the data could not be trusted.
+The NIST FSE (2008) Experiments were conducted in an ISO~9705 compartment~\cite{Lock:1}. The compartment was 2.4~m wide by 3.6~m long by 2.4~m high with a 2~m high door at one end (Fig.~\ref{NIST_FSE_2008_Drawing}). The door width varied between 0.1~m and 0.8~m. The experiments were designed to study the effects of fuel type, fuel distribution, and vent size on under-ventilated compartment fires. Twenty-seven of the thirty experiments were simulated, which included 7 different fuels, 3 fuel sources, and 4 ventilation openings. The five experiments not simulated had several malfunctions of equipment such that the data could not be trusted.
 
 Peak heat release rates ranged from approximately 100~kW to 2.5~MW. Table~\ref{tab:NIST_FSE_Exp} provides a summary of the experiments. Species concentrations and temperature measurements were made at the front and rear of the compartment.
 
@@ -1789,8 +1792,6 @@ Peak heat release rates ranged from approximately 100~kW to 2.5~MW. Table~\ref{t
 Test          &  Fuel         &  Fuel             &  Fuel      &  No.~of   &  Burner       &  Doorway          \\
 Name          &  Type         &  Formula          &  Mass (kg) &  Burners  &  Size (m$^2$) &  Opening (cm)     \\ \hline \hline
 ISONG3        &  Natural Gas  &  CH$_4$           &            &  1        &  1.0          &  80               \\ \hline
-ISOHept4      &  Heptane      &  C$_7$H$_{16}$    &  Pool Fed  &  1        &  1.0          &  80               \\ \hline
-ISOHept5      &  Heptane      &  C$_7$H$_{16}$    &  Pool Fed  &  1        &  1.0          &  40               \\ \hline
 ISOHept8      &  Heptane      &  C$_7$H$_{16}$    &  10        &  1        &  0.5          &  20               \\ \hline
 ISOHept9      &  Heptane      &  C$_7$H$_{16}$    &  20        &  1        &  0.5          &  20               \\ \hline
 ISONylon10    &  Nylon        &  C$_6$H$_{11}$NO  &  10        &  1        &  0.5          &  20               \\ \hline
@@ -2651,6 +2652,19 @@ centerline of the room, and two horizontal arrays located 8.4~cm above the floor
 \label{Restivo_Drawing}
 \end{figure}
 
+
+\section{RISE Materials}
+\label{RISE_Materials_Description}
+
+The Research Insitutes of Sweden (RISE) maintains a database of public measurement data from fire tests in various method and areas as well as from specific research projects~\cite{RISE:Fire_Database}.
+The database contains cone calorimeter experiments from 156 combinations of materials and different thicknesses.
+A total of 74 materials tested at multiple heat fluxes with with sufficient information on the materials tested are included in validation of the scaling-based pyrolysis model.
+
+\subsubsection{Modeling Notes}
+
+This database does not provide thermal properties of the materials. Thermal conductivity, specific heat capacity, and ignition temperature for these materials are specified based on data available in the literature~\cite{SFPE:Tewarson}.
+
+
 \section{Sandia Jets, Pools, and Fireballs}
 \label{Sandia_Jets_Pools_and_Fireballs_Description}
 
@@ -2891,17 +2905,17 @@ A second set of simulations is run at the same two spatial resolutions, but in t
 Comparisons of the simulations with measurements can be found in Sec.~\ref{Smyth_Reactions}.
 
 
-\section{RISE Materials}
-\label{RISE_Materials_Description}
 
-The Research Insitutes of Sweden (RISE) maintains a database of public measurement data from fire tests in various method and areas as well as from specific research projects~\cite{RISE:Fire_Database}.
-The database contains cone calorimeter experiments from 156 combinations of materials and different thicknesses.
-A total of 74 materials tested at multiple heat fluxes with with sufficient information on the materials tested are included in validation of the scaling-based pyrolysis model.
+\section{SNL Walls}
+\label{SNL_Walls_Description}
+
+Sandia National Laboratories (SNL) conducted a variety of experiments aimed at assessing hazards associated with the siting of Liquefied Natural Gas (LNG) facilities~\cite{Luketa:11078}. Per U.S. federal regulations of the Pipeline and Hazardous Materials Safety Administration (PHMSA), models must first be approved for use for such analysis. Part of the approval process involves comparison to experimental data as provided in a Model Evaluation Protocol (MEP) that includes large-scale pool fires, jet fires, and fireballs for LNG and processing fuels stored at facilities.
+
+In addition to the fire experiments, Sandia performed experiments on two types of barrier walls, one made of concrete and the other of masonry blocks. For both, a steel sheet that was offset 5~cm (2~in) from a 1.6~m (64~in) by 1.6~m by 20~cm (8~in) thick wall was heated by an external source, and surface and internal temperatures were recorded as a function of time. The concrete wall consisted of two 7.6~cm (3~in) slabs with a 5~cm (2~in) slab of insulation board sandwiched in between. The masonry wall consisted of a single layer of 41~cm (16~in) by 20~cm (8~in) by 20~cm blocks with the interior cavity filled with perlite, a lightweight, porous volcanic rock.
 
 \subsubsection{Modeling Notes}
 
-This database does not provide thermal properties of the materials. Thermal conductivity, specific heat capacity, and ignition temperature for these materials are specified based on data available in the literature~\cite{SFPE:Tewarson}.
-
+The FDS simulations are performed using the three-dimensional solid heat transfer algorithm. The components of the walls are approximated using 1.27~cm (0.5~in) grid cells, and the heat conduction calculation is carried out with 2~mm spacing. The steel shroud temperature is specified as a function of time. To speed up the simulations, the specific heat of all materials is reduced by a factor of 20 in order to reduce the time simulated by a factor of 20. 
 
 
 

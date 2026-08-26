@@ -39,15 +39,18 @@
       EMISSIVITY    =  0.8
       CONDUCTIVITY  =  0.1 /
 
-&SPEC ID=''Mixed Polymers',
-      C = 1.
-      H = 12.2/
+&SPEC ID='Mixed Polymers',
+      C = 1.0
+      H = 3.8
+      O = 0.3
+      N = 0.4,
+      SPECIFIC_HEAT=1.5/
 
 &REAC FUEL ='Mixed Polymers',
       RADIATIVE_FRACTION=0.55,
-      HEAT_OF_COMBUSTION = 21000.
-      CO_YIELD   = 0.065
-      SOOT_YIELD = 0.125 /
+      HEAT_OF_COMBUSTION = 18500.
+      CO_YIELD   = 0.095
+      SOOT_YIELD = 0.126 /
 
 &SURF ID='FIRE', MLRPUA=0.016, RAMP_Q='leakmlr', COLOR='YELLOW' /
 &RAMP ID='leakmlr', T= 0., F= 0/

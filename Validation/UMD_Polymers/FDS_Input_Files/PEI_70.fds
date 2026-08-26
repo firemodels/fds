@@ -15,7 +15,7 @@
       E(1) = 0
       EMISSIVITY=0.95
       DENSITY= 1285.
-      SPEC_ID='GAS'
+      SPEC_ID='METHANE'
       NU_SPEC= 0.000001
       MATL_ID='PEI_melt'
       NU_MATL=0.999999
@@ -30,7 +30,7 @@
       E(1) = 4.65E5
       EMISSIVITY=0.95
       DENSITY= 1285.
-      SPEC_ID='GAS'
+      SPEC_ID='METHANE'
       NU_SPEC= 0.35
       MATL_ID='PEI_int'
       NU_MATL=0.65
@@ -45,7 +45,7 @@
       E(1) = 8.8E4
       EMISSIVITY=0.95
       DENSITY= 80.
-      SPEC_ID='GAS'
+      SPEC_ID='METHANE'
       NU_SPEC= 0.23
       MATL_ID='PEI_char'
       NU_MATL=0.77

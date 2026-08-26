@@ -5,10 +5,7 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
-$QFDS $DEBUG -p 9 $QUEUE -d $INDIR setcom_0p8.fds
-$QFDS $DEBUG -p 9 $QUEUE -d $INDIR setcom_1p8.fds
-$QFDS $DEBUG -p 9 $QUEUE -d $INDIR setcom_3p7.fds
-$QFDS $DEBUG -p 9 $QUEUE -d $INDIR setcom_4p2.fds
-$QFDS $DEBUG -p 9 $QUEUE -d $INDIR setcom_5p2.fds
+$QFDS $DEBUG $QUEUE -p 72 -d $INDIR concrete_wall.fds
+$QFDS $DEBUG $QUEUE -p 72 -d $INDIR masonry_wall.fds
 
 echo FDS cases submitted

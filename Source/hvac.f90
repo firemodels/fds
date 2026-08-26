@@ -268,51 +268,56 @@ DO NN=1,N_HVAC_READ
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
          IF (DIAMETER < 0._EB .AND. AREA < 0._EB .AND. PERIMETER < 0._EB) THEN
-            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR(505): Duct has no AREA, DIAMETER, or PERIMTER. Duct ID:',TRIM(ID),&
+            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR(505): Duct has no AREA, DIAMETER, or PERIMEER. Duct ID:',TRIM(ID),&
                                         ', HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
-         IF (AREA < 0._EB) THEN
-            IF (DIAMETER < 0._EB) THEN
-               WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR(506): Duct without AREA has no DIAMETER. Duct ID:',TRIM(ID),&
-                                           ', HVAC line number:',NN
+         IF (SQUARE) ROUND = .FALSE.
+         IF (.NOT. ROUND .AND. .NOT. SQUARE) ROUND = .TRUE.
+         ROUNDIF: IF (ROUND) THEN
+            IF ( (AREA > 0._EB .AND. (DIAMETER > 0._EB .OR. PERIMETER > 0._EB)) .OR. &
+                 (DIAMETER > 0._EB .AND. (AREA > 0._EB .OR. PERIMETER > 0._EB)) .OR. &
+                 (PERIMETER > 0._EB .AND. (DIAMETER > 0._EB .OR. AREA > 0._EB))) THEN
+               WRITE(MESSAGE,'(A,A,A,A,I5)') 'ERROR(506): ROUND duct can only have one of AREA, DIAMETER, or PERIMITER set.',&
+                  ' Duct ID:',TRIM(ID),', HVAC line number:',NN
                CALL SHUTDOWN(MESSAGE); RETURN
             ENDIF
-            IF (SQUARE) THEN
-               AREA = DIAMETER**2
-               PERIMETER = 4._EB*DIAMETER
-            ELSEIF (ROUND) THEN
-               AREA = 0.25_EB*PI*DIAMETER**2
-               PERIMETER = PI*DIAMETER
+            IF (DIAMETER > 0._EB) THEN
+               AREA = PI * 0.25_EB * DIAMETER**2
+               PERIMETER = PI * DIAMETER
+            ELSEIF (AREA > 0._EB) THEN
+               DIAMETER = SQRT(AREA*RPI)*2
+               PERIMETER = PI * DIAMETER
             ELSE
-               IF (PERIMETER < 0._EB) THEN
-                  WRITE(MESSAGE,'(A,A,A,I5)') &
-                     'ERROR(507): If both ROUND and SQUARE are FALSE, Duct with DIAMETER must also have PERIMETER. Duct ID:',&
-                     TRIM(ID),', HVAC line number:',NN
-                  CALL SHUTDOWN(MESSAGE); RETURN
+               DIAMETER = PERIMETER * RPI
+               AREA = PI * 0.25_EB * DIAMETER**2
+            ENDIF               
+         ELSE ROUNDIF
+            IF (DIAMETER > 0._EB .AND. AREA > 0._EB .AND. PERIMETER > 0._EB) THEN
+               WRITE(MESSAGE,'(A,A,A,A,I5)') 'ERROR(507): SQUARE duct cannot have all of AREA, DIAMETER, or PERIMITER set.',&
+                  ' Duct ID:',TRIM(ID),', HVAC line number:',NN
+            ENDIF
+            IF (DIAMETER > 0._EB) THEN
+               IF (AREA > 0._EB) THEN
+                  PERIMETER = 4._EB*AREA/DIAMETER
+               ELSEIF (PERIMETER > 0._EB) THEN
+                  AREA = DIAMETER * PERIMETER * 0.25_EB
+               ELSE
+                  AREA = DIAMETER**2
+                  PERIMETER = 4._EB*DIAMETER
                ENDIF
-               AREA = 0.25_EB*DIAMETER*PERIMETER
-            ENDIF
-         ELSEIF (AREA > 0._EB) THEN
-            IF (DIAMETER >  0._EB .AND. PERIMETER >  0._EB) THEN
-               WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR(508): Duct cannot input both PERIMETER and DIAMETER with AREA. Duct ID:',&
-                  TRIM(ID),', HVAC line number:',NN
-               CALL SHUTDOWN(MESSAGE); RETURN
-            ENDIF
-            IF (SQUARE) THEN
+            ELSEIF (PERIMETER > 0._EB) THEN
+               IF (AREA > 0._EB) THEN
+                  DIAMETER = 4._EB*AREA/PERIMETER
+               ELSE
+                  DIAMETER = 0.25_EB*PERIMETER
+                  AREA = DIAMETER**2
+               ENDIF
+            ELSE
                DIAMETER = SQRT(AREA)
                PERIMETER = 4._EB*DIAMETER
-            ELSEIF (ROUND) THEN
-               DIAMETER = SQRT(4._EB*AREA/PI)
-               PERIMETER = PI*DIAMETER
-            ELSE
-               IF (DIAMETER > 0._EB) THEN
-                  PERIMETER = 4._EB*AREA/DIAMETER
-               ELSE
-                  DIAMETER = 4._EB*AREA/PERIMETER
-               ENDIF
             ENDIF
-         ENDIF
+         ENDIF ROUNDIF
          DU%AREA_INITIAL = AREA
          DU%AREA = AREA
          DU%DIAMETER = DIAMETER
@@ -781,6 +786,7 @@ DUCT_ID      = 'null'
 FAN_ID       = 'null'
 FIXED_Q      = -1.E10_EB
 FILTER_ID    = 'null'
+ID           = 'null'
 GEOM         = .FALSE.
 GEOM2        = .FALSE.
 LEAK_ENTHALPY = .FALSE.
@@ -3996,7 +4002,7 @@ ENDDO CHANGELOOP
 DEALLOCATE(N_LOSS)
 
 IF (.NOT. ALL(LOSS_D) .OR. .NOT. ALL(LOSS_N)) THEN
-   WRITE(MESSAGE,'(A,I5,A,I5)') 'ERROR(556): Problem with HVAC network. Insufficient LOSS definitions for DUCTs and NODEs'
+   WRITE(MESSAGE,'(A,I5,A,I5)') 'ERROR(555): Problem with HVAC network. Insufficient LOSS definitions for DUCTs and NODEs'
    CALL SHUTDOWN(MESSAGE); RETURN
 ENDIF
 
@@ -4130,9 +4136,9 @@ SUBROUTINE FIND_DUCTRUNS(CHANGE)
 USE PHYSICAL_FUNCTIONS, ONLY: GET_ENTHALPY
 USE GLOBAL_CONSTANTS, ONLY: N_DUCTS,N_DUCTNODES,N_TRACKED_SPECIES,N_DUCTRUNS,P_INF,N_DUCTRUNS,HVAC_QFAN,TMPA,RHOA,OLD
 LOGICAL, INTENT(IN) :: CHANGE
-INTEGER :: NN,NR,NF,NN3,ND,DUCT_COUNTER(N_DUCTS),NODE_COUNTER(N_DUCTNODES),&
-           DR_DUCTS(N_DUCTS),DR_DUCTNODES(N_DUCTS),DUCTRUN_MAP(N_DUCTS),DR_INDEX
-LOGICAL :: NODE_CHECKED(N_DUCTNODES),NODE_CONNECTED(N_DUCTNODES),DUCT_FOUND,FAN_PRESENT(N_DUCTS),MT_PRESENT(N_DUCTS)
+INTEGER :: NN,NR,NF,NN3,ND,DUCT_COUNTER(N_DUCTS),NODE_COUNTER(N_DUCTNODES),INDEX,&
+           DR_DUCTS(N_DUCTS),DR_DUCTNODES(N_DUCTS),DUCTRUN_MAP(N_DUCTS),DR_INDEX,DR_COUNTER(N_DUCTNODES)
+LOGICAL :: NODE_CHECKED(N_DUCTNODES),MT_PRESENT(N_DUCTS),CHANGE2
 REAL(EB) :: C0,ZZ_GET(1:N_TRACKED_SPECIES)
 TYPE(DUCT_TYPE), POINTER :: DU
 TYPE(DUCTNODE_TYPE), POINTER :: DN
@@ -4146,78 +4152,72 @@ C0 = C0/TMPA
 
 DUCT_COUNTER=0
 NODE_COUNTER=0
-FAN_PRESENT=.FALSE.
-NODE_CONNECTED=.FALSE.
+DR_COUNTER=0
 MT_PRESENT = .FALSE.
 NODE_CHECKED=.FALSE.
 
 DUCT%QFAN_INDEX = -1
 
-! Set leakage paths as already checked, they cannot have a fan.
+! Set leakage paths as already checked, they cannot have a fan or N_CELLS>0.
 DO NN = 1, N_DUCTNODES
    DN=>DUCTNODE(NN)
-   IF (DN%LEAKAGE .OR. DUCT(DN%DUCT_INDEX(1))%LOCALIZED_LEAKAGE) NODE_CHECKED(NN) = .TRUE.
+   IF (DN%LEAKAGE .OR. DUCT(DN%DUCT_INDEX(1))%LOCALIZED_LEAKAGE) THEN
+      NODE_CHECKED(NN) = .TRUE.
+   ELSE
+      NODE_COUNTER(NN) = NN
+   ENDIF
 END DO
 
-N_DUCTRUNS = 1
-NN = 1
+CHANGE2=.TRUE.
 
 ! Finds all connected ducts and nodes and hence number of ductruns
-L1:DO WHILE (NN <= N_DUCTNODES)
-   IF (NODE_CHECKED(NN)) THEN
-      NN = NN + 1
-      CYCLE L1
-   END IF
-   DN=>DUCTNODE(NN)
-   DUCT_FOUND = .FALSE.
-   DL: DO ND = 1, DN%N_DUCTS
-      DU=>DUCT(DN%DUCT_INDEX(ND))
-      IF (DU%AREA < TWENTY_EPSILON_EB) CYCLE DL
-      DUCT_FOUND = .TRUE.
-      DUCT_COUNTER(DN%DUCT_INDEX(ND)) = N_DUCTRUNS
-      IF (DU%N_CELLS > 0) MT_PRESENT(N_DUCTRUNS)=.TRUE.
-      IF (DU%NODE_INDEX(1)==NN) THEN
-         NODE_COUNTER(DU%NODE_INDEX(2)) = N_DUCTRUNS
-         NODE_CONNECTED(DU%NODE_INDEX(2)) = .TRUE.
-         IF (DUCTNODE(DU%NODE_INDEX(2))%N_DUCTS==1) NODE_CHECKED(DU%NODE_INDEX(2)) = .TRUE.
-      ELSE
-         NODE_COUNTER(DU%NODE_INDEX(1)) = N_DUCTRUNS
-         NODE_CONNECTED(DU%NODE_INDEX(1)) = .TRUE.
-         IF (DUCTNODE(DU%NODE_INDEX(1))%N_DUCTS==1) NODE_CHECKED(DU%NODE_INDEX(1)) = .TRUE.
-      ENDIF
-      IF (HVAC_QFAN .AND. DU%FAN_INDEX > 0) THEN
-         IF (FAN(DU%FAN_INDEX)%FAN_TYPE>1) FAN_PRESENT(N_DUCTRUNS)=.TRUE.
-      ENDIF
-   END DO DL
+LC: DO WHILE (CHANGE2)
+   CHANGE2 = .FALSE.
+   CHANGE2 = .FALSE.
+   NL1: DO NN=1,N_DUCTNODES
+      DN => DUCTNODE(NN)
+      IF (NODE_CHECKED(NN)) CYCLE NL1
+      DL1: DO ND=1,DN%N_DUCTS
+         INDEX = DN%DUCT_INDEX(ND)
+         DU => DUCT(INDEX)
+         IF (DU%AREA < TWENTY_EPSILON_EB) CYCLE DL1         
+         IF (DUCT_COUNTER(INDEX)==0) THEN
+            DUCT_COUNTER(INDEX) = NODE_COUNTER(NN)
+            CHANGE2 = .TRUE.
+         ELSE
+            IF (DUCT_COUNTER(INDEX) > NODE_COUNTER(NN)) THEN
+               DUCT_COUNTER(INDEX) = NODE_COUNTER(NN)
+               CHANGE2 = .TRUE.
+            ELSEIF (DUCT_COUNTER(INDEX) < NODE_COUNTER(NN)) THEN
+               NODE_COUNTER(NN) = DUCT_COUNTER(INDEX)
+               CHANGE2 = .TRUE.
+            ENDIF
+         ENDIF
+      ENDDO DL1
+   ENDDO NL1
+ENDDO LC
 
-   NODE_CHECKED(NN) = .TRUE.
+! Count ductruns
 
-   IF (DUCT_FOUND) THEN
-      NODE_COUNTER(NN) = N_DUCTRUNS
-      NODE_CONNECTED(NN) = .TRUE.
-   ELSE
-      ! If no open ducts attached to the node, it doesn't belong to a duct run.
-      NN = NN + 1
-      CYCLE L1
-   ENDIF
-
-   IF (ALL(NODE_CHECKED)) EXIT L1
-   L2:DO NN3 = 1, N_DUCTNODES
-      IF (NODE_CHECKED(NN3)) THEN
-         CYCLE L2
-      ELSE IF ((.NOT. NODE_CHECKED(NN3)) .AND. NODE_CONNECTED(NN3)) THEN
-         ! If node attached to current node hasn't been checked yet, set the active node to that node
-         NN = NN3
-         EXIT L2
-      ELSE IF (NN3 == N_DUCTNODES) THEN
-         ! If there are no nodes part of the current ductrun that haven't been checked, up the ductrun and move to first unchecked
+N_DUCTRUNS = 0
+DO NN=1,N_DUCTNODES
+   IF (NODE_COUNTER(NN) > 0) THEN
+      IF (DR_COUNTER(NODE_COUNTER(NN))==0) THEN
          N_DUCTRUNS = N_DUCTRUNS + 1
-         NODE_CONNECTED = .FALSE.
-         NN = FINDLOC(NODE_CHECKED,.FALSE.,1)
-         EXIT L2
-      END IF
-   END DO L2
-END DO L1
+         DR_COUNTER(NODE_COUNTER(NN)) = N_DUCTRUNS
+      ENDIF
+   ENDIF
+ENDDO
+
+! Renumber runs
+DO NN=1,N_DUCTNODES
+   IF (NODE_COUNTER(NN) > 0) NODE_COUNTER(NN) = DR_COUNTER(NODE_COUNTER(NN))
+ENDDO
+
+DO ND=1,N_DUCTS
+   IF (DUCT_COUNTER(ND) > 0) DUCT_COUNTER(ND) = DR_COUNTER(DUCT_COUNTER(ND))
+   IF (DUCT(ND)%N_CELLS > 0) MT_PRESENT(DUCT_COUNTER(ND))=.TRUE.
+ENDDO
 
 DR_DUCTS = 0
 DR_DUCTNODES = 0
@@ -4225,14 +4225,12 @@ DR_DUCTNODES = 0
 ! Sums up number of ducts and ductnodes for DUCTRUN arrays.
 DO ND = 1, N_DUCTS
    IF (DUCT_COUNTER(ND)==0) CYCLE
-   DR_INDEX =DUCT_COUNTER(ND)
-   IF (DR_INDEX>0) DR_DUCTS(DR_INDEX) = DR_DUCTS(DR_INDEX) + 1
+   DR_DUCTS(DUCT_COUNTER(ND)) = DR_DUCTS(DUCT_COUNTER(ND)) + 1
 ENDDO
 
 DO NN = 1, N_DUCTNODES
    IF (NODE_COUNTER(NN)==0) CYCLE
-   DR_INDEX =NODE_COUNTER(NN)
-   IF (DR_INDEX>0) DR_DUCTNODES(DR_INDEX) = DR_DUCTNODES(DR_INDEX) + 1
+   DR_DUCTNODES(NODE_COUNTER(NN)) = DR_DUCTNODES(NODE_COUNTER(NN)) + 1
 ENDDO
 
 DUCTRUN_MAP = 0
@@ -4363,6 +4361,15 @@ DO NR = 1, N_DUCTRUNS
    ENDIF QFAN_IF
 ENDDO
 
+
+DO ND=1,N_DUCTS
+   DU => DUCT(ND)
+ENDDO
+
+DO NN=1,N_DUCTNODES
+   DN => DUCTNODE(NN)
+ENDDO
+
 DO NR=1,N_DUCTRUNS
    IF (.NOT. MT_PRESENT(NR)) CYCLE
    DO ND=1,DUCTRUN(NR)%N_DUCTS
@@ -4374,6 +4381,7 @@ DO NR=1,N_DUCTRUNS
       ENDIF
    ENDDO
 ENDDO
+
 
 END SUBROUTINE FIND_DUCTRUNS
 
