@@ -2820,6 +2820,15 @@ END SUBROUTINE DUMMY_VENTS
 ! Create EXTERIOR_PATCHes with which Smokeview colors, textures, or contours exterior mesh boundaries.
 SUBROUTINE ADD_EXTERIOR_VENTS
 INTEGER :: FACE_INDEX  ! NM is host-associated from WRITE_SMOKEVIEW_FILE so DUMMY_VENTS/REALLOCATE_PATCH see the current mesh
+! Create EXTERIOR_PATCHes with which Smokeview colors, textures, or contours exterior mesh boundaries.
+! We want to avoid drawing VENTs on exterior surfaces such that the bit planes overlap. Thus, some VENTs are to be drawn 
+! slightly offset from the plane of the surface on which they are attached. 
+! The exterior surface of the domain are covered with EXTERIOR_PATCHES or "dummy" vents because they are not explicitly 
+! specified in the input file, but Smokeview needs to draw them as such.
+! VENT_INDICES provides a code for each exterior cell. -1 means that nothing is to be drawn there. 0 means the default surface
+! type. A positive number indicates the index of the VENT that is to be drawn flush with the wall, assuming that there is no
+! possibility of bit plane overlap.
+
 
    MESH_LOOP: DO NM=1,NMESHES
 
@@ -2828,6 +2837,45 @@ INTEGER :: FACE_INDEX  ! NM is host-associated from WRITE_SMOKEVIEW_FILE so DUMM
 
       ALLOCATE(M%EXTERIOR_PATCH(10)) ; M%N_EXTERIOR_PATCH = 0 ! The size of EXTERIOR_PATCH will expand if need be.
       ALLOCATE(VENT_INDICES(MAX(M%IBAR,M%JBAR),MAX(M%JBAR,M%KBAR),6)) ; VENT_INDICES = 0
+
+   
+      ! Look for OBSTructions that are flush with an exterior boundary of the domain. Set VENT_INDICES=-1 there.
+
+      OBST_LOOP: DO N=1,M%N_OBST
+
+         OB=>M%OBSTRUCTION(N)
+
+         FACE_INDEX = 0
+         IF (OB%I1==0      .AND. OB%I2==0     ) FACE_INDEX = 1
+         IF (OB%I1==M%IBAR .AND. OB%I2==M%IBAR) FACE_INDEX = 2
+         IF (OB%J1==0      .AND. OB%J2==0     ) FACE_INDEX = 3
+         IF (OB%J1==M%JBAR .AND. OB%J2==M%JBAR) FACE_INDEX = 4
+         IF (OB%K1==0      .AND. OB%K2==0     ) FACE_INDEX = 5
+         IF (OB%K1==M%KBAR .AND. OB%K2==M%KBAR) FACE_INDEX = 6
+
+         SELECT CASE(FACE_INDEX)  ! Get vent cell indices
+            CASE(0)
+               CYCLE OBST_LOOP
+            CASE(1:2)
+               HI1 = MAX(1,OB%J1+1)
+               HI2 = MIN(M%JBAR,OB%J2)
+               VI1 = MAX(1,OB%K1+1)
+               VI2 = MIN(M%KBAR,OB%K2)
+            CASE(3:4)
+               HI1 = MAX(1,OB%I1+1)
+               HI2 = MIN(M%IBAR,OB%I2)
+               VI1 = MAX(1,OB%K1+1)
+               VI2 = MIN(M%KBAR,OB%K2)
+            CASE(5:6)
+               HI1 = MAX(1,OB%I1+1)
+               HI2 = MIN(M%IBAR,OB%I2)
+               VI1 = MAX(1,OB%J1+1)
+               VI2 = MIN(M%JBAR,OB%J2)
+         END SELECT
+
+         VENT_INDICES(HI1:HI2,VI1:VI2,FACE_INDEX) = -1
+
+      ENDDO OBST_LOOP
 
       VENT_LOOP: DO N=1,M%N_VENT
 
@@ -2868,14 +2916,16 @@ INTEGER :: FACE_INDEX  ! NM is host-associated from WRITE_SMOKEVIEW_FILE so DUMM
              VT%BOUNDARY_TYPE==PERIODIC_BOUNDARY .OR. &
              VT%TYPE_INDICATOR==2) THEN  ! Render this vent invisible in Smokeview
             WHERE (VENT_INDICES(HI1:HI2,VI1:VI2,FACE_INDEX)==0) VENT_INDICES(HI1:HI2,VI1:VI2,FACE_INDEX) = -1
-         ELSE  ! Tag user-specified vents
-            WHERE (VENT_INDICES(HI1:HI2,VI1:VI2,FACE_INDEX)==0) VENT_INDICES(HI1:HI2,VI1:VI2,FACE_INDEX) = N
-            IF (.NOT.VT%DRAW) THEN  ! a dummy vent will be created and drawn rather than the actual vent.
-               VT%COLOR_INDICATOR =  8
-               VT%TYPE_INDICATOR  = -2
-               VT%TRANSPARENCY    =  0._EB
-            ENDIF
+
+         ELSEIF (ALL(VENT_INDICES(HI1:HI2,VI1:VI2,FACE_INDEX)==0)) THEN  ! Draw a patch exactly at the exterior boundary surface
+
+            VENT_INDICES(HI1:HI2,VI1:VI2,FACE_INDEX) = N
+            VT%COLOR_INDICATOR =  8  ! These three parameters ensure that the original vent will not be drawn as an offset plane.
+            VT%TYPE_INDICATOR  = -2
+            VT%TRANSPARENCY    =  0._EB
+
          ENDIF
+         
 
       ENDDO VENT_LOOP
 
@@ -2888,15 +2938,9 @@ INTEGER :: FACE_INDEX  ! NM is host-associated from WRITE_SMOKEVIEW_FILE so DUMM
             XX = M%X(0) - 0.001_EB*M%DX(0)
             CALL SEARCH_OTHER_MESHES(XX,YY,ZZ,NOM,IIO,JJO,KKO)
             IF (NOM>0 .AND. VENT_INDICES(J,K,1)<1) VENT_INDICES(J,K,1)=-1
-            IF (ALLOCATED(M%WALL)) THEN
-               IF (M%WALL(M%CELL(M%CELL_INDEX(1,J,K))%WALL_INDEX(-1))%OBST_INDEX>0) VENT_INDICES(J,K,1)=-1
-            ENDIF
             XX = M%X(M%IBAR) + 0.001_EB*M%DX(M%IBAR)
             CALL SEARCH_OTHER_MESHES(XX,YY,ZZ,NOM,IIO,JJO,KKO)
             IF (NOM>0 .AND. VENT_INDICES(J,K,2)<1) VENT_INDICES(J,K,2)=-1
-            IF (ALLOCATED(M%WALL)) THEN
-               IF (M%WALL(M%CELL(M%CELL_INDEX(M%IBAR,J,K))%WALL_INDEX(1))%OBST_INDEX>0) VENT_INDICES(J,K,2)=-1
-            ENDIF
          ENDDO
       ENDDO
 
@@ -2907,15 +2951,9 @@ INTEGER :: FACE_INDEX  ! NM is host-associated from WRITE_SMOKEVIEW_FILE so DUMM
             YY = M%Y(0) - 0.001_EB*M%DY(0)
             CALL SEARCH_OTHER_MESHES(XX,YY,ZZ,NOM,IIO,JJO,KKO)
             IF (NOM>0 .AND. VENT_INDICES(I,K,3)<1) VENT_INDICES(I,K,3)=-1
-            IF (ALLOCATED(M%WALL)) THEN
-               IF (M%WALL(M%CELL(M%CELL_INDEX(I,1,K))%WALL_INDEX(-2))%OBST_INDEX>0) VENT_INDICES(I,K,3)=-1
-            ENDIF
             YY = M%Y(M%JBAR) + 0.001_EB*M%DY(M%JBAR)
             CALL SEARCH_OTHER_MESHES(XX,YY,ZZ,NOM,IIO,JJO,KKO)
             IF (NOM>0 .AND. VENT_INDICES(I,K,4)<1) VENT_INDICES(I,K,4)=-1
-            IF (ALLOCATED(M%WALL)) THEN
-               IF (M%WALL(M%CELL(M%CELL_INDEX(I,M%JBAR,K))%WALL_INDEX(2))%OBST_INDEX>0) VENT_INDICES(I,K,4)=-1
-            ENDIF
          ENDDO
       ENDDO
 
@@ -2926,15 +2964,9 @@ INTEGER :: FACE_INDEX  ! NM is host-associated from WRITE_SMOKEVIEW_FILE so DUMM
             ZZ = M%Z(0) - 0.001_EB*M%DZ(0)
             CALL SEARCH_OTHER_MESHES(XX,YY,ZZ,NOM,IIO,JJO,KKO)
             IF (NOM>0 .AND. VENT_INDICES(I,J,5)<1) VENT_INDICES(I,J,5)=-1
-            IF (ALLOCATED(M%WALL)) THEN
-               IF (M%WALL(M%CELL(M%CELL_INDEX(I,J,1))%WALL_INDEX(-3))%OBST_INDEX>0) VENT_INDICES(I,J,5)=-1
-            ENDIF
             ZZ = M%Z(M%KBAR) + 0.001_EB*M%DZ(M%KBAR)
             CALL SEARCH_OTHER_MESHES(XX,YY,ZZ,NOM,IIO,JJO,KKO)
             IF (NOM>0 .AND. VENT_INDICES(I,J,6)<1) VENT_INDICES(I,J,6)=-1
-            IF (ALLOCATED(M%WALL)) THEN
-               IF (M%WALL(M%CELL(M%CELL_INDEX(I,J,M%KBAR))%WALL_INDEX(3))%OBST_INDEX>0) VENT_INDICES(I,J,6)=-1
-            ENDIF
          ENDDO
       ENDDO
 
