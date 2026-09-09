@@ -170,6 +170,7 @@ INTEGER :: CHAR_INDEX=0                    !< Index for MATL CHAR
 
 INTEGER :: STOP_STATUS=NO_STOP             !< Indicator of whether and why to stop the job
 INTEGER :: INPUT_FILE_LINE_NUMBER=0        !< Indicator of what line in the input file is being read
+INTEGER :: SMOKE3D_VERSION=1               !< Indicator of the format of the Smoke3d output files
 
 INTEGER :: RND_SEED=0                      !< User RANDOM_SEED
 
