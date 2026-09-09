@@ -38,7 +38,7 @@
       E(1) = 2.35E4
       EMISSIVITY=0.7
       DENSITY=1000.
-      SPEC_ID='CB GAS'
+      SPEC_ID='METHANE'
       NU_SPEC=1.0
       CONDUCTIVITY = 0.1
       SPECIFIC_HEAT = 4.19
@@ -50,7 +50,7 @@
       E(1) = 1.30E5
       EMISSIVITY=0.7
       DENSITY=520.
-      SPEC_ID='CB GAS'
+      SPEC_ID='METHANE'
       NU_SPEC=0.1
       MATL_ID='LB int'
       NU_MATL=0.9
@@ -65,7 +65,7 @@
       EMISSIVITY=0.775
       HEAT_OF_REACTION=126.
       DENSITY=468.
-      SPEC_ID='CB GAS'
+      SPEC_ID='METHANE'
       NU_SPEC=0.63
       MATL_ID='LB char1'
       NU_MATL=0.37
@@ -78,7 +78,7 @@
       E(1) = 1.70E4
       EMISSIVITY=0.85
       DENSITY=170.
-      SPEC_ID='CB GAS'
+      SPEC_ID='METHANE'
       NU_SPEC=0.41
       MATL_ID='LB char2'
       NU_MATL=0.59
@@ -98,7 +98,7 @@
       E(1) = 1.30E5
       EMISSIVITY=0.7
       DENSITY=49.
-      SPEC_ID='CB GAS'
+      SPEC_ID='METHANE'
       NU_SPEC=0.1
       MATL_ID='CFL int'
       NU_MATL=0.9
@@ -112,7 +112,7 @@
       E(1) = 1.60E5
       EMISSIVITY=0.775
       DENSITY=44.
-      SPEC_ID='CB GAS'
+      SPEC_ID='METHANE'
       NU_SPEC=0.63
       MATL_ID='CFL char1'
       NU_MATL=0.37
@@ -126,7 +126,7 @@
       E(1) = 1.70E4
       EMISSIVITY=0.85
       DENSITY=16.
-      SPEC_ID='CB GAS'
+      SPEC_ID='METHANE'
       NU_SPEC=0.41
       MATL_ID='CFL char2'
       NU_MATL=0.59
@@ -146,7 +146,7 @@
       E(1) = 1.30E5
       EMISSIVITY=0.7
       DENSITY=74.
-      SPEC_ID='CB GAS'
+      SPEC_ID='METHANE'
       NU_SPEC=0.1
       MATL_ID='BFL int'
       NU_MATL=0.9
@@ -160,7 +160,7 @@
       E(1) = 1.60E5
       EMISSIVITY=0.775
       DENSITY=67.
-      SPEC_ID='CB GAS'
+      SPEC_ID='METHANE'
       NU_SPEC=0.63
       MATL_ID='BFL char1'
       NU_MATL=0.37
@@ -174,7 +174,7 @@
       E(1) = 1.70E4
       EMISSIVITY=0.85
       DENSITY=25.
-      SPEC_ID='CB GAS'
+      SPEC_ID='METHANE'
       NU_SPEC=0.41
       MATL_ID='BFL char2'
       NU_MATL=0.59
