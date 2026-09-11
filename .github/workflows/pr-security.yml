@@ -72,6 +72,8 @@ jobs:
     if: always() && needs.prepare.result == 'success'
     runs-on: ubuntu-24.04
     timeout-minutes: 5
+    outputs:
+      run_builds: ${{ steps.admission.outputs.run_builds }}
     permissions:
       contents: read
       statuses: write
@@ -81,6 +83,7 @@ jobs:
           ref: ${{ github.workflow_sha }}
           persist-credentials: false
       - name: Publish admission on the submitted head commit
+        id: admission
         env:
           GH_TOKEN: ${{ github.token }}
           HEAD_SHA: ${{ needs.prepare.outputs.head_sha }}
@@ -115,7 +118,7 @@ jobs:
 
   linux:
     needs: [prepare, admission]
-    if: ${{ !cancelled() && needs.prepare.result == 'success' && needs.admission.result == 'success' && needs.prepare.outputs.conventional == 'true' }}
+    if: ${{ !cancelled() && needs.prepare.result == 'success' && needs.admission.result == 'success' && needs.admission.outputs.run_builds == 'true' && needs.prepare.outputs.conventional == 'true' }}
     permissions:
       contents: read
     uses: ./.github/workflows/linux.yml
@@ -124,7 +127,7 @@ jobs:
 
   macos:
     needs: [prepare, admission]
-    if: ${{ !cancelled() && needs.prepare.result == 'success' && needs.admission.result == 'success' && needs.prepare.outputs.conventional == 'true' }}
+    if: ${{ !cancelled() && needs.prepare.result == 'success' && needs.admission.result == 'success' && needs.admission.outputs.run_builds == 'true' && needs.prepare.outputs.conventional == 'true' }}
     permissions:
       contents: read
     uses: ./.github/workflows/osx.yml
@@ -133,7 +136,7 @@ jobs:
 
   windows:
     needs: [prepare, admission]
-    if: ${{ !cancelled() && needs.prepare.result == 'success' && needs.admission.result == 'success' && needs.prepare.outputs.conventional == 'true' }}
+    if: ${{ !cancelled() && needs.prepare.result == 'success' && needs.admission.result == 'success' && needs.admission.outputs.run_builds == 'true' && needs.prepare.outputs.conventional == 'true' }}
     permissions:
       contents: read
     uses: ./.github/workflows/windows.yml
@@ -142,7 +145,7 @@ jobs:
 
   cmake:
     needs: [prepare, admission]
-    if: ${{ !cancelled() && needs.prepare.result == 'success' && needs.admission.result == 'success' && needs.prepare.outputs.cmake == 'true' }}
+    if: ${{ !cancelled() && needs.prepare.result == 'success' && needs.admission.result == 'success' && needs.admission.outputs.run_builds == 'true' && needs.prepare.outputs.cmake == 'true' }}
     permissions:
       contents: read
     uses: ./.github/workflows/cmake.yml
@@ -151,7 +154,7 @@ jobs:
 
   line-endings:
     needs: [prepare, admission]
-    if: ${{ !cancelled() && needs.prepare.result == 'success' && needs.admission.result == 'success' }}
+    if: ${{ !cancelled() && needs.prepare.result == 'success' && needs.admission.result == 'success' && needs.admission.outputs.run_builds == 'true' }}
     permissions:
       contents: read
     uses: ./.github/workflows/Line_Endings.yml
@@ -162,7 +165,7 @@ jobs:
     # pull_request_target check runs attach to the base revision. Publish the
     # aggregate build result on the submitted head for branch protection.
     needs: [prepare, admission, linux, macos, windows, cmake, line-endings]
-    if: always() && needs.prepare.result == 'success'
+    if: always() && needs.prepare.result == 'success' && needs.admission.outputs.run_builds != 'false'
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions:

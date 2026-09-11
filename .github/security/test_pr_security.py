@@ -66,17 +66,18 @@ class IdentityTests(unittest.TestCase):
 
 
 class PreparationTests(unittest.TestCase):
-    def prepare(self, pull=None, memberships=(False, False), event_sha=HEAD):
+    def prepare(self, pull=None, memberships=(False, False), event_sha=HEAD, parents=None, later_pull=None):
         pull = pull or pull_request()
+        sequence = [pull, later_pull] if later_pull is not None else [pull]
         event = {"number": 7, "pull_request": {"head": {"sha": event_sha}},
                  "sender": {"login": "sender", "type": "User"}}
 
         def api(path, **kwargs):
             if path.endswith("/git/commits/" + MERGE):
-                return {"parents": [{"sha": BASE}, {"sha": HEAD}]}
+                return {"parents": [{"sha": sha} for sha in (parents if parents is not None else [BASE, HEAD])]}
             if "/files?" in path:
                 return [{"filename": "Source/main.f90"}]
-            return copy.deepcopy(pull)
+            return copy.deepcopy(sequence.pop(0) if len(sequence) > 1 else sequence[0])
 
         with tempfile.TemporaryDirectory() as folder:
             event_path = Path(folder) / "event.json"
@@ -87,6 +88,7 @@ class PreparationTests(unittest.TestCase):
                     patch.object(security, "trusted_developer", side_effect=memberships), \
                     patch.object(security, "outputs") as output, patch.object(security.time, "sleep"):
                 security.prepare()
+                self.preparation_statuses = status.call_args_list
                 self.assertEqual(status.call_args_list[0].args[:2], ("developer/fds", event_sha))
                 return output.call_args.args[0]
 
@@ -105,6 +107,35 @@ class PreparationTests(unittest.TestCase):
     def test_stale_event_does_not_admit_a_new_revision(self):
         with self.assertRaisesRegex(ValueError, "stale"):
             self.prepare(event_sha="d" * 40)
+
+    def test_merged_pr_can_prepare_scan_without_resetting_gate_statuses(self):
+        pull = pull_request()
+        pull.update(state="closed", merged=True)
+        for parents in ([BASE, HEAD], [BASE]):
+            with self.subTest(parents=parents):
+                result = self.prepare(pull=pull, memberships=(True, True), parents=parents)
+                self.assertEqual(result["head_sha"], HEAD)
+                self.assertEqual(result["merge_sha"], MERGE)
+                self.assertEqual([call.args[2] for call in self.preparation_statuses], [security.SCAN])
+
+    def test_merge_during_preparation_keeps_scanning(self):
+        initial = pull_request()
+        initial["merge_commit_sha"] = None
+        merged = pull_request()
+        merged.update(state="closed", merged=True)
+        merged["base"]["sha"] = MERGE
+        result = self.prepare(pull=initial, later_pull=merged, parents=[BASE])
+        self.assertEqual(result["merge_sha"], MERGE)
+        self.assertFalse(any(call.args[3] in ("failure", "error") for call in self.preparation_statuses))
+
+    def test_open_pr_still_requires_matching_merge_parents(self):
+        self.assertEqual(self.prepare(parents=[BASE])["merge_sha"], "")
+
+    def test_merged_pr_with_deleted_source_fork_uses_receiving_repository(self):
+        pull = pull_request()
+        pull.update(state="closed", merged=True)
+        pull["head"]["repo"] = None
+        self.assertEqual(self.prepare(pull=pull)["head_repo"], "developer/fds")
 
     def test_conflict_still_permits_head_scan_but_no_build_snapshot(self):
         pull = pull_request()
@@ -125,12 +156,14 @@ class AdmissionTests(unittest.TestCase):
                        "PR_NUMBER": "7", "MERGE_SHA": merge, "TRUSTED": str(trusted).lower(),
                        "EXTERNAL_RESULT": external, "TRUSTED_RESULT": member}
         with patch.dict(os.environ, environment), patch.object(security, "api", return_value=current or pull_request()), \
+                patch.object(security, "outputs") as output, \
                 patch.object(security, "status") as status:
             try:
                 security.report(kind)
                 success = True
             except RuntimeError:
                 success = False
+            self.admission_output = output
             return success, status
 
     def test_external_scan_must_finish_successfully(self):
@@ -144,6 +177,24 @@ class AdmissionTests(unittest.TestCase):
     def test_member_admission_is_independent_of_background_scan(self):
         for outcome in ("success", "failure", "cancelled", "in_progress"):
             self.assertTrue(self.check(trusted=True, external="skipped", member=outcome)[0])
+            self.admission_output.assert_called_once_with({"run_builds": "true"})
+
+    def test_merge_before_admission_skips_builds_without_overwriting_status(self):
+        current = pull_request()
+        current.update(state="closed", merged=True)
+        current["base"]["sha"] = MERGE
+        for trusted in (True, False):
+            success, status = self.check(trusted=trusted, external="skipped", current=current)
+            self.assertTrue(success)
+            status.assert_not_called()
+            self.admission_output.assert_called_once_with({"run_builds": "false"})
+
+    def test_scan_result_can_be_published_after_merge(self):
+        current = pull_request()
+        current.update(state="closed", merged=True)
+        success, status = self.check(trusted=True, current=current, kind="report")
+        self.assertTrue(success)
+        self.assertEqual(status.call_args.args[2:4], (security.SCAN, "success"))
 
     def test_member_scan_failure_is_still_reported(self):
         success, status = self.check(trusted=True, external="skipped", member="failure", kind="report")
@@ -342,6 +393,7 @@ class WorkflowTests(unittest.TestCase):
             with self.subTest(job=name):
                 self.assertIn("admission", jobs[name]["needs"])
                 self.assertIn("needs.admission.result == 'success'", jobs[name]["if"])
+                self.assertIn("needs.admission.outputs.run_builds == 'true'", jobs[name]["if"])
                 self.assertEqual(jobs[name]["with"]["ref"], "${{ needs.prepare.outputs.merge_sha }}")
                 self.assertEqual(jobs[name]["permissions"], {"contents": "read"})
                 self.assertNotIn("secrets", jobs[name])
@@ -363,6 +415,7 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(jobs["scan-member"]["if"], "needs.prepare.outputs.trusted == 'true'")
         self.assertNotIn("scan-member", jobs["build-result"]["needs"])
         self.assertNotIn("scan-external", jobs["build-result"]["needs"])
+        self.assertIn("needs.admission.outputs.run_builds != 'false'", jobs["build-result"]["if"])
 
     def test_scan_and_identity_checkouts_use_only_trusted_policy(self):
         for name in ("pr-security.yml", "virus-scan.yml"):

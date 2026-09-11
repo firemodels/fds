@@ -98,16 +98,20 @@ def prepare():
     number = int(event["number"])
     head_sha = event["pull_request"]["head"]["sha"]
     validate_revision(repository, head_sha)
-    status(repository, head_sha, ADMISSION, "pending", "Checking identity and the exact PR revision")
-    status(repository, head_sha, SCAN, "pending", "ClamAV scan is pending")
-    status(repository, head_sha, BUILDS, "pending", "Builds are waiting for admission")
+    gate_open = False
     try:
         pull = api(f"/repos/{repository}/pulls/{number}")
-        if pull["state"] != "open" or pull["head"]["sha"] != head_sha:
+        if pull["head"]["sha"] != head_sha or (pull["state"] != "open" and not pull.get("merged")):
             raise ValueError("The PR changed or closed; this event is stale")
-        head_repo = pull["head"]["repo"]["full_name"]
+        gate_open = pull["state"] == "open"
+        if gate_open:
+            status(repository, head_sha, ADMISSION, "pending", "Checking identity and the exact PR revision")
+            status(repository, head_sha, BUILDS, "pending", "Builds are waiting for admission")
+        status(repository, head_sha, SCAN, "pending", "ClamAV scan is pending")
+        # The receiving repository retains PR commits if the source fork is deleted.
+        head_repo = (pull["head"]["repo"] or {"full_name": repository})["full_name"]
         validate_revision(head_repo, head_sha)
-        if pull["head"]["repo"]["private"]:
+        if pull["head"]["repo"] and pull["head"]["repo"]["private"]:
             raise ValueError("This scanner requires publicly downloadable source snapshots")
 
         # Never use author_association, fork ownership, commit author strings, or
@@ -121,14 +125,18 @@ def prepare():
             if SHA.fullmatch(candidate):
                 commit = api(f"/repos/{repository}/git/commits/{candidate}")
                 parents = [parent["sha"] for parent in commit["parents"]]
-                if parents == [base_sha, head_sha]:
+                # After merging, GitHub supplies the actual merge/squash/rebase
+                # result. It need not have the temporary merge's two parents.
+                if pull.get("merged") or parents == [base_sha, head_sha]:
                     merge_sha = candidate
                     break
             if pull.get("mergeable") is False:
                 break
             time.sleep(3)
             pull = api(f"/repos/{repository}/pulls/{number}")
-            if pull["state"] != "open" or pull["head"]["sha"] != head_sha or pull["base"]["sha"] != base_sha:
+            gate_open = pull["state"] == "open"
+            if (pull["head"]["sha"] != head_sha or
+                    (not pull.get("merged") and (not gate_open or pull["base"]["sha"] != base_sha))):
                 raise ValueError("The PR changed while preparing the scan")
 
         files = []
@@ -143,9 +151,10 @@ def prepare():
                  "conventional": str(conventional).lower(), "cmake": str(cmake).lower()})
         print(f"PR #{number}: head={head_sha}, merge={merge_sha or 'unavailable'}, trusted={trusted}")
     except Exception:
-        status(repository, head_sha, ADMISSION, "failure", "Admission preparation failed; review workflow logs")
+        if gate_open:
+            status(repository, head_sha, ADMISSION, "failure", "Admission preparation failed; review workflow logs")
+            status(repository, head_sha, BUILDS, "error", "Builds could not be prepared")
         status(repository, head_sha, SCAN, "error", "Scan could not be prepared")
-        status(repository, head_sha, BUILDS, "error", "Builds could not be prepared")
         raise
 
 
@@ -321,10 +330,15 @@ def report(kind):
     trusted = os.environ.get("TRUSTED") == "true"
     external = os.environ.get("EXTERNAL_RESULT", "")
     if kind == "admission":
+        number = int(os.environ["PR_NUMBER"])
+        current = api(f"/repos/{repository}/pulls/{number}")
+        if current["head"]["sha"] == sha and current.get("merged"):
+            # A completed PR needs only its scan. Preserve admission/build statuses.
+            outputs({"run_builds": "false"})
+            print("PR is already merged; background scanning continues without admission or PR builds.")
+            return
         accepted = bool(os.environ["MERGE_SHA"]) and (trusted or external == "success")
         if accepted:
-            number = int(os.environ["PR_NUMBER"])
-            current = api(f"/repos/{repository}/pulls/{number}")
             if (current["state"] != "open" or current["head"]["sha"] != sha
                     or current["base"]["sha"] != os.environ["BASE_SHA"]):
                 # Do not let an older run replace a newer run's pending status.
@@ -349,6 +363,8 @@ def report(kind):
     status(repository, sha, context, "success" if accepted else "failure", description)
     if not accepted:
         raise RuntimeError(description)
+    if kind == "admission":
+        outputs({"run_builds": "true"})
 
 
 def main():
