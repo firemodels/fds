@@ -12,17 +12,17 @@ on:
     - Build/**
     - Source/**
     - CMakeLists.txt
-  pull_request:
-    paths:
-    - .github/**
-    - Build/**
-    - Source/**
-    - CMakeLists.txt
+  workflow_call:
+    inputs:
+      ref:
+        description: Exact commit approved by the PR security gate
+        required: true
+        type: string
 
 
 concurrency:
-  group: ${{ github.event_name }}-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  group: cmake-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request_target' }}
 
 
 permissions:
@@ -92,6 +92,9 @@ jobs:
         sudo apt-get -y install libopenmpi-dev openmpi-bin
 
     - uses: actions/checkout@v7
+      with:
+        ref: ${{ inputs.ref || github.sha }}
+        persist-credentials: false
     - run: git config --global --add safe.directory /__w/fds/fds
 
     - name: set linux-gnu compiler
@@ -166,6 +169,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+          persist-credentials: false
 
       - name: install openmpi
         run: brew install gcc@15 open-mpi
@@ -244,6 +250,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v7
+      with:
+        ref: ${{ inputs.ref || github.sha }}
+        persist-credentials: false
 
       # install oneapi components from web installer based on
       # oneapi-ci/scripts/install_windows.bat

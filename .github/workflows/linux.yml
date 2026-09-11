@@ -7,16 +7,17 @@ on:
     - .github/**
     - Build/**
     - Source/**
-  pull_request:
-    paths:
-    - .github/**
-    - Build/**
-    - Source/**
+  workflow_call:
+    inputs:
+      ref:
+        description: Exact commit approved by the PR security gate
+        required: true
+        type: string
 
 
 concurrency:
-  group: ${{ github.event_name }}-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  group: linux-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request_target' }}
 
 
 permissions:
@@ -40,6 +41,9 @@ jobs:
         prune: false       
          
     - uses: actions/checkout@v7
+      with:
+        ref: ${{ inputs.ref || github.sha }}
+        persist-credentials: false
 
     - name: build fds debug
       run: |
@@ -75,6 +79,9 @@ jobs:
         prune: false  
 
     - uses: actions/checkout@v7
+      with:
+        ref: ${{ inputs.ref || github.sha }}
+        persist-credentials: false
     - name: build fds debug
       run: |
         source /opt/intel/oneapi/setvars.sh
@@ -97,6 +104,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v7
+      with:
+        ref: ${{ inputs.ref || github.sha }}
+        persist-credentials: false
 
     - uses: actions/setup-python@v7
       with:
@@ -106,6 +116,9 @@ jobs:
         echo $GITHUB_WORKSPACE
         cd $GITHUB_WORKSPACE/Utilities/Python
         source setup_python_env.sh --batchmode
+
+    - name: PR security regression tests
+      run: python3 -m unittest discover -s .github/security -p 'test_*.py' -v
 
     - name: Python test
       run: |
