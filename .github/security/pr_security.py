@@ -16,7 +16,7 @@ import urllib.error
 import urllib.request
 
 
-ORGANIZATION = "firemodels"
+TRUSTED_DEVELOPERS = Path(__file__).with_name("trusted-developers.json")
 ADMISSION = "FDS / PR admission"
 SCAN = "FDS / ClamAV scan"
 BUILDS = "FDS / PR builds"
@@ -43,17 +43,21 @@ def api(path, data=None, authenticated=True):
         return json.loads(content) if content else None
 
 
-def organization_member(user):
-    # The public membership endpoint works in personal forks without an org secret.
-    # Private membership, unavailable APIs, and bots do not grant a fast track.
-    login = user.get("login", "")
-    if user.get("type") != "User" or not re.fullmatch(r"[A-Za-z0-9-]{1,39}", login):
-        return False
-    try:
-        return api(f"/orgs/{ORGANIZATION}/public_members/{login}", authenticated=False) is None
-    except (urllib.error.URLError, TimeoutError, ValueError):
-        print(f"Public membership could not be verified for {login}; scanning is required.")
-        return False
+def load_developers():
+    # Use the list beside this trusted helper, never a file from the PR checkout.
+    entries = json.loads(TRUSTED_DEVELOPERS.read_text(encoding="utf-8"))["developers"]
+    ids = [entry["id"] for entry in entries]
+    if any(value is not None and (type(value) is not int or value <= 0) for value in ids):
+        raise ValueError("Trusted developer IDs must be positive integers or null")
+    if None in ids:
+        print("Unresolved developer IDs do not grant the fast path.")
+    return set(ids) - {None}
+
+
+def trusted_developer(user, developer_ids):
+    # Match stable account IDs, not usernames that could later be reused.
+    return (user.get("type") == "User" and type(user.get("id")) is int
+            and user["id"] in developer_ids)
 
 
 def validate_revision(repository, sha):
@@ -108,7 +112,8 @@ def prepare():
 
         # Never use author_association, fork ownership, commit author strings, or
         # triggering_actor (the person re-running a job) as a trust decision.
-        trusted = organization_member(pull["user"]) and organization_member(event["sender"])
+        developers = load_developers()
+        trusted = trusted_developer(pull["user"], developers) and trusted_developer(event["sender"], developers)
         base_sha = pull["base"]["sha"]
         merge_sha = ""
         for attempt in range(10):
@@ -325,7 +330,7 @@ def report(kind):
                 # Do not let an older run replace a newer run's pending status.
                 raise RuntimeError("PR changed before admission; a new scan is required")
         context = ADMISSION
-        description = ("Verified firemodels member; scan continues in background" if trusted else
+        description = ("Approved FDS developer; scan continues in background" if trusted else
                        "Complete PR head and merge snapshot scans passed") if accepted else "PR not admitted; scan or merge snapshot is incomplete"
     elif kind == "builds":
         results = json.loads(os.environ["BUILD_RESULTS"])

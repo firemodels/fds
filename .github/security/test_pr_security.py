@@ -29,24 +29,40 @@ def pull_request():
 
 
 class IdentityTests(unittest.TestCase):
-    def test_public_organization_members_only(self):
-        with patch.object(security, "api", return_value=None) as api:
-            self.assertTrue(security.organization_member({"login": "member", "type": "User"}))
-            api.assert_called_once_with("/orgs/firemodels/public_members/member", authenticated=False)
-
-    def test_private_unknown_or_unavailable_membership_requires_scan(self):
-        for error in (urllib.error.HTTPError("url", 404, "Not Found", {}, None),
-                      urllib.error.HTTPError("url", 403, "Rate limited", {}, None),
-                      urllib.error.URLError("offline"), TimeoutError(), ValueError()):
-            with self.subTest(error=error), patch.object(security, "api", side_effect=error):
-                self.assertFalse(security.organization_member({"login": "author", "type": "User"}))
-
-    def test_bots_and_invalid_names_are_not_members(self):
+    def test_matching_id_retains_trust_after_rename_but_reused_username_does_not(self):
         with patch.object(security, "api") as api:
-            for user in ({"login": "dependabot[bot]", "type": "Bot"},
-                         {"login": "../member", "type": "User"}, {"login": "member"}):
-                self.assertFalse(security.organization_member(user))
+            for login, account_id, expected in (("member", 123, True), ("renamed", 123, True), ("member", 456, False)):
+                user = {"login": login, "id": account_id, "type": "User"}
+                self.assertEqual(security.trusted_developer(user, {123}), expected)
             api.assert_not_called()
+
+    def test_bots_and_missing_or_invalid_ids_are_not_trusted(self):
+        for account_id in (None, "123", True, 456):
+            self.assertFalse(security.trusted_developer({"id": account_id, "type": "User"}, {123}))
+        self.assertFalse(security.trusted_developer({"id": 123, "type": "Bot"}, {123}))
+
+    def test_null_ids_are_excluded_and_invalid_configuration_fails(self):
+        with tempfile.TemporaryDirectory() as name:
+            path = Path(name) / "trusted-developers.json"
+            with patch.object(security, "TRUSTED_DEVELOPERS", path):
+                path.write_text(json.dumps({"developers": [{"id": 123}, {"id": None}]}))
+                self.assertEqual(security.load_developers(), {123})
+                for account_id in (True, "123", 0, -1):
+                    path.write_text(json.dumps({"developers": [{"id": account_id}]}))
+                    with self.assertRaises(ValueError):
+                        security.load_developers()
+
+    def test_policy_is_loaded_beside_trusted_helper_not_from_working_directory(self):
+        self.assertEqual(security.TRUSTED_DEVELOPERS, Path(security.__file__).with_name("trusted-developers.json"))
+        with tempfile.TemporaryDirectory() as name:
+            original = Path.cwd()
+            expected = security.load_developers()
+            try:
+                os.chdir(name)
+                Path("trusted-developers.json").write_text('{"developers": [{"login": "attacker", "id": 999}]}')
+                self.assertEqual(security.load_developers(), expected)
+            finally:
+                os.chdir(original)
 
 
 class PreparationTests(unittest.TestCase):
@@ -68,7 +84,7 @@ class PreparationTests(unittest.TestCase):
             with patch.dict(os.environ, {"GITHUB_EVENT_PATH": str(event_path), "GITHUB_REPOSITORY": "developer/fds"}), \
                     patch.object(security, "api", side_effect=api), \
                     patch.object(security, "status") as status, \
-                    patch.object(security, "organization_member", side_effect=memberships), \
+                    patch.object(security, "trusted_developer", side_effect=memberships), \
                     patch.object(security, "outputs") as output, patch.object(security.time, "sleep"):
                 security.prepare()
                 self.assertEqual(status.call_args_list[0].args[:2], ("developer/fds", event_sha))
@@ -81,7 +97,7 @@ class PreparationTests(unittest.TestCase):
         self.assertEqual(result["trusted"], "false")
         self.assertEqual(result["merge_sha"], MERGE)
 
-    def test_author_and_sender_must_both_be_organization_members(self):
+    def test_author_and_sender_must_both_be_trusted_developers(self):
         self.assertEqual(self.prepare(memberships=(True, True))["trusted"], "true")
         self.assertEqual(self.prepare(memberships=(True, False))["trusted"], "false")
         self.assertEqual(self.prepare(memberships=(False, True))["trusted"], "false")
