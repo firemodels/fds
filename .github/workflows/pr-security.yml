@@ -66,8 +66,8 @@ jobs:
       merge_sha: ${{ needs.prepare.outputs.merge_sha }}
 
   admission:
-    # For members scan-external is skipped, so admission does not wait for
-    # scan-member. For everyone else only a successful scan permits builds.
+    # For listed developers scan-external is skipped, so admission does not wait
+    # for scan-member. For everyone else only a successful scan permits builds.
     needs: [prepare, scan-external]
     if: always() && needs.prepare.result == 'success'
     runs-on: ubuntu-24.04

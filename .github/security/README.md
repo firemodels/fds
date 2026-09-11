@@ -4,17 +4,27 @@
 pull requests against a developer's fork. The receiving repository must have the
 workflow and helpers on its trusted base branch and have GitHub Actions enabled.
 
-The gate checks the PR author and the event sender against the **public membership
-of the `firemodels` GitHub organization**. Both must be verified members for the
-fast path. Fork ownership, repository collaborator status, previous contributions,
-commit author text, and the person re-running a workflow do not grant this trust.
-Private memberships cannot be verified without additional organization access;
-private members and API failures therefore take the scanning-required path.
-No organization secret or personal access token is needed.
+The gate checks the PR author and event sender against **`trusted-developers.json`
+beside the trusted helper**. Both must have a listed numeric GitHub account ID.
+Usernames are labels; stable IDs decide trust even if an account is renamed.
+Fork ownership, collaborator status, commit author text, and the person re-running
+a workflow do not grant trust. No organization-membership lookup or secret is
+needed, and membership can remain private.
+
+Maintain this list through reviewed commits and synchronize it to each developer
+fork. PR edits cannot authorize their own authors: preparation reads the list from
+the trusted workflow revision. Removing a developer from the GitHub organization
+does not automatically remove them from this list.
+
+**Setup required:** `null` IDs are unresolved and never grant the fast path.
+Populate them with verified GitHub account IDs before committing this policy.
+For example, `gh api users/rmcdermo --jq '{login, id}'` retrieves Randy's account
+ID without needing access to private organization membership. Keep existing IDs
+when usernames change; do not replace them with another account's ID.
 
 | Contributor | `FDS / PR admission` | `FDS / ClamAV scan` |
 | --- | --- | --- |
-| Verified organization member | Passes after preparing a current merge snapshot; builds may start immediately | Runs independently in the background |
+| Listed developer with a resolved ID | Passes after preparing a current merge snapshot; builds may start immediately | Runs independently in the background |
 | Everyone else | Passes only after both complete source snapshots scan successfully | Must finish successfully before builds can start |
 
 The snapshots are the exact submitted head commit and the proposed merge commit.
@@ -47,8 +57,8 @@ These repository settings are essential and are **not installed by copying YAML*
    platform builds and line-ending checks: it reports their aggregate result on
    the PR head. Replace old required job names from `pull_request` workflows;
    `pull_request_target` job checks attach to the base revision instead. The build
-   status also does not wait for member scans. Do **not** require
-   `FDS / ClamAV scan` if members must be able to merge before their scan finishes.
+   status also does not wait for listed developers' scans. Do **not** require
+   `FDS / ClamAV scan` if developers must be able to merge before their scan finishes.
 3. In Actions settings, require approval for fork-PR workflows from **all outside
    collaborators**, not just first-time contributors. Do not approve PR-supplied
    workflows until admission succeeds and any workflow changes have been reviewed.
@@ -96,7 +106,7 @@ security review; do not bypass the gate by excluding the file.
 ClamAV detects recognizable malware; a successful scan does not prove that code
 is benign or that scientific results are correct. Builds can still execute harmful
 code that antivirus misses. Code review and isolated build environments remain
-necessary. A compromised organization-member account also retains its fast path.
+necessary. A compromised listed developer account also retains its fast path.
 
 ## Validation and rollout
 
@@ -113,7 +123,7 @@ job after admission.
 
 Before relying on the gate, validate it in a developer fork on GitHub:
 
-- A clean organization-member PR admits promptly while its scan continues.
+- A clean listed-developer PR admits promptly while its scan continues.
 - A clean nonmember PR starts no build jobs until its scan succeeds.
 - The runner's EICAR self-test passes, and a controlled EICAR PR from a nonmember
   blocks admission and all build jobs. Use an isolated test repository for this.
