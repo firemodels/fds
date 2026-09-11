@@ -34,6 +34,14 @@ old one. A missing merge snapshot, conflict, stale event, or scanner error does
 not admit outside code. A conflicted PR's head is still scanned, but the combined
 scan cannot pass until a current merge snapshot is available.
 
+A merged PR can still be scanned, including when preparation starts or is rerun
+after the merge. In that case the scan uses the original submitted head and
+GitHub's recorded merge result (including squash/rebase results). Admission and
+PR builds are skipped without replacing their existing statuses. If the PR merges
+while preparation or admission is running, scanning continues independently.
+An outside PR that is still open continues to require a successful scan before
+admission. Merging does not change whether its author is a trusted developer.
+
 The existing Linux, macOS, Windows, CMake, and line-ending workflows are callable
 by the gate instead of running directly on `pull_request`. Their push behavior is
 preserved. PR source is never executed in the identity or scanning jobs. Only the
