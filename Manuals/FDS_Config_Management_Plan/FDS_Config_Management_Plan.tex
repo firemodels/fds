@@ -545,12 +545,27 @@ In addition to the identified configuration items included in the FDS/Smokeview 
 
 NIST management approval is required prior to destruction of old or out-of-date records. Records are typically maintained for a minimum of 25 years.
 
+\section{Virus Scanning of Pull Requests}
+
+GitHub Actions use ClamAV to scan pull requests to FDS and participating developers' forks. These checks examine repository content and do not replace release-bundle scans. Security code and approved account IDs come from the receiving repository's trusted revision. When both the author and event sender are approved developers, scanning proceeds in the background, including after merging; other pull requests must pass scanning before admission to build checks.
+
+Disposable GitHub-hosted runners update signatures, test detection with EICAR, and scan the submitted and merge snapshots. Files are verified against Git's file list and hashes. Scanner jobs use read-only permissions, receive no project secrets, and never execute submitted code. Detections, errors, timeouts, and incomplete scans block outside contributions.
+
+Each receiving repository must require \texttt{FDS / PR admission} and \texttt{FDS / PR builds} through branch protection, require workflow approval for all outside collaborators, and require maintainer review of security changes. The separate \texttt{FDS / ClamAV scan} status reports scan results. External testing systems must enforce admission independently. A clean scan does not establish that code is benign; code review and isolated testing remain necessary.
+
 \section{Securing the FDS/Smokeview Installation Files}
 
 FDS and Smokeview installation files are built on NIST managed computers with access limited to only those associated with the FDS/Smokeview project. Each bundle file and the bundle itself is scanned for viruses and malware. The bundle is not made available if the scan identifies a suspicious signature. A SHA256 hash code is generated for each bundle file automatically by GitHub.
 
-
-
+To verify a download, find the SHA-256 digest for that exact file under \emph{Assets} on the official GitHub release page. In the download directory, run the appropriate command below, replacing \texttt{bundle-file} with the full filename:
+\begin{center}
+\begin{tabular}{ll}
+Windows (PowerShell) & \verb|Get-FileHash -Algorithm SHA256 "bundle-file"| \\
+macOS (Terminal) & \verb|shasum -a 256 "bundle-file"| \\
+Linux (Terminal) & \verb|sha256sum "bundle-file"| \\
+\end{tabular}
+\end{center}
+Compare all 64 hexadecimal digits, ignoring letter case and any \texttt{sha256:} prefix. A match confirms that the download is identical to the published GitHub asset; do not install the file if the digests differ.
 
 \section{Training}
 
