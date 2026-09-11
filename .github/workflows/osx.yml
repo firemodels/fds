@@ -7,16 +7,17 @@ on:
     - .github/**
     - Build/**
     - Source/**
-  pull_request:
-    paths:
-    - .github/**
-    - Build/**
-    - Source/**
+  workflow_call:
+    inputs:
+      ref:
+        description: Exact commit approved by the PR security gate
+        required: true
+        type: string
 
 
 concurrency:
-  group: ${{ github.event_name }}-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  group: osx-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request_target' }}
 
 
 permissions:
@@ -35,6 +36,9 @@ jobs:
         
     steps:
     - uses: actions/checkout@v7
+      with:
+        ref: ${{ inputs.ref || github.sha }}
+        persist-credentials: false
     - name: install openmpi
       run: |
         brew install gcc@15 open-mpi

@@ -1,0 +1,45 @@
+name: ClamAV source scan
+
+on:
+  workflow_call:
+    inputs:
+      policy_sha:
+        required: true
+        type: string
+      head_repo:
+        required: true
+        type: string
+      head_sha:
+        required: true
+        type: string
+      merge_sha:
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  clamav:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout trusted scanner implementation only
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ inputs.policy_sha }}
+          persist-credentials: false
+      - name: Install ClamAV and update signatures
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y clamav
+          sudo systemctl stop clamav-freshclam.service
+          sudo freshclam
+          clamscan --version
+      - name: Scan complete PR head and proposed merge as data
+        env:
+          GH_TOKEN: ${{ github.token }} # Read-only Git tree metadata; never sent to codeload.
+          HEAD_REPO: ${{ inputs.head_repo }}
+          HEAD_SHA: ${{ inputs.head_sha }}
+          MERGE_SHA: ${{ inputs.merge_sha }}
+        run: python3 .github/security/pr_security.py scan

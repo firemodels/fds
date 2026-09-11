@@ -1,0 +1,183 @@
+name: PR security
+
+# Always use the receiving repository's trusted workflow, including in personal
+# forks. Do not add a checkout of PR code to the prepare/report jobs.
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review, edited]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-security-${{ github.repository }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+      statuses: write
+    outputs:
+      head_sha: ${{ steps.prepare.outputs.head_sha }}
+      head_repo: ${{ steps.prepare.outputs.head_repo }}
+      base_sha: ${{ steps.prepare.outputs.base_sha }}
+      merge_sha: ${{ steps.prepare.outputs.merge_sha }}
+      trusted: ${{ steps.prepare.outputs.trusted }}
+      conventional: ${{ steps.prepare.outputs.conventional }}
+      cmake: ${{ steps.prepare.outputs.cmake }}
+    steps:
+      - name: Checkout trusted gate implementation
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.workflow_sha }}
+          persist-credentials: false
+      - name: Identify author and freeze the PR revision
+        id: prepare
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 .github/security/pr_security.py prepare
+
+  scan-external:
+    needs: prepare
+    if: needs.prepare.outputs.trusted != 'true'
+    permissions:
+      contents: read
+    uses: ./.github/workflows/virus-scan.yml
+    with:
+      policy_sha: ${{ github.workflow_sha }}
+      head_repo: ${{ needs.prepare.outputs.head_repo }}
+      head_sha: ${{ needs.prepare.outputs.head_sha }}
+      merge_sha: ${{ needs.prepare.outputs.merge_sha }}
+
+  scan-member:
+    needs: prepare
+    if: needs.prepare.outputs.trusted == 'true'
+    permissions:
+      contents: read
+    uses: ./.github/workflows/virus-scan.yml
+    with:
+      policy_sha: ${{ github.workflow_sha }}
+      head_repo: ${{ needs.prepare.outputs.head_repo }}
+      head_sha: ${{ needs.prepare.outputs.head_sha }}
+      merge_sha: ${{ needs.prepare.outputs.merge_sha }}
+
+  admission:
+    # For members scan-external is skipped, so admission does not wait for
+    # scan-member. For everyone else only a successful scan permits builds.
+    needs: [prepare, scan-external]
+    if: always() && needs.prepare.result == 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      statuses: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.workflow_sha }}
+          persist-credentials: false
+      - name: Publish admission on the submitted head commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ needs.prepare.outputs.head_sha }}
+          BASE_SHA: ${{ needs.prepare.outputs.base_sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          MERGE_SHA: ${{ needs.prepare.outputs.merge_sha }}
+          TRUSTED: ${{ needs.prepare.outputs.trusted }}
+          EXTERNAL_RESULT: ${{ needs.scan-external.result }}
+        run: python3 .github/security/pr_security.py admission
+
+  scan-result:
+    needs: [prepare, scan-external, scan-member]
+    if: always() && needs.prepare.result == 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      statuses: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.workflow_sha }}
+          persist-credentials: false
+      - name: Publish the scan result independently of admission
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ needs.prepare.outputs.head_sha }}
+          TRUSTED: ${{ needs.prepare.outputs.trusted }}
+          EXTERNAL_RESULT: ${{ needs.scan-external.result }}
+          TRUSTED_RESULT: ${{ needs.scan-member.result }}
+        run: python3 .github/security/pr_security.py report
+
+  linux:
+    needs: [prepare, admission]
+    if: ${{ !cancelled() && needs.prepare.result == 'success' && needs.admission.result == 'success' && needs.prepare.outputs.conventional == 'true' }}
+    permissions:
+      contents: read
+    uses: ./.github/workflows/linux.yml
+    with:
+      ref: ${{ needs.prepare.outputs.merge_sha }}
+
+  macos:
+    needs: [prepare, admission]
+    if: ${{ !cancelled() && needs.prepare.result == 'success' && needs.admission.result == 'success' && needs.prepare.outputs.conventional == 'true' }}
+    permissions:
+      contents: read
+    uses: ./.github/workflows/osx.yml
+    with:
+      ref: ${{ needs.prepare.outputs.merge_sha }}
+
+  windows:
+    needs: [prepare, admission]
+    if: ${{ !cancelled() && needs.prepare.result == 'success' && needs.admission.result == 'success' && needs.prepare.outputs.conventional == 'true' }}
+    permissions:
+      contents: read
+    uses: ./.github/workflows/windows.yml
+    with:
+      ref: ${{ needs.prepare.outputs.merge_sha }}
+
+  cmake:
+    needs: [prepare, admission]
+    if: ${{ !cancelled() && needs.prepare.result == 'success' && needs.admission.result == 'success' && needs.prepare.outputs.cmake == 'true' }}
+    permissions:
+      contents: read
+    uses: ./.github/workflows/cmake.yml
+    with:
+      ref: ${{ needs.prepare.outputs.merge_sha }}
+
+  line-endings:
+    needs: [prepare, admission]
+    if: ${{ !cancelled() && needs.prepare.result == 'success' && needs.admission.result == 'success' }}
+    permissions:
+      contents: read
+    uses: ./.github/workflows/Line_Endings.yml
+    with:
+      ref: ${{ needs.prepare.outputs.merge_sha }}
+
+  build-result:
+    # pull_request_target check runs attach to the base revision. Publish the
+    # aggregate build result on the submitted head for branch protection.
+    needs: [prepare, admission, linux, macos, windows, cmake, line-endings]
+    if: always() && needs.prepare.result == 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      statuses: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.workflow_sha }}
+          persist-credentials: false
+      - name: Publish build results on the submitted head commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ needs.prepare.outputs.head_sha }}
+          CONVENTIONAL: ${{ needs.prepare.outputs.conventional }}
+          CMAKE: ${{ needs.prepare.outputs.cmake }}
+          BUILD_RESULTS: ${{ toJSON(needs) }}
+        run: python3 .github/security/pr_security.py builds
