@@ -1846,6 +1846,9 @@ INTEGER, ALLOCATABLE, DIMENSION(:) :: INTEGER_DUMMY
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: REAL_DUMMY
 REAL(EB), PARAMETER :: TOL=0.0001_EB
 INTEGER, ALLOCATABLE, DIMENSION(:) :: LAYER_INDEX
+integer, parameter :: nrows = 3, ncols = 20
+INTEGER, DIMENSION(nrows,ncols) :: WALL_CANDIDATE
+INTEGER :: N_WALL_CANDIDATES,I_WC,MESH_CUTS
 
 M => MESHES(NM)
 
@@ -1927,15 +1930,28 @@ PRIMARY_WALL_LOOP: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
 
       ! Find wall indices in the two directions normal to the current 1-D path
 
+      N_WALL_CANDIDATES = 0
+      WALL_CANDIDATE = 1000000
       DO IOR=-3,3
          IF (IOR==0 .OR. IOR==BC%IOR .OR. IOR==-BC%IOR) CYCLE
-         CALL FIND_WALL_INDEX(II,JJ,KK,NN,IOR,IW_FOUND,NN_FOUND)
+         CALL FIND_WALL_INDEX(II,JJ,KK,NN,IOR,IW_FOUND,NN_FOUND,MESH_CUTS)
          IF (IW_FOUND==0 .OR. NN_FOUND==0) CYCLE
-         CALL SEARCH_FOR_ALTERNATE_WALL_CELLS(NN_FOUND,WALL_INDEX=IW_FOUND)
-         IF (FOUND) THEN
-            OS => M%OMESH(NN_FOUND)%WALL_RECV_BUFFER
+         N_WALL_CANDIDATES = N_WALL_CANDIDATES + 1
+         WALL_CANDIDATE(1,N_WALL_CANDIDATES) = MESH_CUTS
+         WALL_CANDIDATE(2,N_WALL_CANDIDATES) = NN_FOUND
+         WALL_CANDIDATE(3,N_WALL_CANDIDATES) = IW_FOUND
+      ENDDO
+
+      CALL SORT_COLUMNS_BY_FIRST_ROW(WALL_CANDIDATE)
+
+      DO I_WC=1,N_WALL_CANDIDATES
+         IW2 = WALL_CANDIDATE(3,I_WC)
+         NOM = WALL_CANDIDATE(2,I_WC)
+         CALL SEARCH_FOR_ALTERNATE_WALL_CELLS(NOM,WALL_INDEX=IW2)
+         IF (FOUND .AND. NOM/=NM) THEN
+            OS => M%OMESH(NOM)%WALL_RECV_BUFFER
             DO NNN=1,OS%N_ITEMS
-               IF (OS%ITEM_INDEX(NNN)==IW_FOUND) THEN
+               IF (OS%ITEM_INDEX(NNN)==IW2) THEN
                   OS%SAVE_FLAG(NNN) = .TRUE.
                   EXIT
                ENDIF
@@ -2122,6 +2138,25 @@ PRIMARY_THIN_WALL_LOOP: DO ITW=1,M%N_THIN_WALL_CELLS
 ENDDO PRIMARY_THIN_WALL_LOOP
 
 CONTAINS
+
+
+!> \brief Rearrage array so that first row is in ascending order
+!> \param A 2D array
+
+SUBROUTINE SORT_COLUMNS_BY_FIRST_ROW(A)
+   INTEGER, INTENT(INOUT) :: A(NROWS,NCOLS)
+   INTEGER :: I,J,K,KEY(NROWS)
+   DO I=2,NCOLS
+       KEY = A(:,I)
+       J = I - 1
+       DO WHILE (J >= 1 .and. A(1,J) > KEY(1))
+           A(:,J+1) = A(:,J)
+           J = J - 1
+       ENDDO
+       A(:,J+1) = KEY
+   ENDDO
+END SUBROUTINE SORT_COLUMNS_BY_FIRST_ROW
+
 
 !> \brief Find WALL or THIN_WALL cells whose internal nodes overlap those of the primary WALL or THIN_WALL cell
 !> \param NOM Mesh number of the primary cell or its neighbor
