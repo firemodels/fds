@@ -35,7 +35,7 @@ jobs:
         shell: bash
         
     steps:
-    - uses: actions/checkout@v7
+    - uses: actions/checkout@v7.0.1
       with:
         ref: ${{ inputs.ref || github.sha }}
         persist-credentials: false
