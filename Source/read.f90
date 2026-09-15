@@ -13990,16 +13990,16 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
 
       ! Determine the bounds, XB, for an interpolated gas device
 
-      IF (SPATIAL_STATISTIC=='INTERPOLATION') THEN
+      IF (SPATIAL_STATISTIC=='INTERPOLATION') THEN  ! Carve out the eight nearest neighbor cells to the specified point
          CALL SEARCH_OTHER_MESHES(XYZ(1),XYZ(2),XYZ(3),NM,IIG,JJG,KKG,XI,YJ,ZK)
          IF (NM>0 .AND. IIG>0 .AND. JJG>0 .AND. KKG>0) THEN
             M => MESHES(NM)
-            XB(1) = M%X(NINT(XI)) - 0.5_EB*M%DX(IIG)
-            XB(2) = M%X(NINT(XI)) + 0.5_EB*M%DX(IIG)
-            XB(3) = M%Y(NINT(YJ)) - 0.5_EB*M%DY(JJG)
-            XB(4) = M%Y(NINT(YJ)) + 0.5_EB*M%DY(JJG)
-            XB(5) = M%Z(NINT(ZK)) - 0.5_EB*M%DZ(KKG)
-            XB(6) = M%Z(NINT(ZK)) + 0.5_EB*M%DZ(KKG)
+            XB(1) = M%X(NINT(XI)) - 0.95_EB*M%DX(IIG)
+            XB(2) = M%X(NINT(XI)) + 0.95_EB*M%DX(IIG)
+            XB(3) = M%Y(NINT(YJ)) - 0.95_EB*M%DY(JJG)
+            XB(4) = M%Y(NINT(YJ)) + 0.95_EB*M%DY(JJG)
+            XB(5) = M%Z(NINT(ZK)) - 0.95_EB*M%DZ(KKG)
+            XB(6) = M%Z(NINT(ZK)) + 0.95_EB*M%DZ(KKG)
          ELSE
             XB = 0._EB
          ENDIF
