@@ -4,10 +4,12 @@
 import subprocess
 from pathlib import Path
 import glob
+from datetime import datetime
 
 outdir = '../../../out/'
 valdir = '../../Validation/'
 resdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Scatterplots/'
+
 
 def MAKEGITENTRY(case_name):
 
@@ -24,6 +26,8 @@ def MAKEGITENTRY(case_name):
             gitrev = fff.readline().strip()
 
     output = ''
+    gitdate = ''
+
     if gitrev != '':
         # Extract git revision short hash
         parts = gitrev.split('-')
@@ -34,21 +38,40 @@ def MAKEGITENTRY(case_name):
             gitrevshort = gitrev
 
         # Get git date
-        gitdate = ''
         try:
-            result = subprocess.run( ['git', 'show', '-s', '--format=%aD', gitrevshort], capture_output=True, text=True)
+            result = subprocess.run(
+                ['git', 'show', '-s', '--format=%aD', gitrevshort],
+                capture_output=True,
+                text=True
+            )
+
             if result.returncode == 0 and result.stdout.strip():
-                date_parts = result.stdout.strip().split()
-                if len(date_parts) >= 5:
-                    gitdate = f"{date_parts[2]} {date_parts[1]}, {date_parts[3]}"
+                date_string = result.stdout.strip()
+
+                # Convert Git's RFC 2822 date to a datetime object.
+                # This is used for sorting, rather than sorting the
+                # formatted date string alphabetically.
+                git_datetime = datetime.strptime(
+                    date_string,
+                    '%a, %d %b %Y %H:%M:%S %z'
+                )
+
+                # Format date for LaTeX table
+                gitdate = git_datetime.strftime('%B %d, %Y')
+
+            else:
+                git_datetime = datetime.min.replace(tzinfo=None)
+
         except Exception:
             gitdate = 'Unknown'
+            git_datetime = datetime.min.replace(tzinfo=None)
 
         # Escape underscores for LaTeX
         dir_escaped = case_name.replace('_', '\\_')
+
         output = f"{dir_escaped}  & {gitdate} & {gitrev} \\\\ \\hline\n"
 
-    return output
+    return git_datetime, output
 
 
 # Create a LaTeX table
@@ -74,6 +97,7 @@ with open(valdir + 'Process_All_Output.sh', 'r') as inf:
 
 cases = []
 line_num = 0
+
 for line in lines:
     if 'PROCESS' in line:
         parts = line.strip().split()
@@ -82,12 +106,29 @@ for line in lines:
             if line_num > 1:  # Skip first match
                 cases.append(parts[1])
 
-# Process each case and generate table entries
+
+# Process each case and collect entries
+
+entries = []
 
 for case in cases:
-    entry = MAKEGITENTRY(case)
-    with open(OUTPUT_TEX_FILE, 'a') as outf:
+    git_datetime, entry = MAKEGITENTRY(case)
+
+    if entry:
+        entries.append((git_datetime, entry))
+
+
+# Sort cases from oldest to newest by Git revision date
+
+entries.sort(key=lambda x: x[0])
+
+
+# Write sorted entries to the LaTeX table
+
+with open(OUTPUT_TEX_FILE, 'a') as outf:
+    for git_datetime, entry in entries:
         outf.write(entry)
+
 
 # Table footer
 
