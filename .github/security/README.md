@@ -72,6 +72,12 @@ These repository settings are essential and are **not installed by copying YAML*
    workflows until admission succeeds and any workflow changes have been reviewed.
    An attacker can add a *new* `pull_request` workflow in their PR; the trusted gate
    cannot stop GitHub from scheduling unrelated workflows through YAML alone.
+   Leave **Require actions to be pinned to a full-length commit SHA** unchecked
+   while build and line-ending workflows use action version tags. This setting
+   applies to every workflow and rejects those tagged actions during job setup.
+   The security workflows already pin their external actions; repository-wide
+   SHA enforcement is not required for scanning or admission. Enable it only
+   after every workflow's external actions have been pinned to full commit SHAs.
 4. Protect edits to `.github/workflows/` and `.github/security/` with maintainer
    review. Where your GitHub plan supports organization-required workflows, use a
    ruleset requiring the trusted admission workflow as an additional control.
