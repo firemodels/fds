@@ -88,7 +88,7 @@ version_string = fdsplotlib.get_version_string(git_file)
 fig = fdsplotlib.plot_to_fig(x_data=Qcorr, y_data=Vcorr, data_label='Correlation', marker_style='k-',
                              x_min=0.001, x_max=10, y_min=0.1, y_max=1,
                              revision_label=version_string,
-                             x_label='Heat Release Rate, $Q^*$', y_label='Critical Velocity, $V^*$',
+                             x_label=r'Heat Release Rate, $\dot{Q}^*$', y_label='Critical Velocity, $V^*$',
                              legend_location='upper left',
                              plot_type='loglog')
 
@@ -124,7 +124,7 @@ Vstar[4, :] = np.array([0.288, 0.353, 0.393, 0.393, 0.393, 0.393, 0.393, 0.393])
 fig2 = fdsplotlib.plot_to_fig(x_data=Qcorr, y_data=Vcorr, data_label='Correlation', marker_style='k-',
                               x_min=0.001, x_max=10, y_min=0.1, y_max=1,
                               revision_label=version_string,
-                              x_label='Heat Release Rate, $Q^*$', y_label='Critical Velocity, $V^*$',
+                              x_label=r'Heat Release Rate, $\dot{Q}^*$', y_label='Critical Velocity, $V^*$',
                               legend_location='upper left',
                               plot_type='loglog')
 
