@@ -4,7 +4,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                                                 %
-% The mathematical style of these documents is based on the following                                       %
+% The mathematical style of these documents is based on the following                             %
 %                                                                                                 %
 % A. Thompson and B.N. Taylor. The NIST Guide for the Use of the International System of Units.   %
 %    NIST Special Publication 881, 2008.                                                          %
@@ -494,7 +494,13 @@ Additionally, scripts in the FDS and Smokeview verification suites are used to g
 
 \subsection*{Stage 7: Generation of verification and validation plots and regression statistics}
 
-Scripts in the FDS verification and validation suites are used to generate plots, regression information, and timing statistics using the results from Stage~5. These plots, figures, and statistical information are used in the FDS User~\cite{FDS_Users_Guide} and Verification~\cite{FDS_Verification_Guide} Guides as well as the SMV User and Verification Guides.
+Scripts use the results from Stage~5 to generate plots, regression information, and timing statistics for the FDS User~\cite{FDS_Users_Guide}, Verification~\cite{FDS_Verification_Guide}, and Validation~\cite{FDS_Validation_Guide} Guides, as well as the Smokeview User and Verification Guides.
+
+The file \path{validation_scatterplot_output_baseline.csv} provides a version-controlled baseline for validation statistics. The script \path{validation_git_stats.py} compares each predicted quantity with this baseline and adds signed relative differences in model relative standard deviation, $\tilde{\sigma}_M$, and bias factor, $\delta$, to \path{validation_scatterplot_output.csv}.
+
+Changes greater than 10\,\% in magnitude produce an \texttt{Error} when $\tilde{\sigma}_M$ increases or $\delta$ moves farther from unity. Improvements exceeding the same threshold produce a \texttt{Warning}. Smaller changes are recorded without a threshold message.
+
+Small deviations from a baseline may occur with code changes. As model improvements reduce scatter and bring bias closer to unity, the baseline may be updated to reflect the improved statistics. These reviewed updates establish progressively tighter reference values for subsequent changes, encouraging development of the model physics toward tighter validation statistics over time. Version control preserves the history of these baseline changes.
 
 \subsection*{Stage 8: Compilation of FDS-SMV Guides}
 
