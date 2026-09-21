@@ -11,7 +11,7 @@ fire diameter
      \frac{\dQ}{\rho_\infty \, c_p \, T_\infty \, \sqrt{g} }
      \right)^\frac{2}{5}
 \ee
-and $\dx$ is the nominal size of a mesh cell\footnote{The characteristic fire diameter is related to the characteristic fire size via the relation $Q^* = (D^*/D)^{5/2}$, where $D$ is the physical diameter of the fire.}. The quantity $D^*/\dx$ can be thought of as the number of computational cells spanning the characteristic (not necessarily the physical) diameter of the fire. The more cells spanning the fire, the better the resolution of the calculation. It is better to assess the quality of the mesh in terms of this non-dimensional parameter, rather than an absolute mesh cell size. For example, a cell size of 10~cm may be ``adequate,'' in some sense, for evaluating the spread of smoke and heat through a building from a sizable fire, but may not be appropriate to study a very small, smoldering source. The resolution of all the numerical simulations included in this chapter is given in Table~\ref{Numerical_Parameters}.
+and $\dx$ is the nominal size of a mesh cell\footnote{The characteristic fire diameter is related to the characteristic fire size via the relation $\dot{Q}^* = (D^*/D)^{5/2}$, where $D$ is the physical diameter of the fire.}. The quantity $D^*/\dx$ can be thought of as the number of computational cells spanning the characteristic (not necessarily the physical) diameter of the fire. The more cells spanning the fire, the better the resolution of the calculation. It is better to assess the quality of the mesh in terms of this non-dimensional parameter, rather than an absolute mesh cell size. For example, a cell size of 10~cm may be ``adequate,'' in some sense, for evaluating the spread of smoke and heat through a building from a sizable fire, but may not be appropriate to study a very small, smoldering source. The resolution of all the numerical simulations included in this chapter is given in Table~\ref{Numerical_Parameters}.
 
 \clearpage
 
@@ -1006,13 +1006,13 @@ $z_0$ is the height of the firebed or burner surface.
 
 Table~\ref{Flame_Height_Parameters} lists the parameters for FDS simulations of fires in a 1~m by 1~m square pan\footnote{The effective diameter, $D$, of a 1~m square pan is 1.13~m, obtained by equating the area of a square and circle.}. Figure~\ref{Flame_Height_check_hrr} shows a verification of the heat release rate for each case, and Fig.~\ref{Flame_Height} compares the FDS predictions with Heskestad's empirical correlation. Note that the flame height for the FDS simulations is defined as the distance above the pan, on average, at which 99~\% of the fuel has been consumed. Note also that the simulations were run at three different grid resolutions. A convenient length scale is given by
 \be
-   D^* = (Q^*)^{2/5} \, D
+   D^* = (\dot{Q}^*)^{2/5} \, D
 \ee
 Given a grid cell size, $\dx$, the three resolutions can be characterized by the non-dimensional quantity, $D^*/\dx$, whose values in these cases are 5, 10 and 20.
 
-The flame height definition used in Fig.~\ref{Flame_Height} (99~\% fuel consumption) is admittedly arbitrary and is often questioned when FDS predictions of flame height are compared with experimental values, which are usually based on luminosity (effectively measuring radiation emission from soot).  Further, Heskestad's flame height correlation is one among many such correlations~\cite{SFPE:Heskestad,Steward:1970,Becker:1978,Cox:1985,Hasemi:1984,Cetegen:1984,Delichatsios:1984}, and the reported variation is significant, especially at low values of $Q^*$ where the details of the burner configuration (shape of the burner, etc.) become important.  To illustrate the uncertainty one can expect from FDS calculations and to test the sensitivity of the reported FDS results to the flame height definition, Fig.~\ref{Flame_Height2} shows two different FDS flame height predictions, one at 99~\% fuel consumption (as in Fig.~\ref{Flame_Height})---the red curve---and one using 95~\% fuel consumption---the blue curve.  Three different grid resolutions were run for each flame height definition.  For 99~\% fuel consumption, the red dashed line is the maximum flame height from the three resolutions.  For 95~\% fuel consumption, the blue dashed line is the minimum flame height from the three resolutions.  We also overlay several different flame height correlations (colored solid lines).
+The flame height definition used in Fig.~\ref{Flame_Height} (99~\% fuel consumption) is admittedly arbitrary and is often questioned when FDS predictions of flame height are compared with experimental values, which are usually based on luminosity (effectively measuring radiation emission from soot).  Further, Heskestad's flame height correlation is one among many such correlations~\cite{SFPE:Heskestad,Steward:1970,Becker:1978,Cox:1985,Hasemi:1984,Cetegen:1984,Delichatsios:1984}, and the reported variation is significant, especially at low values of $\dot{Q}^*$ where the details of the burner configuration (shape of the burner, etc.) become important.  To illustrate the uncertainty one can expect from FDS calculations and to test the sensitivity of the reported FDS results to the flame height definition, Fig.~\ref{Flame_Height2} shows two different FDS flame height predictions, one at 99~\% fuel consumption (as in Fig.~\ref{Flame_Height})---the red curve---and one using 95~\% fuel consumption---the blue curve.  Three different grid resolutions were run for each flame height definition.  For 99~\% fuel consumption, the red dashed line is the maximum flame height from the three resolutions.  For 95~\% fuel consumption, the blue dashed line is the minimum flame height from the three resolutions.  We also overlay several different flame height correlations (colored solid lines).
 
-Figure~\ref{Flame_Structure} includes comparisons of the predicted HRR as a function of the height of the burner for three different values of $Q^*$. The experimental measurements were performed by Tamanini at Factory Mutual~\cite{Tamanini:CF1983}. Both the HRR and height above the burner have been non-dimensionalized by the total HRR and the flame height, respectively. These results demonstrate that the predicted spatial distribution of the energy release improves as the numerical grid is refined.
+Figure~\ref{Flame_Structure} includes comparisons of the predicted HRR as a function of the height of the burner for three different values of $\dot{Q}^*$. The experimental measurements were performed by Tamanini at Factory Mutual~\cite{Tamanini:CF1983}. Both the HRR and height above the burner have been non-dimensionalized by the total HRR and the flame height, respectively. These results demonstrate that the predicted spatial distribution of the energy release improves as the numerical grid is refined.
 
 \clearpage
 
@@ -1021,7 +1021,7 @@ Figure~\ref{Flame_Structure} includes comparisons of the predicted HRR as a func
 \begin{center}
 \begin{tabular}{|c|c|c|c|c|c|}
 \hline
-$Q^*$       & $\dot{Q}$~(kW) & $D^*$ (m)  & $\dx_5$ (m)  & $\dx_{10}$  & $\dx_{20}$ \\ \hline \hline
+$\dot{Q}^*$       & $\dot{Q}$~(kW) & $D^*$ (m)  & $\dx_5$ (m)  & $\dx_{10}$  & $\dx_{20}$ \\ \hline \hline
 0.1         &   151          & 0.45       & 0.090        & 0.045       &  0.022     \\ \hline
 0.2         &   303          & 0.59       & 0.119        & 0.059       &  0.030     \\ \hline
 0.5         &   756          & 0.86       & 0.171        & 0.086       &  0.043     \\ \hline
@@ -1059,7 +1059,7 @@ $Q^*$       & $\dot{Q}$~(kW) & $D^*$ (m)  & $\dx_5$ (m)  & $\dx_{10}$  & $\dx_{2
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/Heskestad/Flame_Height}
 \end{center}
 \caption[Summary of flame height predictions, Heskestad correlation]
-{Comparison of FDS predictions of flame height from a 1~m square pan fire for $Q^*$ values ranging from
+{Comparison of FDS predictions of flame height from a 1~m square pan fire for $\dot{Q}^*$ values ranging from
 0.1 to 10000.}
 \label{Flame_Height}
 \end{figure}
@@ -1069,7 +1069,7 @@ $Q^*$       & $\dot{Q}$~(kW) & $D^*$ (m)  & $\dx_5$ (m)  & $\dx_{10}$  & $\dx_{2
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/Heskestad/Flame_Height2}
 \end{center}
 \caption[Flame height uncertainty, multiple correlations and flame height definitions]
-{Flame height predictions from various correlations compared with FDS predictions using two different flame height definitions.  Uncertainty (maximum variation) at $Q^*>1$ is $\pm$15~\%.  At $Q^*=0.1$, the uncertainty is approximately $\pm$65~\%. Correlation references: Steward \cite{Steward:1970}, Becker and Liang \cite{Becker:1978}, Cox and Chitty \cite{Cox:1985}, Heskestad \cite{SFPE:Heskestad}, Hasemi and Tokunaga \cite{Hasemi:1984}, Cetegen \cite{Cetegen:1984}, Delichatsios \cite{Delichatsios:1984}.}
+{Flame height predictions from various correlations compared with FDS predictions using two different flame height definitions.  Uncertainty (maximum variation) at $\dot{Q}^*>1$ is $\pm$15~\%.  At $\dot{Q}^*=0.1$, the uncertainty is approximately $\pm$65~\%. Correlation references: Steward \cite{Steward:1970}, Becker and Liang \cite{Becker:1978}, Cox and Chitty \cite{Cox:1985}, Heskestad \cite{SFPE:Heskestad}, Hasemi and Tokunaga \cite{Hasemi:1984}, Cetegen \cite{Cetegen:1984}, Delichatsios \cite{Delichatsios:1984}.}
 \label{Flame_Height2}
 \end{figure}
 
