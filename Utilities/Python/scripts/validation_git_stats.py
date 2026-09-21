@@ -2,9 +2,10 @@
 # Generate the LaTeX table with validation git statistics.
 
 import subprocess
+import sys
 from pathlib import Path
 import glob
-from datetime import datetime
+from datetime import datetime, timezone
 
 outdir = '../../../out/'
 valdir = '../../Validation/'
@@ -26,7 +27,9 @@ def MAKEGITENTRY(case_name):
             gitrev = fff.readline().strip()
 
     output = ''
-    gitdate = ''
+    gitdate = 'Unknown'
+    # Keep unknown dates comparable with timezone-aware Git dates.
+    git_datetime = datetime.min.replace(tzinfo=timezone.utc)
 
     if gitrev != '':
         # Extract git revision short hash
@@ -60,11 +63,15 @@ def MAKEGITENTRY(case_name):
                 gitdate = git_datetime.strftime('%B %d, %Y')
 
             else:
-                git_datetime = datetime.min.replace(tzinfo=None)
+                reason = result.stderr.strip() or 'git show returned no date'
+                print(f'[validation_git_stats] {case_name}: cannot determine date '
+                      f'for revision {gitrevshort}: {reason}', file=sys.stderr)
 
-        except Exception:
+        except Exception as exc:
             gitdate = 'Unknown'
-            git_datetime = datetime.min.replace(tzinfo=None)
+            git_datetime = datetime.min.replace(tzinfo=timezone.utc)
+            print(f'[validation_git_stats] {case_name}: cannot determine date '
+                  f'for revision {gitrevshort}: {exc}', file=sys.stderr)
 
         # Escape underscores for LaTeX
         dir_escaped = case_name.replace('_', '\\_')
@@ -134,4 +141,3 @@ with open(OUTPUT_TEX_FILE, 'a') as outf:
 
 with open(OUTPUT_TEX_FILE, 'a') as f:
     f.write("\\end{longtable}\n")
-
