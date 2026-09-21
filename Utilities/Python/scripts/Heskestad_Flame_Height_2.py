@@ -87,7 +87,7 @@ fig = fdsplotlib.plot_to_fig(x_data=[1e-6,1e-6], y_data=[1e-6,1e-6],
                              revision_label=version_string,
                              plot_title = 'Flame Height Variation',
                              plot_type='loglog',
-                             x_label='$Q^*$',
+                             x_label=r'$\dot{Q}^*$',
                              y_label=r'$L_{\rm f}/D$')
 
 # Load experimental data
