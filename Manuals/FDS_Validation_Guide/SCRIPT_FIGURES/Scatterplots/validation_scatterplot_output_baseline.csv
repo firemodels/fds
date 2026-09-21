@@ -1,0 +1,43 @@
+Quantity,Number of Datasets,Number of Points,Sigma_Experiment,Sigma_Model,Bias
+HGL Temperature; Forced Ventilation,6,158,0.07,0.18,1.16
+HGL Temperature; Natural Ventilation,18,349,0.07,0.11,1.06
+HGL Temperature; No Ventilation,3,32,0.07,0.08,1.10
+HGL Depth,15,297,0.05,0.13,1.09
+Ceiling Jet Temperature,22,1105,0.07,0.15,1.05
+Plume Temperature,16,480,0.07,0.42,1.00
+Oxygen Concentration,13,316,0.08,0.17,1.00
+Carbon Dioxide Concentration,13,313,0.08,0.15,1.00
+Compartment Over-Pressure,5,187,0.23,0.19,0.93
+Target Temperature,11,1415,0.07,0.18,1.06
+Surface Temperature,10,1277,0.07,0.18,1.12
+Liquid Pool Surface Temperature,10,24,0.07,0.10,0.93
+Target Heat Flux,21,1541,0.11,0.50,1.06
+Surface Heat Flux,15,976,0.11,0.54,0.90
+Velocity,13,554,0.08,0.25,1.06
+Sprinkler Activation Time,6,273,0.06,0.17,1.04
+Smoke Detector Activation Time,1,142,0.34,0.19,0.62
+Smoke Detector Activation Time; Temp. Rise,1,142,0.34,0.32,1.25
+Cable Failure Time,1,35,0.12,0.16,1.16
+Sprinkler Actuations,3,38,0.15,0.31,1.22
+Aerosol Deposition Velocity,3,162,0.98,0.98,0.20
+Heat Release Rate,8,74,0.08,0.29,1.01
+Scaling Heat Release Rate Per Unit Area,4,531,0.08,0.24,0.98
+Burning Rate,2,37,0.08,0.40,0.92
+Liquid Pool Burning Rate,12,31,0.08,0.43,1.59
+Carbon Monoxide Concentration,8,172,0.19,0.68,1.28
+Entrainment,2,87,0.10,0.00,1.13
+Extinction Time,2,45,0.10,0.46,1.20
+Species Concentration,2,126,0.08,0.15,0.97
+Smoke Obscuration,3,44,0.07,0.71,1.27
+Mass Flow Rate,1,40,0.08,0.09,0.91
+Atmospheric Dispersion,13,47,0.50,0.84,1.66
+Minimum Extinguishing Concentration,46,46,0.06,0.00,1.07
+Flame Height,9,84,0.10,0.35,1.05
+Flame Tilt,4,34,0.10,0.64,0.93
+Plume Height,1,3,0.09,0.09,1.06
+Rate of Spread,6,343,0.10,0.38,0.95
+Condensation,5,96,0.12,0.25,0.75
+Aerosol Deposition,2,88,0.12,0.28,1.37
+Evaporation Rate,4,48,0.08,0.08,1.01
+Fireball Diameter,2,9,0.07,0.07,0.83
+Fireball Height,2,9,0.08,0.08,1.08
