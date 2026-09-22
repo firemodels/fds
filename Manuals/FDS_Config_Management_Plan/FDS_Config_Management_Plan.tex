@@ -458,6 +458,22 @@ Individual testing of model algorithms are made by the developers during any rev
 \end{itemize}
 
 
+\section{GitHub Actions: Repository Checks}
+
+GitHub Actions provide automated checks of changes submitted to the \texttt{fds} and \texttt{out} repositories. Workflow definitions reside in each repository's \path{.github/workflows} directory, and results are reported on GitHub. These checks complement the verification and validation testing performed by Firebot. The workflows are summarized below.
+
+\begin{description}
+\item[Platform builds:] \path{linux.yml}, \path{osx.yml}, and \path{windows.yml} compile and launch debug and release versions of FDS using the supported Intel or GNU compiler and MPI combinations. The Linux workflow also checks Python package imports with \path{hello_world.py} and runs regression tests of the PR security logic.
+
+\item[CMake builds:] \path{cmake.yml} builds FDS on Linux, macOS, and Windows across compiler, debug/release, and OpenMP configurations. CTest checks that the resulting executable starts. The platform and CMake workflows run for relevant source, build, or workflow changes.
+
+\item[PR security:] \path{pr-security.yml} coordinates admission and build checks for FDS pull requests, while \path{virus-scan.yml} uses ClamAV to scan the submitted and proposed merge snapshots. Outside contributions must pass scanning before build checks begin; approved developers' scans run independently, including after merging. Section~\ref{sec:pr-virus-scanning} describes this process and its repository settings.
+
+\item[Line endings:] \path{Line_Endings.yml} in both repositories reports an error if text files contain DOS-style line endings.
+
+\item[Validation revisions:] \path{Git_Revisions.yml} in \texttt{out} checks only tracked \path{*_git.txt} files and reports an error if a revision string contains \texttt{dirty}, indicating uncommitted changes in the source used to generate the results.
+\end{description}
+
 \section{Firebot: Automated Software Quality Testing}
 
 The FDS and Smokeview source codes undergo an automated build, verification, validation, and regression testing process, which is similar to a continuous integration system that automates the build/testing cycle for a project. This automated process is referred to as Firebot. The Firebot build/test process helps the FDS-SMV development team by performing automatic error checking and collecting performance and accuracy statistics between FDS revisions.
@@ -552,6 +568,7 @@ In addition to the identified configuration items included in the FDS/Smokeview 
 NIST management approval is required prior to destruction of old or out-of-date records. Records are typically maintained for a minimum of 25 years.
 
 \section{Virus Scanning of Pull Requests}
+\label{sec:pr-virus-scanning}
 
 GitHub Actions use ClamAV to scan pull requests to FDS and participating developers' forks. These checks examine repository content and do not replace release-bundle scans. Security code and approved account IDs come from the receiving repository's trusted revision. When both the author and event sender are approved developers, scanning proceeds in the background, including after merging; other pull requests must pass scanning before admission to build checks.
 
