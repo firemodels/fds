@@ -90,6 +90,7 @@ SMV/for_bundle/uploads
 Manuals/*/SCRIPT_FIGURES/*/*.pdf
 Manuals/*/SCRIPT_FIGURES/*/*.tex
 Manuals/*/SCRIPT_FIGURES/*/*.csv
+!Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Scatterplots/validation_scatterplot_output_baseline.csv
 Manuals/*/SCRIPT_FIGURES/*.pdf
 Manuals/*/SCRIPT_FIGURES/*.tex
 Manuals/*/SCRIPT_FIGURES/*.png
