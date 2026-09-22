@@ -1290,12 +1290,12 @@ This section presents small and large-scale experiments focused on the phenomeno
 
 This section contains the results of the simulations of the Wu and Bakar experiments described in Sec.~\ref{Wu_Bakar_Tunnels_Description}. Five simulations are conducted. In each, the heat release rate is stepped up from its lowest reported value to its highest, each step lasting 20~s. For each of the eight heat release rates, the tunnel velocity is set to the reported critical velocity. Temperature readings along the ceiling indicate where the smoke layer temperature drops below 30~\unit{\degreeCelsius}, 10~\unit{\degreeCelsius} above ambient. This is taken as the extent of the back-layer. Using an empirical correlation for the normalized back-layer length, $L_{\rm b}^*$, developed by Li~et al.~\cite{Li:FSJ2010}
 \be
-   L_{\rm b}^* = \left\{ \begin{array}{ll} 18.5 \, \ln (0.81 \, Q^{*1/3}/V^*) & Q^*\le 0.15 \\
-                                      18.5 \, \ln (0.43 /V^*)            & Q^*>   0.15 \end{array} \right.
+   L_{\rm b}^* = \left\{ \begin{array}{ll} 18.5 \, \ln (0.81 \, (\dot{Q}^*)^{1/3}/V^*) & \dot{Q}^*\le 0.15 \\
+                                      18.5 \, \ln (0.43 /V^*)            & \dot{Q}^*>   0.15 \end{array} \right.
 \ee
 where
 \be
-   L_{\rm b}^* = \frac{L_{\rm b}}{\bar{H}} \quad ; \quad \bar{H}=\frac{4A}{P} \quad ; \quad Q^*=\frac{Q}{\rho_\infty c_p T_\infty \sqrt{g \bar{H}^5} } \quad ; \quad V^* = \frac{V}{\sqrt{g \bar{H}}}
+   L_{\rm b}^* = \frac{L_{\rm b}}{\bar{H}} \quad ; \quad \bar{H}=\frac{4A}{P} \quad ; \quad \dot{Q}^*=\frac{\dot{Q}}{\rho_\infty c_p T_\infty \sqrt{g \bar{H}^5} } \quad ; \quad V^* = \frac{V}{\sqrt{g \bar{H}}}
 \ee
 the FDS-predicted critical velocity, $V_{\rm FDS}$, can be estimated from the measured, $V_{\rm exp}$, via
 \be
@@ -1314,7 +1314,7 @@ Note that $\bar{H}$ is known as the {\em hydraulic diameter} which takes into co
 
 The non-dimensionalized critical velocity predictions are plotted against the non-dimensionalized HRR in Fig.~\ref{Wu_Bakar_Correlation}. The solid line in the figure is the correlation developed by Wu and Bakar~\cite{Wu:FSJ2000}:
 \be
-   V^* = \left\{ \begin{array}{ll} 0.4 \, (Q^*/0.2)^{1/3} & Q^* \le 0.2 \\ 0.4 & Q^* > 0.2 \end{array} \right.
+   V^* = \left\{ \begin{array}{ll} 0.4 \, (\dot{Q}^*/0.2)^{1/3} & \dot{Q}^* \le 0.2 \\ 0.4 & \dot{Q}^* > 0.2 \end{array} \right.
 \ee
 
 

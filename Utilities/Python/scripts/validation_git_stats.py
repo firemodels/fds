@@ -1,14 +1,79 @@
 
-# Generate the LaTeX table with validation git statistics.
+# Generate the LaTeX table with validation git statistics and compare scatterplot
+# statistics with the version-controlled baseline.
 
+import csv
 import subprocess
+import sys
 from pathlib import Path
 import glob
-from datetime import datetime
+from datetime import datetime, timezone
+from decimal import Decimal, InvalidOperation
 
 outdir = '../../../out/'
 valdir = '../../Validation/'
 resdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Scatterplots/'
+
+
+def compare_scatterplot_statistics():
+    """Report changes over 10% as errors only when model agreement worsens."""
+    output_file = Path(resdir) / 'validation_scatterplot_output.csv'
+    baseline_file = Path(resdir) / 'validation_scatterplot_output_baseline.csv'
+    metrics = ('Sigma_Model', 'Bias')
+    difference_columns = [metric + '_Relative_Difference' for metric in metrics]
+
+    try:
+        with baseline_file.open(newline='') as inf:
+            baseline = {row['Quantity']: row for row in csv.DictReader(inf)}
+        with output_file.open(newline='') as inf:
+            reader = csv.DictReader(inf)
+            fieldnames = list(reader.fieldnames or [])
+            rows = list(reader)
+    except OSError as exc:
+        print(f'Error: validation_git_stats: cannot compare scatterplot statistics: {exc}')
+        return
+
+    # Re-running the script updates the existing columns instead of duplicating them.
+    fieldnames += [name for name in difference_columns if name not in fieldnames]
+    for row in rows:
+        quantity = row['Quantity']
+        for column in difference_columns:
+            row[column] = ''
+        if quantity not in baseline:
+            print(f'Error: validation_git_stats: {quantity}: missing scatterplot baseline.')
+            continue
+
+        for metric, column in zip(metrics, difference_columns):
+            try:
+                # Decimal keeps changes of exactly 10% from failing due to roundoff.
+                current = Decimal(row[metric])
+                reference = Decimal(baseline[quantity][metric])
+                if not current.is_finite() or not reference.is_finite():
+                    raise ValueError('non-finite statistic')
+            except (KeyError, TypeError, ValueError, InvalidOperation):
+                print(f'Error: validation_git_stats: {quantity}: invalid {metric} '
+                      'in scatterplot output or baseline.')
+                continue
+
+            if reference == 0:
+                difference = Decimal(0) if current == 0 else Decimal('Infinity').copy_sign(current)
+            else:
+                difference = (current - reference) / abs(reference)
+            row[column] = f'{difference:.6f}'
+            if abs(difference) > Decimal('0.10'):
+                # Lower model scatter is better; bias is better closer to one.
+                # A bias crossing one can change significantly without worsening.
+                current_error = current if metric == 'Sigma_Model' else abs(current - 1)
+                baseline_error = reference if metric == 'Sigma_Model' else abs(reference - 1)
+                severity = 'Error' if current_error > baseline_error else 'Warning'
+                print(f'{severity}: validation_git_stats: {quantity}: {metric} relative '
+                      f'difference {difference:.2%} exceeds 10% in magnitude '
+                      f'(current={current}, baseline={reference}).')
+
+    with output_file.open('w', newline='') as outf:
+        writer = csv.DictWriter(outf, fieldnames=fieldnames, lineterminator='\n')
+        writer.writeheader()
+        writer.writerows(rows)
 
 
 def MAKEGITENTRY(case_name):
@@ -26,7 +91,9 @@ def MAKEGITENTRY(case_name):
             gitrev = fff.readline().strip()
 
     output = ''
-    gitdate = ''
+    gitdate = 'Unknown'
+    # Keep unknown dates comparable with timezone-aware Git dates.
+    git_datetime = datetime.min.replace(tzinfo=timezone.utc)
 
     if gitrev != '':
         # Extract git revision short hash
@@ -60,11 +127,15 @@ def MAKEGITENTRY(case_name):
                 gitdate = git_datetime.strftime('%B %d, %Y')
 
             else:
-                git_datetime = datetime.min.replace(tzinfo=None)
+                reason = result.stderr.strip() or 'git show returned no date'
+                print(f'[validation_git_stats] {case_name}: cannot determine date '
+                      f'for revision {gitrevshort}: {reason}', file=sys.stderr)
 
-        except Exception:
+        except Exception as exc:
             gitdate = 'Unknown'
-            git_datetime = datetime.min.replace(tzinfo=None)
+            git_datetime = datetime.min.replace(tzinfo=timezone.utc)
+            print(f'[validation_git_stats] {case_name}: cannot determine date '
+                  f'for revision {gitrevshort}: {exc}', file=sys.stderr)
 
         # Escape underscores for LaTeX
         dir_escaped = case_name.replace('_', '\\_')
@@ -135,3 +206,5 @@ with open(OUTPUT_TEX_FILE, 'a') as outf:
 with open(OUTPUT_TEX_FILE, 'a') as f:
     f.write("\\end{longtable}\n")
 
+
+compare_scatterplot_statistics()
