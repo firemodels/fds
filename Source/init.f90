@@ -1828,12 +1828,12 @@ END SUBROUTINE REALLOCATE_ONE_D_ARRAYS
 
 SUBROUTINE INITIALIZE_HT3D_WALL_CELLS(NM)
 
-USE GEOMETRY_FUNCTIONS, ONLY: SEARCH_OTHER_MESHES
+USE GEOMETRY_FUNCTIONS, ONLY: SEARCH_OTHER_MESHES,FIND_WALL_INDEX
 INTEGER, INTENT(IN) :: NM
-INTEGER :: I,IW,IW2,ITW,ITW2,NWP,NWP2,I2,IWA,DM,IOR,NOM,II,JJ,KK,NN,IC,NL
+INTEGER :: I,IW,IW2,ITW,ITW2,NWP,NWP2,I2,IWA,DM,IOR,NOM,II,JJ,KK,NN,NNN,IC,NL,IW_FOUND,NN_FOUND,III,JJJ,KKK
 LOGICAL :: IOR_AVOID(-3:3),FOUND
 REAL(EB) :: X1,X2,Y1,Y2,Z1,Z2,XX1,XX2,YY1,YY2,ZZ1,ZZ2,PRIMARY_VOLUME,OVERLAP_VOLUME,DXX,DYY,DZZ,WEIGHT_FACTOR,&
-            SUM_WGT(3),XX,YY,ZZ,WEIGHT,TARGET_WEIGHT
+            SUM_WGT(3),XX,YY,ZZ,WEIGHT,TARGET_WEIGHT,XXX,YYY,ZZZ
 TYPE(WALL_TYPE), POINTER :: WC
 TYPE(THIN_WALL_TYPE), POINTER :: TW
 TYPE(SURFACE_TYPE), POINTER :: SF,SF2
@@ -1846,6 +1846,9 @@ INTEGER, ALLOCATABLE, DIMENSION(:) :: INTEGER_DUMMY
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: REAL_DUMMY
 REAL(EB), PARAMETER :: TOL=0.0001_EB
 INTEGER, ALLOCATABLE, DIMENSION(:) :: LAYER_INDEX
+integer, parameter :: NROWS=3, NCOLS=400
+INTEGER, DIMENSION(nrows,ncols) :: WALL_CANDIDATE
+INTEGER :: N_WALL_CANDIDATES,I_WC,MESH_CUTS,III_OLD,JJJ_OLD,KKK_OLD,NNN_OLD,POINT_INDEX,N_POINTS
 
 M => MESHES(NM)
 
@@ -1925,11 +1928,57 @@ PRIMARY_WALL_LOOP: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
          ENDIF
       ENDIF
 
-      ! Loop over wall cells searching for the "alternate" wall cells whose 1-D path intersects
+      ! Find all grid cells (III,JJJ,KKK) in mesh NNN that overlap with node I of the wall cell IW in mesh NM.
+      ! For each of these grid cells, find wall cells in the four alternate directions whose 1-D internal nodes overlap.
 
-      ALTERNATE_WALL_LOOP: DO IW2=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS  ! Loop over potential alternate wall cells
-         CALL SEARCH_FOR_ALTERNATE_WALL_CELLS(NM,WALL_INDEX=IW2)
-      ENDDO ALTERNATE_WALL_LOOP
+      N_WALL_CANDIDATES = 0
+      WALL_CANDIDATE=1000000
+      XXX=XX ; YYY=YY ; ZZZ=ZZ
+      III_OLD=-1 ; JJJ_OLD=-1 ; KKK_OLD=-1 ; NNN_OLD=-1
+      N_POINTS = 20
+      POINT_INDEX_LOOP: DO POINT_INDEX=0,N_POINTS
+         SELECT CASE(ABS(BC%IOR))
+            CASE(1) ; XXX = X1 + POINT_INDEX*(X2-X1)/REAL(N_POINTS,EB)
+            CASE(2) ; YYY = Y1 + POINT_INDEX*(Y2-Y1)/REAL(N_POINTS,EB)
+            CASE(3) ; ZZZ = Z1 + POINT_INDEX*(Z2-Z1)/REAL(N_POINTS,EB)
+         END SELECT
+         CALL SEARCH_OTHER_MESHES(XXX,YYY,ZZZ,NNN,III,JJJ,KKK)
+         IF (NNN==0) CYCLE POINT_INDEX_LOOP
+         IF (III==III_OLD .AND. JJJ==JJJ_OLD .AND. KKK==KKK_OLD .AND. NNN==NNN_OLD) CYCLE POINT_INDEX_LOOP
+         III_OLD=III ; JJJ_OLD=JJJ ; KKK_OLD=KKK ; NNN_OLD=NNN
+         DIRECTION_LOOP: DO IOR=-3,3
+            IF (IOR==0 .OR. IOR==BC%IOR .OR. IOR==-BC%IOR) CYCLE DIRECTION_LOOP
+            CALL FIND_WALL_INDEX(III,JJJ,KKK,NNN,IOR,IW_FOUND,NN_FOUND,MESH_CUTS)
+            IF (IW_FOUND==0 .OR. NN_FOUND==0) CYCLE DIRECTION_LOOP
+            N_WALL_CANDIDATES = N_WALL_CANDIDATES + 1
+            WALL_CANDIDATE(1,N_WALL_CANDIDATES) = MESH_CUTS
+            WALL_CANDIDATE(2,N_WALL_CANDIDATES) = NN_FOUND
+            WALL_CANDIDATE(3,N_WALL_CANDIDATES) = IW_FOUND
+         ENDDO DIRECTION_LOOP
+      ENDDO POINT_INDEX_LOOP
+
+      ! For all candidate alternate wall cells, order them from nearest to farthest from the current mesh
+
+      IF (N_WALL_CANDIDATES>0) CALL SORT_COLUMNS_BY_FIRST_ROW(WALL_CANDIDATE)
+
+      ! Loop over all candidate wall cells to see which of them have 1-D paths that intersect the current node I
+
+      DO I_WC=1,N_WALL_CANDIDATES
+         IW2 = WALL_CANDIDATE(3,I_WC)
+         NOM = WALL_CANDIDATE(2,I_WC)
+         CALL SEARCH_FOR_ALTERNATE_WALL_CELLS(NOM,WALL_INDEX=IW2)
+         IF (FOUND .AND. NOM/=NM) THEN
+            OS => M%OMESH(NOM)%WALL_RECV_BUFFER
+            DO NNN=1,OS%N_ITEMS
+               IF (OS%ITEM_INDEX(NNN)==IW2) THEN
+                  OS%SAVE_FLAG(NNN) = .TRUE.
+                  EXIT
+               ENDIF
+            ENDDO
+         ENDIF
+      ENDDO
+
+      ! Loop over wall cells searching for the "alternate" wall cells whose 1-D path intersects
 
       ALTERNATE_THIN_WALL_LOOP: DO ITW2=1,M%N_THIN_WALL_CELLS  ! Loop over potential alternate wall cells
          CALL SEARCH_FOR_ALTERNATE_WALL_CELLS(NM,THIN_WALL_INDEX=ITW2)
@@ -1937,12 +1986,6 @@ PRIMARY_WALL_LOOP: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
 
       OTHER_MESH_LOOP: DO NOM=1,NMESHES
          IF (NM==NOM) CYCLE
-         OS => M%OMESH(NOM)%WALL_RECV_BUFFER
-         ALTERNATE_WALL_LOOP_2: DO NN=1,OS%N_ITEMS
-            IW2 = OS%ITEM_INDEX(NN)
-            CALL SEARCH_FOR_ALTERNATE_WALL_CELLS(NOM,WALL_INDEX=IW2)
-            IF (FOUND) OS%SAVE_FLAG(NN) = .TRUE.
-         ENDDO ALTERNATE_WALL_LOOP_2
          OS => M%OMESH(NOM)%THIN_WALL_RECV_BUFFER
          ALTERNATE_WALL_LOOP_2D: DO NN=1,OS%N_ITEMS  !  THIN_WALL cells, neighboring meshes
             ITW2 = OS%ITEM_INDEX(NN)
@@ -2104,6 +2147,29 @@ PRIMARY_THIN_WALL_LOOP: DO ITW=1,M%N_THIN_WALL_CELLS
 ENDDO PRIMARY_THIN_WALL_LOOP
 
 CONTAINS
+
+
+!> \brief Rearrage array so that first row is in ascending order
+!> \param A 2D array
+
+SUBROUTINE SORT_COLUMNS_BY_FIRST_ROW(A)
+   INTEGER, INTENT(INOUT) :: A(NROWS,NCOLS)
+   INTEGER :: I,J,KEY(NROWS)
+   DO I=2,NCOLS
+       KEY = A(:,I)
+       J = I - 1
+       DO WHILE (J >= 1)
+           IF (A(1,J) > KEY(1)) THEN
+              A(:,J+1) = A(:,J)
+              J = J - 1
+           ELSE
+              EXIT
+           ENDIF
+       ENDDO
+       A(:,J+1) = KEY
+   ENDDO
+END SUBROUTINE SORT_COLUMNS_BY_FIRST_ROW
+
 
 !> \brief Find WALL or THIN_WALL cells whose internal nodes overlap those of the primary WALL or THIN_WALL cell
 !> \param NOM Mesh number of the primary cell or its neighbor

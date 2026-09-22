@@ -215,14 +215,14 @@ BUILDING GEMOEMTRY
 &HOLE XB= 4.2, 6.8, 2.6, 5.1, 8.0,26.0 / Upper stair shaft
 &HOLE XB= 4.2, 7.6, 2.6, 5.1, 1.0, 8.0 / Lower stair shaft
 
-&OBST XB=8.175,8.3,0.2,1.1,0.0,2.1,    SURF_ID='Timber Door'/ 1st Floor Door
-&OBST XB=9.075,9.2,2.6,3.5,0.0,2.1,    SURF_ID='Timber Door'/ 1st Floor Door
-&OBST XB=11.575,11.7,2.6,3.5,0.0,2.1,  SURF_ID='Timber Door'/ 1st Floor Door
-&OBST XB=15.575,15.7,4.35,6.15,0.0,2.1,SURF_ID='Timber Door'/ 1st Floor Door
+&OBST XB=8.2,8.3,0.2,1.1,0.0,2.1,    SURF_ID='Timber Door'/ 1st Floor Door
+&OBST XB=9.1,9.2,2.6,3.5,0.0,2.1,    SURF_ID='Timber Door'/ 1st Floor Door
+&OBST XB=11.6,11.7,2.6,3.5,0.0,2.1,  SURF_ID='Timber Door'/ 1st Floor Door
+&OBST XB=15.6,15.7,4.4,6.2,0.0,2.1,SURF_ID='Timber Door'/ 1st Floor Door
 &OBST XB=8.5,9.4,3.4,3.5,3.6,5.7,      SURF_ID='Timber Door'/ 2nd Floor Door
 &OBST XB=10.9,11.8,2.6,2.7,3.6,5.7,    SURF_ID='Timber Door'/ 2nd Floor Door
 &OBST XB=10.9,11.8,2.6,2.7,7.2,9.3,    SURF_ID='Timber Door'/ 3rd Floor Door
-&OBST XB=9.075,9.2,2.6,3.5,7.2,9.3,    SURF_ID='Timber Door'/ 3rd Floor Door
+&OBST XB=9.1,9.2,2.6,3.5,7.2,9.3,    SURF_ID='Timber Door'/ 3rd Floor Door
 &OBST XB=10.9,11.8,9.7,9.8,7.2,9.3,    SURF_ID='Timber Door'/ 3rd floor Door
 &OBST XB=10.9,11.8,9.7,9.8,9.8,11.9,   SURF_ID='Timber Door'/ 4th Floor Door
 &OBST XB=8.5,9.4,3.4,3.5,9.8,11.9,     SURF_ID='Timber Door'/ 4th Floor Door
@@ -231,8 +231,8 @@ BUILDING GEMOEMTRY
 &OBST XB=11.4,11.5,2.9,3.1,9.8,11.9,   SURF_ID='Timber Door'/ 4th Floor Part Open Door
 &OBST XB=11.5,11.6,2.7,2.9,9.8,11.9,   SURF_ID='Timber Door'/ 4th Floor Part Open Door
 &OBST XB=11.6,11.7,2.6,2.7,9.8,11.9,   SURF_ID='Timber Door'/ 4th Floor Part Open Door
-&OBST XB=9.075,9.2,2.6,3.5,12.4,14.5,  SURF_ID='Timber Door'/ 5th Floor Door
-&OBST XB=11.575,11.7,2.6,3.5,12.4,14.5,SURF_ID='Timber Door'/ 5th Floor Door
+&OBST XB=9.1,9.2,2.6,3.5,12.4,14.5,  SURF_ID='Timber Door'/ 5th Floor Door
+&OBST XB=11.6,11.7,2.6,3.5,12.4,14.5,SURF_ID='Timber Door'/ 5th Floor Door
 &OBST XB=10.9,11.8,9.7,9.8,12.4,14.5,  SURF_ID='Timber Door'/ 5th Floor Door
 &OBST XB=12.7,12.9,8.7,8.8,15.0,17.1,  SURF_ID='Timber Door'/ 6th Floor Part Open Door
 &OBST XB=12.9,13.4,8.6,8.7,15.0,17.1,  SURF_ID='Timber Door'/ 6th Floor Part Open Door
@@ -245,9 +245,9 @@ BUILDING GEMOEMTRY
 &OBST XB=14.5,15.4,5.3,5.4,15.0,17.1,  SURF_ID='Timber Door'/ 6th Floor Door
 &OBST XB=8.5,9.4,3.4,3.5,15.0,17.1,    SURF_ID='Timber Door'/ 6th Floor Door
 &OBST XB=10.9,11.8,9.7,9.8,15.0,17.1,  SURF_ID='Timber Door'/ 6th Floor Door
-&OBST XB=9.075,9.2,2.6,3.5,17.6,19.7,  SURF_ID='Timber Door'/ 7th Floor Door
+&OBST XB=9.1,9.2,2.6,3.5,17.6,19.7,  SURF_ID='Timber Door'/ 7th Floor Door
 &OBST XB=10.9,11.8,9.7,9.8,17.6,19.7,  SURF_ID='Timber Door'/ 7th Floor Door
-&OBST XB=11.575,11.7,2.6,3.5,17.6,19.7,SURF_ID='Timber Door'/ 7th Floor Door
+&OBST XB=11.6,11.7,2.6,3.5,17.6,19.7,SURF_ID='Timber Door'/ 7th Floor Door
 &OBST XB=10.9,11.8,9.7,9.8,20.2,22.3,  SURF_ID='Timber Door'/ 8th Floor Door
 &OBST XB=8.5,9.4,3.4,3.5,20.2,22.3,    SURF_ID='Timber Door'/ 8th Floor Door
 &OBST XB=11.2,11.3,3.3,3.4,20.2,22.3,  SURF_ID='Timber Door'/ 8th Floor Part Open Door
@@ -255,7 +255,7 @@ BUILDING GEMOEMTRY
 &OBST XB=11.4,11.5,2.9,3.1,20.2,22.3,  SURF_ID='Timber Door'/ 8th Floor Part Open Door
 &OBST XB=11.5,11.6,2.7,2.9,20.2,22.3,  SURF_ID='Timber Door'/ 8th Floor Part Open Door
 &OBST XB=11.6,11.7,2.6,2.7,20.2,22.3,  SURF_ID='Timber Door'/ 8th Floor Part Open Door
-&OBST XB=9.075,9.2,2.6,3.5,22.8,24.9,  SURF_ID='Timber Door'/ 9th Floor Door
+&OBST XB=9.1,9.2,2.6,3.5,22.8,24.9,  SURF_ID='Timber Door'/ 9th Floor Door
 &OBST XB=10.9,11.8,9.7,9.8,22.8,24.9,  SURF_ID='Timber Door'/ 9th Floor Door
 &OBST XB=10.9,11.8,7.7,7.8,22.8,24.9,  SURF_ID='Timber Door'/ 9th Floor Door
 &OBST XB=10.9,11.8,2.6,2.7,22.8,24.9,  SURF_ID='Timber Door'/ 9th Floor Door
