@@ -1,30 +1,46 @@
 &HEAD CHID='masonry_wall', TITLE='SNL Masonry Wall experiment' /
 
-&MESH XB=-0.0762,0.1905,-1.0668,-0.7112,-1.0668,-0.7112, IJK=21,28,28, MULT_ID='mesh' /
-&MULT ID='mesh', DX=0.2667, DY=0.3556, DZ=0.3556, I_UPPER=1, J_UPPER=5, K_UPPER=5 /
+&MESH XB=-0.08,0.48,-1.08,-0.54,-1.08,-0.54, IJK=56,54,54, MULT_ID='mesh' /
+&MULT ID='mesh', DY=0.54, DZ=0.54, J_UPPER=3, K_UPPER=3 /
 
 &TIME T_END=6300, WALL_INCREMENT=1, DT=0.1, TIME_SHRINK_FACTOR=20 /
 
-&MISC TMPA=19.8, SOLID_PHASE_ONLY=F /
+&MISC TMPA=19.8, SOLID_PHASE_ONLY=F, VERBOSE=F /
 
 &MATL ID = 'Masonry' 
       DENSITY = 1616
       CONDUCTIVITY_RAMP = 'k_masonry'
-      SPECIFIC_HEAT = 1. /
+      SPECIFIC_HEAT_RAMP = 'c_masonry' /
 
-&RAMP ID='k_masonry', T= 26, F=0.27 /
-&RAMP ID='k_masonry', T= 41, F=0.26 /
-&RAMP ID='k_masonry', T= 66, F=0.27 /
-&RAMP ID='k_masonry', T= 96, F=0.31 /
-&RAMP ID='k_masonry', T=120, F=0.35 /
-&RAMP ID='k_masonry', T=143, F=0.40 /
-&RAMP ID='k_masonry', T=164, F=0.42 /
-&RAMP ID='k_masonry', T=185, F=0.44 /
-&RAMP ID='k_masonry', T=204, F=0.46 /
-&RAMP ID='k_masonry', T=221, F=0.47 /
-&RAMP ID='k_masonry', T=237, F=0.50 /
-&RAMP ID='k_masonry', T=252, F=0.54 /
-&RAMP ID='k_masonry', T=265, F=0.59 /
+&RAMP ID='k_masonry', T=26, F=0.217 /
+&RAMP ID='k_masonry', T=41, F=0.207 /
+&RAMP ID='k_masonry', T=66, F=0.220 /
+&RAMP ID='k_masonry', T=96, F=0.257 /
+&RAMP ID='k_masonry', T=120, F=0.290 /
+&RAMP ID='k_masonry', T=143, F=0.335 /
+&RAMP ID='k_masonry', T=164, F=0.358 /
+&RAMP ID='k_masonry', T=185, F=0.380 /
+&RAMP ID='k_masonry', T=204, F=0.403 /
+&RAMP ID='k_masonry', T=221, F=0.416 /
+&RAMP ID='k_masonry', T=237, F=0.446 /
+&RAMP ID='k_masonry', T=252, F=0.478 /
+&RAMP ID='k_masonry', T=265, F=0.527 /
+&RAMP ID='k_masonry', T=400, F=0.691 /
+
+&RAMP ID='c_masonry', T=26, F=0.800 /
+&RAMP ID='c_masonry', T=41, F=0.806 /
+&RAMP ID='c_masonry', T=66, F=0.816 /
+&RAMP ID='c_masonry', T=96, F=0.828 /
+&RAMP ID='c_masonry', T=120, F=0.838 /
+&RAMP ID='c_masonry', T=143, F=0.847 /
+&RAMP ID='c_masonry', T=164, F=0.855 /
+&RAMP ID='c_masonry', T=185, F=0.864 /
+&RAMP ID='c_masonry', T=204, F=0.871 /
+&RAMP ID='c_masonry', T=221, F=0.878 /
+&RAMP ID='c_masonry', T=237, F=0.885 /
+&RAMP ID='c_masonry', T=252, F=0.891 /
+&RAMP ID='c_masonry', T=265, F=0.896 /
+&RAMP ID='c_masonry', T=400, F=0.950 /
 
 &MATL ID = 'Perlite' 
       DENSITY = 93 
@@ -41,7 +57,7 @@
 &RAMP ID='k_perlite', T=427, F=0.163 /
 &RAMP ID='k_perlite', T=538, F=0.214 /
 
-&RAMP ID='c_perlite', T=  2, F=0.716 /
+&RAMP ID='c_perlite', T=  2, F=0.761 /
 &RAMP ID='c_perlite', T= 25, F=0.802 /
 &RAMP ID='c_perlite', T=127, F=0.920 /
 &RAMP ID='c_perlite', T=177, F=0.966 /
@@ -290,25 +306,25 @@
 &RAMP ID='S9', T=6000, F=1.002 /
 &RAMP ID='S9', T=6300, F=1.001 /
 
-&OBST XB=-.0635,-.0508,-0.8128,-0.2032, 0.2032, 0.8128, SURF_ID6='INERT','Shroud Surface S1','INERT','INERT','INERT','INERT', COLOR='BLACK' /
-&OBST XB=-.0635,-.0508,-0.2032, 0.2032, 0.2032, 0.8128, SURF_ID6='INERT','Shroud Surface S2','INERT','INERT','INERT','INERT', COLOR='BLACK' /
-&OBST XB=-.0635,-.0508, 0.2032, 0.8132, 0.2032, 0.8128, SURF_ID6='INERT','Shroud Surface S3','INERT','INERT','INERT','INERT', COLOR='BLACK' /
-&OBST XB=-.0635,-.0508,-0.8128,-0.2032,-0.2032, 0.2032, SURF_ID6='INERT','Shroud Surface S4','INERT','INERT','INERT','INERT', COLOR='BLACK' /
-&OBST XB=-.0635,-.0508,-0.2032, 0.2032,-0.2032, 0.2032, SURF_ID6='INERT','Shroud Surface S5','INERT','INERT','INERT','INERT', COLOR='BLACK' /
-&OBST XB=-.0635,-.0508, 0.2032, 0.8132,-0.2032, 0.2032, SURF_ID6='INERT','Shroud Surface S6','INERT','INERT','INERT','INERT', COLOR='BLACK' /
-&OBST XB=-.0635,-.0508,-0.8128,-0.2032,-0.8128,-0.2032, SURF_ID6='INERT','Shroud Surface S7','INERT','INERT','INERT','INERT', COLOR='BLACK' /
-&OBST XB=-.0635,-.0508,-0.2032, 0.2032,-0.8128,-0.2032, SURF_ID6='INERT','Shroud Surface S8','INERT','INERT','INERT','INERT', COLOR='BLACK' /
-&OBST XB=-.0635,-.0508, 0.2032, 0.8132,-0.8128,-0.2032, SURF_ID6='INERT','Shroud Surface S9','INERT','INERT','INERT','INERT', COLOR='BLACK' /
+&OBST XB=-.06,-.05,-0.80,-0.20, 0.20, 0.80, SURF_ID6='INERT','Shroud Surface S1','INERT','INERT','INERT','INERT', COLOR='BLACK' /
+&OBST XB=-.06,-.05,-0.20, 0.20, 0.20, 0.80, SURF_ID6='INERT','Shroud Surface S2','INERT','INERT','INERT','INERT', COLOR='BLACK' /
+&OBST XB=-.06,-.05, 0.20, 0.80, 0.20, 0.80, SURF_ID6='INERT','Shroud Surface S3','INERT','INERT','INERT','INERT', COLOR='BLACK' /
+&OBST XB=-.06,-.05,-0.80,-0.20,-0.20, 0.20, SURF_ID6='INERT','Shroud Surface S4','INERT','INERT','INERT','INERT', COLOR='BLACK' /
+&OBST XB=-.06,-.05,-0.20, 0.20,-0.20, 0.20, SURF_ID6='INERT','Shroud Surface S5','INERT','INERT','INERT','INERT', COLOR='BLACK' /
+&OBST XB=-.06,-.05, 0.20, 0.80,-0.20, 0.20, SURF_ID6='INERT','Shroud Surface S6','INERT','INERT','INERT','INERT', COLOR='BLACK' /
+&OBST XB=-.06,-.05,-0.80,-0.20,-0.80,-0.20, SURF_ID6='INERT','Shroud Surface S7','INERT','INERT','INERT','INERT', COLOR='BLACK' /
+&OBST XB=-.06,-.05,-0.20, 0.20,-0.80,-0.20, SURF_ID6='INERT','Shroud Surface S8','INERT','INERT','INERT','INERT', COLOR='BLACK' /
+&OBST XB=-.06,-.05, 0.20, 0.80,-0.80,-0.20, SURF_ID6='INERT','Shroud Surface S9','INERT','INERT','INERT','INERT', COLOR='BLACK' /
 
-&OBST XB=-.0508,0.0000,-0.9398,0.9398,-0.9398,0.9398, SURF_ID='Wool Surface', MATL_ID='Mineral Wool Insulation', CELL_SIZE=0.002, COLOR='GREEN' /
-&OBST XB=0.0000,0.4445,-1.0541,1.0541,-1.0541,1.0541, SURF_ID='Wool Surface', MATL_ID='Mineral Wool Insulation', CELL_SIZE=0.002, COLOR='PURPLE' /
-&HOLE XB=-.0508,0.2032,-0.8128,0.8128,-0.8128,0.8128 /
-&OBST XB=0.0000,0.0254,-0.8128,0.8128,-0.8128,0.8128, SURF_ID='Masonry Surface', MATL_ID='Masonry', CELL_SIZE=0.002, COLOR='GRAY 40', PERMIT_HOLE=F /
-&OBST XB=0.1778,0.2032,-0.8128,0.8128,-0.8128,0.8128, SURF_ID='Masonry Surface', MATL_ID='Masonry', CELL_SIZE=0.002, COLOR='GRAY 40', PERMIT_HOLE=F /
-&OBST XB=0.0254,0.1778,-0.0127,0.0127,-0.8128,0.8128, SURF_ID='Masonry Surface', MATL_ID='Masonry', CELL_SIZE=0.002, COLOR='GRAY 40', PERMIT_HOLE=F, MULT_ID='flange' /
-&MULT ID='flange', DY=0.2032, J_LOWER=-4, J_UPPER=4 /
-&OBST XB=0.0254,0.1778, 0.0127,0.1905,-0.8128,0.8128, SURF_ID='Perlite Surface', MATL_ID='Perlite', CELL_SIZE=0.002, COLOR='BEIGE', PERMIT_HOLE=F, MULT_ID='hole' /
-&MULT ID='hole', DY=0.2032, J_LOWER=-4, J_UPPER=3 /
+&OBST XB=-.05,0.00,-0.94,0.94,-0.94,0.94, SURF_ID='Wool Surface', MATL_ID='Mineral Wool Insulation', CELL_SIZE=0.005, COLOR='GREEN' /
+&OBST XB=0.00,0.44,-1.05,1.05,-1.05,1.05, SURF_ID='Wool Surface', MATL_ID='Mineral Wool Insulation', CELL_SIZE=0.005, COLOR='PURPLE' /
+&HOLE XB=-.05,0.20,-0.80,0.80,-0.80,0.80 /
+&OBST XB=0.00,0.04,-0.80,0.80,-0.80,0.80, SURF_ID='Masonry Surface', MATL_ID='Masonry', CELL_SIZE=0.005, COLOR='GRAY 40', PERMIT_HOLE=F /
+&OBST XB=0.16,0.20,-0.80,0.80,-0.80,0.80, SURF_ID='Masonry Surface', MATL_ID='Masonry', CELL_SIZE=0.005, COLOR='GRAY 40', PERMIT_HOLE=F /
+&OBST XB=0.04,0.16,-0.03,0.03,-0.80,0.80, SURF_ID='Masonry Surface', MATL_ID='Masonry', CELL_SIZE=0.005, COLOR='GRAY 40', PERMIT_HOLE=F, MULT_ID='flange' /
+&MULT ID='flange', DY=0.20, J_LOWER=-4, J_UPPER=4 /
+&OBST XB=0.04,0.16, 0.03,0.17,-0.80,0.80, SURF_ID='Perlite Surface', MATL_ID='Perlite', CELL_SIZE=0.005, COLOR='BEIGE', PERMIT_HOLE=F, MULT_ID='hole' /
+&MULT ID='hole', DY=0.20, J_LOWER=-4, J_UPPER=3 /
 
 &VENT MB='XMIN', SURF_ID='OPEN' /
 &VENT MB='XMAX', SURF_ID='OPEN' /
@@ -413,6 +429,10 @@
 &DEVC ID='U-R8',  XYZ= 0.0000, 0.4064, 0.3810, IOR=-1, QUANTITY='INSIDE WALL TEMPERATURE', DEPTH=0.1873 /
 &DEVC ID='U-R9',  XYZ= 0.0000, 0.5080, 0.3810, IOR=-1, QUANTITY='INSIDE WALL TEMPERATURE', DEPTH=0.1873 /
 &DEVC ID='U-R10', XYZ= 0.0000, 0.5937, 0.3810, IOR=-1, QUANTITY='INSIDE WALL TEMPERATURE', DEPTH=0.1873 /
+
+&DEVC ID='RAM_01', XYZ=-0.0100,-0.9000,-0.9000, QUANTITY='RAM' /
+&DEVC ID='RAM_31', XYZ= 0.2700,-0.5400,-0.5400, QUANTITY='RAM' /
+&DEVC ID='RAM_32', XYZ= 0.4100,-0.5400,-0.5400, QUANTITY='RAM' /
 
 &TAIL/
 
