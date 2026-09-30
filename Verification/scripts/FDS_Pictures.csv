@@ -36,7 +36,7 @@ Flowfields,symmetry_test_2,1.0
 Flowfields,symmetry_test_mpi,1.0
 Flowfields,jet_fan,1.0
 Flowfields,velocity_bc_test,1.0
-Heat_Transfer,checkerboard,10.0
+Heat_Transfer,checkerboard,20.0
 Heat_Transfer,ht3d_demo,1.0
 Heat_Transfer,ht3d_ibeam,1.0
 Heat_Transfer,ht3d_network,1.0
