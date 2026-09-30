@@ -43,6 +43,9 @@ function usage {
   echo "    [default: $FDSROOT/fds/Build/${MPI}_intel_linux$DB/fds_${MPI}_intel_linux$DB]"
   echo " -h   - show commonly used options"
   echo " -H   - show all options"
+  echo " -M memory - total memory per node (Slurm --mem; mutually exclusive with -m)"
+  echo " -m memory - memory per CPU (Slurm --mem-per-cpu; mutually exclusive with -M)"
+  echo "             memory is in MiB unless a unit is given, e.g. 4G; no default request"
   echo " -o o - number of OpenMP threads per process [default: 1]"
   echo " -p p - number of MPI processes [default: 1] "
   echo " -q q - name of queue. [default: batch]"
@@ -139,6 +142,8 @@ showinput=0
 exe=
 walltime=99-99:99:99
 ACCOUNT=
+MEMORY=
+MEMORY_PER_CPU=
 
 if [ $# -lt 1 ]; then
   usage
@@ -149,7 +154,7 @@ commandline=`echo $* | sed 's/-V//' | sed 's/-v//'`
 
 #*** read in parameters from command line
 
-while getopts 'A:b:cd:e:GhHIj:Ln:o:Pp:q:stT:U:vw:y:Y' OPTION
+while getopts 'A:b:cd:e:GhHIj:LM:m:n:o:Pp:q:stT:U:vw:y:Y' OPTION
 do
 case $OPTION  in
   A)
@@ -188,6 +193,12 @@ case $OPTION  in
    ;;
   L)
    use_intel_mpi=
+   ;;
+  M)
+   MEMORY="$OPTARG"
+   ;;
+  m)
+   MEMORY_PER_CPU="$OPTARG"
    ;;
   n)
    max_mpi_processes_per_node="$OPTARG"
@@ -246,6 +257,11 @@ case $OPTION  in
 esac
 done
 shift $(($OPTIND-1))
+
+if [ "$MEMORY" != "" ] && [ "$MEMORY_PER_CPU" != "" ]; then
+  echo "***Error: -M and -m are mutually exclusive" >&2
+  exit 1
+fi
 
 #*** define input file
 
@@ -396,6 +412,16 @@ cat << EOF >> $scriptfile
 #SBATCH --cpus-per-task=$n_openmp_threads
 #SBATCH --time=$walltime
 EOF
+if [ "$MEMORY" != "" ]; then
+cat << EOF >> $scriptfile
+#SBATCH --mem=$MEMORY
+EOF
+fi
+if [ "$MEMORY_PER_CPU" != "" ]; then
+cat << EOF >> $scriptfile
+#SBATCH --mem-per-cpu=$MEMORY_PER_CPU
+EOF
+fi
 if [ "$ACCOUNT" != "" ]; then
 cat << EOF >> $scriptfile
 #SBATCH --account=$ACCOUNT
