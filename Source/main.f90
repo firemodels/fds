@@ -514,7 +514,7 @@ ENDIF
 
 ! Check for changes in VENT or OBSTruction control and device status at t=T_BEGIN
 
-IF (.NOT.RESTART) CALL CREATE_OR_REMOVE_OBSTRUCTIONS
+CALL CREATE_OR_REMOVE_OBSTRUCTIONS
 
 ! Compute divergence just in case the flow field is not initialized to ambient
 
