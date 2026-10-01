@@ -11,6 +11,7 @@ import shutil
 import platform
 import argparse
 import sys
+from pathlib import Path
 from PIL import Image
 import numpy as np
 
@@ -56,10 +57,30 @@ smvdir = '../../../smv/Build/smokeview/'
 outdir = '../../Verification/'
 original_dir = os.getcwd()
 
+# CSV columns: directory, case name, image difference tolerance (percent).
 df = pd.read_csv(outdir + 'scripts/FDS_Pictures.csv', header=None)
 
 folder = df[0].values
 case = df[1].values
+tolerances = df[2].astype(float).values
+if not np.all(np.isfinite(tolerances) & (tolerances >= 0)):
+    raise ValueError("Image difference tolerances must be finite, non-negative numbers")
+
+# A case can render several images whose names differ from its case name.
+# Associate each RENDERONCE output with the tolerance for its case.
+image_tolerances = {}
+for case_folder, case_name, tolerance in zip(folder, case, tolerances):
+    case_dir = Path(outdir) / case_folder
+    render_dir = case_dir
+    with (case_dir / (case_name + '.ssf')).open() as script:
+        lines = iter(script)
+        for line in lines:
+            command = line.strip()
+            if command == 'RENDERDIR':
+                render_dir = case_dir / next(lines).strip().replace('\\', '/')
+            elif command == 'RENDERONCE':
+                image_name = next(lines).strip() + '.png'
+                image_tolerances[(render_dir / image_name).resolve()] = tolerance
 
 if smokeview_path != "null":
     print("Using "+smokeview_path)
@@ -89,8 +110,6 @@ for i in range(len(folder)):
 
 # Compare images just created against the reference images in the fig repository
 
-from pathlib import Path
-
 mandir = '../../Manuals/'
 refdir = '../../../fig/fds/Reference_Figures/'
 directories = [mandir+'FDS_User_Guide/SCRIPT_FIGURES/' , mandir+'FDS_Verification_Guide/SCRIPT_FIGURES/']
@@ -104,7 +123,9 @@ for directory in directories:
 
         try:
             results = compare_images(directory+png_file.name, refdir+png_file.name)
-            if results['difference_percentage'] > 1:
+            # Retain the existing threshold for images not produced by a listed case.
+            tolerance = image_tolerances.get(png_file.resolve(), 1.0)
+            if results['difference_percentage'] > tolerance:
                 print('Warning: ',png_file.name,' changed ',f"{results['difference_percentage']:.2f}%")
         except FileNotFoundError as e:
             print(f"Error: Could not find image file - {e}")
