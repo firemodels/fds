@@ -55,3 +55,4 @@
 
 ! Should be initialized to 0.3 based on INIT NUMBER 3 (count starting at 1)
 &DEVC XB=1,2,0,1,0,1,QUANTITY='VOLUME FRACTION',SPEC_ID='PROPANE',ID='P0p3',SPATIAL_STATISTIC='MEAN'/
+&TAIL /
