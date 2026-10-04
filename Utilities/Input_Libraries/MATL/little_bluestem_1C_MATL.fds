@@ -36,4 +36,3 @@
 &RAMP ID='c_v', T=200., F=2.0 /
 &RAMP ID='c_v', T=800., F=2.0 /
 
-&TAIL /

@@ -2204,4 +2204,3 @@
      N_T= 0.0 ,
      SPEC_ID_NU= 'CH2CHO','OH' , 'CH2OH','HCO' ,
      NU= -1.0,-1.0 , 1.0,1.0 /
-&TAIL /
