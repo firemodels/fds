@@ -80,3 +80,4 @@
 &RAMP ID='Occupant-1-Z', T = 0.350, F = 2.5, /
 &RAMP ID='Occupant-1-Z', T = 0.351, F = 2.5, /
 &RAMP ID='Occupant-1-Z', T = 0.400, F = 2.5, /
+&TAIL /
