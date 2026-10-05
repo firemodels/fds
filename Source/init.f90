@@ -1622,7 +1622,7 @@ SUBROUTINE REALLOCATE_ONE_D_ARRAYS(NM,WALL_CELL,THIN_WALL_CELL)
 
 USE PHYSICAL_FUNCTIONS, ONLY: GET_EMISSIVITY
 USE GEOMETRY_FUNCTIONS, ONLY: GET_N_LAYER_CELLS,GET_WALL_NODE_COORDINATES
-USE MEMORY_FUNCTIONS, ONLY: REALLOCATE_REAL_ARRAY,REALLOCATE_INTEGER_ARRAY,PACK_WALL,PACK_THIN_WALL
+USE MEMORY_FUNCTIONS, ONLY: REALLOCATE_REAL_ARRAY,REALLOCATE_INTEGER_ARRAY,PACK_WALL,PACK_WALL_LITE,PACK_THIN_WALL
 INTEGER, INTENT(IN) :: NM
 INTEGER, INTENT(IN), OPTIONAL :: WALL_CELL,THIN_WALL_CELL
 INTEGER :: NL,N_CELLS_MAX,II,NWP,N,I,ITMP,NN
@@ -1814,6 +1814,8 @@ IF (PRESENT(WALL_CELL)) THEN
    WC%N_REALS=0 ; WC%N_INTEGERS=0 ; WC%N_LOGICALS=0
    CALL PACK_WALL(NM,OS_DUMMY,WC,WC%SURF_INDEX,WC%N_REALS,WC%N_INTEGERS,WC%N_LOGICALS,UNPACK_IT=.FALSE.,COUNT_ONLY=.TRUE.,&
                   CHECK_BOUNDS=.FALSE.)
+   WC%N_REALS_LITE=0
+   CALL PACK_WALL_LITE(NM,OS_DUMMY,WC,WC%SURF_INDEX,WC%N_REALS_LITE,UNPACK_IT=.FALSE.,COUNT_ONLY=.TRUE.)
 ELSEIF (PRESENT(THIN_WALL_CELL)) THEN
    TW%N_INTEGERS=0 ; TW%N_REALS=0
    CALL PACK_THIN_WALL(NM,OS_DUMMY,TW,TW%SURF_INDEX,TW%N_REALS,TW%N_INTEGERS,TW%N_LOGICALS,UNPACK_IT=.FALSE.,COUNT_ONLY=.TRUE.,&
@@ -3706,16 +3708,19 @@ IF (SF%FIRE_SPREAD_RATE>0._EB) THEN
    T_ACTIVATE = TT + DIST/SF%FIRE_SPREAD_RATE
 ENDIF
 
-! Set ignition time of each boundary cell
+! Set ignition time of each boundary cell unless this is the initialization phase of a restarted case, in which case leave
+! T_IGN as it was read in.
 
-IF (T_ACTIVATE < T_BEGIN) THEN
-   IF (SF%T_IGN==T_BEGIN) THEN
-      B1%T_IGN = TT
+IF (.NOT.(RESTART.AND.INITIALIZATION_PHASE)) THEN
+   IF (T_ACTIVATE < T_BEGIN) THEN
+      IF (SF%T_IGN==T_BEGIN) THEN
+         B1%T_IGN = TT
+      ELSE
+         B1%T_IGN = SF%T_IGN
+      ENDIF
    ELSE
-      B1%T_IGN = SF%T_IGN
+      B1%T_IGN = T_ACTIVATE
    ENDIF
-ELSE
-   B1%T_IGN = T_ACTIVATE
 ENDIF
 
 ! Set correct initial value of temperature for RAMP_T
@@ -4542,7 +4547,7 @@ OBST_LOOP: DO N=1,N_OBST
    CREATE_REMOVE_IF:IF (OB%CONSUMABLE .AND. OB%MASS<TWENTY_EPSILON_EB) THEN
       REMOVE_OBST = .TRUE.
    ELSE CREATE_REMOVE_IF
-      SET_T_BEGIN_IF: IF (T<=T_BEGIN) THEN
+      SET_T_BEGIN_IF: IF (INITIALIZATION_PHASE) THEN
          ! Set initial state of OBST
          HOLE_FILL_IF: IF (.NOT. OB%HOLE_FILLER) THEN
             !OBST is not a HOLE
@@ -4690,15 +4695,21 @@ OBST_LOOP: DO N=1,N_OBST
       ENDIF SET_T_BEGIN_IF
    ENDIF CREATE_REMOVE_IF
 
+   ! Declare the obstruction to be hidden or not hidden and create the appropriate label for the .smv file.
+   ! Note that during the initialization of a restarted case, an obstruction that was hidden in the previous run has to be rehidden,
+   ! and an obstruction that was not hidden previously may need to be unhidden again. These actions are necessary because the
+   ! .restart files are read AFTER the basic set-up is done, in which case that basic set-up may need alteration during the
+   ! initialization of a restart case much like it did during the original case.
+
    SV_LABEL  = 'null'
 
-   IF (CREATE_OBST .AND. OB%HIDDEN) THEN
+   IF (CREATE_OBST .AND. (OB%HIDDEN .OR. (RESTART.AND.INITIALIZATION_PHASE))) THEN
       OB%HIDDEN = .FALSE.
       SV_LABEL  = 'SHOW_OBST'
       CALL CREATE_OR_REMOVE_OBST(NM,OB%I1,OB%I2,OB%J1,OB%J2,OB%K1,OB%K2,1,N)
    ENDIF
 
-   IF (REMOVE_OBST .AND. (.NOT. OB%HIDDEN)) THEN
+   IF (REMOVE_OBST .AND. (.NOT.OB%HIDDEN .OR. (RESTART.AND.INITIALIZATION_PHASE))) THEN
       OB%HIDDEN = .TRUE.
       SV_LABEL  = 'HIDE_OBST'
       CALL CREATE_OR_REMOVE_OBST(NM,OB%I1,OB%I2,OB%J1,OB%J2,OB%K1,OB%K2,0,N)
