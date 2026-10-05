@@ -5554,8 +5554,15 @@ END SUBROUTINE FIND_WALL_INDEX
 
 SUBROUTINE BLOCK_CELL(NM,I1,I2,J1,J2,K1,K2,IVAL,OBST_INDEX)
 
-INTEGER :: NM,I1,I2,J1,J2,K1,K2,IVAL,I,J,K,OBST_INDEX,IC
+USE GLOBAL_CONSTANTS,ONLY: RSUM0
+INTEGER, INTENT (IN) :: NM,I1,I2,J1,J2,K1,K2,IVAL,OBST_INDEX
+INTEGER :: I,J,K,IC,COUNT,IOR
+REAL(EB) :: TMP_AVG
+LOGICAL :: SINGLE_CELL
 TYPE (MESH_TYPE), POINTER :: M
+
+SINGLE_CELL = .FALSE.
+IF (I1==I2 .AND. J1==J2 .AND. K1==K2 .AND. MESHES(NM)%OBSTRUCTION(OBST_INDEX)%CONSUMABLE) SINGLE_CELL = .TRUE.
 
 M => MESHES(NM)
 DO K=K1,K2
@@ -5566,6 +5573,37 @@ DO K=K1,K2
             CASE(0)
                M%CELL(IC)%SOLID   = .FALSE.
                M%CELL(IC)%OBST_INDEX = 0
+               IF (SINGLE_CELL) THEN
+                  COUNT = 0
+                  TMP_AVG = 0._EB
+                  IF (M%CELL(IC)%WALL_INDEX(-3)==0) THEN
+                     COUNT = COUNT + 1
+                     TMP_AVG = TMP_AVG + M%TMP(I,J,K-1)
+                  ENDIF
+                  IF (M%CELL(IC)%WALL_INDEX( 3)==0) THEN
+                     COUNT = COUNT + 1
+                     TMP_AVG = TMP_AVG + M%TMP(I,J,K+1)
+                  ENDIF
+                  IF (M%CELL(IC)%WALL_INDEX(-2)==0) THEN
+                     COUNT = COUNT + 1
+                     TMP_AVG = TMP_AVG + M%TMP(I,J-1,K)
+                  ENDIF
+                  IF (M%CELL(IC)%WALL_INDEX( 2)==0) THEN
+                     COUNT = COUNT + 1
+                     TMP_AVG = TMP_AVG + M%TMP(I,J+1,K)
+                  ENDIF
+                  IF (M%CELL(IC)%WALL_INDEX(-1)==0) THEN
+                     COUNT = COUNT + 1
+                     TMP_AVG = TMP_AVG + M%TMP(I-1,J,K)
+                  ENDIF
+                  IF (M%CELL(IC)%WALL_INDEX( 1)==0) THEN
+                     COUNT = COUNT + 1
+                     TMP_AVG = TMP_AVG + M%TMP(I+1,J,K)
+                  ENDIF
+                  M%TMP(I,J,K) = TMP_AVG/REAL(COUNT,EB)
+                  M%RHO(I,J,K) = M%PBAR_S(K,M%PRESSURE_ZONE(I,J,K))/(RSUM0*M%TMP(I,J,K))
+                  M%RHOS(I,J,K) = M%RHO(I,J,K)
+               ENDIF
             CASE(1)
                M%CELL(IC)%SOLID   = .TRUE.
                M%CELL(IC)%OBST_INDEX = OBST_INDEX
