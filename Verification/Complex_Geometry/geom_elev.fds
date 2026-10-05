@@ -20,3 +20,4 @@
 &GEOM ID='geom3',
         VERTS=0.0,0.0,1.0,1.0,0.0,1.0,1.0,1.0,1.0,
         FACES=1,2,3,1,ELEV=90,XYZ0=0.0,0.0,1.0,SURF_ID='surf3'/
+&TAIL /

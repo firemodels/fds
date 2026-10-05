@@ -18,3 +18,4 @@
 &GEOM ID='texture2',
         VERTS=0.0,0.0,0.0, 1.0,1.0,0.0, 0.0,1.0,0.0,
         FACES=1,2,3,1,SURF_ID='surf2'/
+&TAIL /

@@ -293,12 +293,12 @@
 &OBST XB=-.06,-.05,-0.20, 0.20,-0.80,-0.20, SURF_ID6='INERT','Shroud Surface S8','INERT','INERT','INERT','INERT', COLOR='BLACK' /
 &OBST XB=-.06,-.05, 0.20, 0.80,-0.80,-0.20, SURF_ID6='INERT','Shroud Surface S9','INERT','INERT','INERT','INERT', COLOR='BLACK' /
 
-&OBST XB=-.05,0.00,-0.94,0.94,-0.94,0.94, SURF_ID='Wool Surface', MATL_ID='Mineral Wool Insulation', CELL_SIZE=0.002, COLOR='GREEN' /
-&OBST XB=0.00,0.44,-1.05,1.05,-1.05,1.05, SURF_ID='Wool Surface', MATL_ID='Mineral Wool Insulation', CELL_SIZE=0.002, COLOR='PURPLE' /
+&OBST XB=-.05,0.00,-0.94,0.94,-0.94,0.94, SURF_ID='Wool Surface', MATL_ID='Mineral Wool Insulation', CELL_SIZE=0.005, COLOR='GREEN' /
+&OBST XB=0.00,0.44,-1.05,1.05,-1.05,1.05, SURF_ID='Wool Surface', MATL_ID='Mineral Wool Insulation', CELL_SIZE=0.005, COLOR='PURPLE' /
 &HOLE XB=-.05,0.20,-0.80,0.80,-0.80,0.80 /
-&OBST XB=0.00,0.08,-0.80,0.80,-0.80,0.80, SURF_ID='Concrete Surface', MATL_ID='Concrete', CELL_SIZE=0.002, COLOR='GRAY 40', PERMIT_HOLE=F /
-&OBST XB=0.08,0.13,-0.80,0.80,-0.80,0.80, SURF_ID='Wool Surface', MATL_ID='Mineral Wool Insulation', CELL_SIZE=0.002, COLOR='YELLOW', PERMIT_HOLE=F /
-&OBST XB=0.13,0.20,-0.80,0.80,-0.80,0.80, SURF_ID='Concrete Surface', MATL_ID='Concrete', CELL_SIZE=0.002, COLOR='GRAY 40', PERMIT_HOLE=F /
+&OBST XB=0.00,0.08,-0.80,0.80,-0.80,0.80, SURF_ID='Concrete Surface', MATL_ID='Concrete', CELL_SIZE=0.005, COLOR='GRAY 40', PERMIT_HOLE=F /
+&OBST XB=0.08,0.13,-0.80,0.80,-0.80,0.80, SURF_ID='Wool Surface', MATL_ID='Mineral Wool Insulation', CELL_SIZE=0.005, COLOR='YELLOW', PERMIT_HOLE=F /
+&OBST XB=0.13,0.20,-0.80,0.80,-0.80,0.80, SURF_ID='Concrete Surface', MATL_ID='Concrete', CELL_SIZE=0.005, COLOR='GRAY 40', PERMIT_HOLE=F /
 
 &VENT MB='XMIN', SURF_ID='OPEN' /
 &VENT MB='XMAX', SURF_ID='OPEN' /
