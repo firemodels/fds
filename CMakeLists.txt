@@ -129,6 +129,8 @@ elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "Intel" OR CMAKE_Fortran_COMPILER_ID S
     if (NOT(WIN32))
         target_compile_options(fds PRIVATE -no-wrap-margin)
     endif()
+elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "NVHPC")
+    target_compile_options(fds PRIVATE -Mpreprocess -Mrecursive)
 endif()
 
 # If we are using the old Intel Fortran compiler (ifort) suppress the warning

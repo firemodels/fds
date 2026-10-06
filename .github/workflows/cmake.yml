@@ -153,6 +153,59 @@ jobs:
         fi
         ctest --test-dir builddir -j --output-on-failure -V
 
+  cmake-linux-nvhpc:
+    # build on ubuntu using the NVIDIA HPC SDK compilers (nvfortran, nvc, nvc++) and its bundled MPI (HPC-X, Open MPI based)
+    name: ubuntu-24.04 nvhpc_hpcx openmp=${{ matrix.openmp }} ${{ matrix.build_type }}
+    runs-on: [ubuntu-24.04]
+    env:
+      NVHPC_VERSION: "26.9"
+      # The runners have no GPU; skip the CUDA/UCC parts of the HPC-X initialization (see HPC SDK release notes)
+      OMPI_MCA_coll_ucc_enable: "0"
+      UCX_MODULES: "^cuda"
+    strategy:
+      fail-fast: false
+      matrix:
+        openmp:
+          - "ON"
+          - "OFF"
+        build_type:
+          - "Debug"
+          - "Release"
+    defaults:
+      run:
+        shell: bash
+    steps:
+    - name: install nvidia hpc sdk
+      run: |
+        KR=/usr/share/keyrings/nvidia-hpcsdk-archive-keyring.gpg
+        curl -fsSL https://developer.download.nvidia.com/hpc-sdk/ubuntu/DEB-GPG-KEY-NVIDIA-HPC-SDK | sudo gpg --dearmor -o $KR
+        echo "deb [signed-by=$KR] https://developer.download.nvidia.com/hpc-sdk/ubuntu/amd64 /" | sudo tee /etc/apt/sources.list.d/nvhpc.list
+        sudo apt-get -y update
+        sudo apt-get -y install environment-modules nvhpc-${NVHPC_VERSION/./-}
+
+    - uses: actions/checkout@v7.0.1
+      with:
+        ref: ${{ inputs.ref || github.sha }}
+        persist-credentials: false
+
+    - name: build fds
+      run: |
+        source /usr/share/modules/init/bash
+        module use /opt/nvidia/hpc_sdk/modulefiles
+        module load nvhpc/${NVHPC_VERSION}
+        export CC=nvc CXX=nvc++ FC=nvfortran
+        nvfortran --version
+        which mpifort && mpifort --showme
+        cmake -B builddir -S . -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DUSE_OPENMP=${{matrix.openmp}}
+        cmake --build builddir -j --target fds
+
+    - name: Test
+      run: |
+        source /usr/share/modules/init/bash
+        module use /opt/nvidia/hpc_sdk/modulefiles
+        module load nvhpc/${NVHPC_VERSION}
+        ctest --test-dir builddir -j --output-on-failure -V
+
   cmake-osx:
     # Set the name of this build, variable depending on the OS
     name: ${{ matrix.os }} ${{ matrix.compiler_mpi }} openmp=${{ matrix.openmp }} ${{ matrix.build_type }}
