@@ -434,13 +434,13 @@ END SELECT
 ! For the special case of tunnels, add back 1-D global pressure solution to 3-D local pressure solution
 
 IF (TUNNEL_PRECONDITIONER) THEN
-   !$OMP MASTER
+   !$OMP MASKED
    DO I=1,IBAR
       HP(I,1:JBAR,1:KBAR) = HP(I,1:JBAR,1:KBAR) + H_BAR(I_OFFSET(NM)+I)  ! H = H' + H_bar
    ENDDO
    BXS = BXS + BXS_BAR  ! b = b' + b_bar
    BXF = BXF + BXF_BAR  ! b = b' + b_bar
-   !$OMP END MASTER
+   !$OMP END MASKED
    !$OMP BARRIER
 ENDIF
 
