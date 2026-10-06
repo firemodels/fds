@@ -514,9 +514,9 @@ CASE(.TRUE.) PREDICTOR_STEP
 
    ! Check mass density for positivity
 
-   !$OMP MASTER
+   !$OMP MASKED
    CALL CHECK_MASS_DENSITY
-   !$OMP END MASTER
+   !$OMP END MASKED
    !$OMP BARRIER
 
    ALLOCATE(ZZ_GET(1:N_TOTAL_SCALARS))
@@ -536,18 +536,18 @@ CASE(.TRUE.) PREDICTOR_STEP
 
    ! Passive scalars
 
-   !$OMP MASTER
+   !$OMP MASKED
    CALL CLIP_PASSIVE_SCALARS
-   !$OMP END MASTER
+   !$OMP END MASKED
    !$OMP BARRIER
 
    ! Predict background pressure at next time step
 
-   !$OMP MASTER
+   !$OMP MASKED
    DO I=1,N_ZONE
       PBAR_S(:,I) = PBAR(:,I) + D_PBAR_DT(I)*DT
    ENDDO
-   !$OMP END MASTER
+   !$OMP END MASKED
    !$OMP BARRIER
 
    ! Compute molecular weight term RSUM=R0*SUM(Y_i/W_i)
@@ -608,9 +608,9 @@ CASE(.FALSE.) PREDICTOR_STEP  ! CORRECTOR step
    ENDDO WALL_LOOP_2
    !$OMP END DO
 
-   !$OMP MASTER
+   !$OMP MASKED
    IF (ANY(SPECIES_MIXTURE%DEPOSITING) .AND. (GRAVITATIONAL_SETTLING .OR. THERMOPHORETIC_SETTLING)) CALL SETTLING_VELOCITY(NM)
-   !$OMP END MASTER
+   !$OMP END MASKED
    !$OMP BARRIER
 
    ! Compute species mass density at the next time step
@@ -696,9 +696,9 @@ CASE(.FALSE.) PREDICTOR_STEP  ! CORRECTOR step
 
    ! Check mass density for positivity
 
-   !$OMP MASTER
+   !$OMP MASKED
    CALL CHECK_MASS_DENSITY
-   !$OMP END MASTER
+   !$OMP END MASKED
    !$OMP BARRIER
 
    ALLOCATE(ZZ_GET(1:N_TOTAL_SCALARS))
@@ -718,18 +718,18 @@ CASE(.FALSE.) PREDICTOR_STEP  ! CORRECTOR step
 
    ! Passive scalars
 
-   !$OMP MASTER
+   !$OMP MASKED
    CALL CLIP_PASSIVE_SCALARS
-   !$OMP END MASTER
+   !$OMP END MASKED
    !$OMP BARRIER
 
    ! Correct background pressure
 
-   !$OMP MASTER
+   !$OMP MASKED
    DO I=1,N_ZONE
       PBAR(:,I) = 0.5_EB*(PBAR(:,I) + PBAR_S(:,I) + D_PBAR_DT_S(I)*DT)
    ENDDO
-   !$OMP END MASTER
+   !$OMP END MASKED
    !$OMP BARRIER
 
    ! Compute molecular weight term RSUM=R0*SUM(Y_i/W_i)
