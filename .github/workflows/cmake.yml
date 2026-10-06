@@ -85,6 +85,10 @@ jobs:
       if: endsWith(matrix.compiler_mpi, '_openmpi') && (startsWith(matrix.container, 'rockylinux') || startsWith(matrix.container, 'fedora'))
       run: dnf install -y openmpi-devel
 
+    - name: install gcc-toolset
+      if: startsWith(matrix.compiler_mpi, 'gnu_') && startsWith(matrix.container, 'rockylinux')
+      run: dnf install -y gcc-toolset-14-gcc gcc-toolset-14-gcc-c++ gcc-toolset-14-gcc-gfortran
+
     - name: install openmpi
       if: endsWith(matrix.compiler_mpi, '_openmpi') && startsWith(matrix.container, 'ubuntu')
       run: |
@@ -125,6 +129,7 @@ jobs:
       run: |
         # source /opt/intel/oneapi/setvars.sh
         if [ "${{matrix.container}}" = "rockylinux:9" ]; then
+            source /opt/rh/gcc-toolset-14/enable
             source /etc/profile.d/modules.sh
             module load mpi/openmpi-x86_64
         fi
@@ -142,6 +147,7 @@ jobs:
       run: |
         source /opt/intel/oneapi/setvars.sh
         if [ "${{matrix.container}}" = "rockylinux:9" ]; then
+            source /opt/rh/gcc-toolset-14/enable
             source /etc/profile.d/modules.sh
             module load mpi/openmpi-x86_64
         fi
