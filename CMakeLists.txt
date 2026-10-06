@@ -131,6 +131,8 @@ elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "Intel" OR CMAKE_Fortran_COMPILER_ID S
     endif()
 elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "NVHPC")
     target_compile_options(fds PRIVATE -Mpreprocess -Mrecursive)
+    # nvfortran does not support the F2018 IMPLICIT NONE (TYPE,EXTERNAL); the preprocessor turns it into IMPLICIT NONE.
+    target_compile_options(fds PRIVATE "-DNONE(T,E)=NONE")
 endif()
 
 # If we are using the old Intel Fortran compiler (ifort) suppress the warning
