@@ -699,16 +699,12 @@ The exact CFL needed to maintain stability depends on the order (as well as othe
     \begin{equation}
     \frac{\|\mathbf{u}\|}{\delta x} = \frac{|u|}{\delta x}+\frac{|v|}{\delta y}+\frac{|w|}{\delta z} + |\nabla\cdot\mathbf{u}|
     \end{equation}
-\ct{CFL\_VELOCITY\_NORM=2} (VLES default, $L_2$ norm of velocity vector)
+\ct{CFL\_VELOCITY\_NORM=2} (VLES and SVLES default, $L_2$ norm of velocity vector)
     \begin{equation}
     \frac{\|\mathbf{u}\|}{\delta x} = \sqrt{ (u/\delta x)^2+(v/\delta y)^2+(w/\delta z)^2 } + |\nabla\cdot\mathbf{u}|
     \end{equation}
-\ct{CFL\_VELOCITY\_NORM=3} (SVLES default, least restrictive, corresponds to $L_\infty$ norm of velocity vector)
-    \begin{equation}
-    \frac{\|\mathbf{u}\|}{\delta x} = \max \left(\frac{|u|}{\delta x}, \frac{|v|}{\delta y}, \frac{|w|}{\delta z}\right)
-    \end{equation}
 
-The addition of the magnitude of the velocity divergence to the velocity norm is discussed below in Sec.~\ref{sec:mass_density_constraint}.  Notice that \ct{CFL_VELOCITY_NORM=3} omits this restriction and should therefore only be used for incompressible flows.
+The addition of the magnitude of the velocity divergence to the velocity norm is discussed below in Sec.~\ref{sec:mass_density_constraint}.
 
 \subsection{The Von Neumann Constraint}
 

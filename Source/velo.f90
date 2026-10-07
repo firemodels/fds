@@ -3067,7 +3067,6 @@ DO K=1,KBAR
             CASE(0) ; UVW = MAX(UODX,VODY,WODZ) + ABS(DS(I,J,K))
             CASE(1) ; UVW = UODX + VODY + WODZ  + ABS(DS(I,J,K))
             CASE(2) ; UVW = SQRT(UODX**2+VODY**2+WODZ**2) + ABS(DS(I,J,K))
-            CASE(3) ; UVW = MAX(UODX,VODY,WODZ)
          END SELECT
          IF (UVW>=UVWMAX_TMP) THEN
             UVWMAX_TMP = UVW
