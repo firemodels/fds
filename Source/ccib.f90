@@ -8487,7 +8487,8 @@ ELSE
    PRFCTV = 0._EB
 ENDIF
 
-CONST_GAMMA_IF_1: IF (.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
+! Constant gamma makes rho*h_s uniform only when the background pressure is uniform (no stratification).
+CONST_GAMMA_IF_1: IF (.NOT.CONSTANT_SPECIFIC_HEAT_RATIO .OR. STRATIFICATION) THEN
    CALL CCENTHALPY_ADVECTION ! Compute u dot grad rho h_s in FV form and add to DP in regular + cut-cells.
 ENDIF CONST_GAMMA_IF_1
 
@@ -8527,6 +8528,7 @@ ENDDO
 
 ! 4. Enthalpy flux due to mass diffusion and advection:
 ! sum_n [\bar{W}/W_n - h_{s,n}*R_H_G] ( Grad dot (rho D_\alpha Grad Z_n) - \bar{u dot Grad (rho Z_n)})
+! For constant gamma, Wbar/W_alpha-h_s,alpha/(cp*T) is zero even with stratification.
 
 CONST_GAMMA_IF_2: IF (.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
 
