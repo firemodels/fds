@@ -583,8 +583,9 @@ CASE(.TRUE.) CYLINDER3   ! 2D Cylindrical
 END SELECT CYLINDER3
 
 ! Compute U_DOT_DEL_RHO_H_S and add to other enthalpy equation source terms
+! Constant gamma makes rho*h_s uniform only when the background pressure is uniform (no stratification).
 
-CONST_GAMMA_IF_1: IF (.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
+CONST_GAMMA_IF_1: IF (.NOT.CONSTANT_SPECIFIC_HEAT_RATIO .OR. STRATIFICATION) THEN
 
    CALL ENTHALPY_ADVECTION_NEW(U_DOT_DEL_RHO_H_S) ! Compute u dot grad rho h_s
 
@@ -632,6 +633,7 @@ ELSE
 ENDIF
 
 ! Compute (1/rho) * Sum( (Wbar/W_alpha-h_s,alpha/cp*T) (del dot rho*D del Z_n - u dot del rho*Z_n)
+! For constant gamma, Wbar/W_alpha-h_s,alpha/(cp*T) is zero even with stratification.
 
 CONST_GAMMA_IF_2: IF (.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
 
