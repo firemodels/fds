@@ -1876,7 +1876,7 @@ Obstructions, geometries and vents may be colored individually, over-riding the 
 
 In addition to the various ways of prescribing the color of various objects within the computational domain, there is also a way of pasting images onto the obstructions for the purpose of making the Smokeview images more realistic. This technique is known as ``texture mapping.'' For example, to apply a wood paneling image to a wall, add to the \ct{SURF} line defining the physical properties of the paneling the line:
 \begin{lstlisting}
-    &SURF ID='wood paneling',..., TEXTURE_MAP='paneling.jpg', 
+    &SURF ID='wood paneling',..., TEXTURE_MAP='paneling.jpg',
     TEXTURE_WIDTH=1., TEXTURE_HEIGHT=2. /
 \end{lstlisting}
 Assuming that a JPEG file called \ct{paneling.jpg} exists in the working directory, Smokeview will load and display the image wherever the paneling is used. PNG images may also be used for texture maps. Note that the image does not appear when Smokeview is first invoked. It is an option controlled by the \ct{Show/Hide} menu. The parameters \ct{TEXTURE_WIDTH} and \ct{TEXTURE_HEIGHT} are the physical dimensions of the image. In this case, the JPEG image is of a 1~m wide by 2~m high piece of paneling. Smokeview replicates the image as often as necessary to make it appear that the paneling is applied where desired. Consider carefully how the image repeats itself when applied in a scene. If the image has no obvious pattern, there is no problem with the image being repeated. If the image has an obvious direction, the real triplet \ct{TEXTURE_ORIGIN} should be added to the \ct{VENT} or \ct{OBST} line to which a texture map should be applied. For example,
@@ -2389,7 +2389,7 @@ If a \ct{VENT} is applied to a thermally-thick obstruction with 3-D heat conduct
 
 An alternative back side boundary condition, \ct{BACKING='INSULATED'}, assumes that the solid backs up to a perfectly insulated material, in which case there is no heat transfer to or from the back side. Use of this condition means specifying properties of the inner insulating material is not necessary because it is assumed to be perfectly insulated.
 
-The initial back side temperature can be set with \ct{TMP_BACK}. 
+The initial back side temperature can be set with \ct{TMP_BACK}.
 
 If the wall is assumed to always back up to the ambient, then the attribute \ct{BACKING='VOID'} should be set. You can also set the back side exposing gas temperature to be something other than ambient using \ct{TMP_GAS_BACK}. A \ct{RAMP} for \ct{TMP_GAS_BACK} can be specified with \ct{RAMP_TMP_GAS_BACK}. The backside heat transfer coefficient is computed using a natural convection correlation (see the FDS Tech Guide \cite{FDS_Math_Guide}). Similarly, you can set the front side gas temperature using \ct{TMP_GAS_FRONT} and ramp \ct{RAMP_TMP_GAS_FRONT}. This is useful mainly for diagnostic cases where you want to control the exposing temperature.
 
@@ -2648,7 +2648,7 @@ The sample case called \ct{Heat_Transfer/checkerboard.fds} demonstrates how to w
     &MATL ID='steel', SPECIFIC_HEAT=0.515, CONDUCTIVITY=16.2, DENSITY=7900 /
     &SURF ID='paint',    COLOR='BLACK',  EMISSIVITY=0.95, HT3D=T /
     &SURF ID='no paint', COLOR='SILVER', EMISSIVITY=0.33, HT3D=T /
-    &OBST XB=0.00,1.20,0.00,0.0031,0.00,1.20, MATL_ID='steel', 
+    &OBST XB=0.00,1.20,0.00,0.0031,0.00,1.20, MATL_ID='steel',
     SURF_ID='no paint' /
     &VENT XB=0.00,0.05,0.0000,0.0000,0.00,0.05, SURF_ID='paint',
     MULT_ID='M', IOR=-2 /
@@ -3812,7 +3812,7 @@ Below are three example duct node inputs representing a typical tee-type connect
 \begin{lstlisting}
     &HVAC TYPE_ID='NODE', ID='tee', DUCT_ID='duct 1','duct 2',..'duct n',
     LOSS=lossarray, XYZ=x,y,z /
-    &HVAC TYPE_ID='NODE', ID='FDS connection', DUCT_ID='duct 1', 
+    &HVAC TYPE_ID='NODE', ID='FDS connection', DUCT_ID='duct 1',
     VENT_ID='vent',LOSS=enter,exit /
     &HVAC TYPE_ID='NODE', ID='ambient', DUCT_ID='duct 1', LOSS=enter,exit,
     XYZ=x,y,z, AMBIENT=T /
@@ -4358,7 +4358,7 @@ At the start of any simulation, the temperature is ambient everywhere, the flow 
 \end{equation}
 where $\dot{Q}_0$ is the user-specified heat release rate and $\tau$ is a time-scale with a default value of 1~s that can be specified via \ct{TAU_Q} on the \ct{SURF} line. The parameter \ct{TAU_T} controls the surface temperature (\ct{TMP_FRONT}) and \ct{TAU_V} controls the normal velocity (\ct{VEL}), volume flow (\ct{VOLUME_FLOW}), or total mass flux (\ct{MASS_FLUX_TOTAL}).
 
-If the fire ramps up following a $t$-squared curve, then it remains constant after |\ct{TAU_Q}| seconds.  These rules apply to \ct{TAU_T} and \ct{TAU_V} as well. The default value for all \ct{TAU}s is 1~s\footnote{You can change the default ramp-up time by setting \ct{TAU_DEFAULT} on the \ct{MISC} line.}.  
+If the fire ramps up following a $t$-squared curve, then it remains constant after |\ct{TAU_Q}| seconds.  These rules apply to \ct{TAU_T} and \ct{TAU_V} as well. The default value for all \ct{TAU}s is 1~s\footnote{You can change the default ramp-up time by setting \ct{TAU_DEFAULT} on the \ct{MISC} line.}.
 
 If something other than a tanh or $t$-squared ramp up is desired, then a user-defined function can be input. To do this, set \ct{RAMP_Q}, \ct{RAMP_T} or \ct{RAMP_V} equal to a character string designating the ramp function to use for that particular surface type, then somewhere in the input file generate lines of the form:
 \begin{lstlisting}
@@ -4775,7 +4775,7 @@ By default, duplicate species are considered to be a lumped species and not a pr
 
 \subsection{Soot}
 \label{info:SOOT}
-The predefined species of \ct{SOOT'} is defined with with \ct{FORMULA='C'}. To specify soot that contains other elements, use \ct{FORMULA}. For example, the following would redefine \ct{SOOT} to include a 10\,\% hydrogen atom fraction. 
+The predefined species of \ct{SOOT'} is defined with with \ct{FORMULA='C'}. To specify soot that contains other elements, use \ct{FORMULA}. For example, the following would redefine \ct{SOOT} to include a 10\,\% hydrogen atom fraction.
 \begin{lstlisting}
     &SPEC ID='SOOT', FORMULA='C0.9H0.1'/
 \end{lstlisting}
@@ -7975,8 +7975,8 @@ To specify one or more sprinklers, you need to specify several different groups 
 \begin{lstlisting}
     &SPEC ID='WATER VAPOR' /
     &PART ID='my droplets', DIAMETER=1000., SPEC_ID='WATER VAPOR' /
-    &PROP ID='K-11', QUANTITY='SPRINKLER LINK TEMPERATURE', RTI=148., 
-    C_FACTOR=0.7, ACTIVATION_TEMPERATURE=74., OFFSET=0.10, 
+    &PROP ID='K-11', QUANTITY='SPRINKLER LINK TEMPERATURE', RTI=148.,
+    C_FACTOR=0.7, ACTIVATION_TEMPERATURE=74., OFFSET=0.10,
     PART_ID='my droplets', FLOW_RATE=189.3, PARTICLE_VELOCITY=10.,
     SPRAY_ANGLE=30.,80., SMOKEVIEW_ID='sprinkler_upright'   /
     &DEVC ID='Spr-1', XYZ=22.8,19.7,7.4, PROP_ID='K-11' /
@@ -8550,14 +8550,14 @@ There are times when you might only want to run a simulation until some goal is 
 \begin{lstlisting}
     &DEVC ID='temp', QUANTITY='TEMPERATURE', SETPOINT=1000., XYZ=4.5,6.7,3.6 /
     &DEVC ID='velo', QUANTITY='VELOCITY', SETPOINT=10., XYZ=4.5,6.7,3.6 /
-    
+
     &CTRL ID='kill', FUNCTION_TYPE='KILL', INPUT_ID='temp' /
     &CTRL ID='restart', FUNCTION_TYPE='RESTART', INPUT_ID='velo' /
 \end{lstlisting}
 will kill the job when the temperature at the given point rises above 1000~\unit{\degreeCelsius}; or just force restart files to be output when the velocity at a given point exceeds 10~m/s. The lines
 \begin{lstlisting}
     &DEVC ID='temp', QUANTITY='TEMPERATURE', SETPOINT=1000., XYZ=4.5,6.7,3.6 /
-    
+
     &CTRL ID='kill', FUNCTION_TYPE='KILL', INPUT_ID='temp' /
     &CTRL ID='restart', FUNCTION_TYPE='RESTART', INPUT_ID='temp' /
 \end{lstlisting}
@@ -8717,7 +8717,7 @@ specified with \ct{QUANTITY='CONTROL'}.
     &DEVC XYZ=4,4,3, PROP_ID='Acme Smoker', ID='SD_4' /
     &DEVC XYZ=2,2,3, PROP_ID='Acme Nozzle', QUANTITY='CONTROL',
     ID='NOZZLE 1', CTRL_ID='nozzle trigger' /
-    
+
     &CTRL ID='nozzle trigger', FUNCTION_TYPE='ALL', INPUT_ID='smokey',
     'delay' /
     &CTRL ID='delay', FUNCTION_TYPE='TIME_DELAY', INPUT_ID='smokey', DELAY=30. /
@@ -8773,15 +8773,15 @@ control functions, will then flow water.
 \begin{lstlisting}
     &DEVC XYZ=2,2,3, PROP_ID='Acme Sprinkler Link', ID='LINK 1' /
     &DEVC XYZ=2,3,3, PROP_ID='Acme Sprinkler Link', ID='LINK 2' /
-    
+
     &PROP ID='Acme Sprinkler Link', QUANTITY='LINK TEMPERATURE',
     ACTIVATION_TEMPERATURE=74., RTI=30./
-    
+
     &DEVC XYZ=2,2,3, PROP_ID='Acme Nozzle', QUANTITY='CONTROL',
     ID='NOZZLE 1', CTRL_ID='nozzle 1 trigger' /
     &DEVC XYZ=2,3,3, PROP_ID='Acme Nozzle', QUANTITY='CONTROL',
     ID='NOZZLE 2', CTRL_ID='nozzle 2 trigger' /
-    
+
     &CTRL ID='check links', FUNCTION_TYPE='ANY', INPUT_ID='LINK 1','LINK 2'/
     &CTRL ID='delay', FUNCTION_TYPE='TIME_DELAY', INPUT_ID='check links', DELAY=30. /
     &CTRL ID='nozzle 1 trigger', FUNCTION_TYPE='ALL',
@@ -8891,7 +8891,7 @@ In this example, a fire spreads radially from a single point as directed by the 
 \begin{lstlisting}
     &VENT SURF_ID='FIRE', XB=1.0,7.0,1.0,7.0,0.0,0.0, XYZ=3.0,3.0,0.0,
     SPREAD_RATE=0.1, AREA_ADJUST=F /
-    
+
     &SURF ID='FIRE', HRRPUA=1., RAMP_Q='HRRPUA RAMP' /
     &RAMP ID='HRRPUA RAMP', T=0, F=0, CTRL_ID_DEP='HRRPUA CTRL' /
     &DEVC ID='TIMER', XYZ=1,1,1, QUANTITY='TIME' /
@@ -8902,7 +8902,7 @@ In this example, a fire spreads radially from a single point as directed by the 
     XB=0,8,0,8,0,1, SURF_ID='FIRE', SPATIAL_STATISTIC='SURFACE AREA' /
     &CTRL ID='HRRPUA CTRL', FUNCTION_TYPE='DIVIDE', INPUT_ID='HRR+EPS',
     'Fire Area' /
-    
+
     &RAMP ID='HRR', T=  0., F=    0.0 /
     &RAMP ID='HRR', T= 10., F=  100.0 /
     &RAMP ID='HRR', T= 20., F=  400.0 /
@@ -8925,9 +8925,9 @@ In this example, a fire spreads radially from a single point as directed by the 
 \label{external_control}
 
 It is possible to externally control some aspects of an FDS simulation while the simulation is running. These include most \ct{RAMP}s and the logical state of any \ct{CTRL}. The logical state of a \ct{CTRL} can be externally controlled by setting \ct{FUNCTION_TYPE='EXTERNAL'} on the \ct{CTRL} input. A \ct{RAMP} can be externally controlled by setting \ct{EXTERNAL_FILE} on \ct{RAMP}. \ct{RAMP}s used during initialization only cannot be externally controlled. These include \ct{RAMP}s controlling time (such as the output time \ct{RAMP}s on \ct{DUMP} like \ct{RAMP_BNDF}), defining \ct{SPEC} or \ct{MATL} physical properties (such as \ct{CONDUCTIVITY_RAMP} on \ct{MATL}), defining particle distributions (such as \ct{CNF_RAMP} on \ct{PART}), defining atmospheric conditions (such as \ct{RAMP_T0_Z} on \ct{WIND}), or for defining the initial surface temperature {\ct{RAMP_T_I} on \ct{SURF}) cannot be externally controlled.
-    
+
 When external control is selected, FDS will set the value of the \ct{RAMP} or the logical state of the \ct{CTRL} based on values contained in a csv file whose name is given by \ct{EXTERNAL_FILENAME} on \ct{MISC}. This file will be checked for new values every \ct{DT_EXTERNAL} on \ct{TIME} seconds. Only those inputs whose values are being changed need to specified. For inputs not specified or if the file does not exist or cannot be opened (e.g., locked by the operating system during a file write), the current values will be kept. The initial values are defined with either \ct{INITIAL_VALUE} on \ct{RAMP} or \ct{INITIAL_STATE} on \ct{CTRL}. By using \ct{DT_EXTERNAL_HEARTBEAT} and \ct{EXTERNAL_HEARTBEAT_FILENAME} on \ct{TIME}, FDS can be forced to wait if no file is present or use an alternate \ct{EXTERNAL_FILENAME}. With this approach FDS looks for \ct{EXTERNAL_HEARTBEAT_FILENAME}. If the file is not found FDS will wait up to \ct{DT_EXTERNAL_HEARTBEAT} seconds. If \ct{EXTERNAL_HEARTBEAT_FILENAME} is still not present, FDS will stop trying to update the external controls.  If \ct{HEARTBEAT_FAIL=T} on \ct{TIME}, FDS will stop the simulation after failing to find \ct{EXTERNAL_HEARTBEAT_FILENAME}. If \ct{EXTERNAL_HEARTBEAT_FILENAME} is present, FDS will read \ct{EXTERNAL_FILENAME} from it. If your external program requires that output files it reads be current, set \ct{DT_FLUSH} to be less than the \ct{DT} values for any file types being used by the external program.
-    
+
 The csv file format is:
 \begin{lstlisting}
     Type(1), ID(1), Value(1)
@@ -8941,12 +8941,12 @@ An example set of inputs is below:
 \begin{lstlisting}
     &MISC EXTERNAL_FILENAME='external_test_input.csv'/
     &TIME T_END=10,DT_EXTERNAL=5/
-    
+
     &OBST XB=0.0,0.1,0,1,0,1/
     &VENT XB=0.1,0.1,0,1,0,1,SURF_ID='FLOW',CTRL_ID='VENT CTRL'/
     &SURF ID='FLOW',VEL=-1,COLOR='BLUE',TAU_V=0/
     &CTRL ID='VENT CTRL',FUNCTION_TYPE='EXTERNAL',INITIAL_STATE=T/
-    
+
     &VENT XB=2,2,0,1,0,1,SURF_ID='HOT'/
     &SURF ID='HOT',TMP_FRONT=1000,RAMP_T='T RAMP',COLOR='RED'/
     &RAMP ID='T RAMP',EXTERNAL_FILE=T,INITIAL_VALUE=0.081633/
@@ -8991,7 +8991,7 @@ Table~\ref{tbl:SIMULATION_MODE} indicates the value of various parameters for ea
     \begin{tabular}{|l|c|c|c|c|c|}
         \hline
         Key Parameter                      & Section                        & \ct{'DNS'}    & \ct{'LES'}     & \ct{'VLES'}       & \ct{'SVLES'}     \\ \hline \hline
-        \ct{CFL_VELOCITY_NORM}             & \ref{info:CFL}                 & 1             & 1              & 2                 & 3                \\ \hline
+        \ct{CFL_VELOCITY_NORM}             & \ref{info:CFL}                 & 1             & 1              & 2                 & 2                \\ \hline
         \ct{CHECK_VN}                      & \ref{info:VN}                  & T             & T              & T                 & F                \\ \hline
         \ct{FLUX_LIMITER}                  & \ref{info:flux_limiters}       & \ct{'CHARM'}  & \ct{'CHARM'}   & \ct{'SUPERBEE'}   & \ct{'SUPERBEE'}  \\ \hline
         \ct{CONSTANT_SPECIFIC_HEAT_RATIO}  & \ref{info:Enthalpy}            & F             & F              & F                 & T                \\ \hline
@@ -9069,17 +9069,12 @@ The exact CFL needed to maintain stability depends on the order (as well as othe
 \begin{equation}
     \frac{\|\mathbf{u}\|}{\Delta} = \frac{|u|}{\delta x}+\frac{|v|}{\delta y}+\frac{|w|}{\delta z} + |\nabla \cdot \bu|
 \end{equation}
-\ct{CFL_VELOCITY_NORM=2} (VLES default, $L_2$ norm of velocity vector)
+\ct{CFL_VELOCITY_NORM=2} (VLES and SVLES defaults, $L_2$ norm of velocity vector)
 \begin{equation}
     \frac{\|\mathbf{u}\|}{\Delta} = \sqrt{ \left( \frac{u}{\delta x} \right)^2 + \left( \frac{v}{\delta y} \right)^2 + \left( \frac{w}{\delta z} \right)^2 } + |\nabla \cdot \bu|
 \end{equation}
-\ct{CFL_VELOCITY_NORM=3} (SVLES default, least restrictive, corresponds to $L_\infty$ norm of velocity vector without the velocity divergence)
-\begin{equation}
-    \frac{\|\mathbf{u}\|}{\Delta} = \max \left(\frac{|u|}{\delta x}, \frac{|v|}{\delta y}, \frac{|w|}{\delta z}\right)
-\end{equation}
-The last listed form of the constraint is the least restrictive, but also the most dangerous in the sense that a numerical instability is more likely to occur when the CFL constraint is least restrictive. This option is akin to a high optimization level of a computer program compiler---there is a trade-off between added speed and added risk of failure.
 
-Notice that the CFL norms 0-2 include the divergence of the velocity field. This is an added safeguard because often numerical instabilities arise when there is a sudden release of energy and a corresponding increase in the divergence within a single grid cell. In an explicit Euler update of the continuity equation, if the time increment is too large, the grid cell may be totally drained of mass, which is not physical. The constraint $\rho^{n+1}>0$ leads to the following restriction on the time step:
+Notice that the CFL norms include the divergence of the velocity field. This is an added safeguard because often numerical instabilities arise when there is a sudden release of energy and a corresponding increase in the divergence within a single grid cell. In an explicit Euler update of the continuity equation, if the time increment is too large, the grid cell may be totally drained of mass, which is not physical. The constraint $\rho^{n+1}>0$ leads to the following restriction on the time step:
 \begin{equation}
     \label{eqn_dtmassrestrict}
     \delta t < \frac{\rho^n}{\overline{\mathbf{u}}^n\cdot\nabla\rho^n + \rho^n \nabla\cdot\mathbf{u}^n}
@@ -9381,12 +9376,12 @@ By default, gravity points in the negative $z$ direction, or more simply, downwa
 There are a few special applications where you might want to vary the gravity vector as a function of time or as a function of the first spatial coordinate, $x$. For example, on board space craft, small motions can cause temporal changes in the normally zero level of gravity, an effect known as ``g-jitter.'' More commonly, in tunnel fire simulations, it is sometimes convenient to change the direction of gravity to mimic the change in slope. The slope of the tunnel might change as you travel through it; thus, you can tell FDS where to redirect gravity. For either a spatially or temporally varying direction and/or magnitude of gravity, do the following. First, on the \ct{MISC} line, set the three components of gravity, \ct{GVEC}, to some ``base'' state like \ct{GVEC=1.,1.,1.}, which gives you the flexibility to vary all three components. Next, designate ``ramps'' for the individual components, \ct{RAMP_GX}, \ct{RAMP_GY}, and \ct{RAMP_GZ}, all of which are specified on the \ct{MISC} line. There is more discussion of \ct{RAMP}s in Sec.~\ref{info:RAMP}, but for now you can use the following as a simple template to follow:
 \begin{lstlisting}
     &MISC GVEC=1.,0.,1., RAMP_GX='x-ramp', RAMP_GZ='z-ramp' /
-    
+
     &RAMP ID='x-ramp', X=  0., F=0.0 /
     &RAMP ID='x-ramp', X= 50., F=0.0 /
     &RAMP ID='x-ramp', X= 51., F=-0.49 /
     &RAMP ID='x-ramp', X=100., F=-0.49 /
-    
+
     &RAMP ID='z-ramp', X=  0., F=-9.81 /
     &RAMP ID='z-ramp', X= 50., F=-9.81 /
     &RAMP ID='z-ramp', X= 51., F=-9.80 /
@@ -9442,21 +9437,21 @@ The number of pressure iterations and the maximum velocity error in the domain c
 The default Poisson solver in FDS (\ct{SOLVER='FFT'} on the \ct{PRES} line) is based on the package of linear algebra routines called CrayFishpak. However, in certain circumstances you may need to use one of several alternatives that are based on the Intel\textsuperscript{\textregistered} MKL Sparse Cluster Solver or the HYPRE solver library from Lawrence Livermore National Laboratories (LLNL) \cite{HYPRE}.
 \begin{itemize}
     \item \ct{SOLVER='ULMAT'} This solver is useful when the computational domain has relatively small, sealed cavities enclosed with thin (i.e. zero cell thick) walls. The small error in the normal component of velocity that you incur with the FFT solver can lead to unphysical changes in temperature, density and pressure that may eventually cause the calculation to become numerically unstable. For example, suppose you have hollow steel columns or hollow aluminum ducts with thin walls and you want to simulate the heat penetration within these spaces.
-    
+
     With the \ct{ULMAT} solver, the unknown values of the pressure live only in gas-phase cells, allowing for the normal components of velocity at a solid surface to be computed exactly with no penetration error. Strictly speaking, in this mode, FDS is no longer using an ``immersed boundary method'' for flow obstructions---the pressure solution is now ``unstructured,'' hence the \ct{U} in its name. This solver does not guarantee that the normal component of velocity matches perfectly at mesh boundaries, and the iterative procedure used by the default \ct{'FFT'} solver is still used to drive the mesh interface velocity normals closer together. This solver option does allow for refinement at mesh boundaries and for internal sealed regions within the domain for which additional matrices must be computed.
-    
+
     The default \ct{ULMAT} linear system solver is MKL Pardiso. You can also call this solver as \ct{SOLVER='ULMAT PARDISO'}. This solver uses a substantial amount of memory per mesh. Its use should be limited to meshes of at most 150,000 cells. This number depends on the amount of random access memory (RAM) that you can devote to each MPI process, and you might want to experiment with larger meshes if you have, say, tens of gigabytes of RAM per MPI process.
-    
+
     \item \ct{SOLVER='ULMAT HYPRE'}  This solver uses the same strategy as ULMAT but the solver is implemented via LLNL's HYPRE library \cite{HYPRE}.  \ct{ULMAT HYPRE} uses the algebraic multi-grid (AMG) preconditioned conjugate gradient (PCG) solver.  This solver does not require LU decomposition and storage of a dense matrix, so the memory requirements are much less than the MKL solver.  Hence, \ct{ULMAT HYPRE} may be considered as an option for large mesh blocks (larger than 150,000 cells).  Note, however, that for small mesh blocks HYPRE is somewhat slower than MKL Pardiso.
-    
+
     \item \ct{SOLVER='GLMAT'} With this solver, the pressure in both solid and gas cells is computed using an immersed boundary method for flow obstructions, the same as the default \ct{'FFT'} solver.  This mode produces the exact same pressure solution as the \ct{'FFT'} solver would if the domain were one single mesh. That is, velocity errors at any mesh boundaries are eliminated.
     The \ct{GLMAT} solver is used mainly for testing and diagnostics. The default linear system solver for \ct{GLMAT} is the HYPRE AMG preconditioned parallel PCG solver. The solver variants are \ct{SOLVER='GLMAT PARDISO'} and \ct{SOLVER='GLMAT HYPRE'} (default).
-    
+
     \item \ct{SOLVER='UGLMAT'} This solver is used for non-overlapping meshes, and allows stretching and refinement. Like the solver \ct{'ULMAT'}, the unknown values of the pressure live only in gas-phase cells, allowing for the normal components of velocity at a solid surface to be computed exactly (no velocity penetration error). In addition, this solver ensures that the normal component of velocity matches perfectly at mesh boundaries. The default linear system solver for this solver is the HYPRE AMG preconditioned parallel PCG solver. You can also call this solver as \ct{SOLVER='UGLMAT HYPRE'}. It is CPU-intensive, but does not have the global mesh size limitation of \ct{UGLMAT PARDISO}.
-    
+
     \item \ct{SOLVER='UGLMAT PARDISO'} Performs the same global solution as \ct{'UGLMAT'} calling the MKL Sparse Cluster Solver. It is limited to about 1~million grid cells, and it is the most CPU-intensive of the alternative solvers.
-    
-    
+
+
 \end{itemize}
 Because the \ct{'ULMAT PARDISO','GLMAT PARDISO','UGLMAT PARDISO'} alternative methods are based on the Intel\textsuperscript{\textregistered} MKL parallel LU decomposition solver, they require computation and storage of global factorization matrices. Depending on the size of the problem, these operations can be expensive in terms of both CPU time and memory. It has been found suitable for problems with up to a million cells on a multi-core workstation with 64~GB of RAM.
 
@@ -9951,7 +9946,7 @@ where $dA$ depends on the coordinates you specify for \ct{XB}. Note that this st
 
 This feature is usually used in conjunction with \ct{SPATIAL_STATISTIC='VOLUME INTEGRAL'} above (use two separate \ct{DEVC} lines, each with the same \ct{QUANTITY}). When performing precise mass and energy balances, it is useful to know exactly the volume of gas present in the region of interest. Using \ct{SPATIAL_STATISTIC='VOLUME'} produces the discrete analog of
 \be \int \; \d V \ee
-where $dV$ depends on the coordinates you specify for \ct{XB}.  
+where $dV$ depends on the coordinates you specify for \ct{XB}.
 
 \subsubsection{Area}
 
@@ -10165,7 +10160,7 @@ Note that you must specify the \ct{PART_ID} so that the appropriate inner noding
 
 The \ct{QUANTITY} is the physical quantity to record. Each \ct{PROF} line creates a separate file. The first number in each row is the time at which the profile is extracted. The second number is the number of ``nodes,'' $n$, which is the number of solid phase cells plus 1. The next $n$ values are the node coordinates, running from 0 at the surface to the full \ct{THICKNESS} at the end. The next $n$ numbers are the values of the \ct{QUANTITY} at the node points. The first of these values is located at the surface. If you specify \ct{CELL_CENTERED=T}, the \ct{QUANTITY} values will be recorded at $n$ interior cell centers rather than cell boundaries. The \ct{ID} is an optional input which, if provided, is used in the file header.
 
-To choose your own discrete locations for where the data is recorded, add the parameter \ct{DEPTHS} to the \ct{PROF} line followed by a list of non-negative depths (m) at which the temperatures are to be recorded. 
+To choose your own discrete locations for where the data is recorded, add the parameter \ct{DEPTHS} to the \ct{PROF} line followed by a list of non-negative depths (m) at which the temperatures are to be recorded.
 
 There is a second optional format. If you specify \ct{FORMAT_INDEX=2} on the \ct{PROF} line, the resulting file will contain columns containing only the final set of node coordinates and quantity values. This is handy for displaying a steady-state temperature profile.
 
@@ -10865,33 +10860,33 @@ Each \ct{TIME} the intensities are written out, each cell in the designated bloc
 \begin{lstlisting}
     NSTEPS
     2
-    
+
     TIMES
     0.00
     10.00
-    
+
     NP
     3150
-    
+
     XYZ_INTENSITIES
     2.350   1.350   0.050
     .
     .
     .
-    
+
     NI
     104
-    
+
     XYZ_DIRECTIONS
     0.138  0.138  0.981
     -0.138  0.138  0.981
     .
     .
     .
-    
+
     TIME
     0.00
-    
+
     INTENSITIES
     293.15  0.00      133.17      133.17      133.17      133.17      133.17  ...
     .
@@ -14269,7 +14264,7 @@ Keyword             & Type     & Description                      & Units       
 504 \> \ct{Duct has no ID ...} \> Section~\ref{info:HVAC}  \\
 505 \> \ct{Duct has no AREA, DIAMETER, or PERIMETER ...}  \> Section~\ref{info:HVACduct} \\
 506 \> \ct{ROUND duct can only have one of AREA, DIAMETER, ...}  \> Section~\ref{info:HVACduct} \\
-507 \> \ct{SQUARE duct cannot have all of AREA, DIAMETER, ...} \> Section~\ref{info:HVACduct}\\ 
+507 \> \ct{SQUARE duct cannot have all of AREA, DIAMETER, ...} \> Section~\ref{info:HVACduct}\\
 509 \> \ct{Can only specify one of CTRL_ID or DEVC_ID. ...} \> Section~\ref{info:HVACduct}  \\
 510 \> \ct{Duct can only have one of damper, fan or aircoil ...} \> Section~\ref{info:HVACduct}  \\
 511 \> \ct{Duct has fan specified but no fans have been defined ...} \> Section~\ref{info:HVACduct}  \\
@@ -15174,12 +15169,12 @@ Table~\ref{tbl:fileextensions} provides a quick reference to file extensions use
     \begin{tabular}{|c|l|c|}
         \hline
         File extension  & Short Description   & Reference    \\ \hline \hline
-        
+
         % for each file extension xxx entry in this table add the line %fdsext xxx or %smvext xxx .
         % The script {\tt check_exts.sh} in the bot repo uses this information to determine which
         % file extensions are documented.
         % If you wish to not document a file extension add the line %ignoreext xxx
-        
+
         %fdsext bf
         %fdsext bingeom
         %fdsext bnd
@@ -15206,7 +15201,7 @@ Table~\ref{tbl:fileextensions} provides a quick reference to file extensions use
         %fdsext sz
         %fdsext ter
         %fdsext txt
-        
+
         \ct{.be}        & Data values for \ct{.gcf,.gsf,.iso} files   & Section \ref{out:GEOMETRY_DATA}                    \\ \hline
         \ct{.bf}        & Boundary files                              & Section \ref{out:BNDF}                              \\ \hline
         \ct{.bingeom}   & Binary geometry files                      & Section \ref{inout:bingeom}                          \\ \hline
@@ -15236,7 +15231,7 @@ Table~\ref{tbl:fileextensions} provides a quick reference to file extensions use
         \ct{_devc.csv} & Device files                                & Section \ref{out:DEVC}                              \\ \hline
         \ct{_git.txt}  & Git revision                                &                                                     \\ \hline
         \ct{_hrr.csv}  & Heat Release Rate files                     & Section \ref{out:hrr}                               \\ \hline
-        
+
     \end{tabular}
 \end{center}
 \end{table}
