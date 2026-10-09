@@ -85,6 +85,10 @@ jobs:
       if: endsWith(matrix.compiler_mpi, '_openmpi') && (startsWith(matrix.container, 'rockylinux') || startsWith(matrix.container, 'fedora'))
       run: dnf install -y openmpi-devel
 
+    - name: install gcc-toolset
+      if: startsWith(matrix.compiler_mpi, 'gnu_') && startsWith(matrix.container, 'rockylinux')
+      run: dnf install -y gcc-toolset-14-gcc gcc-toolset-14-gcc-c++ gcc-toolset-14-gcc-gfortran
+
     - name: install openmpi
       if: endsWith(matrix.compiler_mpi, '_openmpi') && startsWith(matrix.container, 'ubuntu')
       run: |
@@ -125,6 +129,7 @@ jobs:
       run: |
         # source /opt/intel/oneapi/setvars.sh
         if [ "${{matrix.container}}" = "rockylinux:9" ]; then
+            source /opt/rh/gcc-toolset-14/enable
             source /etc/profile.d/modules.sh
             module load mpi/openmpi-x86_64
         fi
@@ -142,9 +147,63 @@ jobs:
       run: |
         source /opt/intel/oneapi/setvars.sh
         if [ "${{matrix.container}}" = "rockylinux:9" ]; then
+            source /opt/rh/gcc-toolset-14/enable
             source /etc/profile.d/modules.sh
             module load mpi/openmpi-x86_64
         fi
+        ctest --test-dir builddir -j --output-on-failure -V
+
+  cmake-linux-nvhpc:
+    # build on ubuntu using the NVIDIA HPC SDK compilers (nvfortran, nvc, nvc++) and its bundled MPI (HPC-X, Open MPI based)
+    name: ubuntu-24.04 nvhpc_hpcx openmp=${{ matrix.openmp }} ${{ matrix.build_type }}
+    runs-on: [ubuntu-24.04]
+    env:
+      NVHPC_VERSION: "26.9"
+      # The runners have no GPU; skip the CUDA/UCC parts of the HPC-X initialization (see HPC SDK release notes)
+      OMPI_MCA_coll_ucc_enable: "0"
+      UCX_MODULES: "^cuda"
+    strategy:
+      fail-fast: false
+      matrix:
+        openmp:
+          - "ON"
+          - "OFF"
+        build_type:
+          - "Debug"
+          - "Release"
+    defaults:
+      run:
+        shell: bash
+    steps:
+    - name: install nvidia hpc sdk
+      run: |
+        KR=/usr/share/keyrings/nvidia-hpcsdk-archive-keyring.gpg
+        curl -fsSL https://developer.download.nvidia.com/hpc-sdk/ubuntu/DEB-GPG-KEY-NVIDIA-HPC-SDK | sudo gpg --dearmor -o $KR
+        echo "deb [signed-by=$KR] https://developer.download.nvidia.com/hpc-sdk/ubuntu/amd64 /" | sudo tee /etc/apt/sources.list.d/nvhpc.list
+        sudo apt-get -y update
+        sudo apt-get -y install environment-modules nvhpc-${NVHPC_VERSION/./-}
+
+    - uses: actions/checkout@v7.0.1
+      with:
+        ref: ${{ inputs.ref || github.sha }}
+        persist-credentials: false
+
+    - name: build fds
+      run: |
+        source /usr/share/modules/init/bash
+        module use /opt/nvidia/hpc_sdk/modulefiles
+        module load nvhpc/${NVHPC_VERSION}
+        export CC=nvc CXX=nvc++ FC=nvfortran
+        nvfortran --version
+        which mpifort && mpifort --showme
+        cmake -B builddir -S . -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DUSE_OPENMP=${{matrix.openmp}}
+        cmake --build builddir -j --target fds
+
+    - name: Test
+      run: |
+        source /usr/share/modules/init/bash
+        module use /opt/nvidia/hpc_sdk/modulefiles
+        module load nvhpc/${NVHPC_VERSION}
         ctest --test-dir builddir -j --output-on-failure -V
 
   cmake-osx:
