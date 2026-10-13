@@ -1,4 +1,4 @@
-﻿&HEAD CHID='SC_p1_p3_30_test', TITLE='Solar Chimney, inlet height, cavity width, temperature'/
+&HEAD CHID='SC_p4_p5_40', TITLE='Solar Chimney, inlet height, cavity width, temperature'/
 
 &TIME T_END=250. /
 &DUMP DT_DEVC=1., DT_HRR=1. /
