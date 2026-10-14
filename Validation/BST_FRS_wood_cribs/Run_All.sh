@@ -5,11 +5,11 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
-$QFDS -p 12  $DEBUG $QUEUE -d $INDIR BST_FRS_1.fds
-$QFDS -p 12  $DEBUG $QUEUE -d $INDIR BST_FRS_2.fds
-$QFDS -p 12  $DEBUG $QUEUE -d $INDIR BST_FRS_3.fds
-$QFDS -p 12  $DEBUG $QUEUE -d $INDIR BST_FRS_4.fds
-$QFDS -p 12  $DEBUG $QUEUE -d $INDIR BST_FRS_5.fds
-$QFDS -p 16  $DEBUG $QUEUE -d $INDIR BST_FRS_6.fds
+$QFDS -p 22  $DEBUG $QUEUE -d $INDIR BST_FRS_1.fds
+$QFDS -p 22  $DEBUG $QUEUE -d $INDIR BST_FRS_2.fds
+$QFDS -p 22  $DEBUG $QUEUE -d $INDIR BST_FRS_3.fds
+$QFDS -p 22  $DEBUG $QUEUE -d $INDIR BST_FRS_4.fds
+$QFDS -p 22  $DEBUG $QUEUE -d $INDIR BST_FRS_5.fds
+$QFDS -p 39  $DEBUG $QUEUE -d $INDIR BST_FRS_6.fds
 
 echo FDS cases submitted
