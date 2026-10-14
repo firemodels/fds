@@ -123,7 +123,7 @@ class PreparationTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "stale"):
             self.prepare(event_sha="d" * 40)
 
-    def test_merged_pr_can_prepare_scan_without_resetting_gate_statuses(self):
+    def test_merged_developer_pr_still_prepares_scan_and_publishes_admission(self):
         pull = pull_request()
         pull.update(state="closed", merged=True)
         for parents in ([BASE, HEAD], [BASE]):
@@ -131,7 +131,8 @@ class PreparationTests(unittest.TestCase):
                 result = self.prepare(pull=pull, memberships=(True, True), parents=parents)
                 self.assertEqual(result["head_sha"], HEAD)
                 self.assertEqual(result["merge_sha"], MERGE)
-                self.assertEqual([call.args[2] for call in self.preparation_statuses], [security.SCAN])
+                self.assertEqual([call.args[2] for call in self.preparation_statuses],
+                                 [security.SCAN, security.ADMISSION, security.ADMISSION])
 
     def test_merge_during_preparation_keeps_scanning(self):
         initial = pull_request()
@@ -197,13 +198,16 @@ class AdmissionTests(unittest.TestCase):
             self.assertEqual(len(calls), 1)
             self.assertEqual(calls[0].args[2], security.SCAN)
 
-    def test_scan_finishes_after_merge_without_resetting_admission(self):
+    def test_scan_finishes_and_publishes_external_admission_after_merge(self):
         current = pull_request()
         current.update(state="closed", merged=True)
+        current["base"]["sha"] = "d" * 40
         for trusted in (True, False):
             passed, calls = self.finish(trusted=trusted, current=current)
             self.assertTrue(passed)
-            self.assertEqual([call.args[2] for call in calls], [security.SCAN])
+            expected = [security.SCAN] if trusted else [security.SCAN, security.ADMISSION, security.ADMISSION]
+            self.assertEqual([call.args[2] for call in calls], expected)
+            self.assertTrue(all(call.args[3] == "success" for call in calls))
 
     def test_stale_scan_does_not_admit_changed_head_base_or_closed_pr(self):
         for field in ("head", "base", "state"):
@@ -218,10 +222,13 @@ class AdmissionTests(unittest.TestCase):
 
 
 class AdmissionWaitTests(unittest.TestCase):
-    def wait(self, states=("success",), current=None, run=None, target=None, timeout=3000):
+    def wait(self, states=("success",), current=None, run=None, target=None, timeout=3000, trusted=False):
         requests = []
         outcomes = iter(states)
         current = current or pull_request()
+        pulls = copy.deepcopy(current if isinstance(current, list) else [current])
+        for pull in pulls:
+            pull["user"]["id"] = 123 if trusted else 456
         event = {"number": 7, "pull_request": {"head": {"sha": HEAD}, "base": {"sha": BASE}}}
 
         def api(path):
@@ -234,7 +241,7 @@ class AdmissionWaitTests(unittest.TestCase):
                 return run or {"event": "pull_request_target", "path": ".github/workflows/pr-security.yml"}
             if "/files?" in path:
                 return [{"filename": "Source/main.f90"}]
-            return current
+            return pulls.pop(0) if len(pulls) > 1 else pulls[0]
 
         with tempfile.TemporaryDirectory() as folder:
             event_path = Path(folder) / "event.json"
@@ -242,7 +249,8 @@ class AdmissionWaitTests(unittest.TestCase):
             with patch.dict(os.environ, {"GITHUB_EVENT_PATH": str(event_path), "GITHUB_REPOSITORY": "developer/fds",
                                          "GITHUB_SHA": MERGE}), \
                     patch.object(security, "api", side_effect=api), \
-                    patch.object(security, "outputs") as output, patch.object(security.time, "sleep") as sleep:
+                    patch.object(security, "outputs") as output, patch.object(security.time, "sleep") as sleep, \
+                    patch.object(security, "load_developers", return_value={123}):
                 security.wait_for_admission(timeout=timeout)
                 return requests, output, sleep
 
@@ -252,6 +260,49 @@ class AdmissionWaitTests(unittest.TestCase):
         self.assertEqual(queried, [f"/repos/developer/fds/commits/{MERGE}/status?per_page=100"] * 3)
         self.assertEqual(sleep.call_count, 2)
         output.assert_called_once_with({"conventional": "true", "cmake": "true"})
+
+    def test_listed_developer_builds_start_without_scan_before_or_after_merge(self):
+        for merged in (False, True):
+            current = pull_request()
+            if merged:
+                current.update(state="closed", merged=True)
+                current["base"]["sha"] = "d" * 40
+                current["merge_commit_sha"] = "e" * 40
+            with self.subTest(merged=merged):
+                requests, output, sleep = self.wait(current=current, states=(), trusted=True)
+                self.assertFalse(any("/status?" in path for path in requests))
+                output.assert_called_once_with({"conventional": "true", "cmake": "true"})
+                sleep.assert_not_called()
+
+    def test_external_builds_still_start_after_merge_once_scan_passes(self):
+        current = pull_request()
+        current.update(state="closed", merged=True)
+        current["base"]["sha"] = "d" * 40
+        requests, output, sleep = self.wait(current=current, states=("pending", "success"))
+        self.assertEqual(sleep.call_count, 1)
+        self.assertEqual(sum("/status?" in path for path in requests), 2)
+        output.assert_called_once_with({"conventional": "true", "cmake": "true"})
+
+    def test_merge_while_waiting_does_not_interrupt_external_builds(self):
+        merged = pull_request()
+        merged.update(state="closed", merged=True)
+        requests, output, sleep = self.wait(current=[pull_request(), merged], states=("pending", "success"))
+        self.assertEqual(sleep.call_count, 1)
+        output.assert_called_once_with({"conventional": "true", "cmake": "true"})
+
+    def test_merging_never_bypasses_required_external_scan(self):
+        current = pull_request()
+        current.update(state="closed", merged=True)
+        for state in ("failure", "error"):
+            with self.subTest(state=state), self.assertRaisesRegex(RuntimeError, "blocked"):
+                self.wait(current=current, states=(state,))
+
+    def test_merge_of_a_different_head_does_not_admit_stale_code(self):
+        current = pull_request()
+        current.update(state="closed", merged=True)
+        current["head"]["sha"] = "d" * 40
+        with self.assertRaisesRegex(RuntimeError, "stale revision"):
+            self.wait(current=current)
 
     def test_failure_error_and_timeout_never_release_builds(self):
         for state in ("failure", "error"):
@@ -419,6 +470,8 @@ class WorkflowTests(unittest.TestCase):
 
     def test_builds_use_pull_request_and_security_never_calls_builds(self):
         builds = self.workflows["pr-builds.yml"]
+        self.assertNotIn("run_builds", json.dumps(builds))
+        self.assertNotIn("merged", json.dumps(builds))
         gate = self.workflows["pr-security.yml"]
         self.assertIn("pull_request", builds.get("on", builds.get("true")))
         self.assertIn("pull_request_target", gate.get("on", gate.get("true")))

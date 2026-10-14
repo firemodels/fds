@@ -28,7 +28,7 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.base.sha }}
           persist-credentials: false
-      - name: Wait for this exact merge revision to be admitted
+      - name: Check author or wait for this exact revision to pass scanning
         id: admission
         env:
           GH_TOKEN: ${{ github.token }}

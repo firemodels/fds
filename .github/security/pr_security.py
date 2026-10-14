@@ -139,12 +139,11 @@ def prepare():
 
         outputs({"head_sha": head_sha, "head_repo": head_repo, "base_sha": base_sha,
                  "merge_sha": merge_sha, "trusted": str(trusted).lower()})
-        if gate_open:
-            if trusted:
-                publish_admission(repository, number, head_sha, base_sha, merge_sha,
-                                  "success", "Listed PR author; scan continues in background")
-            elif merge_sha:
-                status(repository, merge_sha, ADMISSION, "pending", "Waiting for the virus scan")
+        if trusted:
+            publish_admission(repository, number, head_sha, base_sha, merge_sha,
+                              "success", "Listed PR author; scan continues in background")
+        elif merge_sha:
+            status(repository, merge_sha, ADMISSION, "pending", "Waiting for the virus scan")
         print(f"PR #{number}: head={head_sha}, merge={merge_sha or 'unavailable'}, trusted={trusted}")
     except Exception:
         if gate_open:
@@ -322,10 +321,9 @@ def scan():
 def publish_admission(repository, number, head_sha, base_sha, merge_sha, state, description):
     """Publish the merge rule on the head and the build rule on the exact merge."""
     current = api(f"/repos/{repository}/pulls/{number}")
-    if current["head"]["sha"] == head_sha and current.get("merged"):
-        return  # A developer may merge while the background scan is still running.
-    if (current["state"] != "open" or current["head"]["sha"] != head_sha
-            or current["base"]["sha"] != base_sha):
+    if (current["head"]["sha"] != head_sha or
+            (not current.get("merged") and
+             (current["state"] != "open" or current["base"]["sha"] != base_sha))):
         raise RuntimeError("PR changed before admission; a new run is required")
     if merge_sha:
         status(repository, merge_sha, ADMISSION, state, description)
@@ -356,37 +354,48 @@ def wait_for_admission(timeout=3000):
     base_sha = event["pull_request"]["base"]["sha"]
     merge_sha = os.environ["GITHUB_SHA"]
     validate_revision(repository, merge_sha)
+    developers = load_developers()
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
         pull = api(f"/repos/{repository}/pulls/{number}")
-        if (pull["state"] != "open" or pull["head"]["sha"] != head_sha
-                or pull["base"]["sha"] != base_sha):
-            raise RuntimeError("PR changed or closed; do not build this stale revision")
-        combined = api(f"/repos/{repository}/commits/{merge_sha}/status?per_page=100")
-        admission = next((item for item in combined["statuses"] if item["context"] == ADMISSION), None)
-        if admission:
-            # Only accept a result attributed to the trusted security workflow.
-            prefix = f"https://github.com/{repository}/actions/runs/"
-            target = admission.get("target_url") or ""
-            run_id = target.removeprefix(prefix)
-            if not target.startswith(prefix) or not run_id.isdigit():
-                raise RuntimeError("Admission status has no trusted workflow run")
-            run = api(f"/repos/{repository}/actions/runs/{run_id}")
-            if run["event"] != "pull_request_target" or run["path"] != ".github/workflows/pr-security.yml":
-                raise RuntimeError("Admission status did not come from the security workflow")
-            if admission["state"] == "success":
-                files = []
-                for page in range(1, 31):
-                    batch = api(f"/repos/{repository}/pulls/{number}/files?per_page=100&page={page}")
-                    files.extend(batch)
-                    if len(batch) < 100:
-                        break
-                conventional, cmake = build_selection(files, len(files) == pull["changed_files"])
-                outputs({"conventional": str(conventional).lower(), "cmake": str(cmake).lower()})
-                print(f"Admission passed for merge {merge_sha}; builds may start")
-                return
-            if admission["state"] in ("failure", "error"):
-                raise RuntimeError("Virus scan did not admit this revision; builds remain blocked")
+        if pull["head"]["sha"] != head_sha:
+            raise RuntimeError("PR head changed; do not build this stale revision")
+        if not pull.get("merged"):
+            if pull["state"] != "open":
+                raise RuntimeError("PR closed without merging; do not build this stale revision")
+            if pull["base"]["sha"] != base_sha:
+                raise RuntimeError("PR base changed; update the PR branch before building this stale revision")
+
+        # The same author-only rule applies before and after merging. Listed
+        # developers do not wait for the scan or for its reporting jobs.
+        admitted = trusted_developer(pull["user"], developers)
+        if not admitted:
+            combined = api(f"/repos/{repository}/commits/{merge_sha}/status?per_page=100")
+            admission = next((item for item in combined["statuses"] if item["context"] == ADMISSION), None)
+            if admission:
+                # Only accept a result attributed to the trusted security workflow.
+                prefix = f"https://github.com/{repository}/actions/runs/"
+                target = admission.get("target_url") or ""
+                run_id = target.removeprefix(prefix)
+                if not target.startswith(prefix) or not run_id.isdigit():
+                    raise RuntimeError("Admission status has no trusted workflow run")
+                run = api(f"/repos/{repository}/actions/runs/{run_id}")
+                if run["event"] != "pull_request_target" or run["path"] != ".github/workflows/pr-security.yml":
+                    raise RuntimeError("Admission status did not come from the security workflow")
+                admitted = admission["state"] == "success"
+                if admission["state"] in ("failure", "error"):
+                    raise RuntimeError("Virus scan did not admit this revision; builds remain blocked")
+        if admitted:
+            files = []
+            for page in range(1, 31):
+                batch = api(f"/repos/{repository}/pulls/{number}/files?per_page=100&page={page}")
+                files.extend(batch)
+                if len(batch) < 100:
+                    break
+            conventional, cmake = build_selection(files, len(files) == pull["changed_files"])
+            outputs({"conventional": str(conventional).lower(), "cmake": str(cmake).lower()})
+            print(f"Admission passed for merge {merge_sha}; builds may start, whether or not the PR is merged")
+            return
         time.sleep(15)
     raise RuntimeError("Timed out waiting for PR admission; inspect the PR security workflow")
 
