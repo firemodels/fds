@@ -7,6 +7,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import sys
 import tarfile
 import tempfile
 import unittest
@@ -99,10 +100,24 @@ class PreparationTests(unittest.TestCase):
         self.assertEqual(result["trusted"], "false")
         self.assertEqual(result["merge_sha"], MERGE)
 
-    def test_author_and_sender_must_both_be_trusted_developers(self):
+    def test_only_pr_author_determines_trust(self):
         self.assertEqual(self.prepare(memberships=(True, True))["trusted"], "true")
-        self.assertEqual(self.prepare(memberships=(True, False))["trusted"], "false")
+        self.assertEqual(self.prepare(memberships=(True, False))["trusted"], "true")
         self.assertEqual(self.prepare(memberships=(False, True))["trusted"], "false")
+
+    def test_developer_gets_head_and_merge_admission_before_scanning(self):
+        self.prepare(memberships=(True, False))
+        successes = [(call.args[1], call.args[2]) for call in self.preparation_statuses
+                     if call.args[3] == "success"]
+        self.assertEqual(successes, [(MERGE, security.ADMISSION), (HEAD, security.ADMISSION)])
+        scans = [call for call in self.preparation_statuses if call.args[2] == security.SCAN]
+        self.assertEqual([call.args[3] for call in scans], ["pending"])
+
+    def test_outsider_has_no_admission_until_scanner_finishes(self):
+        self.prepare(memberships=(False, True))
+        self.assertTrue(all(call.args[3] == "pending" for call in self.preparation_statuses))
+        admissions = [call.args[1] for call in self.preparation_statuses if call.args[2] == security.ADMISSION]
+        self.assertEqual(admissions, [HEAD, MERGE])
 
     def test_stale_event_does_not_admit_a_new_revision(self):
         with self.assertRaisesRegex(ValueError, "stale"):
@@ -151,88 +166,118 @@ class PreparationTests(unittest.TestCase):
 
 
 class AdmissionTests(unittest.TestCase):
-    def check(self, trusted=False, external="success", member="success", merge=MERGE, current=None, kind="admission"):
+    def finish(self, trusted=False, outcome="success", current=None, merge=MERGE):
         environment = {"GITHUB_REPOSITORY": "developer/fds", "HEAD_SHA": HEAD, "BASE_SHA": BASE,
                        "PR_NUMBER": "7", "MERGE_SHA": merge, "TRUSTED": str(trusted).lower(),
-                       "EXTERNAL_RESULT": external, "TRUSTED_RESULT": member}
+                       "SCAN_RESULT": outcome}
         with patch.dict(os.environ, environment), patch.object(security, "api", return_value=current or pull_request()), \
-                patch.object(security, "outputs") as output, \
                 patch.object(security, "status") as status:
             try:
-                security.report(kind)
-                success = True
+                security.finish()
+                passed = True
             except RuntimeError:
-                success = False
-            self.admission_output = output
-            return success, status
+                passed = False
+            return passed, status.call_args_list
 
-    def test_external_scan_must_finish_successfully(self):
-        self.assertTrue(self.check(external="success")[0])
-        for outcome in ("failure", "cancelled", "skipped", "", "in_progress"):
-            with self.subTest(outcome=outcome):
-                success, status = self.check(external=outcome)
-                self.assertFalse(success)
-                self.assertEqual(status.call_args.args[3], "failure")
+    def test_outsiders_require_successful_scan_on_head_and_exact_merge(self):
+        passed, calls = self.finish()
+        self.assertTrue(passed)
+        self.assertEqual([(call.args[1], call.args[2], call.args[3]) for call in calls],
+                         [(HEAD, security.SCAN, "success"), (MERGE, security.ADMISSION, "success"),
+                          (HEAD, security.ADMISSION, "success")])
+        for result in ("failure", "cancelled", "skipped", "", "in_progress"):
+            passed, calls = self.finish(outcome=result)
+            self.assertFalse(passed)
+            self.assertTrue(all(call.args[3] == "failure" for call in calls))
 
-    def test_member_admission_is_independent_of_background_scan(self):
-        for outcome in ("success", "failure", "cancelled", "in_progress"):
-            self.assertTrue(self.check(trusted=True, external="skipped", member=outcome)[0])
-            self.admission_output.assert_called_once_with({"run_builds": "true"})
+    def test_developer_scan_never_changes_early_admission(self):
+        for result in ("success", "failure", "cancelled", "skipped"):
+            passed, calls = self.finish(trusted=True, outcome=result)
+            self.assertEqual(passed, result == "success")
+            self.assertEqual(len(calls), 1)
+            self.assertEqual(calls[0].args[2], security.SCAN)
 
-    def test_merge_before_admission_skips_builds_without_overwriting_status(self):
+    def test_scan_finishes_after_merge_without_resetting_admission(self):
         current = pull_request()
         current.update(state="closed", merged=True)
-        current["base"]["sha"] = MERGE
         for trusted in (True, False):
-            success, status = self.check(trusted=trusted, external="skipped", current=current)
-            self.assertTrue(success)
-            status.assert_not_called()
-            self.admission_output.assert_called_once_with({"run_builds": "false"})
+            passed, calls = self.finish(trusted=trusted, current=current)
+            self.assertTrue(passed)
+            self.assertEqual([call.args[2] for call in calls], [security.SCAN])
 
-    def test_scan_result_can_be_published_after_merge(self):
-        current = pull_request()
-        current.update(state="closed", merged=True)
-        success, status = self.check(trusted=True, current=current, kind="report")
-        self.assertTrue(success)
-        self.assertEqual(status.call_args.args[2:4], (security.SCAN, "success"))
-
-    def test_member_scan_failure_is_still_reported(self):
-        success, status = self.check(trusted=True, external="skipped", member="failure", kind="report")
-        self.assertFalse(success)
-        self.assertEqual(status.call_args.args[2:4], (security.SCAN, "failure"))
-
-    def test_missing_merge_snapshot_never_admits(self):
-        for trusted in (True, False):
-            self.assertFalse(self.check(trusted=trusted, merge="")[0])
-
-    def test_changed_head_base_or_closed_pr_does_not_overwrite_new_status(self):
+    def test_stale_scan_does_not_admit_changed_head_base_or_closed_pr(self):
         for field in ("head", "base", "state"):
             current = pull_request()
             if field == "state":
                 current[field] = "closed"
             else:
                 current[field]["sha"] = "e" * 40
-            success, status = self.check(current=current)
-            self.assertFalse(success)
-            status.assert_not_called()
+            passed, calls = self.finish(current=current)
+            self.assertFalse(passed)
+            self.assertEqual([call.args[2] for call in calls], [security.SCAN])
 
-    def test_build_status_requires_all_selected_checks(self):
-        results = {name: {"result": "success"} for name in
-                   ("prepare", "admission", "linux", "macos", "windows", "cmake", "line-endings")}
-        environment = {"BUILD_RESULTS": json.dumps(results), "CONVENTIONAL": "true", "CMAKE": "true"}
-        with patch.dict(os.environ, environment):
-            passed, status = self.check(kind="builds")
-            self.assertTrue(passed)
-            self.assertEqual(status.call_args.args[2], security.BUILDS)
-        for name in results:
-            changed = copy.deepcopy(results)
-            changed[name]["result"] = "skipped"
-            with self.subTest(job=name), patch.dict(os.environ, {**environment, "BUILD_RESULTS": json.dumps(changed)}):
-                self.assertFalse(self.check(kind="builds")[0])
-        for name in ("linux", "macos", "windows", "cmake"):
-            results[name]["result"] = "skipped"
-        with patch.dict(os.environ, {"BUILD_RESULTS": json.dumps(results), "CONVENTIONAL": "false", "CMAKE": "false"}):
-            self.assertTrue(self.check(kind="builds")[0])
+
+class AdmissionWaitTests(unittest.TestCase):
+    def wait(self, states=("success",), current=None, run=None, target=None, timeout=3000):
+        requests = []
+        outcomes = iter(states)
+        current = current or pull_request()
+        event = {"number": 7, "pull_request": {"head": {"sha": HEAD}, "base": {"sha": BASE}}}
+
+        def api(path):
+            requests.append(path)
+            if "/status?" in path:
+                state = next(outcomes)
+                return {"statuses": [] if state is None else [{"context": security.ADMISSION, "state": state,
+                        "target_url": target or "https://github.com/developer/fds/actions/runs/123"}]}
+            if "/actions/runs/" in path:
+                return run or {"event": "pull_request_target", "path": ".github/workflows/pr-security.yml"}
+            if "/files?" in path:
+                return [{"filename": "Source/main.f90"}]
+            return current
+
+        with tempfile.TemporaryDirectory() as folder:
+            event_path = Path(folder) / "event.json"
+            event_path.write_text(json.dumps(event))
+            with patch.dict(os.environ, {"GITHUB_EVENT_PATH": str(event_path), "GITHUB_REPOSITORY": "developer/fds",
+                                         "GITHUB_SHA": MERGE}), \
+                    patch.object(security, "api", side_effect=api), \
+                    patch.object(security, "outputs") as output, patch.object(security.time, "sleep") as sleep:
+                security.wait_for_admission(timeout=timeout)
+                return requests, output, sleep
+
+    def test_waits_until_exact_merge_is_admitted(self):
+        requests, output, sleep = self.wait(states=(None, "pending", "success"))
+        queried = [path for path in requests if "/status?" in path]
+        self.assertEqual(queried, [f"/repos/developer/fds/commits/{MERGE}/status?per_page=100"] * 3)
+        self.assertEqual(sleep.call_count, 2)
+        output.assert_called_once_with({"conventional": "true", "cmake": "true"})
+
+    def test_failure_error_and_timeout_never_release_builds(self):
+        for state in ("failure", "error"):
+            with self.subTest(state=state), self.assertRaisesRegex(RuntimeError, "blocked"):
+                self.wait(states=(state,))
+        with self.assertRaisesRegex(RuntimeError, "Timed out"):
+            self.wait(timeout=0)
+
+    def test_status_must_reference_trusted_workflow_in_receiving_repository(self):
+        for target in ("https://github.com/outsider/fds/actions/runs/123", "https://example.com/123"):
+            with self.assertRaisesRegex(RuntimeError, "trusted workflow"):
+                self.wait(target=target)
+        for run in ({"event": "pull_request", "path": ".github/workflows/pr-security.yml"},
+                    {"event": "pull_request_target", "path": ".github/workflows/other.yml"}):
+            with self.assertRaisesRegex(RuntimeError, "security workflow"):
+                self.wait(run=run)
+
+    def test_changed_or_closed_pr_never_starts_tests(self):
+        for field in ("head", "base", "state"):
+            current = pull_request()
+            if field == "state":
+                current[field] = "closed"
+            else:
+                current[field]["sha"] = "d" * 40
+            with self.subTest(field=field), self.assertRaisesRegex(RuntimeError, "stale revision"):
+                self.wait(current=current)
 
 
 class ArchiveTests(unittest.TestCase):
@@ -372,64 +417,85 @@ class WorkflowTests(unittest.TestCase):
                                 check=True, capture_output=True, text=True)
         cls.workflows = json.loads(result.stdout)
 
-    def test_pr_code_cannot_directly_trigger_the_existing_workflows(self):
-        for name, workflow in self.workflows.items():
-            events = workflow.get("on", workflow.get("true"))
-            with self.subTest(workflow=name):
-                self.assertNotIn("pull_request", events)
-                if name in ("pr-security.yml", "virus-scan.yml"):
-                    continue
-                self.assertIn("workflow_call", events)
-                self.assertIn("push", events)
-                for job in workflow["jobs"].values():
-                    for step in job.get("steps", []):
-                        if step.get("uses", "").startswith("actions/checkout@"):
-                            self.assertEqual(step["with"]["ref"], "${{ inputs.ref || github.sha }}")
-                            self.assertIs(step["with"]["persist-credentials"], False)
+    def test_builds_use_pull_request_and_security_never_calls_builds(self):
+        builds = self.workflows["pr-builds.yml"]
+        gate = self.workflows["pr-security.yml"]
+        self.assertIn("pull_request", builds.get("on", builds.get("true")))
+        self.assertIn("pull_request_target", gate.get("on", gate.get("true")))
+        self.assertEqual(set(gate["jobs"]), {"author", "scan", "result"})
+        for job in gate["jobs"].values():
+            self.assertNotIn("uses", job)
+        self.assertNotIn("virus-scan.yml", self.workflows)
 
-    def test_every_pr_build_depends_on_successful_admission(self):
-        jobs = self.workflows["pr-security.yml"]["jobs"]
+    def test_no_pr_code_is_checked_out_before_admission(self):
+        gate = self.workflows["pr-security.yml"]
+        for job in gate["jobs"].values():
+            for step in job["steps"]:
+                if step.get("uses", "").startswith("actions/checkout@"):
+                    self.assertEqual(step["with"]["ref"], "${{ github.workflow_sha }}")
+                    self.assertIs(step["with"]["persist-credentials"], False)
+                    self.assertIs(step["with"]["allow-unsafe-checkout"], True)
+        wait = self.workflows["pr-builds.yml"]["jobs"]["admission"]["steps"]
+        self.assertEqual(wait[0]["with"]["ref"], "${{ github.event.pull_request.base.sha }}")
+        self.assertIs(wait[0]["with"]["persist-credentials"], False)
+        self.assertIn("pr_security.py wait", wait[1]["run"])
+
+    def test_every_build_depends_on_admission_and_uses_exact_event_merge(self):
+        jobs = self.workflows["pr-builds.yml"]["jobs"]
         for name in ("linux", "macos", "windows", "cmake", "line-endings"):
             with self.subTest(job=name):
-                self.assertIn("admission", jobs[name]["needs"])
-                self.assertIn("needs.admission.result == 'success'", jobs[name]["if"])
-                self.assertIn("needs.admission.outputs.run_builds == 'true'", jobs[name]["if"])
-                self.assertEqual(jobs[name]["with"]["ref"], "${{ needs.prepare.outputs.merge_sha }}")
+                self.assertEqual(jobs[name]["needs"], "admission")
+                self.assertNotIn("always()", jobs[name].get("if", ""))
+                self.assertEqual(jobs[name]["with"]["ref"], "${{ github.sha }}")
                 self.assertEqual(jobs[name]["permissions"], {"contents": "read"})
                 self.assertNotIn("secrets", jobs[name])
 
-    def test_reusable_workflows_do_not_share_concurrency_groups(self):
-        groups = []
-        for name in ("linux.yml", "osx.yml", "windows.yml", "cmake.yml"):
-            group = self.workflows[name]["concurrency"]["group"]
-            self.assertIn("github.event.pull_request.number", group)
-            self.assertNotIn("github.workflow", group)
-            groups.append(group)
-        self.assertEqual(len(set(groups)), len(groups))
+    def test_only_author_and_report_jobs_have_write_permissions(self):
+        for name, workflow in self.workflows.items():
+            for job_name, job in workflow["jobs"].items():
+                permissions = job.get("permissions", workflow.get("permissions", {}))
+                writes = [key for key, value in permissions.items() if value == "write"]
+                if name == "pr-security.yml" and job_name in ("author", "result"):
+                    self.assertEqual(writes, ["statuses"])
+                else:
+                    self.assertEqual(writes, [])
+                if name != "pr-security.yml":
+                    for step in job.get("steps", []):
+                        self.assertNotIn("allow-unsafe-checkout", step.get("with", {}))
 
-    def test_member_scan_is_not_an_admission_dependency(self):
+    def test_developer_admission_does_not_depend_on_scan_and_failures_are_reported(self):
         jobs = self.workflows["pr-security.yml"]["jobs"]
-        self.assertEqual(jobs["admission"]["needs"], ["prepare", "scan-external"])
-        self.assertIn("scan-member", jobs["scan-result"]["needs"])
-        self.assertEqual(jobs["scan-external"]["if"], "needs.prepare.outputs.trusted != 'true'")
-        self.assertEqual(jobs["scan-member"]["if"], "needs.prepare.outputs.trusted == 'true'")
-        self.assertNotIn("scan-member", jobs["build-result"]["needs"])
-        self.assertNotIn("scan-external", jobs["build-result"]["needs"])
-        self.assertIn("needs.admission.outputs.run_builds != 'false'", jobs["build-result"]["if"])
+        self.assertNotIn("needs", jobs["author"])
+        self.assertEqual(jobs["scan"]["needs"], "author")
+        self.assertEqual(jobs["scan"]["permissions"], {"contents": "read"})
+        self.assertIn("sudo freshclam", jobs["scan"]["steps"][1]["run"])
+        self.assertEqual(jobs["result"]["needs"], ["author", "scan"])
+        self.assertIn("always()", jobs["result"]["if"])
+        self.assertEqual(jobs["result"]["steps"][-1]["env"]["SCAN_RESULT"], "${{ needs.scan.result }}")
 
-    def test_scan_and_identity_checkouts_use_only_trusted_policy(self):
-        for name in ("pr-security.yml", "virus-scan.yml"):
-            for job in self.workflows[name]["jobs"].values():
-                for step in job.get("steps", []):
-                    if step.get("uses", "").startswith("actions/checkout@"):
-                        self.assertRegex(step["uses"], r"@[0-9a-f]{40}$")
-                        self.assertIn(step["with"]["ref"], ("${{ github.workflow_sha }}", "${{ inputs.policy_sha }}"))
-                        self.assertIs(step["with"]["persist-credentials"], False)
-        scanner = self.workflows["virus-scan.yml"]
-        self.assertEqual(scanner["permissions"], {"contents": "read"})
-        steps = scanner["jobs"]["clamav"]["steps"]
-        self.assertIn("sudo freshclam", steps[1]["run"])
-        self.assertEqual(steps[2]["env"]["GH_TOKEN"], "${{ github.token }}")
+    def test_build_summary_fails_for_failed_blocked_or_cancelled_required_jobs(self):
+        job = self.workflows["pr-builds.yml"]["jobs"]["result"]
+        self.assertEqual(job["name"], "FDS / PR builds")
+        self.assertEqual(job["if"], "always()")
+        script = job["steps"][0]["run"].split("\n", 1)[1].rsplit("PYTHON", 1)[0]
+        results = {name: {"result": "success"} for name in job["needs"]}
+        results["admission"]["outputs"] = {"conventional": "true", "cmake": "true"}
+
+        def run(value):
+            return subprocess.run([sys.executable, "-c", script],
+                                  env={**os.environ, "RESULTS": json.dumps(value)}, capture_output=True).returncode
+
+        self.assertEqual(run(results), 0)
+        for name in results:
+            for state in ("failure", "cancelled", "skipped"):
+                changed = copy.deepcopy(results)
+                changed[name]["result"] = state
+                with self.subTest(job=name, state=state):
+                    self.assertNotEqual(run(changed), 0)
+        results["admission"]["outputs"] = {"conventional": "false", "cmake": "false"}
+        for name in ("linux", "macos", "windows", "cmake"):
+            results[name]["result"] = "skipped"
+        self.assertEqual(run(results), 0)
 
 
 if __name__ == "__main__":

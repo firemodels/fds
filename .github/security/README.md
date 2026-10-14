@@ -1,96 +1,82 @@
-# PR virus scanning and admission
+# PR author policy and virus scanning
 
-`pr-security.yml` runs for every pull request against this repository, including
-pull requests against a developer's fork. The receiving repository must have the
-workflow and helpers on its trusted base branch and have GitHub Actions enabled.
+The policy is based on the **PR author's** numeric GitHub account ID in
+`trusted-developers.json`. The person pushing, editing, approving, or rerunning
+the PR does not change its classification. Usernames in the list are labels;
+renaming an account does not change its numeric ID. Missing or null IDs are not
+trusted. The list is always read from the receiving repository's trusted revision.
 
-The gate checks the PR author and event sender against **`trusted-developers.json`
-beside the trusted helper**. Both must have a listed numeric GitHub account ID.
-Usernames are labels; stable IDs decide trust even if an account is renamed.
-Fork ownership, collaborator status, commit author text, and the person re-running
-a workflow do not grant trust. No organization-membership lookup or secret is
-needed, and membership can remain private.
+| PR author | Merge permission | Builds and tests | Virus scan |
+| --- | --- | --- | --- |
+| Listed developer | Admission passes immediately, subject to other branch rules | May start immediately | Continues independently, including after merge |
+| Anyone else | Admission stays pending until the scan passes | Wait for successful admission | Failure, cancellation, or incomplete scan blocks admission |
 
-Maintain this list through reviewed commits and synchronize it to each developer
-fork. PR edits cannot authorize their own authors: preparation reads the list from
-the trusted workflow revision. Removing a developer from the GitHub organization
-does not automatically remove them from this list.
+## Two workflows with separate responsibilities
 
-**Setup required:** `null` IDs are unresolved and never grant the fast path.
-Populate them with verified GitHub account IDs before committing this policy.
-For example, `gh api users/rmcdermo --jq '{login, id}'` retrieves Randy's account
-ID without needing access to private organization membership. Keep existing IDs
-when usernames change; do not replace them with another account's ID.
+**`pr-security.yml`** runs the trusted policy under `pull_request_target`:
 
-| Contributor | `FDS / PR admission` | `FDS / ClamAV scan` |
-| --- | --- | --- |
-| Listed developer with a resolved ID | Passes after preparing a current merge snapshot; builds may start immediately | Runs independently in the background |
-| Everyone else | Passes only after both complete source snapshots scan successfully | Must finish successfully before builds can start |
+1. **Check PR author:** publish `FDS / PR admission` immediately for a listed
+   author, or leave it pending for everyone else.
+2. **Virus scan:** scan the exact PR head and proposed merge as data. This job has
+   a read-only token and never executes PR scripts.
+3. **Report virus scan:** publish `FDS / ClamAV scan`. For an unlisted author, also
+   pass or fail admission. A developer's admission is not changed by the scan.
 
-The snapshots are the exact submitted head commit and the proposed merge commit.
-The gate verifies the merge commit's parent SHAs. Builds check out that same merge
-SHA, rather than a moving branch or PR ref. Updates start a new run and cancel the
-old one. A missing merge snapshot, conflict, stale event, or scanner error does
-not admit outside code. A conflicted PR's head is still scanned, but the combined
-scan cannot pass until a current merge snapshot is available.
+Only the author and reporting jobs can write commit statuses. All three jobs
+check out the trusted workflow revision, never PR code. Their narrowly scoped
+`allow-unsafe-checkout` setting accommodates checkout v7's restriction on fork
+PRs in `pull_request_target`. This setting is absent from every build job.
 
-A merged PR can still be scanned, including when preparation starts or is rerun
-after the merge. In that case the scan uses the original submitted head and
-GitHub's recorded merge result (including squash/rebase results). Admission and
-PR builds are skipped without replacing their existing statuses. If the PR merges
-while preparation or admission is running, scanning continues independently.
-An outside PR that is still open continues to require a successful scan before
-admission. Merging does not change whether its author is a trusted developer.
+**`pr-builds.yml`** runs under ordinary `pull_request`, with read-only permissions:
 
-The existing Linux, macOS, Windows, CMake, and line-ending workflows are callable
-by the gate instead of running directly on `pull_request`. Their push behavior is
-preserved. PR source is never executed in the identity or scanning jobs. Only the
-preparation and status-reporting jobs receive `statuses: write`; scan and build
-jobs have `contents: read`, do not inherit secrets, and do not retain checkout
-credentials. The workflow/helper checkouts in the security jobs are pinned to
-the trusted workflow revision, not to the PR's files.
+1. Wait for admission of the **exact merge commit** supplied by GitHub. The wait
+   runs only the trusted admission reader from the base commit, before checking
+   out any PR code. It checks that admission references the security workflow.
+2. Run the selected Linux, macOS, Windows, CMake, and line-ending checks. The
+   existing push workflows remain available. PR builds use normal PR cache scope.
+3. Report the ordinary check `FDS / PR builds`; no write token is needed.
 
-## Required setup in upstream AND every developer fork
+Admission is published on the head commit for merge rules and on the merge
+commit for build coordination. A changed head or base cannot reuse a result for
+a different merge. The wait fails after 50 minutes if admission never arrives;
+inspect the security run and rerun builds if necessary. Listed authors wait only
+for the short author check, not the scanner. A scan still reports its result if
+the PR was merged while it ran.
 
-These repository settings are essential and are **not installed by copying YAML**:
+## Repository settings and rollout
 
-1. Enable GitHub Actions in the receiving repository and install these files on
-   each branch that accepts PRs. Until that is done, its existing workflows and
-   merge rules still apply. The workflow deliberately follows the local trusted
-   revision so forks do not depend on a moving upstream workflow.
-2. Protect the target branches using a branch rule or ruleset. Require the exact
-   commit status **`FDS / PR admission`**, require branches to be up to date before
-   merging, and restrict bypass/direct pushes as appropriate. Also retain the
-   project's review requirements. Use **`FDS / PR builds`** for the existing
-   platform builds and line-ending checks: it reports their aggregate result on
-   the PR head. Replace old required job names from `pull_request` workflows;
-   `pull_request_target` job checks attach to the base revision instead. The build
-   status also does not wait for listed developers' scans. Do **not** require
-   `FDS / ClamAV scan` if developers must be able to merge before their scan finishes.
-3. In Actions settings, require approval for fork-PR workflows from **all outside
-   collaborators**, not just first-time contributors. Do not approve PR-supplied
-   workflows until admission succeeds and any workflow changes have been reviewed.
-   An attacker can add a *new* `pull_request` workflow in their PR; the trusted gate
-   cannot stop GitHub from scheduling unrelated workflows through YAML alone.
-   Leave **Require actions to be pinned to a full-length commit SHA** unchecked
-   while build and line-ending workflows use action version tags. This setting
-   applies to every workflow and rejects those tagged actions during job setup.
-   The security workflows already pin their external actions; repository-wide
-   SHA enforcement is not required for scanning or admission. Enable it only
-   after every workflow's external actions have been pinned to full commit SHAs.
-4. Protect edits to `.github/workflows/` and `.github/security/` with maintainer
-   review. Where your GitHub plan supports organization-required workflows, use a
-   ruleset requiring the trusted admission workflow as an additional control.
-   A status name alone is not cryptographic proof of which workflow produced it;
-   do not allow arbitrary PR workflows to publish trusted statuses.
-5. Keep unreviewed PRs off self-hosted/NIST runners. This workflow uses disposable
-   standard GitHub-hosted runners. Separate external bots or developer machines
-   must independently check admission for the exact head SHA before downloading
-   and executing a PR. Updating these workflows does not gate an external Firebot.
+YAML alone cannot enforce merge rules or stop an unreviewed PR from rewriting
+its own `pull_request` build workflow. Configure these settings in upstream and
+in each developer fork that accepts PRs:
 
-For merge-queue deployments, add and test an equivalent scan for the queue's
-`merge_group` snapshot before enabling the queue. This configuration covers ordinary
-PR merges, not merge queues.
+- Require **`FDS / PR admission`** in the target branch's protection/ruleset, and
+  require the branch to be up to date. Restrict bypass/direct pushes as needed.
+- Keep existing build/review requirements. If builds are required, select
+  **`FDS / PR builds`**, now an ordinary check from the PR builds workflow instead
+  of a commit status published by the old gate. Verify the rule after rollout.
+- **Do not require `FDS / ClamAV scan` or the whole PR security workflow** if
+  listed developers must be able to merge while scanning is still running.
+- Retain GitHub's workflow approval requirement for **all outside contributors**.
+  Before approving a workflow changed by an outside PR, wait for admission and
+  review its workflow changes. The scan workflow itself uses trusted base code.
+  This GitHub approval is separate from the developer list and may still apply
+  to a listed author who is not a repository collaborator.
+- Protect edits to `.github/workflows/` and `.github/security/` with maintainer
+  review. Keep PR jobs on disposable GitHub-hosted runners with read-only tokens
+  and no inherited secrets. Unrelated external bots such as Firebot need their
+  own admission check; this policy only gates these GitHub Actions builds.
+
+Install the revised policy, helper, and build workflow together on the receiving
+base branch. A PR's edited policy does not govern its own admission, and rerunning
+an old workflow revision does not install the update. After installation, trigger
+a new PR event and verify the required checks in branch protection. The old
+`virus-scan.yml` reusable workflow and the gate's build-dispatch/reporting jobs
+have been removed.
+
+This covers ordinary PRs, not merge queues. A scan is not a guarantee that code
+is safe; approval and review remain necessary. A compromised listed developer
+account still receives the fast path. To add an author, obtain their numeric ID
+with `gh api users/LOGIN --jq '{login, id}'` and review the list change normally.
 
 ## Scan scope and limits
 
@@ -122,28 +108,21 @@ is benign or that scientific results are correct. Builds can still execute harmf
 code that antivirus misses. Code review and isolated build environments remain
 necessary. A compromised listed developer account also retains its fast path.
 
-## Validation and rollout
+## Validation
 
-Run the offline tests from the repository root:
+From the repository root:
 
 ```sh
 python3 -m unittest discover -s .github/security -p 'test_*.py' -v
 ```
 
-These tests use mocked GitHub/ClamAV calls, synthetic non-malicious archives, and
-Ruby's YAML parser. They do not connect to GitHub, scan with a real engine, or
-write an EICAR file on a workstation. They also run in the existing Linux Python
-job after admission.
+The tests mock GitHub and ClamAV; they do not create malware, access the network,
+or execute submitted PR files. They cover author-only trust, early developer
+admission, failed scans, stale revisions, exact-merge build admission, permissions,
+and required build results. The Linux Python job also runs them.
 
-Before relying on the gate, validate it in a developer fork on GitHub:
-
-- A clean listed-developer PR admits promptly while its scan continues.
-- A clean nonmember PR starts no build jobs until its scan succeeds.
-- The runner's EICAR self-test passes, and a controlled EICAR PR from a nonmember
-  blocks admission and all build jobs. Use an isolated test repository for this.
-- A scanner/signature-update failure blocks nonmembers; member scans still report
-  their failure separately.
-- A new PR commit requires a fresh status, and repository rules prevent merging
-  a pending or failed nonmember PR.
-
-Do not use production secrets or self-hosted runners during these rollout tests.
+After rollout, check a listed-author PR and an outside-author PR on GitHub. For
+the first, builds/admission should pass before scanning finishes; for the second,
+builds must wait. Confirm a failed scanner blocks outside admission while leaving
+developer admission intact. These live checks require GitHub access and are not
+replaced by the offline tests.
