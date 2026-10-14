@@ -1,0 +1,106 @@
+name: PR builds
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review, edited]
+
+permissions:
+  contents: read
+  pull-requests: read
+  statuses: read
+  actions: read
+
+concurrency:
+  group: pr-builds-${{ github.repository }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  admission:
+    name: Wait for PR admission
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    outputs:
+      conventional: ${{ steps.admission.outputs.conventional }}
+      cmake: ${{ steps.admission.outputs.cmake }}
+    steps:
+      - name: Checkout trusted admission reader
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          persist-credentials: false
+      - name: Wait for this exact merge revision to be admitted
+        id: admission
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 .github/security/pr_security.py wait
+
+  linux:
+    needs: admission
+    if: needs.admission.outputs.conventional == 'true'
+    permissions:
+      contents: read
+    uses: ./.github/workflows/linux.yml
+    with:
+      ref: ${{ github.sha }}
+
+  macos:
+    needs: admission
+    if: needs.admission.outputs.conventional == 'true'
+    permissions:
+      contents: read
+    uses: ./.github/workflows/osx.yml
+    with:
+      ref: ${{ github.sha }}
+
+  windows:
+    needs: admission
+    if: needs.admission.outputs.conventional == 'true'
+    permissions:
+      contents: read
+    uses: ./.github/workflows/windows.yml
+    with:
+      ref: ${{ github.sha }}
+
+  cmake:
+    needs: admission
+    if: needs.admission.outputs.cmake == 'true'
+    permissions:
+      contents: read
+    uses: ./.github/workflows/cmake.yml
+    with:
+      ref: ${{ github.sha }}
+
+  line-endings:
+    needs: admission
+    permissions:
+      contents: read
+    uses: ./.github/workflows/Line_Endings.yml
+    with:
+      ref: ${{ github.sha }}
+
+  result:
+    name: FDS / PR builds
+    needs: [admission, linux, macos, windows, cmake, line-endings]
+    if: always()
+    runs-on: ubuntu-24.04
+    permissions: {}
+    steps:
+      - name: Check selected build results
+        env:
+          RESULTS: ${{ toJSON(needs) }}
+        run: |
+          python3 - <<'PYTHON'
+          import json, os
+          results = json.loads(os.environ['RESULTS'])
+          selected = results['admission'].get('outputs', {})
+          expected = {'admission': True, 'line-endings': True,
+                      'linux': selected.get('conventional') == 'true',
+                      'macos': selected.get('conventional') == 'true',
+                      'windows': selected.get('conventional') == 'true',
+                      'cmake': selected.get('cmake') == 'true'}
+          failed = [name for name, required in expected.items()
+                    if results[name]['result'] != ('success' if required else 'skipped')]
+          if failed:
+              raise SystemExit('Failed or blocked: ' + ', '.join(failed))
+          print('All selected PR builds/checks passed')
+          PYTHON
