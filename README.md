@@ -1,5 +1,7 @@
 ## Fire Dynamics Simulator and Smokeview
 
+# Dummy commit to test PR security.
+
 *Continuous Integration. Continuous Improvement.*
 
 Fire Dynamics Simulator ([FDS](https://github.com/firemodels/fds)) is a large-eddy simulation (LES) code for low-speed flows, with an emphasis on smoke and heat transport from fires.
