@@ -4,7 +4,7 @@ name: Line_Endings
 
 # Controls when the workflow will run
 on:
-  # PR runs are called by the trusted security gate after admission.
+  # PR runs are called by pr-builds.yml after admission.
   push:
   workflow_call:
     inputs:
