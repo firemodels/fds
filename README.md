@@ -2,6 +2,7 @@
 
 FireX is a research branch of the Fire Dynamics Simulator (FDS) focused on integrating high-performance computing (HPC) functionalities. We try to keep FireX synchronized with the master branch of FDS, ensuring that any new commits to the master branch are incorporated into FireX within a few days.
 
+
 ### Key Features of FireX:
 
 1. **GPU-accelerated Pressure Poisson Solver**

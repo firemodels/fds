@@ -17,7 +17,7 @@ on:
 
 concurrency:
   group: osx-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request_target' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 
 permissions:
@@ -29,7 +29,7 @@ jobs:
     # debug build on osx using gfortran with openmpi
   
     name: osx gnu openmpi
-    runs-on: [macos-14]
+    runs-on: [macos-26]
     defaults:
       run:
         shell: bash
@@ -41,8 +41,8 @@ jobs:
         persist-credentials: false
     - name: install openmpi
       run: |
-        brew install gcc@15 open-mpi
-        echo "OMPI_FC=gfortran-15" >> $GITHUB_ENV
+        brew install gcc open-mpi
+        echo "OMPI_FC=gfortran" >> $GITHUB_ENV
 
     - name: build fds debug
       run: |
