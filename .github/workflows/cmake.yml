@@ -233,7 +233,9 @@ jobs:
           persist-credentials: false
 
       - name: install openmpi
-        run: brew install gcc open-mpi
+        run: |
+          brew install gcc libomp open-mpi
+          brew link --force libomp
 
       - name: set macos gcc
         if: startsWith(matrix.compiler_mpi, 'gnu_')
