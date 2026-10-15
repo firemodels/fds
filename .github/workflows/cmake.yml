@@ -215,7 +215,7 @@ jobs:
       # and build configurations
       matrix:
         os:
-          - macos-14
+          - macos-26
         compiler_mpi:
           - "gnu_openmpi"
         openmp:
@@ -233,18 +233,18 @@ jobs:
           persist-credentials: false
 
       - name: install openmpi
-        run: brew install gcc@15 open-mpi
+        run: brew install gcc open-mpi
 
       - name: set macos gcc
         if: startsWith(matrix.compiler_mpi, 'gnu_')
         shell: bash
         run: |
-          echo "CC=gcc-15" >> $GITHUB_ENV
-          echo "CXX=g++-15" >> $GITHUB_ENV
-          echo "FC=gfortran-15" >> $GITHUB_ENV
-          echo "OMPI_CC=gcc-15" >> $GITHUB_ENV
-          echo "OMPI_CXX=g++-15" >> $GITHUB_ENV
-          echo "OMPI_FC=gfortran-15" >> $GITHUB_ENV
+          echo "CC=gcc" >> $GITHUB_ENV
+          echo "CXX=g++" >> $GITHUB_ENV
+          echo "FC=gfortran" >> $GITHUB_ENV
+          echo "OMPI_CC=gcc" >> $GITHUB_ENV
+          echo "OMPI_CXX=g++" >> $GITHUB_ENV
+          echo "OMPI_FC=gfortran" >> $GITHUB_ENV
           brew install glew gd zlib json-c
 
       - name: set macos intel
