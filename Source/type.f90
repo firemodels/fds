@@ -466,7 +466,7 @@ TYPE EXTERNAL_WALL_TYPE
    INTEGER :: NOM                                     !< Number of the adjacent (Other) Mesh
    INTEGER :: NIC_MIN                                 !< Start of indices for the cell in the other mesh
    INTEGER :: NIC_MAX                                 !< End of indices for the cell in the other mesh
-   INTEGER :: NIC                                     !< NIC_MAX-NIC_MIN
+   INTEGER :: NIC=0                                   !< NIC_MAX-NIC_MIN
    INTEGER :: IIO_MIN                                 !< Minimum I index of adjacent cell in other mesh
    INTEGER :: IIO_MAX                                 !< Maximum I index of adjacent cell in other mesh
    INTEGER :: JJO_MIN                                 !< Minimum J index of adjacent cell in other mesh
