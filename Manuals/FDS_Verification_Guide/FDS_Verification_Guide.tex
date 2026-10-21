@@ -2683,7 +2683,17 @@ A sealed, adiabatic box, 1~m on a side, is filled with 10~kg of spherically-shap
 \label{geom_hrrpuv_init}
 \label{geom_part_init}
 
+\subsection{Energy Conservation for Specified Mass Flux Particles}
+\label{cold_particle}
 
+A sealed, adiabatic box, 1~m on a side is filled with a gas with a molecular weight of 28~\unit{g/mol} and a specific heat of 1~\unit{kJ/(kg.K)} at a temperature of 20~\unit{\degreeCelsius}. A single 1.5~\unit{cm} diameter particle with a surface temperature of -80~\unit{\degreeCelsius} is placed at the center of the box. The particle emits mass for 100~\unit{s} at a rate of 0.1~\unit{\%/s} of the initial gas mass (i.e, over 100~\unit{s} it adds an additional 10~\% mass). The particle has an emissivity of zero and a heat transfer coefficient of 0~\unit{W/(m^2.K)}. The only energy source term is the enthalpy of the mass being added to the box. This case tests that the change in internal energy of the box is equal to enthalpy being injected.
+
+\begin{figure}[ht]
+    \centering    
+    \includegraphics[height=2.2in]{SCRIPT_FIGURES/cold_particle}
+    \caption[The \ct{cold_particle} test case]{Change in internal energy.}
+    \label{cold_particle_fig}
+\end{figure}
 
 \chapter{Checking for Coding Errors}
 
