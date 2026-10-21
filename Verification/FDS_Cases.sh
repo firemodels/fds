@@ -211,6 +211,7 @@ $QFDS -d Energy_Budget energy_budget_solid.fds
 $QFDS -d Energy_Budget energy_budget_tmix.fds
 $QFDS -d Energy_Budget test_hrr_2d_cyl.fds
 $QFDS -d Energy_Budget test_hrr_3d.fds
+$QFDS -d Energy_Budget cold_particle.fds
 
 $QFDS -d Extinction extinction_1.fds
 $QFDS -d Extinction extinction_2.fds
