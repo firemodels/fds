@@ -42,7 +42,7 @@ figd = fdsplotlib.plot_to_fig(x_data=[0,0], y_data=[0,0],
                               x_min=0, x_max=9, y_min=0, y_max=800,
                               revision_label=version_string,
                               x_label='Pressure (bar)', y_label=r'Mean Diameter ($\mu$m)',
-                              legend_location='upper left')
+                              legend_location='upper right')
 
 figw = fdsplotlib.plot_to_fig(x_data=[0,0], y_data=[0,0],
                               x_min=0, x_max=9, y_min=0, y_max=8,
@@ -63,38 +63,38 @@ figa = fdsplotlib.plot_to_fig(x_data=[0,40], y_data=[0,40], marker_style='k-',
 
 for n in range(3):  # 0, 1, 2 for nozzles A, B, D
     for p in range(8):  # 0 to 7 for pressure points
-        
+
         FDS_File = outdir + 'BRE_Spray_' + Nozzle[n] + '_' + str(p+1) + '_devc.csv'
         fds_data = np.loadtxt(FDS_File, delimiter=',', skiprows=2)
-        
-        # initial flux between t = 0.1 and 1.0 s
-        i1 = np.where(fds_data[:, 0] >= 0.1)[0][0]
+
+        # initial flux between t = 2 and 4 s
+        i1 = np.where(fds_data[:, 0] >= 2.0)[0][0]
         i2 = np.where(fds_data[:, 0] <= 4.0)[0][-1]
         FDS_Flux_0[n, p] = np.mean(fds_data[i1:i2+1, 1])
-        
+
         # spray properties at t = 9 s.
         i2 = np.where(fds_data[:, 0] < 9)[0][-1] - 1
         FDS_d32[n, p] = fds_data[i2, 2] * 1E6
         FDS_w[n, p] = -1 * fds_data[i2, 3]
-        
-        # Final flux as mean between t=11 and 15 s.
+
+        # Final flux as mean between t=12 and 15 s.
         i1 = np.where(fds_data[:, 0] >= 12)[0][0]
-        i2 = np.where(fds_data[:, 0] > 10)[0][-1] - 1
+        i2 = np.where(fds_data[:, 0] <= 15)[0][-1] - 1
         FDS_Flux[n, p] = np.mean(fds_data[i1:i2+1, 1])
         FDS_Attenuation[n, p] = 100 * (FDS_Flux_0[n, p] - FDS_Flux[n, p]) / FDS_Flux_0[n, p]
-    
+
     # plot dv50 points
 
-    fdsplotlib.plot_to_fig(x_data=range(1,9), y_data=exp_data[exp_rows[n, :], 5], data_label=f'Exp Nozzle {Nozzle[n]}', 
+    fdsplotlib.plot_to_fig(x_data=range(1,9), y_data=exp_data[exp_rows[n, :], 5], data_label=f'Exp Nozzle {Nozzle[n]}',
                            marker_style=marker[n], marker_fill_color='none', figure_handle=figd)
-    fdsplotlib.plot_to_fig(x_data=range(1,9), y_data=FDS_d32[n, :], data_label=f'FDS Nozzle {Nozzle[n]}', 
+    fdsplotlib.plot_to_fig(x_data=range(1,9), y_data=FDS_d32[n, :], data_label=f'FDS Nozzle {Nozzle[n]}',
                            marker_style=marker[n], marker_fill_color=color[n],figure_handle=figd)
 
     # plot w points
 
-    fdsplotlib.plot_to_fig(x_data=range(1,9), y_data=exp_data[exp_rows[n, :], 6], data_label=f'Exp Nozzle {Nozzle[n]}', 
+    fdsplotlib.plot_to_fig(x_data=range(1,9), y_data=exp_data[exp_rows[n, :], 6], data_label=f'Exp Nozzle {Nozzle[n]}',
                            marker_style=marker[n], marker_fill_color='none', figure_handle=figw)
-    fdsplotlib.plot_to_fig(x_data=range(1,9), y_data=FDS_w[n, :], data_label=f'FDS Nozzle {Nozzle[n]}', 
+    fdsplotlib.plot_to_fig(x_data=range(1,9), y_data=FDS_w[n, :], data_label=f'FDS Nozzle {Nozzle[n]}',
                            marker_style=marker[n], marker_fill_color=color[n], figure_handle=figw)
 
     # plot attenuation points for Nozzles A, B and D
@@ -119,17 +119,17 @@ exp_data[0:5, 0:4] = np.loadtxt(expdir + 'LEMTA_Spray_Test.csv', delimiter=',', 
 
 n = 3  # Index for LEMTA data
 for p in range(5):
-    
+
     FDS_File = outdir + 'LEMTA_Spray_' + str(p+1) + '_devc.csv'
     fds_data = np.loadtxt(FDS_File, delimiter=',', skiprows=2)
-    
+
     # initial flux between t = 1 and 10 s
-    i1 = np.where(fds_data[:, 0] > 1.0)[0][0]
+    i1 = np.where(fds_data[:, 0] > 7.0)[0][0]
     i2 = np.where(fds_data[:, 0] <= 10.0)[0][-1]
     FDS_Flux_0[n, p] = np.mean(fds_data[i1:i2+1, 1])
-    
-    # Final flux as mean between t=10 and 15 s
-    i1 = np.where(fds_data[:, 0] > 10)[0][0]
+
+    # Final flux as mean between t=20 and 30 s
+    i1 = np.where(fds_data[:, 0] > 20)[0][0]
     i2 = np.where(fds_data[:, 0] <= 30)[0][-1] - 1
     FDS_Flux[n, p] = np.mean(fds_data[i1:i2+1, 1])
     FDS_Attenuation[n, p] = 100 * (FDS_Flux_0[n, p] - FDS_Flux[n, p]) / FDS_Flux_0[n, p]

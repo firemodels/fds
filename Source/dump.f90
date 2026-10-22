@@ -5618,9 +5618,9 @@ SUBROUTINE GET_GEOMINFO(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NVERTS_CUTCELLS,NFACE
          ENDDO
          DO K=1,NK-1
             DO J=1,NJ-1
-               IF (ANY(CELL(CELL_INDEX(SLICE:SLICE+1,J,K))%SOLID)) CYCLE
-               IF (FCVAR(SLICE,J,K,CC_FGSC,IAXIS) == CC_CUTCFE) THEN
-                  ICF = FCVAR(SLICE,J,K,CC_IDCF,IAXIS) ! store cutcell faces and vertices
+               IF (ANY(CELL(CELL_INDEX(SLICE:SLICE+1,J+J1,K+K1))%SOLID)) CYCLE
+               IF (FCVAR(SLICE,J+J1,K+K1,CC_FGSC,IAXIS) == CC_CUTCFE) THEN
+                  ICF = FCVAR(SLICE,J+J1,K+K1,CC_IDCF,IAXIS) ! store cutcell faces and vertices
                   DO IFACECF=1,CUT_FACE(ICF)%NFACE+CUT_FACE(ICF)%NSFACE
                      NVF=CUT_FACE(ICF)%CFELEM(1,IFACECF)
                      VERTBEG = IVERTCUT + 1
@@ -5656,14 +5656,14 @@ SUBROUTINE GET_GEOMINFO(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NVERTS_CUTCELLS,NFACE
                ELSE
                   IFACE = IFACE + 1 ! store solid and gas faces and vertices (2 faces per cell)
                   LOCATIONS(IFACE) = 0 + 16
-                  IF ( FCVAR(SLICE,J,K,CC_FGSC,IAXIS) == CC_SOLID) LOCATIONS(IFACE)=1 + 16
+                  IF ( FCVAR(SLICE,J+J1,K+K1,CC_FGSC,IAXIS) == CC_SOLID) LOCATIONS(IFACE)=1 + 16
                   FACES(3*IFACE-2) = IJK(  J,  K,NJ)
                   FACES(3*IFACE-1) = IJK(J+1,  K,NJ)
                   FACES(3*IFACE)   = IJK(J+1,K+1,NJ)
 
                   IFACE = IFACE + 1
                   LOCATIONS(IFACE) = 0 + 4
-                  IF ( FCVAR(SLICE,J,K,CC_FGSC,IAXIS) == CC_SOLID) LOCATIONS(IFACE)=1 + 4
+                  IF ( FCVAR(SLICE,J+J1,K+K1,CC_FGSC,IAXIS) == CC_SOLID) LOCATIONS(IFACE)=1 + 4
                   FACES(3*IFACE-2) = IJK(  J,  K,NJ)
                   FACES(3*IFACE-1) = IJK(J+1,K+1,NJ)
                   FACES(3*IFACE)   = IJK(  J,K+1,NJ)
@@ -5683,9 +5683,9 @@ SUBROUTINE GET_GEOMINFO(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NVERTS_CUTCELLS,NFACE
          ENDDO
          DO K=1,NK-1
             DO I=1,NI-1
-               IF (ANY(CELL(CELL_INDEX(I,SLICE:SLICE+1,K))%SOLID)) CYCLE
-               IF (FCVAR(I,SLICE,K,CC_FGSC,JAXIS) == CC_CUTCFE) THEN
-                  ICF = FCVAR(I,SLICE,K,CC_IDCF,JAXIS)
+               IF (ANY(CELL(CELL_INDEX(I+I1,SLICE:SLICE+1,K+K1))%SOLID)) CYCLE
+               IF (FCVAR(I+I1,SLICE,K+K1,CC_FGSC,JAXIS) == CC_CUTCFE) THEN
+                  ICF = FCVAR(I+I1,SLICE,K+K1,CC_IDCF,JAXIS)
                   DO IFACECF=1,CUT_FACE(ICF)%NFACE+CUT_FACE(ICF)%NSFACE
                      NVF=CUT_FACE(ICF)%CFELEM(1,IFACECF)
                      VERTBEG = IVERTCUT + 1
@@ -5717,14 +5717,14 @@ SUBROUTINE GET_GEOMINFO(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NVERTS_CUTCELLS,NFACE
                ELSE
                   IFACE = IFACE + 1
                   LOCATIONS(IFACE) = 0 + 16
-                  IF ( FCVAR(I,SLICE,K,CC_FGSC,JAXIS) == CC_SOLID) LOCATIONS(IFACE)=1 + 16
+                  IF ( FCVAR(I+I1,SLICE,K+K1,CC_FGSC,JAXIS) == CC_SOLID) LOCATIONS(IFACE)=1 + 16
                   FACES(3*IFACE-2) = IJK(  I,  K,NI)
                   FACES(3*IFACE-1) = IJK(I+1,  K,NI)
                   FACES(3*IFACE)   = IJK(I+1,K+1,NI)
 
                   IFACE = IFACE + 1
                   LOCATIONS(IFACE) = 0 + 4
-                  IF ( FCVAR(I,SLICE,K,CC_FGSC,JAXIS) == CC_SOLID) LOCATIONS(IFACE)=1 + 4
+                  IF ( FCVAR(I+I1,SLICE,K+K1,CC_FGSC,JAXIS) == CC_SOLID) LOCATIONS(IFACE)=1 + 4
                   FACES(3*IFACE-2) = IJK(  I,  K,NI)
                   FACES(3*IFACE-1) = IJK(I+1,K+1,NI)
                   FACES(3*IFACE)   = IJK(  I,K+1,NI)
@@ -5744,9 +5744,9 @@ SUBROUTINE GET_GEOMINFO(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NVERTS_CUTCELLS,NFACE
          ENDDO
          DO J=1,NJ-1
             DO I=1,NI-1
-               IF (ANY(CELL(CELL_INDEX(I,J,SLICE:SLICE+1))%SOLID)) CYCLE
-               IF (FCVAR(I,J,SLICE,CC_FGSC,KAXIS) == CC_CUTCFE) THEN
-                  ICF = FCVAR(I,J,SLICE,CC_IDCF,KAXIS)
+               IF (ANY(CELL(CELL_INDEX(I+I1,J+J1,SLICE:SLICE+1))%SOLID)) CYCLE
+               IF (FCVAR(I+I1,J+J1,SLICE,CC_FGSC,KAXIS) == CC_CUTCFE) THEN
+                  ICF = FCVAR(I+I1,J+J1,SLICE,CC_IDCF,KAXIS)
                   DO IFACECF=1,CUT_FACE(ICF)%NFACE+CUT_FACE(ICF)%NSFACE
                      NVF=CUT_FACE(ICF)%CFELEM(1,IFACECF)
                      VERTBEG = IVERTCUT + 1
@@ -5778,14 +5778,14 @@ SUBROUTINE GET_GEOMINFO(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NVERTS_CUTCELLS,NFACE
                ELSE
                   IFACE = IFACE + 1
                   LOCATIONS(IFACE) = 0 + 16
-                  IF ( FCVAR(I,J,SLICE,CC_FGSC,KAXIS) == CC_SOLID) LOCATIONS(IFACE)=1 + 16
+                  IF ( FCVAR(I+I1,J+J1,SLICE,CC_FGSC,KAXIS) == CC_SOLID) LOCATIONS(IFACE)=1 + 16
                   FACES(3*IFACE-2) = IJK(  I,  J,NI)
                   FACES(3*IFACE-1) = IJK(I+1,  J,NI)
                   FACES(3*IFACE)   = IJK(I+1,J+1,NI)
 
                   IFACE = IFACE + 1
                   LOCATIONS(IFACE) = 0 + 4
-                  IF ( FCVAR(I,J,SLICE,CC_FGSC,KAXIS) == CC_SOLID) LOCATIONS(IFACE)=1 + 4
+                  IF ( FCVAR(I+I1,J+J1,SLICE,CC_FGSC,KAXIS) == CC_SOLID) LOCATIONS(IFACE)=1 + 4
                   FACES(3*IFACE-2) = IJK(  I,  J,NI)
                   FACES(3*IFACE-1) = IJK(I+1,J+1,NI)
                   FACES(3*IFACE)   = IJK(  I,J+1,NI)

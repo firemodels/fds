@@ -5,8 +5,8 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
-$QFDS $DEBUG -p 3  $QUEUE -d $INDIR UMD_SBI_4_cm.fds
-$QFDS $DEBUG -p 24  $QUEUE -d $INDIR UMD_SBI_2_cm.fds
-$QFDS $DEBUG -p 128 $QUEUE -d $INDIR UMD_SBI_1_cm.fds
+$QFDS $DEBUG -p 8  $QUEUE -d $INDIR UMD_SBI_4_cm.fds
+$QFDS $DEBUG -p 16  $QUEUE -d $INDIR UMD_SBI_2_cm.fds
+$QFDS $DEBUG -p 64 $QUEUE -d $INDIR UMD_SBI_1_cm.fds
 
 echo FDS cases submitted
