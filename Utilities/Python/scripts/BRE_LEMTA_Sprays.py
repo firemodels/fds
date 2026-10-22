@@ -42,7 +42,7 @@ figd = fdsplotlib.plot_to_fig(x_data=[0,0], y_data=[0,0],
                               x_min=0, x_max=9, y_min=0, y_max=800,
                               revision_label=version_string,
                               x_label='Pressure (bar)', y_label=r'Mean Diameter ($\mu$m)',
-                              legend_location='upper left')
+                              legend_location='upper right')
 
 figw = fdsplotlib.plot_to_fig(x_data=[0,0], y_data=[0,0],
                               x_min=0, x_max=9, y_min=0, y_max=8,
