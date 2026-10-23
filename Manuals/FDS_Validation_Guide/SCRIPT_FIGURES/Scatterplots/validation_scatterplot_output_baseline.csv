@@ -29,7 +29,7 @@ Entrainment,2,87,0.10,0.00,1.13
 Extinction Time,2,45,0.10,0.46,1.20
 Species Concentration,2,126,0.08,0.15,0.97
 Smoke Obscuration,3,44,0.07,0.71,1.27
-Mass Flow Rate,1,40,0.08,0.09,0.91
+Mass Flow Rate,1,40,0.08,0.03,0.66
 Atmospheric Dispersion,13,47,0.50,0.84,1.66
 Minimum Extinguishing Concentration,46,46,0.06,0.00,1.07
 Flame Height,9,84,0.10,0.35,1.05
