@@ -466,7 +466,7 @@ TYPE EXTERNAL_WALL_TYPE
    INTEGER :: NOM                                     !< Number of the adjacent (Other) Mesh
    INTEGER :: NIC_MIN                                 !< Start of indices for the cell in the other mesh
    INTEGER :: NIC_MAX                                 !< End of indices for the cell in the other mesh
-   INTEGER :: NIC                                     !< NIC_MAX-NIC_MIN
+   INTEGER :: NIC=0                                   !< NIC_MAX-NIC_MIN
    INTEGER :: IIO_MIN                                 !< Minimum I index of adjacent cell in other mesh
    INTEGER :: IIO_MAX                                 !< Maximum I index of adjacent cell in other mesh
    INTEGER :: JJO_MIN                                 !< Minimum J index of adjacent cell in other mesh
@@ -977,6 +977,7 @@ TYPE SURFACE_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: HEAT_SOURCE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: LAYER_THICKNESS
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: MIN_LAYER_THICKNESS !< Smallest layer size before layer is removed (m)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: MINIMUM_LAYER_MASS_FRACTION !< Fraction of original layer mass when layer is removed
    LOGICAL, ALLOCATABLE, DIMENSION(:) :: HT3D_LAYER
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: CELL_SIZE_FACTOR
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: CELL_SIZE           !< Specified constant cell size (m)

@@ -25704,7 +25704,8 @@ DO K=KLO,KHI
                IF(DO_NOADVANCE .AND. VOL(ICELL)/(DXCELL(I)*DYCELL(J)*DZCELL(K))<MIN_VOL_FACTOR) &
                   NOADVANCE(ICELL) = BLOCKED_SMALL_CELL
                IF(VOL(ICELL)>DXCELL(I)*DYCELL(J)*DZCELL(K)) VOL(ICELL) = DXCELL(I)*DYCELL(J)*DZCELL(K)
-               IF(VOL(ICELL) < GEOMEPS) THEN ! Volume too small for correct calculation of XYZCEN-> take cartcell centroid.
+               ! Volume below a GEOMEPS thick skin on the cell is too small for correct XYZCEN -> take cartcell centroid.
+               IF(VOL(ICELL) < GEOMEPS*(DXCELL(I)*DYCELL(J)+DYCELL(J)*DZCELL(K)+DZCELL(K)*DXCELL(I))) THEN
                   IF(.NOT.DO_NOADVANCE .AND. VOL(ICELL)<TWENTY_EPSILON_EB) VOL(ICELL) = DXCELL(I)*DYCELL(J)*DZCELL(K)
                   XYZCEN(IAXIS:KAXIS,ICELL) = (/ XCELL(I), YCELL(J), ZCELL(K) /)
                ELSE
