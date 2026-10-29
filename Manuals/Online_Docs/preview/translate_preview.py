@@ -20,7 +20,7 @@ HERE = Path(__file__).resolve().parent
 SITE = HERE.parent / 'build/tech-preview/html'
 CACHE = HERE / 'translations/es-overview.json'
 TOKEN = re.compile(r'⟦(\d+)⟧')
-BLOCKS = {'p', 'li', 'h1', 'h3', 'h4', 'h5', 'figcaption'}
+BLOCKS = {'p', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'figcaption'}
 
 
 def text(element):
@@ -166,7 +166,7 @@ def localize_reader(doc):
         node.tail = ' Traducción de prueba'
     footer = doc.xpath('//footer[@class="page-footer"]/span[2]')[0]
     footer.text = footer.text.replace('Source revision', 'Revisión del original')
-    headings = {node.get('id'): text(node) for node in doc.xpath('//article//h3[@id] | //article//h4[@id]')}
+    headings = {node.get('id'): text(node) for node in doc.xpath('//article//h2[@id] | //article//h3[@id]')}
     for link in doc.xpath('//aside[@class="page-toc"]//nav/a'):
         link.text = headings[link.get('href')[1:]]
     names = ['Descripción general del modelo FDS', 'Transporte de masa, especies y entalpía (inglés)',
@@ -194,7 +194,7 @@ def localize_reader(doc):
 def make_search(doc, target):
     entries, title, anchor, texts = [], '', '', []
     for node in doc.xpath('//article')[0]:
-        if node.tag in {'h1', 'h3', 'h4'}:
+        if node.tag in {'h1', 'h2', 'h3'}:
             if texts:
                 entries.append({'title': title, 'chapter': 'Descripción general del modelo FDS',
                                 'url': 'overview.html#' + anchor, 'text': ' '.join(texts)})

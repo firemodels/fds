@@ -19,6 +19,8 @@ import sys
 import time
 from urllib.parse import quote, unquote, urlsplit
 
+from accessibility import heading_levels, adapt_content
+
 from lxml import etree
 from lxml import html as dom
 
@@ -383,10 +385,11 @@ def make_reader(tex, site, fallbacks, pages=None, full=False):
         for br in heading.findall('br'):
             br.drop_tree()
         heading.tag = 'h1'
+        heading_levels(body)
         page['title'] = plain(heading)
         page['body'] = body
-        page['toc'] = [(element.get('id'), plain(element), element.tag == 'h4')
-                       for element in body.xpath('.//h3[@id] | .//h4[@id]')]
+        page['toc'] = [(element.get('id'), plain(element), element.tag == 'h3')
+                       for element in body.xpath('.//h2[@id] | .//h3[@id]')]
         for element in body.xpath('.//*[@id]'):
             # Shared empty bibliography helper anchors are not destinations.
             if element.get('id') == 'X0-':
@@ -418,14 +421,8 @@ def make_reader(tex, site, fallbacks, pages=None, full=False):
             shutil.copy2(original, assets / original.name)
             image.set('src', 'assets/' + original.name)
             image.set('loading', 'lazy')
-            figure = next(iter(image.iterancestors('figure')), None)
-            caption = figure.find('figcaption') if figure is not None else None
-            image.set('alt', plain(caption) if caption is not None else 'Technical diagram')
-        # Equation rows keep TeX numbering, with horizontal scroll at narrow widths.
-        for table in list(body.xpath('.//table')):
-            wrapper = etree.Element('div', {'class': 'table-scroll', 'tabindex': '0'})
-            table.addprevious(wrapper)
-            wrapper.append(table)
+            image.set('alt', 'Technical diagram')
+        adapt_content(body)
 
     revision = run(['git', 'rev-parse', '--short', 'HEAD'], MANUALS)
     template = (HERE / 'reader.html').read_text()
@@ -472,7 +469,7 @@ def make_reader(tex, site, fallbacks, pages=None, full=False):
 
         title, anchor, texts = page['title'], '', []
         for element in page['body']:
-            if element.tag in {'h1', 'h3', 'h4'}:
+            if element.tag in {'h1', 'h2', 'h3'}:
                 if texts:
                     search.append({'title': title, 'chapter': page['title'],
                                    'url': page['file'] + ('#' + anchor if anchor else ''),

@@ -225,7 +225,7 @@ def translate_edition(site, pages, language, translator=None, cache_root=None):
         assert ids_before == doc.xpath('//@id'), 'Translation changed anchors'
         assert math_before == [etree.tostring(n, with_tail=False) for n in doc.xpath('//math')], 'Translation changed math'
         titles[page['file']] = reader.plain(doc.xpath('//article/h1')[0])
-        for heading in doc.xpath('//article//*[self::h1 or self::h3 or self::h4 or self::h5]'):
+        for heading in doc.xpath('//article//*[self::h1 or self::h2 or self::h3 or self::h4 or self::h5]'):
             label = reader.plain(heading)
             marker = heading.find('span')
             if marker is not None and marker.get('class') == 'titlemark':
@@ -248,14 +248,11 @@ def translate_edition(site, pages, language, translator=None, cache_root=None):
             link.findall('span')[-1].text = titles.get(link.get('href'), link.findall('span')[-1].text)
         for link in doc.xpath('//nav[@class="page-navigation"]/a'):
             link.find('small').tail = titles.get(link.get('href'), link.find('small').tail)
-        headings = {n.get('id'): reader.plain(n) for n in doc.xpath('//article//h3[@id] | //article//h4[@id]')}
+        headings = {n.get('id'): reader.plain(n) for n in doc.xpath('//article//h2[@id] | //article//h3[@id]')}
         for link in doc.xpath('//aside[@class="page-toc"]//nav/a'):
             link.text = headings[link.get('href')[1:]]
-        for figure in doc.xpath('//article//figure'):
-            caption = figure.find('figcaption')
-            if caption is not None:
-                for image in figure.xpath('.//img'):
-                    image.set('alt', reader.plain(caption))
+        from accessibility import figure_labels
+        figure_labels(doc.getroot(), language)
         for picker in doc.xpath('//label[@class="language-picker"]'):
             picker.find('span').text = 'Idioma'
             select = picker.find('select')
@@ -266,7 +263,7 @@ def translate_edition(site, pages, language, translator=None, cache_root=None):
         (site / name).write_text('<!doctype html>\n' + etree.tostring(doc, encoding='unicode', method='html'))
         title, anchor, texts = titles[name], '', []
         for node in doc.xpath('//article')[0]:
-            if node.tag in {'h1', 'h3', 'h4'}:
+            if node.tag in {'h1', 'h2', 'h3'}:
                 if texts:
                     search.append({'title': title, 'chapter': titles[name], 'url': name + ('#' + anchor if anchor else ''), 'text': ' '.join(texts)})
                 title, anchor, texts = reader.plain(node), node.get('id', ''), []
@@ -316,7 +313,8 @@ def localize_full_interface(doc):
         node.text = node.text.replace('Source revision', 'Revisión del original')
     aria = {'Open chapter navigation': 'Abrir la navegación por capítulos',
             'Chapter navigation': 'Navegación por capítulos', 'On this page': 'En esta página',
-            'Previous and next pages': 'Páginas anterior y siguiente', 'Close search': 'Cerrar búsqueda'}
+            'Previous and next pages': 'Páginas anterior y siguiente', 'Close search': 'Cerrar búsqueda',
+            'Scrollable equation or table': 'Ecuación o tabla desplazable'}
     for node in doc.xpath('//*[@aria-label]'):
         node.set('aria-label', aria.get(node.get('aria-label'), node.get('aria-label')))
 

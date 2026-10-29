@@ -20,6 +20,14 @@
 
 - Keep scientific content in the original LaTeX. Fix conversion or presentation
   code, not generated HTML or a second maintained copy of a chapter.
+- Accessibility changes belong in the shared converter and reader. Preserve
+  mathematical structure and anchors; never guess complex table headers or
+  figure meaning. Apply accessibility work only to generated HTML and its reader;
+  do not retrofit the LaTeX or PDF. Future supplemental figure descriptions
+  should be maintained as online accessibility metadata tied to source figures.
+  Run the static accessibility audit on each edition, and browser/keyboard
+  and assistive-technology checks when available. Keep human-review items and
+  unperformed checks explicit; automated success is not Section 508 compliance.
 - TeX4ht staging must brace font/text commands used directly after `_` or `^`
   (for example, `y_\mathrm{CO}` becomes `y_{\mathrm{CO}}`). Preserve nested
   arguments and avoid changing already grouped scripts. TeX comments consume
