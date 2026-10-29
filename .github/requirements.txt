@@ -19,6 +19,15 @@ pyinstaller
 dmgbuild
 pillow
 
+# Online manuals: HTML reader and offline Argos translation dependencies
+lxml==6.1.1
+# Keep the tested inference/tokenizer versions together.
+# pip also installs Argos's remaining declared dependencies (spaCy, MiniSBD, etc.).
+argostranslate==1.11.0
+ctranslate2==4.8.4
+sentencepiece==0.2.2
+stanza==1.10.1
+
 # Local utility packages (imports fdsplotlib)
 -e ../Utilities/Python
 
