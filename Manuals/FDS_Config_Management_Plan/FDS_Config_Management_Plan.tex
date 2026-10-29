@@ -331,7 +331,7 @@ The FDS manuals are typeset using \LaTeX, specifically, pdf\LaTeX. The \LaTeX\ f
 
 \subsubsection{Source Control and Build Process}
 
-The online manuals are generated HTML editions of the existing \LaTeX\ manuals. The \LaTeX\ files remain the source of the scientific content; developers do not maintain a separate set of chapters for the website. The initial implementation covers Volume~1 of the FDS Technical Reference Guide. Extension to the other manuals is planned.
+The online manuals are generated HTML editions of the existing \LaTeX\ manuals. The \LaTeX\ files remain the source of the scientific content; developers do not maintain a separate set of chapters for the website. The shared build interface selects the User Guide or one of the four volumes of the Technical Reference Guide. Each manual has its own output directory, search index, and registry of successfully built language editions. Each new manual conversion requires validation and visual review before publication.
 
 The conversion uses make4ht/TeX4ht and Python scripts to produce chapter pages with navigation, search, cross-references, figures, and mathematical expressions represented in MathML. A link provides access to the PDF manual. The converter and shared reader templates are maintained under version control in \path{Manuals/Online_Docs}. Python package requirements are maintained in \path{.github/requirements.txt}. Generated HTML, converted figures, translation caches, and audit reports are build products and are excluded from source control. Changes to scientific notation must preserve the distinctions in the original source, following NIST Special Publication~811.
 

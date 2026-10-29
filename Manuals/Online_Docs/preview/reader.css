@@ -27,6 +27,12 @@ dialog{border:1px solid var(--line);border-radius:10px;box-shadow:0 20px 90px #0
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.sidebar{transition:none}}
 @media print{.site-header,.sidebar,.page-toc,.breadcrumb,.page-navigation,.page-footer{display:none}.page-layout{display:block;margin:0;padding:0}main{max-width:none;padding:0}article{max-width:none}article figure{break-inside:avoid}article .table-scroll{overflow:visible}}
 .language-picker{display:flex;align-items:center;gap:8px;color:#aec1cf;font-size:11px}
+@media(max-width:900px){
+  body[data-manuals-catalog]{--header:112px}
+  body[data-manuals-catalog] .site-header{flex-wrap:wrap;padding-top:8px;padding-bottom:8px;gap:6px}
+  body[data-manuals-catalog] .header-links{width:100%;justify-content:flex-end;gap:16px}
+  body[data-manuals-catalog] .header-links>a{white-space:nowrap}
+}
 /* LaTeX overlines span the entire base, including groups and nested math. */
 article math mrow.mixture-overline,article math mrow.latex-overline{border-top:0.055em solid currentColor;padding:0.06em 0.025em 0}
 article math mrow.mixture-overline{position:relative;left:0.10em}
