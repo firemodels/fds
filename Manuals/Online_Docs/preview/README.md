@@ -1,8 +1,12 @@
 # Local Technical Guide preview
 
+For accessibility scope, audit commands, and remaining human review, see
+[Accessibility](ACCESSIBILITY.md). Accessibility is under development; these
+manuals are not currently represented as fully Section 508 compliant.
+
 ## Build the complete Technical Guide (Volume 1)
 
-From `Manuals/Sphinx_Online_Docs`, run:
+From `Manuals/Online_Docs`, run:
 
 ```sh
 ./preview/build_tech_guide.sh --language en
@@ -71,7 +75,7 @@ package.install_from_path(model.download())
 PY
 ```
 
-Then, from `Manuals/Sphinx_Online_Docs`:
+Then, from `Manuals/Online_Docs`:
 
 ```sh
 ./preview/build_tech_guide.sh --language es --check
@@ -127,7 +131,7 @@ make4ht, Biber, dvisvgm, Ghostscript, and Poppler's `pdftocairo`. A locally buil
 Technical Guide PDF, its `.aux` files, and populated `SCRIPT_FIGURES` are required.
 The PDF and auxiliary files must correspond to the local source.
 
-From `Manuals/Sphinx_Online_Docs`:
+From `Manuals/Online_Docs`:
 
 ```sh
 python3 preview/build_preview.py

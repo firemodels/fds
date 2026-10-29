@@ -84,14 +84,45 @@ function renderSearch() {
 input.addEventListener("input", renderSearch);
 const menu = document.querySelector(".menu-toggle");
 const sidebar = document.querySelector(".sidebar");
-menu.addEventListener("click", () => {
-  const open = sidebar.classList.toggle("open");
+const mobile = window.matchMedia("(max-width: 720px)");
+function setMenu(open, restoreFocus = false) {
+  sidebar.classList.toggle("open", open);
   menu.setAttribute("aria-expanded", String(open));
+  sidebar.inert = mobile.matches && !open;
+  if (restoreFocus) menu.focus();
+}
+menu.addEventListener("click", () => setMenu(!sidebar.classList.contains("open")));
+mobile.addEventListener("change", () => {
+  const wasInside = sidebar.contains(document.activeElement);
+  setMenu(false, mobile.matches && wasInside);
 });
+setMenu(false);
 document.addEventListener("keydown", event => {
-  if (event.key === "Escape") { sidebar.classList.remove("open"); menu.setAttribute("aria-expanded", "false"); }
+  // Escape first belongs to the modal search dialog.
+  if (event.key === "Escape" && !dialog.open && mobile.matches && sidebar.classList.contains("open")) {
+    setMenu(false, true);
+  }
 });
-const sections = [...document.querySelectorAll("article h3[id], article h4[id]")];
+function updateScrollRegions() {
+  for (const region of document.querySelectorAll(".table-scroll")) {
+    const overflowing = region.scrollWidth > region.clientWidth + 1;
+    if (overflowing) {
+      region.setAttribute("tabindex", "0");
+      region.setAttribute("role", "region");
+      region.setAttribute("aria-label", spanish ? "Ecuación o tabla desplazable" : "Scrollable equation or table");
+    } else {
+      region.removeAttribute("tabindex");
+      region.removeAttribute("role");
+      region.removeAttribute("aria-label");
+    }
+  }
+}
+const resizeObserver = new ResizeObserver(updateScrollRegions);
+for (const region of document.querySelectorAll(".table-scroll")) resizeObserver.observe(region);
+window.addEventListener("load", updateScrollRegions);
+document.fonts.ready.then(updateScrollRegions);
+updateScrollRegions();
+const sections = [...document.querySelectorAll("article h2[id], article h3[id]")];
 const tocLinks = [...document.querySelectorAll(".page-toc nav a")];
 let queued = false;
 function highlightSection() {
