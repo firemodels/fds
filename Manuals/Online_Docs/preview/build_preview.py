@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Convert FDS LaTeX with make4ht into a reader; use --full for all of Volume 1.
+"""Convert FDS LaTeX with make4ht; --full --manual selects a complete manual.
 
 This pilot requires an already built local Tech Guide (PDF and .aux files) for
 links to chapters outside the preview. It does not fetch release assets.
@@ -20,6 +20,7 @@ import time
 from urllib.parse import quote, unquote, urlsplit
 
 from accessibility import heading_levels, adapt_content
+from manuals import MANUALS as MANUAL_SPECS, TECH
 
 from lxml import etree
 from lxml import html as dom
@@ -100,6 +101,50 @@ def group_math_scripts(text):
         parts.append(match[1] + '{' + group_math_scripts(text[match.start() + 1:end].strip()) + '}')
         pos = end
     parts.append(text[pos:])
+    return ''.join(parts)
+
+
+def group_compound_math(text):
+    """Brace compound TeX atoms for TeX4ht without changing their operands."""
+    def atom_end(pos):
+        while pos < len(text) and text[pos].isspace():
+            pos += 1
+        if pos == len(text):
+            raise ValueError('Missing math operand')
+        if text[pos] == '{':
+            return group(text, pos)[1]
+        command = re.match(r'\\([A-Za-z]+|.)', text[pos:])
+        if not command:
+            return pos + 1
+        end = pos + len(command[0])
+        if command[1] in {'frac', 'dfrac', 'tfrac'}:
+            return atom_end(atom_end(end))
+        if command[1] == 'sqrt':
+            option = re.match(r'\s*\[[^\]]*\]', text[end:])
+            if option:
+                end += len(option[0])
+            return atom_end(end)
+        return end
+
+    pattern = re.compile(r'(?P<prefix>[_^]|\\sqrt(?:\s*\[[^\]]*\])?)\s*(?=\\(?:frac|dfrac|tfrac|sqrt)\b)')
+    parts, pos = [], 0
+    while match := pattern.search(text, pos):
+        end = atom_end(match.end())
+        parts.extend([text[pos:match.start()], match['prefix'], '{',
+                      group_compound_math(text[match.end():end]), '}'])
+        pos = end
+    parts.append(text[pos:])
+    return ''.join(parts)
+
+
+def prepare_math(text):
+    # Literal code examples are content, not TeX math to be normalized.
+    literal = re.compile(r'(\\begin\{(?:lstlisting|verbatim)\}.*?\\end\{(?:lstlisting|verbatim)\}|\\verb\*?(.).*?\2)', re.S)
+    parts, pos = [], 0
+    for match in literal.finditer(text):
+        parts.extend([group_nested_primes(group_math_scripts(group_compound_math(text[pos:match.start()]))), match[0]])
+        pos = match.end()
+    parts.append(group_nested_primes(group_math_scripts(group_compound_math(text[pos:]))))
     return ''.join(parts)
 
 
@@ -343,7 +388,8 @@ def reader_link(href, current, filename_map, id_files):
     return href
 
 
-def make_reader(tex, site, fallbacks, pages=None, full=False):
+def make_reader(tex, site, fallbacks, pages=None, full=False, manual=TECH):
+    guide = MANUALS / manual.directory
     site.mkdir(parents=True, exist_ok=True)
     assets = site / 'assets'
     assets.mkdir(exist_ok=True)
@@ -353,7 +399,7 @@ def make_reader(tex, site, fallbacks, pages=None, full=False):
     font = Path(run(['kpsewhich', 'latinmodern-math.otf'], tex))
     if font.is_file():
         shutil.copy2(font, assets / 'latinmodern-math.otf')
-    shutil.copy2(GUIDE / 'FDS_Technical_Reference_Guide.pdf', site / 'full-guide.pdf')
+    shutil.copy2(guide / manual.pdf, site / 'full-guide.pdf')
     filename_map = {'preview.html': 'index.html'}
     if pages is None:
         pages = [{'raw': f'previewch{i}.html', 'file': slug + '.html',
@@ -372,7 +418,7 @@ def make_reader(tex, site, fallbacks, pages=None, full=False):
         body = tree.find('body')
         for element in body.xpath('.//div[@class="crosslinks"] | .//div[@class="crosslinks-bottom"]'):
             element.drop_tree()
-        headings = body.xpath('.//h2')
+        headings = body.xpath('./h1 | ./h2')
         if not headings and page.get('synthetic_title'):
             heading = etree.Element('h2', id='manual-index')
             heading.text = page['synthetic_title']
@@ -429,8 +475,8 @@ def make_reader(tex, site, fallbacks, pages=None, full=False):
     if full:
         template = template.replace('<body>', '<body data-language-manifest="../languages.json">')
         template = template.replace('IN THIS PREVIEW', 'IN THIS MANUAL').replace(
-            'Selected chapters from the<br>FDS Technical Reference Guide.',
-            'Complete Volume 1: Mathematical Model.')
+            'Selected chapters from the<br>FDS {{MANUAL_TITLE}}.',
+            'Complete manual.')
         template = template.replace('Search the chapters included in this preview.', 'Search this manual.')
     # Refresh presentation assets automatically when their contents change.
     for name in ['reader.css', 'reader.js']:
@@ -454,11 +500,13 @@ def make_reader(tex, site, fallbacks, pages=None, full=False):
                         if p is not None)
         if page['source']:
             source = assets / Path(page['source']).name
-            shutil.copy2(GUIDE / page['source'], source)
+            shutil.copy2(guide / page['source'], source)
             source_link = f'<a href="assets/{source.name}">View LaTeX source ↗</a>'
         else:
             source_link = ''
-        values = {'TITLE': html.escape(page['title']), 'NAV': nav, 'TOC': toc,
+        values = {'MANUAL_TITLE': html.escape(manual.title),
+                  'MANUAL_SUBTITLE': html.escape(manual.subtitle), 'MANUAL_ENTRY': manual.entry,
+                  'TITLE': html.escape(page['title']), 'NAV': nav, 'TOC': toc,
                   'CONTENT': content, 'PAGER': pager, 'REVISION': revision,
                   'EYEBROW': page.get('eyebrow', 'CHAPTER ' + str(page['number']) if page['number'] else 'BIBLIOGRAPHY'),
                   'SOURCE': source_link}
@@ -481,8 +529,8 @@ def make_reader(tex, site, fallbacks, pages=None, full=False):
             search.append({'title': title, 'chapter': page['title'],
                            'url': page['file'] + ('#' + anchor if anchor else ''), 'text': ' '.join(texts)})
     (site / 'index.html').write_text('<!doctype html><html lang="en"><meta charset="utf-8">'
-        '<meta http-equiv="refresh" content="0;url=overview.html"><title>FDS Technical Guide</title>'
-        '<a href="overview.html">Open the FDS Technical Guide</a></html>')
+        f'<meta http-equiv="refresh" content="0;url={manual.entry}"><title>FDS {html.escape(manual.title)}</title>'
+        f'<a href="{manual.entry}">Open the FDS {html.escape(manual.title)}</a></html>')
     (site / 'search-index.json').write_text(json.dumps(search, ensure_ascii=False))
     return pages, revision
 
@@ -525,12 +573,15 @@ def validate(site, pages, progress=False):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, help='Build root; defaults depend on --full')
-    parser.add_argument('--full', action='store_true', help='Build all of Volume 1, front matter, references, and appendices')
+    parser.add_argument('--full', action='store_true', help='Build a complete manual')
+    parser.add_argument('--manual', choices=list(MANUAL_SPECS), default='tech', help='Manual to build in full mode (default: tech)')
     parser.add_argument('--language', default='en', choices=['en', 'es'], help='Edition to build (default: en)')
     parser.add_argument('--check', action='store_true', help='Check full-guide inputs without converting or building')
     parser.add_argument('--refresh-languages', action='store_true', help='Refresh the full-site language registry after combining edition artifacts')
     parser.add_argument('--reuse-conversion', action='store_true', help='Restyle previously converted HTML')
     args = parser.parse_args()
+    if args.manual != 'tech' and not args.full:
+        parser.error('--manual requires --full (or use build_manual.sh)')
     if args.full:
         from full_guide import build_full
         build_full(args)

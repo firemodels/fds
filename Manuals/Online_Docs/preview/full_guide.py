@@ -1,4 +1,4 @@
-"""Full Volume 1 orchestration; --check never runs TeX or writes build files."""
+"""Full FDS manual orchestration; --check never runs TeX or writes build files."""
 from __future__ import annotations
 import json
 import os
@@ -11,74 +11,23 @@ from urllib.parse import urlsplit
 from lxml import etree, html
 import build_preview as reader
 
-MAIN = 'FDS_Technical_Reference_Guide.tex'
+from manuals import MANUALS, TECH
+from manual_sources import GRAPHIC, uncomment, active_geometry, slug
+from manual_sources import inventory as source_inventory
+
+MAIN = TECH.main
 LANGUAGES = {'en': 'English', 'es': 'Español'}
-GRAPHIC = re.compile(r'(?:\\includegraphics\*?|\\addplot\+?\s+graphics)(?:\s*\[[^\]]*\])?\s*\{([^{}]+)\}', re.S)
-SLUGS = {'Equation_Chapter': 'overview', 'Mass_Chapter': 'mass-transport',
-         'Particle_Chapter': 'particles', 'Introduction_Chapter': 'introduction'}
 
 
-def uncomment(text):
-    # TeX comments consume the newline as well. Leaving it behind creates
-    # paragraph breaks where commented-out rows occur inside align/tabular.
-    return re.sub(r'(?<!\\)%[^\n]*(?:\n|$)', '', text)
-
-
-def active_geometry(text, enabled):
-    def select(match):
-        branches = match[1].split(r'\else', 1)
-        return branches[0] if enabled else (branches[1] if len(branches) == 2 else '')
-    return re.sub(r'\\ifcompgeom\b(.*?)\\fi\b', select, text, flags=re.S)
-
-
-def slug(name):
-    return SLUGS.get(name, re.sub(r'[^a-z0-9]+', '-', name.replace('_Chapter', '').lower()).strip('-'))
-
-
-def inventory():
-    main = uncomment((reader.GUIDE / MAIN).read_text())
-    common = uncomment((reader.MANUALS / 'Bibliography/commoncommands.tex').read_text())
-    flags = re.findall(r'\\compgeom(true|false)\b', common)
-    enabled = bool(flags and flags[-1] == 'true')
-    main = active_geometry(main, enabled)
-    names = re.findall(r'\\include\{([^{}]+)\}', main.split(r'\mainmatter', 1)[1])
-    chapters = [name for name in names if name != 'Appendices']
-    # Preserve the original front matter and bibliography/appendix order, but
-    # leave print-only covers and logo pages in the linked PDF.
-    preamble = main.split(r'\begin{document}', 1)[0]
-    master = preamble + '\\begin{document}\n' + main[main.index(r'\frontmatter'):]
-    sources = {MAIN: master}
-    sources.update({name + '.tex': uncomment((reader.GUIDE / (name + '.tex')).read_text()) for name in names})
-    appendices = re.findall(r'\\chapter\{', sources['Appendices.tex'])
-    figures, missing, plot_graphics = {}, [], set()
-    for source in sources.values():
-        for match in GRAPHIC.finditer(source):
-            reference = match[1]
-            if match[0].startswith(r'\addplot'):
-                plot_graphics.add(reference)
-            if reference in figures:
-                continue
-            path = (reader.GUIDE / reference).resolve()
-            candidates = [path] if path.suffix else [path.with_suffix(ext) for ext in ['.pdf', '.png', '.jpg', '.jpeg', '.eps']]
-            found = next((p for p in candidates if p.is_file()), None)
-            if found is None:
-                missing.append(reference)
-            elif found.suffix.lower() == '.eps':
-                missing.append(reference + ' (EPS requires a PDF or PNG counterpart)')
-            else:
-                figures[reference] = found
-    for reference in plot_graphics:
-        if reference in figures and figures[reference].suffix.lower() != '.pdf':
-            missing.append(reference + ' (PGFPlots background currently requires a PDF source)')
-    return {'chapters': chapters, 'appendices': len(appendices), 'sources': sources,
-            'figures': figures, 'plot_graphics': plot_graphics,
-            'missing': sorted(set(missing)), 'complex_geometry': enabled}
+def inventory(manual=TECH):
+    return source_inventory(manual, reader.MANUALS)
 
 
 def expected_pages(inv):
     return (['fds-developers', 'preface', 'disclaimer', 'acknowledgments', 'references']
+            + [f'part-{i + 1}' for i in range(len(inv.get('part_sources', [])))]
             + [slug(name) for name in inv['chapters']]
-            + ['appendix-' + chr(97 + i) for i in range(inv['appendices'])])
+            + inv.get('appendix_slugs', ['appendix-' + chr(97 + i) for i in range(inv['appendices'])]))
 
 
 def cache_path(language, page):
@@ -89,21 +38,23 @@ def cache_path(language, page):
 
 
 def preflight(inv, language):
-    errors = ['Missing figure: ' + name for name in inv['missing']]
+    manual = inv.get('manual', TECH)
+    errors = list(inv['missing'])
     env_path = '/Library/TeX/texbin:/opt/homebrew/bin:' + os.environ.get('PATH', '')
     for tool in ['make4ht', 'biber', 'dvisvgm', 'kpsewhich', 'pdftocairo', 'pdftops']:
         if not shutil.which(tool, path=env_path):
             errors.append('Missing tool: ' + tool)
-    if not (reader.GUIDE / 'FDS_Technical_Reference_Guide.pdf').is_file():
-        errors.append('Build the local Technical Guide PDF for the PDF manual link.')
-    print(f"Volume 1: {len(inv['chapters'])} chapters, {inv['appendices']} appendices, "
+    if not (reader.MANUALS / manual.directory / manual.pdf).is_file():
+        errors.append(f'Missing PDF manual: {reader.MANUALS / manual.directory / manual.pdf}')
+    print(f"{manual.title}: {len(inv['chapters'])} chapters, {inv['appendices']} appendices, "
           f"{len(inv['figures'])} external figures; complex geometry {'enabled' if inv['complex_geometry'] else 'disabled'}.", flush=True)
     if errors:
         raise RuntimeError('Input checks failed:\n' + '\n'.join(errors))
 
 
 def stage(inv, work):
-    tex = work / 'Manuals' / reader.GUIDE.name
+    manual = inv.get('manual', TECH)
+    tex = work / 'Manuals' / manual.directory
     tex.mkdir(parents=True)
     (work / '.fds-docs-work').write_text('Generated full-guide staging files.\n')
     for name in ['Bibliography', 'LaTeX_Style_Files']:
@@ -116,6 +67,7 @@ def stage(inv, work):
     common.write_text(common.read_text().replace(r'\usepackage[pdftex]{graphicx}', r'\usepackage{graphicx}')
                       .replace(r'\usepackage[pdftex,', r'\usepackage[')
                       .replace(r'\usepackage{colortbl}', '% Table colors supplied by reader CSS.')
+                      .replace(r'\usepackage{xltabular}', '% Staged as longtable for TeX4ht.')
                       .replace('backref=true', 'backref=false'))
     folder = tex / 'WEB_FIGURES'
     folder.mkdir()
@@ -127,7 +79,10 @@ def stage(inv, work):
             # PGFPlots backgrounds need real DVI graphics, not TeX4ht's BMP
             # placeholder specials (which silently disappear from the SVG).
             eps = folder / (stem + '.eps')
-            reader.run(['pdftops', '-eps', str(source), str(eps)], tex)
+            if source.suffix.lower() == '.pdf':
+                reader.run(['pdftops', '-eps', str(source), str(eps)], tex)
+            else:
+                raster_to_eps(source, eps)
             replacements[reference] = str(eps.relative_to(tex))
             continue
         if source.suffix.lower() == '.pdf':
@@ -141,22 +96,83 @@ def stage(inv, work):
             shutil.copy2(source, raster)
         replacements[reference] = str(raster.relative_to(tex))
     for name, text in inv['sources'].items():
-        text = GRAPHIC.sub(lambda m: m[0].replace('{' + m[1] + '}', '{' + replacements[m[1]] + '}'), text)
-        text = reader.group_nested_primes(reader.group_math_scripts(text))
-        (tex / ('preview.tex' if name == MAIN else name)).write_text(text)
+        text = GRAPHIC.sub(lambda m: m[0].replace('{' + m[1] + '}', '{' + replacements.get(m[1], m[1]) + '}'), text)
+        text = prepare_tables(reader.prepare_math(text))
+        target = tex / ('preview.tex' if name == manual.main else name)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(text)
     (tex / 'web-figures.json').write_text(json.dumps(web_figures, indent=2))
     (tex / 'preview.mk4').write_text('Make:htlatex {}\nMake:biber {}\nMake:htlatex {}\nMake:htlatex {}\n')
     return tex
 
 
+def raster_to_eps(source, destination):
+    """Give DVI/dvisvgm actual raster artwork inside a PGFPlots background."""
+    from PIL import Image
+    with Image.open(source) as original:
+        rgba = original.convert('RGBA')
+        background = Image.new('RGBA', rgba.size, 'white')
+        background.alpha_composite(rgba)
+        background.convert('RGB').save(destination, format='EPS')
+
+
+def prepare_tables(text):
+    """Use native longtable handling instead of TeX4ht's tabularx alias.
+
+    The alias loses multipage captions and breaks listing cells. HTML controls
+    table width; keep the cells, captions, labels, and repeated header structure.
+    """
+    # Print-page rotation produces invalid inline wrappers around block tables.
+    # The reader presents these as upright, horizontally scrollable tables.
+    text = re.sub(r'\\(?:begin|end)\{landscape\}', '', text)
+    text = text.replace('{sidewaystable}', '{table}')
+    # Listings inside math text boxes emit HTML code tags across MathML nodes.
+    # Keep literal monospaced labels as native text inside the existing box.
+    def boxed_code(match):
+        escapes = {'_': r'\_', '#': r'\#', '%': r'\%', '&': r'\&', '$': r'\$'}
+        literal = ''.join(escapes.get(char, char) for char in match[1])
+        return r'\mbox{\texttt{' + literal + '}}'
+    text = re.sub(r'\\mbox\{\\ct\{([^{}\\]*)\}\}', boxed_code, text)
+    pattern = re.compile(r'\\begin\{xltabular\}(?:\[[^\]]*\])?\s*(?=\{)')
+    parts, pos = [], 0
+    while match := pattern.search(text, pos):
+        _, end = reader.group(text, match.end())
+        while text[end].isspace():
+            end += 1
+        columns, end = reader.group(text, end)
+        output, depth = [], 0
+        for char in columns:
+            output.append(r'p{0.2\linewidth}' if char == 'X' and depth == 0 else char)
+            if char == '{':
+                depth += 1
+            elif char == '}':
+                depth -= 1
+        parts.extend([text[pos:match.start()], r'\begin{longtable}{', ''.join(output), '}'])
+        pos = end
+    parts.append(text[pos:])
+    text = ''.join(parts).replace(r'\end{xltabular}', r'\end{longtable}')
+    text = re.sub(r'\\(?:rowcolor|cellcolor)(?:\[[^\]]*\])?\{[^{}]*\}(?:\[[^\]]*\]){0,2}', '', text)
+    def inline_math(match):
+        delimiter, content = match.groups()
+        pieces = re.split(r'(?<!\\)\$', content)
+        if len(pieces) % 2 == 0:
+            raise RuntimeError('Unbalanced math escape in inline listing: ' + content)
+        # TeX4ht must close typewriter mode before entering native math.
+        return ''.join(('$' + part + '$') if i % 2 else
+                       (r'\lstinline' + delimiter + part + delimiter if part else '')
+                       for i, part in enumerate(pieces))
+    return re.sub(r'\\lstinline\[mathescape=true\]([^\w\s{])(.*?)\1', inline_math, text)
+
+
 def discover_pages(tex, inv):
+    manual = inv.get('manual', TECH)
     pages = []
     for path in tex.glob('preview*.html'):
         doc = html.parse(str(path), parser=html.HTMLParser(encoding='utf-8'))
-        headings = doc.xpath('//body/h2')
+        headings = doc.xpath('//body/h1 | //body/h2')
         if not headings:
             if path.name == 'preview.html' and doc.xpath('//div[@class="tableofcontents"]'):
-                pages.append({'raw': path.name, 'file': 'manual-index.html', 'source': MAIN,
+                pages.append({'raw': path.name, 'file': 'manual-index.html', 'source': manual.main,
                               'number': None, 'eyebrow': 'CONTENTS', 'order': 0,
                               'synthetic_title': 'Manual contents'})
             continue
@@ -167,15 +183,23 @@ def discover_pages(tex, inv):
         title = reader.plain(heading)
         number = re.search(r'Chapter\s+(\d+)', marker)
         appendix = re.search(r'Appendix\s+([A-Z]+)', marker)
-        if number:
+        part = re.search(r'Part\s+([IVXLCDM]+)', marker)
+        if part:
+            values = {'I': 1, 'V': 5, 'X': 10, 'L': 50, 'C': 100, 'D': 500, 'M': 1000}
+            digits = [values[c] for c in part[1]]
+            index = sum(-v if i + 1 < len(digits) and v < digits[i + 1] else v for i, v in enumerate(digits))
+            source = inv['part_sources'][index - 1]
+            name, eyebrow, number = f'part-{index}', 'PART ' + part[1], None
+        elif number:
             number = int(number[1])
-            source = inv['chapters'][number - 1] + '.tex'
-            name, eyebrow = slug(Path(source).stem), 'CHAPTER ' + str(number)
+            source = inv.get('chapter_sources', [name + '.tex' for name in inv['chapters']])[number - 1]
+            name, eyebrow = slug(inv['chapters'][number - 1]), 'CHAPTER ' + str(number)
         elif appendix:
             number = appendix[1]
-            source, name, eyebrow = 'Appendices.tex', 'appendix-' + number.lower(), 'APPENDIX ' + number
+            name, eyebrow = 'appendix-' + number.lower(), 'APPENDIX ' + number
+            source = dict(zip(inv.get('appendix_slugs', []), inv.get('appendix_sources', []))).get(name, 'Appendices.tex')
         else:
-            number, source, name, eyebrow = None, MAIN, slug(title), 'FRONT MATTER'
+            number, source, name, eyebrow = None, manual.main, slug(title), 'FRONT MATTER'
             if name == 'references':
                 source, eyebrow = None, 'REFERENCES'
         ids = heading.xpath('.//@id') + heading.xpath('./@id')
@@ -194,7 +218,7 @@ def discover_pages(tex, inv):
     return pages
 
 
-def translate_edition(site, pages, language, translator=None, cache_root=None):
+def translate_edition(site, pages, language, translator=None, cache_root=None, manual=TECH):
     """Translate prose offline, retaining all scientific markup and anchors."""
     from translate_preview import translation_units, apply_translation
     documents, titles, stats, heading_labels = {}, {}, {}, {}
@@ -238,7 +262,7 @@ def translate_edition(site, pages, language, translator=None, cache_root=None):
         doc.getroot().set('lang', language)
         doc.find('head/title').text = titles[name] + ' — FDS'
         # Translate the reader separately from protected chapter markup.
-        localize_full_interface(doc)
+        localize_full_interface(doc, manual)
         for link in doc.xpath('//article//div[@class="tableofcontents"]//a[@href]'):
             target = urlsplit(link.get('href'))
             label = heading_labels.get((target.path or name, target.fragment))
@@ -275,25 +299,25 @@ def translate_edition(site, pages, language, translator=None, cache_root=None):
     return stats
 
 
-def localize_full_interface(doc):
+def localize_full_interface(doc, manual=TECH):
     labels = {
         '//a[@class="skip-link"]': 'Saltar al contenido',
         '//span[@class="brand-name"]/span': 'DOCUMENTACIÓN TÉCNICA',
         '//span[@class="edition"]': 'SEXTA EDICIÓN',
         '//div[@class="header-links"]/a': 'Manual PDF (inglés) ↗',
-        '//div[@class="manual-name"]': 'Guía de referencia técnica',
-        '//div[@class="volume"]': 'Volumen 1 · Modelo matemático',
+        '//div[@class="manual-name"]': manual.title_es,
+        '//div[@class="volume"]': manual.subtitle_es,
         '//button[@class="search-trigger"]/span': '⌕ Buscar en este manual',
         '//div[@class="nav-heading"]': 'EN ESTE MANUAL',
         '//div[@class="sidebar-footer"]/p': 'Traducción automática. Las figuras y el PDF conservan el contenido original en inglés.',
         '//div[@class="sidebar-footer"]/a': 'Descargar el PDF en inglés ↓',
-        '//div[@class="breadcrumb"]/a': 'Guía de referencia técnica',
-        '//div[@class="breadcrumb"]/span[last()]': 'Modelo matemático',
+        '//div[@class="breadcrumb"]/a': manual.title_es,
+        '//div[@class="breadcrumb"]/span[last()]': manual.subtitle_es,
         '//aside[@class="page-toc"]/div': 'EN ESTA PÁGINA',
         '//a[@class="back-top"]': 'Volver arriba ↑',
         '//label[@id="search-title"]': 'Buscar en el manual',
         '//div[@id="search-status"]': 'Buscar en este manual.',
-        '//footer[@class="page-footer"]/span[1]': 'FDS · Guía de referencia técnica',
+        '//footer[@class="page-footer"]/span[1]': 'FDS · ' + manual.title_es,
         '//footer[@class="page-footer"]/a': 'Ver el código LaTeX original ↗',
     }
     for xpath, label in labels.items():
@@ -356,12 +380,17 @@ def refresh_registry(root):
     tmp = root / '.languages.json.tmp'
     tmp.write_text(json.dumps({'languages': editions}, ensure_ascii=False, indent=2) + '\n')
     tmp.replace(root / 'languages.json')
-    (root / 'index.html').write_text('<!doctype html><meta charset="utf-8"><title>FDS Technical Guide</title>'
+    (root / 'index.html').write_text('<!doctype html><meta charset="utf-8"><title>FDS Online Manual</title>'
         + ''.join(f'<p><a href="{entry["code"]}/index.html">{entry["label"]}</a></p>' for entry in editions))
+    if root.name == 'html' and root.parent.name in {m.output for m in MANUALS.values()}:
+        from build_catalog import refresh_catalog
+        refresh_catalog(root.parent.parent)
 
 
 def input_signature(inv):
     signature = {name: reader.hashlib.sha256(text.encode()).hexdigest() for name, text in inv['sources'].items()}
+    # Conversion rules affect staged TeX even when manual sources are unchanged.
+    signature['conversion-rules'] = 2
     signature.update({str(path): reader.sha(path) for path in inv['figures'].values()})
     for directory in ['Bibliography', 'LaTeX_Style_Files']:
         signature.update({str(path): reader.sha(path) for path in (reader.MANUALS / directory).iterdir()
@@ -369,13 +398,15 @@ def input_signature(inv):
     return signature
 
 
-def english_edition(output):
+def english_edition(output, manual=TECH):
     source = output / 'html/en'
     manifest = source / 'build-manifest.json'
-    message = 'Build English first: ./preview/build_tech_guide.sh --language en'
+    message = f'Build English first: ./preview/build_manual.sh --manual {manual.key} --language en'
     if not manifest.is_file():
         raise RuntimeError('No completed English edition found. ' + message)
     data = json.loads(manifest.read_text())
+    if data.get('manual', 'tech') != manual.key:
+        raise RuntimeError(f'English edition belongs to another manual. {message}')
     names = data.get('pages', [])
     if (not data.get('complete') or data.get('language') != 'en' or not names
             or any(Path(name).name != name or not (source / name).is_file() for name in names)):
@@ -385,7 +416,8 @@ def english_edition(output):
 
 def build_translated(args, output):
     from translate_argos import ArgosTranslator
-    source, english, pages = english_edition(output)
+    manual = MANUALS[getattr(args, 'manual', 'tech')]
+    source, english, pages = english_edition(output, manual)
     reader.validate(source, pages)
     translator = ArgosTranslator(args.language)
     print(f'Translating completed English edition ({english["fds_revision"]}) '
@@ -398,14 +430,14 @@ def build_translated(args, output):
     try:
         shutil.copytree(source, candidate, dirs_exist_ok=True)
         (candidate / 'build-manifest.json').unlink()
-        stats = translate_edition(candidate, pages, args.language, translator, output / 'translation-cache')
+        stats = translate_edition(candidate, pages, args.language, translator, output / 'translation-cache', manual)
         counts = reader.validate(candidate, pages)
         # Fail safely if another job replaced English while translation ran.
         if source_hashes != {p['file']: reader.sha(source / p['file']) for p in pages}:
             raise RuntimeError('English changed during translation; rerun this language build.')
         (candidate / 'index.html').write_text('<!doctype html><html lang="' + args.language + '">'
-            '<meta charset="utf-8"><meta http-equiv="refresh" content="0;url=overview.html">'
-            '<title>FDS</title><a href="overview.html">' + LANGUAGES[args.language] + '</a></html>')
+            f'<meta charset="utf-8"><meta http-equiv="refresh" content="0;url={manual.entry}">'
+            f'<title>FDS</title><a href="{manual.entry}">' + LANGUAGES[args.language] + '</a></html>')
         manifest = {**english, 'complete': True, 'language': args.language, 'validation': counts,
                     'translation': translator.provenance, 'translation_stats': stats,
                     'english_pages_sha256': source_hashes,
@@ -421,7 +453,11 @@ def build_translated(args, output):
 
 
 def build_full(args):
-    output = (args.output or reader.DOCS / 'build/tech-guide').resolve()
+    manual = MANUALS[getattr(args, 'manual', 'tech')]
+    output = (args.output or reader.DOCS / 'build' / manual.output).resolve()
+    for manifest in (output / 'html').glob('*/build-manifest.json'):
+        if json.loads(manifest.read_text()).get('manual', 'tech') != manual.key:
+            raise RuntimeError(f'Output belongs to another manual: {output}. Choose a separate --output directory.')
     if args.refresh_languages:
         refresh_registry(output / 'html')
         print(f'Refreshed available languages: {output / "html/languages.json"}')
@@ -430,7 +466,7 @@ def build_full(args):
         build_translated(args, output)
         return
     print('Checking English guide sources, figures, and tools…', flush=True)
-    inv = inventory()
+    inv = inventory(manual)
     preflight(inv, args.language)
     if args.check:
         print('Input checks passed. No files converted or built.')
@@ -442,7 +478,7 @@ def build_full(args):
     if args.reuse_conversion:
         if not record.is_file() or json.loads(record.read_text()) != signature:
             raise RuntimeError('Full-guide conversion is missing or stale; rerun without --reuse-conversion.')
-        tex = work / 'Manuals' / reader.GUIDE.name
+        tex = work / 'Manuals' / manual.directory
         print('Reusing the completed LaTeX conversion.', flush=True)
     else:
         if work.exists():
@@ -477,7 +513,7 @@ def build_full(args):
     print(f'Assembling English reader: {len(pages)} pages.', flush=True)
     candidate = Path(tempfile.mkdtemp(prefix='edition-', dir=output))
     try:
-        pages, revision = reader.make_reader(tex, candidate, {}, pages=pages, full=True)
+        pages, revision = reader.make_reader(tex, candidate, {}, pages=pages, full=True, manual=manual)
         from translate_preview import translation_units
         translation_inputs = output / 'translation-inputs'
         translation_inputs.mkdir(exist_ok=True)
@@ -492,9 +528,9 @@ def build_full(args):
         counts = reader.validate(candidate, pages, progress=True)
         print(f'Validation passed: {len(pages)} pages, '
               f'{sum(p["math"] for p in counts.values())} math expressions.', flush=True)
-        manifest = {'complete': True, 'language': args.language, 'fds_revision': revision,
+        manifest = {'complete': True, 'manual': manual.key, 'entry': manual.entry, 'language': args.language, 'fds_revision': revision,
                     'pages': [page['file'] for page in pages], 'validation': counts,
-                    'source_sha256': signature, 'pdf_sha256': reader.sha(reader.GUIDE / 'FDS_Technical_Reference_Guide.pdf'),
+                    'source_sha256': signature, 'pdf_sha256': reader.sha(reader.MANUALS / manual.directory / manual.pdf),
                     'limitations': ['Uses local figure inputs; release archive download is not yet integrated.',
                                     'Print covers remain in the PDF; generated HTML includes front matter and all content chapters.',
                                     'Full-guide visual review is required after the first build.']}

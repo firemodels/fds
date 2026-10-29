@@ -4,6 +4,7 @@ Do not infer scientific descriptions or complex table headers from appearance.
 The separate audit records those cases for human review.
 """
 import re
+import unicodedata
 from lxml import etree
 
 
@@ -46,6 +47,43 @@ def figure_labels(body, language='en'):
             image.set('alt', name)
             image.set('aria-describedby', caption.get('id'))
             image.set('data-description-review', 'caption-only')
+    object_image_labels(body, language)
+
+
+def object_image_labels(body, language='en'):
+    """Use inspected Smokeview object-table labels, not inferred artwork meaning."""
+    canonical = lambda node: unicodedata.normalize('NFKC', text(node))
+    for index, table in enumerate(body.xpath('.//table'), 1):
+        rows = table.xpath('./tr | ./tbody/tr')
+        if not any(canonical(row).startswith('SMOKEVIEW_ID') for row in rows):
+            continue
+        captions = table.xpath('./caption')
+        if not captions:
+            continue
+        caption = captions[0]
+        if not caption.get('id'):
+            caption.set('id', f'a11y-object-table-{index}')
+        # The inspected dual-frame table explicitly labels these columns.
+        states = None
+        for row in rows:
+            cells = row.xpath('./td | ./th')
+            labels = [canonical(cell) for cell in cells]
+            if row.get('data-object-states') == 'true' or labels == ['', 'inactive', 'active']:
+                row.set('data-object-states', 'true')
+                states = labels
+        for row in rows:
+            cells = row.xpath('./td | ./th')
+            if not cells or not cells[0].xpath('.//code') or not row.xpath('.//img'):
+                continue
+            identifier = canonical(cells[0])
+            for column, cell in enumerate(cells):
+                for image in cell.xpath('.//img'):
+                    label = ('Objeto Smokeview ' if language == 'es' else 'Smokeview object ') + identifier
+                    if states and column < len(states) and states[column]:
+                        label += ', ' + states[column]
+                    image.set('alt', label)
+                    image.set('aria-describedby', caption.get('id'))
+                    image.set('data-description-review', 'table-label-only')
 
 
 def table_semantics(body):

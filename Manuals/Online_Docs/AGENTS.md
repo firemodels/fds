@@ -46,6 +46,16 @@
   Do not accept HTML fallback parsing: it can corrupt surrounding inequalities
   and MathML. Read generated UTF-8 explicitly and resolve citation links against
   the actual unique destination anchor rather than trusting stale TeX4ht filenames.
+- Stage `xltabular` as `longtable` with paragraph columns: TeX4ht’s
+  `tabularx` alias loses multipage captions and corrupts listing cells. Preserve
+  captions, labels, headers, and cell content; table colors belong in reader CSS.
+- Inventory each manual’s recursive local inputs and inline chapters, including
+  generated tables, Part landing pages, and `\incgraphics` calls. Keep outputs, translation caches,
+  and language registries separate per manual. Never replace one manual with
+  another through a shared output directory.
+- In staging, also brace compound math operands: `^\frac{2}{5}` becomes
+  `^{\frac{2}{5}}`, and `\sqrt \frac{a}{b}` becomes `\sqrt{\frac{a}{b}}`.
+  Preserve operands, already grouped math, and literal code examples.
 - Full-guide builds take an explicit `--language` (English by default) and
   publish separate editions. The language dropdown reads the shared registry
   of successfully built editions and offers only editions containing the current

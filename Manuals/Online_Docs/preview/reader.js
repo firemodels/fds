@@ -1,5 +1,24 @@
 "use strict";
 const spanish = document.documentElement.lang === "es";
+async function addManualsNavigation() {
+  if (!document.body.dataset.languageManifest) return;
+  const catalog = new URL("../../../manuals.json", location.href);
+  try {
+    const response = await fetch(catalog, {cache: "no-store"});
+    if (!response.ok || (await response.json()).kind !== "fds-manual-catalog") return;
+    const header = document.querySelector(".header-links");
+    if (!header || header.querySelector(".all-manuals")) return;
+    const link = document.createElement("a");
+    link.className = "all-manuals";
+    const home = new URL("index.html", catalog);
+    if (spanish) home.searchParams.set("language", "es");
+    link.href = home.href;
+    link.textContent = spanish ? "Todos los manuales" : "All manuals";
+    header.prepend(link);
+    document.body.dataset.manualsCatalog = "available";
+  } catch { /* Standalone manual servers do not have a shared catalog. */ }
+}
+addManualsNavigation();
 document.querySelector(".language-picker select")?.addEventListener("change", event => {
   const target = new URL(event.target.value, location.href);
   if (event.target.selectedOptions[0].dataset.keepSection !== "false") target.hash = location.hash;

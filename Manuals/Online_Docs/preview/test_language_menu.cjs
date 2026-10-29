@@ -18,6 +18,20 @@ async function optionsFor(languages, reject = false) {
   await context.refreshLanguages();
   return select.options;
 }
+async function manualsLink(href, available, spanish = false) {
+  const header = {link: null, querySelector() { return this.link; }, prepend(link) { this.link = link; }};
+  const context = {URL, spanish, location: {href},
+    document: {body: {dataset: {languageManifest: '../languages.json'}},
+      querySelector: () => header, createElement: () => ({})},
+    fetch: async () => ({ok: available, json: async () => ({kind: 'fds-manual-catalog'})})};
+  vm.createContext(context);
+  const start = source.indexOf('async function addManualsNavigation()');
+  const end = source.indexOf('\naddManualsNavigation();', start);
+  vm.runInContext(source.slice(start, end), context);
+  await context.addManualsNavigation();
+  await context.addManualsNavigation();
+  return header.link;
+}
 (async () => {
   const en = {code: 'en', label: 'English', pages: ['mass-transport.html']};
   const es = {code: 'es', label: 'Español', pages: ['overview.html']};
@@ -30,5 +44,10 @@ async function optionsFor(languages, reject = false) {
   assert.equal(options[1].value, 'http://localhost/es/mass-transport.html');
   assert.equal(options[0].selected, true);
   assert.deepEqual(await optionsFor([], true), ['current edition']);
+  const link = await manualsLink('http://localhost/docs/user-guide/html/en/chapter-1.html', true);
+  assert.equal(link.href, 'http://localhost/docs/index.html');
+  assert.equal(link.textContent, 'All manuals');
+  assert.equal((await manualsLink('http://localhost/docs/tech-guide/html/es/overview.html', true, true)).textContent, 'Todos los manuales');
+  assert.equal(await manualsLink('http://localhost/en/overview.html', false), null);
   console.log('Language menu checks passed: page coverage, relative URLs, current selection, and unavailable registry.');
 })().catch(error => { console.error(error); process.exitCode = 1; });

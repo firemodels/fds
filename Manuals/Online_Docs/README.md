@@ -1,6 +1,6 @@
 # Welcome to FDS Online Documentation
 
-For the current make4ht-based Technical Guide reader and offline Argos Spanish
+For the current make4ht-based manual reader and offline Argos Spanish
 build, see [the preview build instructions](preview/README.md). The Sphinx/Pandoc
 instructions below describe the earlier prototype.
 

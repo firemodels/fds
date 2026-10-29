@@ -1,8 +1,91 @@
-# Local Technical Guide preview
+# Local online manuals
 
 For accessibility scope, audit commands, and remaining human review, see
 [Accessibility](ACCESSIBILITY.md). Accessibility is under development; these
 manuals are not currently represented as fully Section 508 compliant.
+
+## Shared manuals home page
+
+Serve the shared build directory to browse all completed manuals:
+
+~~~sh
+python3 -m http.server 8767 --bind 127.0.0.1 --directory build
+~~~
+
+Paste this URL into the browser:
+
+~~~text
+http://127.0.0.1:8767/
+~~~
+
+The upper-right language dropdown changes the home-page text, manual titles,
+and destinations. Manuals without the selected translation keep a clearly
+labeled English link. The reader
+offers **All manuals** in the top bar when served from this shared directory.
+That link stays hidden when serving an individual manual without a catalog.
+New successful builds refresh the catalog automatically; the home page also
+checks for editions that finished after it was generated. Reload to see them.
+To generate the catalog and upgrade navigation assets in existing editions
+without rebuilding or translating:
+
+~~~sh
+python3 preview/build_catalog.py
+~~~
+
+The home page, registry, and copied assets are generated under ignored
+`build/`. After combining separate build artifacts, refresh the catalog
+once in the final assembly directory using `--root DIRECTORY`.
+
+## Build another manual
+
+The shared builder accepts an explicit manual and language:
+
+| `--manual` | Manual | Output directory under `build/` |
+| --- | --- | --- |
+| `tech` | Technical Reference Guide, Volume 1 | `tech-guide` |
+| `user` | User Guide | `user-guide` |
+| `verification` | Verification Guide, Volume 2 | `verification-guide` |
+| `validation` | Validation Guide, Volume 3 | `validation-guide` |
+| `config` | Configuration Management Plan, Volume 4 | `config-guide` |
+
+From `Manuals/Online_Docs`, for example:
+
+```sh
+./preview/build_manual.sh --manual user --language en --check
+./preview/build_manual.sh --manual user --language en
+python3 -m http.server 8767 --bind 127.0.0.1 --directory build/user-guide/html
+```
+
+Open **http://127.0.0.1:8767/en/index.html**. The index redirects to that
+manual's first chapter. Substitute the manual key and output directory from the
+table for another guide. Each guide has its own navigation, PDF link, search,
+translation cache, and registry of available languages. To add Spanish after
+that guide's English edition succeeds:
+
+```sh
+./preview/build_manual.sh --manual user --language es
+```
+
+The original `build_tech_guide.sh` remains a shortcut for `--manual tech`.
+`--check`, `--reuse-conversion`, and `--refresh-languages` work for every manual.
+The converter follows inline chapters and recursive local inputs, including
+generated tables, and removes temporary `\includeonly` selections in staging.
+Scientific LaTeX sources remain unchanged. Multipage `xltabular` tables are
+staged as `longtable` so their captions and headers survive TeX4ht conversion;
+inline code with math escapes is split into code and MathML segments.
+PDF figures become SVG for the
+reader; PNG/JPEG figures retain their raster format. PGFPlots raster backgrounds
+are embedded through EPS using Pillow (already in the FDS pip requirements).
+
+Inputs are resolved from this checkout's `Manuals`, with external paths such as
+`../../../fig` and `../../../cad` resolved relative to each guide's source
+directory. Populate the selected guide's `SCRIPT_FIGURES` and generated table
+inputs, and supply its PDF for the PDF link, before building. `--check` reports
+missing inputs without writing output. Copying figures into a different FDS
+checkout does not make them available here. The Validation Guide references
+thousands of figures, so its first conversion can take substantially longer.
+Separate manual outputs can be built independently; never share an `--output`
+directory between manuals. GitHub Actions integration is a subsequent step.
 
 ## Build the complete Technical Guide (Volume 1)
 
