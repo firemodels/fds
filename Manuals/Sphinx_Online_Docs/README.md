@@ -1,5 +1,9 @@
 # Welcome to FDS Online Documentation
 
+For the current make4ht-based Technical Guide reader and offline Argos Spanish
+build, see [the preview build instructions](preview/README.md). The Sphinx/Pandoc
+instructions below describe the earlier prototype.
+
 To compile the online docs, please follow the steps below.
 
 The basic process is to convert the LaTeX manuals to restructured text (.rst) files using [Pandoc](https://pandoc.org/), do a bit of cleanup, and then generate the html using [Sphinx](https://www.sphinx-doc.org/).

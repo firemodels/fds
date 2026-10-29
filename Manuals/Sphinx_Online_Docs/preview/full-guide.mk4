@@ -1,0 +1,35 @@
+-- Repair two TeX4ht serialization defects before XML DOM filters run.
+-- HTML fallback parsing otherwise damages adjacent math and inequalities.
+Make:add("fdsprogress", function(parameters)
+  io.write("[FDS-DOCS] " .. parameters.message .. "\n")
+  io.flush()
+  return 0
+end)
+if mode ~= "html-only" then
+  Make:fdsprogress {message="LaTeX pass 1/3: converting chapters and appendices"}
+  Make:htlatex {}
+  Make:fdsprogress {message="Bibliography: resolving citations"}
+  Make:biber {}
+  Make:fdsprogress {message="LaTeX pass 2/3: resolving cross-references"}
+  Make:htlatex {}
+  Make:fdsprogress {message="LaTeX pass 3/3: finalizing references and numbering"}
+  Make:htlatex {}
+  Make:fdsprogress {message="Generating HTML, MathML, and SVG figures"}
+else
+  -- A nonempty build sequence prevents make4ht's automatic LaTeX fallback.
+  Make:tex4ht {}
+end
+
+local filter = require "make4ht-filter"
+Make:match("html?$", filter {function(content)
+  content = content:gsub('(<mi[^>]*>[^<]*)</math>(%s*)</mi>', '%1</mi>%2</math>')
+  content = content:gsub('<a[^>]-id=("page%.[^"]*")>', '<a id=%1>')
+  return content
+end})
+
+-- Use the standard filters explicitly, after the serialization repair.
+local domfilter = require "make4ht-domfilter"
+Make:match("html?$", domfilter {
+  "fixinlines", "idcolons", "joincharacters", "tablecaption", "mathmlfixes",
+  "tablerows", "booktabs", "sectionid", "itemparagraphs"
+})
