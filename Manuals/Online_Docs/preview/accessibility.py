@@ -48,6 +48,15 @@ def figure_labels(body, language='en'):
             image.set('aria-describedby', caption.get('id'))
             image.set('data-description-review', 'caption-only')
     object_image_labels(body, language)
+    # The generated Validation histogram gallery has no captions. Its source
+    # identifiers provide navigation labels, not descriptions of the plotted data.
+    for image in body.xpath('.//img[not(@aria-describedby)]'):
+        if image.get('alt') not in (None, '', 'Technical diagram') and image.get('data-description-review') != 'source-label-only':
+            continue
+        match = re.search(r'(?:^|/)(FDS_[A-Za-z0-9_]+_Histogram)-[0-9a-f]{12}\.svg$', image.get('src', ''))
+        if match:
+            image.set('alt', ('Gráfico: ' if language == 'es' else 'Plot: ') + match[1].replace('_', ' '))
+            image.set('data-description-review', 'source-label-only')
 
 
 def object_image_labels(body, language='en'):

@@ -76,6 +76,8 @@ inline code with math escapes is split into code and MathML segments.
 PDF figures become SVG for the
 reader; PNG/JPEG figures retain their raster format. PGFPlots raster backgrounds
 are embedded through EPS using Pillow (already in the FDS pip requirements).
+Graphics inside LaTeX `picture` environments also use EPS, retaining the
+composite diagram's arrows, labels, and embedded artwork in its generated SVG.
 
 Inputs are resolved from this checkout's `Manuals`, with external paths such as
 `../../../fig` and `../../../cad` resolved relative to each guide's source
@@ -84,6 +86,24 @@ inputs, and supply its PDF for the PDF link, before building. `--check` reports
 missing inputs without writing output. Copying figures into a different FDS
 checkout does not make them available here. The Validation Guide references
 thousands of figures, so its first conversion can take substantially longer.
+Cross-manual references also require the referenced manual's PDF and `.aux`
+metadata. For example, build the User Guide PDF before converting Validation.
+The reader bundles that PDF and preserves section numbers using PDF destination
+links; it does not require a separately served online User Guide.
+If TeX4ht omits an internal reference anchor, the reader uses the original PDF
+metadata to preserve that reference's number and link to its PDF destination.
+Unknown broken references still fail validation.
+Validation's uncaptioned histogram gallery uses source-name labels for navigation.
+These labels do not describe the data: the accessibility audit explicitly flags
+each panel for a supplemental description and does not certify conformance.
+
+Converted figures are retained in each manual's `figure-cache-v1` directory,
+keyed by source content. Rebuild progress marks reused figures as `(cached)`.
+Existing successful conversions can seed this cache automatically. This avoids
+repeating figure conversion when only text changes. `--reuse-conversion` goes
+further and skips TeX entirely, but requires unchanged conversion inputs,
+including external reference metadata and PDFs. These caches are build products.
+
 Separate manual outputs can be built independently; never share an `--output`
 directory between manuals. GitHub Actions integration is a subsequent step.
 

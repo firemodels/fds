@@ -55,7 +55,9 @@ def inspect_document(doc, filename):
                        'target': image.get('src'), 'alt': alt,
                        'description': ' '.join(text(n) for target in image.get('aria-describedby', '').split()
                                                for n in doc.xpath('//*[@id=$target]', target=target)),
-                       'task': 'Check that the caption conveys the figure’s essential information; record any supplemental description needed for the online edition.'})
+                       'task': ('This uncaptioned plot has only a source-name label. Supply a description of its essential information for the online edition.'
+                                if image.get('data-description-review') == 'source-label-only' else
+                                'Check that the caption conveys the figure’s essential information; record any supplemental description needed for the online edition.')})
     for table in doc.xpath('//article//table'):
         if table.get('role') == 'presentation':
             continue

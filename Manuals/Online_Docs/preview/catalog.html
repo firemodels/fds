@@ -1,0 +1,24 @@
+<!doctype html>
+<!-- FDS manuals catalog -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FDS Online Manuals</title>
+<link rel="stylesheet" href="catalog.css">
+<script src="catalog.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to content</a>
+<header><a class="brand" href="index.html"><strong>FDS</strong><span>Fire Dynamics Simulator<small>TECHNICAL DOCUMENTATION</small></span></a>
+<label class="language-picker"><span>Language</span><select aria-label="Language" id="catalog-language">{{LANGUAGES}}</select></label></header>
+<main id="main-content" tabindex="-1">
+<p class="eyebrow">DOCUMENTATION LIBRARY</p>
+<h1>FDS online manuals</h1>
+<p class="intro">Choose a manual and language to start reading.</p>
+<div id="manuals">{{CARDS}}</div>
+<div id="empty">{{EMPTY}}</div>
+<footer>These manuals are generated from the FDS LaTeX sources. Each manual includes search, chapter navigation, and access to its PDF edition.</footer>
+</main>
+</body>
+</html>

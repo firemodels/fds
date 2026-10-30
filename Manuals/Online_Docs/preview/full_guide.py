@@ -17,10 +17,64 @@ from manual_sources import inventory as source_inventory
 
 MAIN = TECH.main
 LANGUAGES = {'en': 'English', 'es': 'Español'}
+EXTERNAL_DOCUMENT = re.compile(r'\\externaldocument(?:\[([^\]]*)\])?\{([^{}]+)\}')
+REFERENCE = re.compile(r'\\(ref|eqref|pageref)\{([^{}]+)\}')
 
 
 def inventory(manual=TECH):
-    return source_inventory(manual, reader.MANUALS)
+    inv = source_inventory(manual, reader.MANUALS)
+    inv.update(external_references(inv))
+    return inv
+
+
+def external_references(inv):
+    """Read the source's declared cross-manual labels from its PDF build."""
+    references, files = {}, {}
+    text = '\n'.join(inv['sources'].values())
+    keys = {m[2] for m in REFERENCE.finditer(text)}
+    local_labels = set(re.findall(r'\\label\{([^{}]+)\}', text))
+    for match in EXTERNAL_DOCUMENT.finditer(text):
+        prefix, name = match[1] or '', match[2]
+        other = next((m for m in MANUALS.values() if m.directory == name), None)
+        if other is None:
+            inv['missing'].append('Unsupported external manual: ' + name)
+            continue
+        guide = reader.MANUALS / other.directory
+        aux, pdf = guide / (name + '.aux'), guide / other.pdf
+        if not aux.is_file() or not pdf.is_file():
+            inv['missing'].append(f'External reference inputs: build {other.pdf} and its .aux files first')
+            continue
+        labels = reader.read_labels(guide)
+        for path in guide.glob('*.aux'):
+            files[str(path)] = path
+        files[str(pdf)] = pdf
+        for key in keys:
+            if not key.startswith(prefix) or key in local_labels:
+                continue
+            label = labels.get(key[len(prefix):])
+            if label is None:
+                # With no prefix, only labels actually imported are external.
+                if prefix:
+                    inv['missing'].append('External reference label: ' + key)
+                continue
+            references[key] = {**label, 'pdf': pdf}
+    return {'external_references': references, 'external_files': files}
+
+
+def resolve_external_references(text, references):
+    text = EXTERNAL_DOCUMENT.sub('', text)
+    def replace(match):
+        command, key = match.groups()
+        if key not in references:
+            return match[0]
+        target = references[key]
+        number = target['page'] if command == 'pageref' else target['number']
+        # Printed page numbers differ from physical PDF indices after front matter.
+        destination = 'page.' + target['page'] if command == 'pageref' else target['destination']
+        fragment = 'nameddest=' + destination
+        link = (r'\href{external-manuals/' + target['pdf'].name + r'\#' + fragment + '}{' + number + '}')
+        return '(' + link + ')' if command == 'eqref' else link
+    return REFERENCE.sub(replace, text)
 
 
 def expected_pages(inv):
@@ -71,31 +125,53 @@ def stage(inv, work):
                       .replace('backref=true', 'backref=false'))
     folder = tex / 'WEB_FIGURES'
     folder.mkdir()
+    cache = work.parent / 'figure-cache-v1'
+    cache.mkdir(exist_ok=True)
     replacements, web_figures = {}, {}
     for i, (reference, source) in enumerate(sorted(inv['figures'].items()), 1):
-        print(f"Preparing figure {i}/{len(inv['figures'])}: {reference}", flush=True)
         stem = re.sub(r'[^A-Za-z0-9_-]', '-', source.stem) + '-' + reader.sha(source)[:12]
+        extensions = (['.eps'] if reference in inv['plot_graphics'] else
+                      ['.png', '.svg'] if source.suffix.lower() == '.pdf' else [source.suffix.lower()])
+        cached = all((cache / (stem + ext)).is_file() for ext in extensions)
+        print(f"Preparing figure {i}/{len(inv['figures'])}: {reference}" + (' (cached)' if cached else ''), flush=True)
+        if cached:
+            for ext in extensions:
+                shutil.copy2(cache / (stem + ext), folder / (stem + ext))
         if reference in inv['plot_graphics']:
             # PGFPlots backgrounds need real DVI graphics, not TeX4ht's BMP
             # placeholder specials (which silently disappear from the SVG).
             eps = folder / (stem + '.eps')
-            if source.suffix.lower() == '.pdf':
+            if cached:
+                pass
+            elif source.suffix.lower() == '.pdf':
                 reader.run(['pdftops', '-eps', str(source), str(eps)], tex)
             else:
                 raster_to_eps(source, eps)
+            if not cached:
+                cache_figure(eps, cache / eps.name)
             replacements[reference] = str(eps.relative_to(tex))
             continue
         if source.suffix.lower() == '.pdf':
             raster = folder / (stem + '.png')
             vector = folder / (stem + '.svg')
-            reader.run(['pdftocairo', '-png', '-singlefile', '-r', '160', str(source), str(folder / stem)], tex)
-            reader.run(['pdftocairo', '-svg', str(source), str(vector)], tex)
+            if not cached:
+                reader.run(['pdftocairo', '-png', '-singlefile', '-r', '160', str(source), str(folder / stem)], tex)
+                reader.run(['pdftocairo', '-svg', str(source), str(vector)], tex)
             web_figures[str(raster.relative_to(tex))] = str(vector.relative_to(tex))
         else:
             raster = folder / (stem + source.suffix.lower())
             shutil.copy2(source, raster)
         replacements[reference] = str(raster.relative_to(tex))
+        if not cached:
+            for ext in extensions:
+                cache_figure(folder / (stem + ext), cache / (stem + ext))
+    if inv.get('external_references'):
+        external = tex / 'external-manuals'
+        external.mkdir()
+        for pdf in {target['pdf'] for target in inv['external_references'].values()}:
+            shutil.copy2(pdf, external / pdf.name)
     for name, text in inv['sources'].items():
+        text = resolve_external_references(text, inv.get('external_references', {}))
         text = GRAPHIC.sub(lambda m: m[0].replace('{' + m[1] + '}', '{' + replacements.get(m[1], m[1]) + '}'), text)
         text = prepare_tables(reader.prepare_math(text))
         target = tex / ('preview.tex' if name == manual.main else name)
@@ -104,6 +180,17 @@ def stage(inv, work):
     (tex / 'web-figures.json').write_text(json.dumps(web_figures, indent=2))
     (tex / 'preview.mk4').write_text('Make:htlatex {}\nMake:biber {}\nMake:htlatex {}\nMake:htlatex {}\n')
     return tex
+
+
+def cache_figure(source, destination):
+    # An interrupted copy must never become a usable cache entry.
+    with tempfile.NamedTemporaryFile(dir=destination.parent, delete=False) as stream:
+        temporary = Path(stream.name)
+    try:
+        shutil.copy2(source, temporary)
+        temporary.replace(destination)
+    finally:
+        temporary.unlink(missing_ok=True)
 
 
 def raster_to_eps(source, destination):
@@ -126,6 +213,9 @@ def prepare_tables(text):
     # The reader presents these as upright, horizontally scrollable tables.
     text = re.sub(r'\\(?:begin|end)\{landscape\}', '', text)
     text = text.replace('{sidewaystable}', '{table}')
+    # A legacy table supplies a width where tabular accepts only t/b/c alignment.
+    # PDF LaTeX tolerates it, but TeX4ht treats it as an invalid control sequence.
+    text = re.sub(r'(\\begin\{tabular\})\s*\[\\textwidth\]', r'\1', text)
     # Listings inside math text boxes emit HTML code tags across MathML nodes.
     # Keep literal monospaced labels as native text inside the existing box.
     def boxed_code(match):
@@ -390,7 +480,8 @@ def refresh_registry(root):
 def input_signature(inv):
     signature = {name: reader.hashlib.sha256(text.encode()).hexdigest() for name, text in inv['sources'].items()}
     # Conversion rules affect staged TeX even when manual sources are unchanged.
-    signature['conversion-rules'] = 2
+    signature['conversion-rules'] = 3
+    signature.update({str(path): reader.sha(path) for path in inv.get('external_files', {}).values()})
     signature.update({str(path): reader.sha(path) for path in inv['figures'].values()})
     for directory in ['Bibliography', 'LaTeX_Style_Files']:
         signature.update({str(path): reader.sha(path) for path in (reader.MANUALS / directory).iterdir()
@@ -484,6 +575,16 @@ def build_full(args):
         if work.exists():
             if not (work / '.fds-docs-work').is_file():
                 raise RuntimeError(f'Refusing to replace an unrecognized staging directory: {work}')
+            # Import successful pre-cache builds. Their figure format and
+            # content-hashed names are identical to figure-cache-v1.
+            if record.is_file() and json.loads(record.read_text()).get('conversion-rules') in {2, 3}:
+                old_figures = work / 'Manuals' / manual.directory / 'WEB_FIGURES'
+                cache = output / 'figure-cache-v1'
+                cache.mkdir(exist_ok=True)
+                for figure in old_figures.glob('*'):
+                    if figure.is_file() and not (cache / figure.name).exists():
+                        figure.replace(cache / figure.name)
+                print('Reusing saved figure conversions when source hashes match.', flush=True)
             shutil.rmtree(work)
         record.unlink(missing_ok=True)
         tex = stage(inv, work)
