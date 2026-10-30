@@ -266,6 +266,7 @@ def plain(element):
 
 def normalize_math(body):
     """Preserve differential operators and clearly separated math accents."""
+    align_equation_numbers(body)
     # MathML Core does not inherit legacy mstyle mathvariant onto single-letter
     # mi tokens. Preserve explicit LaTeX roman type on the token itself (SP 811,
     # 10.2.3), including differential d/D, units, and descriptive subscripts.
@@ -369,6 +370,34 @@ def normalize_math(body):
             overline.append(children[0])
             overline.tail = accent.tail
             accent.getparent().replace(accent, overline)
+
+
+def align_equation_numbers(body):
+    """Mark explicit equation labels in native MathML, independent of row layout.
+
+    Retain one native MathML table so tall fractions and multiline operands
+    determine both expression and label row heights. The reader positions visual
+    labels from those rendered rows without splitting the native math nodes.
+    """
+    for table in body.xpath('.//math[@display="block"]//mtable'):
+        classes = table.get('class', '').split()
+        if 'numbered-equations' in classes:
+            continue
+        labels = []
+        for marker in table.xpath('.//mstyle[contains(concat(" ",normalize-space(@class)," ")," maketag ")] | '
+                                  './/mtext[contains(concat(" ",normalize-space(@class)," ")," eqnarray ")]'):
+            if marker.xpath('ancestor::mtable')[-1] is not table or not plain(marker):
+                continue
+            cell = marker.xpath('ancestor::mtd')[-1]
+            if cell not in labels:
+                labels.append(cell)
+        if not labels:
+            continue
+        table.set('class', ' '.join(classes + ['numbered-equations']))
+        math = table.xpath('ancestor::math')[0]
+        math.set('class', (math.get('class', '') + ' numbered-math').strip())
+        for label in labels:
+            label.set('class', (label.get('class', '') + ' equation-label').strip())
 
 
 def reader_link(href, current, filename_map, id_files):

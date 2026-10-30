@@ -155,3 +155,79 @@ function highlightSection() {
 }
 document.addEventListener("scroll", () => { if (!queued) { queued = true; requestAnimationFrame(highlightSection); } }, {passive:true});
 highlightSection();
+
+function equationNumberPlacement(region, math, label) {
+  const outer = region.getBoundingClientRect();
+  const expression = math.getBoundingClientRect();
+  const number = label.getBoundingClientRect();
+  return {
+    width: Math.max(region.clientWidth, expression.right - outer.left + region.scrollLeft),
+    top: number.top + number.height / 2 - outer.top + region.scrollTop
+  };
+}
+function positionEquationNumbers() {
+  const groups = [];
+  for (const math of document.querySelectorAll('math[display="block"]')) {
+    const region = math.closest('.table-scroll');
+    if (!region) continue;
+    // Recognize native arrays as well as newly marked builds, so shared reader
+    // updates also fix previously generated English and translated editions.
+    const cells = [];
+    for (const table of math.querySelectorAll('mtable')) {
+      const numbers = new Set();
+      for (const marker of table.querySelectorAll('mstyle.maketag, mtext.eqnarray')) {
+        if (marker.closest('mtable') !== table || !marker.textContent.trim()) continue;
+        const cell = marker.closest('mtd');
+        if (cell) numbers.add(cell);
+      }
+      if (!numbers.size) continue;
+      table.classList.add('numbered-equations');
+      for (const cell of numbers) { cell.classList.add('equation-label'); cells.push(cell); }
+    }
+    if (!cells.length) continue;
+    math.classList.add('numbered-math');
+    const layer = document.createElement('span');
+    layer.className = 'equation-number-layer';
+    layer.setAttribute('aria-hidden', 'true');
+    const labels = [];
+    for (const cell of cells) {
+      const text = cell.textContent.trim();
+      if (!text) continue;
+      const original = cell.querySelector('mtext') || cell;
+      const visual = document.createElement('span');
+      visual.className = 'equation-number-visual';
+      visual.textContent = text;
+      layer.append(visual);
+      labels.push({original, visual});
+    }
+    if (!labels.length) continue;
+    region.classList.add('numbered-equation-region');
+    region.append(layer);
+    groups.push({region, math, layer, labels});
+  }
+  if (!groups.length) return;
+  function update() {
+    for (const {region, math, layer, labels} of groups) {
+      if (!region.clientWidth || !math.getBoundingClientRect().width) continue;
+      for (const {original, visual} of labels) {
+        const placement = equationNumberPlacement(region, math, original);
+        layer.style.width = `${placement.width}px`;
+        visual.style.top = `${placement.top}px`;
+      }
+      math.classList.add('equation-numbers-positioned');
+    }
+  }
+  let scheduled = false;
+  function schedule() {
+    if (scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(() => { scheduled = false; update(); });
+  }
+  const observer = new ResizeObserver(schedule);
+  for (const {region, math} of groups) { observer.observe(region); observer.observe(math); }
+  window.addEventListener('resize', schedule);
+  window.addEventListener('load', schedule);
+  document.fonts.ready.then(schedule);
+  update();
+}
+positionEquationNumbers();

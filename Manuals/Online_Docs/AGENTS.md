@@ -124,6 +124,16 @@
 - Keep regression coverage for equations 2.6 (divergence and dotted m) and 2.9
   (gradients and dotted q), plus powered nabla and real named functions.
   Rebuild the reader and audit all generated occurrences after changes.
+- Numbered eqnarray, align, gather, and multline rows must use the same right-margin label styling as single
+  equations. Preserve the native MathML table, shared row heights, expression
+  alignment, unnumbered rows, and reference anchors. Do not renumber equations
+  or position labels using guessed line heights. Check Verification 3.13–3.14
+  and 3.38–3.39. Identify explicit maketag/eqnarray number markers instead of
+  assuming fixed column counts; retain unnumbered continuation rows.
+  Chrome did not honor percentage widths on the native MathML table. Position
+  an aria-hidden visual copy at the reader margin using measured native label
+  bounds, updating on resize/font load. Retain the native label for speech and
+  anchors, with a visible fallback when JavaScript is unavailable.
 - Verify rendering visually when browser access is available. If it is blocked,
   report that limit and use the user's screenshots for joint review; do not
   claim that structural checks establish visual correctness.
