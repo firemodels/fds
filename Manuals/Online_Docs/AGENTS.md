@@ -20,6 +20,16 @@
 
 - Keep scientific content in the original LaTeX. Fix conversion or presentation
   code, not generated HTML or a second maintained copy of a chapter.
+- Resolve declared cross-manual references using the referenced manual's PDF
+  build metadata. Preserve its section numbers and bundle the target PDF with
+  named-destination links so independently served manuals retain working links.
+  Report missing PDFs, auxiliary metadata, or referenced labels before conversion.
+  If TeX4ht omits an internal label anchor, use its explicit reference annotation
+  and the original PDF metadata to link to that PDF destination with its correct
+  number. Never invent HTML anchors or suppress unknown broken-link failures.
+- Cache converted figures by source content hash and conversion-format version.
+  Publish cache files atomically, require all expected formats for a cache hit,
+  and bump the cache version when conversion settings change. Keep caches ignored.
 - Accessibility changes belong in the shared converter and reader. Preserve
   mathematical structure and anchors; never guess complex table headers or
   figure meaning. Apply accessibility work only to generated HTML and its reader;
@@ -37,6 +47,8 @@
   For PGFPlots PDF backgrounds, stage EPS via `pdftops -eps` so dvisvgm
   embeds the artwork. Raster placeholders can compile with bounding boxes
   yet silently disappear from the generated SVG; verify embedded images.
+  Apply the same EPS handling to graphics inside LaTeX picture environments,
+  preserving their surrounding vector arrows and labels in the composite SVG.
   Primes following a primed subscript can exhaust TeX4ht's grouping stack
   (Appendix P: `\dot{q}_{\alpha'}'''`). In staging, write the outer primes
   as `^{\prime\prime\prime}`; preserve the inner species prime and both
@@ -49,6 +61,13 @@
 - Stage `xltabular` as `longtable` with paragraph columns: TeX4ht’s
   `tabularx` alias loses multipage captions and corrupts listing cells. Preserve
   captions, labels, headers, and cell content; table colors belong in reader CSS.
+  Remove the legacy `tabular` optional argument `[\textwidth]` in staging;
+  that argument accepts vertical alignment, not a width. Preserve valid `[t]`,
+  `[b]`, and `[c]` alignment options.
+- Keep make4ht error detection enabled. For large logs, detect error markers
+  line by line before invoking its detailed parser; do not use an unanchored
+  whole-log search that becomes quadratic. Test both TeX error formats and
+  preserve fatal-error checks on clean logs.
 - Inventory each manual’s recursive local inputs and inline chapters, including
   generated tables, Part landing pages, and `\incgraphics` calls. Keep outputs, translation caches,
   and language registries separate per manual. Never replace one manual with

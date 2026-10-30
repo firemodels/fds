@@ -170,9 +170,9 @@ def group_nested_primes(text):
     return ''.join(parts)
 
 
-def read_labels():
+def read_labels(guide=GUIDE):
     result = {}
-    for path in GUIDE.glob('*.aux'):
+    for path in guide.glob('*.aux'):
         for line in path.read_text().splitlines():
             if not line.startswith(r'\newlabel{'):
                 continue
@@ -183,7 +183,7 @@ def read_labels():
                 field, pos = group(value, pos)
                 fields.append(field)
             if len(fields) >= 4:
-                result[key] = {'number': fields[0], 'destination': fields[3]}
+                result[key] = {'number': fields[0], 'page': fields[1], 'destination': fields[3]}
     return result
 
 
@@ -373,6 +373,9 @@ def normalize_math(body):
 
 def reader_link(href, current, filename_map, id_files):
     """Resolve local anchors against their actual generated page, including citations."""
+    # TeX4ht's id filter escapes '=' even in external PDF destination parameters.
+    if href.startswith('external-manuals/'):
+        href = href.replace('.pdf#nameddest_', '.pdf#nameddest=', 1)
     url = urlsplit(href)
     if url.scheme or url.netloc:
         return href
@@ -388,6 +391,23 @@ def reader_link(href, current, filename_map, id_files):
     return href
 
 
+def missing_reference_link(link, href, labels, id_files, filename_map):
+    """Recover omitted TeX4ht label anchors using the authoritative PDF metadata."""
+    url = urlsplit(href)
+    if (url.scheme or url.netloc or not url.fragment or url.fragment in id_files
+            or (url.path and url.path not in filename_map)):
+        return href
+    for comment in link.xpath('./comment()'):
+        match = re.fullmatch(r'\s*tex4ht:ref:\s*(\S+)\s*', comment.text or '')
+        target = labels.get(match[1]) if match else None
+        if target and target['destination'] and '\\' not in target['number']:
+            for child in list(link):
+                link.remove(child)
+            link.text = target['number']
+            return 'full-guide.pdf#nameddest=' + target['destination']
+    return href
+
+
 def make_reader(tex, site, fallbacks, pages=None, full=False, manual=TECH):
     guide = MANUALS / manual.directory
     site.mkdir(parents=True, exist_ok=True)
@@ -400,6 +420,8 @@ def make_reader(tex, site, fallbacks, pages=None, full=False, manual=TECH):
     if font.is_file():
         shutil.copy2(font, assets / 'latinmodern-math.otf')
     shutil.copy2(guide / manual.pdf, site / 'full-guide.pdf')
+    if (tex / 'external-manuals').is_dir():
+        shutil.copytree(tex / 'external-manuals', site / 'external-manuals', dirs_exist_ok=True)
     filename_map = {'preview.html': 'index.html'}
     if pages is None:
         pages = [{'raw': f'previewch{i}.html', 'file': slug + '.html',
@@ -407,6 +429,7 @@ def make_reader(tex, site, fallbacks, pages=None, full=False, manual=TECH):
                  for i, (name, number, slug) in enumerate(CHAPTERS, 1)]
         pages.append({'raw': 'previewli1.html', 'file': 'references.html', 'source': None, 'number': None})
     filename_map.update({page['raw']: page['file'] for page in pages})
+    pdf_labels = read_labels(guide) if full else {}
     figure_map_path = tex / 'web-figures.json'
     figure_map = json.loads(figure_map_path.read_text()) if figure_map_path.exists() else {}
 
@@ -446,14 +469,15 @@ def make_reader(tex, site, fallbacks, pages=None, full=False, manual=TECH):
     for page in pages:
         body = page['body']
         normalize_math(body)
-        for link in body.iter():
+        for link in list(body.iter()):
             key = next((key for key in ['href', 'xlink:href', '{http://www.w3.org/1999/xlink}href']
                         if link.get(key) is not None), None)
             if key is None:
                 continue
             href = link.get(key)
+            href = missing_reference_link(link, href, pdf_labels, id_files, filename_map)
             link.set(key, reader_link(href, page['file'], filename_map, id_files))
-            if 'full-guide.pdf' in href:
+            if 'full-guide.pdf' in href or href.startswith('external-manuals/'):
                 link.set('title', 'Open this reference in the full PDF manual')
                 link.set('class', 'pdf-reference')
         for image in body.xpath('.//img'):

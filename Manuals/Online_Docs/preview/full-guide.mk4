@@ -1,5 +1,30 @@
 -- Repair two TeX4ht serialization defects before XML DOM filters run.
 -- HTML fallback parsing otherwise damages adjacent math and inequalities.
+-- make4ht's unanchored file:line:error search is quadratic on large clean logs.
+-- Scan individual lines first, retaining its detailed parser for actual errors
+-- and its fatal-error/unsupported-package checks for every run.
+local original_testlogfile = Make.testlogfile
+if original_testlogfile then
+  Make.testlogfile = function(parameters)
+    local path = mkutils.file_in_builddir(parameters.input .. '.log', parameters)
+    local file = io.open(path, 'r')
+    if not file then return original_testlogfile(parameters) end
+    local has_error = false
+    for line in file:lines() do
+      if line:match('^!') or line:match('^[^:]+:%d+:.+') then
+        has_error = true
+        break
+      end
+    end
+    file:close()
+    if has_error then return original_testlogfile(parameters) end
+    local checked = {}
+    for key, value in pairs(parameters) do checked[key] = value end
+    -- This affects only post-run log analysis, never the LaTeX invocation.
+    checked.interaction = 'errorstopmode'
+    return original_testlogfile(checked)
+  end
+end
 Make:add("fdsprogress", function(parameters)
   io.write("[FDS-DOCS] " .. parameters.message .. "\n")
   io.flush()
