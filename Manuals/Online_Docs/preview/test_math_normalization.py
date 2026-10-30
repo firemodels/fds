@@ -1,10 +1,55 @@
 """Regression cases from the Tech Guide's converted MathML."""
 import unittest
 from lxml import etree, html
-from build_preview import normalize_math
+from build_preview import normalize_math, align_equation_numbers
 
 
 class MathTypographyTests(unittest.TestCase):
+    def test_verification_eqnarray_numbers_share_rows_and_preserve_anchors(self):
+        body = html.fromstring('<article><math display="block"><mrow><mtable class="eqnarray">'
+            '<mtr><mtd><mi>u</mi></mtd><mtd><mo>=</mo></mtd><mtd><mfrac><mi>a</mi><mi>b</mi></mfrac></mtd>'
+            '<mtd><mtext class="eqnarray">(3.13)</mtext><mtext id="velocity-u"></mtext></mtd></mtr>'
+            '<mtr><mtd><mi>v</mi></mtd><mtd><mo>=</mo></mtd><mtd><mi>c</mi></mtd>'
+            '<mtd><mtext class="eqnarray">(3.14)</mtext></mtd></mtr>'
+            '<mtr><mtd></mtd><mtd></mtd><mtd><mi>d</mi></mtd><mtd></mtd></mtr>'
+            '</mtable></mrow></math></article>')
+        original_text = ''.join(body.itertext())
+        align_equation_numbers(body)
+        self.assertEqual(''.join(body.itertext()), original_text)
+        self.assertEqual(len(body.xpath('.//math')), 1)
+        self.assertEqual(len(body.xpath('.//mtr/mtd')), 12)
+        self.assertTrue(body.xpath('.//mtr/mtd[last()]/mtext[@id="velocity-u"]'))
+        self.assertTrue(body.xpath('.//mtr/mtd[3]/mfrac'))
+        once = etree.tostring(body)
+        align_equation_numbers(body)
+        self.assertEqual(etree.tostring(body), once)
+
+    def test_unnumbered_eqnarray_and_matrix_are_unchanged(self):
+        body = html.fromstring('<article><math display="block"><mtable class="eqnarray-star">'
+            '<mtr><mtd><mi>u</mi></mtd><mtd><mo>=</mo></mtd><mtd><mi>x</mi></mtd><mtd></mtd></mtr>'
+            '</mtable><mtable><mtr><mtd><mn>1</mn></mtd></mtr></mtable></math></article>')
+        original = etree.tostring(body)
+        align_equation_numbers(body)
+        self.assertEqual(etree.tostring(body), original)
+
+    def test_align_gather_and_multline_use_explicit_tags_not_column_count(self):
+        for environment, count in [('align', 3), ('align', 11), ('gather', 2), ('multline', 3)]:
+            expression = '<mtd><mi>x</mi></mtd>' * (count - 1)
+            body = html.fromstring('<article><math display="block"><mtable class="' + environment + '">'
+                '<mtr><mtd><mtext>(3.38)</mtext></mtd></mtr>'
+                '<mtr>' + expression + '<mtd><mstyle id="rotation"></mstyle>'
+                '<mstyle class="maketag"><mtext>(3.39)</mtext></mstyle></mtd></mtr>'
+                '</mtable></math></article>')
+            original_text = ''.join(body.itertext())
+            align_equation_numbers(body)
+            self.assertEqual(''.join(body.itertext()), original_text)
+            self.assertEqual(len(body.xpath('.//mtd[contains(@class,"equation-label")]')), 1)
+            self.assertTrue(body.xpath('.//mtd[contains(@class,"equation-label")]/mstyle[@id="rotation"]'))
+            self.assertFalse(body.xpath('.//mtr[1]/mtd/@class'), 'Ordinary parenthesized text is not a number tag')
+            once = etree.tostring(body)
+            align_equation_numbers(body)
+            self.assertEqual(etree.tostring(body), once)
+
     def convert(self, content):
         body = html.fromstring('<article><math>' + content + '</math></article>')
         normalize_math(body)

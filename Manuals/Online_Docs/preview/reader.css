@@ -1,4 +1,13 @@
 @font-face{font-family:FDSlmMath;src:url('latinmodern-math.otf') format('opentype');font-display:swap}
+/* Native MathML equation arrays retain shared row heights and alignment. */
+article mtable.numbered-equations>mtr>mtd.equation-label{width:54px;min-width:54px;padding-left:12px;padding-right:6px;text-align:right;white-space:nowrap;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;font-size:12px;color:#526573}
+article .numbered-equation-region{position:relative}
+article .equation-number-layer{position:absolute;top:0;left:0;pointer-events:none;user-select:none}
+article .equation-number-visual{position:absolute;right:6px;transform:translateY(-50%);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;font-size:12px;line-height:normal;color:#526573;white-space:nowrap}
+/* Opacity retains native MathML labels for speech and copying. Without JS,
+   the original in-table numbers remain visible as a readable fallback. */
+article math.equation-numbers-positioned .equation-label{opacity:0}
+@media print{article .equation-number-layer{display:none}article math.equation-numbers-positioned .equation-label{opacity:1}}
 :root{--navy:#112c40;--teal:#126977;--ink:#233341;--muted:#526573;--line:#e0e7ec;--sidebar:#f7f9fb;--left:280px;--right:228px;--header:76px}
 *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:100px}
 /* TeX4ht limits body to 80ch; the reader owns the full-page layout instead. */
