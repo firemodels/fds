@@ -30,7 +30,7 @@ stanza==1.10.1
 
 # Online-manual accessibility audit (axe-core is bundled by the adapter).
 # Playwright constrains the compatible versions of these runtime dependencies.
-playwright==1.64.1
+playwright==1.60.0
 axe-playwright-python==0.1.8
 pyee
 greenlet
