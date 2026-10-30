@@ -14146,7 +14146,7 @@ Keyword             & Type     & Description                      & Units       
 312  \> \ct{SURF ... GEOMETRY not recognized.} \> Section~\ref{info:GEOMETRY}  \\
 313  \> \ct{SURF ... HEAT_TRANSFER_MODEL not recognized.} \> Section~\ref{info:convection}  \\
 314  \> \ct{SURF ... must have a REAC line when using HRRPUA or MLRPUA.} \> Section~\ref{info:gas_burner}  \\
-315  \> \ct{SURF ... should have only one LEAK_PATH and LEAK_PATH_ID.} \> Section~\ref{info:Leaks}  \\
+315  \> \ct{SURF ... should have only one of LEAK_PATH or LEAK_PATH_ID.} \> Section~\ref{info:Leaks}  \\
 316  \> \ct{SURF ... N_LAYER_CELLS_MAX must be > 0.} \> Section~\ref{info:solid_phase_stability}  \\
 317  \> \ct{SURF ... Specify either ROUGHNESS or Z_0, not both.} \> Section~\ref{info:WALL_MODEL}  \\
 318  \> \ct{SURF ... MASS_FLUX_TOTAL is only for outflow.} \> Section~\ref{info:MASS_FLUX_TOTAL}  \\
@@ -14167,7 +14167,7 @@ Keyword             & Type     & Description                      & Units       
 333  \> \ct{SURF ... MATL_ID ... not found.} \> Section~\ref{info:MATL}  \\
 334  \> \ct{SURF ... has too many materials.} \> Section~\ref{info:solid_pyrolysis}  \\
 335  \> \ct{SURF ... cannot have a reacting MATL and IGNITION_TEMPERATURE.} \> Section~\ref{info:specified_burning}  \\
-336  \> \ct{SURF ... cannot use both ADIABATIC and NET and CONVECTIVE ...} \> Section~\ref{info:adiabatic}  \\
+336  \> \ct{SURF ... cannot use both ADIABATIC and NET or CONVECTIVE ...} \> Section~\ref{info:adiabatic}  \\
 337  \> \ct{SURF ... cannot use both NET and CONVECTIVE_HEAT_FLUX.} \> Section~\ref{info:net_and_convective_heat_flux}  \\
 338  \> \ct{SURF ... cannot use TMP_FRONT and NET_HEAT_FLUX.} \> Section~\ref{info:net_and_convective_heat_flux}  \\
 339  \> \ct{SURF ... RAMP_T_I cannot be used with HT3D.} \> Section~\ref{info:TMP_INNER}  \\
@@ -14177,8 +14177,8 @@ Keyword             & Type     & Description                      & Units       
 243  \> \ct{SURF ... RAMP_T_I cannot be used with TMP_BACK.} \> Section~\ref{info:TMP_INNER}  \\
 344  \> \ct{SURF ... RAMP_T_I cannot be used with TMP_INNER.} \> Section~\ref{info:TMP_INNER}  \\
 345  \> \ct{SURF ... VEL_BULK must be less than or equal to VEL.} \> Section~\ref{info:VEL_BULK}  \\
-346  \> \ct{SURF ... ZONE ID for LEAK_PATH_ID(1) not found.} \> Section~\ref{info:Leaks}  \\
-347  \> \ct{SURF ... ZONE ID for LEAK_PATH_ID(2) not found.} \> Section~\ref{info:Leaks}  \\
+346  \> \ct{SURF ... ZONE ID for LEAK_PATH_ID not found.} \> Section~\ref{info:Leaks}  \\
+347  \> \ct{SURF ... both LEAK_PATH must be >= 0.} \> Section~\ref{info:Leaks}  \\
 348  \> \ct{SURF ... Cannot set the same ZONE for each leakage path.} \> Section~\ref{info:Leaks}  \\
 349  \> \ct{SURF ... LEAK_PATH greater than number of ZONEs.} \> Section~\ref{info:Leaks}  \\
 350  \> \ct{SURF ... needs a THICKNESS.} \> Section~\ref{info:GEOMETRY}  \\
