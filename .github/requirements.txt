@@ -24,6 +24,9 @@ lxml==6.1.1
 # Keep the tested inference/tokenizer versions together.
 # pip also installs Argos's remaining declared dependencies (spaCy, MiniSBD, etc.).
 argostranslate==1.11.0
+# spaCy 3.8.17 requires Thinc versions unavailable on Spark (Python 3.9).
+spacy==3.7.5
+thinc==8.2.5
 ctranslate2==4.8.4
 sentencepiece==0.2.2
 stanza==1.10.1
