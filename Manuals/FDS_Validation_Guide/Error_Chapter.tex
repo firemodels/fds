@@ -136,13 +136,14 @@ Gas concentrations were measured in two sets of experiments conducted at NIST, t
 
 For the NIST/NRC experiments, the species were measured in both the upper and lower layers. The relative standard uncertainty in the measured values was about 1.5~\% for both the O$_2$ depletion and the CO$_2$ measurements. The largest contributors were the uncertainty in the composition of the calibration gas and the possibility of an undetermined amount of water vapor in the sample. The difference between the repeat measurements was about 1~\%, on average, for both the O$_2$ depletion and the CO$_2$ measurements. Therefore, the combined relative standard uncertainty is estimated to be 2~\% for measurements of both the O$_2$ decrease and the CO$_2$ increase.
 
-\subsubsection{Smoke Light Extinction Calculations}
+\subsubsection{Laser Smoke Meters}
 
-The smoke concentration was measured in the NIST/NRC experiments using laser transmission at 632.8~nm. The reported mass concentration of smoke, $m_s'''$, was computed using the following expression:
+Smoke obscuration is typically measured with a laser beam of light passing through a smoke-filled space. The obscuration per unit length is computed using the following expression:
 \be
-   m_s'''=\frac{\ln(I_0/I)}{\phi_{\rm s} L}
+   O = \left( 1 - (I/I_0)^{1/L} \right) \times 100
 \ee
-where $L$ is the path length, $I$ and $I_0$ are the laser signal and reference signal, respectively, and $\phi_{\rm s}$ is the specific extinction coefficient, which has a nearly universal value of 8.7~m$^2$/g~$\pm$~5~\% for hydrocarbons~\cite{Mulholland:F+M}. The systematic relative standard uncertainty of this measurement was reported to be 9~\% in Ref.~\cite{Hamins:SP1013-1}, with the dominant contribution to the uncertainty coming from drift in the laser measurement. Repeatability of the smoke measurement was investigated for the NIST/NRC experiments. The mean difference between replicate measurements was about 11~\%. Therefore, a combined relative standard uncertainty of 14~\% is suggested.
+where $L$ is the path length, and $I$ and $I_0$ are the received and originating intensities, respectively. For the NIST/NRC experiments~\cite{Hamins:SP1013-1}, assuming a smoke mass concentration of $1 \times 10^{-4}$~\unit{kg/m^3}, the standard relative uncertainty of the quantity $\ln(I_0/I)$ is 7~\%. The reported standard relative uncertainty of the 0.8~m path length, $L$, is 2.5~\%. Using the NIST Uncertainty Machine~\cite{NIST_Uncertainty_Machine}, the standard relative uncertainty of the reported obscuration is computed to be approximately 7~\%.
+
 
 \subsubsection{Pressure Gauges}
 
@@ -180,11 +181,19 @@ This is a simple formula with which one can readily estimate the relative change
 
 Most of the experiments for which the HGL depth was predicted had at least one open door or window that effectively determined the steady-state HGL depth. Unlike all of the other predicted quantities, the HGL depth is relatively insensitive to the fire's HRR. It is largely determined by the height of the opening, and for this reason there is essentially no uncertainty associated with the model inputs that affect the layer depth.
 
-\subsubsection{Gas and Smoke Concentration}
+\subsubsection{Gas Concentration}
 
 Most fire models assume that combustion product gases and soot, once beyond the flaming region of the fire, are passively transported throughout the compartment. The major products of combustion, like CO$_2$ and water vapor, plus the major reactant, O$_2$, are generated, or consumed, in direct proportion to the burning rate of the fuel, which is directly proportional to the HRR. The mass fraction of any species in the HGL is directly proportional to the product of its yield and the HRR.
 
-For many of the experiments described in this guide, the yields of the major product gases like O$_2$ and CO$_2$ from pure fuels like methane gas and heptane liquid are known from the basic stoichiometry to a high level of accuracy. Thus, the relative uncertainty in the concentration of major products gases is the same as that of the HRR, 7.5~\%. The uncertainty in the smoke concentration, however, is a combination of the uncertainty of the HRR and the soot yield. The relative standard uncertainty of the soot yield of heptane reported in Ref.~\cite{Hamins:SP1013-1} is 11~\%. The uncertainties for HRR and soot yield are combined via quadrature and the resulting expanded relative uncertainty is 13~\%.
+For many of the experiments described in this guide, the yields of the major product gases like O$_2$ and CO$_2$ from pure fuels like methane gas and heptane liquid are known from the basic stoichiometry to a high level of accuracy. Thus, the relative uncertainty in the concentration of major products gases is the same as that of the HRR, 7.5~\%. 
+
+\subsubsection{Smoke Obscuration}
+
+The obscuration of visible light by smoke is computed
+\be
+   O = \left( 1 - \exp(-K_{\rm m} \rho_{\rm s} L) \right) \times 100 
+\ee
+The specific extinction coefficient, $K_{\rm m}$, is taken to be 8700~\unit{m^2/kg} with a standard relative uncertainty of 6~\%~\cite{Mulholland:F+M}. The uncertainty of the smoke concentration, $\rho_{\rm s}$, combines the uncertainty of the HRR and the soot yield. The relative standard uncertainty of the soot yield of heptane reported in Ref.~\cite{Hamins:SP1013-1} is 11~\%. The uncertainties for HRR and soot yield are combined via quadrature and the resulting expanded relative uncertainty is $\sqrt{7.5^2+11^2} \approx 13$~\%. Using the NIST Uncertainty Machine~\cite{NIST_Uncertainty_Machine}, the standard relative uncertainty in the computed obscuration is approximately 10~\%.
 
 \subsubsection{Pressure}
 
@@ -269,10 +278,10 @@ Table~\ref{Uncertainty} summarizes the estimated uncertainties of the major outp
 \hline
 Output                        & Measurement     & Propagated Input  & Combined                                  \\
 Quantity                      & Uncertainty     & Uncertainty       & Uncertainty, $\widetilde{\sigma}_E$       \\ \hline \hline
-Gas and Solid Temperatures    & 0.05            & 0.05              & 0.07                                      \\ \hline
+Gas and Solid Temperature     & 0.05            & 0.05              & 0.07                                      \\ \hline
 HGL Depth                     & 0.05            & 0.00              & 0.05                                      \\ \hline
-Gas Concentrations            & 0.02            & 0.08              & 0.08                                      \\ \hline
-Smoke Concentration           & 0.14            & 0.13              & 0.19                                      \\ \hline
+Gas Concentration             & 0.02            & 0.08              & 0.08                                      \\ \hline
+Smoke Obscuration             & 0.07            & 0.10              & 0.12                                      \\ \hline
 Pressure, Closed Compartment  & 0.01            & 0.21              & 0.21                                      \\ \hline
 Pressure, Open Compartment    & 0.01            & 0.15              & 0.15                                      \\ \hline
 Velocity                      & 0.07            & 0.03              & 0.08                                      \\ \hline
