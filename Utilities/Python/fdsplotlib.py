@@ -2253,6 +2253,8 @@ def scatplot(saved_data, drange, **kwargs):
         else:
             Sigma_E = u / np.sqrt(2)
 
+        Sigma_E = min(u / np.sqrt(2), Sigma_E)
+
         Sigma_M = np.sqrt(max(0.0, u**2 - Sigma_E**2))
         delta = np.exp(log_M_bar - log_E_bar + 0.5 * Sigma_M**2 - 0.5 * Sigma_E**2)
 
