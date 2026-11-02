@@ -9,7 +9,7 @@ import os
 outdir = '../../../out/Crown_Fires/'
 
 file_list = [f for f in os.listdir(outdir) if f.endswith('_cat_devc.csv')]
-file_list.sort() 
+file_list.sort()
 
 wind_speed = []
 slope = []
@@ -20,9 +20,9 @@ for fname in file_list:
     M = pd.read_csv(full_path, skiprows=2, header=None)
     M_data = M.to_numpy()
 
-    # Extract rows satisfying conditions (700<=x<=900, 30<Time<300)
+    # Extract rows satisfying conditions (690<=x<=900, 30<Time<300)
     indices = np.where(
-        (M_data[:, 1] >= 700) &
+        (M_data[:, 1] >= 690) &
         (M_data[:, 1] <= 900) &
         (M_data[:, 0] > 30) &
         (M_data[:, 0] < 300)
