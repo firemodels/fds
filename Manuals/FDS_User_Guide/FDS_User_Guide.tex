@@ -964,7 +964,7 @@ Occasionally, there are applications in which only the steady-state solution (in
 requires that the simulation be run long enough that a steady-state flow field and gas temperature field develops and that steady-state temperature profiles develop in solid surfaces. Developing steady-state temperature
 profiles can take a long time as the surface must be heated up in-depth. This can make the cost of the calculation prohibitive. Given steady-state boundary conditions, the time it takes a surface to
 heat up is proportional to its specific heat. Therefore, under steady conditions, this time can be accelerated by reducing the specific heat. So that the \ct{SPECIFIC_HEAT} inputs on \ct{MATL}
-can remain the same but still provide a means to reduce the heating time of a surface, the \ct{MISC} input of \ct{TIME_SHRINK_FACTOR} can be used. The \ct{SPECIFIC_HEAT} inputs on \ct{MATL} are reduced by this factor.
+can remain the same but still provide a means to reduce the heating time of a surface, the \ct{TIME} input of \ct{TIME_SHRINK_FACTOR} can be used. The \ct{SPECIFIC_HEAT} inputs on \ct{MATL} are reduced by this factor.
 For a \ct{TIME_SHRINK_FACTOR} of 10, the specific heats of the various materials is reduced by a factor of 10. This speeds up the heating
 of solid materials roughly by a factor of 10. An example of an application where this parameter is handy is a validation experiment where a steady heat source
 warms up a compartment to a nearly equilibrium state at which point time-averaged flow quantities are measured.
