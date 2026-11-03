@@ -4546,7 +4546,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                            DO IFACE=1,CF%NFACE
                               CFA => CFACE(CF%CFACE_INDEX(IFACE))
                               BC => BOUNDARY_COORD(CFA%BC_INDEX)
-                              DLF = DOT_PRODUCT(GET_CFACE_RAD_NVEC(CFA),DLA) ! face normal * radiation angle
+                              DLF = DOT_PRODUCT(CF%NVEC_RAD(IAXIS:KAXIS,IFACE),DLA) ! Geometric normal: cut-cell balance closes.
                               IF (DLF>0._EB) THEN ! upwind
                                  BR  => BOUNDARY_RADIA(CFA%BR_INDEX)
                                  AILFU = AILFU + DLF*CFA%AREA*BR%BAND(IBND)%ILW(N)
