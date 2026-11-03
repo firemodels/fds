@@ -50,7 +50,7 @@ Miscellaneous,obst_cylinder,1.0
 Miscellaneous,obst_cone,1.0
 Miscellaneous,obst_rotbox,1.0
 NS_Analytical_Solution,ns2d_64,1.0
-Pressure_Effects,pressure_boundary,1.0
+Pressure_Effects,pressure_boundary,5.0
 Pressure_Solver,dancing_eddies_embed,1.0
 Pressure_Solver,dancing_eddies_tight,1.0
 Scalar_Analytical_Solution,move_slug,1.0
