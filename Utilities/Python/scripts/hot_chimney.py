@@ -135,10 +135,10 @@ def hot_chimney():
     # Use the original printed precision; convert correlation enthalpy to kW.
     rows = [
         (r'Heat Transfer Coefficient ($\overline{h}$, \unit{W/(m^2 K)})', 'h_avg', h_bar, 2),
-        (r'Average Velocity ($V_{\rm avg}$, m/s)', 'w_avg', V_avg, 4),
+        (r'Average Velocity ($V_{\rm avg}$, m/s)', 'w_avg', V_avg, 3),
         (r'Air Exit Temperature ($T_{\rm out}$, \unit{\degreeCelsius})', 'T_avg', T_out - 273.15, 2),
         (r'Mass Flow Rate ($\dot{m}$, kg/s)', 'm_dot', m_dot, 4),
-        (r'Total Enthalpy Flow Rate ($\dot{Q}$, kW)', 'q_dot', Q_heat / 1000.0, 2),
+        (r'Total Enthalpy Flow Rate ($\dot{Q}$, kW)', 'q_dot', Q_heat / 1000.0, 3),
     ]
     table = [
         r'\begin{table}[!h]',
