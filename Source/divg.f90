@@ -531,7 +531,13 @@ IF (TENSOR_DIFFUSIVITY) CALL TENSOR_DIFFUSIVITY_MODEL(NM)
 
 CORRECTION_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    WC => WALL(IW)
-   IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY .OR. WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) CYCLE CORRECTION_LOOP
+   IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) THEN
+      ! At a refined mesh interface, replace the coarse-side k dT/dn with the area-weighted sum of the fine-side values
+      IF (IW<=N_EXTERNAL_WALL_CELLS .AND. .NOT.TENSOR_DIFFUSIVITY) &
+         CALL MATCH_HEAT_FLUX_AT_REFINED_INTERFACE(IW,PBAR_P,KDTDX,KDTDY,KDTDZ)
+      CYCLE CORRECTION_LOOP
+   ENDIF
+   IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE CORRECTION_LOOP
    BC => BOUNDARY_COORD(WC%BC_INDEX)
    B1 => BOUNDARY_PROP1(WC%B1_INDEX)
    IF (WC%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
@@ -785,6 +791,152 @@ ENDIF IF_PRESSURE_ZONES
 T_USED(2)=T_USED(2)+CURRENT_TIME()-TNOW
 
 END SUBROUTINE DIVERGENCE_PART_1
+
+
+!> \brief Match the conductive heat flux at an INTERPOLATED boundary with mesh refinement
+!> \param IW Index of the external wall cell on the coarse mesh
+!> \param PBAR_P Background pressure (Pa) of the current mesh, predictor or corrector value
+!> \param KDTDX k dT/dx on the x faces of the current mesh (W/m2)
+!> \param KDTDY k dT/dy on the y faces of the current mesh (W/m2)
+!> \param KDTDZ k dT/dz on the z faces of the current mesh (W/m2)
+!> \details The coarse mesh sees several fine-mesh cells across one of its boundary faces (EWC\%NIC>1). Each mesh computes
+!> k dT/dn at the interface from its own ghost cells, so the heat leaving one mesh does not equal the heat entering the other.
+!> Here the coarse-side value is replaced by the area-weighted sum of the values the fine mesh computes on its faces, using the
+!> same inputs the fine mesh uses: the fine cell's k (the fine mesh copies k into its ghost cell) and the temperature of the
+!> fine-mesh ghost cell (coarse density and composition at the fine-mesh background pressure). This is the same treatment
+!> as the species diffusive flux in CALCULATE_TMP_F (wall.f90) and divg.f90 above.
+
+SUBROUTINE MATCH_HEAT_FLUX_AT_REFINED_INTERFACE(IW,PBAR_P,KDTDX,KDTDY,KDTDZ)
+
+USE PHYSICAL_FUNCTIONS, ONLY: GET_CONDUCTIVITY,GET_SPECIFIC_HEAT,GET_VISCOSITY,GET_SPECIFIC_GAS_CONSTANT
+USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
+USE COMPLEX_GEOMETRY, ONLY: CC_CGSC, CC_GASPHASE
+INTEGER, INTENT(IN) :: IW
+REAL(EB), POINTER, DIMENSION(:,:), INTENT(IN) :: PBAR_P
+REAL(EB), POINTER, DIMENSION(:,:,:), INTENT(INOUT) :: KDTDX,KDTDY,KDTDZ
+REAL(EB) :: DP_ZONE,RSUM_G,RSUM_O,RHO_O,TMP_O,TMP_GH,P_O,P_GH,K_O,MU_DNS_O,CP_O,ARO,RDN,KDTDN
+REAL(EB) :: ZZ_GET(1:N_TRACKED_SPECIES)
+INTEGER :: IIO,JJO,KKO,IIGH,JJGH,KKGH,IPZ
+TYPE(EXTERNAL_WALL_TYPE), POINTER :: EWC
+TYPE(WALL_TYPE), POINTER :: WC
+TYPE(BOUNDARY_COORD_TYPE), POINTER :: BC
+TYPE(OMESH_TYPE), POINTER :: OM
+TYPE(MESH_TYPE), POINTER :: MM
+REAL(EB), POINTER, DIMENSION(:,:,:) :: OM_RHOP
+REAL(EB), POINTER, DIMENSION(:,:,:,:) :: OM_ZZP
+
+EWC => EXTERNAL_WALL(IW)
+IF (EWC%NOM==0 .OR. EWC%NIC<2) RETURN   ! not the coarse side of a refined interface
+
+WC => WALL(IW)
+BC => BOUNDARY_COORD(WC%BC_INDEX)
+
+! Vertical coarsening in the atmosphere has its own ghost-cell treatment (ATMOSPHERIC_INTERPOLATION in wall.f90)
+
+IF (USE_ATMOSPHERIC_INTERPOLATION .AND. ABS(BC%IOR)==3) RETURN
+
+! Leave cut cells to the cut-cell routines
+
+IF (CC_IBM) THEN
+   IF (CCVAR(BC%IIG,BC%JJG,BC%KKG,CC_CGSC)/=CC_GASPHASE) RETURN
+ENDIF
+
+OM => OMESH(EWC%NOM)
+MM => MESHES(EWC%NOM)
+IF (PREDICTOR) THEN
+   OM_RHOP => OM%RHOS
+   OM_ZZP  => OM%ZZS
+ELSE
+   OM_RHOP => OM%RHO
+   OM_ZZP  => OM%ZZ
+ENDIF
+
+! The fine mesh fills its ghost cell with the coarse cell's density and composition
+
+ZZ_GET(1:N_TRACKED_SPECIES) = MAX(0._EB,MIN(1._EB,ZZP(BC%IIG,BC%JJG,BC%KKG,1:N_TRACKED_SPECIES)))
+CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RSUM_G)
+
+! Rise of the zone pressure above the ambient profile; the same at all heights in the zone, on all meshes
+
+IPZ = BOUNDARY_PROP1(WC%B1_INDEX)%PRESSURE_ZONE
+DP_ZONE = PBAR_P(BC%KKG,IPZ) - P_0(BC%KKG)
+
+KDTDN = 0._EB
+
+DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
+   DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
+      DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
+
+         IF (MM%CELL(MM%CELL_INDEX(IIO,JJO,KKO))%SOLID) RETURN   ! keep the default treatment next to obstructions
+
+         ! Fine-mesh ghost cell facing this coarse cell, face area ratio, and the fine-mesh 1/dn of the interface face
+
+         IIGH = IIO ; JJGH = JJO ; KKGH = KKO
+         SELECT CASE(BC%IOR)
+            CASE( 1) ; IIGH = IIO+1 ; ARO = MM%DY(JJO)*MM%DZ(KKO)/(DY(BC%JJ)*DZ(BC%KK)) ; RDN = MM%RDXN(IIO)
+            CASE(-1) ; IIGH = IIO-1 ; ARO = MM%DY(JJO)*MM%DZ(KKO)/(DY(BC%JJ)*DZ(BC%KK)) ; RDN = MM%RDXN(IIO-1)
+            CASE( 2) ; JJGH = JJO+1 ; ARO = MM%DX(IIO)*MM%DZ(KKO)/(DX(BC%II)*DZ(BC%KK)) ; RDN = MM%RDYN(JJO)
+            CASE(-2) ; JJGH = JJO-1 ; ARO = MM%DX(IIO)*MM%DZ(KKO)/(DX(BC%II)*DZ(BC%KK)) ; RDN = MM%RDYN(JJO-1)
+            CASE( 3) ; KKGH = KKO+1 ; ARO = MM%DX(IIO)*MM%DY(JJO)/(DX(BC%II)*DY(BC%JJ)) ; RDN = MM%RDZN(KKO)
+            CASE(-3) ; KKGH = KKO-1 ; ARO = MM%DX(IIO)*MM%DY(JJO)/(DX(BC%II)*DY(BC%JJ)) ; RDN = MM%RDZN(KKO-1)
+         END SELECT
+
+         ! Background pressure of the fine cell and of the fine-mesh ghost cell
+
+         IF (STRATIFICATION) THEN
+            P_O  = EVALUATE_RAMP(MM%ZC(KKO) ,I_RAMP_P0_Z) + DP_ZONE
+            P_GH = EVALUATE_RAMP(MM%ZC(KKGH),I_RAMP_P0_Z) + DP_ZONE
+         ELSE
+            P_O  = P_INF + DP_ZONE
+            P_GH = P_INF + DP_ZONE
+         ENDIF
+
+         ! Temperature of the fine cell and of its ghost cell, as computed on the fine mesh
+
+         RHO_O = OM_RHOP(IIO,JJO,KKO)
+         ZZ_GET(1:N_TRACKED_SPECIES) = OM_ZZP(IIO,JJO,KKO,1:N_TRACKED_SPECIES)
+         CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RSUM_O)
+         TMP_O  = P_O/(RSUM_O*RHO_O)
+         TMP_GH = P_GH/(RSUM_G*RHOP(BC%IIG,BC%JJG,BC%KKG))
+
+         ! Thermal conductivity of the fine cell, as in DIVERGENCE_PART_1
+
+         IF (SIM_MODE==DNS_MODE .OR. SIM_MODE==LES_MODE) THEN
+            CALL GET_CONDUCTIVITY(ZZ_GET,K_O,TMP_O)
+            IF (SIM_MODE==LES_MODE) THEN
+               CALL GET_VISCOSITY(ZZ_GET,MU_DNS_O,TMP_O)
+               IF (.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
+                  CALL GET_SPECIFIC_HEAT(ZZ_GET,CP_O,TMP_O)
+                  K_O = K_O + MAX(0._EB,OM%MU(IIO,JJO,KKO)-MU_DNS_O)*CP_O*RPR_T
+               ELSE
+                  K_O = K_O + MAX(0._EB,OM%MU(IIO,JJO,KKO)-MU_DNS_O)*CPOPR
+               ENDIF
+            ENDIF
+         ELSE
+            ! VLES: k = mu*cp/Pr, and the fine-mesh ghost cell carries the coarse cell's viscosity
+            K_O = 0.5_EB*(OM%MU(IIO,JJO,KKO)+MU(BC%IIG,BC%JJG,BC%KKG))*CPOPR
+         ENDIF
+
+         ! k dT/dn on the fine face, in the positive coordinate direction from the fine cell to the coarse cell
+
+         KDTDN = KDTDN + ARO*K_O*(TMP_GH-TMP_O)*RDN
+
+      ENDDO
+   ENDDO
+ENDDO
+
+! Overwrite the coarse-side face value (positive coordinate direction)
+
+SELECT CASE(BC%IOR)
+   CASE( 1) ; KDTDX(BC%II  ,BC%JJ  ,BC%KK  ) =  KDTDN
+   CASE(-1) ; KDTDX(BC%II-1,BC%JJ  ,BC%KK  ) = -KDTDN
+   CASE( 2) ; KDTDY(BC%II  ,BC%JJ  ,BC%KK  ) =  KDTDN
+   CASE(-2) ; KDTDY(BC%II  ,BC%JJ-1,BC%KK  ) = -KDTDN
+   CASE( 3) ; KDTDZ(BC%II  ,BC%JJ  ,BC%KK  ) =  KDTDN
+   CASE(-3) ; KDTDZ(BC%II  ,BC%JJ  ,BC%KK-1) = -KDTDN
+END SELECT
+
+END SUBROUTINE MATCH_HEAT_FLUX_AT_REFINED_INTERFACE
 
 
 SUBROUTINE ENTHALPY_ADVECTION_NEW(U_DOT_DEL_RHO_H_S)
