@@ -905,7 +905,14 @@ METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
                               D_Z_N = D_Z(:,N)
                               ZZ_GET(1:N_TRACKED_SPECIES) = OM_ZZP(IIO,JJO,KKO,1:N_TRACKED_SPECIES)
                               CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RSUM_OTHER)
-                              PBAR_OTHER = EVALUATE_RAMP(MM%ZC(KKO),I_RAMP_P0_Z)
+                              ! Background pressure of the other cell: ambient profile at its height plus the zone pressure rise.
+                              ! Without STRATIFICATION there is no pressure profile RAMP (I_RAMP_P0_Z=0 returns 1 Pa).
+                              IF (STRATIFICATION) THEN
+                                 PBAR_OTHER = EVALUATE_RAMP(MM%ZC(KKO),I_RAMP_P0_Z) + &
+                                              PBAR_P(BC%KKG,B1%PRESSURE_ZONE) - P_0(BC%KKG)
+                              ELSE
+                                 PBAR_OTHER = PBAR_P(BC%KKG,B1%PRESSURE_ZONE)
+                              ENDIF
                               TMP_OTHER = PBAR_OTHER/(RSUM_OTHER*RHO_OTHER)
                               CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP_OTHER,D_Z_OTHER)
                               RHO_D_TURB = 0._EB
