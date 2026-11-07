@@ -39,7 +39,7 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX,KDTDY,KDTDZ,DP,KP,CP, &
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: RHO_D_DZDX,RHO_D_DZDY,RHO_D_DZDZ
 REAL(EB), POINTER, DIMENSION(:,:) :: PBAR_P
 REAL(EB) :: DELKDELT,VC,VC1,DTDX,DTDY,DTDZ,TNOW,DZDX,DZDY,DZDZ,TMP_G,DIV_DIFF_HEAT_FLUX,H_S,XHAT,ZHAT,TT,Q_Z,&
-            D_Z_TEMP,D_Z_N(0:I_MAX_TEMP),RHO_D_DZDN_GET(1:N_TRACKED_SPECIES),UN_P,TMP_F_GAS,R_PFCT,RHO_D_DZDN,CP_GHOST
+            D_Z_TEMP,D_Z_N(0:I_MAX_TEMP),RHO_D_DZDN_GET(1:N_TRACKED_SPECIES),UN_P,TMP_F_GAS,R_PFCT,RHO_D_DZDN,CP_GHOST,F_CD
 INTEGER :: IW,N,I,J,K,IPZ,N_ZZ_MAX,ICF
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_GET
 TYPE(SPECIES_MIXTURE_TYPE), POINTER :: SM
@@ -188,7 +188,7 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
 
       ! Store rho*D_n grad Z_n at OPEN boundaries, flux match at INTERPOLATED boundaries, zero out otherwise
 
-      !$OMP PARALLEL DO PRIVATE(IW,WC,BC,B1,EWC) SCHEDULE(GUIDED)
+      !$OMP PARALLEL DO PRIVATE(IW,WC,BC,B1,EWC,F_CD) SCHEDULE(GUIDED)
       WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
          WC => WALL(IW)
          IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP
@@ -218,6 +218,18 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
                      CASE(-3); RHO_D_DZDZ(BC%IIG  ,BC%JJG  ,BC%KKG  ,N) = -B1%RHO_D_DZDN_F(N)
                   END SELECT
                ELSE
+                  ! one cell on the other side of an interpolated boundary: if its normal width differs, use the centre distance
+                  IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) THEN
+                     F_CD = CENTRE_DISTANCE_FACTOR(IW)
+                     SELECT CASE(BC%IOR)
+                        CASE( 1); RHO_D_DZDX(BC%IIG-1,BC%JJG  ,BC%KKG  ,N) = RHO_D_DZDX(BC%IIG-1,BC%JJG  ,BC%KKG  ,N)*F_CD
+                        CASE(-1); RHO_D_DZDX(BC%IIG  ,BC%JJG  ,BC%KKG  ,N) = RHO_D_DZDX(BC%IIG  ,BC%JJG  ,BC%KKG  ,N)*F_CD
+                        CASE( 2); RHO_D_DZDY(BC%IIG  ,BC%JJG-1,BC%KKG  ,N) = RHO_D_DZDY(BC%IIG  ,BC%JJG-1,BC%KKG  ,N)*F_CD
+                        CASE(-2); RHO_D_DZDY(BC%IIG  ,BC%JJG  ,BC%KKG  ,N) = RHO_D_DZDY(BC%IIG  ,BC%JJG  ,BC%KKG  ,N)*F_CD
+                        CASE( 3); RHO_D_DZDZ(BC%IIG  ,BC%JJG  ,BC%KKG-1,N) = RHO_D_DZDZ(BC%IIG  ,BC%JJG  ,BC%KKG-1,N)*F_CD
+                        CASE(-3); RHO_D_DZDZ(BC%IIG  ,BC%JJG  ,BC%KKG  ,N) = RHO_D_DZDZ(BC%IIG  ,BC%JJG  ,BC%KKG  ,N)*F_CD
+                     END SELECT
+                  ENDIF
                   ! store computed flux for output
                   SELECT CASE(BC%IOR)
                      CASE( 1); B1%RHO_D_DZDN_F(N) =  RHO_D_DZDX(BC%IIG-1,BC%JJG  ,BC%KKG  ,N)
@@ -861,20 +873,13 @@ MM => MESHES(EWC%NOM)
 !     Both meshes do this, with the same conductivity and temperatures, so they get the same value.
 
 IF (EWC%NIC==1) THEN
-   SELECT CASE(ABS(BC%IOR))
-      CASE(1) ; DN_O = MM%DX(EWC%IIO_MIN) ; DN_G = DX(BC%IIG)
-      CASE(2) ; DN_O = MM%DY(EWC%JJO_MIN) ; DN_G = DY(BC%JJG)
-      CASE(3) ; DN_O = MM%DZ(EWC%KKO_MIN) ; DN_G = DZ(BC%KKG)
-   END SELECT
-   IF (ABS(DN_O-DN_G)<=1.E-6_EB*DN_G) RETURN
-   RDN = 2._EB/(DN_O+DN_G)
    SELECT CASE(BC%IOR)
-      CASE( 1) ; KDTDX(BC%II  ,BC%JJ  ,BC%KK  ) = KDTDX(BC%II  ,BC%JJ  ,BC%KK  )*RDN/RDXN(BC%II)
-      CASE(-1) ; KDTDX(BC%II-1,BC%JJ  ,BC%KK  ) = KDTDX(BC%II-1,BC%JJ  ,BC%KK  )*RDN/RDXN(BC%II-1)
-      CASE( 2) ; KDTDY(BC%II  ,BC%JJ  ,BC%KK  ) = KDTDY(BC%II  ,BC%JJ  ,BC%KK  )*RDN/RDYN(BC%JJ)
-      CASE(-2) ; KDTDY(BC%II  ,BC%JJ-1,BC%KK  ) = KDTDY(BC%II  ,BC%JJ-1,BC%KK  )*RDN/RDYN(BC%JJ-1)
-      CASE( 3) ; KDTDZ(BC%II  ,BC%JJ  ,BC%KK  ) = KDTDZ(BC%II  ,BC%JJ  ,BC%KK  )*RDN/RDZN(BC%KK)
-      CASE(-3) ; KDTDZ(BC%II  ,BC%JJ  ,BC%KK-1) = KDTDZ(BC%II  ,BC%JJ  ,BC%KK-1)*RDN/RDZN(BC%KK-1)
+      CASE( 1) ; KDTDX(BC%II  ,BC%JJ  ,BC%KK  ) = KDTDX(BC%II  ,BC%JJ  ,BC%KK  )*CENTRE_DISTANCE_FACTOR(IW)
+      CASE(-1) ; KDTDX(BC%II-1,BC%JJ  ,BC%KK  ) = KDTDX(BC%II-1,BC%JJ  ,BC%KK  )*CENTRE_DISTANCE_FACTOR(IW)
+      CASE( 2) ; KDTDY(BC%II  ,BC%JJ  ,BC%KK  ) = KDTDY(BC%II  ,BC%JJ  ,BC%KK  )*CENTRE_DISTANCE_FACTOR(IW)
+      CASE(-2) ; KDTDY(BC%II  ,BC%JJ-1,BC%KK  ) = KDTDY(BC%II  ,BC%JJ-1,BC%KK  )*CENTRE_DISTANCE_FACTOR(IW)
+      CASE( 3) ; KDTDZ(BC%II  ,BC%JJ  ,BC%KK  ) = KDTDZ(BC%II  ,BC%JJ  ,BC%KK  )*CENTRE_DISTANCE_FACTOR(IW)
+      CASE(-3) ; KDTDZ(BC%II  ,BC%JJ  ,BC%KK-1) = KDTDZ(BC%II  ,BC%JJ  ,BC%KK-1)*CENTRE_DISTANCE_FACTOR(IW)
    END SELECT
    RETURN
 ENDIF
@@ -995,6 +1000,40 @@ SELECT CASE(BC%IOR)
 END SELECT
 
 END SUBROUTINE MATCH_HEAT_FLUX_AT_MESH_INTERFACE
+
+
+!> \brief Factor that converts a diffusive flux at an INTERPOLATED boundary to the distance between the cell centres
+!> \param IW Index of the external wall cell
+!> \details Each mesh computes the gradient at the interface over its own ghost-cell spacing, the ghost cell having the size
+!> of the interior cell. If there is one cell on the other side (EWC\%NIC=1) and its width normal to the boundary differs, the
+!> two meshes would use different spacings for the same face. The factor rescales the flux to the centre distance
+!> 0.5*(dn_1+dn_2), which both meshes then share. It is 1 otherwise, and for cut-cell (GEOM) cases.
+
+REAL(EB) FUNCTION CENTRE_DISTANCE_FACTOR(IW)
+
+INTEGER, INTENT(IN) :: IW
+REAL(EB) :: DN_O,DN_G,RDN_FACE
+TYPE(EXTERNAL_WALL_TYPE), POINTER :: EWC
+TYPE(BOUNDARY_COORD_TYPE), POINTER :: BC
+TYPE(MESH_TYPE), POINTER :: MM
+
+CENTRE_DISTANCE_FACTOR = 1._EB
+IF (CC_IBM .OR. IW>N_EXTERNAL_WALL_CELLS) RETURN
+EWC => EXTERNAL_WALL(IW)
+IF (EWC%NOM==0 .OR. EWC%NIC/=1) RETURN
+BC => BOUNDARY_COORD(WALL(IW)%BC_INDEX)
+MM => MESHES(EWC%NOM)
+SELECT CASE(BC%IOR)
+   CASE( 1) ; DN_O = MM%DX(EWC%IIO_MIN) ; DN_G = DX(BC%IIG) ; RDN_FACE = RDXN(BC%II)
+   CASE(-1) ; DN_O = MM%DX(EWC%IIO_MIN) ; DN_G = DX(BC%IIG) ; RDN_FACE = RDXN(BC%II-1)
+   CASE( 2) ; DN_O = MM%DY(EWC%JJO_MIN) ; DN_G = DY(BC%JJG) ; RDN_FACE = RDYN(BC%JJ)
+   CASE(-2) ; DN_O = MM%DY(EWC%JJO_MIN) ; DN_G = DY(BC%JJG) ; RDN_FACE = RDYN(BC%JJ-1)
+   CASE( 3) ; DN_O = MM%DZ(EWC%KKO_MIN) ; DN_G = DZ(BC%KKG) ; RDN_FACE = RDZN(BC%KK)
+   CASE(-3) ; DN_O = MM%DZ(EWC%KKO_MIN) ; DN_G = DZ(BC%KKG) ; RDN_FACE = RDZN(BC%KK-1)
+END SELECT
+IF (ABS(DN_O-DN_G)>1.E-6_EB*DN_G) CENTRE_DISTANCE_FACTOR = 2._EB/((DN_O+DN_G)*RDN_FACE)
+
+END FUNCTION CENTRE_DISTANCE_FACTOR
 
 
 SUBROUTINE ENTHALPY_ADVECTION_NEW(U_DOT_DEL_RHO_H_S)

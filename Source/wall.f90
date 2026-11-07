@@ -613,7 +613,7 @@ REAL(EB) :: ARO,QNET,RAMP_FACTOR,RSUM_F,PBAR_F,TSI,UN, &
             RHO_ZZ_F(1:N_TOTAL_SCALARS),ZZ_GET(1:N_TRACKED_SPECIES), &
             RHO_OTHER, PBAR_OTHER,D_Z_N(0:I_MAX_TEMP),D_Z_G,D_Z_OTHER,TMP_OTHER,DDO, &
             MU_DNS_G,MU_DNS_OTHER,MU_OTHER,RHO_D,RHO_D_TURB,RHO_D_DZDN,RHO_D_DZDN_OTHER,RSUM_OTHER, &
-            BBB,CCC,PPP,QQQ,RRR,UUU,YYY,WWW,HTC_OLD,RSC_LOC,DTMP,RSUM_G,MU_G
+            BBB,CCC,PPP,QQQ,RRR,UUU,YYY,WWW,HTC_OLD,RSC_LOC,DTMP,RSUM_G,MU_G,RDN_O,DN_O,DN_G
 LOGICAL :: ATMOSPHERIC_INTERPOLATION
 INTEGER :: IIO,JJO,KKO,N,ADCOUNT
 REAL(EB), POINTER, DIMENSION(:,:,:) :: OM_RHOP
@@ -924,26 +924,31 @@ METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
                               ENDIF
                               RHO_D = 0.5_EB*( RHO_OTHER*D_Z_OTHER + B1%RHO_G*D_Z_G ) + RHO_D_TURB
                         END SELECT MODE_SELECT
+                        ! face area ratio, fine-mesh 1/dn of the interface face, and the cell widths normal to the boundary
                         SELECT CASE(BC%IOR)
                            CASE( 1)
-                              ARO = MM%DY(JJO)*MM%DZ(KKO)/(DY(BC%JJ)*DZ(BC%KK))
-                              RHO_D_DZDN = RHO_D*(ZZP(BC%IIG,BC%JJG,BC%KKG,N)-OM_ZZP(IIO,JJO,KKO,N))*MM%RDXN(IIO)
+                              ARO = MM%DY(JJO)*MM%DZ(KKO)/(DY(BC%JJ)*DZ(BC%KK)) ; RDN_O = MM%RDXN(IIO)
+                              DN_O = MM%DX(IIO) ; DN_G = DX(BC%IIG)
                            CASE(-1)
-                              ARO = MM%DY(JJO)*MM%DZ(KKO)/(DY(BC%JJ)*DZ(BC%KK))
-                              RHO_D_DZDN = RHO_D*(ZZP(BC%IIG,BC%JJG,BC%KKG,N)-OM_ZZP(IIO,JJO,KKO,N))*MM%RDXN(IIO-1)
+                              ARO = MM%DY(JJO)*MM%DZ(KKO)/(DY(BC%JJ)*DZ(BC%KK)) ; RDN_O = MM%RDXN(IIO-1)
+                              DN_O = MM%DX(IIO) ; DN_G = DX(BC%IIG)
                            CASE( 2)
-                              ARO = MM%DX(IIO)*MM%DZ(KKO)/(DX(BC%II)*DZ(BC%KK))
-                              RHO_D_DZDN = RHO_D*(ZZP(BC%IIG,BC%JJG,BC%KKG,N)-OM_ZZP(IIO,JJO,KKO,N))*MM%RDYN(JJO)
+                              ARO = MM%DX(IIO)*MM%DZ(KKO)/(DX(BC%II)*DZ(BC%KK)) ; RDN_O = MM%RDYN(JJO)
+                              DN_O = MM%DY(JJO) ; DN_G = DY(BC%JJG)
                            CASE(-2)
-                              ARO = MM%DX(IIO)*MM%DZ(KKO)/(DX(BC%II)*DZ(BC%KK))
-                              RHO_D_DZDN = RHO_D*(ZZP(BC%IIG,BC%JJG,BC%KKG,N)-OM_ZZP(IIO,JJO,KKO,N))*MM%RDYN(JJO-1)
+                              ARO = MM%DX(IIO)*MM%DZ(KKO)/(DX(BC%II)*DZ(BC%KK)) ; RDN_O = MM%RDYN(JJO-1)
+                              DN_O = MM%DY(JJO) ; DN_G = DY(BC%JJG)
                            CASE( 3)
-                              ARO = MM%DX(IIO)*MM%DY(JJO)/(DX(BC%II)*DY(BC%JJ))
-                              RHO_D_DZDN = RHO_D*(ZZP(BC%IIG,BC%JJG,BC%KKG,N)-OM_ZZP(IIO,JJO,KKO,N))*MM%RDZN(KKO)
+                              ARO = MM%DX(IIO)*MM%DY(JJO)/(DX(BC%II)*DY(BC%JJ)) ; RDN_O = MM%RDZN(KKO)
+                              DN_O = MM%DZ(KKO) ; DN_G = DZ(BC%KKG)
                            CASE(-3)
-                              ARO = MM%DX(IIO)*MM%DY(JJO)/(DX(BC%II)*DY(BC%JJ))
-                              RHO_D_DZDN = RHO_D*(ZZP(BC%IIG,BC%JJG,BC%KKG,N)-OM_ZZP(IIO,JJO,KKO,N))*MM%RDZN(KKO-1)
+                              ARO = MM%DX(IIO)*MM%DY(JJO)/(DX(BC%II)*DY(BC%JJ)) ; RDN_O = MM%RDZN(KKO-1)
+                              DN_O = MM%DZ(KKO) ; DN_G = DZ(BC%KKG)
                         END SELECT
+                        ! the fine mesh uses the distance between the cell centres where the normal widths differ
+                        ! (CENTRE_DISTANCE_FACTOR in divg.f90)
+                        IF (.NOT.CC_IBM .AND. ABS(DN_G-DN_O)>1.E-6_EB*DN_O) RDN_O = 2._EB/(DN_O+DN_G)
+                        RHO_D_DZDN = RHO_D*(ZZP(BC%IIG,BC%JJG,BC%KKG,N)-OM_ZZP(IIO,JJO,KKO,N))*RDN_O
                         ! average multiple face values
                         RHO_D_DZDN_OTHER = RHO_D_DZDN_OTHER + ARO*RHO_D_DZDN
                      ENDDO IIO_LOOP
