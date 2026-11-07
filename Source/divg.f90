@@ -551,9 +551,9 @@ IF (TENSOR_DIFFUSIVITY) CALL TENSOR_DIFFUSIVITY_MODEL(NM)
 CORRECTION_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    WC => WALL(IW)
    IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) THEN
-      ! At a refined mesh interface, replace the coarse-side k dT/dn with the area-weighted sum of the fine-side values
+      ! At a mesh interface where the cell size changes, make k dT/dn the same on both sides
       IF (IW<=N_EXTERNAL_WALL_CELLS .AND. .NOT.TENSOR_DIFFUSIVITY) &
-         CALL MATCH_HEAT_FLUX_AT_REFINED_INTERFACE(IW,PBAR_P,KDTDX,KDTDY,KDTDZ)
+         CALL MATCH_HEAT_FLUX_AT_MESH_INTERFACE(IW,PBAR_P,KDTDX,KDTDY,KDTDZ)
       CYCLE CORRECTION_LOOP
    ENDIF
    IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE CORRECTION_LOOP
@@ -812,28 +812,29 @@ T_USED(2)=T_USED(2)+CURRENT_TIME()-TNOW
 END SUBROUTINE DIVERGENCE_PART_1
 
 
-!> \brief Match the conductive heat flux at an INTERPOLATED boundary with mesh refinement
-!> \param IW Index of the external wall cell on the coarse mesh
+!> \brief Match the conductive heat flux at an INTERPOLATED boundary where the cell size changes
+!> \param IW Index of the external wall cell
 !> \param PBAR_P Background pressure (Pa) of the current mesh, predictor or corrector value
 !> \param KDTDX k dT/dx on the x faces of the current mesh (W/m2)
 !> \param KDTDY k dT/dy on the y faces of the current mesh (W/m2)
 !> \param KDTDZ k dT/dz on the z faces of the current mesh (W/m2)
-!> \details The coarse mesh sees several fine-mesh cells across one of its boundary faces (EWC\%NIC>1). Each mesh computes
-!> k dT/dn at the interface from its own ghost cells, so the heat leaving one mesh does not equal the heat entering the other.
-!> Here the coarse-side value is replaced by the area-weighted sum of the values the fine mesh computes on its faces, using the
-!> same inputs the fine mesh uses: the face conductivity 0.5*(k_fine+k_ghost) and the temperature of the fine-mesh ghost
-!> cell (coarse density and composition at the fine-mesh background pressure). This is the same treatment
-!> as the species diffusive flux in CALCULATE_TMP_F (wall.f90) and divg.f90 above.
+!> \details Each mesh computes k dT/dn at the interface from its own cell and its ghost cell, and the ghost cell has the size
+!> of the interior cell. Where the two meshes have different cell sizes, the heat leaving one mesh then differs from the heat
+!> entering the other. (1) If there is one cell on the other side (EWC\%NIC=1) and its width normal to the boundary differs,
+!> both meshes use the distance between the two cell centres instead of their ghost-cell spacing. (2) On the coarse side of a
+!> refined interface (EWC\%NIC>1), the value is replaced by the area-weighted sum of the values the fine mesh computes on its
+!> faces, from the same inputs the fine mesh uses: the face conductivity 0.5*(k_fine+k_ghost), the temperature of the
+!> fine-mesh ghost cell (coarse density and composition at the fine-mesh background pressure), and the centre distance.
+!> (2) is the same treatment as the species diffusive flux in CALCULATE_TMP_F (wall.f90) and divg.f90 above.
 
-SUBROUTINE MATCH_HEAT_FLUX_AT_REFINED_INTERFACE(IW,PBAR_P,KDTDX,KDTDY,KDTDZ)
+SUBROUTINE MATCH_HEAT_FLUX_AT_MESH_INTERFACE(IW,PBAR_P,KDTDX,KDTDY,KDTDZ)
 
 USE PHYSICAL_FUNCTIONS, ONLY: GET_CONDUCTIVITY,GET_SPECIFIC_HEAT,GET_VISCOSITY,GET_SPECIFIC_GAS_CONSTANT
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
-USE COMPLEX_GEOMETRY, ONLY: CC_CGSC, CC_GASPHASE
 INTEGER, INTENT(IN) :: IW
 REAL(EB), POINTER, DIMENSION(:,:), INTENT(IN) :: PBAR_P
 REAL(EB), POINTER, DIMENSION(:,:,:), INTENT(INOUT) :: KDTDX,KDTDY,KDTDZ
-REAL(EB) :: DP_ZONE,RSUM_G,RSUM_O,RHO_O,TMP_O,TMP_GH,P_O,P_GH,K_O,K_GH,MU_DNS_O,CP_O,CP_GH,ARO,RDN,KDTDN
+REAL(EB) :: DP_ZONE,RSUM_G,RSUM_O,RHO_O,TMP_O,TMP_GH,P_O,P_GH,K_O,K_GH,MU_DNS_O,CP_O,CP_GH,ARO,RDN,KDTDN,DN_O,DN_G
 REAL(EB) :: ZZ_GET(1:N_TRACKED_SPECIES),ZZ_G(1:N_TRACKED_SPECIES)
 INTEGER :: IIO,JJO,KKO,IIGH,JJGH,KKGH,IPZ
 TYPE(EXTERNAL_WALL_TYPE), POINTER :: EWC
@@ -845,23 +846,44 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: OM_RHOP
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: OM_ZZP
 
 EWC => EXTERNAL_WALL(IW)
-IF (EWC%NOM==0 .OR. EWC%NIC<2) RETURN   ! not the coarse side of a refined interface
+IF (EWC%NOM==0 .OR. EWC%NIC<1) RETURN
+
+! Cells on either side may be cut cells, whose interface fluxes the cut-cell routines compute, and one mesh has no
+! information about the other's cut cells. Keep the default treatment.
+
+IF (CC_IBM) RETURN
 
 WC => WALL(IW)
 BC => BOUNDARY_COORD(WC%BC_INDEX)
+MM => MESHES(EWC%NOM)
 
-! Vertical coarsening in the atmosphere has its own ghost-cell treatment (ATMOSPHERIC_INTERPOLATION in wall.f90)
+! (1) One cell on the other side: use the distance between the cell centres if the widths normal to the boundary differ.
+!     Both meshes do this, with the same conductivity and temperatures, so they get the same value.
 
-IF (USE_ATMOSPHERIC_INTERPOLATION .AND. ABS(BC%IOR)==3) RETURN
-
-! Leave cut cells to the cut-cell routines
-
-IF (CC_IBM) THEN
-   IF (CCVAR(BC%IIG,BC%JJG,BC%KKG,CC_CGSC)/=CC_GASPHASE) RETURN
+IF (EWC%NIC==1) THEN
+   SELECT CASE(ABS(BC%IOR))
+      CASE(1) ; DN_O = MM%DX(EWC%IIO_MIN) ; DN_G = DX(BC%IIG)
+      CASE(2) ; DN_O = MM%DY(EWC%JJO_MIN) ; DN_G = DY(BC%JJG)
+      CASE(3) ; DN_O = MM%DZ(EWC%KKO_MIN) ; DN_G = DZ(BC%KKG)
+   END SELECT
+   IF (ABS(DN_O-DN_G)<=1.E-6_EB*DN_G) RETURN
+   RDN = 2._EB/(DN_O+DN_G)
+   SELECT CASE(BC%IOR)
+      CASE( 1) ; KDTDX(BC%II  ,BC%JJ  ,BC%KK  ) = KDTDX(BC%II  ,BC%JJ  ,BC%KK  )*RDN/RDXN(BC%II)
+      CASE(-1) ; KDTDX(BC%II-1,BC%JJ  ,BC%KK  ) = KDTDX(BC%II-1,BC%JJ  ,BC%KK  )*RDN/RDXN(BC%II-1)
+      CASE( 2) ; KDTDY(BC%II  ,BC%JJ  ,BC%KK  ) = KDTDY(BC%II  ,BC%JJ  ,BC%KK  )*RDN/RDYN(BC%JJ)
+      CASE(-2) ; KDTDY(BC%II  ,BC%JJ-1,BC%KK  ) = KDTDY(BC%II  ,BC%JJ-1,BC%KK  )*RDN/RDYN(BC%JJ-1)
+      CASE( 3) ; KDTDZ(BC%II  ,BC%JJ  ,BC%KK  ) = KDTDZ(BC%II  ,BC%JJ  ,BC%KK  )*RDN/RDZN(BC%KK)
+      CASE(-3) ; KDTDZ(BC%II  ,BC%JJ  ,BC%KK-1) = KDTDZ(BC%II  ,BC%JJ  ,BC%KK-1)*RDN/RDZN(BC%KK-1)
+   END SELECT
+   RETURN
 ENDIF
 
+! (2) Coarse side of a refined interface. The area weights below are Cartesian.
+
+IF (CYLINDRICAL) RETURN
+
 OM => OMESH(EWC%NOM)
-MM => MESHES(EWC%NOM)
 IF (PREDICTOR) THEN
    OM_RHOP => OM%RHOS
    OM_ZZP  => OM%ZZS
@@ -892,13 +914,25 @@ DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
 
          IIGH = IIO ; JJGH = JJO ; KKGH = KKO
          SELECT CASE(BC%IOR)
-            CASE( 1) ; IIGH = IIO+1 ; ARO = MM%DY(JJO)*MM%DZ(KKO)/(DY(BC%JJ)*DZ(BC%KK)) ; RDN = MM%RDXN(IIO)
-            CASE(-1) ; IIGH = IIO-1 ; ARO = MM%DY(JJO)*MM%DZ(KKO)/(DY(BC%JJ)*DZ(BC%KK)) ; RDN = MM%RDXN(IIO-1)
-            CASE( 2) ; JJGH = JJO+1 ; ARO = MM%DX(IIO)*MM%DZ(KKO)/(DX(BC%II)*DZ(BC%KK)) ; RDN = MM%RDYN(JJO)
-            CASE(-2) ; JJGH = JJO-1 ; ARO = MM%DX(IIO)*MM%DZ(KKO)/(DX(BC%II)*DZ(BC%KK)) ; RDN = MM%RDYN(JJO-1)
-            CASE( 3) ; KKGH = KKO+1 ; ARO = MM%DX(IIO)*MM%DY(JJO)/(DX(BC%II)*DY(BC%JJ)) ; RDN = MM%RDZN(KKO)
-            CASE(-3) ; KKGH = KKO-1 ; ARO = MM%DX(IIO)*MM%DY(JJO)/(DX(BC%II)*DY(BC%JJ)) ; RDN = MM%RDZN(KKO-1)
+            CASE( 1) ; IIGH = IIO+1 ; ARO = MM%DY(JJO)*MM%DZ(KKO)/(DY(BC%JJ)*DZ(BC%KK)) ; DN_O = MM%DX(IIO) ; DN_G = DX(BC%IIG)
+            CASE(-1) ; IIGH = IIO-1 ; ARO = MM%DY(JJO)*MM%DZ(KKO)/(DY(BC%JJ)*DZ(BC%KK)) ; DN_O = MM%DX(IIO) ; DN_G = DX(BC%IIG)
+            CASE( 2) ; JJGH = JJO+1 ; ARO = MM%DX(IIO)*MM%DZ(KKO)/(DX(BC%II)*DZ(BC%KK)) ; DN_O = MM%DY(JJO) ; DN_G = DY(BC%JJG)
+            CASE(-2) ; JJGH = JJO-1 ; ARO = MM%DX(IIO)*MM%DZ(KKO)/(DX(BC%II)*DZ(BC%KK)) ; DN_O = MM%DY(JJO) ; DN_G = DY(BC%JJG)
+            CASE( 3) ; KKGH = KKO+1 ; ARO = MM%DX(IIO)*MM%DY(JJO)/(DX(BC%II)*DY(BC%JJ)) ; DN_O = MM%DZ(KKO) ; DN_G = DZ(BC%KKG)
+            CASE(-3) ; KKGH = KKO-1 ; ARO = MM%DX(IIO)*MM%DY(JJO)/(DX(BC%II)*DY(BC%JJ)) ; DN_O = MM%DZ(KKO) ; DN_G = DZ(BC%KKG)
          END SELECT
+
+         ! 1/dn as the fine mesh uses it: its own ghost spacing if the normal widths are equal, else the centre distance
+
+         SELECT CASE(BC%IOR)
+            CASE( 1) ; RDN = MM%RDXN(IIO)
+            CASE(-1) ; RDN = MM%RDXN(IIO-1)
+            CASE( 2) ; RDN = MM%RDYN(JJO)
+            CASE(-2) ; RDN = MM%RDYN(JJO-1)
+            CASE( 3) ; RDN = MM%RDZN(KKO)
+            CASE(-3) ; RDN = MM%RDZN(KKO-1)
+         END SELECT
+         IF (ABS(DN_G-DN_O)>1.E-6_EB*DN_O) RDN = 2._EB/(DN_O+DN_G)
 
          ! Background pressure of the fine cell and of the fine-mesh ghost cell
 
@@ -941,7 +975,7 @@ DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
             K_GH = MU(BC%IIG,BC%JJG,BC%KKG)*CPOPR
          ENDIF
 
-         ! k dT/dn on the fine face, in the positive coordinate direction from the fine cell to the coarse cell
+         ! k dT/dn on the fine face, positive in the direction of the coarse-mesh boundary orientation IOR
 
          KDTDN = KDTDN + ARO*0.5_EB*(K_O+K_GH)*(TMP_GH-TMP_O)*RDN
 
@@ -960,7 +994,7 @@ SELECT CASE(BC%IOR)
    CASE(-3) ; KDTDZ(BC%II  ,BC%JJ  ,BC%KK-1) = -KDTDN
 END SELECT
 
-END SUBROUTINE MATCH_HEAT_FLUX_AT_REFINED_INTERFACE
+END SUBROUTINE MATCH_HEAT_FLUX_AT_MESH_INTERFACE
 
 
 SUBROUTINE ENTHALPY_ADVECTION_NEW(U_DOT_DEL_RHO_H_S)
