@@ -837,7 +837,8 @@ END SUBROUTINE DIVERGENCE_PART_1
 !> refined interface (EWC\%NIC>1), the value is replaced by the area-weighted sum of the values the fine mesh computes on its
 !> faces, from the same inputs the fine mesh uses: the face conductivity 0.5*(k_fine+k_ghost), the temperature of the
 !> fine-mesh ghost cell (coarse density and composition at the fine-mesh background pressure), and the centre distance.
-!> (2) is the same treatment as the species diffusive flux in CALCULATE_TMP_F (wall.f90) and divg.f90 above.
+!> Solid fine cells add nothing to the sum. (2) is the same treatment as the species diffusive flux in CALCULATE_TMP_F
+!> (wall.f90) and divg.f90 above.
 
 SUBROUTINE MATCH_HEAT_FLUX_AT_MESH_INTERFACE(IW,PBAR_P,KDTDX,KDTDY,KDTDZ)
 
@@ -913,7 +914,7 @@ DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
    DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
       DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
 
-         IF (MM%CELL(MM%CELL_INDEX(IIO,JJO,KKO))%SOLID) RETURN   ! keep the default treatment next to obstructions
+         IF (MM%CELL(MM%CELL_INDEX(IIO,JJO,KKO))%SOLID) CYCLE   ! no gas flux through a solid fine cell
 
          ! Fine-mesh ghost cell facing this coarse cell, face area ratio, and the fine-mesh 1/dn of the interface face
 
