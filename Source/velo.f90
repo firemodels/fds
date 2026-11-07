@@ -90,6 +90,19 @@ ELSE
    DEALLOCATE(ZZ_GET)
    !$OMP END PARALLEL
 
+   ! Molecular viscosity of the ghost cells at mesh interfaces. These cells hold the state of the neighbouring mesh,
+   ! and the turbulent diffusivity and conductivity of the ghost cell (MU-MU_DNS) are used for the interface fluxes.
+
+   ALLOCATE(ZZ_GET(1:N_TRACKED_SPECIES))
+   DO IW=1,N_EXTERNAL_WALL_CELLS
+      WC => WALL(IW)
+      IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE
+      BC => BOUNDARY_COORD(WC%BC_INDEX)
+      ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(BC%II,BC%JJ,BC%KK,1:N_TRACKED_SPECIES)
+      CALL GET_VISCOSITY(ZZ_GET,MU_DNS(BC%II,BC%JJ,BC%KK),TMP(BC%II,BC%JJ,BC%KK))
+   ENDDO
+   DEALLOCATE(ZZ_GET)
+
 ENDIF
 
 IF (CC_IBM) THEN

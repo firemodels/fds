@@ -39,7 +39,7 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX,KDTDY,KDTDZ,DP,KP,CP, &
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: RHO_D_DZDX,RHO_D_DZDY,RHO_D_DZDZ
 REAL(EB), POINTER, DIMENSION(:,:) :: PBAR_P
 REAL(EB) :: DELKDELT,VC,VC1,DTDX,DTDY,DTDZ,TNOW,DZDX,DZDY,DZDZ,TMP_G,DIV_DIFF_HEAT_FLUX,H_S,XHAT,ZHAT,TT,Q_Z,&
-            D_Z_TEMP,D_Z_N(0:I_MAX_TEMP),RHO_D_DZDN_GET(1:N_TRACKED_SPECIES),UN_P,TMP_F_GAS,R_PFCT,RHO_D_DZDN
+            D_Z_TEMP,D_Z_N(0:I_MAX_TEMP),RHO_D_DZDN_GET(1:N_TRACKED_SPECIES),UN_P,TMP_F_GAS,R_PFCT,RHO_D_DZDN,CP_GHOST
 INTEGER :: IW,N,I,J,K,IPZ,N_ZZ_MAX,ICF
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_GET
 TYPE(SPECIES_MIXTURE_TYPE), POINTER :: SM
@@ -479,11 +479,30 @@ K_DNS_OR_LES: IF (SIM_MODE==DNS_MODE .OR. SIM_MODE==LES_MODE) THEN
       ENDIF
    ENDIF
 
+   ALLOCATE(ZZ_GET(1:N_TRACKED_SPECIES))
    BOUNDARY_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
       WC=>WALL(IW)
       BC => BOUNDARY_COORD(WC%BC_INDEX)
-      KP(BC%II,BC%JJ,BC%KK) = KP(BC%IIG,BC%JJG,BC%KKG)
+      IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) THEN
+         ! The ghost cell holds the state of the neighbouring mesh. Give it that cell's own conductivity, so that both
+         ! meshes use the same face value 0.5*(k_1+k_2) and the heat leaving one mesh equals the heat entering the other.
+         ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(BC%II,BC%JJ,BC%KK,1:N_TRACKED_SPECIES)
+         CALL GET_CONDUCTIVITY(ZZ_GET,KP(BC%II,BC%JJ,BC%KK),TMP(BC%II,BC%JJ,BC%KK))
+         IF (SIM_MODE==LES_MODE .AND. .NOT.TENSOR_DIFFUSIVITY) THEN
+            IF (.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
+               CALL GET_SPECIFIC_HEAT(ZZ_GET,CP_GHOST,TMP(BC%II,BC%JJ,BC%KK))
+               KP(BC%II,BC%JJ,BC%KK) = KP(BC%II,BC%JJ,BC%KK) + &
+                                       MAX(0._EB,(MU(BC%II,BC%JJ,BC%KK)-MU_DNS(BC%II,BC%JJ,BC%KK)))*CP_GHOST*RPR_T
+            ELSE
+               KP(BC%II,BC%JJ,BC%KK) = KP(BC%II,BC%JJ,BC%KK) + &
+                                       MAX(0._EB,(MU(BC%II,BC%JJ,BC%KK)-MU_DNS(BC%II,BC%JJ,BC%KK)))*CPOPR
+            ENDIF
+         ENDIF
+      ELSE
+         KP(BC%II,BC%JJ,BC%KK) = KP(BC%IIG,BC%JJG,BC%KKG)
+      ENDIF
    ENDDO BOUNDARY_LOOP
+   DEALLOCATE(ZZ_GET)
 
 ELSE K_DNS_OR_LES
 
@@ -802,8 +821,8 @@ END SUBROUTINE DIVERGENCE_PART_1
 !> \details The coarse mesh sees several fine-mesh cells across one of its boundary faces (EWC\%NIC>1). Each mesh computes
 !> k dT/dn at the interface from its own ghost cells, so the heat leaving one mesh does not equal the heat entering the other.
 !> Here the coarse-side value is replaced by the area-weighted sum of the values the fine mesh computes on its faces, using the
-!> same inputs the fine mesh uses: the fine cell's k (the fine mesh copies k into its ghost cell) and the temperature of the
-!> fine-mesh ghost cell (coarse density and composition at the fine-mesh background pressure). This is the same treatment
+!> same inputs the fine mesh uses: the face conductivity 0.5*(k_fine+k_ghost) and the temperature of the fine-mesh ghost
+!> cell (coarse density and composition at the fine-mesh background pressure). This is the same treatment
 !> as the species diffusive flux in CALCULATE_TMP_F (wall.f90) and divg.f90 above.
 
 SUBROUTINE MATCH_HEAT_FLUX_AT_REFINED_INTERFACE(IW,PBAR_P,KDTDX,KDTDY,KDTDZ)
@@ -814,8 +833,8 @@ USE COMPLEX_GEOMETRY, ONLY: CC_CGSC, CC_GASPHASE
 INTEGER, INTENT(IN) :: IW
 REAL(EB), POINTER, DIMENSION(:,:), INTENT(IN) :: PBAR_P
 REAL(EB), POINTER, DIMENSION(:,:,:), INTENT(INOUT) :: KDTDX,KDTDY,KDTDZ
-REAL(EB) :: DP_ZONE,RSUM_G,RSUM_O,RHO_O,TMP_O,TMP_GH,P_O,P_GH,K_O,MU_DNS_O,CP_O,ARO,RDN,KDTDN
-REAL(EB) :: ZZ_GET(1:N_TRACKED_SPECIES)
+REAL(EB) :: DP_ZONE,RSUM_G,RSUM_O,RHO_O,TMP_O,TMP_GH,P_O,P_GH,K_O,K_GH,MU_DNS_O,CP_O,CP_GH,ARO,RDN,KDTDN
+REAL(EB) :: ZZ_GET(1:N_TRACKED_SPECIES),ZZ_G(1:N_TRACKED_SPECIES)
 INTEGER :: IIO,JJO,KKO,IIGH,JJGH,KKGH,IPZ
 TYPE(EXTERNAL_WALL_TYPE), POINTER :: EWC
 TYPE(WALL_TYPE), POINTER :: WC
@@ -853,8 +872,8 @@ ENDIF
 
 ! The fine mesh fills its ghost cell with the coarse cell's density and composition
 
-ZZ_GET(1:N_TRACKED_SPECIES) = MAX(0._EB,MIN(1._EB,ZZP(BC%IIG,BC%JJG,BC%KKG,1:N_TRACKED_SPECIES)))
-CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RSUM_G)
+ZZ_G(1:N_TRACKED_SPECIES) = MAX(0._EB,MIN(1._EB,ZZP(BC%IIG,BC%JJG,BC%KKG,1:N_TRACKED_SPECIES)))
+CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_G,RSUM_G)
 
 ! Rise of the zone pressure above the ambient profile; the same at all heights in the zone, on all meshes
 
@@ -899,27 +918,32 @@ DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
          TMP_O  = P_O/(RSUM_O*RHO_O)
          TMP_GH = P_GH/(RSUM_G*RHOP(BC%IIG,BC%JJG,BC%KKG))
 
-         ! Thermal conductivity of the fine cell, as in DIVERGENCE_PART_1
+         ! Thermal conductivity of the fine cell and of the fine-mesh ghost cell (coarse state), as in DIVERGENCE_PART_1
 
          IF (SIM_MODE==DNS_MODE .OR. SIM_MODE==LES_MODE) THEN
             CALL GET_CONDUCTIVITY(ZZ_GET,K_O,TMP_O)
+            CALL GET_CONDUCTIVITY(ZZ_G,K_GH,TMP_GH)
             IF (SIM_MODE==LES_MODE) THEN
                CALL GET_VISCOSITY(ZZ_GET,MU_DNS_O,TMP_O)
                IF (.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
                   CALL GET_SPECIFIC_HEAT(ZZ_GET,CP_O,TMP_O)
-                  K_O = K_O + MAX(0._EB,OM%MU(IIO,JJO,KKO)-MU_DNS_O)*CP_O*RPR_T
+                  CALL GET_SPECIFIC_HEAT(ZZ_G,CP_GH,TMP_GH)
+                  K_O  = K_O  + MAX(0._EB,OM%MU(IIO,JJO,KKO)-MU_DNS_O)*CP_O*RPR_T
+                  K_GH = K_GH + MAX(0._EB,MU(BC%IIG,BC%JJG,BC%KKG)-MU_DNS(BC%IIG,BC%JJG,BC%KKG))*CP_GH*RPR_T
                ELSE
-                  K_O = K_O + MAX(0._EB,OM%MU(IIO,JJO,KKO)-MU_DNS_O)*CPOPR
+                  K_O  = K_O  + MAX(0._EB,OM%MU(IIO,JJO,KKO)-MU_DNS_O)*CPOPR
+                  K_GH = K_GH + MAX(0._EB,MU(BC%IIG,BC%JJG,BC%KKG)-MU_DNS(BC%IIG,BC%JJG,BC%KKG))*CPOPR
                ENDIF
             ENDIF
          ELSE
-            ! VLES: k = mu*cp/Pr, and the fine-mesh ghost cell carries the coarse cell's viscosity
-            K_O = 0.5_EB*(OM%MU(IIO,JJO,KKO)+MU(BC%IIG,BC%JJG,BC%KKG))*CPOPR
+            ! VLES: k = mu*cp/Pr in every cell; the fine-mesh ghost cell carries the coarse cell's viscosity
+            K_O  = OM%MU(IIO,JJO,KKO)*CPOPR
+            K_GH = MU(BC%IIG,BC%JJG,BC%KKG)*CPOPR
          ENDIF
 
          ! k dT/dn on the fine face, in the positive coordinate direction from the fine cell to the coarse cell
 
-         KDTDN = KDTDN + ARO*K_O*(TMP_GH-TMP_O)*RDN
+         KDTDN = KDTDN + ARO*0.5_EB*(K_O+K_GH)*(TMP_GH-TMP_O)*RDN
 
       ENDDO
    ENDDO
