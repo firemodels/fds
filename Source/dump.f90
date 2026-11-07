@@ -6787,7 +6787,9 @@ DEVICE_LOOP: DO N=1,N_DEVC
                K_DEVICE_CELL_LOOP: DO K=SDV%K1,SDV%K2
                   J_DEVICE_CELL_LOOP: DO J=SDV%J1,SDV%J2
                      I_DEVICE_CELL_LOOP: DO I=SDV%I1,SDV%I2
-                        IF (CELL(CELL_INDEX(I,J,K))%SOLID .AND. &
+                        ! The check for 102 is BULK DENSITY, which is a special case.
+                        ! For BULK DENSITY the device should be updated when the cell is solid.
+                        IF (CELL(CELL_INDEX(I,J,K))%SOLID .AND. .NOT. DV%QUANTITY_INDEX(1)==102 .AND. &
                            OUTPUT_QUANTITY(DV%QUANTITY_INDEX(1))%CELL_POSITION/=CELL_FACE) CYCLE I_DEVICE_CELL_LOOP
                         VOL = DX(I)*RC(I)*DY(J)*DZ(K)
                         CFACE_AREA = 0._EB
