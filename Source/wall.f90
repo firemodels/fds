@@ -890,12 +890,14 @@ METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
                   CASE(DNS_MODE,LES_MODE)
                      D_Z_N = D_Z(:,N)
                      CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,B1%TMP_G,D_Z_G)
-                     IF (SIM_MODE==LES_MODE) CALL GET_VISCOSITY(ZZ_GET,MU_DNS_G,B1%TMP_G)
+                     ! molecular viscosity of the coarse cell, as the fine mesh has it in its ghost cell
+                     IF (SIM_MODE==LES_MODE) MU_DNS_G = MU_DNS(BC%IIG,BC%JJG,BC%KKG)
                END SELECT
                RHO_D_DZDN_OTHER = 0._EB
                KKO_LOOP: DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
                   JJO_LOOP: DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
                      IIO_LOOP: DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
+                        IF (MM%CELL(MM%CELL_INDEX(IIO,JJO,KKO))%SOLID) CYCLE IIO_LOOP   ! no gas flux through a solid fine cell
                         MU_OTHER = OM_MUP(IIO,JJO,KKO)
                         RHO_OTHER = OM_RHOP(IIO,JJO,KKO)
                         MODE_SELECT: SELECT CASE(SIM_MODE)
@@ -920,7 +922,7 @@ METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
                                  CALL GET_VISCOSITY(ZZ_GET,MU_DNS_OTHER,TMP_OTHER)
                                  RSC_LOC = RSC_T
                                  IF (SPECIES_MIXTURE(N)%SC_T_USER>TWENTY_EPSILON_EB) RSC_LOC=1._EB/SPECIES_MIXTURE(N)%SC_T_USER
-                                 RHO_D_TURB = 0.5_EB*(MU_OTHER-MU_DNS_OTHER + MU_G-MU_DNS_G)*RSC_LOC
+                                 RHO_D_TURB = 0.5_EB*(MAX(0._EB,MU_OTHER-MU_DNS_OTHER) + MAX(0._EB,MU_G-MU_DNS_G))*RSC_LOC
                               ENDIF
                               RHO_D = 0.5_EB*( RHO_OTHER*D_Z_OTHER + B1%RHO_G*D_Z_G ) + RHO_D_TURB
                         END SELECT MODE_SELECT
