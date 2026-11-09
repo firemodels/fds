@@ -1089,6 +1089,8 @@ where $n$ is the ratio of fine to coarse cells. The value of 0.001 can be change
 
 Experiment with different mesh configurations using relatively coarse mesh cells to ensure that information is being transferred properly from mesh to mesh. There are two issues of concern. First, does it appear that the flow is being badly affected by the mesh boundary? If so, check your velocity errors and consider tightening your velocity tolerance or changing pressure solvers, see Sec.~\ref{pressure_solver}. Second, is there too much of a jump in cell size from one mesh to another? If so, consider whether the loss of information moving from a fine to a coarse mesh is tolerable.  Mesh refinement ratios of more than 4:1 to should be avoided if possible.
 
+Where two meshes with different cell sizes abut, the mesh downstream of the interface uses the advective face values of the upstream mesh, and the coarse mesh then corrects the cells along the interface with the face values that the fine mesh used, so that for the same normal velocity both meshes move the same mass of each species through the interface. Mass errors at mesh interfaces then come only from the mismatch of the normal velocities of the two meshes (and from cells where the correction would take a density out of bounds), as between meshes with the same cell size. This mismatch is negligible with the \ct{UGLMAT} pressure solver and is controlled by \ct{VELOCITY_TOLERANCE} with the default FFT solver (see Sec.~\ref{pressure_solver}). This correction can be turned off by setting \ct{REFLUX_MESH_INTERFACES} to \ct{F} on the \ct{MISC} line. It is not applied where meshes overlap, at \ct{PERIODIC FLOW ONLY} boundaries, with complex geometry (\ct{GEOM}) or with cylindrical coordinates. See the FDS Technical Reference Guide~\cite{FDS_Math_Guide} for details.
+
 
 
 
@@ -12770,6 +12772,7 @@ Keyword                                         & Type         & Description    
 \ct{RAMP_WX}                                    & Character    & Section~\ref{info:ramp_velocity_1d}     &             &                   \\ \hline
 \ct{RAMP_WY}                                    & Character    & Section~\ref{info:ramp_velocity_1d}     &             &                   \\ \hline
 \ct{RAMP_WZ}                                    & Character    & Section~\ref{info:ramp_velocity_1d}     &             &                   \\ \hline
+\ct{REFLUX_MESH_INTERFACES}                     & Logical      & Section~\ref{info:mesh_alignment}       &             & \ct{T}           \\ \hline
 \ct{RESTART}                                    & Logical      & Section~\ref{info:restart}              &             & \ct{F}           \\ \hline
 \ct{RESTART_CHID}                               & Character    & Section~\ref{info:restart}              &             & \ct{CHID}        \\ \hline
 \ct{RND_SEED}                                   & Integer      & Section~\ref{info:NOISE}                &             &                   \\ \hline

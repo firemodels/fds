@@ -69,8 +69,8 @@ INTEGER :: N,I,IERR=0
 INTEGER :: PNAMELEN=0
 INTEGER :: PROVIDED
 INTEGER, PARAMETER :: REQUIRED=MPI_THREAD_FUNNELED
-TYPE (MPI_REQUEST), ALLOCATABLE, DIMENSION(:) :: REQ,REQ1,REQ2,REQ3,REQ4,REQ5,REQ7,REQ6,REQ14,REQ15
-INTEGER :: N_REQ=0,N_REQ1=0,N_REQ2=0,N_REQ3=0,N_REQ4=0,N_REQ5=0,N_REQ7=0,N_REQ6=0,N_REQ14=0,N_REQ15=0
+TYPE (MPI_REQUEST), ALLOCATABLE, DIMENSION(:) :: REQ,REQ1,REQ2,REQ3,REQ4,REQ5,REQ7,REQ6,REQ14,REQ15,REQ24
+INTEGER :: N_REQ=0,N_REQ1=0,N_REQ2=0,N_REQ3=0,N_REQ4=0,N_REQ5=0,N_REQ7=0,N_REQ6=0,N_REQ14=0,N_REQ15=0,N_REQ24=0
 CHARACTER(MPI_MAX_PROCESSOR_NAME) :: PNAME
 LOGICAL, ALLOCATABLE, DIMENSION(:)        :: LOGICAL_BUFFER_EXTERNAL
 REAL(EB), ALLOCATABLE, DIMENSION(:)       :: REAL_BUFFER_DUCT,REAL_BUFFER_EXTERNAL
@@ -220,6 +220,39 @@ ENDIF
 DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    CALL INITIALIZE_MESH_EXCHANGE_1(NM)
 ENDDO
+
+! Determine if any mesh interface has a different cell size on its two sides (used for refluxing of advective fluxes)
+
+DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   M => MESHES(NM)
+   DO I=1,M%N_EXTERNAL_WALL_CELLS
+      IF (M%EXTERNAL_WALL(I)%NIC>1 .AND. M%WALL(I)%SURF_INDEX/=PERIODIC_FLOW_ONLY_SURF_INDEX) REFINED_MESH_INTERFACES = .TRUE.
+   ENDDO
+ENDDO
+CALL MPI_ALLREDUCE(MPI_IN_PLACE,REFINED_MESH_INTERFACES,INTEGER_ONE,MPI_LOGICAL,MPI_LOR,MPI_COMM_WORLD,IERR)
+IF (CC_IBM .OR. CYLINDRICAL) REFLUX_MESH_INTERFACES = .FALSE.
+IF (REFINED_MESH_INTERFACES .AND. REFLUX_MESH_INTERFACES) THEN
+   DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX  ! fluxes of the other mesh are only stored where this mesh is coarser
+      M => MESHES(NM)
+      DO I=1,M%N_EXTERNAL_WALL_CELLS
+         IF (M%EXTERNAL_WALL(I)%NIC<=1 .OR. M%WALL(I)%SURF_INDEX==PERIODIC_FLOW_ONLY_SURF_INDEX) CYCLE
+         M2 => M%OMESH(M%EXTERNAL_WALL(I)%NOM)
+         IF (ALLOCATED(M2%ADV_FLUX) .OR. .NOT.ALLOCATED(M2%RHO)) CYCLE
+         ALLOCATE(M2%ADV_FLUX(LBOUND(M2%RHO,1):UBOUND(M2%RHO,1),LBOUND(M2%RHO,2):UBOUND(M2%RHO,2),&
+                              LBOUND(M2%RHO,3):UBOUND(M2%RHO,3),-1:N_TOTAL_SCALARS))
+         M2%ADV_FLUX = 0._EB
+      ENDDO
+      DO I=1,M%N_EXTERNAL_WALL_CELLS  ! face values of the other mesh are only stored where the cell size changes
+         IF (M%EXTERNAL_WALL(I)%NOM==0 .OR. M%WALL(I)%SURF_INDEX==PERIODIC_FLOW_ONLY_SURF_INDEX) CYCLE
+         IF (M%EXTERNAL_WALL(I)%NIC==1 .AND. M%EXTERNAL_WALL(I)%AREA_RATIO>0.99_EB) CYCLE
+         M2 => M%OMESH(M%EXTERNAL_WALL(I)%NOM)
+         IF (ALLOCATED(M2%FACE_VALUE) .OR. .NOT.ALLOCATED(M2%RHO)) CYCLE
+         ALLOCATE(M2%FACE_VALUE(LBOUND(M2%RHO,1):UBOUND(M2%RHO,1),LBOUND(M2%RHO,2):UBOUND(M2%RHO,2),&
+                                LBOUND(M2%RHO,3):UBOUND(M2%RHO,3),0:N_TOTAL_SCALARS))
+         M2%FACE_VALUE = 0._EB
+      ENDDO
+   ENDDO
+ENDIF
 
 IF (MY_RANK==0 .AND. VERBOSE) CALL VERBOSE_PRINTOUT('Completed INITIALIZE_MESH_EXCHANGE_1')
 
@@ -668,6 +701,15 @@ MAIN_LOOP: DO
       CALL MASS_FINITE_DIFFERENCES(NM)
    ENDDO COMPUTE_FINITE_DIFFERENCES_1
 
+   ! At mesh interfaces with refinement, the mesh downstream of the interface takes the face values of the upstream mesh
+
+   IF (REFINED_MESH_INTERFACES .AND. REFLUX_MESH_INTERFACES .AND. LEVEL_SET_MODE/=1) THEN
+      CALL MESH_EXCHANGE(25)
+      DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+         CALL FACE_VALUES_AT_MESH_INTERFACE(NM)
+      ENDDO
+   ENDIF
+
    ! Estimate quantities at next time step, and decrease/increase time step if necessary based on CFL condition
 
    FIRST_PASS = .TRUE.
@@ -685,6 +727,15 @@ MAIN_LOOP: DO
       IF (LEVEL_SET_MODE==2 .AND. CHECK_FREEZE_VELOCITY) CALL CHECK_FREEZE_VELOCITY_STATUS
 
       IF (CC_IBM) CALL CC_DENSITY(T,DT)
+
+      ! At mesh interfaces with refinement, the coarse mesh corrects its fluxes with the fine-mesh face values (refluxing)
+
+      IF (REFINED_MESH_INTERFACES .AND. REFLUX_MESH_INTERFACES .AND. LEVEL_SET_MODE/=1) THEN
+         CALL MESH_EXCHANGE(24)
+         DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+            CALL REFLUX_AT_MESH_INTERFACE(DT,NM)
+         ENDDO
+      ENDIF
 
       ! Exchange species mass fractions at interpolated boundaries.
 
@@ -847,13 +898,34 @@ MAIN_LOOP: DO
    COMPUTE_FINITE_DIFFERENCES_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       IF (.NOT.SOLID_PHASE_ONLY .AND. .NOT.FREEZE_VELOCITY) CALL COMPUTE_VISCOSITY(NM,APPLY_TO_ESTIMATED_VARIABLES=.TRUE.)
       CALL MASS_FINITE_DIFFERENCES(NM)
+      IF (REFINED_MESH_INTERFACES .AND. REFLUX_MESH_INTERFACES .AND. LEVEL_SET_MODE/=1) CYCLE
       CALL DENSITY(T,DT,NM)
       IF (LEVEL_SET_MODE>0) CALL LEVEL_SET_FIRESPREAD(T,DT,NM)
    ENDDO COMPUTE_FINITE_DIFFERENCES_2
 
+   ! At mesh interfaces with refinement, the mesh downstream of the interface takes the face values of the upstream mesh
+
+   IF (REFINED_MESH_INTERFACES .AND. REFLUX_MESH_INTERFACES .AND. LEVEL_SET_MODE/=1) THEN
+      CALL MESH_EXCHANGE(25)
+      DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+         CALL FACE_VALUES_AT_MESH_INTERFACE(NM)
+         CALL DENSITY(T,DT,NM)
+         IF (LEVEL_SET_MODE>0) CALL LEVEL_SET_FIRESPREAD(T,DT,NM)
+      ENDDO
+   ENDIF
+
    IF (LEVEL_SET_MODE==2 .AND. CHECK_FREEZE_VELOCITY) CALL CHECK_FREEZE_VELOCITY_STATUS
 
    IF (CC_IBM) CALL CC_DENSITY(T,DT)
+
+   ! At mesh interfaces with refinement, the coarse mesh corrects its fluxes with the fine-mesh face values (refluxing)
+
+   IF (REFINED_MESH_INTERFACES .AND. REFLUX_MESH_INTERFACES .AND. LEVEL_SET_MODE/=1) THEN
+      CALL MESH_EXCHANGE(24)
+      DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+         CALL REFLUX_AT_MESH_INTERFACE(DT,NM)
+      ENDDO
+   ENDIF
 
    ! Exchange species mass fractions.
 
@@ -1280,6 +1352,7 @@ SELECT CASE(TASK_NUMBER)
       ALLOCATE(REQ7(N_COMMUNICATIONS*4))
       ALLOCATE(REQ14(N_COMMUNICATIONS*4))
       ALLOCATE(REQ15(N_COMMUNICATIONS*4))
+      ALLOCATE(REQ24(N_COMMUNICATIONS*4))
 
       REQ = MPI_REQUEST_NULL
       REQ1 = MPI_REQUEST_NULL
@@ -1291,6 +1364,7 @@ SELECT CASE(TASK_NUMBER)
       REQ7 = MPI_REQUEST_NULL
       REQ14 = MPI_REQUEST_NULL
       REQ15 = MPI_REQUEST_NULL
+      REQ24 = MPI_REQUEST_NULL
 
    CASE(5)
 
@@ -1854,6 +1928,7 @@ DO I=1,N_REQ5  ; CALL MPI_REQUEST_FREE(REQ5(I) ,IERR) ; ENDDO
 DO I=1,N_REQ6  ; CALL MPI_REQUEST_FREE(REQ6(I) ,IERR) ; ENDDO
 DO I=1,N_REQ7  ; CALL MPI_REQUEST_FREE(REQ7(I) ,IERR) ; ENDDO
 DO I=1,N_REQ14 ; CALL MPI_REQUEST_FREE(REQ14(I),IERR) ; ENDDO
+DO I=1,N_REQ24 ; CALL MPI_REQUEST_FREE(REQ24(I),IERR) ; ENDDO
 IF (EXCHANGE_OBST_MASS) THEN
    DO I=1,N_REQ15 ; CALL MPI_REQUEST_FREE(REQ15(I),IERR) ; ENDDO
 ENDIF
@@ -2853,6 +2928,7 @@ RECEIVING_MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             ALLOCATE(M3%REAL_RECV_PKG8(M3%NIC_R*2))
 
             IF (LEVEL_SET_MODE>0 .OR. TERRAIN_CASE) ALLOCATE(M3%REAL_RECV_PKG14(5*M3%NIC_R))
+            IF (REFINED_MESH_INTERFACES .AND. REFLUX_MESH_INTERFACES) ALLOCATE(M3%REAL_RECV_PKG24((N_TOTAL_SCALARS+2)*M3%NIC_R))
 
          ENDIF
 
@@ -2893,6 +2969,12 @@ RECEIVING_MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                N_REQ14 = N_REQ14 + 1
                CALL MPI_RECV_INIT(M3%REAL_RECV_PKG14(1),SIZE(M3%REAL_RECV_PKG14),MPI_DOUBLE_PRECISION,SNODE,NOM,MPI_COMM_WORLD,&
                                   REQ14(N_REQ14),IERR)
+            ENDIF
+
+            IF (REFINED_MESH_INTERFACES .AND. REFLUX_MESH_INTERFACES) THEN
+               N_REQ24 = N_REQ24 + 1
+               CALL MPI_RECV_INIT(M3%REAL_RECV_PKG24(1),SIZE(M3%REAL_RECV_PKG24),MPI_DOUBLE_PRECISION,SNODE,NOM,MPI_COMM_WORLD,&
+                                  REQ24(N_REQ24),IERR)
             ENDIF
 
          ENDIF
@@ -2995,7 +3077,7 @@ SUBROUTINE MESH_EXCHANGE(CODE)
 
 USE MEMORY_FUNCTIONS, ONLY: PACK_PARTICLE,PACK_WALL,PACK_WALL_LITE,PACK_THIN_WALL,REALLOCATE_STORAGE_ARRAYS,ALLOCATE_STORAGE
 
-REAL(EB) :: TNOW,XI,YJ,ZK,T_NOW_SUB
+REAL(EB) :: TNOW,XI,YJ,ZK,T_NOW_SUB,FLAG,VEL
 INTEGER, INTENT(IN) :: CODE
 INTEGER :: NM,NOM,I,II,JJ,KK,LL,LLL,N,RNODE,SNODE,IMIN,IMAX,JMIN,JMAX,KMIN,KMAX,IJK_SIZE,RC,IC,LC
 INTEGER :: NNN,NN1,NN2,IPC,II1,II2,JJ1,JJ2,KK1,KK2,NQT2,NN,IOR,AIC,OBST_INDEX,IP,IW
@@ -3050,6 +3132,7 @@ SENDING_MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             ALLOCATE(M3%REAL_SEND_PKG7(M3%NIC_S*3))
 
             IF (LEVEL_SET_MODE>0 .OR. TERRAIN_CASE) ALLOCATE(M3%REAL_SEND_PKG14(5*M3%NIC_S))
+            IF (REFINED_MESH_INTERFACES .AND. REFLUX_MESH_INTERFACES) ALLOCATE(M3%REAL_SEND_PKG24((N_TOTAL_SCALARS+2)*M3%NIC_S))
 
          ENDIF
 
@@ -3094,6 +3177,12 @@ SENDING_MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                N_REQ14 = N_REQ14 + 1
                CALL MPI_SEND_INIT(M3%REAL_SEND_PKG14(1),SIZE(M3%REAL_SEND_PKG14),MPI_DOUBLE_PRECISION,RNODE,NM,MPI_COMM_WORLD,&
                                   REQ14(N_REQ14),IERR)
+            ENDIF
+
+            IF (REFINED_MESH_INTERFACES .AND. REFLUX_MESH_INTERFACES) THEN
+               N_REQ24 = N_REQ24 + 1
+               CALL MPI_SEND_INIT(M3%REAL_SEND_PKG24(1),SIZE(M3%REAL_SEND_PKG24),MPI_DOUBLE_PRECISION,RNODE,NM,MPI_COMM_WORLD,&
+                                  REQ24(N_REQ24),IERR)
             ENDIF
 
          ENDIF
@@ -3472,6 +3561,120 @@ SENDING_MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          ENDIF
       ENDIF
 
+      ! Send the advective flux of each scalar through the faces of this mesh at its boundary with the other mesh,
+      ! and the normal velocity at these faces (UVW_SAVE, positive in the direction of the coordinate axis), as used by
+      ! DENSITY. The other mesh uses them where its cells are coarser. In ADV_FLUX, slot -1 is 1 if the face is on the
+      ! boundary of this mesh facing the other mesh, or the cell is solid, and 0 if the cell is inside this mesh (overlapping
+      ! meshes), in which case the other mesh does not use these values; slot 0 is the velocity, slots 1 to N_TOTAL_SCALARS
+      ! the fluxes. In the buffer, slot n of face LL is at (N_TOTAL_SCALARS+2)*(LL-1)+2+n. Faces that are not interpolated
+      ! boundaries in this stage (e.g. an obstruction on the interface) send no velocity and no flux.
+
+      IF (CODE==24 .AND. M3%NIC_S>0) THEN
+         IF (RNODE==SNODE) M2=>MESHES(NOM)%OMESH(NM)
+         PACK_REAL_SEND_PKG24: DO LL=1,M3%NIC_S
+            IF (RNODE==SNODE) THEN
+               IF (.NOT.ALLOCATED(M2%ADV_FLUX)) EXIT PACK_REAL_SEND_PKG24  ! the other mesh is not coarser here
+            ENDIF
+            II1 = M3%IIO_S(LL) ; JJ1 = M3%JJO_S(LL) ; KK1 = M3%KKO_S(LL) ; IOR = M3%IOR_S(LL)
+            IC = M%CELL_INDEX(II1,JJ1,KK1)
+            FLAG = 0._EB ; IW = 0
+            IF (M%CELL(IC)%SOLID) THEN
+               FLAG = 1._EB
+            ELSE
+               IW = M%CELL(IC)%WALL_INDEX(IOR)
+               IF (IW>0 .AND. IW<=M%N_EXTERNAL_WALL_CELLS) THEN
+                  IF (M%EXTERNAL_WALL(IW)%NOM==NOM) FLAG = 1._EB
+                  IF (.NOT.((PREDICTOR .AND. M%WALL(IW)%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) .OR. &
+                            (CORRECTOR .AND. M%EXTERNAL_WALL(IW)%BOUNDARY_TYPE_PREVIOUS==INTERPOLATED_BOUNDARY))) IW = 0
+               ELSE
+                  IW = 0
+               ENDIF
+            ENDIF
+            VEL = 0._EB
+            IF (IW>0) VEL = M%UVW_SAVE(IW)
+            IF (RNODE/=SNODE) THEN
+               M3%REAL_SEND_PKG24((N_TOTAL_SCALARS+2)*(LL-1)+1) = FLAG
+               M3%REAL_SEND_PKG24((N_TOTAL_SCALARS+2)*(LL-1)+2) = VEL
+            ELSE
+               M2%ADV_FLUX(II1,JJ1,KK1,-1) = FLAG
+               M2%ADV_FLUX(II1,JJ1,KK1, 0) = VEL
+            ENDIF
+            DO NN=1,N_TOTAL_SCALARS
+               XI = 0._EB
+               IF (IW>0) THEN
+                  SELECT CASE(IOR)
+                     CASE( 1) ; XI = M%FX(II1  ,JJ1,KK1,NN)*M%UVW_SAVE(IW)
+                     CASE(-1) ; XI = M%FX(II1-1,JJ1,KK1,NN)*M%UVW_SAVE(IW)
+                     CASE( 2) ; XI = M%FY(II1,JJ1  ,KK1,NN)*M%UVW_SAVE(IW)
+                     CASE(-2) ; XI = M%FY(II1,JJ1-1,KK1,NN)*M%UVW_SAVE(IW)
+                     CASE( 3) ; XI = M%FZ(II1,JJ1,KK1  ,NN)*M%UVW_SAVE(IW)
+                     CASE(-3) ; XI = M%FZ(II1,JJ1,KK1-1,NN)*M%UVW_SAVE(IW)
+                  END SELECT
+               ENDIF
+               IF (RNODE/=SNODE) THEN
+                  M3%REAL_SEND_PKG24((N_TOTAL_SCALARS+2)*(LL-1)+2+NN) = XI
+               ELSE
+                  M2%ADV_FLUX(II1,JJ1,KK1,NN) = XI
+               ENDIF
+            ENDDO
+         ENDDO PACK_REAL_SEND_PKG24
+      ENDIF
+
+      ! Send the face value of each scalar, as computed by MASS_FINITE_DIFFERENCES, and the normal velocity that DENSITY
+      ! uses (UVW_SAVE, positive in the direction of the coordinate axis) at the faces of this mesh at its boundary with the
+      ! other mesh. Where the cell size changes, the mesh downstream of the interface uses them for its own face values.
+      ! The buffers and requests of CODE=24 are used, with the same layout (first slot of each face not used).
+      ! A velocity of 0 means that the values are not to be used.
+
+      IF (CODE==25 .AND. M3%NIC_S>0) THEN
+         IF (RNODE==SNODE) M2=>MESHES(NOM)%OMESH(NM)
+         PACK_REAL_SEND_PKG25: DO LL=1,M3%NIC_S
+            IF (RNODE==SNODE) THEN
+               IF (.NOT.ALLOCATED(M2%FACE_VALUE)) EXIT PACK_REAL_SEND_PKG25  ! no change of cell size here
+            ENDIF
+            II1 = M3%IIO_S(LL) ; JJ1 = M3%JJO_S(LL) ; KK1 = M3%KKO_S(LL) ; IOR = M3%IOR_S(LL)
+            IC = M%CELL_INDEX(II1,JJ1,KK1)
+            VEL = 0._EB ; IW = 0
+            IF (.NOT.M%CELL(IC)%SOLID) THEN
+               IW = M%CELL(IC)%WALL_INDEX(IOR)
+               IF (IW>0 .AND. IW<=M%N_EXTERNAL_WALL_CELLS) THEN
+                  IF (M%EXTERNAL_WALL(IW)%NOM/=NOM) IW = 0
+               ELSE
+                  IW = 0
+               ENDIF
+            ENDIF
+            IF (IW>0) THEN
+               IF (.NOT.((PREDICTOR .AND. M%WALL(IW)%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) .OR. &
+                         (CORRECTOR .AND. M%EXTERNAL_WALL(IW)%BOUNDARY_TYPE_PREVIOUS==INTERPOLATED_BOUNDARY))) IW = 0
+            ENDIF
+            IF (IW>0) VEL = M%UVW_SAVE(IW)
+            IF (RNODE/=SNODE) THEN
+               M3%REAL_SEND_PKG24((N_TOTAL_SCALARS+2)*(LL-1)+1) = 0._EB  ! not used
+               M3%REAL_SEND_PKG24((N_TOTAL_SCALARS+2)*(LL-1)+2) = VEL
+            ELSE
+               M2%FACE_VALUE(II1,JJ1,KK1,0) = VEL
+            ENDIF
+            DO NN=1,N_TOTAL_SCALARS
+               XI = 0._EB
+               IF (IW>0) THEN
+                  SELECT CASE(IOR)
+                     CASE( 1) ; XI = M%FX(II1  ,JJ1,KK1,NN)
+                     CASE(-1) ; XI = M%FX(II1-1,JJ1,KK1,NN)
+                     CASE( 2) ; XI = M%FY(II1,JJ1  ,KK1,NN)
+                     CASE(-2) ; XI = M%FY(II1,JJ1-1,KK1,NN)
+                     CASE( 3) ; XI = M%FZ(II1,JJ1,KK1  ,NN)
+                     CASE(-3) ; XI = M%FZ(II1,JJ1,KK1-1,NN)
+                  END SELECT
+               ENDIF
+               IF (RNODE/=SNODE) THEN
+                  M3%REAL_SEND_PKG24((N_TOTAL_SCALARS+2)*(LL-1)+2+NN) = XI
+               ELSE
+                  M2%FACE_VALUE(II1,JJ1,KK1,NN) = XI
+               ENDIF
+            ENDDO
+         ENDDO PACK_REAL_SEND_PKG25
+      ENDIF
+
       ! Send mass losses from OBSTRUCTIONs that only border the current mesh
 
       IF (CODE==15) THEN
@@ -3568,6 +3771,16 @@ IF (N_MPI_PROCESSES>1 .AND. CODE==14 .AND. N_REQ14>0) THEN
    CALL TIMEOUT('MPI exchange of level set values (CODE=14)',N_REQ14,REQ14(1:N_REQ14))
 ENDIF
 
+IF (N_MPI_PROCESSES>1 .AND. CODE==24 .AND. N_REQ24>0) THEN
+   CALL MPI_STARTALL(N_REQ24,REQ24(1:N_REQ24),IERR)
+   CALL TIMEOUT('MPI exchange of advective fluxes at mesh interfaces with refinement (CODE=24)',N_REQ24,REQ24(1:N_REQ24))
+ENDIF
+
+IF (N_MPI_PROCESSES>1 .AND. CODE==25 .AND. N_REQ24>0) THEN
+   CALL MPI_STARTALL(N_REQ24,REQ24(1:N_REQ24),IERR)
+   CALL TIMEOUT('MPI exchange of face values at mesh interfaces with refinement (CODE=25)',N_REQ24,REQ24(1:N_REQ24))
+ENDIF
+
 IF (N_MPI_PROCESSES>1 .AND. CODE==15 .AND. N_REQ15>0) THEN
    CALL MPI_STARTALL(N_REQ15,REQ15(1:N_REQ15),IERR)
    CALL TIMEOUT('MPI exchange of obstruction mass (CODE=15)',N_REQ15,REQ15(1:N_REQ15))
@@ -3588,6 +3801,26 @@ RECV_MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       IF (NOM==NM .AND. M2%NIC_R==0) CYCLE SEND_MESH_LOOP
 
       SNODE = PROCESS(NOM)
+
+      ! Unpack the flags, normal velocities and advective fluxes at the boundary faces of the other mesh
+
+      IF (CODE==24 .AND. M2%NIC_R>0 .AND. RNODE/=SNODE .AND. ALLOCATED(M2%ADV_FLUX)) THEN
+         UNPACK_REAL_RECV_PKG24: DO LL=1,M2%NIC_R
+            DO NN=-1,N_TOTAL_SCALARS
+               M2%ADV_FLUX(M2%IIO_R(LL),M2%JJO_R(LL),M2%KKO_R(LL),NN) = M2%REAL_RECV_PKG24((N_TOTAL_SCALARS+2)*(LL-1)+2+NN)
+            ENDDO
+         ENDDO UNPACK_REAL_RECV_PKG24
+      ENDIF
+
+      ! Unpack the face values and normal velocities at the boundary faces of the other, coarser mesh
+
+      IF (CODE==25 .AND. M2%NIC_R>0 .AND. RNODE/=SNODE .AND. ALLOCATED(M2%FACE_VALUE)) THEN
+         UNPACK_REAL_RECV_PKG25: DO LL=1,M2%NIC_R
+            DO NN=0,N_TOTAL_SCALARS
+               M2%FACE_VALUE(M2%IIO_R(LL),M2%JJO_R(LL),M2%KKO_R(LL),NN) = M2%REAL_RECV_PKG24((N_TOTAL_SCALARS+2)*(LL-1)+2+NN)
+            ENDDO
+         ENDDO UNPACK_REAL_RECV_PKG25
+      ENDIF
 
       ! Unpack densities and species mass fractions in the PREDICTOR (CODE=1) and CORRECTOR (CODE=4) step
 

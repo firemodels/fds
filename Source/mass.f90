@@ -9,7 +9,7 @@ USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
 
 IMPLICIT NONE (TYPE,EXTERNAL)
 PRIVATE
-PUBLIC MASS_FINITE_DIFFERENCES,DENSITY
+PUBLIC MASS_FINITE_DIFFERENCES,DENSITY,REFLUX_AT_MESH_INTERFACE,FACE_VALUES_AT_MESH_INTERFACE
 
 CONTAINS
 
@@ -990,5 +990,227 @@ ENDDO
 END SUBROUTINE CLIP_PASSIVE_SCALARS
 
 END SUBROUTINE DENSITY
+
+!> \brief At a mesh interface where the cell size changes, each mesh limits its face value with its own cells and ghost
+!> cells, and the ghost cells of the fine mesh hold only the coarse-cell value. The two meshes then compute different face
+!> values, and the fine mesh is first order where gas flows into it. Here the mesh downstream of the interface takes the face
+!> values of the upstream mesh: on the fine side, the face value the coarse mesh computed with its flux limiter; on the
+!> coarse side, the flux-weighted average of the fine-mesh face values. Faces with flow in both directions are left as they
+!> are. The normal velocities are those DENSITY uses on each side (UVW_SAVE). The values of the other mesh arrive in
+!> OMESH(NOM)%FACE_VALUE (MESH_EXCHANGE code 25). Called after MASS_FINITE_DIFFERENCES and before DENSITY;
+!> REFLUX_AT_MESH_INTERFACE then corrects the coarse cells where the flow crosses the interface in both directions.
+!> \param NM Mesh number
+
+SUBROUTINE FACE_VALUES_AT_MESH_INTERFACE(NM)
+
+INTEGER, INTENT(IN) :: NM
+INTEGER :: IW,IIG,JJG,KKG,IOR,IIO,JJO,KKO
+REAL(EB) :: UN,UN_OTHER,ARO,SUM_U,SUM_F(1:N_TOTAL_SCALARS)
+TYPE(WALL_TYPE), POINTER :: WC
+TYPE(EXTERNAL_WALL_TYPE), POINTER :: EWC
+TYPE(BOUNDARY_COORD_TYPE), POINTER :: BC
+TYPE(OMESH_TYPE), POINTER :: OM
+TYPE(MESH_TYPE), POINTER :: MM
+
+IF (SOLID_PHASE_ONLY .OR. CC_IBM .OR. CYLINDRICAL .OR. .NOT.REFLUX_MESH_INTERFACES) RETURN
+
+CALL POINT_TO_MESH(NM)
+
+WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
+
+   WC  => WALL(IW)
+   EWC => EXTERNAL_WALL(IW)
+   IF (EWC%NOM==0) CYCLE WALL_LOOP
+   IF (EWC%NIC==1 .AND. EWC%AREA_RATIO>0.99_EB) CYCLE WALL_LOOP  ! same cell size on both sides
+   IF (WC%SURF_INDEX==PERIODIC_FLOW_ONLY_SURF_INDEX) CYCLE WALL_LOOP
+   IF (PREDICTOR .AND. WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE WALL_LOOP
+   IF (CORRECTOR .AND. EWC%BOUNDARY_TYPE_PREVIOUS/=INTERPOLATED_BOUNDARY) CYCLE WALL_LOOP
+   OM => OMESH(EWC%NOM)
+   IF (.NOT.ALLOCATED(OM%FACE_VALUE)) CYCLE WALL_LOOP
+   BC  => BOUNDARY_COORD(WC%BC_INDEX)
+   IIG = BC%IIG ; JJG = BC%JJG ; KKG = BC%KKG ; IOR = BC%IOR
+   IF (CELL(CELL_INDEX(IIG,JJG,KKG))%SOLID) CYCLE WALL_LOOP
+
+   ! Normal velocity on this side as used by DENSITY, positive into this mesh
+
+   UN = SIGN(1._EB,REAL(IOR,EB))*UVW_SAVE(IW)
+   IF (UN<=0._EB) CYCLE WALL_LOOP
+
+   IF (EWC%NIC==1) THEN
+
+      ! Fine side: one coarse cell on the other side. Take its face value if the gas also flows into this mesh there.
+
+      IIO = EWC%IIO_MIN ; JJO = EWC%JJO_MIN ; KKO = EWC%KKO_MIN
+      UN_OTHER = SIGN(1._EB,REAL(IOR,EB))*OM%FACE_VALUE(IIO,JJO,KKO,0)
+      IF (UN_OTHER<=0._EB) CYCLE WALL_LOOP
+      SUM_F = OM%FACE_VALUE(IIO,JJO,KKO,1:N_TOTAL_SCALARS)
+
+   ELSE
+
+      ! Coarse side: several fine cells on the other side. Take the flux-weighted average of their face values if the gas
+      ! flows into this mesh through all of them.
+
+      MM => MESHES(EWC%NOM)
+      SUM_U = 0._EB
+      SUM_F = 0._EB
+      DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
+         DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
+            DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
+               UN_OTHER = SIGN(1._EB,REAL(IOR,EB))*OM%FACE_VALUE(IIO,JJO,KKO,0)
+               IF (UN_OTHER<=0._EB) CYCLE WALL_LOOP
+               SELECT CASE(ABS(IOR))
+                  CASE(1) ; ARO = MM%DY(JJO)*MM%DZ(KKO)/(DY(JJG)*DZ(KKG))
+                  CASE(2) ; ARO = MM%DX(IIO)*MM%DZ(KKO)/(DX(IIG)*DZ(KKG))
+                  CASE(3) ; ARO = MM%DX(IIO)*MM%DY(JJO)/(DX(IIG)*DY(JJG))
+               END SELECT
+               SUM_U = SUM_U + ARO*UN_OTHER
+               SUM_F = SUM_F + ARO*UN_OTHER*OM%FACE_VALUE(IIO,JJO,KKO,1:N_TOTAL_SCALARS)
+            ENDDO
+         ENDDO
+      ENDDO
+      SUM_F = SUM_F/SUM_U
+
+   ENDIF
+
+   SELECT CASE(IOR)
+      CASE( 1) ; FX(IIG-1,JJG,KKG,1:N_TOTAL_SCALARS) = SUM_F
+      CASE(-1) ; FX(IIG  ,JJG,KKG,1:N_TOTAL_SCALARS) = SUM_F
+      CASE( 2) ; FY(IIG,JJG-1,KKG,1:N_TOTAL_SCALARS) = SUM_F
+      CASE(-2) ; FY(IIG,JJG  ,KKG,1:N_TOTAL_SCALARS) = SUM_F
+      CASE( 3) ; FZ(IIG,JJG,KKG-1,1:N_TOTAL_SCALARS) = SUM_F
+      CASE(-3) ; FZ(IIG,JJG,KKG  ,1:N_TOTAL_SCALARS) = SUM_F
+   END SELECT
+
+ENDDO WALL_LOOP
+
+END SUBROUTINE FACE_VALUES_AT_MESH_INTERFACE
+
+
+!> \brief At a mesh interface with refinement, correct the advective flux of each scalar through the coarse face by the
+!> area-weighted sum over the fine faces of u_fine*(phi_fine - phi_coarse), where phi is the face value, so that it carries
+!> the face values the fine mesh used. Where the coarse normal velocity equals the area-weighted average of the fine ones,
+!> both meshes then move the same mass. A difference of the velocities (FFT pressure solver, within VELOCITY_TOLERANCE) is
+!> not moved into the coarse cell, which would get more or less gas than its own velocity field makes room for; the mass
+!> error left is the velocity difference times the face value, as between meshes with the same cell size, and is
+!> controlled by VELOCITY_TOLERANCE.
+!> The fine-mesh fluxes and velocities arrive in OMESH(NOM)%ADV_FLUX(:,:,:,1:N_TOTAL_SCALARS) and ADV_FLUX(:,:,:,0)
+!> (MESH_EXCHANGE code 24). ADV_FLUX(:,:,:,-1) is 0 where the fine cell is not at the boundary of the fine mesh
+!> (overlapping meshes); such walls are not corrected.
+!> \param DT Time step (s)
+!> \param NM Mesh index of the coarse mesh
+
+SUBROUTINE REFLUX_AT_MESH_INTERFACE(DT,NM)
+
+USE PHYSICAL_FUNCTIONS, ONLY : GET_SPECIFIC_GAS_CONSTANT
+REAL(EB), INTENT(IN) :: DT
+INTEGER, INTENT(IN) :: NM
+INTEGER :: IW,IIG,JJG,KKG,IIO,JJO,KKO,IOR
+REAL(EB) :: ARO,FAC,RDN,RHO_NEW,U_FINE,F_FINE(N_TOTAL_SCALARS),PHI_COARSE(N_TOTAL_SCALARS),DF(N_TOTAL_SCALARS),&
+            RHO_ZZ(N_TOTAL_SCALARS),ZZ_GET(N_TRACKED_SPECIES)
+REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP
+REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP
+REAL(EB), POINTER, DIMENSION(:,:) :: PBARP
+TYPE(MESH_TYPE), POINTER :: MM
+TYPE(WALL_TYPE), POINTER :: WC
+TYPE(EXTERNAL_WALL_TYPE), POINTER :: EWC
+TYPE(BOUNDARY_COORD_TYPE), POINTER :: BC
+
+IF (SOLID_PHASE_ONLY .OR. CC_IBM .OR. CYLINDRICAL .OR. .NOT.REFLUX_MESH_INTERFACES) RETURN
+
+! Return where DENSITY did not update the fields
+
+SELECT CASE (PERIODIC_TEST)
+   CASE DEFAULT
+      IF (ICYC<=1) RETURN
+   CASE (5,8)
+      RETURN
+   CASE (4,7,11,21,22)
+END SELECT
+
+CALL POINT_TO_MESH(NM)
+
+IF (PREDICTOR) THEN
+   RHOP => RHOS ; ZZP => ZZS ; PBARP => PBAR_S ; FAC = 1._EB
+ELSE
+   RHOP => RHO  ; ZZP => ZZ  ; PBARP => PBAR   ; FAC = 0.5_EB
+ENDIF
+
+WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
+
+   WC  => WALL(IW)
+   EWC => EXTERNAL_WALL(IW)
+   IF (EWC%NOM==0 .OR. EWC%NIC<=1) CYCLE WALL_LOOP
+   IF (WC%SURF_INDEX==PERIODIC_FLOW_ONLY_SURF_INDEX) CYCLE WALL_LOOP  ! scalars do not cross this boundary
+   IF (PREDICTOR .AND. WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE WALL_LOOP
+   IF (CORRECTOR .AND. EWC%BOUNDARY_TYPE_PREVIOUS/=INTERPOLATED_BOUNDARY) CYCLE WALL_LOOP
+   BC  => BOUNDARY_COORD(WC%BC_INDEX)
+   IIG = BC%IIG ; JJG = BC%JJG ; KKG = BC%KKG ; IOR = BC%IOR
+   IF (CELL(CELL_INDEX(IIG,JJG,KKG))%SOLID) CYCLE WALL_LOOP
+   IF (.NOT.ALLOCATED(OMESH(EWC%NOM)%ADV_FLUX)) CYCLE WALL_LOOP
+   MM => MESHES(EWC%NOM)
+
+   ! Face value used by DENSITY on this (coarse) mesh
+
+   SELECT CASE(IOR)
+      CASE( 1) ; PHI_COARSE = FX(IIG-1,JJG,KKG,1:N_TOTAL_SCALARS) ; RDN = RDX(IIG)
+      CASE(-1) ; PHI_COARSE = FX(IIG  ,JJG,KKG,1:N_TOTAL_SCALARS) ; RDN = RDX(IIG)
+      CASE( 2) ; PHI_COARSE = FY(IIG,JJG-1,KKG,1:N_TOTAL_SCALARS) ; RDN = RDY(JJG)
+      CASE(-2) ; PHI_COARSE = FY(IIG,JJG  ,KKG,1:N_TOTAL_SCALARS) ; RDN = RDY(JJG)
+      CASE( 3) ; PHI_COARSE = FZ(IIG,JJG,KKG-1,1:N_TOTAL_SCALARS) ; RDN = RDZ(KKG)
+      CASE(-3) ; PHI_COARSE = FZ(IIG,JJG,KKG  ,1:N_TOTAL_SCALARS) ; RDN = RDZ(KKG)
+   END SELECT
+
+   ! Sum of the fluxes and normal velocities used by DENSITY on the fine mesh, weighted by face area,
+   ! positive in the direction of the coordinate axis
+
+   F_FINE = 0._EB
+   U_FINE = 0._EB
+   DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
+      DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
+         DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
+            SELECT CASE(ABS(IOR))
+               CASE(1) ; ARO = MM%DY(JJO)*MM%DZ(KKO)/(DY(JJG)*DZ(KKG))
+               CASE(2) ; ARO = MM%DX(IIO)*MM%DZ(KKO)/(DX(IIG)*DZ(KKG))
+               CASE(3) ; ARO = MM%DX(IIO)*MM%DY(JJO)/(DX(IIG)*DY(JJG))
+            END SELECT
+            IF (OMESH(EWC%NOM)%ADV_FLUX(IIO,JJO,KKO,-1)<0.5_EB) CYCLE WALL_LOOP  ! meshes overlap here
+            F_FINE = F_FINE + ARO*OMESH(EWC%NOM)%ADV_FLUX(IIO,JJO,KKO,1:N_TOTAL_SCALARS)
+            U_FINE = U_FINE + ARO*OMESH(EWC%NOM)%ADV_FLUX(IIO,JJO,KKO,0)
+         ENDDO
+      ENDDO
+   ENDDO
+
+   ! Correction of the coarse flux, sum over the fine faces of u_fine*(phi_fine - phi_coarse)
+
+   DF = F_FINE - U_FINE*PHI_COARSE
+
+   ! Correct rho*Z in the coarse cell, then density, mass fractions and temperature
+
+   RHO_ZZ = RHOP(IIG,JJG,KKG)*ZZP(IIG,JJG,KKG,1:N_TOTAL_SCALARS) + SIGN(1._EB,REAL(IOR,EB))*FAC*DT*DF*RDN
+   RHO_NEW = SUM(RHO_ZZ(1:N_TRACKED_SPECIES))
+   IF (ANY(RHO_ZZ<0._EB) .OR. RHO_NEW<RHOMIN .OR. RHO_NEW>RHOMAX) CYCLE WALL_LOOP  ! keep the coarse-mesh flux in this cell
+   RHOP(IIG,JJG,KKG) = RHO_NEW
+   ZZP(IIG,JJG,KKG,1:N_TOTAL_SCALARS) = RHO_ZZ/RHOP(IIG,JJG,KKG)
+   ZZ_GET = ZZP(IIG,JJG,KKG,1:N_TRACKED_SPECIES)
+   CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RSUM(IIG,JJG,KKG))
+   TMP(IIG,JJG,KKG) = PBARP(KKG,PRESSURE_ZONE(IIG,JJG,KKG))/(RSUM(IIG,JJG,KKG)*RHOP(IIG,JJG,KKG))
+
+   ! Stored advective flux at this face (output)
+
+   IF (STORE_SPECIES_FLUX) THEN
+      SELECT CASE(IOR)
+         CASE( 1) ; ADV_FX(IIG-1,JJG,KKG,1:N_TOTAL_SCALARS) = ADV_FX(IIG-1,JJG,KKG,1:N_TOTAL_SCALARS) + FAC*DF
+         CASE(-1) ; ADV_FX(IIG  ,JJG,KKG,1:N_TOTAL_SCALARS) = ADV_FX(IIG  ,JJG,KKG,1:N_TOTAL_SCALARS) + FAC*DF
+         CASE( 2) ; ADV_FY(IIG,JJG-1,KKG,1:N_TOTAL_SCALARS) = ADV_FY(IIG,JJG-1,KKG,1:N_TOTAL_SCALARS) + FAC*DF
+         CASE(-2) ; ADV_FY(IIG,JJG  ,KKG,1:N_TOTAL_SCALARS) = ADV_FY(IIG,JJG  ,KKG,1:N_TOTAL_SCALARS) + FAC*DF
+         CASE( 3) ; ADV_FZ(IIG,JJG,KKG-1,1:N_TOTAL_SCALARS) = ADV_FZ(IIG,JJG,KKG-1,1:N_TOTAL_SCALARS) + FAC*DF
+         CASE(-3) ; ADV_FZ(IIG,JJG,KKG  ,1:N_TOTAL_SCALARS) = ADV_FZ(IIG,JJG,KKG  ,1:N_TOTAL_SCALARS) + FAC*DF
+      END SELECT
+   ENDIF
+
+ENDDO WALL_LOOP
+
+END SUBROUTINE REFLUX_AT_MESH_INTERFACE
+
 
 END MODULE MASS

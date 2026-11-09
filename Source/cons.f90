@@ -279,6 +279,8 @@ LOGICAL :: STORE_FIRE_ARRIVAL=.FALSE.               !< Flag for tracking arrival
 LOGICAL :: STORE_FIRE_RESIDENCE=.FALSE.             !< Flag for tracking residence time of spreading fire front over a surface
 LOGICAL :: STORE_LS_SPREAD_RATE=.FALSE.             !< Flag for outputting local level set spread rate magnitude
 LOGICAL :: TEST_NEW_CHAR_MODEL=.FALSE.              !< Flag to envoke new char model
+LOGICAL :: REFLUX_MESH_INTERFACES=.TRUE.            !< Same advective face values on both sides of mesh interfaces with refinement
+LOGICAL :: REFINED_MESH_INTERFACES=.FALSE.          !< At least one mesh interface has a different cell size on its two sides
 LOGICAL :: FLUX_LIMITER_MW_CORRECTION=.TRUE.        !< Flag for MW correction ensure consistent equation of state at face
 LOGICAL :: TEST_NEW_KSGS_MODEL=.FALSE.              !< Flag for new subgrid kinetic energy model from Pope model spectrum
 
