@@ -393,7 +393,7 @@ If you are running FDS under any variety of Linux or macOS, you can determine th
 
 \subsection{Two Ways to Use Multiple Processors}
 
-FDS can be run on a single computer, using one or more cores, or it can be run on multiple computers. For each supported operating system (Windows, Linux, macOS) there are two executables. One is for running with OpenMP and one is for running without OpenMP. Both executables support using MPI.
+FDS can be run on a single computer, using one or more cores, or it can be run on multiple computers\footnote{While it is possible to run FDS across Windows or macOS networks, it has become increasingly difficult due to network security concerns. Dedicated Linux compute clusters are recommended for running large FDS jobs that require multiple computers or compute nodes.}. For each supported operating system (Windows, Linux, macOS) there are two executables. One is for running with OpenMP and one is for running without OpenMP. Both executables support using MPI.
 
 There are two ways that FDS can be run in parallel; that is, exploit multiple cores on a single computer or multiple processors/cores distributed over multiple computers on a network or compute cluster. The first way is OpenMP (Open Multi-Processing)~\cite{Chapman:OpenMP} which allows a single computer to run a single or multiple mesh FDS simulation on multiple cores. The use of OpenMP does not require the computational domain to be broken up into multiple meshes, and it will still work with cases that have multiple meshes defined. The second way to run FDS in parallel is by way of MPI (Message Passing Interface). Here, the computational domain must be divided into multiple meshes. Typically each mesh is assigned its own {\em process}. These processes can be limited to a single computer, or they can be distributed over a network.
 
@@ -442,47 +442,13 @@ The progress of the simulation is indicated by diagnostic output that is written
 \begin{lstlisting}
 fds_local ... job_name.fds > job_name.err
 \end{lstlisting}
-
 It is recommend that the simulation be run in a folder associated with a drive that is physically attached to the computer. Saving files to a network share or a folder controlled by a cloud service (e.g. OneDrive) can result in simulation failures if a network issue or a file lock during automated backup results in Windows preventing FDS from writing data to a file.
 
 \subsection{Multiple Computers Running MS Windows}
 
-The following procedure is intended for a Windows domain network; that is, a network where user accounts are centrally managed such that any user can log in to any machine using the same credentials.
-\begin{enumerate}
-\item The first time you run a job, you must provide your domain name and password by issuing this command:
+FDS is compiled for Windows using the Intel oneAPI Fortran compiler and MPI library. With Intel MPI 2021.9 and later, local administrator privileges on the participating computers may not be sufficient to enable one to run an FDS simulation using multiple computers. Depending on organizational security policies and the authentication method, assistance from the Windows domain or endpoint-management administrator may be required, particularly when the calculation uses a shared working directory.
 
-      \ct{mpiexec -register}
-
-\item Create a text file, say \ct{hosts.txt}, and in it list, line by line, the names of the computers:
-
-      fred:3 \\
-      wilma:2 \\
-      dino:3
-
-      where the number following the name is the number of MPI processes that you want to invoke on that computer. The sum of all the numbers should be the number of MPI processes for the job, usually equal to the number of meshes.
-
-\item Test your network by running the following test program:
-
-    \ct{mpiexec -machine hosts.txt test_mpi}
-
-    If this command returns a ``Hello World'' message from each of the computers you listed in the \ct{hosts.txt} file, proceed to the next step. If this command fails, check the network connection between the computers by using each computer to ``ping'' the other computers. Also, make sure that the same version of FDS is installed on all computers.
-
-\item Share (with both read and write privilege) a working directory on your machine. Do not put this directory within the ``Program Files'' folder because it is write-protected. Share the working directory with everybody so that all other computers can see it. Note how this directory is defined on the other computers. Sometimes it is \ct{\\\\<my_computer>\\<my_shared_directory>\\} and sometimes it is defined via the numerical IP address, like \ct{\\\\129.6.129.87\\<my_shared_directory>\\}. The definition depends on the way your domain name server (DNS) works. Blank spaces in directory names or filenames should be avoided as they can cause problems unless you are a DOS/Windows expert.
-
-\item Within the command prompt, \ct{cd} to the working directory. At the command prompt, type:
-
-   \ct{mpiexec -wdir <working directory> -machinefile hosts.txt fds job_name.fds}
-
-   where \ct{<working directory>} is the full path name of the directory from which the command was invoked.
-
-   If you want to use more than one OpenMP thread per MPI process, add the argument
-
-   \ct{mpiexec ... -env OMP_NUM_THREADS <threads> fds_openmp job_name.fds}
-
-   If you accidentally set too many OpenMP threads, you can overload your logical processors and reduce the job efficiency.
-
-\item If successful, you should see the usual FDS printout indicating which MPI processes are assigned to which computer. If not successful, check with your network administrator or monitor the FDS help forums for advice.
-\end{enumerate}
+Given these constraints, it is recommended that Windows users take advantage of computers with a large number of cores rather than rely on a network of computers. 
 
 
 \subsection{macOS}
@@ -491,18 +457,15 @@ To run a single core FDS job on macOS, cd to the working directory and simply ty
 \begin{lstlisting}
 fds job_name.fds
 \end{lstlisting}
-
 Mac systems tend to be single machines, but may have several cores to utilize.  It may be helpful to use the OpenMP version of the code that is provided in the distribution.  To run FDS on macOS with OpenMP do the following:
 \begin{lstlisting}
 export OMP_NUM_THREADS=4 # may be set in ~/.bash_profile as well
 fds_openmp job_name.fds
 \end{lstlisting}
-
 Even if you have only one machine, you may use the cores for MPI (distributed) parallel computing.  You can map one or more meshes to a given MPI process or rank.  On macOS, without OpenMP (one core per MPI process), run a four process job like this:
 \begin{lstlisting}
 mpiexec -n 4 fds job_name.fds
 \end{lstlisting}
-
 To utilize MPI and OpenMP together (4 MPI ranks with 4 OpenMP threads each, requiring 16 total cores) on macOS do:
 \begin{lstlisting}
 export OMP_NUM_THREADS=4
@@ -520,7 +483,7 @@ A compute cluster that consists of a rack of dedicated compute nodes usually run
 
 If you opt to run the job without using a job scheduler, you can issue the commands directly at the command prompt. It is best to do this only when running short, small jobs, for example when testing a new computer or a new installation. Do not run large, time-consuming jobs this way because your jobs can potentially interfere with other scheduled jobs. Here is an example of how to run a job that uses four meshes where two MPI processes are assigned to node001 and two are assigned to node002:
 \begin{lstlisting}
-mpiexec -n 4 -host node001,node002 /home/username/.../fds job_name.fds
+mpiexec -n 4 -ppn 2 -host node001,node002 /home/username/.../fds job_name.fds
 \end{lstlisting}
 When the job starts, you should see print out to the screen that looks like this:
 \begin{lstlisting}
@@ -540,7 +503,7 @@ Note that the pre-compiled packages for either macOS and Linux contain the progr
 
 MPI is the better choice when using multiple meshes because it more efficiently divides the computational work than OpenMP. However, combining MPI and OpenMP in the same simulation is possible. If you have multiple computers at your disposal, and each computer has multiple cores, you can assign one MPI process to each computer, and use multiple cores on each computer to speed up the processing of a given mesh using OpenMP. Typically, the use of OpenMP speeds the calculation by at most factor of 2, regardless of how many OpenMP threads you assign to each MPI process. It is usually better to divide the computational domain into more meshes and set the number of OpenMP threads to 1. This all depends on your particular OS, hardware, network traffic, and so on. You should choose a good test case and try different meshing and parallel processing strategies to see what is best for you. The following command runs a 4 mesh FDS job using 4 MPI processes split over two nodes with 4 OpenMP threads attached to each process (Linux):
 \begin{lstlisting}
-mpiexec -n 4 -host node001,node002 -genv OMP_NUM_THREADS 4 /home/username/.../fds_openmp job_name.fds
+mpiexec -n 4 -ppn 2 -host node001,node002 -genv OMP_NUM_THREADS 4 /home/username/.../fds_openmp job_name.fds
 \end{lstlisting}
 When the job starts, you should see print out to the screen that looks like this:
 \begin{lstlisting}
@@ -971,7 +934,7 @@ warms up a compartment to a nearly equilibrium state at which point time-average
 
 \ct{TIME_SHRINK_FACTOR} does not reduce the time for the flow and gas temperature fields to develop; however, these often develop much faster than the wall temperature profile.
 
-Note that when \ct{TIME_SHRINK_FACTOR} is used a device with \ct{QUANTITY='TIME'} or a device or control function with a \ct{DELAY} will have those values adjusted by the value of \ct{TIME_SHRINK_FACTOR}.  For example if a 10~s \ct{DELAY} is specified for a \ct{CTRL} input with a \ct{TIME_SHRINK_FACTOR} of 10, then FDS will adjust the \ct{DELAY} to 1~s. However, use of time based device or control functions that change the simulation implies a non-steady scenario where the use of \ct{TIME_SHRINK_FACTOR} may no longer be appropriate.
+Note that when \ct{TIME_SHRINK_FACTOR} is used a device with \ct{QUANTITY='TIME'} and a \ct{SETPOINT} or a device or control function with a \ct{DELAY} will have those values adjusted by the value of \ct{TIME_SHRINK_FACTOR}. For example if a 10~s \ct{DELAY} is specified for a \ct{CTRL} input with a \ct{TIME_SHRINK_FACTOR} of 10, then FDS will adjust the \ct{DELAY} to 1~s. Time-based \ct{RAMP}s will have their independent (\ct{T}) values adjusted unless the \ct{RAMP} has a \ct{DEVC_ID} or \ct{CTRL_ID} specified.  Use of time based devices, control functions, or ramps that change the simulation, however, implies a non-steady scenario where the use of \ct{TIME_SHRINK_FACTOR} may no longer be appropriate. 
 
 \section{Computational Meshes}
 \label{info:MESH}
@@ -3233,16 +3196,15 @@ The burnout time of a liquid fuel is calculated automatically based on the liqui
 \label{box_burn_away_2D}
 \label{box_burn_away_2D_residue}
 
-If a combustible solid is to disappear from the simulation once it is consumed, set \ct{BURN_AWAY=T} on the \ct{SURF} line that is applied to the \ct{OBST}. The solid object disappears from the calculation cell by cell as the mass contained within each solid cell is consumed either by the pyrolysis reactions or by the prescribed HRR. The following issues should be kept in mind when using \ct{BURN_AWAY}:
+If a combustible solid is to disappear from the simulation once it is consumed, set \ct{BURN_AWAY=T} on the \ct{SURF} line that is applied to the \ct{OBST} and set a \ct{BULK_DENSITY} for the \ct{OBST}. The solid object disappears from the calculation cell by cell as the mass contained within each solid cell is consumed either by the pyrolysis reactions or by the prescribed HRR. The following issues should be kept in mind when using \ct{BURN_AWAY}:
 \begin{itemize}
     \item Use \ct{BURN_AWAY} cautiously. If an object has the potential of burning away, a significant amount of extra memory has to be set aside to store additional information for newly exposed surfaces.
     \item The heat conduction into an \ct{OBST} that can \ct{BURN_AWAY} is limited to 1-D. On the \ct{SURF} line, specify the \ct{THICKNESS} to be approximately that of a single cell, and also set \ct{BACKING='VOID'}. It is assumed that the solid is relatively well-insulated and that the in-depth temperature profile drops off relatively quickly at the surface. When a cell is removed, the newly exposed surface is initially at ambient temperature but heats up quickly at the surface.
     \item If the volume of the obstruction changes because it has to conform to the uniform mesh, FDS does {\em not} adjust the burning rate to account for this as it does with various quantities associated with areas, like \ct{HRRPUA}.
-    \item A parameter called \ct{BULK_DENSITY} (\unit{kg/m^3}) can be specified on the \ct{OBST} line to designate the {\em combustible} mass of the solid object. The calculation uses the user-specified object dimensions, not those of the mesh-adjusted object. This parameter over-rides all other parameters with which a combustible mass would be calculated. Note that without a \ct{BULK_DENSITY} specified, the total amount of mass burned will depend upon the grid resolution. The use of the \ct{BULK_DENSITY} parameter ensures a specific fuel mass per unit volume that is independent of the grid resolution. Note that in the event that the solid phase reaction involves the production of solid residue (like char or ash), the \ct{BULK_DENSITY} refers to the mass of the solid that is converted to gas upon reaction. You can visualize the decrease in the bulk density of a burning solid using the output quantity \ct{'BULK DENSITY'} with a slice (\ct{SLCF}) or device (\ct{DEVC}).
-    \item If \ct{BURN_AWAY} is prescribed on a \ct{SURF} line, that single \ct{SURF_ID} should be applied to the entire \ct{OBST}, not to specific faces, because it is unclear how to remove solid obstructions that have different \ct{SURF_ID}s on different faces. An exception to this rule is where a \ct{BULK_DENSITY} is applied to the \ct{OBST}, in which case the \ct{OBST} will disappear when the mass of fuel designated by \ct{BULK_DENSITY} is consumed rather than that of any particular face.
+    \item The parameter \ct{BULK_DENSITY} (\unit{kg/m^3}) must be specified on the \ct{OBST} line to designate the {\em combustible} mass of the solid object. The calculation uses the user-specified object dimensions (i.e., the {\ct XB}), not those of the mesh-adjusted object. This parameter over-rides all other parameters with which a combustible mass would be calculated. The use of the \ct{BULK_DENSITY} parameter ensures a specific fuel mass per unit volume that is independent of the grid resolution. Note that in the event that the solid phase reaction involves the production of solid residue (like char or ash), the \ct{BULK_DENSITY} refers to the mass of the solid that is converted to gas upon reaction. You can visualize the decrease in the bulk density of a burning solid using the output quantity \ct{'BULK DENSITY'} with a slice (\ct{SLCF}) or device (\ct{DEVC}).
     \item By default, newly exposed surfaces take on the same \ct{SURF_ID} that has been applied to the original obstruction. However, you can specify an optional \ct{SURF_ID_INTERIOR} on the \ct{OBST} line to define surface properties of newly exposed surfaces. For example, an upholstered cushion might have a surface layer of fabric whereas a newly exposed grid cell within the cushion will not.
-    \item To compensate for the inaccurate obstruction area, an additional parameter \ct{AREA_MULTIPLIER} can be added on the \ct{SURF} line. It will multiply all mass and energy fluxes with a user-specified factor. Check that the \ct{BURN_AWAY} works as expected if these two features are combined.
-    \item The mass of the object is based on the densities of all material components (\ct{MATL}), but it is only consumed by mass fluxes of the {\em known} species. If the sum of the gaseous yields is less than one, it will take longer to consume the mass.
+    \item To compensate for an inaccurate obstruction area, an additional parameter \ct{AREA_MULTIPLIER} can be added on the \ct{SURF} line. It will multiply all mass and energy fluxes with a user-specified factor before they are applied to adjacent gas phase cells. Check that the \ct{BURN_AWAY} works as expected if these two features are combined.
+    \item The mass of the object is only consumed by mass fluxes of the {\em known} species or particles. If the sum of the gaseous and particle yields is less than one, it will take longer to consume the mass.
 \end{itemize}
 
 \subsubsection{Examples}
@@ -14600,7 +14562,7 @@ If a compiled version of FDS exists for the machine on which the calculation is 
 
 Table~\ref{tab:sourcefiles} lists the files that make up the FDS source code. Files with the ``.f90'' suffix contain free-form Fortran~90 instructions conforming to the ANSI and ISO standards (2018 edition). A \ct{makefile} is available in the \href{https://github.com/firemodels/fds/tree/master/Build}{Build directory of the FDS GitHub repository} that contains platform specific options for compilation. Note the following:
 \begin{itemize}
-\item The source code consists entirely of Fortran statements organized into 32 files. Some compilers have a standard optimization level, plus various degrees of ``aggressive'' optimization. Be cautious in using the highest levels of optimization.
+\item The source code consists entirely of Fortran statements organized into 33 files. Some compilers have a standard optimization level, plus various degrees of ``aggressive'' optimization. Be cautious in using the highest levels of optimization.
 \item To compile FDS, you need a Fortran compiler (2018 or greater) and MPI libraries.
 \item To compile routines for the ULMAT and UGLMAT pressure solvers, Intel Math Kernel Libraries (MKL) are required.
 \item To compile routines for the HYPRE (iterative linear solvers), the HYPRE Library \cite{HYPRE} from Lawrence Livermore National Laboratory is required.

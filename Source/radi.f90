@@ -3842,7 +3842,7 @@ OUTRAD_W   => WALL_WORK1
 INRAD_W    => WALL_WORK2
 IF (CC_IBM) THEN
    OUTRAD_F => FACE_WORK1
-   INRAD_F  => FACE_WORK2; INRAD_F  = 0._EB
+   INRAD_F  => FACE_WORK2
    IL_F     => FACE_WORK3
 ENDIF
 
@@ -4272,6 +4272,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
          BR  => BOUNDARY_RADIA(CFA%BR_INDEX)
          BC  => BOUNDARY_COORD(CFA%BC_INDEX)
          NVECL = GET_CFACE_RAD_NVEC(CFA)
+         INRAD_F(ICF) = 0._EB
          DO N=1,NRA
             DLA = (/DLX(N),DLY(N),DLZ(N)/)
             DLF = DOT_PRODUCT(NVECL,DLA) ! face normal * radiation angle
@@ -4567,7 +4568,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                            DO IFACE=1,CF%NFACE
                               CFA => CFACE(CF%CFACE_INDEX(IFACE))
                               BC => BOUNDARY_COORD(CFA%BC_INDEX)
-                              DLF = DOT_PRODUCT(GET_CFACE_RAD_NVEC(CFA),DLA) ! face normal * radiation angle
+                              DLF = DOT_PRODUCT(CF%NVEC_RAD(IAXIS:KAXIS,IFACE),DLA) ! Geometric normal: cut-cell balance closes.
                               IF (DLF>0._EB) THEN ! upwind
                                  BR  => BOUNDARY_RADIA(CFA%BR_INDEX)
                                  AILFU = AILFU + DLF*CFA%AREA*BR%BAND(IBND)%ILW(N)
@@ -4924,7 +4925,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
          IF (CFACE(ICF)%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE
          B1 => BOUNDARY_PROP1(CFA%B1_INDEX)
          SF => SURFACE(CFA%SURF_INDEX)
-         IF (SF%SKIP_INRAD) INRAD_W(ICF) = 0._EB
+         IF (SF%SKIP_INRAD) INRAD_F(ICF) = 0._EB
          IF (SF%TMP_GAS_FRONT>0._EB) CYCLE
          IF (SF%EXTERNAL_FLUX > TWENTY_EPSILON_EB) THEN
             IF (ABS(T_BEGIN) <= SPACING(B1%T_IGN)) THEN

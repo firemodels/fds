@@ -293,7 +293,7 @@ if [ "$use_intel_mpi" == "1" ]; then
   if [ "$exe" == "" ]; then
     exe=$FDSROOT/fds/Build/impi_intel_linux$DB/fds_impi_intel_linux$DB
   fi
-  if [[ $n_openmp_threads > 1 ]]; then
+  if [[ $n_openmp_threads -gt 1 ]]; then
     exe=$FDSROOT/fds/Build/impi_intel_linux_openmp$DB/fds_impi_intel_linux_openmp$DB
   fi
 fi
