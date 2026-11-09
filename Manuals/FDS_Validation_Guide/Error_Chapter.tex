@@ -5,21 +5,12 @@
 
 This chapter describes a method to estimate the model uncertainty using comparisons of model predictions with experimental measurements whose uncertainty has been quantified. The method is ideal for complex numerical models like FDS for which a systematic analysis of sub-components is impractical, but for which there exists a relatively large amount of experimental data with which to evaluate the accuracy of the model predictions. If the uncertainty in the experiments can be quantified, the uncertainty in the model can then be expressed in the form of a normal distribution whose mean and standard deviation are estimated from the relative difference between the predicted and measured values.
 
-This method only addresses model uncertainty. It does not account for the uncertainty associated with the model input parameters. How the {\em parameter uncertainty} is treated depends greatly on the type of application. Regardless of how the parameter uncertainty is calculated, the model uncertainty needs to be addressed independently. In fact, it is incumbent on the model developers to express the uncertainty of the model in as simple a form as possible to enable the end user to assess the impact of parameter uncertainty and then combine the two forms of uncertainty into a final result.
-
 
 \section{Introduction}
 
 The most effective way of introducing the subject of uncertainty in fire modeling is by way of an example. Suppose that a fire model is used to estimate the likelihood that an electrical control cable could be damaged by a fire. It is assumed that the cable loses functionality when its surface temperature reaches 200~\unit{\degreeCelsius}, and the model predicts that the cable temperature could reach as high as 175~\unit{\degreeCelsius}. Does this mean that there is no chance of damage? The answer is no, because the input parameters, like the heat release rate of the fire, and the model assumptions, like the way the cables are modeled, are uncertain. The combination of the two -- the {\em parameter uncertainty} and the {\em model uncertainty} -- leave open the possibility that the cable temperature could exceed 200~\unit{\degreeCelsius}.
 
-This chapter addresses {\em model uncertainty} only and suggests a simple method to quantify it. While parameter uncertainty is certainly an
-important consideration in fire modeling, its treatment varies considerably depending on the particular application. For example, in what is often
-referred to as a ``bounding analysis,'' the model input parameters are chosen so as to simulate a ``maximum credible'' or ``worst case'' fire. In
-other cases, mean values of the input parameters constitute a ``50th percentile'' design scenario. Sometimes entire statistical distributions, rather
-than individual values, of the input parameters are ``propagated'' through the model in a variety of ways, leading to a statistical distribution of
-the model output. Notarianni and Parry survey these techniques in the SFPE Handbook~\cite{Notarianni:SFPE}. Regardless of the method that is chosen
-for assessing the impact of the input parameters on the model prediction, there needs to be a way of quantifying the uncertainty of the model itself.
-In other words, how good is the prediction for a given set of input parameters?
+This chapter addresses {\em model uncertainty} only and suggests a simple method to quantify it. While parameter uncertainty is certainly an important consideration in fire modeling, its treatment varies considerably depending on the particular application. For example, in what is often referred to as a ``bounding analysis,'' the model input parameters are chosen so as to simulate a ``maximum credible'' or ``worst case'' fire. In other cases, mean values of the input parameters constitute a ``50th percentile'' design scenario. Sometimes entire statistical distributions, rather than individual values, of the input parameters are ``propagated'' through the model in a variety of ways, leading to a statistical distribution of the model output. Notarianni and Parry survey these techniques in the SFPE Handbook~\cite{Notarianni:SFPE}. Regardless of the method that is chosen for assessing the impact of the input parameters on the model prediction, there needs to be a way of quantifying the uncertainty of the model itself. In other words, how good is the prediction for a given set of input parameters?
 
 The issue of model uncertainty has been around as long as the models themselves. The scenario above, for example, was considered by Siu and Apostolakis in the early 1980s~\cite{Siu:RE1982} as part of their development of risk models for nuclear power plants. The fire models at the time were relatively simple. In fact, many were engineering correlations in the form of simple formulae. This made the methods for quantifying their uncertainty reasonably tractable because each formula consisted of only a handful of physical parameters. Over the past thirty years, however, both fire modeling and the corresponding methods of uncertainty analysis have become far more complex. The current generation of computational fluid dynamics (CFD) based fire models require such a large number of physical and numerical parameters that it is considered too cumbersome to estimate model uncertainty by systematically assessing their combined effect on the final prediction. The more practical approach is to compare model predictions with actual fire experiments in a validation study, the conclusions of which typically come in the form of statements like: ``The model generally over-predicts the measured temperatures by about 10~\%,'' or ``The model predictions are within about 20~\% of the measured heat fluxes.'' This information is helpful, at the very least to demonstrate that the model is appropriate for the given application. However, even the statement that the model over-predicts measured temperatures by 10~\% is useful not only to gain acceptance of the model but also to provide a better sense of the model's accuracy, and a greater level of assurance in answering the question posed above. Knowing that the model not only predicted a temperature of 175~\unit{\degreeCelsius}, but also that the model tends to over-predict temperatures by a certain amount, increases the confidence that the postulated fire would not cause the cable to fail. The probability of cable failure could be quantified further via a statistical distribution like the one shown in Fig.~\ref{bell_curve}. The area indicated by the shaded region is the probability that the temperature will exceed 200~\unit{\degreeCelsius}, even though the model has predicted a peak temperature of only 175~\unit{\degreeCelsius}.
 \begin{figure}[ht]
@@ -36,70 +27,13 @@ This chapter describes a method for expressing {\em model uncertainty} by way of
 
 \section{Sources of Model Uncertainty}
 
-A deterministic fire model is based on fundamental conservation laws of mass, momentum and energy,
-applied either to entire compartments or smaller control
-volumes that make up the compartments. A CFD model may use millions of control volumes to compute the
-solution of the Navier-Stokes equations.
-However, it does not actually solve the Navier-Stokes equations, but rather an approximate form of these equations.
-The approximation involves simplifying
-physical assumptions, like the various techniques for treating subgrid-scale turbulence.
-One critical approximation is the discretization of the governing equations. For example,
-the partial derivative of the density, $\rho$,
-with respect to the spatial coordinate, $x$, can be written in approximate form as:
+A deterministic fire model is based on fundamental conservation laws of mass, momentum and energy, applied either to entire compartments or smaller control volumes that make up the compartments. A CFD model may use millions of control volumes to compute the solution of the Navier-Stokes equations.  However, it does not actually solve the Navier-Stokes equations, but rather an approximate form of these equations.  The approximation involves simplifying physical assumptions, like the various techniques for treating subgrid-scale turbulence.  One critical approximation is the discretization of the governing equations. For example, the partial derivative of the density, $\rho$, with respect to the spatial coordinate, $x$, can be written in approximate form as:
 \be \frac{\partial \rho}{\partial x} = \frac{\rho_{i+1} - \rho_{i-1}}{2 \, \dx} + \mathcal{O}(\dx^2) \ee
-where $\rho_i$ is the average value of the density in the $i$th grid cell and $\dx$ is the spacing between cells.
-The second term on the right represents all of the terms of order $\dx^2$ and higher in the Taylor
-series expansion and are known collectively as the
-{\em discretization error}. These extra terms are simply dropped from
-the equation set, the argument being that they become smaller and smaller with decreasing grid cell size, $\dx$.
-The effect of these neglected terms is captured, to
-some extent, by the subgrid-scale turbulence model, but that is yet another approximation of the true physics.
-What effect do these approximations have on
-the predicted results? It is very difficult to determine based on an analysis of the discretized equations.
-One possibility for estimating
-the magnitude of the discretization error is to perform a detailed
-convergence analysis, but this still does not answer a
-question like, ``What is the uncertainty of the model prediction of the gas
-temperature at a particular location in the room at a particular point in time?''
+where $\rho_i$ is the average value of the density in the $i$th grid cell and $\dx$ is the spacing between cells.  The second term on the right represents all of the terms of order $\dx^2$ and higher in the Taylor series expansion and are known collectively as the {\em discretization error}. These extra terms are simply dropped from the equation set, the argument being that they become smaller and smaller with decreasing grid cell size, $\dx$.  The effect of these neglected terms is captured, to some extent, by the subgrid-scale turbulence model, but that is yet another approximation of the true physics.  What effect do these approximations have on the predicted results? It is very difficult to determine based on an analysis of the discretized equations.  One possibility for estimating the magnitude of the discretization error is to perform a detailed convergence analysis, but this still does not answer a question like, ``What is the uncertainty of the model prediction of the gas temperature at a particular location in the room at a particular point in time?''
 
-To make matters worse, there are literally dozens of subroutines that make up a CFD-based fire model,
-from its transport equations, radiation solver, solid phase heat transfer routines, pyrolysis model,
-empirical mass, momentum and energy transfer routines at the wall, and so on.
-It has been suggested by some that
-a means to quantify the model uncertainty is to combine the uncertainties of all the model
-components.
-However, such an exercise is very difficult, especially for a CFD model,
-for a number of reasons. First, fire involves
-a complicated interaction of gas and solid phase phenomena that are closely coupled.
-Second, grid sensitivity in a CFD model or the error associated with
-a two-layer assumption in a zone model are dependent on the particular fire scenario.
-Third, fire is an inherently transient phenomenon in which relatively small
-changes in events, like a door opening or sprinkler actuation, can lead to significant changes in outcome.
+To make matters worse, there are literally dozens of subroutines that make up a CFD-based fire model, from its transport equations, radiation solver, solid phase heat transfer routines, pyrolysis model, empirical mass, momentum and energy transfer routines at the wall, and so on.  It has been suggested by some that a means to quantify the model uncertainty is to combine the uncertainties of all the model components.  However, such an exercise is very difficult, especially for a CFD model, for a number of reasons. First, fire involves a complicated interaction of gas and solid phase phenomena that are closely coupled.  Second, grid sensitivity in a CFD model or the error associated with a two-layer assumption in a zone model are dependent on the particular fire scenario.  Third, fire is an inherently transient phenomenon in which relatively small changes in events, like a door opening or sprinkler actuation, can lead to significant changes in outcome.
 
-Rather than attempt to decompose the model into its constituent parts and assess the uncertainty of
-each, the strategy adopted here is to compare model predictions to as many
-experiments as possible. This has been the traditional approach for quantifying model uncertainty in fire
-protection engineering because of the relative abundance of test data. Consider, for example, the
-plot shown in Fig.~\ref{scatterplot}. This is the typical outcome of a validation study, where in this case a series of
-heat flux measurements are compared with model predictions.
-The diagonal line indicates where the prediction and measurement agree.
-But because there is uncertainty associated with each, it cannot be said that the model is perfect if its predictions
-agree exactly with measurements.
-There needs to be a way of quantifying the uncertainties of each before any conclusions can be drawn.
-Such an exercise would result in the uncertainty
-bars\footnote{The data in Fig.~\ref{scatterplot} was extracted from Ref.~\cite{NUREG_1824_Sup_1}.
-The uncertainty bars are for demonstration only.}
-shown in the figure. The
-horizontal bar associated with each point represents the uncertainty in the measurement itself.
-For example, the heat flux gauge is subject to uncertainty due to its design and fabrication.
-Because the horizontal bar represents the experimental uncertainty, it is assumed that the vertical
-bar represents the model uncertainty. This is only partially true. In fact the vertical bar represents the total
-uncertainty of the prediction, which is a combination of the {\em model} and {\em parameter} uncertainties. The physical
-input parameters, like the heat release rate and material properties, are based on measurements that are reported
-in the documentation of the experiment.
-The total {\em experimental uncertainty} is represented by all of the horizontal bar and part of the vertical.
-If the {\em experimental uncertainty} can be quantified, then the {\em model uncertainty} can be obtained as a result.
-
+Rather than attempt to decompose the model into its constituent parts and assess the uncertainty of each, the strategy adopted here is to compare model predictions to as many experiments as possible. This has been the traditional approach for quantifying model uncertainty in fire protection engineering because of the relative abundance of test data. Consider, for example, the plot shown in Fig.~\ref{scatterplot}. This is the typical outcome of a validation study, where in this case a series of heat flux measurements are compared with model predictions.  The diagonal line indicates where the prediction and measurement agree.  But because there is uncertainty associated with each, it cannot be said that the model is perfect if its predictions agree exactly with measurements.  There needs to be a way of quantifying the uncertainties of each before any conclusions can be drawn.  Such an exercise would result in the uncertainty bars\footnote{The data in Fig.~\ref{scatterplot} was extracted from Ref.~\cite{NUREG_1824_Sup_1}.  The uncertainty bars are for demonstration only.} shown in the figure. The horizontal bar associated with each point represents the uncertainty in the measurement itself.  For example, the heat flux gauge is subject to uncertainty due to its design and fabrication.  Because the horizontal bar represents the experimental uncertainty, it is assumed that the vertical bar represents the model uncertainty. This is only partially true. In fact the vertical bar represents the total uncertainty of the prediction, which is a combination of the {\em model} and {\em parameter} uncertainties. The physical input parameters, like the heat release rate and material properties, are based on measurements that are reported in the documentation of the experiment.  The total {\em experimental uncertainty} is represented by all of the horizontal bar and part of the vertical. If the {\em experimental uncertainty} can be quantified, then the {\em model uncertainty} can be obtained as a result.
 
 \begin{figure}[ht]
 \begin{center}
@@ -114,13 +48,17 @@ If the {\em experimental uncertainty} can be quantified, then the {\em model unc
 
 The difference between a model prediction and an experimental measurement is a combination of three components: (1) uncertainty in the measurement of the predicted quantity, (2) uncertainty in the model input parameters, and (3) uncertainty in the model physics and numerics. The first two components are related to uncertainty in the measured input and output quantities. For example, consider the hot gas layer (HGL) temperature. First, the thermocouple measurements used to calculate the HGL temperature have uncertainty. Second, the measurement of the heat release rate of the fire has uncertainty, and this uncertainty affects the predicted HGL temperature. Third, the model itself, including its physical assumptions and numerical approximations, has uncertainty. The objective of the validation study is to quantify this third component, the model uncertainty. To do this, the first two components of uncertainty related to the experimental measurements must be quantified. The combination of these two, the experimental uncertainty, is the objective of this section.
 
-For many of the experiments considered in this guide, the uncertainty of the measurements was not documented. Instead, estimates of measurement uncertainty are made based on those few experiments that do include uncertainty estimates, and this information is supplemented by engineering judgment. In the following two subsections, each component of the experimental uncertainty is considered separately. First, the uncertainty in the measurement of the predicted quantity of interest, like the surface temperature of the compartment. Second, the uncertainties of the most important input parameters are propagated through simple models to quantify their effect on the predicted quantity. Then, the uncertainties are combined via simple quadrature to estimate the total experimental uncertainty.
+The discussion to follow makes use of commonly accepted guidelines for evaluating and expressing the uncertainty of measurements~\cite{Taylor&Kuyatt:1994}. The {\it standard uncertainty} of a measured quantity, $y$, typically denoted $u(y)$, is expressed as a single standard deviation. However, the uncertainty of a single measurement may be a combination of the systematic uncertainty associated with the various underlying measurements and assumptions; and the random uncertainty associated with the conduct of the experiment. The systematic and random uncertainty values are combined via quadrature resulting in a {\t combined standard uncertainty}, $u_{\rm c}(y)$. 
 
-Note that in this guide, all uncertainties are expressed in relative form, as a percentage. The uncertainty of a measurement is a combination of the systematic uncertainty associated with the various underlying measurements and assumptions; and the random uncertainty associated with the conduct of the experiment. Following the recommended guidelines for evaluating and expressing the uncertainty of measurements~\cite{Taylor&Kuyatt:1994}, the systematic and random uncertainty values are combined via quadrature resulting in a combined relative standard uncertainty.
+Note that in this guide, an uncertainty is typically expressed as a {\it relative standard uncertainty}; that is, $u_{\rm r}(y)=u(y)/|y|$. This is convenient when consolidating the results of many experiments with a wide range of measured values. Note also that for many of the experiments considered here, the uncertainty of the measurements is not documented. Instead, estimates of measurement uncertainty have been made based on those few experiments that do include uncertainty estimates, and this information is supplemented by engineering judgment. 
+
+In the following two subsections, each component of the experimental uncertainty is considered separately. First, in Sec.~\ref{measurement_uncertainty}, the uncertainty of common measurement devices used in fire experiments is discussed. Next, in Sec.~\ref{input_uncertainty}, it is shown how the uncertainties of the most important model input parameters, like the heat release rate or soot yield, contribute to the uncertainty of the model prediction. Finally, the uncertainties in the model inputs and the measured quantities are combined via simple quadrature to estimate the total experimental uncertainty.
+
 
 \subsection{Uncertainty of Common Fire Measurements}
+\label{measurement_uncertainty}
 
-Because most of the experiments described in this guide have little or no information about the uncertainty of the measurements, much of this section is based on the uncertainty analysis contained in the test report of the NIST/NRC Experiments\footnote{Note that the uncertainties in Ref.~\cite{Hamins:SP1013-1} are reported in the form of 95~\% confidence intervals, or ``2-sigma''. This is referred to as the expanded uncertainty with a coverage factor of 2. To avoid confusion, in this report the uncertainty of all measurements and model predictions shall be reported in terms of a relative standard uncertainty; that is, the estimated standard deviation of the measured or predicted quantity.}. The types of measurements described in this report are the ones most commonly used in large scale fire experiments. They include thermocouples for gas and surface temperature measurements, heat flux gauges, smoke and gas analyzers, and pressure sensors.
+Because most of the experiments described in this guide have little or no information about the uncertainty of the measurements, much of this section is based on the uncertainty analysis contained in the test report of the NIST/NRC Experiments\footnote{Note that the uncertainties in Ref.~\cite{Hamins:SP1013-1} are reported in the form of 95~\% confidence intervals, or ``2-sigma''. This is referred to as the {\it expanded uncertainty} with a coverage factor of $k=2$, or mathematically, $U=k \, u_{c,r}(y)$. To avoid confusion, in this report the uncertainty of all measurements and model predictions shall be reported in terms of a relative standard uncertainty; that is, the estimated standard deviation of the measured or predicted quantity.}~\cite{Hamins:SP1013-1}. The types of measurements described in this report are the ones most commonly used in large scale fire experiments. They include thermocouples for gas and surface temperature measurements, heat flux gauges, smoke and gas analyzers, and pressure sensors.
 
 \subsubsection{Thermocouples}
 
@@ -132,9 +70,9 @@ For the NIST/NRC experiments, four types of heat flux gauges were used, some of 
 
 \subsubsection{Gas Analyzers}
 
-Gas concentrations were measured in two sets of experiments conducted at NIST, the NIST/NRC and the WTC experiments. The volume fractions of the combustion products, carbon monoxide (CO) and carbon dioxide (CO$_2$), were measured using gas sampling in conjunction with non-dispersive infrared analyzers, while the oxygen (O$_2$) volume fraction was typically measured using a paramagnetic analyzer. Gases were extracted through stainless steel or other types of lines and were pumped from the compartment and passed through the analyzers. For several reasons, water in the sample was typically filtered, so the reported results are denoted as ``dry''. Analyzers were calibrated through the use of standard gas mixtures, with low relative uncertainties. Problems with the technique may involve instrument drift, analyzer response, incomplete and partial drying of sample gases, or (in the case when drying is not used) undetermined amounts of water vapor in the oxygen cell, which result in inaccurate readings.
+The volume fractions of the combustion products, carbon monoxide (CO) and carbon dioxide (CO$_2$), are typically measured using gas sampling in conjunction with non-dispersive infrared analyzers, while the oxygen (O$_2$) volume fraction is typically measured using a paramagnetic analyzer. For several reasons, water in the gas sample is typically filtered, so the reported results are often denoted as ``dry''. Analyzers are calibrated through the use of standard gas mixtures, with low relative uncertainties. Problems with the technique may involve instrument drift, analyzer response, incomplete and partial drying of sample gases, or (in the case when drying is not used) undetermined amounts of water vapor in the oxygen cell, which result in inaccurate readings.
 
-For the NIST/NRC experiments, the species were measured in both the upper and lower layers. The relative standard uncertainty in the measured values was about 1.5~\% for both the O$_2$ depletion and the CO$_2$ measurements. The largest contributors were the uncertainty in the composition of the calibration gas and the possibility of an undetermined amount of water vapor in the sample. The difference between the repeat measurements was about 1~\%, on average, for both the O$_2$ depletion and the CO$_2$ measurements. Therefore, the combined relative standard uncertainty is estimated to be 2~\% for measurements of both the O$_2$ decrease and the CO$_2$ increase.
+For the NIST/NRC experiments, the species were measured in both the upper and lower layers. The relative standard uncertainty in the measured values is about 1.5~\% for both the O$_2$ depletion and the CO$_2$ measurements. The largest contributors are the uncertainty in the composition of the calibration gas and the possibility of an undetermined amount of water vapor in the sample. The difference between the repeat measurements was about 1~\%, on average, for both the O$_2$ depletion and the CO$_2$ measurements. Therefore, the combined relative standard uncertainty is estimated to be 2~\% for measurements of both the O$_2$ decrease and the CO$_2$ increase.
 
 \subsubsection{Laser Smoke Meters}
 
@@ -142,7 +80,7 @@ Smoke obscuration is typically measured with a laser beam of light passing throu
 \be
    O = \left( 1 - (I/I_0)^{1/L} \right) \times 100
 \ee
-where $L$ is the path length, and $I$ and $I_0$ are the received and originating intensities, respectively. For the NIST/NRC experiments~\cite{Hamins:SP1013-1}, assuming a smoke mass concentration of $1 \times 10^{-4}$~\unit{kg/m^3}, the standard relative uncertainty of the quantity $\ln(I_0/I)$ is 7~\%. The reported standard relative uncertainty of the 0.8~m path length, $L$, is 2.5~\%. Using the NIST Uncertainty Machine~\cite{NIST_Uncertainty_Machine}, the standard relative uncertainty of the reported obscuration is computed to be approximately 7~\%.
+where $L$ is the path length, and $I$ and $I_0$ are the received and originating intensities, respectively. For the NIST/NRC experiments~\cite{Hamins:SP1013-1}, assuming a smoke mass concentration of $1 \times 10^{-4}$~\unit{kg/m^3}, the relative standard uncertainty of the quantity $\ln(I_0/I)$ is 7~\%. The reported relative standard uncertainty of the 0.8~m path length, $L$, is 2.5~\%. Using the NIST Uncertainty Machine~\cite{NIST_Uncertainty_Machine}, the relative standard uncertainty of the reported obscuration measurement is approximately 7~\%.
 
 
 \subsubsection{Pressure Gauges}
@@ -151,7 +89,7 @@ The uncertainty in pressure measurements is typically small, but depends on the 
 
 \subsubsection{Bi-Directional Probes}
 
-Gas velocity is typically measured in fire experiments using bi-directional probes. These devices work like pitot tubes but have much larger openings. Bryant~\cite{Bryant:FSJ2009} estimates that the standard relative uncertainty of this measurement, assuming that the probe is aligned well with the flow, is approximately 7~\%.
+Gas velocity is typically measured in fire experiments using bi-directional probes. These devices work like pitot tubes but have much larger openings. Bryant~\cite{Bryant:FSJ2009} estimates that the relative standard uncertainty of this measurement, assuming that the probe is aligned well with the flow, is approximately 7~\%.
 
 \subsubsection{Oxygen Consumption Calorimeters}
 
@@ -162,6 +100,7 @@ For all of the experiments described in this guide, the heat release rate (HRR) 
 Fire models are often used to predict the time to activation of devices like sprinklers and smoke detectors, and time to failure of critical equipment like electrical cables. Measuring activation or failure times in experiments is fairly precise, and, thus, the uncertainty of such measurements is essentially zero. Almost all of the uncertainty associated with these times is in the measurement or characterization of the mechanism of activation or failure. For example, the activation of a sprinkler is based on its measured RTI (Response Time Index) and activation temperature. Estimates of the uncertainty of these parameters are discussed in the next section.
 
 \subsection{Propagation of Input Parameter Uncertainty}
+\label{input_uncertainty}
 
 Empirical correlations for basic fire phenomena provide a convenient way to assess the propagation of the uncertainty of the model input parameters. The more complex fire models may require dozens of physical and numerical input parameters for a given fire scenario.  However, only a few of these parameters, when varied over their plausible range of values, significantly impact the results. For example, the thermal conductivity of the compartment walls does not significantly affect a predicted cable surface temperature, but the HRR of the fire does. The relatively simple empirical models identify the key parameters that impact the predicted quantity, and they provide the means to quantify the functional relationship between model inputs and outputs.
 
@@ -193,7 +132,7 @@ The obscuration of visible light by smoke is computed
 \be
    O = \left( 1 - \exp(-K_{\rm m} \rho_{\rm s} L) \right) \times 100 
 \ee
-The specific extinction coefficient, $K_{\rm m}$, is taken to be 8700~\unit{m^2/kg} with a standard relative uncertainty of 6~\%~\cite{Mulholland:F+M}. The uncertainty of the smoke concentration, $\rho_{\rm s}$, combines the uncertainty of the HRR and the soot yield. The relative standard uncertainty of the soot yield of heptane reported in Ref.~\cite{Hamins:SP1013-1} is 11~\%. The uncertainties for HRR and soot yield are combined via quadrature and the resulting expanded relative uncertainty is $\sqrt{7.5^2+11^2} \approx 13$~\%. Using the NIST Uncertainty Machine~\cite{NIST_Uncertainty_Machine}, the standard relative uncertainty in the computed obscuration is approximately 10~\%.
+The specific extinction coefficient, $K_{\rm m}$, is taken to be 8700~\unit{m^2/kg} with an expanded\footnote{In this instance, the term {\it expanded} means that a coverage factor, $k=2$, is applied is applied to the standard uncertainty, $u(y)$, resulting in a 95~\% confidence interval. The relative standard uncertainty is $u_{\rm r}(y)=u(y)/|y|\approx 6$~\%.} uncertainty of 1100~\unit{m^2/kg} \cite{Mulholland:F+M}. The uncertainty of the smoke concentration, $\rho_{\rm s}$, combines the uncertainty of the HRR and the soot yield. The relative standard uncertainty of the soot yield of heptane reported in Ref.~\cite{Hamins:SP1013-1} is 11~\%. The uncertainties for HRR and soot yield are combined via quadrature and the resulting expanded relative uncertainty is $\sqrt{7.5^2+11^2} \approx 13$~\%. Using the NIST Uncertainty Machine~\cite{NIST_Uncertainty_Machine}, the contribution of the parameter uncertainty to the relative standard uncertainty of the predicted obscuration is approximately 10~\%.
 
 \subsubsection{Pressure}
 
@@ -209,7 +148,7 @@ The maximum compartment pressure is achieved when the pressure rise term in Eq.~
 \be
    (p-p_\infty)_{\max} \approx \frac{\rho_\infty}{2} \left( \frac{ (\gamma-1)  \left( \dot{Q} - \dot{Q}_{\rm loss} \right) + \gamma p_\infty \dot{V} }{\gamma p_\infty A_{\rm leak} } \right)^2 \label{pmax}
 \ee
-The test report for the NIST/NRC experiments contains estimates of the uncertainty in the HRR, ventilation rate and leakage area. To calculate the uncertainty in the maximum pressure rise resulting from the uncertainty in these three parameters, the pressure rise estimate in Eq.~(\ref{pmax}) was calculated using 1000 randomly selected sets of values of the HRR, ventilation rate, and leakage area. These parameters were assumed to be randomly distributed with mean values of 1000~kW, 1~m$^3$/s, and 0.06~m$^2$ and relative standard uncertainties of 75~kW, 0.1~m$^3$/s, and 0.0021~m$^2$. The mean values of these parameters were typical of the NIST/NRC experiments, and the uncertainties were reported in the test report. The resulting relative standard uncertainty in the pressure of a closed compartment due to the uncertainty in the HRR, ventilation rate, and leakage area is 21~\%.
+The test report for the NIST/NRC experiments contains estimates of the uncertainty in the HRR, ventilation rate and leakage area. To calculate the uncertainty in the maximum pressure rise resulting from the uncertainty in these three parameters, the pressure rise estimate in Eq.~(\ref{pmax}) can be calculated using 1000 randomly selected sets of values of the HRR, ventilation rate, and leakage area. These parameters are assumed to be randomly distributed with mean values of 1000~kW, 1~m$^3$/s, and 0.06~m$^2$ and standard uncertainties of 75~kW, 0.1~m$^3$/s, and 0.0021~m$^2$. The mean values of these parameters are typical of the NIST/NRC experiments, and the uncertainties are reported in the test report. The resulting relative standard uncertainty in the pressure of a closed compartment due to the uncertainty in the HRR, ventilation rate, and leakage area is 21~\%.
 
 For an open compartment, in which the ventilation rate and leakage area have much less influence, the relative standard uncertainty in the pressure is twice that of the HRR, 15~\%.
 
@@ -272,7 +211,7 @@ There is a single set of experiments with which to evaluate model predictions of
 Table~\ref{Uncertainty} summarizes the estimated uncertainties of the major output quantities. The right-most column in the table represents the total experimental uncertainty, denoted as $\widetilde{\sigma}_E$, a combination of the uncertainty in the measurement of the output quantity itself, along with the propagated uncertainties of the key measured input quantities. This total experimental uncertainty is obtained by taking the square root of the sum of the squares of the measurement and propagation uncertainties that have been estimated in the previous two sections. It is assumed that the two forms of uncertainty are independent.
 
 \begin{table}[ht]
-\caption[Summary of uncertainty estimates]{Summary of uncertainty estimates. All values are expressed in the form of a standard relative uncertainty.}
+\caption[Summary of uncertainty estimates]{Summary of uncertainty estimates. All values are expressed in the form of a relative standard uncertainty.}
 \begin{center}
 \begin{tabular}{|l|c|c|c|}
 \hline
