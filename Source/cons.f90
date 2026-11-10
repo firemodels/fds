@@ -475,7 +475,7 @@ CHARACTER(LABEL_LENGTH) :: EXTINCTION_MODEL='null'
 
 LOGICAL, ALLOCATABLE, DIMENSION(:) :: RADIATION_COMPLETED  !< Indicates that the radiation field is completely updated
 
-LOGICAL :: RANDOMIZE_RADIATION_DIRECTIONS=.FALSE.           !< If TRUE, randomly rotate solid angles each full RTE solve
+LOGICAL :: RANDOM_ROTATION=.FALSE.                         !< If TRUE, randomly rotate solid angles each full RTE solve
 LOGICAL :: ALLOW_RANDOM_RADIATION_ROTATION=.FALSE.         !< A derived variable, to block random rotation fo cyl and 2d cases
 
 INTEGER :: NUMBER_SPECTRAL_BANDS=0                         !< Number of wavelength bands for rad solver (1 for gray gas)
