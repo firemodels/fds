@@ -6398,9 +6398,9 @@ The \ct{INIT} line designates the plane of the screen using the sextuplet \ct{XB
 where $l$ is the screen thickness (equal to the wire diameter), $\mu$ is the viscosity of the gas, $u$ is the velocity normal to the screen, $\rho$ is the density of the gas, and $Y$ and $K$ are empirical constants given by \cite{Bartzanas:1}
 \begin{eqnarray}
     K &=& 3.44 \times 10^{-9} \;f^{1.6} \; \; \unit{m^2} \\
-    Y &=& 0.043 \; f^{2.13}
+    Y &=& 0.043 \; f^{-2.13}
 \end{eqnarray}
-This correlation was developed using window screens with \ct{FREE_AREA_FRACTION} ranging from ~0.3 to ~0.6.
+This correlation was developed using window screens with \ct{FREE_AREA_FRACTION} ranging from ~0.04 to ~0.9.
 
 The \ct{MISC} input parameter \ct{PARTICLE_CFL_MAX} controls the time step on the pressure drop across a screen (or other porous media). If a screen or other porous media introduces numerical instabilities, reducing the value of \ct{PARTICLE_CFL_MAX} below 1 may resolve them.
 
