@@ -8199,11 +8199,11 @@ where $i$ is a mesh cell along the path of the beam, $\rho_{{\rm s},i}$ is the s
 \begin{lstlisting}
     &DEVC XB=x1,x2,y1,y2,z1,z2, QUANTITY='PATH OBSCURATION', ID='beam1', SETPOINT=33.0 /
 \end{lstlisting}
-A similar \ct{QUANTITY} is \ct{'TRANSMISSION'} which is given by the following expression:
+A similar \ct{QUANTITY} is \ct{'TRANSMISSIVITY'} which is given by the following expression:
 \be
-\hbox{Transmission}  = \exp \left( -K_{\rm m} \frac{L_0}{L} \sum_{i=1}^N {\rho_{{\rm s},i}\; \Delta x_i} \right)  \times 100  \; \; \unit{\percent/m}
+ \tau = \exp \left( -K_{\rm m} \frac{L_0}{L} \sum_{i=1}^N {\rho_{{\rm s},i}\; \Delta x_i} \right)  \times 100  \; \; \unit{\percent/m}
 \ee
-Note that the transmission is given in units of \%/m rather than \% like obscuration. $L$ is the total path length of the beam, and $L_0$ is the reference dimension of 1~m.
+Note that the transmissivity is given in units of \%/m rather than \% like obscuration. $L$ is the total path length of the beam, and $L_0$ is the reference dimension of 1~m.
 
 
 
@@ -10453,6 +10453,21 @@ The gas phase output quantity \ct{'EXTINCTION COEFFICIENT'} is $K$. A similar qu
 
 Note that FDS cannot report a visibility of infinity, but rather reports a \ct{MAXIMUM_VISIBILITY} that you can control via the \ct{MISC} line. The default is 30~m.
 
+The quantities \ct{'VISIBILITY'}, \ct{'EXTINCTION COEFFICIENT'}, and \ct{'OPTICAL DENSITY'} can reported in different ways. To obtain a contour plot of \ct{'VISIBILITY'}, for example, add the following line to the input file
+\begin{lstlisting}
+&SLCF ..., QUANTITY='VISIBILITY' /
+\end{lstlisting}
+To report the visibility as a function of time at a given point
+\begin{lstlisting}
+&DEVC ID='...', XYZ=..., QUANTITY='VISIBILITY' /
+\end{lstlisting}
+To report the visibility as a function of time over a specific linear path
+\begin{lstlisting}
+&DEVC ID='...', XB=..., QUANTITY='VISIBILITY' /
+\end{lstlisting}
+where \ct{XB=(x1,x2,y1,y2,z1,z2)} designate the end points of the path.
+
+
 
 \subsection{Flame Height and Flame Tilt}
 \label{info:flameheight}
@@ -11690,7 +11705,7 @@ Table~\ref{tab:deviceoutputquantities} below lists output quantities associated 
 \ct{TIME}                                      & Simulation time                               & s              & D            \\ \hline
 \ct{TIME STEP}                                 & Section~\ref{info:TIMING}                     & s              & D            \\ \hline
 \ct{TOTAL NUMBER OF PARTICLES}                 & Section~\ref{info:TIMING}                     &                & D            \\ \hline
-\ct{TRANSMISSION}                              & Section~\ref{info:beam_detector}              & \%/m           & D            \\ \hline
+\ct{TRANSMISSIVITY}                            & Section~\ref{info:beam_detector}              & \%/m           & D            \\ \hline
 \ct{UPPER TEMPERATURE}                         & Section~\ref{info:layerheight}                & \unit{\degreeCelsius} & D            \\ \hline
 \ct{WALL CLOCK TIME}                           & Section~\ref{info:TIMING}                     & s              & D            \\ \hline
 \ct{WALL CLOCK TIME ITERATIONS}                & Section~\ref{info:TIMING}                     & s              & D            \\ \hline
@@ -14416,7 +14431,6 @@ Keyword             & Type     & Description                      & Units       
 890 \> \ct{DEVC ... STATISTICS is not recognized.} \> Section~\ref{info:statistics} \\
 891 \> \ct{DEVC ... HVAC outputs specified with no HVAC inputs.} \> Section~\ref{info:HVAC} \\
 892 \> \ct{DEVC ... or PROP ... must have a QUANTITY.} \> Section~\ref{info:HVAC} \\
-893 \> \ct{DEVC ... QUANTITY ... requires XB coordinates.} \> Section~\ref{info:statistics} \\
 894 \> \ct{DEVC ... uses invalid solid phase SPATIAL_STATISTIC.} \> Section~\ref{info:statistics} \\
 895 \> \ct{DEVC ... uses invalid gas phase SPATIAL_STATISTIC.} \> Section~\ref{info:statistics} \\
 896 \> \ct{DEVC ... requires XB for SPATIAL_STATISTIC.} \> Section~\ref{info:statistics} \\
