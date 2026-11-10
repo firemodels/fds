@@ -3991,15 +3991,15 @@ In the case of a normal HVAC node, using the simple example from Section~\ref{in
 \begin{lstlisting}
     &SURF ID='NODE SURF',NODE_ID='MY NODE'/
     &GEOM ID='My Solid'
-    SURF_ID='NODE SURF','INERT'
-    VERTS= -1.0, -1.0,  0.0,
-    1.0, -1.0,  0.0,
-    0.0,  1.0,  0.0,
-    0.0,  0.0,  1.0,
-    FACES= 1,3,2, 2,
-    1,4,3, 1,
-    3,4,2, 1,
-    2,4,1, 0 /
+          SURF_ID='NODE SURF','INERT'
+          VERTS= -1.0, -1.0,  0.0,
+                  1.0, -1.0,  0.0,
+                  0.0,  1.0,  0.0,
+                  0.0,  0.0,  1.0,
+          FACES= 1,3,2, 2,
+                 1,4,3, 1,
+                 3,4,2, 1,
+                 2,4,1, 0 /
     &HVAC ID='MY NODE',TYPE_ID='NODE',GEOM=T,..../
 \end{lstlisting}
 
@@ -4009,17 +4009,17 @@ To apply localized leakage to \ct{GEOM}, the process is similar. \ct{NODE_ID} on
 \begin{lstlisting}
     &SURF ID='LEAK SURF',NODE_ID='LEAK OUT'/
     &GEOM ID='My Solid'
-    SURF_ID='LEAK SURF','INERT'
-    VERTS= -1.0, -1.0,  0.0,
-    1.0, -1.0,  0.0,
-    0.0,  1.0,  0.0,
-    0.0,  0.0,  1.0,
-    FACES= 1,3,2, 2,
-    1,4,3, 1,
-    3,4,2, 1,
-    2,4,1, 0 /
+          SURF_ID='LEAK SURF','INERT'
+          VERTS= -1.0, -1.0,  0.0,
+                  1.0, -1.0,  0.0,
+                  0.0,  1.0,  0.0,
+                  0.0,  0.0,  1.0,
+          FACES= 1,3,2, 2,
+                 1,4,3, 1,
+                 3,4,2, 1,
+                 2,4,1, 0 /
     &HVAC ID='MY LEAK',TYPE_ID='LEAK',VENT_ID='LEAK IN',
-    VENT2_ID='LEAK OUT',GEOM2=T,AREA=0.01/
+          VENT2_ID='LEAK OUT',GEOM2=T,AREA=0.01/
 \end{lstlisting}
 Here the use of \ct{GEOM2=T} indicates that \ct{VENT2_ID} is a \ct{NODE_ID} on \ct{SURF}.
 
