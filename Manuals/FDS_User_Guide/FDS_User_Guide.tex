@@ -4273,37 +4273,6 @@ where the ratio of specific heats, $\gamma=1.4$, volume flow rate, $\dot{V}=1$~\
 
 
 
-\subsubsection{Boundary Layer (Circular Vent)}
-\label{info:VEL_BULK}
-
-\ct{PROFILE='BOUNDARY LAYER'} may be used for circular vents created using \ct{RADIUS}. By adding \ct{VEL_BULK} on the \ct{SURF} line together with \ct{VEL}, FDS will produce a plug flow core profile, with max velocity given by \ct{VEL}, and a quadratic profile in the boundary layer.  The form of the profile is illustrated in Fig.~\ref{fig:bl_profile} for a circular vent.  The functional form of the velocity profile (here taken a vertical profile) is
-\begin{equation}
-    w(r) = \left\{ \begin{array}{ll} w_{\unit{max}} & \quad \mbox{if} \quad r \le R-\delta \\ w_{\unit{max}}\left(1 - \left(\frac{r-(R-\delta)}{\delta}\right)^2\right) & \quad \mbox{if} \quad R-\delta < r \le R \end{array} \right.
-\end{equation}
-The bulk velocity is the volumetric flow rate divided by the circular flow area.  \ct{VEL_BULK} is negative pointing into the domain.  The boundary layer thickness is $\delta$.  This feature is handy for dealing with the case where the maximum velocity is higher than the bulk velocity.  Here is an example input file line:
-\begin{lstlisting}
-    &SURF ID='JET', VEL=-69, VEL_BULK=-53, PROFILE='BOUNDARY LAYER', ... /
-\end{lstlisting}
-
-\begin{figure}[ht]
-    \begin{center}
-        \includegraphics[width=3.2in]{FIGURES/bl_profile}
-        \caption[Boundary layer profile]{Boundary layer profile.}
-        \label{fig:bl_profile}
-    \end{center}
-\end{figure}
-
-
-
-
-
-
-
-
-
-
-
-
 \chapter{User-Specified Functions}
 \label{info:RAMP}
 
@@ -13679,7 +13648,6 @@ Keyword                                               & Type            & Descri
 \ct{VEG_LSET_WIND_HEIGHT}                             & Real            & Section~\ref{info:custom_wind}            & m                   & 6.1                      \\ \hline
 \ct{VEG_LSET_WIND_RAMP}                               & Character       & Section~\ref{info:custom_wind}            &                     &                         \\ \hline
 \ct{VEL}                                              & Real            & Section~\ref{info:Velocity_BC}            & m/s                 &                         \\ \hline
-\ct{VEL_BULK}                                         & Real            & Section~\ref{info:profiles}               & m/s                 &                         \\ \hline
 \ct{VEL_GRAD}                                         & Real            & Section~\ref{info:vel_grad}               & 1/s                 &                         \\ \hline
 \ct{VEL_PART}                                         & Real            & Section~\ref{info:particle_flux}          & m/s                 &                         \\ \hline
 \ct{VEL_T(2)}                                         & Real Array      & Section~\ref{info:louvers}                & m/s                 &                         \\ \hline
@@ -14133,7 +14101,6 @@ Keyword             & Type     & Description                      & Units       
 342  \> \ct{SURF ... RAMP_T_I cannot be used with TMP_FRONT.} \> Section~\ref{info:TMP_INNER}  \\
 243  \> \ct{SURF ... RAMP_T_I cannot be used with TMP_BACK.} \> Section~\ref{info:TMP_INNER}  \\
 344  \> \ct{SURF ... RAMP_T_I cannot be used with TMP_INNER.} \> Section~\ref{info:TMP_INNER}  \\
-345  \> \ct{SURF ... VEL_BULK must be less than or equal to VEL.} \> Section~\ref{info:VEL_BULK}  \\
 346  \> \ct{SURF ... ZONE ID for LEAK_PATH_ID not found.} \> Section~\ref{info:Leaks}  \\
 347  \> \ct{SURF ... both LEAK_PATH must be >= 0.} \> Section~\ref{info:Leaks}  \\
 348  \> \ct{SURF ... Cannot set the same ZONE for each leakage path.} \> Section~\ref{info:Leaks}  \\
