@@ -76,8 +76,9 @@ jobs:
         mirror_ready=false
         for mirror in $UBUNTU_MIRRORS; do
           echo "Trying Ubuntu mirror: $mirror"
+          # Handle both direct Ubuntu URLs and the hosted runner's mirror-list URI.
           printf '%s\n' "$original_sources" |
-            sed -E "s@https?://([[:alnum:].-]*archive\.ubuntu\.com|security\.ubuntu\.com)/ubuntu/?@$mirror/@g" |
+            sed -E "s@(https?://([[:alnum:].-]*archive\.ubuntu\.com|security\.ubuntu\.com)/ubuntu/?|mirror\+file:/etc/apt/apt-mirrors\.txt)@$mirror/@g" |
             "${root[@]}" tee "$sources" > /dev/null
           if "${root[@]}" timeout --kill-after=5s 90s apt-get \
             -o Dir::Etc::sourcelist="$sources" -o Dir::Etc::sourceparts="-" \
@@ -222,8 +223,9 @@ jobs:
         mirror_ready=false
         for mirror in $UBUNTU_MIRRORS; do
           echo "Trying Ubuntu mirror: $mirror"
+          # Handle both direct Ubuntu URLs and the hosted runner's mirror-list URI.
           printf '%s\n' "$original_sources" |
-            sed -E "s@https?://([[:alnum:].-]*archive\.ubuntu\.com|security\.ubuntu\.com)/ubuntu/?@$mirror/@g" |
+            sed -E "s@(https?://([[:alnum:].-]*archive\.ubuntu\.com|security\.ubuntu\.com)/ubuntu/?|mirror\+file:/etc/apt/apt-mirrors\.txt)@$mirror/@g" |
             "${root[@]}" tee "$sources" > /dev/null
           if "${root[@]}" timeout --kill-after=5s 90s apt-get \
             -o Dir::Etc::sourcelist="$sources" -o Dir::Etc::sourceparts="-" \
