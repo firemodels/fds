@@ -448,7 +448,7 @@ It is recommend that the simulation be run in a folder associated with a drive t
 
 FDS is compiled for Windows using the Intel oneAPI Fortran compiler and MPI library. With Intel MPI 2021.9 and later, local administrator privileges on the participating computers may not be sufficient to enable one to run an FDS simulation using multiple computers. Depending on organizational security policies and the authentication method, assistance from the Windows domain or endpoint-management administrator may be required, particularly when the calculation uses a shared working directory.
 
-Given these constraints, it is recommended that Windows users take advantage of computers with a large number of cores rather than rely on a network of computers. 
+Given these constraints, it is recommended that Windows users take advantage of computers with a large number of cores rather than rely on a network of computers.
 
 
 \subsection{macOS}
@@ -934,7 +934,7 @@ warms up a compartment to a nearly equilibrium state at which point time-average
 
 \ct{TIME_SHRINK_FACTOR} does not reduce the time for the flow and gas temperature fields to develop; however, these often develop much faster than the wall temperature profile.
 
-Note that when \ct{TIME_SHRINK_FACTOR} is used a device with \ct{QUANTITY='TIME'} and a \ct{SETPOINT} or a device or control function with a \ct{DELAY} will have those values adjusted by the value of \ct{TIME_SHRINK_FACTOR}. For example if a 10~s \ct{DELAY} is specified for a \ct{CTRL} input with a \ct{TIME_SHRINK_FACTOR} of 10, then FDS will adjust the \ct{DELAY} to 1~s. Time-based \ct{RAMP}s will have their independent (\ct{T}) values adjusted unless the \ct{RAMP} has a \ct{DEVC_ID} or \ct{CTRL_ID} specified.  Use of time based devices, control functions, or ramps that change the simulation, however, implies a non-steady scenario where the use of \ct{TIME_SHRINK_FACTOR} may no longer be appropriate. 
+Note that when \ct{TIME_SHRINK_FACTOR} is used a device with \ct{QUANTITY='TIME'} and a \ct{SETPOINT} or a device or control function with a \ct{DELAY} will have those values adjusted by the value of \ct{TIME_SHRINK_FACTOR}. For example if a 10~s \ct{DELAY} is specified for a \ct{CTRL} input with a \ct{TIME_SHRINK_FACTOR} of 10, then FDS will adjust the \ct{DELAY} to 1~s. Time-based \ct{RAMP}s will have their independent (\ct{T}) values adjusted unless the \ct{RAMP} has a \ct{DEVC_ID} or \ct{CTRL_ID} specified.  Use of time based devices, control functions, or ramps that change the simulation, however, implies a non-steady scenario where the use of \ct{TIME_SHRINK_FACTOR} may no longer be appropriate.
 
 \section{Computational Meshes}
 \label{info:MESH}
@@ -1639,6 +1639,7 @@ One current limitation of the unstructured geometry algorithm is that a Cartesia
 \item Using triangular faces that are much smaller than the Cartesian grid cell is not recommended. Each face will be assigned boundary conditions at unnecessary resolution compared to Cartesian cells.
 \item Particles will interact with the \ct{GEOM}, but will not flow underneath a geometry due to surface tension.  That is, if particles are falling on top of a sphere, once they reach the equator they fall directly to the floor. They will behave as pellets, not droplets.
 \item Be cautious with soot deposition.  While the functionality for deposition exists with geometry, it has not undergone thorough testing.
+\item Be cautious applying HVAC to GEOM.  There are documented issues of spurious behavior.  This feature is experimental and under development.
 \end{itemize}
 
 \subsection{The Big Picture, Run Time, and Accuracy}
