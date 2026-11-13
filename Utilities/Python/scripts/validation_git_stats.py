@@ -16,6 +16,7 @@ resdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Scatterplots/'
 
 
 def compare_scatterplot_statistics():
+    error_flag = False
     """Report changes over 10% as errors only when model agreement worsens."""
     output_file = Path(resdir) / 'validation_scatterplot_output.csv'
     baseline_file = Path(resdir) / 'validation_scatterplot_output_baseline.csv'
@@ -31,7 +32,7 @@ def compare_scatterplot_statistics():
             rows = list(reader)
     except OSError as exc:
         print(f'Error: validation_git_stats: cannot compare scatterplot statistics: {exc}')
-        return
+        return True
 
     # Re-running the script updates the existing columns instead of duplicating them.
     fieldnames += [name for name in difference_columns if name not in fieldnames]
@@ -53,6 +54,7 @@ def compare_scatterplot_statistics():
             except (KeyError, TypeError, ValueError, InvalidOperation):
                 print(f'Error: validation_git_stats: {quantity}: invalid {metric} '
                       'in scatterplot output or baseline.')
+                error_flag = True
                 continue
 
             if reference == 0:
@@ -69,12 +71,14 @@ def compare_scatterplot_statistics():
                 print(f'{severity}: validation_git_stats: {quantity}: {metric} relative '
                       f'difference {difference:.2%} exceeds 10% in magnitude '
                       f'(current={current}, baseline={reference}).')
+                error_flag = True
 
     with output_file.open('w', newline='') as outf:
         writer = csv.DictWriter(outf, fieldnames=fieldnames, lineterminator='\n')
         writer.writeheader()
         writer.writerows(rows)
 
+    return error_flag
 
 def MAKEGITENTRY(case_name):
 
@@ -206,5 +210,12 @@ with open(OUTPUT_TEX_FILE, 'a') as outf:
 with open(OUTPUT_TEX_FILE, 'a') as f:
     f.write("\\end{longtable}\n")
 
+file_path = Path(resdir + 'error.txt')
+file_path.unlink(missing_ok=True)
 
-compare_scatterplot_statistics()
+error_flag = compare_scatterplot_statistics()
+print(error_flag)
+if error_flag:
+   with open(file_path, 'w') as outf:
+      outf.write("Error in validation_git_stats")
+
