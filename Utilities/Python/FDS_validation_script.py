@@ -1,6 +1,26 @@
 #!$FIREMODELS/fds/.github/fds_python_env/bin/python
 
 import subprocess
+import io
+import re
+import sys
+
+# Keep normal output visible and collect it for the final error/warning check.
+class ValidationOutput:
+    def __init__(self, stream):
+        self.stream = stream
+
+    def write(self, text):
+        validation_output.write(text)
+        return self.stream.write(text)
+
+    def __getattr__(self, name):
+        return getattr(self.stream, name)
+
+validation_output = io.StringIO()
+stdout, stderr = sys.stdout, sys.stderr
+sys.stdout, sys.stderr = ValidationOutput(stdout), ValidationOutput(stderr)
+
 import fdsplotlib
 import matplotlib.pyplot as plt
 import importlib
@@ -113,7 +133,11 @@ print("Theobald_Hose_Stream...");         safe_run("./scripts/Theobald_Hose_Stre
 print("USFS_Deep_Fuel_Beds...");          safe_run("./scripts/USFS_Deep_Fuel_Beds.py")
 print("Wu_Bakar_Tunnels...");             safe_run("./scripts/Wu_Bakar_Tunnels.py")
 
-print("Python validation scripts completed successfully!")
+sys.stdout, sys.stderr = stdout, stderr
+if re.search(r'error|warning', validation_output.getvalue(), re.IGNORECASE):
+    print("Python validation scripts failed: errors or warnings were reported above.")
+else:
+    print("Python validation scripts completed successfully!")
 
 # ------------------------------
 # plot_range usage examples
