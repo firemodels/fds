@@ -6,8 +6,9 @@ HGL Depth,15,297,0.05,0.13,1.09
 Ceiling Jet Temperature,22,1105,0.07,0.15,1.05
 Plume Temperature,16,480,0.07,0.42,1
 Oxygen Concentration,13,316,0.08,0.17,1
-Carbon Dioxide Concentration,13,313,0.08,0.15,1
+Carbon Dioxide Concentration,14,321,0.08,0.19,1.01
 Compartment Over-Pressure,5,187,0.21,0.21,0.94
+Pressure Coefficient,1,48,0.10,0.20,1.23
 Target Temperature,11,1415,0.07,0.18,1.06
 Surface Temperature,10,1277,0.07,0.18,1.12
 Liquid Pool Surface Temperature,10,24,0.07,0.1,0.93

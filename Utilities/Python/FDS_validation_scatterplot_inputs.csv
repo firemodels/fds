@@ -8,6 +8,7 @@ Plume Temperature,Measured Temperature Rise (°C),Predicted Temperature Rise (°
 Oxygen Concentration,Measured Drop in Volume Fraction,Predicted Drop in Volume Fraction,0.01,0.25,0.03 0.95,EastOutside,1.5,8,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/Scatterplots/FDS_Oxygen_Concentration
 Carbon Dioxide Concentration,Measured Rise in Volume Fraction,Predicted Rise in Volume Fraction,0.001,0.2,0.03 0.95,EastOutside,1.5,8,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/Scatterplots/FDS_Carbon_Dioxide_Concentration
 Compartment Over-Pressure,Measured Pressure Rise (Pa),Predicted Pressure Rise (Pa),1,2000,0.03 0.95,EastOutside,1.5,23,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/Scatterplots/FDS_Compartment_Pressure
+Pressure Coefficient,Measured Max Pressure Coefficient,Predicted Max Pressure Coefficient,0.1,5,0.03 0.95,EastOutside,1.5,10,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/Scatterplots/FDS_Pressure_Coefficient
 Target Temperature,Measured Temperature Rise (°C),Predicted Temperature Rise (°C),1,1300,0.03 0.95,EastOutside,1.5,7,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/Scatterplots/FDS_Target_Temperature
 Surface Temperature,Measured Temperature Rise (°C),Predicted Temperature Rise (°C),1,2000,0.03 0.95,EastOutside,1.5,7,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/Scatterplots/FDS_Surface_Temperature
 Liquid Pool Surface Temperature,Measured Temperature Rise (°C),Predicted Temperature Rise (°C),1,500,0.03 0.95,EastOutside,1.6,7,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/Scatterplots/FDS_Liquid_Pool_Surface_Temperature
