@@ -6,7 +6,7 @@ import pandas as pd
 from scipy.interpolate import griddata
 from fdsplotlib import configure_fds_fonts
 
-configure_fds_fonts(usetex=True)
+configure_fds_fonts(usetex=False)
 
 expdir = '../../../exp/Submodules/macfp-db/Wall_Fires/JIS_Facade/Experimental_Data/'
 pltdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/JIS_Facade/'

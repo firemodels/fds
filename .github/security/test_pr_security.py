@@ -487,7 +487,8 @@ class WorkflowTests(unittest.TestCase):
                 if step.get("uses", "").startswith("actions/checkout@"):
                     self.assertEqual(step["with"]["ref"], "${{ github.workflow_sha }}")
                     self.assertIs(step["with"]["persist-credentials"], False)
-                    self.assertIs(step["with"]["allow-unsafe-checkout"], True)
+                    self.assertIs(step["with"]["allow-unsafe-pr-checkout"], True)
+                    self.assertNotIn("allow-unsafe-checkout", step["with"])
         wait = self.workflows["pr-builds.yml"]["jobs"]["admission"]["steps"]
         self.assertEqual(wait[0]["with"]["ref"], "${{ github.event.pull_request.base.sha }}")
         self.assertIs(wait[0]["with"]["persist-credentials"], False)
@@ -514,7 +515,7 @@ class WorkflowTests(unittest.TestCase):
                     self.assertEqual(writes, [])
                 if name != "pr-security.yml":
                     for step in job.get("steps", []):
-                        self.assertNotIn("allow-unsafe-checkout", step.get("with", {}))
+                        self.assertNotIn("allow-unsafe-pr-checkout", step.get("with", {}))
 
     def test_developer_admission_does_not_depend_on_scan_and_failures_are_reported(self):
         jobs = self.workflows["pr-security.yml"]["jobs"]

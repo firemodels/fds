@@ -898,7 +898,6 @@ TYPE SURFACE_TYPE
    REAL(EB) :: FIRE_SPREAD_RATE                        ! Defines speed (m/s) of spread from XYZ
    REAL(EB) :: INNER_RADIUS=0._EB                      ! Inner radius when SURF GEOMETRY = CYLINDRICAL
    REAL(EB) :: MASS_FLUX_VAR=-1._EB
-   REAL(EB) :: VEL_BULK
    REAL(EB) :: VEL_PART
    REAL(EB) :: PARTICLE_SURFACE_DENSITY=-1._EB
    REAL(EB) :: DRAG_COEFFICIENT=2.8_EB

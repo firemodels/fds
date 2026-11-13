@@ -2730,7 +2730,7 @@ TYPE(SURFACE_TYPE), INTENT(IN) :: SF
 TYPE(VENTS_TYPE), INTENT(IN) :: VT
 INTEGER, INTENT(IN) :: IOR
 REAL(EB), INTENT(IN) :: X,Y,Z
-REAL(EB) :: PX,PY,PZ,RR,DELTA,R1
+REAL(EB) :: PX,PY,PZ,RR
 
 SURFACE_VELOCITY_PROFILE_FACTOR = 1._EB
 
@@ -2777,35 +2777,6 @@ SELECT CASE(SF%PROFILE)
             SURFACE_VELOCITY_PROFILE_FACTOR = SURFACE_VELOCITY_PROFILE_FACTOR*9._EB/4._EB
          ENDIF
       ENDIF
-
-   CASE(BOUNDARY_LAYER_PROFILE)
-      ! Currently only set up for circular vents
-      SELECT CASE(ABS(IOR))
-         CASE(1)
-            IF (VT%RADIUS>0._EB) THEN
-               DELTA = VT%RADIUS - SQRT( VT%RADIUS**2*(2._EB*ABS(SF%VEL_BULK/SF%VEL)-1._EB) )
-               R1 = VT%RADIUS - DELTA
-               RR = SQRT( (Y-VT%Y0)**2 + (Z-VT%Z0)**2 )
-               IF (RR>R1 .AND. RR<=VT%RADIUS .AND. DELTA>TWENTY_EPSILON_EB) &
-                  SURFACE_VELOCITY_PROFILE_FACTOR = 1._EB - ((RR-R1)/DELTA)**2
-            ENDIF
-         CASE(2)
-            IF (VT%RADIUS>0._EB) THEN
-               DELTA = VT%RADIUS - SQRT( VT%RADIUS**2*(2._EB*ABS(SF%VEL_BULK/SF%VEL)-1._EB) )
-               R1 = VT%RADIUS - DELTA
-               RR = SQRT( (X-VT%X0)**2 + (Z-VT%Z0)**2 )
-               IF (RR>R1 .AND. RR<=VT%RADIUS .AND. DELTA>TWENTY_EPSILON_EB) &
-                  SURFACE_VELOCITY_PROFILE_FACTOR = 1._EB - ((RR-R1)/DELTA)**2
-            ENDIF
-         CASE(3)
-            IF (VT%RADIUS>0._EB) THEN
-               DELTA = VT%RADIUS - SQRT( VT%RADIUS**2*(2._EB*ABS(SF%VEL_BULK/SF%VEL)-1._EB) )
-               R1 = VT%RADIUS - DELTA
-               RR = SQRT( (X-VT%X0)**2 + (Y-VT%Y0)**2 )
-               IF (RR>R1 .AND. RR<=VT%RADIUS .AND. DELTA>TWENTY_EPSILON_EB) &
-                  SURFACE_VELOCITY_PROFILE_FACTOR = 1._EB - ((RR-R1)/DELTA)**2
-            ENDIF
-      END SELECT
 
    CASE(ATMOSPHERIC_PROFILE)
       IF (Z>GROUND_LEVEL .AND. SF%Z0>TWO_EPSILON_EB) &

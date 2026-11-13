@@ -54,10 +54,10 @@ for k in range(len(C)):
             for i in idx_range:
                 x_val = (dist + M.iloc[i, coord_col] - x1) if order_index == 1 \
                         else (dist + x1 - M.iloc[i, coord_col])
-                cp_mean = M.iloc[i, mean_col]
-                cp_rms  = M.iloc[i, rms_col]
-                cp_min  = M.iloc[i, min_col]
-                cp_max  = M.iloc[i, max_col]
+                cp_mean = M.iloc[i, mean_col]/9.1**2
+                cp_rms  = M.iloc[i, rms_col]/9.1**2
+                cp_min  = M.iloc[i, min_col]/9.1**2
+                cp_max  = M.iloc[i, max_col]/9.1**2
                 fid.write(f'{x_val:6.3f},{cp_mean:6.3f},{cp_rms:6.3f},{cp_min:6.3f},{cp_max:6.3f}\n')
 
             # if not last side, add blank header row

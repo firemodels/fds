@@ -358,7 +358,7 @@ Running FDS using MPI requires shared disk access to each computer on which case
 The goal of making FDS and Smokeview publicly available has been to enable practicing engineers to perform fairly sophisticated simulations at a reasonable cost. Thus, FDS and Smokeview have been designed for computers running Microsoft Windows, macOS, and Linux.
 \begin{description}
 \item[MS Windows] An installation package is available for the 64~bit Windows operating system. Running FDS/Smokeview any version of MS Windows released prior to Windows 7 is not recommended.
-\item[macOS] Pre-compiled executables are installed into a user selected directory using an installation script.  macOS 10.4.x or later is recommended. You can always download the latest version of FDS source and compile FDS for other versions of macOS (see Chapter~\ref{info:compilation} for details).  Note that Rosetta allows running FDS compiled on x86-64 architecture on Apple silicon systems; therefore the FDS executable distributed with the macOS bundle will run on the newer Macs.  However, if compiling the source natively on Apple silicon with GNU and Open MPI, it is not currently possible to use the ULMAT pressure solver (which requires Intel MKL libraries), instead ULMAT HYPRE may be used (see Sec.~\ref{optional_pressure_solver}).
+\item[macOS] Pre-compiled bundles are provided for Apple silicon (ARM64) Macs and run natively without Rosetta. The minimum macOS version depends on the executables and runtime libraries included in each release. Executables are installed into a user selected directory using an installation script. You can download the FDS source and compile it for other supported systems (see Chapter~\ref{info:compilation} for details).
 \item[Linux] Pre-compiled executables are installed into a user selected directory using an installation script. If the pre-compiled FDS executable does not work (usually because of library incompatibilities), the FDS Fortran source code can be downloaded and compiled (See Chapter~\ref{info:compilation} for details). If Smokeview does not work on the Linux workstation, you can use the Windows version to view FDS output.
 \end{description}
 
@@ -448,7 +448,7 @@ It is recommend that the simulation be run in a folder associated with a drive t
 
 FDS is compiled for Windows using the Intel oneAPI Fortran compiler and MPI library. With Intel MPI 2021.9 and later, local administrator privileges on the participating computers may not be sufficient to enable one to run an FDS simulation using multiple computers. Depending on organizational security policies and the authentication method, assistance from the Windows domain or endpoint-management administrator may be required, particularly when the calculation uses a shared working directory.
 
-Given these constraints, it is recommended that Windows users take advantage of computers with a large number of cores rather than rely on a network of computers. 
+Given these constraints, it is recommended that Windows users take advantage of computers with a large number of cores rather than rely on a network of computers.
 
 
 \subsection{macOS}
@@ -934,7 +934,7 @@ warms up a compartment to a nearly equilibrium state at which point time-average
 
 \ct{TIME_SHRINK_FACTOR} does not reduce the time for the flow and gas temperature fields to develop; however, these often develop much faster than the wall temperature profile.
 
-Note that when \ct{TIME_SHRINK_FACTOR} is used a device with \ct{QUANTITY='TIME'} and a \ct{SETPOINT} or a device or control function with a \ct{DELAY} will have those values adjusted by the value of \ct{TIME_SHRINK_FACTOR}. For example if a 10~s \ct{DELAY} is specified for a \ct{CTRL} input with a \ct{TIME_SHRINK_FACTOR} of 10, then FDS will adjust the \ct{DELAY} to 1~s. Time-based \ct{RAMP}s will have their independent (\ct{T}) values adjusted unless the \ct{RAMP} has a \ct{DEVC_ID} or \ct{CTRL_ID} specified.  Use of time based devices, control functions, or ramps that change the simulation, however, implies a non-steady scenario where the use of \ct{TIME_SHRINK_FACTOR} may no longer be appropriate. 
+Note that when \ct{TIME_SHRINK_FACTOR} is used a device with \ct{QUANTITY='TIME'} and a \ct{SETPOINT} or a device or control function with a \ct{DELAY} will have those values adjusted by the value of \ct{TIME_SHRINK_FACTOR}. For example if a 10~s \ct{DELAY} is specified for a \ct{CTRL} input with a \ct{TIME_SHRINK_FACTOR} of 10, then FDS will adjust the \ct{DELAY} to 1~s. Time-based \ct{RAMP}s will have their independent (\ct{T}) values adjusted unless the \ct{RAMP} has a \ct{DEVC_ID} or \ct{CTRL_ID} specified.  Use of time based devices, control functions, or ramps that change the simulation, however, implies a non-steady scenario where the use of \ct{TIME_SHRINK_FACTOR} may no longer be appropriate.
 
 \section{Computational Meshes}
 \label{info:MESH}
@@ -1639,6 +1639,7 @@ One current limitation of the unstructured geometry algorithm is that a Cartesia
 \item Using triangular faces that are much smaller than the Cartesian grid cell is not recommended. Each face will be assigned boundary conditions at unnecessary resolution compared to Cartesian cells.
 \item Particles will interact with the \ct{GEOM}, but will not flow underneath a geometry due to surface tension.  That is, if particles are falling on top of a sphere, once they reach the equator they fall directly to the floor. They will behave as pellets, not droplets.
 \item Be cautious with soot deposition.  While the functionality for deposition exists with geometry, it has not undergone thorough testing.
+\item Be cautious applying HVAC to GEOM.  There are documented issues of spurious behavior.  This feature is experimental and under development.
 \end{itemize}
 
 \subsection{The Big Picture, Run Time, and Accuracy}
@@ -2099,16 +2100,16 @@ A simple example is shown Fig~\ref{fig:obst_rotbox}.
     &SURF ID='shape', COLOR='GRAY'/
     &MULT ID='cube array', DX=0.005,DY=0.005,DZ=0.005,
     I_UPPER=41,J_UPPER=41,K_UPPER=41/
-    &OBST XB=-0.105,-0.100,-0.105,-0.100,-0.105,-0.100
-    MULT_ID='cube array'
-    SURF_ID='shape'
-    SHAPE='BOX'
-    LENGTH=0.075
-    WIDTH=0.025
-    HEIGHT=0.05
-    XYZ=0,0,0.01
-    ORIENTATION=0.5,0,1
-    THETA = 45. /
+    &OBST XB          =-0.105,-0.100,-0.105,-0.100,-0.105,-0.100
+          MULT_ID     ='cube array'
+          SURF_ID     ='shape'
+          SHAPE       ='BOX'
+          LENGTH      =0.075
+          WIDTH       =0.025
+          HEIGHT      =0.05
+          XYZ         =0,0,0.01
+          ORIENTATION =0.5,0,1
+          THETA       = 45. /
 \end{lstlisting}
 \begin{figure}[ht]
     \centering
@@ -2279,16 +2280,16 @@ The \ct{MATL} namelist group is used to define the properties of the materials t
 
 Material layers and components are specified on the \ct{SURF} line via the array called \ct{MATL_ID(IL,IC)}. The argument \ct{IL} is an integer indicating the layer index, starting at 1, the layer at the exterior boundary. The argument \ct{IC} is an integer indicating the component index. For example, \ct{MATL_ID(2,3)='BRICK'} indicates that the third material component of the second layer is \ct{BRICK}. The \ct{THICKNESS} inputs apply to each layer in order. In practice, the materials are often listed as in the following example:
 \begin{lstlisting}
-    &MATL ID             = 'INSULATOR'
-    CONDUCTIVITY   = 0.041
-    SPECIFIC_HEAT  = 2.09
-    DENSITY        = 229. /
+    &MATL ID            = 'INSULATOR'
+          CONDUCTIVITY  = 0.041
+          SPECIFIC_HEAT = 2.09
+          DENSITY       = 229. /
 
     &SURF ID        = 'BRICK WALL'
-    MATL_ID   = 'BRICK','INSULATOR'
-    COLOR     = 'RED'
-    BACKING   = 'EXPOSED'
-    THICKNESS = 0.20,0.10 /
+          MATL_ID   = 'BRICK','INSULATOR'
+          COLOR     = 'RED'
+          BACKING   = 'EXPOSED'
+          THICKNESS = 0.20,0.10 /
 \end{lstlisting}
 Without arguments, the parameter \ct{MATL_ID} is assumed to be a list of the materials in multiple layers, with each layer consisting of only a single material component.
 
@@ -2297,17 +2298,17 @@ When a set of \ct{SURF} parameters is applied to the face of an \ct{OBST}, the f
 Mixtures of solid materials within the same layer can be defined using the \ct{MATL_MASS_FRACTION} keyword. This parameter has the same two indices as the \ct{MATL_ID} keyword. For example, if the brick layer contains some additional water, the input could look like this:
 \begin{lstlisting}
     &MATL ID            = 'WATER'
-    CONDUCTIVITY  = 0.60
-    SPECIFIC_HEAT = 4.19
-    DENSITY       = 1000. /
+          CONDUCTIVITY  = 0.60
+          SPECIFIC_HEAT = 4.19
+          DENSITY       = 1000. /
 
     &SURF ID                        = 'BRICK WALL'
-    MATL_ID(1,1:2)            = 'BRICK','WATER'
-    MATL_MASS_FRACTION(1,1:2) = 0.95,0.05
-    MATL_ID(2,1)              = 'INSULATOR'
-    COLOR                     = 'RED'
-    BACKING                   = 'EXPOSED'
-    THICKNESS                 = 0.20,0.10 /  <--- for layers 1 and 2
+          MATL_ID(1,1:2)            = 'BRICK','WATER'
+          MATL_MASS_FRACTION(1,1:2) = 0.95,0.05
+          MATL_ID(2,1)              = 'INSULATOR'
+          COLOR                     = 'RED'
+          BACKING                   = 'EXPOSED'
+          THICKNESS                 = 0.20,0.10 /  <--- for layers 1 and 2
 \end{lstlisting}
 In this example, the first layer of material, Layer~1, is composed of a mixture of brick and water. This is given by the \ct{MATL_ID} array which specifies Component~1 of Layer~1 to be brick, and Component~2 of Layer~1 to be water. The mass fraction of each is specified via \ct{MATL_MASS_FRACTION}. In this case, brick is 95~\%, by mass, of Layer 1, and water is 5~\%.
 
@@ -2324,10 +2325,10 @@ where $Y_i$ are the material mass fractions and $\rho_i$ are the material bulk d
 For any solid material, specify its thermal \ct{CONDUCTIVITY} (\unit{W/(m.K)}), \ct{DENSITY} (\unit{kg/m^3}), \ct{SPECIFIC_HEAT} (\unit{kJ/(kg.K)}), and \ct{EMISSIVITY}\footnote{The values of \ct{EMISSIVITY} that are specified on the various \ct{MATL} lines that define that material components of the solid are used to compute an effective emissivity for the front and back surfaces. However, if you specify an \ct{EMISSIVITY} or \ct{EMISSIVITY_BACK} on the \ct{SURF} line, these values will then take precedence.} (0.9 by default). Both \ct{CONDUCTIVITY} and \ct{SPECIFIC_HEAT} can be functions of temperature using \ct{CONDUCTIVITY_RAMP} and \ct{SPECIFIC_HEAT_RAMP} respectively. \ct{DENSITY} and \ct{EMISSIVITY} cannot. Temperature-dependence is specified using the \ct{RAMP} convention. As an example, consider Marinite, a wall material suitable for high temperature applications:
 \begin{lstlisting}
     &MATL ID                 = 'MARINITE'
-    EMISSIVITY         = 0.8
-    DENSITY            = 737.
-    SPECIFIC_HEAT_RAMP = 'c_ramp'
-    CONDUCTIVITY_RAMP  = 'k_ramp' /
+          EMISSIVITY         = 0.8
+          DENSITY            = 737.
+          SPECIFIC_HEAT_RAMP = 'c_ramp'
+          CONDUCTIVITY_RAMP  = 'k_ramp' /
     &RAMP ID='k_ramp', T= 24., F=0.13 /
     &RAMP ID='k_ramp', T=149., F=0.12 /
     &RAMP ID='k_ramp', T=538., F=0.12 /
@@ -2368,29 +2369,29 @@ By default, the initial temperature of the solid material is set to ambient (\ct
 
 If an \ct{OBST} does not border the edge of the computational domain, FDS calculates the heat transfer through the specified solid \ct{THICKNESS} using the gas phase temperature and heat flux on the front and back sides for boundary conditions. A redundant calculation is performed on the opposite side of the obstruction. The first layer listed is applied to the exposed front face and the last layer to the opposite face. Take, for example, a \ct{SURF} line that is applied to a solid \ct{OBST}. On the $-x$ side of the \ct{OBST}, layer~1 is \ct{MATERIAL A}, layer~2 is \ct{MATERIAL B}, and layer~3 is \ct{MATERIAL A}.  On the $+x$ side the \ct{SURF} is applied in the same manner.
 \begin{lstlisting}
-    &SURF ID           = 'SYMMETRIC'
-    BACKING            = 'EXPOSED'
-    MATL_ID(1:3,1)     = 'MATERIAL A','MATERIAL B','MATERIAL A'
-    THICKNESS(1:3)     = 0.1,0.2,0.1 /
+    &SURF ID             = 'SYMMETRIC'
+          BACKING        = 'EXPOSED'
+          MATL_ID(1:3,1) = 'MATERIAL A','MATERIAL B','MATERIAL A'
+          THICKNESS(1:3) = 0.1,0.2,0.1 /
 \end{lstlisting}
 Now consider the \ct{SURF} definition below. On the $-x$ side of the \ct{OBST}, layer~1 is \ct{MATERIAL A}, layer~2 is \ct{MATERIAL B}, and layer~3 is \ct{MATERIAL C}.  On the $+x$ side, the \ct{SURF} is applied in the same manner, layer~1 is \ct{MATERIAL A}, layer~2 is \ct{MATERIAL B}, and layer~3 is \ct{MATERIAL C}.  This means that both sides of the \ct{OBST} will compute heat transfer assuming \ct{MATERIAL A} is the first layer but this is not possible.
 \begin{lstlisting}
-    &SURF ID           = 'NON-SYMMETRIC'
-    BACKING            = 'EXPOSED'
-    MATL_ID(1:3,1)     = 'MATERIAL A','MATERIAL B','MATERIAL C'
-    THICKNESS(1:3)     = 0.1,0.2,0.1 /
+    &SURF ID             = 'NON-SYMMETRIC'
+          BACKING        = 'EXPOSED'
+          MATL_ID(1:3,1) = 'MATERIAL A','MATERIAL B','MATERIAL C'
+          THICKNESS(1:3) = 0.1,0.2,0.1 /
 \end{lstlisting}
 Care is needed when specifying multiple layers. If the layering is symmetric, the same \ct{SURF} line can be applied to both sides. However, if the layering is not symmetric, two separate \ct{SURF} lines must be created and applied one to each side. For example, a hollow box column that is made of steel and covered on the outside by a layer of insulation material and a layer of plastic on top of the insulation material, would have to be described with two \ct{SURF} lines like the following:
 \begin{lstlisting}
-    &SURF ID           = 'COLUMN EXTERIOR'
-    BACKING            = 'EXPOSED'
-    MATL_ID(1:3,1)     = 'PLASTIC','INSULATION','STEEL'
-    THICKNESS(1:3)     = 0.002,0.036,0.0063 /
+    &SURF ID             = 'COLUMN EXTERIOR'
+          BACKING        = 'EXPOSED'
+          MATL_ID(1:3,1) = 'PLASTIC','INSULATION','STEEL'
+          THICKNESS(1:3) = 0.002,0.036,0.0063 /
 
-    &SURF ID           = 'COLUMN INTERIOR'
-    BACKING            = 'EXPOSED'
-    MATL_ID(1:3,1)     = 'STEEL','INSULATION','PLASTIC'
-    THICKNESS(1:3)     = 0.0063,0.036,0.002 /
+    &SURF ID             = 'COLUMN INTERIOR'
+          BACKING        = 'EXPOSED'
+          MATL_ID(1:3,1) = 'STEEL','INSULATION','PLASTIC'
+          THICKNESS(1:3) = 0.0063,0.036,0.002 /
 \end{lstlisting}
 If, in addition, the insulation material and plastic are combustible, and their burning properties are specified on the appropriate \ct{MATL} lines, then indicating which side of the column would generate the fuel vapor is needed. In this case, the steel is impermeable. Adding the the parameter \ct{LAYER_DIVIDE=2.0} to the \ct{SURF} line labeled \ct{'COLUMN EXTERIOR'} would result in fuel vapors formed by the heating of the two first layers (\ct{'PLASTIC'} and \ct{'INSULATION'}) being driven out of that surface. Similarly, for the \ct{SURF} line labeled \ct{'COLUMN INTERIOR'}, specifying \ct{LAYER_DIVIDE=0.0} would indicate that no fuel vapors are to driven into the interior of the column. In fact, values from 0.0 to 1.0 would work equally because the material \ct{'STEEL'} would not generate any fuel vapors. By default, \ct{LAYER_DIVIDE} is 0.5 times the number of layers for surfaces with \ct{EXPOSED} backing, and equal to the number of layers for other surfaces. See Section~\ref{info:LAYER_DIVIDE} for more information.
 
@@ -2739,18 +2740,18 @@ If the obstruction or vent with the pyrolysis model represents an object that ha
 
 Real objects, like furnishings, office equipment, and so on, are often difficult to describe via the \ct{SURF} and \ct{MATL} parameters. Sometimes the only information about a given object is its bulk thermal properties, its ``ignition'' temperature, and its subsequent burning rate as a function of time from ignition. For this situation, add lines similar to the following:
 \begin{lstlisting}
-    &MATL ID             = 'stuff'
-    CONDUCTIVITY         = 0.1
-    SPECIFIC_HEAT        = 1.0
-    DENSITY              = 900.0 /
+    &MATL ID            = 'stuff'
+          CONDUCTIVITY  = 0.1
+          SPECIFIC_HEAT = 1.0
+          DENSITY       = 900.0 /
 
-    &SURF ID             = 'my surface'
-    COLOR                = 'GREEN'
-    MATL_ID              = 'stuff'
-    HRRPUA               = 1000.
-    IGNITION_TEMPERATURE = 500.
-    RAMP_Q               = 'fire_ramp'
-    THICKNESS            = 0.01 /
+    &SURF ID                   = 'my surface'
+          COLOR                = 'GREEN'
+          MATL_ID              = 'stuff'
+          HRRPUA               = 1000.
+          IGNITION_TEMPERATURE = 500.
+          RAMP_Q               = 'fire_ramp'
+          THICKNESS            = 0.01 /
 
     &RAMP ID='fire_ramp', T=  0.0, F=0.0 /
     &RAMP ID='fire_ramp', T= 10.0, F=1.0 /
@@ -2762,13 +2763,13 @@ Each wall cell or particle for an object with surface properties defined by \ct{
 After the surface has ignited, the heat transfer into the solid is still calculated, but there is no coupling between the burning rate and the surface temperature. As a result, the surface temperature may increase too much. To account for the energy loss due to the vaporization of the solid fuel, \ct{HEAT_OF_VAPORIZATION} can be specified for the surface. For example, when using the lines below, the total heat flux at the material surface is reduced by a factor 1000~kJ/kg times the instantaneous burning rate.
 \begin{lstlisting}
     &SURF ID                   = 'my surface'
-    COLOR                = 'GREEN'
-    MATL_ID              = 'stuff'
-    HRRPUA               = 1000.
-    IGNITION_TEMPERATURE = 500.
-    HEAT_OF_VAPORIZATION = 1000.
-    RAMP_Q               = 'fire_ramp'
-    THICKNESS            = 0.01 /
+          COLOR                = 'GREEN'
+          MATL_ID              = 'stuff'
+          HRRPUA               = 1000.
+          IGNITION_TEMPERATURE = 500.
+          HEAT_OF_VAPORIZATION = 1000.
+          RAMP_Q               = 'fire_ramp'
+          THICKNESS            = 0.01 /
 \end{lstlisting}
 Finally, if you desire that the burning stop if the surface temperature drops below a specified value, set \ct{EXTINCTION_TEMPERATURE} on the \ct{SURF} line. This value should be less than or equal to the \ct{IGNITION_TEMPERATURE}.
 
@@ -2854,21 +2855,21 @@ In the example below, a reaction for the pyrolysis of wood is defined. In the re
 \begin{lstlisting}
     &SPEC ID = 'PYROLYZATE', MW=53.6 /
 
-    &MATL ID               = 'WOOD'
-    EMISSIVITY             = 0.9
-    CONDUCTIVITY           = 0.2
-    SPECIFIC_HEAT          = 1.3
-    DENSITY                = 570.
-    N_REACTIONS            = 1
-    A(1)                   = 1.89E10
-    E(1)                   = 1.51E5
-    N_S(1)                 = 1.0
-    MATL_ID(1,1)           = 'CHAR'
-    NU_MATL(1,1)           = 0.18
-    SPEC_ID(1,1)           = 'PYROLYZATE'
-    NU_SPEC(1,1)           = 0.82
-    HEAT_OF_REACTION(1)    = 430.
-    HEAT_OF_COMBUSTION(4,1)= 14500. /
+    &MATL ID                      = 'WOOD'
+          EMISSIVITY              = 0.9
+          CONDUCTIVITY            = 0.2
+          SPECIFIC_HEAT           = 1.3
+          DENSITY                 = 570.
+          N_REACTIONS             = 1
+          A(1)                    = 1.89E10
+          E(1)                    = 1.51E5
+          N_S(1)                  = 1.0
+          MATL_ID(1,1)            = 'CHAR'
+          NU_MATL(1,1)            = 0.18
+          SPEC_ID(1,1)            = 'PYROLYZATE'
+          NU_SPEC(1,1)            = 0.82
+          HEAT_OF_REACTION(1)     = 430.
+          HEAT_OF_COMBUSTION(4,1) = 14500. /
 \end{lstlisting}
 Note that the indices associated with the parameters are not needed {\em in this case}, but they are shown to emphasize that, in general, there can be multiple reactions with corresponding kinetic parameters and products.
 
@@ -2960,16 +2961,16 @@ There are many cases where it is only possible to estimate the \ct{REFERENCE_TEM
 \ee
 When in doubt about the values of these various parameters, just specify the \ct{REFERENCE_TEMPERATURE}. Note that FDS will automatically calculate $A$ and $E$ using the above formulae. Do not specify $A$ and $E$ if you specify the \ct{REFERENCE_TEMPERATURE}, and do not specify \ct{PYROLYSIS_RANGE} if you specify \ct{REFERENCE_RATE}. For the material decomposition shown in Fig.~\ref{pyrolysis}, the \ct{MATL} would have the form:
 \begin{lstlisting}
-    &MATL ID                 = 'My Fuel'
-    ...
-    N_REACTIONS              = 1
-    SPEC_ID(1,1)             = '...'
-    NU_SPEC(1,1)             = 1.
-    REFERENCE_TEMPERATURE(1) = 300.
-    REFERENCE_RATE(1)        = 0.002
-    HEATING_RATE(1)          = 5.
-    HEAT_OF_COMBUSTION(1)    = ...
-    HEAT_OF_REACTION(1)      = ... /
+    &MATL ID                       = 'My Fuel'
+          ...
+          N_REACTIONS              = 1
+          SPEC_ID(1,1)             = '...'
+          NU_SPEC(1,1)             = 1.
+          REFERENCE_TEMPERATURE(1) = 300.
+          REFERENCE_RATE(1)        = 0.002
+          HEATING_RATE(1)          = 5.
+          HEAT_OF_COMBUSTION(1)    = ...
+          HEAT_OF_REACTION(1)      = ... /
 \end{lstlisting}
 Note that the indices have been added to the reaction parameters to emphasize the fact that these parameters are stored in arrays of length equal to \ct{N_REACTIONS}. If there is only one reaction, the \ct{(1)} may be omitted, but using it anyways ensures consistency.
 
@@ -2978,15 +2979,15 @@ Note that the indices have been added to the reaction parameters to emphasize th
 
 The example input file called \ct{Fires/couch.fds} demonstrates a simple way to model upholstered furniture. Modeling a couch requires a simplification of its structure and materials.  At the very least, we want the upholstery to be modeled as a layer of fabric covering polyurethane foam. The thermal properties of each are needed, along with estimates of the ``reference'' temperatures as described above. The foam might be described as follows:
 \begin{lstlisting}
-    &MATL ID              = 'FOAM'
-    SPECIFIC_HEAT         = 1.0
-    CONDUCTIVITY          = 0.1
-    DENSITY               = 40.0
-    NU_SPEC               = 1.
-    SPEC_ID               = 'POLYURETHANE'
-    REFERENCE_TEMPERATURE = 280.
-    HEAT_OF_REACTION      = 800.
-    HEAT_OF_COMBUSTION    = 22700. /
+    &MATL ID                    = 'FOAM'
+          SPECIFIC_HEAT         = 1.0
+          CONDUCTIVITY          = 0.1
+          DENSITY               = 40.0
+          NU_SPEC               = 1.
+          SPEC_ID               = 'POLYURETHANE'
+          REFERENCE_TEMPERATURE = 280.
+          HEAT_OF_REACTION      = 800.
+          HEAT_OF_COMBUSTION    = 22700. /
 \end{lstlisting}
 Note that these properties are completely made up.  Both the fabric and the foam decompose into fuel gases via a single-step reaction. The fuel gases from each have different composition and heats of combustion. FDS automatically adjusts the mass loss rate of each so that the ``effective'' fuel gas is that which is specified on the \ct{REAC} line.  Figure~\ref{couch_fig} shows the fire after 1~min, 2~min, 3~min, and 10~min. Only the flame zone of the fire is shown; the smoke is hidden so that you can see the fire progressing along the couch. Also shown in the Fig.~\ref{couch_fig} is the heat release rate of the burning couch. The ``Expected HRR'' is a rough estimate of the peak HRR of a piece of furniture of this size.
 
@@ -3058,11 +3059,11 @@ The solid phase reaction represented by Fig.~\ref{pyrolysis} is fairly simple---
 
 The plot in Fig.~\ref{pyrolysis_2} contains two sets of curves. The solid curves represent the solution of the set of equations computed using a numerical ODE solver, and the underlying dashed curves are a ``fit'' of the solution using FDS. The \ct{MATL} line for the solid material contains the following three parameters that define its decomposition:
 \begin{lstlisting}
-    &MATL ID              = '...'
-    ...
-    REFERENCE_TEMPERATURE = 300.
-    PYROLYSIS_RANGE       = 100.
-    HEATING_RATE          = 5.   /
+    &MATL ID                    = '...'
+          ...
+          REFERENCE_TEMPERATURE = 300.
+          PYROLYSIS_RANGE       = 100.
+          HEATING_RATE          = 5.   /
 \end{lstlisting}
 The \ct{REFERENCE_TEMPERATURE} is the temperature in \unit{\degreeCelsius} where the mass loss rate is at its peak. The \ct{HEATING_RATE} is the linear temperature rise (K/min) used in the TGA experiment, which is represented here by the numerical solution. The \ct{PYROLYSIS_RANGE} is the approximate ``width'' of the second red hump in Fig.~\ref{pyrolysis_2}, fit by inspection. That is, the value of 100~\unit{\degreeCelsius} was chosen by trial and error. This is typically how one would choose kinetic parameters in FDS to match a given TGA curve.
 
@@ -3084,24 +3085,24 @@ The evaporation rate of a liquid fuel can be modeled is analogous to the convect
 The properties of a liquid fuel are given on the \ct{MATL} line:
 \begin{lstlisting}
     &REAC FUEL       = 'ETHANOL'
-    CO_YIELD           = 0.001
-    SOOT_YIELD         = 0.008 /
+          CO_YIELD   = 0.001
+          SOOT_YIELD = 0.008 /
 
-    &MATL ID               = 'ETHANOL LIQUID'
-    EMISSIVITY             = 1.
-    NU_SPEC                = 1.
-    SPEC_ID                = 'ETHANOL'
-    HEAT_OF_REACTION       = 837
-    CONDUCTIVITY           = 0.17
-    SPECIFIC_HEAT          = 2.44
-    DENSITY                = 794
-    ABSORPTION_COEFFICIENT = 1140
-    BOILING_TEMPERATURE    = 78.5 /
+    &MATL ID                     = 'ETHANOL LIQUID'
+          EMISSIVITY             = 1.
+          NU_SPEC                = 1.
+          SPEC_ID                = 'ETHANOL'
+          HEAT_OF_REACTION       = 837
+          CONDUCTIVITY           = 0.17
+          SPECIFIC_HEAT          = 2.44
+          DENSITY                = 794
+          ABSORPTION_COEFFICIENT = 1140
+          BOILING_TEMPERATURE    = 78.5 /
 
-    &SURF ID  = 'ETHANOL POOL'
-    COLOR     = 'YELLOW'
-    MATL_ID   = 'ETHANOL LIQUID'
-    THICKNESS = 0.1 /
+    &SURF ID        = 'ETHANOL POOL'
+          COLOR     = 'YELLOW'
+          MATL_ID   = 'ETHANOL LIQUID'
+          THICKNESS = 0.1 /
 \end{lstlisting}
 The inclusion of \ct{BOILING_TEMPERATURE} on the \ct{MATL} line tells FDS to use its liquid pyrolysis model. It also automatically sets \ct{N_REACTIONS=1}, that is, the only ``reaction'' is the phase change from liquid to gaseous fuel. Thus, \ct{HEAT_OF_REACTION} in this case is the latent heat of vaporization at the boiling temperature. The thermal conductivity, density and specific heat are used to compute the loss of heat into the liquid via conduction using the same one-dimensional heat transfer equation that is used for solids. Obviously, the convection of the liquid is important, but is not considered in the model. The \ct{ABSORPTION_COEFFICIENT} denotes the absorption in depth of thermal radiation into the liquid. Liquids do not just absorb radiation at the surface, but rather over a thin layer near the surface. Its effect on the burning rate can be significant.
 
@@ -3130,11 +3131,11 @@ Most liquid fuels of interest in fire protection engineering are not pure liquid
 \begin{lstlisting}
     &SPEC ID='WATER VAPOR' /
     &REAC FUEL='N-HEXANE' /
-    &SURF ID  ='POOL'
-    COLOR     ='YELLOW'
-    MATL_ID(1,1:6) = 'HEXANE','HEPTANE','OCTANE','DECANE','BENZENE','WATER'
-    MATL_MASS_FRACTION(1,1:6) = 0.521,0.054,0.063,0.023,0.200,0.139
-    THICKNESS = 0.002 /
+    &SURF ID                        ='POOL'
+          COLOR                     ='YELLOW'
+          MATL_ID(1,1:6)            = 'HEXANE','HEPTANE','OCTANE','DECANE','BENZENE','WATER'
+          MATL_MASS_FRACTION(1,1:6) = 0.521,0.054,0.063,0.023,0.200,0.139
+          THICKNESS                 = 0.002 /
 \end{lstlisting}
 Water is to evaporate and form \ct{'WATER VAPOR'}, but the other components are all to form \ct{'N-HEXANE'}. On each \ct{MATL} line for each liquid component, either \ct{'WATER VAPOR'} or \ct{'N-HEXANE'} is declared as the \ct{SPEC_ID}, along with the \ct{BOILING_TEMPERATURE}, \ct{MW}, \ct{SPECIFIC_HEAT}, and \ct{HEAT_OF_REACTION} (i.e. the heat of vaporization). Additionally, a \ct{HEAT_OF_COMBUSTION} may be specified on the \ct{MATL} line to indicate that the liquid component has a different heat of combustion than n-hexane and FDS should adjust its evaporation rate accordingly.
 
@@ -3329,18 +3330,18 @@ Compare your results to measurements made in a bench-scale device, like the cone
 &TIME T_END=600., WALL_INCREMENT=1, DT=0.05 /
 &MISC SOLID_PHASE_ONLY=T /
 &SPEC ID='METHANE' /
-&MATL ID='BLACKPMMA'
-      ABSORPTION_COEFFICIENT=2700.
-      N_REACTIONS=1
-      A(1) = 8.5E12
-      E(1) = 188000
-      EMISSIVITY=0.85
-      DENSITY=1100.
-      SPEC_ID='METHANE'
-      NU_SPEC=1.
-      HEAT_OF_REACTION=870.
-      CONDUCTIVITY = 0.20
-      SPECIFIC_HEAT = 2.2
+&MATL ID                     ='BLACKPMMA'
+      ABSORPTION_COEFFICIENT =2700.
+      N_REACTIONS            =1
+      A(1)                   = 8.5E12
+      E(1)                   = 188000
+      EMISSIVITY             =0.85
+      DENSITY                =1100.
+      SPEC_ID                ='METHANE'
+      NU_SPEC                =1.
+      HEAT_OF_REACTION       =870.
+      CONDUCTIVITY           = 0.20
+      SPECIFIC_HEAT          = 2.2
 &SURF ID='PMMA SLAB'
       COLOR='BLACK'
       BACKING='INSULATED'
@@ -3362,14 +3363,14 @@ Compare your results to measurements made in a bench-scale device, like the cone
 
 There are a number of techniques to measure the thermo-physical properties of a solid material. Most of these involve heating a very small sample, a few mg, at a relatively slow, linear rate. In this way, thermal conduction is minimized, and the sample can be considered thermally-thin. FDS has a special feature that mimics thermogravimetric analysis (TGA), differential scanning calorimetry (DSC), and micro-combustion calorimetry (MCC) measurements. To use it, set up your input file as you normally would. Then, add the flag \ct{TGA_ANALYSIS=T} to the \ct{SURF} line you want to analyze. Only one \ct{SURF} line can be analyzed at a time. Doing multiple \ct{SURF} lines will require multiple runs. The linear heating rate (K/min) and final sample temperature (\unit{\degreeCelsius}) are respectively specified using \ct{TGA_HEATING_RATE} and \ct{TGA_FINAL_TEMPERATURE}. The default values are 5~K/min and 800~\unit{\degreeCelsius}. The initial temperature is \ct{TMPA}. Note that this feature is only appropriate for a \ct{SURF} line that describes a thermally-thick sample consisting of a single layer with multiple reacting components. For example, the following \ct{SURF} line describes a material that consists of three components:
 \begin{lstlisting}
-    &SURF ID = 'Cable Insulation'
-    TGA_ANALYSIS = T
-    TGA_HEATING_RATE = 60.
-    THICKNESS = 0.005
-    MATL_ID(1,1) = 'Component A',
-    MATL_ID(1,2) = 'Component B',
-    MATL_ID(1,3) = 'Component C',
-    MATL_MASS_FRACTION(1,1:3) = 0.26,0.33,0.41 /
+    &SURF ID                        = 'Cable Insulation'
+          TGA_ANALYSIS              = T
+          TGA_HEATING_RATE          = 60.
+          THICKNESS                 = 0.005
+          MATL_ID(1,1)              = 'Component A',
+          MATL_ID(1,2)              = 'Component B',
+          MATL_ID(1,3)              = 'Component C',
+          MATL_MASS_FRACTION(1,1:3) = 0.26,0.33,0.41 /
 \end{lstlisting}
 The two \ct{TGA} entries will force FDS to perform a numerical version of the TGA, DSC and MCC measurements. The \ct{THICKNESS} and other boundary conditions on the \ct{SURF} line will be ignored. After running the analysis, which only takes a second or two, FDS will then shut down without running the actual simulation. To run the simulation, either remove the \ct{TGA} entries or set \ct{TGA_ANALYSIS} to \ct{F}.
 
@@ -3598,7 +3599,8 @@ Either \ct{TURBULENCE_INTENSITY} or \ct{REYNOLDS_STRESS} must be provided (not b
 Figure~\ref{fig:sem_profiles} shows examples for flat, parabolic, atmospheric, and ramp mean profiles with 10~\% turbulence intensity (see the \ct{sem_*} cases in the Turbulence verification subdirectory). The atmospheric case is:
 \begin{lstlisting}
     &SURF ID='inlet', VEL=-1, PROFILE='ATMOSPHERIC', Z0=0.5, PLE=0.3 /
-    &VENT DB='XMIN', SURF_ID='inlet', N_EDDY=100, L_EDDY=0.2, TURBULENCE_INTENSITY=.1 /
+    &VENT DB='XMIN', SURF_ID='inlet', N_EDDY=100, L_EDDY=0.2,
+          TURBULENCE_INTENSITY=.1 /
 \end{lstlisting}
 
 \begin{figure}[ht]
@@ -3615,9 +3617,9 @@ Figure~\ref{fig:sem_profiles} shows examples for flat, parabolic, atmospheric, a
 An anisotropic example using dimensional Reynolds stresses and elongated eddies is:
 \begin{lstlisting}
     &VENT XB=... , SURF_ID='WIND', N_EDDY=500, L_EDDY=6, EDDY_GAMMA2=4,
-         REYNOLDS_STRESS(1,1)=2.16,  REYNOLDS_STRESS(1,2)=0.,   REYNOLDS_STRESS(1,3)=-0.47,
-         REYNOLDS_STRESS(2,1)=0.,    REYNOLDS_STRESS(2,2)=1.53, REYNOLDS_STRESS(2,3)=0.,
-         REYNOLDS_STRESS(3,1)=-0.47, REYNOLDS_STRESS(3,2)=0.,   REYNOLDS_STRESS(3,3)=4.259 /
+          REYNOLDS_STRESS(1,1:3) =  2.16, 0.,   -0.47,
+          REYNOLDS_STRESS(2,1:3) =  0.,   1.53,  0.,
+          REYNOLDS_STRESS(3,1:3) = -0.47, 0.,    4.259 /
 \end{lstlisting}
 For this stress tensor the principal values are approximately $\lambda=(4.36,\,2.06,\,1.53)$~\unit{m^2/s^2}. The value of \ct{EDDY_GAMMA2} gives an eddy length scale ratio of 2:1:1 between the major and minor principal components.
 
@@ -3679,9 +3681,9 @@ A number of examples of simple HVAC systems are given in the HVAC folder of the 
 
 As described in the Technical Reference Manual, the HVAC pressure solution is not directly coupled to the FDS pressure solution. Rather there is implicit coupling using the wall boundary condition for HVAC vents. At times this can result in stability problems. There are two methods of attempting to resolve this.
 
-The first method is the keyword \ct{HVAC_PRES_RELAX} ($\Theta$) on the \ct{MISC} line with a default value of 1.0. At each time step FDS evaluates the average pressure in the FDS gas cells adjacent to nodes connecting the FDS domain to the HVAC network, $P_{FDS}$. The node pressure at time step n+1,$P_{node}^{n+1}$ , is taken as:
+The first method is the keyword \ct{HVAC_PRES_RELAX} ($\Theta$) on the \ct{MISC} line with a default value of 1.0. At each time step FDS evaluates the average pressure in the FDS gas cells adjacent to nodes connecting the FDS domain to the HVAC network, $P_{\mathrm{FDS}}$. The node pressure at time step $n+1$, $P_{\mathrm{node}}^{n+1}$, is taken as:
 \be
-P_{node}^{n+1}=P_{node}^n \; (1-\Theta) \; + \; P_{FDS}^{n+1} \; \Theta
+P_{\mathrm{node}}^{n+1}=P_{\mathrm{node}}^n \; (1-\Theta) \; + \; P_{\mathrm{FDS}}^{n+1} \; \Theta
 \ee
 Setting this parameter closer to 0 reduces the sensitivity of the HVAC solution to short, transient pressure changes in the FDS domain; however, doing so will also result in the HVAC solution lagging for longer duration pressure changes.
 
@@ -3990,15 +3992,15 @@ In the case of a normal HVAC node, using the simple example from Section~\ref{in
 \begin{lstlisting}
     &SURF ID='NODE SURF',NODE_ID='MY NODE'/
     &GEOM ID='My Solid'
-    SURF_ID='NODE SURF','INERT'
-    VERTS= -1.0, -1.0,  0.0,
-    1.0, -1.0,  0.0,
-    0.0,  1.0,  0.0,
-    0.0,  0.0,  1.0,
-    FACES= 1,3,2, 2,
-    1,4,3, 1,
-    3,4,2, 1,
-    2,4,1, 0 /
+          SURF_ID='NODE SURF','INERT'
+          VERTS= -1.0, -1.0,  0.0,
+                  1.0, -1.0,  0.0,
+                  0.0,  1.0,  0.0,
+                  0.0,  0.0,  1.0,
+          FACES= 1,3,2, 2,
+                 1,4,3, 1,
+                 3,4,2, 1,
+                 2,4,1, 0 /
     &HVAC ID='MY NODE',TYPE_ID='NODE',GEOM=T,..../
 \end{lstlisting}
 
@@ -4008,17 +4010,17 @@ To apply localized leakage to \ct{GEOM}, the process is similar. \ct{NODE_ID} on
 \begin{lstlisting}
     &SURF ID='LEAK SURF',NODE_ID='LEAK OUT'/
     &GEOM ID='My Solid'
-    SURF_ID='LEAK SURF','INERT'
-    VERTS= -1.0, -1.0,  0.0,
-    1.0, -1.0,  0.0,
-    0.0,  1.0,  0.0,
-    0.0,  0.0,  1.0,
-    FACES= 1,3,2, 2,
-    1,4,3, 1,
-    3,4,2, 1,
-    2,4,1, 0 /
+          SURF_ID='LEAK SURF','INERT'
+          VERTS= -1.0, -1.0,  0.0,
+                  1.0, -1.0,  0.0,
+                  0.0,  1.0,  0.0,
+                  0.0,  0.0,  1.0,
+          FACES= 1,3,2, 2,
+                 1,4,3, 1,
+                 3,4,2, 1,
+                 2,4,1, 0 /
     &HVAC ID='MY LEAK',TYPE_ID='LEAK',VENT_ID='LEAK IN',
-    VENT2_ID='LEAK OUT',GEOM2=T,AREA=0.01/
+          VENT2_ID='LEAK OUT',GEOM2=T,AREA=0.01/
 \end{lstlisting}
 Here the use of \ct{GEOM2=T} indicates that \ct{VENT2_ID} is a \ct{NODE_ID} on \ct{SURF}.
 
@@ -4272,37 +4274,6 @@ where the ratio of specific heats, $\gamma=1.4$, volume flow rate, $\dot{V}=1$~\
 
 
 
-\subsubsection{Boundary Layer (Circular Vent)}
-\label{info:VEL_BULK}
-
-\ct{PROFILE='BOUNDARY LAYER'} may be used for circular vents created using \ct{RADIUS}. By adding \ct{VEL_BULK} on the \ct{SURF} line together with \ct{VEL}, FDS will produce a plug flow core profile, with max velocity given by \ct{VEL}, and a quadratic profile in the boundary layer.  The form of the profile is illustrated in Fig.~\ref{fig:bl_profile} for a circular vent.  The functional form of the velocity profile (here taken a vertical profile) is
-\begin{equation}
-    w(r) = \left\{ \begin{array}{ll} w_{\unit{max}} & \quad \mbox{if} \quad r \le R-\delta \\ w_{\unit{max}}\left(1 - \left(\frac{r-(R-\delta)}{\delta}\right)^2\right) & \quad \mbox{if} \quad R-\delta < r \le R \end{array} \right.
-\end{equation}
-The bulk velocity is the volumetric flow rate divided by the circular flow area.  \ct{VEL_BULK} is negative pointing into the domain.  The boundary layer thickness is $\delta$.  This feature is handy for dealing with the case where the maximum velocity is higher than the bulk velocity.  Here is an example input file line:
-\begin{lstlisting}
-    &SURF ID='JET', VEL=-69, VEL_BULK=-53, PROFILE='BOUNDARY LAYER', ... /
-\end{lstlisting}
-
-\begin{figure}[ht]
-    \begin{center}
-        \includegraphics[width=3.2in]{FIGURES/bl_profile}
-        \caption[Boundary layer profile]{Boundary layer profile.}
-        \label{fig:bl_profile}
-    \end{center}
-\end{figure}
-
-
-
-
-
-
-
-
-
-
-
-
 \chapter{User-Specified Functions}
 \label{info:RAMP}
 
@@ -4394,10 +4365,10 @@ Thermal properties like conductivity and specific heat can vary significantly wi
 the \ct{RAMP} function like this:
 \begin{lstlisting}
     &MATL ID                 = 'STEEL'
-    FYI                = 'A242 Steel'
-    SPECIFIC_HEAT_RAMP = 'c_steel'
-    CONDUCTIVITY_RAMP  = 'k_steel'
-    DENSITY            = 7850. /
+          FYI                = 'A242 Steel'
+          SPECIFIC_HEAT_RAMP = 'c_steel'
+          CONDUCTIVITY_RAMP  = 'k_steel'
+          DENSITY            = 7850. /
 
     &RAMP ID='c_steel', T= 20., F=0.45   /
     &RAMP ID='c_steel', T=377., F=0.60   /
@@ -4865,19 +4836,19 @@ A few sample \ct{REAC} lines are given here.
 \end{lstlisting}
 In this case, there is no need for a \ct{SPEC} because the \ct{FUEL} is listed in Appendix~\ref{info:predefined_species}. It is assumed that the soot and CO yields are zero.  FDS will compute the yields of product species and the heat of combustion based upon predefined values.
 \begin{lstlisting}
-    &REAC FUEL         = 'PROPANE'
-    SOOT_YIELD         = 0.01
-    CO_YIELD           = 0.02
-    HEAT_OF_COMBUSTION = 46460. /
+    &REAC FUEL               = 'PROPANE'
+          SOOT_YIELD         = 0.01
+          CO_YIELD           = 0.02
+          HEAT_OF_COMBUSTION = 46460. /
 \end{lstlisting}
 In this case, the fuel species is again predefined.  However, here the heat of combustion is specified explicitly rather than calculated. Additionally, minor species yields have been specified with the soot yield specified as 0.01 and the CO yield specified as 0.02.
 See Sec.~\ref{info:heat_of_combustion} for more details on the heat of combustion.
 \begin{lstlisting}
-    &SPEC ID = 'MY FUEL'
-    FORMULA  = 'C3H8O3N4'/
+    &SPEC ID      = 'MY FUEL'
+          FORMULA = 'C3H8O3N4'/
 
-    &REAC FUEL         = 'MY FUEL'
-    HEAT_OF_COMBUSTION = 46124. /
+    &REAC FUEL               = 'MY FUEL'
+          HEAT_OF_COMBUSTION = 46124. /
 \end{lstlisting}
 In this case, the fuel is not predefined.  Therefore, either the \ct{FORMULA} or the atom counts (\ct{C},\ct{H},\ct{O}, and \ct{N}) must be defined on \ct{SPEC}, see Sec.~\ref{info:FORMULA}. \footnote{Prior to FDS 6.8.0 the typical approach to define an unknown fuel was to use the inputs \ct{C},\ct{H},\ct{O}, and \ct{N} on \ct{REAC}. Now the preferred approach is to use \ct{SPEC} to encourage you to think about what other species properties should be defined.} In this case, the heat of combustion is known and specified; however, if it weren't FDS would compute it using \ct{EPUMO2} and the fuel chemistry. Note that simple chemistry can also be used for cases where the fuel is a lumped species so long as the defining primitive species contain only C, H, N, and O atoms. An example can be found in Section \ref{info:Complex_Fuel}.
 
@@ -5331,17 +5302,17 @@ Examination of Eq.~(\ref{eq:pu_combust}) and Eq.~(\ref{eq:wood_combust}) shows t
 \end{lstlisting}
 Once we have constructed the lumped species, we can define the \ct{REAC} lines.
 \begin{lstlisting}
-    &REAC ID = 'plastic',
-    FUEL = 'POLYURETHANE',
-    HEAT_OF_COMBUSTION=26200,
-    SPEC_ID_NU = 'POLYURETHANE','AIR','PRODUCTS_1'
-    NU=-1,-27.32741,1 /
+    &REAC ID                 = 'plastic',
+          FUEL               = 'POLYURETHANE',
+          HEAT_OF_COMBUSTION =26200,
+          SPEC_ID_NU         = 'POLYURETHANE','AIR','PRODUCTS_1'
+          NU                 =-1,-27.32741,1 /
 
-    &REAC ID = 'wood'
-    FUEL = 'WOOD',
-    HEAT_OF_COMBUSTION=16400,
-    SPEC_ID_NU = 'WOOD','AIR','PRODUCTS_2'
-    NU=-1,-1.02121,1 /
+    &REAC ID                 = 'wood'
+          FUEL               = 'WOOD',
+          HEAT_OF_COMBUSTION =16400,
+          SPEC_ID_NU         = 'WOOD','AIR','PRODUCTS_2'
+          NU                 =-1,-1.02121,1 /
 \end{lstlisting}
 In both of these reactions, the \ct{ENTHALPY_OF_FORMATION} of the chosen fuels is unknown to FDS, so the \ct{HEAT_OF_COMBUSTION} is specified for each reaction. Typically, the heat release per unit area (\ct{HRRPUA}) parameter is used to specify the fire size on the \ct{SURF} line along with \ct{SPEC_ID} if there are multiple \ct{REAC} inputs and \ct{MASS_FRACTION} if the \ct{HRRPUA} is a mixture of fuels. Multiple fuels can also be used by specifying the mass flux of each fuel. In this example, we want both fuels to flow out of the same burner and ramp up to a 1200~kW fire after 60~s. First, we create a 1~\unit{m^2} burner by defining a \ct{VENT} line:
 \begin{lstlisting}
@@ -5392,8 +5363,8 @@ When specifying a reaction scheme using all primitive variables ({\em i.e., no l
 \end{itemize}
 For example, if the reaction defines the complete combustion of methane using primitive species, then the following would be equivalent:
 \begin{lstlisting}
-    &REAC FUEL='METHANE',
-    EQUATION ='METHANE+2*OXYGEN=CARBON DIOXIDE+2*WATER VAPOR' /
+    &REAC FUEL     ='METHANE',
+          EQUATION ='METHANE+2*OXYGEN=CARBON DIOXIDE+2*WATER VAPOR' /
     &REAC FUEL='METHANE', EQUATION ='CH4+2*O2=CO2+2*H2O' /
     &REAC FUEL='METHANE', EQUATION ='METHANE+2*O2=CO2+2*H2O' /
 \end{lstlisting}
@@ -5438,14 +5409,14 @@ If we use Arrhenius parameters found from experiments or the literature (for thi
 \end{equation}
 and the resulting \ct{REAC} line is:
 \begin{lstlisting}
-    &REAC ID = 'R1'
-    FUEL = 'PROPANE'
-    A = 8.6e11
-    E = 125520
-    SPEC_ID_NU = 'PROPANE','OXYGEN','CARBON DIOXIDE','WATER VAPOR'
-    NU = -1,-5,3,4
-    SPEC_ID_N_S = 'PROPANE','OXYGEN'
-    N_S = 0.1,1.65 /
+    &REAC ID          = 'R1'
+          FUEL        = 'PROPANE'
+          A           = 8.6e11
+          E           = 125520
+          SPEC_ID_NU  = 'PROPANE','OXYGEN','CARBON DIOXIDE','WATER VAPOR'
+          NU          = -1,-5,3,4
+          SPEC_ID_N_S = 'PROPANE','OXYGEN'
+          N_S         = 0.1,1.65 /
 \end{lstlisting}
 The array \ct{SPEC_ID_NU} contains the list of tracked species participating in the reaction as a product or reactant.  Note that a primitive species with \ct{LUMPED_COMPONENT_ONLY=T} cannot be used in a reaction since it is not tracked separately.  The array \ct{SPEC_ID_N_S} contains the list of species with the exponents, \ct{N_S}, in Eq.~(\ref{eq:finite_rate}).  This array must contain only primitive species, i.e., no species mixtures. The array of stoichiometric coefficients, \ct{NU}, can be taken directly from Eq.~(\ref{eq:propane_1step}). If any of \ct{SPEC_ID_NU} is a lumped species and a reactant (this would include product species when \ct{REVERSE=T}), then \ct{SPEC_ID_N_S} and \ct{N_S} must be defined to identify which specific species inside the lumped species are reactants.
 
@@ -5458,29 +5429,29 @@ If we extend Eq.~(\ref{eq:propane_1step}) to include reactions from Westbrook an
 \end{align}
 In this case we will combine fast chemistry with finite-rate chemistry to create a mixed reaction mechanism. As before, we use primitive species rather than mixtures. A \ct{REAC} line is needed for each reaction including the reverse reaction. The propane oxidation reaction is a fast chemistry while the reversible carbon monoxide reaction is finite-rate. The Arrhenius parameters are modified from Andersen et al.~\cite{AndersenJ:1}:
 \begin{lstlisting}
-    &REAC ID = 'R1'
-    FUEL = 'PROPANE'
-    SPEC_ID_NU = 'PROPANE','OXYGEN','CARBON MONOXIDE','WATER VAPOR'
-    NU = -1,-3.5,3,4 /
+    &REAC ID         = 'R1'
+          FUEL       = 'PROPANE'
+          SPEC_ID_NU = 'PROPANE','OXYGEN','CARBON MONOXIDE','WATER VAPOR'
+          NU         = -1,-3.5,3,4 /
 
-    &REAC ID = 'R2'
-    FUEL = 'CARBON MONOXIDE'
-    A = 1.5e9
-    E = 41840
-    SPEC_ID_NU = 'CARBON MONOXIDE','OXYGEN','CARBON DIOXIDE'
-    NU = -1,-0.5,1
-    SPEC_ID_N_S = 'OXYGEN','CARBON MONOXIDE','WATER VAPOR'
-    N_S = 0.25,1,0.5 /
+    &REAC ID          = 'R2'
+          FUEL        = 'CARBON MONOXIDE'
+          A           = 1.5e9
+          E           = 41840
+          SPEC_ID_NU  = 'CARBON MONOXIDE','OXYGEN','CARBON DIOXIDE'
+          NU          = -1,-0.5,1
+          SPEC_ID_N_S = 'OXYGEN','CARBON MONOXIDE','WATER VAPOR'
+          N_S         = 0.25,1,0.5 /
 
-    &REAC ID = 'R3'
-    FUEL = 'CARBON DIOXIDE'
-    A = 6.16e13
-    E = 328026
-    SPEC_ID_NU = 'CARBON DIOXIDE','OXYGEN','CARBON MONOXIDE'
-    NU = -1,0.5,1
-    SPEC_ID_N_S = 'OXYGEN','CARBON DIOXIDE','WATER VAPOR'
-    N_S = -0.25,1,0.5
-    N_T = -0.97 /
+    &REAC ID          = 'R3'
+          FUEL        = 'CARBON DIOXIDE'
+          A           = 6.16e13
+          E           = 328026
+          SPEC_ID_NU  = 'CARBON DIOXIDE','OXYGEN','CARBON MONOXIDE'
+          NU          = -1,0.5,1
+          SPEC_ID_N_S = 'OXYGEN','CARBON DIOXIDE','WATER VAPOR'
+          N_S         = -0.25,1,0.5
+          N_T         = -0.97 /
 \end{lstlisting}
 For the reaction R2, the reaction rate depends on the water vapor concentration, as indicated by its assignment of a value of \ct{N_S}. However, it does not explicitly participate in the reaction because it is not assigned a stoichiometric coefficient, \ct{NU}.  Reactions of this sort are often written in textbooks as
 \begin{equation}\label{eq:inert_1step}
@@ -5540,17 +5511,17 @@ In some cases, only the forward rate parameters will be known for a reversible r
     \mathrm{H_2 + 0.5 \, O_2} &\leftrightharpoons  \mathrm{H_2O}
 \end{align}
 \begin{lstlisting}
-    &REAC ID = 'R1'
-    REVERSE = T
-    FUEL = 'HYDROGEN'
-    A = 0.85e16
-    E = 167360.
-    RADIATIVE_FRACTION=0.0
-    SPEC_ID_NU='HYDROGEN','OXYGEN','WATER VAPOR'
-    SPEC_ID_N_S='HYDROGEN','OXYGEN'
-    NU= -1,-0.5,1
-    N_S = 0.25,1.5
-    N_T = -1 /
+    &REAC ID                 = 'R1'
+          REVERSE            = T
+          FUEL               = 'HYDROGEN'
+          A                  = 0.85e16
+          E                  = 167360.
+          RADIATIVE_FRACTION =0.0
+          SPEC_ID_NU         ='HYDROGEN','OXYGEN','WATER VAPOR'
+          SPEC_ID_N_S        ='HYDROGEN','OXYGEN'
+          NU                 = -1,-0.5,1
+          N_S                = 0.25,1.5
+          N_T                = -1 /
 \end{lstlisting}
 
 \subsection{Third Body Reactions}
@@ -5764,7 +5735,7 @@ Condensation can occur in both gas cells and on wall cells. The heat transfer to
 \chapter{Radiation}
 
 \section{Basic Radiation Parameters: The \texorpdfstring{{\tt RADI}}{RADI} Namelist Group}
-ildland\label{info:RADI}
+\label{info:RADI}
 \label{info:CHI_R}
 
 \ct{RADI} is the namelist group that contains parameters related to the radiation solver. There can be only one \ct{RADI} line in the input file.
@@ -5851,7 +5822,7 @@ where $N_\Omega$ should be between 5 and 10.
 
 The frequency of calls to the radiation solver can be changed from every 3 time steps with an integer called \ct{TIME_STEP_INCREMENT}. The increment over which the angles are updated can be changed from 5 with the integer called \ct{ANGLE_INCREMENT}. If \ct{TIME_STEP_INCREMENT} and \ct{ANGLE_INCREMENT} are both set to 1, the radiation field is completely updated in a single time step, but the cost of the calculation increases significantly. By default, the radiation transport equation is fully updated every 15 time steps. Given the relatively small time steps typically dictated by the CFL constraint, 15 time steps is usually still a relatively short interval of time. Increasing the temporal resolution of the radiation solver rarely adds to the overall accuracy of the calculation. Spatial resolution is far more important.
 
-Additionally, to mitigate ray effects in the wall radiative heat flux, the option \ct{RANDOMIZE_RADIATION_DIRECTIONS} randomly rotates the local meridian ($x$), azimuthal ($y$), and axial ($z$) coordinate system used to define the angular coordinates $\theta$ and $\phi$. If \ct{RANDOMIZE_RADIATION_DIRECTIONS} is true, this rotation is performed after each complete sweep of the angular directions.
+%Additionally, to mitigate ray effects in the wall radiative heat flux, the option \ct{RANDOM_ROTATION} randomly rotates the local meridian ($x$), azimuthal ($y$), and axial ($z$) coordinate system used to define the angular coordinates $\theta$ and $\phi$. If \ct{RANDOM_ROTATION} is true, this rotation is performed after each complete sweep of the angular directions.
 
 If you are using multiple meshes, the radiation solver cannot transfer energy from mesh to mesh within a single time step. If you notice an obvious delay in the propagation of radiative intensity from one mesh to another, you can increase the number of times the radiative intensity is updated within a single time step using \ct{RADIATION_ITERATIONS}, which is 1 by default. You rarely need to do this, unless it is obvious from the animation of various slice files.
 
@@ -6397,9 +6368,9 @@ The \ct{INIT} line designates the plane of the screen using the sextuplet \ct{XB
 where $l$ is the screen thickness (equal to the wire diameter), $\mu$ is the viscosity of the gas, $u$ is the velocity normal to the screen, $\rho$ is the density of the gas, and $Y$ and $K$ are empirical constants given by \cite{Bartzanas:1}
 \begin{eqnarray}
     K &=& 3.44 \times 10^{-9} \;f^{1.6} \; \; \unit{m^2} \\
-    Y &=& 0.043 \; f^{2.13}
+    Y &=& 0.043 \; f^{-2.13}
 \end{eqnarray}
-This correlation was developed using window screens with \ct{FREE_AREA_FRACTION} ranging from ~0.3 to ~0.6.
+This correlation was developed using window screens with \ct{FREE_AREA_FRACTION} ranging from ~0.04 to ~0.9.
 
 The \ct{MISC} input parameter \ct{PARTICLE_CFL_MAX} controls the time step on the pressure drop across a screen (or other porous media). If a screen or other porous media introduces numerical instabilities, reducing the value of \ct{PARTICLE_CFL_MAX} below 1 may resolve them.
 
@@ -7203,12 +7174,12 @@ The char reaction, Eq.~(\ref{char_reaction}), is usually modified in FDS when th
 \ee
 Assuming that $\nu_{\rm O_2, char}=1.65$, $Y_{{\rm O_2},\infty}=0.23$, and $\nu_{\rm ash}=0.02$, the reaction is specified by the following parameters on the \ct{MATL} line that defines the char:
 \begin{lstlisting}
-    &MATL ID                 = 'char'
-    ...
-    MATL_ID            = 'ash'
-    NU_MATL            = 0.02
-    SPEC_ID            = 'PRODUCTS','AIR'
-    NU_SPEC            = 8.15,-7.17 /
+    &MATL ID      = 'char'
+          ...
+          MATL_ID = 'ash'
+          NU_MATL = 0.02
+          SPEC_ID = 'PRODUCTS','AIR'
+          NU_SPEC = 8.15,-7.17 /
 \end{lstlisting}
 This means that the decomposition of 1~g of char consumes 7.17~g of Air and produces 8.15~g of Products and 0.02~g of Ash. The Products in this case are the products of the single step gas phase reaction, not just CO$_2$. The discrepancy is minor, and the alternative to using this approximation is to explicitly track all gas species and apply Eq.~(\ref{char_reaction}) directly.
 
@@ -7316,46 +7287,46 @@ Gaseous products created during the thermal degradation process are water vapor 
 
 The sample input lines below demonstrate how the vegetation model can be applied to particles that represent pine needles that are 1~mm in diameter and 5~cm long. Note that the special surface oxidation model is invoked by setting \ct{SURFACE_OXIDATION_MODEL} to \ct{T} on the \ct{MATL} line. All parameters described above must be explicitly specified in the input file---there are no hard-wired default values.
 \begin{lstlisting}
-    &MATL ID = 'MOISTURE'
-    DENSITY = 1000.
-    CONDUCTIVITY = 0.6
-    SPECIFIC_HEAT = 4.190
-    A = 600000.
-    E = 48200.
-    N_T = -0.5
-    NU_SPEC = 1.
-    SPEC_ID = 'WATER VAPOR'
-    HEAT_OF_REACTION = 2259. /
+    &MATL ID               = 'MOISTURE'
+          DENSITY          = 1000.
+          CONDUCTIVITY     = 0.6
+          SPECIFIC_HEAT    = 4.190
+          A                = 600000.
+          E                = 48200.
+          N_T              = -0.5
+          NU_SPEC          = 1.
+          SPEC_ID          = 'WATER VAPOR'
+          HEAT_OF_REACTION = 2259. /
 
-    &MATL ID = 'DRY VEGETATION'
-    DENSITY = 400.
-    CONDUCTIVITY = 0.1
-    SPECIFIC_HEAT_RAMP = '...'
-    A = 1040.
-    E = 61041.
-    NU_MATL = 0.25
-    MATL_ID = 'CHAR'
-    NU_SPEC = 0.74
-    SPEC_ID = 'Fuel Gas'
-    HEAT_OF_REACTION = 418. /
+    &MATL ID                 = 'DRY VEGETATION'
+          DENSITY            = 400.
+          CONDUCTIVITY       = 0.1
+          SPECIFIC_HEAT_RAMP = '...'
+          A                  = 1040.
+          E                  = 61041.
+          NU_MATL            = 0.25
+          MATL_ID            = 'CHAR'
+          NU_SPEC            = 0.74
+          SPEC_ID            = 'Fuel Gas'
+          HEAT_OF_REACTION   = 418. /
 
-    &MATL ID = 'CHAR'
-    DENSITY  = 300.
-    CONDUCTIVITY = 0.05
-    SPECIFIC_HEAT_RAMP = '...'
-    SURFACE_OXIDATION_MODEL = T
-    A = 465.
-    E = 68000.
-    MATL_ID = 'ASH'
-    NU_MATL = 0.10
-    SPEC_ID = 'PRODUCTS','AIR'
-    NU_SPEC = 8.07,-7.17
-    HEAT_OF_REACTION= -25000. /
+    &MATL ID                      = 'CHAR'
+          DENSITY                 = 300.
+          CONDUCTIVITY            = 0.05
+          SPECIFIC_HEAT_RAMP      = '...'
+          SURFACE_OXIDATION_MODEL = T
+          A                       = 465.
+          E                       = 68000.
+          MATL_ID                 = 'ASH'
+          NU_MATL                 = 0.10
+          SPEC_ID                 = 'PRODUCTS','AIR'
+          NU_SPEC                 = 8.07,-7.17
+          HEAT_OF_REACTION        = -25000. /
 
-    &MATL ID = 'ASH'
-    DENSITY = 67.
-    CONDUCTIVITY = 0.1
-    SPECIFIC_HEAT_RAMP = '...' /
+    &MATL ID                 = 'ASH'
+          DENSITY            = 67.
+          CONDUCTIVITY       = 0.1
+          SPECIFIC_HEAT_RAMP = '...' /
 \end{lstlisting}
 
 \subsection{Examples}
@@ -7417,12 +7388,12 @@ The \ct{PART} line references a \ct{PROP} line that tells Smokeview to visualize
 \end{lstlisting}
 The geometry and composition of the needle is described on the \ct{SURF} line that is referenced by the \ct{PART} line:
 \begin{lstlisting}
-    &SURF ID = 'wet vegetation'
-    MATL_ID  = 'dry pine'
-    MOISTURE_CONTENT = 0.25
-    SURFACE_VOLUME_RATIO = 8000.
-    LENGTH = 0.1
-    GEOMETRY = 'CYLINDRICAL' /
+    &SURF ID                   = 'wet vegetation'
+          MATL_ID              = 'dry pine'
+          MOISTURE_CONTENT     = 0.25
+          SURFACE_VOLUME_RATIO = 8000.
+          LENGTH               = 0.1
+          GEOMETRY             = 'CYLINDRICAL' /
 \end{lstlisting}
 The needle is composed of two materials---\ct{'dry pine'} and \ct{'MOISTURE'}. Following the convention used in forestry, the moisture content is expressed via the \ct{MOISTURE_CONTENT}, which is the mass of moisture divided by the mass of {\em dry} vegetation. Do not confuse this with the mass fraction of moisture, $Y_{\rm m}$, which is related to the moisture fraction, $M$, via
 \be
@@ -7430,21 +7401,21 @@ Y_{\rm m} = \frac{M}{1+M}
 \ee
 The length of each needle is specified directly, but its diameter is specified via the surface area to volume ratio, $\sigma=2/r$ for a cylinder. For a sphere, $\sigma=3/r$, where $r$ is the radius of the cylinder or sphere. The \ct{GEOMETRY} can be \ct{'CARTESIAN'}, i.e. a plate, \ct{'CYLINDRICAL'}, or \ct{'SPHERICAL'}. For a plate, $\sigma=1/\delta$ where $\delta$ is the half-thickness of the plate. The \ct{MATL_ID} specifies the thermo-physical properties of the pine needle.
 \begin{lstlisting}
-    &MATL ID = 'dry pine'
-    DENSITY = 500.
-    CONDUCTIVITY = 0.1
-    SPECIFIC_HEAT = 1.0
-    REFERENCE_TEMPERATURE = 300.
-    NU_MATL = 0.2
-    NU_SPEC = 0.8
-    SPEC_ID = 'CELLULOSE'
-    HEAT_OF_REACTION = 1000
-    MATL_ID  = 'CHAR' /
+    &MATL ID                    = 'dry pine'
+          DENSITY               = 500.
+          CONDUCTIVITY          = 0.1
+          SPECIFIC_HEAT         = 1.0
+          REFERENCE_TEMPERATURE = 300.
+          NU_MATL               = 0.2
+          NU_SPEC               = 0.8
+          SPEC_ID               = 'CELLULOSE'
+          HEAT_OF_REACTION      = 1000
+          MATL_ID               = 'CHAR' /
 
-    &MATL ID = 'CHAR'
-    DENSITY = 200.
-    CONDUCTIVITY = 1.0
-    SPECIFIC_HEAT = 1.6 /
+    &MATL ID            = 'CHAR'
+          DENSITY       = 200.
+          CONDUCTIVITY  = 1.0
+          SPECIFIC_HEAT = 1.6 /
 \end{lstlisting}
 Note that if you specify a \ct{MOISTURE_CONTENT} on the \ct{SURF} line, FDS will automatically add a \ct{MATL} line for \ct{'MOISTURE'} as it is written in the example in Sec.~\ref{info:wui_heat_transfer}. FDS will also alter the \ct{DENSITY} of the dry vegetation, in this case \ct{'dry pine'}, so that the size and wood content of the particle do not change when moisture is added. The modified density of the ``dry'' vegetation, $\tilde{\rho}_{\rm d}$, is given by:
 \be
@@ -7566,13 +7537,13 @@ In many simulations of wildland fire, the ground vegetation layer is too thin to
 
 To invoke this {\em Boundary Fuel Model}, create a \ct{SURF} line similar to the following:
 \begin{lstlisting}
-    &SURF ID = 'Ground Vegetation'
-    MATL_ID(1,1) = 'Dry Vegetation'
-    MATL_ID(2,1) = 'Soil'
-    MOISTURE_CONTENT(1) = 0.218
-    SURFACE_VOLUME_RATIO(1) = 3092.
-    MASS_PER_VOLUME(1) = 5.
-    THICKNESS(1:2) = 0.076,0.1 /
+    &SURF ID                      = 'Ground Vegetation'
+          MATL_ID(1,1)            = 'Dry Vegetation'
+          MATL_ID(2,1)            = 'Soil'
+          MOISTURE_CONTENT(1)     = 0.218
+          SURFACE_VOLUME_RATIO(1) = 3092.
+          MASS_PER_VOLUME(1)      = 5.
+          THICKNESS(1:2)          = 0.076,0.1 /
 \end{lstlisting}
 The presence of the parameter \ct{MASS_PER_VOLUME} automatically triggers the Boundary Fuel Model. Note that its argument of 1 refers to the first layer; the second layer being \ct{Soil}. If you specify \ct{MOISTURE_CONTENT}, FDS will automatically add a \ct{MATL} line for \ct{'MOISTURE'}.
 
@@ -7710,14 +7681,14 @@ The $x$ and $y$ components of the predicted spread velocity can be ouptut using 
 
 In this second option, you create your own custom fuel type as follows:
 \begin{lstlisting}
-    &SURF ID = 'My Fuel'
-    VEG_LSET_ROS_00 = 0.007
-    VEG_LSET_SIGMA = 3344.
-    VEG_LSET_BETA = 0.0041
-    VEG_LSET_HT = 0.91
-    VEG_LSET_SURF_LOAD = 0.5
-    VEG_LSET_CHAR_FRACTION = 0.25
-    VEG_LSET_FIREBASE_TIME = 20 /
+    &SURF ID                     = 'My Fuel'
+          VEG_LSET_ROS_00        = 0.007
+          VEG_LSET_SIGMA         = 3344.
+          VEG_LSET_BETA          = 0.0041
+          VEG_LSET_HT            = 0.91
+          VEG_LSET_SURF_LOAD     = 0.5
+          VEG_LSET_CHAR_FRACTION = 0.25
+          VEG_LSET_FIREBASE_TIME = 20 /
 \end{lstlisting}
 \ct{VEG_LSET_ROS_00} is the no-wind, no-slope rate of spread for the given fuel model. \ct{VEG_LSET_SIGMA} (\unit{\per\meter}) and \ct{VEG_LSET_BETA} are the average surface-to-volume ratio ($\sigma$) and packing ratio ($\beta$) of the underlying vegetation. \ct{VEG_LSET_HT} (m) is the height of the vegetation. When the fire front arrives at a given surface cell, fuel vapors are generated at a rate given by
 \be
@@ -7788,11 +7759,11 @@ When a surface is defined using level set fuel parameters, a drag force is appli
 Bova et al.~\cite{Bova:IJWF2015} compare the level set calculation that has been implemented in FDS with the identical algorithm in the U.S. Forest Service FARSITE model. The three contour plots in Fig.~\ref{Bova_fig} match those in Figs.~1(a), 1(b), and 4(a) in the paper. The FDS input files, \ct{WUI/Bova_1a.fds}, \ct{WUI/Bova_1b.fds}, and \ct{WUI/Bova_4a.fds} all have the same \ct{SURF} line that defines the vegetation. Note that in these examples, there is no actual fire nor does the level set calculation depend on the local wind field (\ct{LEVEL_SET_MODE=1} on the \ct{MISC} line). The purpose of the exercise is simply to test the level set algorithm.
 \begin{lstlisting}
     &MISC ..., LEVEL_SET_MODE = 1 /
-    &SURF ID = 'Custom Grass'
-    VEG_LSET_ROS_00 = 0.04
-    VEG_LSET_SIGMA = 11400.
-    VEG_LSET_BETA = 0.0012
-    VEG_LSET_HT = 0.51 /
+    &SURF ID              = 'Custom Grass'
+          VEG_LSET_ROS_00 = 0.04
+          VEG_LSET_SIGMA  = 11400.
+          VEG_LSET_BETA   = 0.0012
+          VEG_LSET_HT     = 0.51 /
 \end{lstlisting}
 
 \begin{figure}[p]
@@ -8025,14 +7996,14 @@ A sprinkler, known as \ct{'Spr-1'}, is located at a point in space given by \ct{
 
 In real sprinkler systems, the pipe pressure is affected by the number of actuated sprinklers. Typically, the pressure is higher than the design value when the first sprinkler activates, and decreases as more and more sprinklers are activated. The pipe pressure has an effect on flow rate, droplet velocity and droplet size distribution. In FDS, the varying pipe pressure can be specified on a \ct{PROP} line using \ct{PRESSURE_RAMP}. On each \ct{RAMP} line, the number of open sprinklers or nozzles is associated with certain pipe pressure (bar). For example:
 \begin{lstlisting}
-    &PROP ID='My nozzle'
-    OFFSET=0.1
-    PART_ID='water drops'
-    FLOW_RATE=0.9
-    OPERATING_PRESSURE = 10.0
-    PARTICLE_VELOCITY=15.0
-    SPRAY_ANGLE=0.0,80.0
-    PRESSURE_RAMP = 'PR1' /
+    &PROP ID                 ='My nozzle'
+          OFFSET             =0.1
+          PART_ID            ='water drops'
+          FLOW_RATE          =0.9
+          OPERATING_PRESSURE = 10.0
+          PARTICLE_VELOCITY  =15.0
+          SPRAY_ANGLE        =0.0,80.0
+          PRESSURE_RAMP      = 'PR1' /
 
     &RAMP ID = 'PR1' T = 1, F = 16. /
     &RAMP ID = 'PR1' T = 2, F = 10. /
@@ -9305,15 +9276,15 @@ Tracked species are written out as a comma-separated list with each cell as a ro
 
 You may read in the 3-D fields using a \ct{CSVF} line.  Only one \ct{CSVF} line is allowed.  For example:
 \begin{lstlisting}
-    &CSVF UVWFILE ='my_velocity_field.csv',
-    TMPFILE ='my_temperature_field.csv'
-    SPECFILE='my_species_field.csv' /
+    &CSVF UVWFILE  ='my_velocity_field.csv',
+          TMPFILE  ='my_temperature_field.csv'
+          SPECFILE ='my_species_field.csv' /
 \end{lstlisting}
 If multiple meshes are involved, enter the name of the first \ct{.csv} file only.  The file must end in ``\ct{1.csv}''.  FDS will increment the mesh number to the total number of meshes.  For example, if you had 16 meshes you can use
 \begin{lstlisting}
-    &CSVF UVWFILE ='CHID_uvw_t1_m1.csv',
-    TMPFILE ='CHID_tmp_t1_m1.csv',
-    SPECFILE='CHID_spec_t1_m1.csv' /
+    &CSVF UVWFILE  ='CHID_uvw_t1_m1.csv',
+          TMPFILE  ='CHID_tmp_t1_m1.csv',
+          SPECFILE ='CHID_spec_t1_m1.csv' /
 \end{lstlisting}
 and FDS will read, for example, \ct{CHID_uvw_t1_m1.csv} through \ct{CHID_uvw_t1_m16.csv} in the order of the \ct{MESH} lines (note that a \ct{MULT} line for the meshes may also be used).
 
@@ -9324,9 +9295,9 @@ It may be useful to allow the solid phase to respond to an established flow fiel
 \begin{lstlisting}
     &TIME DT=1.0, T_END=120.0, LIMITING_DT_RATIO=1e-6 /
     &MISC UNFREEZE_TIME=90, /
-    &CSVF UVWFILE ='CHID_uvw_t1_m1.csv',
-    TMPFILE ='CHID_tmp_t1_m1.csv',
-    SPECFILE='CHID_spec_t1_m1.csv' /
+    &CSVF UVWFILE  ='CHID_uvw_t1_m1.csv',
+          TMPFILE  ='CHID_tmp_t1_m1.csv',
+          SPECFILE ='CHID_spec_t1_m1.csv' /
 \end{lstlisting}
 The example will read in an initial flow field using the \ct{CSVF} files, then allow the solids to heat for 90 seconds at a time step of 1 seconds (90 time steps total). The flow field will then be unfrozen for the remaining 30 seconds of simulation time.
 
@@ -11864,6 +11835,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 % ignorenamelistkw: /PART/DEBUG, /PART/EMBER_SNAG_FACTOR
 % ignorenamelistkw: /PRES/WRITE_PARCSRPCG_MATRIX
 % ignorenamelistkw: /PROP/IGNITION_ZONE
+% ignorenamelistkw: /RADI/RANDOM_ROTATION
 % ignorenamelistkw: /REAC/C, /REAC/H, /REAC/O, /REAC/N, /REAC/FORMULA
 % ignorenamelistkw: /SLCF/DEBUG, /SLCF/RLE_MIN, /SLCF/RLE_MAX, /SLCF/SLICETYPE
 % ignorenamelistkw: /SURF/MOISTURE_FRACTION
@@ -13252,7 +13224,7 @@ Keyword                            & Type         & Description                 
 \ct{RADIATION}                     & Logical      & Section~\ref{info:radiation_off}     &                 & \ct{T}   \\ \hline
 \ct{RADIATION_ITERATIONS}          & Integer      & Section~\ref{info:RADI_Resolution}   &                 & 1              \\ \hline
 \ct{RADTMP}                        & Real         & Section~\ref{info:RADI_Two_Phase}    & \unit{\degreeCelsius} & 900            \\ \hline
-\ct{RANDOMIZE_RADIATION_DIRECTIONS}& Logical      & Section~\ref{info:RADI_Resolution}   &                 & \ct{F}  \\ \hline
+%\ct{RANDOM_ROTATION}              & Logical      & Section~\ref{info:RADI_Resolution}   &                 & \ct{F}  \\ \hline
 \ct{TIME_STEP_INCREMENT}           & Integer      & Section~\ref{info:RADI_Resolution}   &                 & 3\,(3D),2\,(2D) \\ \hline
 \ct{WIDE_BAND_MODEL}               & Logical      & Section~\ref{info:RADI_Wide_Band}    &                 & \ct{F}  \\ \hline
 \ct{WSGG_MODEL}                    & Logical      & Section~\ref{info:RADI_WSGG}         &                 & \ct{F}  \\ \hline
@@ -13684,7 +13656,6 @@ Keyword                                               & Type            & Descri
 \ct{VEG_LSET_WIND_HEIGHT}                             & Real            & Section~\ref{info:custom_wind}            & m                   & 6.1                      \\ \hline
 \ct{VEG_LSET_WIND_RAMP}                               & Character       & Section~\ref{info:custom_wind}            &                     &                         \\ \hline
 \ct{VEL}                                              & Real            & Section~\ref{info:Velocity_BC}            & m/s                 &                         \\ \hline
-\ct{VEL_BULK}                                         & Real            & Section~\ref{info:profiles}               & m/s                 &                         \\ \hline
 \ct{VEL_GRAD}                                         & Real            & Section~\ref{info:vel_grad}               & 1/s                 &                         \\ \hline
 \ct{VEL_PART}                                         & Real            & Section~\ref{info:particle_flux}          & m/s                 &                         \\ \hline
 \ct{VEL_T(2)}                                         & Real Array      & Section~\ref{info:louvers}                & m/s                 &                         \\ \hline
@@ -14138,7 +14109,6 @@ Keyword             & Type     & Description                      & Units       
 342  \> \ct{SURF ... RAMP_T_I cannot be used with TMP_FRONT.} \> Section~\ref{info:TMP_INNER}  \\
 243  \> \ct{SURF ... RAMP_T_I cannot be used with TMP_BACK.} \> Section~\ref{info:TMP_INNER}  \\
 344  \> \ct{SURF ... RAMP_T_I cannot be used with TMP_INNER.} \> Section~\ref{info:TMP_INNER}  \\
-345  \> \ct{SURF ... VEL_BULK must be less than or equal to VEL.} \> Section~\ref{info:VEL_BULK}  \\
 346  \> \ct{SURF ... ZONE ID for LEAK_PATH_ID not found.} \> Section~\ref{info:Leaks}  \\
 347  \> \ct{SURF ... both LEAK_PATH must be >= 0.} \> Section~\ref{info:Leaks}  \\
 348  \> \ct{SURF ... Cannot set the same ZONE for each leakage path.} \> Section~\ref{info:Leaks}  \\
