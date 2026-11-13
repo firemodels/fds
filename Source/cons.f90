@@ -113,7 +113,6 @@ INTEGER, PARAMETER :: PYROLYSIS_SURFACE_OXIDATION=5    !< Flag for ML\%PYROLYSIS
 
 INTEGER, PARAMETER :: ATMOSPHERIC_PROFILE=1            !< Flag for SF\%PROFILE
 INTEGER, PARAMETER :: PARABOLIC_PROFILE=2              !< Flag for SF\%PROFILE
-INTEGER, PARAMETER :: BOUNDARY_LAYER_PROFILE=3         !< Flag for SF\%PROFILE
 INTEGER, PARAMETER :: RAMP_PROFILE=4                   !< Flag for SF\%PROFILE
 
 INTEGER, PARAMETER :: CELL_CENTER=1                    !< Flag for OUTPUT_QUANTITY()\%CELL_POSITION
@@ -500,7 +499,7 @@ CHARACTER(LABEL_LENGTH) :: EXTINCTION_MODEL='null'
 
 LOGICAL, ALLOCATABLE, DIMENSION(:) :: RADIATION_COMPLETED  !< Indicates that the radiation field is completely updated
 
-LOGICAL :: RANDOMIZE_RADIATION_DIRECTIONS=.FALSE.           !< If TRUE, randomly rotate solid angles each full RTE solve
+LOGICAL :: RANDOM_ROTATION=.FALSE.                         !< If TRUE, randomly rotate solid angles each full RTE solve
 LOGICAL :: ALLOW_RANDOM_RADIATION_ROTATION=.FALSE.         !< A derived variable, to block random rotation fo cyl and 2d cases
 
 INTEGER :: NUMBER_SPECTRAL_BANDS=0                         !< Number of wavelength bands for rad solver (1 for gray gas)

@@ -19,7 +19,7 @@ Smoke Detector Activation Time,1,142,0.28,0.28,0.65
 Smoke Detector Activation Time; Temp. Rise,1,142,0.33,0.33,1.26
 Cable Failure Time,1,35,0.12,0.16,1.16
 Sprinkler Actuations,3,38,0.15,0.31,1.22
-Aerosol Deposition Velocity,3,162,0.98,0.98,0.2
+Aerosol Deposition Velocity,3,162,0.07,1.38,0.52
 Heat Release Rate,8,74,0.08,0.29,1.01
 Scaling Heat Release Rate Per Unit Area,4,531,0.08,0.24,0.98
 Burning Rate,2,37,0.08,0.4,0.92
