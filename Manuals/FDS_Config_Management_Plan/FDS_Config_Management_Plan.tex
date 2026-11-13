@@ -502,6 +502,33 @@ GitHub Actions provide automated checks of changes submitted to the \texttt{fds}
 \item[Validation revisions:] \path{Git_Revisions.yml} in \texttt{out} checks only tracked \path{*_git.txt} files and reports an error if a revision string contains \texttt{dirty}, indicating uncommitted changes in the source used to generate the results.
 \end{description}
 
+Figure~\ref{fig:pr-build-dependencies} shows the dependencies within the \texttt{PR builds} workflow, defined in \path{pr-builds.yml}. After admission passes, the selected build and check jobs run in parallel as runners become available. The CMake matrix expands into combinations of operating system, compiler, Debug/Release configuration, and OpenMP settings. Jobs not selected for the changed files are skipped.
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    stage/.style={draw, rounded corners=2pt, align=center, font=\small,
+                  text width=3cm, minimum height=1cm, inner sep=5pt},
+    check/.style={stage, text width=4cm},
+    dependency/.style={-{Latex}, thick}]
+    \node[stage] (admission) at (0,0) {Check PR admission};
+    \node[check] (linux) at (5,2.6) {Linux builds +\\Python import check};
+    \node[check] (macos) at (5,1.3) {macOS build};
+    \node[check] (windows) at (5,0) {Windows build};
+    \node[check] (cmake) at (5,-1.3) {CMake build combinations};
+    \node[check] (endings) at (5,-2.6) {Line-ending check};
+    \node[stage] (result) at (10,0) {\texttt{FDS / PR builds}\\Combined result};
+    \foreach \job in {linux,macos,windows,cmake,endings} {
+        \draw[dependency] (admission.east) -- (\job.west);
+        \draw[dependency] (\job.east) -- (result.west);
+    }
+\end{tikzpicture}
+\caption[PR build dependencies]{Dependencies within the PR builds workflow. The middle jobs run independently after admission; the final job combines their results.}
+\label{fig:pr-build-dependencies}
+\end{figure}
+
+The workflow name \texttt{PR builds} refers to this entire process. The final job, \texttt{FDS / PR builds}, reports whether the selected checks passed; it does not perform another compilation. Passing admission allows listed authors to merge while these jobs continue, subject to the repository conditions described in Section~\ref{sec:pr-virus-scanning}.
+
 \section{Firebot: Automated Software Quality Testing}
 
 The FDS and Smokeview source codes undergo an automated build, verification, validation, and regression testing process, which is similar to a continuous integration system that automates the build/testing cycle for a project. This automated process is referred to as Firebot. The Firebot build/test process helps the FDS-SMV development team by performing automatic error checking and collecting performance and accuracy statistics between FDS revisions.
