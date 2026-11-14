@@ -22,7 +22,7 @@ USE COMPLEX_GEOMETRY, ONLY: GEOMEPS,LOOSEPS,GEOFCT,NGUARD,CCGUARD,CC_GASPHASE,CC
      LU_SETCC,SEARCH_OTHER_MESHES_FACE,POINT_IN_POLYGON
 USE COMPLEX_GEOMETRY_GRID, ONLY: DELTA_INT,DELTA_VERT,DIST_THRES,FDS_AREA_GEOM,INDEX_UNDEFINED,INT_N_EXT_PTS, &
      INT_P_IND,INT_TMP_IND,INT_VEL_IND,INT_RHO_IND,INT_H_IND,INT_RSUM_IND,INT_MU_IND,INT_MUDNS_IND, &
-     INT_RHO0_IND,INT_WCEN_IND,INT_VELS_IND,MAX_INTERP_POINTS,NQT2C,N_CUTCELLS_PROC,N_INB_CUTFACES_PROC, &
+     INT_RHO0_IND,INT_WCEN_IND,INT_VELS_IND,MAX_INTERP_POINTS,N_CUTCELLS_PROC,N_INB_CUTFACES_PROC, &
      N_INT_CVARS,N_INT_CCVARS,N_REG_CUTFACES_PROC,N_LINK_ATTMP_F,GLOBAL_DELTA_CELL,GLOBAL_DELTA_EDGE, &
      GLOBAL_DELTA_FACE,SET_CVS_3D,BLOCK_CC_SOLID_EXTWALLCELLS,INIT_CFACE_CELL,GET_REGULAR_CUT_EDGES_BC, &
      GET_SOLID_CUTCELL_EDGES_BC,GET_BACK_CFACE_INDEX,CC_CV_GET_SOLVER_KEY,CC_CV_CELL_IS_CV_MASTER, &
@@ -191,6 +191,8 @@ INTEGER, SAVE, ALLOCATABLE, DIMENSION(:) :: CF_BACK_SEND_CNT3,CF_BACK_SDISPL3,CF
 ! Requester side: owner mesh and back CFACE index per query. Owner side: owner mesh and resolved local CFACE index.
 INTEGER, SAVE, ALLOCATABLE, DIMENSION(:) :: CF_BACK_SEND_NOM,CF_BACK_MAP_IDX
 INTEGER, SAVE, ALLOCATABLE, DIMENSION(:) :: CF_BACK_RECV_NOM,CF_BACK_RECV_IDX
+! Ranks this process sends answers to (owner side) and receives answers from (requester side).
+INTEGER, SAVE, ALLOCATABLE, DIMENSION(:) :: CF_BACK_TO,CF_BACK_FROM
 
 ! L2 pressure edges gathered once after numbering. Face sides hold the owner and neighbor rows.
 !< Thermodynamic rows of this process (CC_SET_THERMO_ROWS), as slots: the volume integrals and owner terms of
@@ -384,6 +386,8 @@ CROSS_PROCESS_IF: IF (N_MPI_PROCESSES>1) THEN
    ALLOCATE(CF_BACK_RECV_CNT3(0:N_MPI_PROCESSES-1),CF_BACK_RDISPL3(0:N_MPI_PROCESSES-1))
    CF_BACK_SEND_CNT3 = CNT3_S ; CF_BACK_SDISPL3 = DSP3_S
    CF_BACK_RECV_CNT3 = CNT3_R ; CF_BACK_RDISPL3 = DSP3_R
+   CF_BACK_TO   = PACK([(P,P=0,N_MPI_PROCESSES-1)],CNT3_R>0)
+   CF_BACK_FROM = PACK([(P,P=0,N_MPI_PROCESSES-1)],CNT3_S>0)
    ALLOCATE(CF_BACK_SEND_NOM(MAX(TOTAL_SEND,1)),CF_BACK_MAP_IDX(MAX(TOTAL_SEND,1)))
    ALLOCATE(CF_BACK_RECV_NOM(MAX(TOTAL_RECV,1)),CF_BACK_RECV_IDX(MAX(TOTAL_RECV,1)))
    IF (TOTAL_SEND>0) THEN
@@ -413,8 +417,10 @@ END SUBROUTINE INITIALIZE_BACK_CFACE_EXCHANGE
 ! ------------------------ EXCHANGE_BACK_CFACE_DATA --------------------------------
 SUBROUTINE EXCHANGE_BACK_CFACE_DATA
 
-INTEGER :: K,P,NOM,ICFACE,B1,IERR
+INTEGER :: K,P,NOM,ICFACE,B1,IERR,IP,NREQ
+INTEGER, PARAMETER :: TAGB=27025
 REAL(EB), ALLOCATABLE :: SBUF(:),RBUF(:)
+TYPE(MPI_REQUEST), ALLOCATABLE :: REQ(:)
 
 IF (.NOT.CF_BACK_EXCHANGE_ACTIVE .OR. N_MPI_PROCESSES==1) RETURN
 ALLOCATE(SBUF(MAX(3*N_CF_BACK_RECV,1))) ; SBUF = 0._EB
@@ -431,8 +437,19 @@ DO K=1,N_CF_BACK_RECV
    SBUF(3*K-1) = MESHES(NOM)%BOUNDARY_PROP1(B1)%HEAT_TRANS_COEF
    SBUF(3*K  ) = MESHES(NOM)%BOUNDARY_PROP1(B1)%Q_RAD_IN
 ENDDO
-CALL MPI_ALLTOALLV(SBUF,CF_BACK_RECV_CNT3,CF_BACK_RDISPL3,MPI_DOUBLE_PRECISION, &
-                   RBUF,CF_BACK_SEND_CNT3,CF_BACK_SDISPL3,MPI_DOUBLE_PRECISION,MPI_COMM_WORLD,IERR)
+! Point to point with the ranks listed at setup, on the same displacements as the setup layout.
+ALLOCATE(REQ(SIZE(CF_BACK_TO)+SIZE(CF_BACK_FROM))) ; NREQ = 0
+DO IP=1,SIZE(CF_BACK_FROM)
+   P = CF_BACK_FROM(IP) ; NREQ = NREQ+1
+   CALL MPI_IRECV(RBUF(CF_BACK_SDISPL3(P)+1),CF_BACK_SEND_CNT3(P),MPI_DOUBLE_PRECISION,P,TAGB,MPI_COMM_WORLD, &
+                  REQ(NREQ),IERR)
+ENDDO
+DO IP=1,SIZE(CF_BACK_TO)
+   P = CF_BACK_TO(IP) ; NREQ = NREQ+1
+   CALL MPI_ISEND(SBUF(CF_BACK_RDISPL3(P)+1),CF_BACK_RECV_CNT3(P),MPI_DOUBLE_PRECISION,P,TAGB,MPI_COMM_WORLD, &
+                  REQ(NREQ),IERR)
+ENDDO
+CALL MPI_WAITALL(NREQ,REQ,MPI_STATUSES_IGNORE,IERR)
 
 ! Requester side: deposit the received state into the ghost CFACE so the solver reads it like a same-mesh back CFACE.
 DO P=1,N_CF_BACK_SEND
@@ -445,7 +462,7 @@ DO P=1,N_CF_BACK_SEND
    MESHES(NOM)%BOUNDARY_PROP1(B1)%HEAT_TRANS_COEF = RBUF(3*P-1)
    MESHES(NOM)%BOUNDARY_PROP1(B1)%Q_RAD_IN        = RBUF(3*P)
 ENDDO
-DEALLOCATE(SBUF,RBUF)
+DEALLOCATE(SBUF,RBUF,REQ)
 
 END SUBROUTINE EXCHANGE_BACK_CFACE_DATA
 
@@ -4659,7 +4676,7 @@ INITIALIZE_CC_SCALARS_FORC_COND : IF (INITIALIZE_CC_SCALARS_FORC) THEN
          IF (M3%NFCC_R(2)==0) CYCLE OTHER_MESH_LOOP_13
          SNODE = PROCESS(NOM)
          ! Cell centered variables:
-         ALLOCATE(M3%REAL_RECV_PKG13(M3%NFCC_R(2)*(NQT2C+N_TRACKED_SPECIES)))
+         ALLOCATE(M3%REAL_RECV_PKG13(4*M3%NFCC_R(2)))
          IF (RNODE/=SNODE) THEN
             N_REQ13 = N_REQ13 + 1
             CALL MPI_RECV_INIT(M3%REAL_RECV_PKG13(1),SIZE(M3%REAL_RECV_PKG13),MPI_DOUBLE_PRECISION, &
@@ -4723,7 +4740,7 @@ INITIALIZE_CC_SCALARS_FORC_COND : IF (INITIALIZE_CC_SCALARS_FORC) THEN
          SNODE = PROCESS(NOM)
          ! Initialize persistent send requests
          IF (M3%NFCC_S(2)>0 .AND. RNODE/=SNODE) THEN
-            ALLOCATE(M3%REAL_SEND_PKG13(M3%NFCC_S(2)*(NQT2C+N_TRACKED_SPECIES)))
+            ALLOCATE(M3%REAL_SEND_PKG13(4*M3%NFCC_S(2)))
             N_REQ13 = N_REQ13 + 1
             CALL MPI_SEND_INIT(M3%REAL_SEND_PKG13(1),SIZE(M3%REAL_SEND_PKG13),MPI_DOUBLE_PRECISION, &
                                SNODE,NM,MPI_COMM_WORLD,REQ13(N_REQ13),IERR)
@@ -4792,32 +4809,6 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                   ENDIF
                ENDDO
             ENDDO PACK_REAL_SEND_PKG11
-         ENDIF
-      ENDIF
-
-      ! Information for cell centered variables:
-      IF (CODE==1 .AND. M3%NFCC_S(2)>0) THEN
-         NQT2 = NQT2C+N_TOTAL_SCALARS
-         LL = 0
-         IF (RNODE/=SNODE) THEN
-            PACK_REAL_SEND_PKG213 : DO ICC=1,M3%NFCC_S(2)
-               I     = M3%IIO_CC_S(ICC)
-               J     = M3%JJO_CC_S(ICC)
-               K     = M3%KKO_CC_S(ICC)
-               LL = LL + 1
-               M3%REAL_SEND_PKG13(NQT2*(LL-1)+1) = M%HS(I,J,K)                            ! Prev H in cell I,J,K
-               M3%REAL_SEND_PKG13(NQT2*(LL-1)+2) = M%RHO_0(K)                             ! RHO_0 in cell I,J,K
-               M3%REAL_SEND_PKG13(NQT2*(LL-1)+3) = 0.5_EB*(M%W(I,J,K-1)+M%W(I,J,K))       ! Wcen^n in I,J,K.
-               M3%REAL_SEND_PKG13(NQT2*(LL-1)+4) = M%RHOS(I,J,K)                          ! RHO^*
-               M3%REAL_SEND_PKG13(NQT2*(LL-1)+5) = M%TMP(I,J,K)                           ! TMP^*
-               M3%REAL_SEND_PKG13(NQT2*(LL-1)+6) = M%RSUM(I,J,K)                          ! RSUM^*
-               M3%REAL_SEND_PKG13(NQT2*(LL-1)+7) = M%MU(I,J,K)                            ! MU^n
-               M3%REAL_SEND_PKG13(NQT2*(LL-1)+8) = M%MU_DNS(I,J,K)                        ! MU_DNS^n
-               M3%REAL_SEND_PKG13(NQT2*(LL-1)+NQT2C)= M%RHO(I,J,K)*(M%HS(I,J,K)-M%KRES(I,J,K)) ! Previous substep pressure.
-               DO NN=1,N_TOTAL_SCALARS
-                  M3%REAL_SEND_PKG13(NQT2*(LL-1)+NQT2C+NN)= M%ZZS(I,J,K,NN)
-               ENDDO
-            ENDDO PACK_REAL_SEND_PKG213
          ENDIF
       ENDIF
 
@@ -4970,32 +4961,6 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                   ENDIF
                ENDDO
             ENDDO PACK_REAL_SEND_PKG111
-         ENDIF
-      ENDIF
-
-      ! Information for cell centered variables:
-      IF (CODE==4 .AND. M3%NFCC_S(2)>0) THEN
-         NQT2 = NQT2C+N_TOTAL_SCALARS
-         LL = 0
-         IF (RNODE/=SNODE) THEN
-            PACK_REAL_SEND_PKG313 : DO ICC=1,M3%NFCC_S(2)
-               I     = M3%IIO_CC_S(ICC)
-               J     = M3%JJO_CC_S(ICC)
-               K     = M3%KKO_CC_S(ICC)
-               LL = LL + 1
-               M3%REAL_SEND_PKG13(NQT2*(LL-1)+1) = M%H(I,J,K)                             ! Prev H in cell I,J,K
-               M3%REAL_SEND_PKG13(NQT2*(LL-1)+2) = M%RHO_0(K)                             ! RHO_0 in cell I,J,K
-               M3%REAL_SEND_PKG13(NQT2*(LL-1)+3) = 0.5_EB*(M%WS(I,J,K-1)+M%WS(I,J,K))     ! Wcen^* in I,J,K.
-               M3%REAL_SEND_PKG13(NQT2*(LL-1)+4) = M%RHO(I,J,K)                           ! RHO^n+1
-               M3%REAL_SEND_PKG13(NQT2*(LL-1)+5) = M%TMP(I,J,K)                           ! TMP^n+1
-               M3%REAL_SEND_PKG13(NQT2*(LL-1)+6) = M%RSUM(I,J,K)                          ! RSUM^n+1
-               M3%REAL_SEND_PKG13(NQT2*(LL-1)+7) = M%MU(I,J,K)                            ! MU^*
-               M3%REAL_SEND_PKG13(NQT2*(LL-1)+8) = M%MU_DNS(I,J,K)                        ! MU_DNS^*
-               M3%REAL_SEND_PKG13(NQT2*(LL-1)+NQT2C)= M%RHOS(I,J,K)*(M%H(I,J,K)-M%KRES(I,J,K)) ! Previous substep pressure.
-               DO NN=1,N_TOTAL_SCALARS
-                  M3%REAL_SEND_PKG13(NQT2*(LL-1)+NQT2C+NN)= M%ZZ(I,J,K,NN)
-               ENDDO
-            ENDDO PACK_REAL_SEND_PKG313
          ENDIF
       ENDIF
 
@@ -5266,8 +5231,8 @@ IF (N_MPI_PROCESSES>1 .AND. (CODE==3.OR.CODE==6) .AND. N_REQ12>0) THEN
    CALL CC_TIMEOUT('REQ12',N_REQ12,REQ12(1:N_REQ12))
 ENDIF
 
-! Exchange scalar data End of step cell-centered data:
-IF (N_MPI_PROCESSES>1 .AND. (CODE==1.OR.CODE==4.OR.CODE==3.OR.CODE==6) .AND. N_REQ13>0) THEN
+! Exchange end of step cell-centered stencil data (H, RHO_0, WCEN, MU):
+IF (N_MPI_PROCESSES>1 .AND. (CODE==3.OR.CODE==6) .AND. N_REQ13>0) THEN
    CALL MPI_STARTALL(N_REQ13,REQ13(1:N_REQ13),IERR)
    CALL CC_TIMEOUT('REQ13',N_REQ13,REQ13(1:N_REQ13))
 ENDIF
