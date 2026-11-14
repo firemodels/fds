@@ -31,8 +31,8 @@ def generate_csv_from_source(folder_name: str = "../../../out/SNL_Walls/"):
     # 4. Create the new DataFrame with the specific header
     new_df = pd.DataFrame(data)
 
-    # # 5. Save to "new_file.csv" in the same directory
-    # new_df.to_csv(output_path, index=False)
+    # 5. Save to "new_file.csv" in the same directory
+    new_df.to_csv(output_path, index=False)
     # print(f"Successfully created: {output_path}")
 
 if __name__ == "__main__":
