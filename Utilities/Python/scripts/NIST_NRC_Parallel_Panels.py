@@ -214,8 +214,9 @@ fig = fdsplotlib.plot_to_fig(x_data=[-1,-1], y_data=[-1,-1],
                              x_label='Width (cm)',
                              y_label='Height (cm)')
 
-# Filled contour for experimental data
-C_exp = plt.contourf(X, Y, Z, levels=levels, linestyles='-', cmap='viridis')
+# Label contour lines rather than filled contours for compatibility across Matplotlib versions.
+plt.contourf(X, Y, Z, levels=levels, cmap='viridis')
+C_exp = plt.contour(X, Y, Z, levels=levels, colors='black', linestyles='-', linewidths=0)
 plt.clabel(C_exp, fontsize=6, colors='black')
 
 # Contour lines for FDS 4 cm
