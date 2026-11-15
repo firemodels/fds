@@ -1058,13 +1058,11 @@ TYPE OMESH_TYPE
 
    ! CC_IBM data exchange arrays:
    ! NFEP_R(1:2) are unused (they counted the removed cut-face interpolation stencil); 3:5 are the cut-cell/edge stencils.
-   INTEGER :: NICC_S(2)=0, NICC_R(2)=0, NICF_S(2)=0, NICF_R(2)=0, NLKF_S=0, NLKF_R=0, &
-              NFCC_S(2)=0, NFCC_R(2)=0, NCC_INT_R=0, NFEP_R(5)=0
+   INTEGER :: NICC_S(2)=0, NICC_R(2)=0, NFCC_S(2)=0, NFCC_R(2)=0, NCC_INT_R=0, NFEP_R(5)=0
    REAL(EB), ALLOCATABLE, DIMENSION(:) ::                &
-         REAL_SEND_PKG11,REAL_SEND_PKG112,REAL_SEND_PKG12,REAL_SEND_PKG13,&
-         REAL_RECV_PKG11,REAL_RECV_PKG112,REAL_RECV_PKG12,REAL_RECV_PKG13
-   INTEGER, ALLOCATABLE, DIMENSION(:) :: ICC_UNKZ_CT_S, ICC_UNKZ_CC_S, ICC_UNKZ_CT_R, ICC_UNKZ_CC_R,&
-                                         ICF_UFFB_CF_S, ICF_UFFB_CF_R
+         REAL_SEND_PKG11,REAL_SEND_PKG112,REAL_SEND_PKG115,REAL_SEND_PKG12,REAL_SEND_PKG13,&
+         REAL_RECV_PKG11,REAL_RECV_PKG112,REAL_RECV_PKG115,REAL_RECV_PKG12,REAL_RECV_PKG13
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: ICC_UNKZ_CT_S, ICC_UNKZ_CC_S, ICC_UNKZ_CT_R, ICC_UNKZ_CC_R
    LOGICAL, ALLOCATABLE, DIMENSION(:) :: ICC_UNKZ_CC_R_MASK  !< Replica ICC membership in ICC_UNKZ_CC_R
    ! PKG11 receive halo: one SoA row per received gas polyhedron (NICC_R(2)).
    ! Filled in addition to replica CUT_CELL writes; row identity matches the PKG11 unpack walk.
@@ -1072,9 +1070,15 @@ TYPE OMESH_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: CCHALO_VOLUME         !< Replica cut-cell volume, filled at setup.
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: CCHALO_RHO, CCHALO_RHOS, CCHALO_TMP, CCHALO_RSUM, CCHALO_D, CCHALO_DS
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: CCHALO_ZZ, CCHALO_ZZS !< (1:N_TOTAL_SCALARS,1:NICC_R(2)), same order as FV%CV%ZZ.
-   ! PKG112 receive store: one row per received cut-face piece (NICF_R(2)), unpack slot order.
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: CFHALO_VEL, CFHALO_VELS, CFHALO_VEL_LNK, CFHALO_FN !< (1:NICF_R(2)).
-   INTEGER, ALLOCATABLE, DIMENSION(:) :: CFHALO_ROW0 !< Copy ICF -> first row; 0 = not received.
+   ! Cut-face halo of the interface planes (PKG112 at CODE 3/6, PKG115 at CODE 5; CC_SET_CF_HALO_LISTS). _S: this mesh
+   ! sends to NOM, _R: it receives from NOM. A plane (0:6): normal axis, low (IAXIS:KAXIS) and high (3+IAXIS:3+KAXIS)
+   ! face indices on the sender's grid. NCF: cut-face pieces on the planes, NPF: plane faces.
+   INTEGER :: NCF_S=0, NCF_R=0, NPF_S=0, NPF_R=0
+   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: CF_PLANE_S, CF_PLANE_R
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: CF_FC_S               !< FACE row of each piece sent, in set order.
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: LNK_POS_S, LNK_UNK_S  !< Linked plane faces: PKG112 slot, link number.
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: CFHALO_VEL, CFHALO_VELS, CFHALO_VEL_LNK, CFHALO_FN !< (1:NCF_R), set order.
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: CFHALO_ROW0 !< Copy ICF -> first row; 0 = not on the planes.
    INTEGER, ALLOCATABLE, DIMENSION(:,:,:) :: MUNKH,GSCH,EWC_TYPE
 
    ! Face variables data (velocities):
@@ -1082,7 +1086,7 @@ TYPE OMESH_TYPE
    INTEGER, ALLOCATABLE, DIMENSION(:) :: IIO_CC_R,JJO_CC_R,KKO_CC_R,IIO_CC_S,JJO_CC_S,KKO_CC_S
    INTEGER, ALLOCATABLE, DIMENSION(:) :: IIO_LF_R,JJO_LF_R,KKO_LF_R,AXS_LF_R,IIO_LF_S,JJO_LF_S,KKO_LF_S,AXS_LF_S
    INTEGER, ALLOCATABLE, DIMENSION(:,:) :: IFEP_R_3, IFEP_R_4, IFEP_R_5
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: U_LNK, V_LNK, W_LNK
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: U_LNK, V_LNK, W_LNK !< Receive box shape; set on the plane faces only.
 
    ! Level Set
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: PHI_LS,PHI1_LS,U_LS,V_LS,Z_LS

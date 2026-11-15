@@ -12,7 +12,7 @@ USE COMPLEX_GEOMETRY, ONLY: GEOMEPS,LOOSEPS,GEOFCT,NGUARD,CCGUARD,CC_GASPHASE,CC
      CC_FGSC,CC_IDCF,CC_IDRC,CC_FROW,CC_CGSC,CC_IDCC,CC_UNKZ,CC_UNKH,CC_ETYPE_RGGAS, &
      CC_ETYPE_CFGAS,CC_FTYPE_RGGAS,CC_FTYPE_CFGAS,CC_FTYPE_CFINB,CC_FTYPE_SVERT,CC_FTYPE_RCGAS, &
      CC_FTYPE_CCGAS,CC_ETYPE_SCINB,CC_ETYPE_RCGAS,CC_ETYPE_EP,CC_MATVEC_DEFINED,NM_START, &
-     CALL_FOR_GLMAT,CALL_FROM_GLMAT_SETUP,N_REQ11,N_REQ12,N_REQ112,N_REQ13,REQ11,REQ112,REQ12,REQ13, &
+     CALL_FOR_GLMAT,CALL_FROM_GLMAT_SETUP,N_REQ11,N_REQ12,N_REQ112,N_REQ115,N_REQ13,REQ11,REQ112,REQ115,REQ12,REQ13, &
      WRITE_SET_CUTCELLS_TIMINGS,N_SET_CUTCELLS_3D_CALLS,SET_CUTCELLS_TIME_INDEX,GET_CARTCELL_CUTCELLS_TIME_INDEX, &
      CC_SET_DATA_TIME_INDEX,INIT_CUTCELL_DATA_TIME_INDEX,CCCOMPUTE_RADIATION_TIME_INDEX, &
      CC_DENSITY_TIME_INDEX,CC_VELOCITY_FLUX_TIME_INDEX,CC_COMPUTE_VISCOSITY_TIME_INDEX, &
@@ -4117,86 +4117,144 @@ CALL CC_GRID_SEAM_EXCHANGE(1,NR,SB,XS_RDEST,NB,RB,XS_PEER)
 ALLOCATE(XS_BSLOT(NB)); XS_BSLOT=NINT(RB(1,1:NB))
 END SUBROUTINE L2_XS_SLOTS
 
-SUBROUTINE L2_ADD_GUARD_CF_REQUEST(NM,NOM,DO_FILL,NBASE)
-! Numbered guard cuts whose owner face is not already on the interpolated-wall list.
-INTEGER, INTENT(IN) :: NM,NOM,NBASE
-LOGICAL, INTENT(IN) :: DO_FILL
-INTEGER :: IW,IIO,JJO,KKO,IIOF,JJOF,KKOF,ICF,ICF2,JCF,JC2,AX,SLOT
-LOGICAL, ALLOCATABLE :: SEEN(:)
-TYPE(MESH_TYPE), POINTER :: M1,M2
+SUBROUTINE CC_SET_CF_HALO_LISTS
+
+! Cut-face halo of the mesh interfaces (PKG112 at CODE 3 and 6, PKG115 at CODE 5), built once, no list negotiation.
+! Pair (NM receives, NOM sends): the interface planes are those of the cells of NOM that abut NM (IIO_R..IOR_R, which
+! the sender holds as IIO_S..IOR_S), each a box of face indices on NOM's grid. On them, in the order plane, K, J, I,
+! piece: every gas cut-face piece of NOM (FCVAR CC_IDCF>0, pieces 1..NFACE) and every face normal to the plane (its
+! linked velocity, else its velocity). The sender walks its own geometry, the receiver its copy MESHES(NOM): the same
+! set in the same order; the sender's piece count and position checksum are checked once against the receiver's.
+
+USE MPI_F08
+INTEGER :: NM,NOM,NS,NR,N,NLNK,ICHK,IERR
+INTEGER, ALLOCATABLE, DIMENSION(:,:) :: CHK_S,CHK_R
+TYPE(MPI_REQUEST), ALLOCATABLE, DIMENSION(:) :: REQ
 TYPE(OMESH_TYPE), POINTER :: M3
-TYPE(WALL_TYPE), POINTER :: WC
-TYPE(EXTERNAL_WALL_TYPE), POINTER :: EWC
-TYPE(BOUNDARY_COORD_TYPE), POINTER :: BC
-TYPE(CC_CUTFACE_TYPE), POINTER :: CF,CF2
-REAL(EB) :: XX,YY,ZZ
-IF (NM==NOM) RETURN
-M1 => MESHES(NM)
-M2 => MESHES(NOM)
-M3 => MESHES(NM)%OMESH(NOM)
-IF (M1%N_GCCUTFACE_MESH<1) RETURN
-ALLOCATE(SEEN(M2%N_CUTFACE_MESH+M2%N_GCCUTFACE_MESH))
-SEEN = .FALSE.
-CALL POINT_TO_MESH(NM)
-DO IW=1,N_EXTERNAL_WALL_CELLS
-   WC => WALL(IW)
-   IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE
-   EWC => EXTERNAL_WALL(IW)
-   IF (EWC%NOM/=NOM) CYCLE
-   BC => BOUNDARY_COORD(WC%BC_INDEX)
-   DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
-      DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
-         DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
-            IIOF = IIO; JJOF = JJO; KKOF = KKO
-            SELECT CASE(-BC%IOR)
-            CASE( IAXIS); IIOF = IIO-1
-            CASE( JAXIS); JJOF = JJO-1
-            CASE( KAXIS); KKOF = KKO-1
-            END SELECT
-            ICF = MESHES(NOM)%FCVAR(IIOF,JJOF,KKOF,CC_IDCF,ABS(BC%IOR))
-            IF (ICF>=1 .AND. ICF<=SIZE(SEEN)) SEEN(ICF) = .TRUE.
-         ENDDO
-      ENDDO
+
+NS = 0; NR = 0
+DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   DO NOM=1,NMESHES
+      IF (PROCESS(NOM)==MY_RANK) CYCLE
+      IF (MESHES(NM)%OMESH(NOM)%NIC_S>0) NS = NS+1
+      IF (MESHES(NM)%OMESH(NOM)%NIC_R>0) NR = NR+1
    ENDDO
 ENDDO
-SLOT = NBASE
-DO ICF=M1%N_CUTFACE_MESH+1,M1%N_CUTFACE_MESH+M1%N_GCCUTFACE_MESH
-   CF => M1%CUT_FACE(ICF)
-   IF (CF%STATUS/=CC_GASPHASE) CYCLE
-   IF (.NOT.ALLOCATED(CF%XYZCEN)) CYCLE
-   AX = CF%IJK(KAXIS+1)
-   DO JCF=1,CF%NFACE
-      IF (CC_FV_UNKF_CF(NM,ICF,JCF)<1) CYCLE
-      IF (JCF>SIZE(CF%XYZCEN,DIM=2)) CYCLE
-      XX = CF%XYZCEN(IAXIS,JCF)
-      YY = CF%XYZCEN(JAXIS,JCF)
-      ZZ = CF%XYZCEN(KAXIS,JCF)
-      DO ICF2=1,M2%N_CUTFACE_MESH
-         IF (SEEN(ICF2)) CYCLE
-         CF2 => M2%CUT_FACE(ICF2)
-         IF (CF2%STATUS/=CC_GASPHASE) CYCLE
-         IF (CF2%IJK(KAXIS+1)/=AX) CYCLE
-         IF (.NOT.ALLOCATED(CF2%XYZCEN)) CYCLE
-         DO JC2=1,CF2%NFACE
-            IF (JC2>SIZE(CF2%XYZCEN,DIM=2)) CYCLE
-            IF (ABS(CF2%XYZCEN(IAXIS,JC2)-XX)>1.E-7_EB) CYCLE
-            IF (ABS(CF2%XYZCEN(JAXIS,JC2)-YY)>1.E-7_EB) CYCLE
-            IF (ABS(CF2%XYZCEN(KAXIS,JC2)-ZZ)>1.E-7_EB) CYCLE
-            SEEN(ICF2) = .TRUE.
-            IF (DO_FILL) THEN
-               SLOT = SLOT+1
-               M3%ICF_UFFB_CF_R(4*SLOT-3:4*SLOT) = (/CF2%IJK(IAXIS),CF2%IJK(JAXIS),CF2%IJK(KAXIS),AX/)
-            ELSE
-               M3%NICF_R(1) = M3%NICF_R(1)+1
-               M3%NICF_R(2) = M3%NICF_R(2)+CF2%NFACE
+ALLOCATE(CHK_S(2,NS),CHK_R(6,NR),REQ(NS+NR)); NS = 0; NR = 0
+
+DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   DO NOM=1,NMESHES
+      M3 => MESHES(NM)%OMESH(NOM)
+      ! NM sends to NOM: the FACE rows of its pieces, the PKG112 slots and link numbers of its linked plane faces.
+      IF (M3%NIC_S>0) THEN
+         CALL CF_HALO_PLANES(M3%IIO_S,M3%JJO_S,M3%KKO_S,M3%IOR_S,M3%CF_PLANE_S)
+         CALL CF_HALO_WALK(NM,M3%CF_PLANE_S,.TRUE.,M3%NCF_S,M3%NPF_S,NLNK,ICHK)
+         ALLOCATE(M3%CF_FC_S(M3%NCF_S),M3%LNK_POS_S(NLNK),M3%LNK_UNK_S(NLNK))
+         CALL CF_HALO_WALK(NM,M3%CF_PLANE_S,.TRUE.,M3%NCF_S,M3%NPF_S,NLNK,ICHK,FC=M3%CF_FC_S,LPOS=M3%LNK_POS_S, &
+                           LUNK=M3%LNK_UNK_S)
+         M3%LNK_POS_S = M3%LNK_POS_S + 2*M3%NCF_S
+         IF (PROCESS(NOM)/=MY_RANK) THEN
+            NS = NS+1; CHK_S(1:2,NS) = (/M3%NCF_S,ICHK/)
+            CALL MPI_ISEND(CHK_S(1,NS),2,MPI_INTEGER,PROCESS(NOM),NM,MPI_COMM_WORLD,REQ(NS+NR),IERR)
+         ENDIF
+      ENDIF
+      ! NM receives from NOM: one halo row per piece (first row per cut face), the linked velocities of the plane faces.
+      IF (M3%NIC_R>0) THEN
+         CALL CF_HALO_PLANES(M3%IIO_R,M3%JJO_R,M3%KKO_R,M3%IOR_R,M3%CF_PLANE_R)
+         CALL CF_HALO_WALK(NOM,M3%CF_PLANE_R,.FALSE.,M3%NCF_R,M3%NPF_R,NLNK,ICHK)
+         N = M3%NCF_R
+         ALLOCATE(M3%CFHALO_VEL(N),M3%CFHALO_VELS(N),M3%CFHALO_VEL_LNK(N),M3%CFHALO_FN(N))
+         M3%CFHALO_VEL = 0._EB; M3%CFHALO_VELS = 0._EB; M3%CFHALO_VEL_LNK = 0._EB; M3%CFHALO_FN = 0._EB
+         IF (N>0) THEN
+            ALLOCATE(M3%CFHALO_ROW0(SIZE(MESHES(NOM)%CUT_FACE))); M3%CFHALO_ROW0 = 0
+            CALL CF_HALO_WALK(NOM,M3%CF_PLANE_R,.FALSE.,M3%NCF_R,M3%NPF_R,NLNK,ICHK,ROW0=M3%CFHALO_ROW0)
+         ENDIF
+         ALLOCATE(M3%U_LNK(M3%I_MIN_R:M3%I_MAX_R,M3%J_MIN_R:M3%J_MAX_R,M3%K_MIN_R:M3%K_MAX_R))
+         ALLOCATE(M3%V_LNK(M3%I_MIN_R:M3%I_MAX_R,M3%J_MIN_R:M3%J_MAX_R,M3%K_MIN_R:M3%K_MAX_R))
+         ALLOCATE(M3%W_LNK(M3%I_MIN_R:M3%I_MAX_R,M3%J_MIN_R:M3%J_MAX_R,M3%K_MIN_R:M3%K_MAX_R))
+         M3%U_LNK = 0._EB; M3%V_LNK = 0._EB; M3%W_LNK = 0._EB
+         IF (PROCESS(NOM)/=MY_RANK) THEN
+            NR = NR+1; CHK_R(3:6,NR) = (/M3%NCF_R,ICHK,NM,NOM/)
+            CALL MPI_IRECV(CHK_R(1,NR),2,MPI_INTEGER,PROCESS(NOM),NOM,MPI_COMM_WORLD,REQ(NS+NR),IERR)
+         ENDIF
+      ENDIF
+   ENDDO
+ENDDO
+IF (NS+NR>0) CALL MPI_WAITALL(NS+NR,REQ,MPI_STATUSES_IGNORE,IERR)
+DO N=1,NR
+   IF (ALL(CHK_R(1:2,N)==CHK_R(3:4,N))) CYCLE
+   WRITE(LU_ERR,'(A,I0,A,I0,A)') 'ERROR: MESH ',CHK_R(5,N),' and MESH ',CHK_R(6,N), &
+                                 ' do not see the same cut faces on their interface.'
+   STOP_STATUS = SETUP_STOP
+ENDDO
+DEALLOCATE(CHK_S,CHK_R,REQ)
+
+CONTAINS
+
+SUBROUTINE CF_HALO_PLANES(IIO,JJO,KKO,IOR,PLANE)
+! One plane per wall orientation IOR of the abutting cells, in the order -3..3: the box of the faces between those
+! cells and the other mesh. PLANE(0,:) normal axis, (IAXIS:KAXIS,:) low and (3+IAXIS:3+KAXIS,:) high face indices.
+INTEGER, INTENT(IN) :: IIO(:),JJO(:),KKO(:),IOR(:)
+INTEGER, ALLOCATABLE, INTENT(OUT) :: PLANE(:,:)
+INTEGER :: LO(IAXIS:KAXIS,-3:3),HI(IAXIS:KAXIS,-3:3),IJK(IAXIS:KAXIS),N,ID
+LO = HUGE(1); HI = -HUGE(1)
+DO N=1,SIZE(IOR)
+   IJK = (/IIO(N),JJO(N),KKO(N)/)
+   IF (IOR(N)<0) IJK(-IOR(N)) = IJK(-IOR(N))-1
+   LO(:,IOR(N)) = MIN(LO(:,IOR(N)),IJK); HI(:,IOR(N)) = MAX(HI(:,IOR(N)),IJK)
+ENDDO
+ALLOCATE(PLANE(0:6,COUNT(HI(IAXIS,:)>=LO(IAXIS,:)))); N = 0
+DO ID=-3,3
+   IF (HI(IAXIS,ID)<LO(IAXIS,ID)) CYCLE
+   N = N+1; PLANE(0,N) = ABS(ID); PLANE(IAXIS:KAXIS,N) = LO(:,ID); PLANE(3+IAXIS:3+KAXIS,N) = HI(:,ID)
+ENDDO
+END SUBROUTINE CF_HALO_PLANES
+
+SUBROUTINE CF_HALO_WALK(MW,PLANE,SENDER,NCF,NPF,NLNK,ICHK,FC,LPOS,LUNK,ROW0)
+! Walk the plane faces of mesh MW in set order: count the plane faces and cut-face pieces (and the linked faces on
+! the sender: link of the regular face, else of the RC face), a checksum of the cut-face positions; fill the lists
+! that are present.
+INTEGER, INTENT(IN) :: MW,PLANE(0:,:)
+LOGICAL, INTENT(IN) :: SENDER
+INTEGER, INTENT(OUT) :: NCF,NPF,NLNK,ICHK
+INTEGER, INTENT(INOUT), OPTIONAL :: FC(:),LPOS(:),LUNK(:),ROW0(:)
+INTEGER :: IP,I,J,K,AX,ICF,NF,IL,IRC,N,V(5)
+TYPE(MESH_TYPE), POINTER :: MM
+MM => MESHES(MW)
+NCF = 0; NPF = 0; NLNK = 0; ICHK = 0
+DO IP=1,SIZE(PLANE,DIM=2)
+   AX = PLANE(0,IP)
+   DO K=PLANE(KAXIS,IP),PLANE(3+KAXIS,IP)
+      DO J=PLANE(JAXIS,IP),PLANE(3+JAXIS,IP)
+         DO I=PLANE(IAXIS,IP),PLANE(3+IAXIS,IP)
+            NPF = NPF+1
+            ICF = MM%FCVAR(I,J,K,CC_IDCF,AX)
+            IF (ICF>0) THEN
+               NF = MM%CUT_FACE(ICF)%NFACE
+               V = (/AX,I,J,K,NF/)
+               DO N=1,5
+                  ICHK = MOD(31*ICHK+V(N),999983)
+               ENDDO
+               IF (PRESENT(ROW0)) ROW0(ICF) = NCF+1
+               IF (PRESENT(FC)) FC(NCF+1:NCF+NF) = MM%CUT_FACE(ICF)%FC(1:NF)
+               NCF = NCF+NF
             ENDIF
-            EXIT
+            IF (.NOT.SENDER) CYCLE
+            IL = CC_FV_UNKF_REG(MW,I,J,K,AX)
+            IRC = MM%FCVAR(I,J,K,CC_IDRC,AX)
+            IF (IL<1 .AND. IRC>0) IL = CC_FV_UNKF_RC(MW,IRC)
+            IF (IL<1) CYCLE
+            NLNK = NLNK+1
+            IF (PRESENT(LPOS)) THEN
+               LPOS(NLNK) = NPF; LUNK(NLNK) = IL
+            ENDIF
          ENDDO
-         IF (SEEN(ICF2)) EXIT
       ENDDO
    ENDDO
 ENDDO
-END SUBROUTINE L2_ADD_GUARD_CF_REQUEST
+END SUBROUTINE CF_HALO_WALK
+
+END SUBROUTINE CC_SET_CF_HALO_LISTS
 
 
 
@@ -4541,11 +4599,12 @@ INTEGER, INTENT(IN) :: CODE
 ! Local Variables:
 INTEGER :: NM,NOM,RNODE,SNODE,IERR
 INTEGER :: II1,JJ1,KK1,NCELL,ICC,ICC1,NQT2,JCC,LL,NN
-INTEGER :: I,J,K,II,JJ,KK,IFC,ICF,X1AXIS,ICF1,JCF,ICV,IG
+INTEGER :: I,J,K,IFC,X1AXIS,ICV,IG,IP,N
 TYPE (MESH_TYPE), POINTER :: M,M1
 TYPE (OMESH_TYPE), POINTER :: M2,M3
 TYPE (CC_FV_TYPE), POINTER :: FV
-REAL(EB), POINTER, DIMENSION(:,:,:) :: UP,UP2,VP,VP2,WP,WP2
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UP,VP,WP,XP
+REAL(EB), POINTER, DIMENSION(:) :: BUF
 LOGICAL, SAVE :: INITIALIZE_CC_SCALARS_FORC=.TRUE.
 LOGICAL :: USE_FV
 
@@ -4582,16 +4641,17 @@ INITIALIZE_CC_SCALARS_FORC_COND : IF (INITIALIZE_CC_SCALARS_FORC) THEN
    ALLOCATE(REQ11(N_REQ11*4)); N_REQ11=0
 
 
-   ! Allocate REQ112: Exchange cut-face data in block boundaries.
+   ! Allocate REQ112 (CODE 3/6) and REQ115 (CODE 5), the cut-face halo of the interface planes: at most one send and
+   ! one receive per face neighbour (CC_SET_CF_HALO_LISTS).
    N_REQ112=0
    DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       DO NOM=1,NMESHES
          M3=>MESHES(NM)%OMESH(NOM)
-         IF (M3%NICF_S(1)==0 .AND. M3%NICF_R(1)==0 .AND. M3%NLKF_S==0 .AND. M3%NLKF_R==0) CYCLE
-         N_REQ112 = N_REQ112+1
+         IF (M3%NIC_S>0) N_REQ112 = N_REQ112+1
+         IF (M3%NIC_R>0) N_REQ112 = N_REQ112+1
       ENDDO
    ENDDO
-   ALLOCATE(REQ112(N_REQ112*4)); N_REQ112=0
+   ALLOCATE(REQ112(N_REQ112),REQ115(N_REQ112)); N_REQ112=0; N_REQ115=0
 
    ! Allocate REQ12: Dual use, IBM forcing or TAU,OMG computation vars.
    N_REQ12=0
@@ -4641,19 +4701,21 @@ INITIALIZE_CC_SCALARS_FORC_COND : IF (INITIALIZE_CC_SCALARS_FORC) THEN
          ENDIF
       ENDDO OTHER_MESH_LOOP_11
 
-      ! REQ112:
+      ! REQ112: VEL(S) and VEL_LNK of the pieces, then one value per plane face. REQ115: FN of the pieces.
+      ! A same-rank sender packs straight into these buffers.
       OTHER_MESH_LOOP_112: DO NOM=1,NMESHES
          M3=>MESHES(NM)%OMESH(NOM)
-         IF (M3%NICF_R(1)==0 .AND. M3%NLKF_R==0) CYCLE OTHER_MESH_LOOP_112
+         IF (M3%NIC_R==0) CYCLE OTHER_MESH_LOOP_112
          SNODE = PROCESS(NOM)
-         ! Cut-face centered variables: FN or VEL/VELS plus VEL_LNK. Linked faces follow, 3 reals each.
-         ALLOCATE(M3%REAL_RECV_PKG112(M3%NICF_R(2) * 2 + M3%NLKF_R * 3))
-         IF (M3%NICF_R(1)>0) CALL ALLOCATE_CFHALO(M3,NOM)
-         IF (RNODE/=SNODE) THEN
-            N_REQ112 = N_REQ112 + 1
-            CALL MPI_RECV_INIT(M3%REAL_RECV_PKG112(1),SIZE(M3%REAL_RECV_PKG112),MPI_DOUBLE_PRECISION, &
-                               SNODE,NOM,MPI_COMM_WORLD,REQ112(N_REQ112),IERR)
-         ENDIF
+         ALLOCATE(M3%REAL_RECV_PKG112(2*M3%NCF_R+M3%NPF_R),M3%REAL_RECV_PKG115(M3%NCF_R))
+         IF (RNODE==SNODE) CYCLE OTHER_MESH_LOOP_112
+         N_REQ112 = N_REQ112 + 1
+         CALL MPI_RECV_INIT(M3%REAL_RECV_PKG112(1),SIZE(M3%REAL_RECV_PKG112),MPI_DOUBLE_PRECISION, &
+                            SNODE,NOM,MPI_COMM_WORLD,REQ112(N_REQ112),IERR)
+         IF (M3%NCF_R==0) CYCLE OTHER_MESH_LOOP_112
+         N_REQ115 = N_REQ115 + 1
+         CALL MPI_RECV_INIT(M3%REAL_RECV_PKG115(1),M3%NCF_R,MPI_DOUBLE_PRECISION, &
+                            SNODE,NOM,MPI_COMM_WORLD,REQ115(N_REQ115),IERR)
       ENDDO OTHER_MESH_LOOP_112
 
       ! REQ12:
@@ -4705,18 +4767,19 @@ INITIALIZE_CC_SCALARS_FORC_COND : IF (INITIALIZE_CC_SCALARS_FORC) THEN
          ENDIF
       ENDDO RECEIVING_MESH_LOOP_11
 
-      ! REQ112:
+      ! REQ112, REQ115:
       RECEIVING_MESH_LOOP_112: DO NOM=1,NMESHES
          M3=>MESHES(NM)%OMESH(NOM)
-         IF (M3%NICF_S(1)==0 .AND. M3%NLKF_S==0)  CYCLE RECEIVING_MESH_LOOP_112
          SNODE = PROCESS(NOM)
-         ! Initialize persistent send requests
-         IF ((M3%NICF_S(1)>0 .OR. M3%NLKF_S>0) .AND. RNODE/=SNODE) THEN
-            ALLOCATE(M3%REAL_SEND_PKG112(M3%NICF_S(2) * 2 + M3%NLKF_S * 3))
-            N_REQ112 = N_REQ112 + 1
-            CALL MPI_SEND_INIT(M3%REAL_SEND_PKG112(1),SIZE(M3%REAL_SEND_PKG112),MPI_DOUBLE_PRECISION, &
-                               SNODE,NM,MPI_COMM_WORLD,REQ112(N_REQ112),IERR)
-         ENDIF
+         IF (M3%NIC_S==0 .OR. RNODE==SNODE) CYCLE RECEIVING_MESH_LOOP_112
+         ALLOCATE(M3%REAL_SEND_PKG112(2*M3%NCF_S+M3%NPF_S),M3%REAL_SEND_PKG115(M3%NCF_S))
+         N_REQ112 = N_REQ112 + 1
+         CALL MPI_SEND_INIT(M3%REAL_SEND_PKG112(1),SIZE(M3%REAL_SEND_PKG112),MPI_DOUBLE_PRECISION, &
+                            SNODE,NM,MPI_COMM_WORLD,REQ112(N_REQ112),IERR)
+         IF (M3%NCF_S==0) CYCLE RECEIVING_MESH_LOOP_112
+         N_REQ115 = N_REQ115 + 1
+         CALL MPI_SEND_INIT(M3%REAL_SEND_PKG115(1),M3%NCF_S,MPI_DOUBLE_PRECISION, &
+                            SNODE,NM,MPI_COMM_WORLD,REQ115(N_REQ115),IERR)
       ENDDO RECEIVING_MESH_LOOP_112
 
       ! REQ12:
@@ -4812,55 +4875,38 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          ENDIF
       ENDIF
 
-      ! Exchange momentum rhs FN for cut-faces, in PREDICTOR, IBM forcing:
-      IF (CODE==5 .AND. PREDICTOR .AND. M3%NICF_S(1)>0) THEN
-         NQT2 = 2
-         LL   = 0
-         IF (RNODE/=SNODE) THEN
-            PACK_REAL_SEND_PKG112A: DO ICF1=1,M3%NICF_S(1)
-               ICF=M3%ICF_UFFB_CF_S(ICF1); CF => M%CUT_FACE(ICF)
-               DO JCF=1,CF%NFACE
-                  LL = LL + 1
-                  M3%REAL_SEND_PKG112(NQT2*(LL-1)+1) = CC_FV_CUTFACE_MOM(NM,ICF,JCF,CC_FV_MOM_FN)
-               ENDDO
-            ENDDO PACK_REAL_SEND_PKG112A
-         ELSE
-            M2=>MESHES(NOM)%OMESH(NM)
-            PACK_REAL_SEND_PKG112A2: DO ICF1=1,M3%NICF_S(1)
-               ICF=M3%ICF_UFFB_CF_S(ICF1); CF => M%CUT_FACE(ICF)
-               DO JCF=1,CF%NFACE
-                  LL = LL + 1
-                  M2%CFHALO_FN(LL) = CC_FV_CUTFACE_MOM(NM,ICF,JCF,CC_FV_MOM_FN)
-               ENDDO
-            ENDDO PACK_REAL_SEND_PKG112A2
-         ENDIF
+      ! Cut-face halo of the interface planes: FN of the pieces at CODE 5; at CODE 3 (6) VELS (VEL) and VEL_LNK of the
+      ! pieces, then the velocity of every plane face, the linked velocity written over it where the face is linked.
+      ! A same-rank pair packs straight into the receiver's buffer.
+      IF (CODE==5 .AND. M3%NCF_S>0) THEN
+         IF (RNODE/=SNODE) THEN; BUF => M3%REAL_SEND_PKG115; ELSE; BUF => MESHES(NOM)%OMESH(NM)%REAL_RECV_PKG115; ENDIF
+         BUF = FV%FACE%FN(M3%CF_FC_S)
       ENDIF
-
-      ! Exchange Velocity at end of PREDICTOR: To be used in RCEDGEs estimation of OMEGA and TAU at next substep.
-
-      IF (CODE==3 .AND. M3%NICF_S(1)>0) THEN
-         NQT2 = 2
-         LL   = 0
-         IF (RNODE/=SNODE) THEN
-            PACK_REAL_SEND_PKG112A3: DO ICF1=1,M3%NICF_S(1)
-               ICF=M3%ICF_UFFB_CF_S(ICF1); CF => M%CUT_FACE(ICF)
-               DO JCF=1,CF%NFACE
-                  LL = LL + 1
-                  M3%REAL_SEND_PKG112(NQT2*(LL-1)+1) = CC_FV_CUTFACE_MOM(NM,ICF,JCF,CC_FV_MOM_VELS)
-                  M3%REAL_SEND_PKG112(NQT2*(LL-1)+2) = FV%FACE%VEL_LNK(CF%FC(JCF))
-               ENDDO
-            ENDDO PACK_REAL_SEND_PKG112A3
+      IF ((CODE==3 .OR. CODE==6) .AND. M3%NIC_S>0) THEN
+         IF (RNODE/=SNODE) THEN; BUF => M3%REAL_SEND_PKG112; ELSE; BUF => MESHES(NOM)%OMESH(NM)%REAL_RECV_PKG112; ENDIF
+         N = M3%NCF_S
+         IF (CODE==3) THEN
+            UP => M%US; VP => M%VS; WP => M%WS
          ELSE
-            M2=>MESHES(NOM)%OMESH(NM)
-            PACK_REAL_SEND_PKG112A4: DO ICF1=1,M3%NICF_S(1)
-               ICF=M3%ICF_UFFB_CF_S(ICF1); CF => M%CUT_FACE(ICF)
-               DO JCF=1,CF%NFACE
-                  LL = LL + 1
-                  M2%CFHALO_VELS(LL) = CC_FV_CUTFACE_MOM(NM,ICF,JCF,CC_FV_MOM_VELS)
-                  M2%CFHALO_VEL_LNK(LL) = FV%FACE%VEL_LNK(CF%FC(JCF))
-               ENDDO
-            ENDDO PACK_REAL_SEND_PKG112A4
+            UP => M%U;  VP => M%V;  WP => M%W
          ENDIF
+         IF (N>0) THEN ! Pieces only: a run without GEOM has no FACE arrays.
+            IF (CODE==3) BUF(1:N) = FV%FACE%VELS(M3%CF_FC_S)
+            IF (CODE==6) BUF(1:N) = FV%FACE%VEL(M3%CF_FC_S)
+            BUF(N+1:2*N) = FV%FACE%VEL_LNK(M3%CF_FC_S)
+         ENDIF
+         LL = 2*N
+         DO IP=1,SIZE(M3%CF_PLANE_S,DIM=2)
+            SELECT CASE(M3%CF_PLANE_S(0,IP)); CASE(IAXIS); XP => UP; CASE(JAXIS); XP => VP; CASE(KAXIS); XP => WP; END SELECT
+            DO K=M3%CF_PLANE_S(KAXIS,IP),M3%CF_PLANE_S(3+KAXIS,IP)
+               DO J=M3%CF_PLANE_S(JAXIS,IP),M3%CF_PLANE_S(3+JAXIS,IP)
+                  DO I=M3%CF_PLANE_S(IAXIS,IP),M3%CF_PLANE_S(3+IAXIS,IP)
+                     LL = LL+1; BUF(LL) = XP(I,J,K)
+                  ENDDO
+               ENDDO
+            ENDDO
+         ENDDO
+         BUF(M3%LNK_POS_S) = M%UN_LNK(M3%LNK_UNK_S)
       ENDIF
       IF (CODE==3 .AND. M3%NFCC_S(1)>0) THEN
          NQT2 = 1
@@ -4964,131 +5010,6 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          ENDIF
       ENDIF
 
-
-      ! Exchange momentum rhs FN for cut-faces, in CORRECTOR, IBM forcing:
-      IF (CODE==5 .AND. CORRECTOR .AND. M3%NICF_S(1)>0) THEN
-         NQT2 = 2
-         LL   = 0
-         IF (RNODE/=SNODE) THEN
-            PACK_REAL_SEND_PKG112B: DO ICF1=1,M3%NICF_S(1)
-               ICF=M3%ICF_UFFB_CF_S(ICF1); CF => M%CUT_FACE(ICF)
-               DO JCF=1,CF%NFACE
-                  LL = LL + 1
-                  M3%REAL_SEND_PKG112(NQT2*(LL-1)+1) = CC_FV_CUTFACE_MOM(NM,ICF,JCF,CC_FV_MOM_FN)
-               ENDDO
-            ENDDO PACK_REAL_SEND_PKG112B
-         ELSE
-            M2=>MESHES(NOM)%OMESH(NM)
-            PACK_REAL_SEND_PKG112B2: DO ICF1=1,M3%NICF_S(1)
-               ICF=M3%ICF_UFFB_CF_S(ICF1); CF => M%CUT_FACE(ICF)
-               DO JCF=1,CF%NFACE
-                  LL = LL + 1
-                  M2%CFHALO_FN(LL) = CC_FV_CUTFACE_MOM(NM,ICF,JCF,CC_FV_MOM_FN)
-               ENDDO
-            ENDDO PACK_REAL_SEND_PKG112B2
-         ENDIF
-      ENDIF
-
-      ! Exchange Velocity at end of CORRECTOR: To be used in RCEDGEs estimation of OMEGA and TAU next substep.
-
-      IF (CODE==6 .AND. M3%NICF_S(1)>0) THEN
-         NQT2 = 2
-         LL   = 0
-         IF (RNODE/=SNODE) THEN
-            PACK_REAL_SEND_PKG112B3: DO ICF1=1,M3%NICF_S(1)
-               ICF=M3%ICF_UFFB_CF_S(ICF1); CF => M%CUT_FACE(ICF)
-               DO JCF=1,CF%NFACE
-                  LL = LL + 1
-                  M3%REAL_SEND_PKG112(NQT2*(LL-1)+1) = CC_FV_CUTFACE_MOM(NM,ICF,JCF,CC_FV_MOM_VEL)
-                  M3%REAL_SEND_PKG112(NQT2*(LL-1)+2) = FV%FACE%VEL_LNK(CF%FC(JCF))
-               ENDDO
-            ENDDO PACK_REAL_SEND_PKG112B3
-         ELSE
-            M2=>MESHES(NOM)%OMESH(NM)
-            PACK_REAL_SEND_PKG112B4: DO ICF1=1,M3%NICF_S(1)
-               ICF=M3%ICF_UFFB_CF_S(ICF1); CF => M%CUT_FACE(ICF)
-               DO JCF=1,CF%NFACE
-                  LL = LL + 1
-                  M2%CFHALO_VEL(LL) = CC_FV_CUTFACE_MOM(NM,ICF,JCF,CC_FV_MOM_VEL)
-                  M2%CFHALO_VEL_LNK(LL) = FV%FACE%VEL_LNK(CF%FC(JCF))
-               ENDDO
-            ENDDO PACK_REAL_SEND_PKG112B4
-         ENDIF
-      ENDIF
-      IF ((CODE==3 .OR. CODE==6) .AND. M3%NLKF_S>0) THEN
-         IF (CODE==3) THEN
-            UP => M%US ; VP => M%VS ; WP => M%WS
-         ELSE
-            UP => M%U  ; VP => M%V  ; WP => M%W
-         ENDIF
-         IF (RNODE/=SNODE) THEN
-            LL = 2 * M3%NICF_S(2)
-            DO KK=M3%K_MIN_S,M3%K_MAX_S
-               DO JJ=M3%J_MIN_S,M3%J_MAX_S
-                  DO II=M3%I_MIN_S,M3%I_MAX_S
-                     ! U linked Velocity:
-                     M3%REAL_SEND_PKG112(LL+1) = UP(II,JJ,KK)
-                     IF (CC_FV_UNKF_REG(NM,II,JJ,KK,IAXIS)>0) THEN ! Regular Face
-                        M3%REAL_SEND_PKG112(LL+1) = M%UN_LNK(CC_FV_UNKF_REG(NM,II,JJ,KK,IAXIS))
-                     ELSEIF(M%FCVAR(II,JJ,KK,CC_IDRC,IAXIS)>0) THEN ! RC Face.
-                        ICF=M%FCVAR(II,JJ,KK,CC_IDRC,IAXIS); IF(CC_FV_UNKF_RC(NM,ICF)>0) &
-                        M3%REAL_SEND_PKG112(LL+1) = M%UN_LNK(CC_FV_UNKF_RC(NM,ICF))
-                     ENDIF
-                     ! V linked Velocity:
-                     M3%REAL_SEND_PKG112(LL+2) = VP(II,JJ,KK)
-                     IF (CC_FV_UNKF_REG(NM,II,JJ,KK,JAXIS)>0) THEN ! Regular Face
-                        M3%REAL_SEND_PKG112(LL+2) = M%UN_LNK(CC_FV_UNKF_REG(NM,II,JJ,KK,JAXIS))
-                     ELSEIF(M%FCVAR(II,JJ,KK,CC_IDRC,JAXIS)>0) THEN ! RC Face.
-                        ICF=M%FCVAR(II,JJ,KK,CC_IDRC,JAXIS); IF(CC_FV_UNKF_RC(NM,ICF)>0) &
-                        M3%REAL_SEND_PKG112(LL+2) = M%UN_LNK(CC_FV_UNKF_RC(NM,ICF))
-                     ENDIF
-                     ! W linked velocity:
-                     M3%REAL_SEND_PKG112(LL+3) = WP(II,JJ,KK)
-                     IF (CC_FV_UNKF_REG(NM,II,JJ,KK,KAXIS)>0) THEN ! Regular Face
-                        M3%REAL_SEND_PKG112(LL+3) = M%UN_LNK(CC_FV_UNKF_REG(NM,II,JJ,KK,KAXIS))
-                     ELSEIF(M%FCVAR(II,JJ,KK,CC_IDRC,KAXIS)>0) THEN ! RC Face.
-                        ICF=M%FCVAR(II,JJ,KK,CC_IDRC,KAXIS); IF(CC_FV_UNKF_RC(NM,ICF)>0) &
-                        M3%REAL_SEND_PKG112(LL+3) = M%UN_LNK(CC_FV_UNKF_RC(NM,ICF))
-                     ENDIF
-                     LL = LL+3
-                  ENDDO
-               ENDDO
-            ENDDO
-         ELSE
-            M2=>MESHES(NOM)%OMESH(NM)
-            UP2 => M2%U_LNK ; VP2 => M2%V_LNK ; WP2 => M2%W_LNK
-            DO KK=M3%K_MIN_S,M3%K_MAX_S
-               DO JJ=M3%J_MIN_S,M3%J_MAX_S
-                  DO II=M3%I_MIN_S,M3%I_MAX_S
-                     ! U linked Velocity:
-                     UP2(II,JJ,KK) = UP(II,JJ,KK)
-                     IF (CC_FV_UNKF_REG(NM,II,JJ,KK,IAXIS)>0) THEN ! Regular Face
-                        UP2(II,JJ,KK) = M%UN_LNK(CC_FV_UNKF_REG(NM,II,JJ,KK,IAXIS))
-                     ELSEIF(M%FCVAR(II,JJ,KK,CC_IDRC,IAXIS)>0) THEN ! RC Face.
-                        ICF=M%FCVAR(II,JJ,KK,CC_IDRC,IAXIS); IF(CC_FV_UNKF_RC(NM,ICF)>0) &
-                        UP2(II,JJ,KK) = M%UN_LNK(CC_FV_UNKF_RC(NM,ICF))
-                     ENDIF
-                     ! V linked Velocity:
-                     VP2(II,JJ,KK) = VP(II,JJ,KK)
-                     IF (CC_FV_UNKF_REG(NM,II,JJ,KK,JAXIS)>0) THEN ! Regular Face
-                        VP2(II,JJ,KK) = M%UN_LNK(CC_FV_UNKF_REG(NM,II,JJ,KK,JAXIS))
-                     ELSEIF(M%FCVAR(II,JJ,KK,CC_IDRC,JAXIS)>0) THEN ! RC Face.
-                        ICF=M%FCVAR(II,JJ,KK,CC_IDRC,JAXIS); IF(CC_FV_UNKF_RC(NM,ICF)>0) &
-                        VP2(II,JJ,KK) = M%UN_LNK(CC_FV_UNKF_RC(NM,ICF))
-                     ENDIF
-                     ! W linked velocity:
-                     WP2(II,JJ,KK) = WP(II,JJ,KK)
-                     IF (CC_FV_UNKF_REG(NM,II,JJ,KK,KAXIS)>0) THEN ! Regular Face
-                        WP2(II,JJ,KK) = M%UN_LNK(CC_FV_UNKF_REG(NM,II,JJ,KK,KAXIS))
-                     ELSEIF(M%FCVAR(II,JJ,KK,CC_IDRC,KAXIS)>0) THEN ! RC Face.
-                        ICF=M%FCVAR(II,JJ,KK,CC_IDRC,KAXIS); IF(CC_FV_UNKF_RC(NM,ICF)>0) &
-                        WP2(II,JJ,KK) = M%UN_LNK(CC_FV_UNKF_RC(NM,ICF))
-                     ENDIF
-                  ENDDO
-               ENDDO
-            ENDDO
-         ENDIF
-      ENDIF
       IF (CODE==6 .AND. M3%NFCC_S(1)>0) THEN
          NQT2 = 1
          LL   = 0
@@ -5219,8 +5140,12 @@ IF (N_MPI_PROCESSES>1 .AND. (CODE==1.OR.CODE==4) .AND. N_REQ11>0) THEN
    CALL CC_TIMEOUT('REQ11',N_REQ11,REQ11(1:N_REQ11))
 ENDIF
 
-! Exchange FVX,FVY,FVZ data for gas cut-faces:
-IF (N_MPI_PROCESSES>1 .AND. ANY(CODE==(/3,5,6/)) .AND. N_REQ112>0) THEN
+! Exchange the cut-face halo of the interface planes: FN at CODE 5, velocities at CODE 3 and 6.
+IF (N_MPI_PROCESSES>1 .AND. CODE==5 .AND. N_REQ115>0) THEN
+   CALL MPI_STARTALL(N_REQ115,REQ115(1:N_REQ115),IERR)
+   CALL CC_TIMEOUT('REQ115',N_REQ115,REQ115(1:N_REQ115))
+ENDIF
+IF (N_MPI_PROCESSES>1 .AND. (CODE==3.OR.CODE==6) .AND. N_REQ112>0) THEN
    CALL MPI_STARTALL(N_REQ112,REQ112(1:N_REQ112),IERR)
    CALL CC_TIMEOUT('REQ112',N_REQ112,REQ112(1:N_REQ112))
 ENDIF
@@ -5277,22 +5202,6 @@ RECV_MESH_LOOP: DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             ENDDO
          ENDIF
 
-         ! Unpack momentum rhs FN for cut-faces, in PREDICTOR or CORRECTOR, IBM forcing:
-         IF (CODE==5  .AND. M2%NICF_R(1)>0) THEN
-            NQT2 = 2
-            LL   = 0
-            DO ICF1=1,M2%NICF_R(1)
-               ICF = M2%ICF_UFFB_CF_R(ICF1)
-               IF (ICF > 0) THEN
-                  CF => MESHES(NM)%CUT_FACE(ICF)
-                  DO JCF=1,CF%NFACE
-                     LL = LL + 1
-                     M2%CFHALO_FN(LL) = M2%REAL_RECV_PKG112(NQT2*(LL-1)+1)
-                  ENDDO
-               ENDIF
-            ENDDO
-         ENDIF
-
          IF (CODE==3 .AND. M2%NFCC_R(1)>0) THEN
             NQT2 = 1
             ! Second Loop cut-edges:
@@ -5307,21 +5216,6 @@ RECV_MESH_LOOP: DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                INPE = M2%IFEP_R_4(HIGH_IND,IFEP)
                LL   = M%CC_IBEDGE(IEDGE)%INT_NOMIND(HIGH_IND,INPE)
                M%CC_IBEDGE(IEDGE)%INT_FVARS(INT_VEL_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) ! Vel^*, added to INT_VEL_IND pos.
-            ENDDO
-         ENDIF
-         IF(CODE==3 .AND. M2%NICF_R(1)>0) THEN
-            NQT2 = 2
-            LL   = 0
-            DO ICF1=1,M2%NICF_R(1)
-               ICF = M2%ICF_UFFB_CF_R(ICF1)
-               IF (ICF > 0) THEN
-                  CF => MESHES(NM)%CUT_FACE(ICF)
-                  DO JCF=1,CF%NFACE
-                     LL = LL + 1
-                     M2%CFHALO_VELS(LL) = M2%REAL_RECV_PKG112(NQT2*(LL-1)+1)
-                     M2%CFHALO_VEL_LNK(LL) = M2%REAL_RECV_PKG112(NQT2*(LL-1)+2)
-                  ENDDO
-               ENDIF
             ENDDO
          ENDIF
 
@@ -5366,37 +5260,35 @@ RECV_MESH_LOOP: DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                M%CC_IBEDGE(IEDGE)%INT_FVARS(INT_VEL_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) ! Vel^n+1
             ENDDO
          ENDIF
-         IF(CODE==6 .AND. M2%NICF_R(1)>0) THEN
-            NQT2 = 2
-            LL   = 0
-            DO ICF1=1,M2%NICF_R(1)
-               ICF = M2%ICF_UFFB_CF_R(ICF1)
-               IF (ICF > 0) THEN
-                  CF => MESHES(NM)%CUT_FACE(ICF)
-                  DO JCF=1,CF%NFACE
-                     LL = LL + 1
-                     M2%CFHALO_VEL(LL) = M2%REAL_RECV_PKG112(NQT2*(LL-1)+1)
-                     M2%CFHALO_VEL_LNK(LL) = M2%REAL_RECV_PKG112(NQT2*(LL-1)+2)
-                  ENDDO
-               ENDIF
-            ENDDO
+
+      ENDIF RNODE_SNODE_IF
+
+      ! Cut-face halo of the interface planes, every pair (a same-rank sender packed into these buffers).
+      IF (CODE==5 .AND. M2%NCF_R>0) M2%CFHALO_FN = M2%REAL_RECV_PKG115
+      IF ((CODE==3 .OR. CODE==6) .AND. M2%NIC_R>0) THEN
+         N = M2%NCF_R
+         IF (CODE==3) THEN
+            M2%CFHALO_VELS = M2%REAL_RECV_PKG112(1:N)
+         ELSE
+            M2%CFHALO_VEL  = M2%REAL_RECV_PKG112(1:N)
          ENDIF
-         IF ((CODE==3.OR.CODE==6) .AND. M2%NLKF_R>0) THEN
-            UP2 => M2%U_LNK ; VP2 => M2%V_LNK ; WP2 => M2%W_LNK
-            LL = 2 * M2%NICF_R(2)
-            DO KK=M2%K_MIN_R,M2%K_MAX_R
-               DO JJ=M2%J_MIN_R,M2%J_MAX_R
-                  DO II=M2%I_MIN_R,M2%I_MAX_R
-                     UP2(II,JJ,KK) = M2%REAL_RECV_PKG112(LL+1)
-                     VP2(II,JJ,KK) = M2%REAL_RECV_PKG112(LL+2)
-                     WP2(II,JJ,KK) = M2%REAL_RECV_PKG112(LL+3)
-                     LL = LL+3
+         M2%CFHALO_VEL_LNK = M2%REAL_RECV_PKG112(N+1:2*N)
+         LL = 2*N
+         DO IP=1,SIZE(M2%CF_PLANE_R,DIM=2)
+            SELECT CASE(M2%CF_PLANE_R(0,IP))
+            CASE(IAXIS); XP => M2%U_LNK
+            CASE(JAXIS); XP => M2%V_LNK
+            CASE(KAXIS); XP => M2%W_LNK
+            END SELECT
+            DO K=M2%CF_PLANE_R(KAXIS,IP),M2%CF_PLANE_R(3+KAXIS,IP)
+               DO J=M2%CF_PLANE_R(JAXIS,IP),M2%CF_PLANE_R(3+JAXIS,IP)
+                  DO I=M2%CF_PLANE_R(IAXIS,IP),M2%CF_PLANE_R(3+IAXIS,IP)
+                     LL = LL+1; XP(I,J,K) = M2%REAL_RECV_PKG112(LL)
                   ENDDO
                ENDDO
             ENDDO
-         ENDIF
-
-      ENDIF RNODE_SNODE_IF
+         ENDDO
+      ENDIF
 
       ! Unpack H, RHO_0 and W velocity averaged to cell center, at PREDICTOR or CORRECTOR end of step:
 
@@ -5724,32 +5616,6 @@ DO ICC1=1,OM%NICC_R(1)
    ENDDO
 ENDDO
 END SUBROUTINE ALLOCATE_CCHALO
-
-SUBROUTINE ALLOCATE_CFHALO(OM,NOM_SEND)
-TYPE(OMESH_TYPE), INTENT(INOUT) :: OM
-INTEGER, INTENT(IN) :: NOM_SEND
-INTEGER :: ICF1,ICF,IROW,N_ROW0
-N_ROW0 = SIZE(MESHES(NOM_SEND)%CUT_FACE)
-ALLOCATE(OM%CFHALO_VEL(OM%NICF_R(2)))
-ALLOCATE(OM%CFHALO_VELS(OM%NICF_R(2)))
-ALLOCATE(OM%CFHALO_VEL_LNK(OM%NICF_R(2)))
-ALLOCATE(OM%CFHALO_FN(OM%NICF_R(2)))
-ALLOCATE(OM%CFHALO_ROW0(N_ROW0))
-OM%CFHALO_VEL = 0._EB
-OM%CFHALO_VELS = 0._EB
-OM%CFHALO_VEL_LNK = 0._EB
-OM%CFHALO_FN = 0._EB
-OM%CFHALO_ROW0 = 0
-! Same walk as the PKG112 unpack: ICF1 over NICF_R(1), skip ICF<1, then JCF=1..NFACE.
-! CFHALO_ROW0(ICF) is the first row of that piece block. A repeated ICF keeps the first row.
-IROW = 1
-DO ICF1=1,OM%NICF_R(1)
-   ICF = OM%ICF_UFFB_CF_R(ICF1)
-   IF (ICF<1) CYCLE
-   IF (OM%CFHALO_ROW0(ICF)==0) OM%CFHALO_ROW0(ICF) = IROW
-   IROW = IROW + MESHES(NOM_SEND)%CUT_FACE(ICF)%NFACE
-ENDDO
-END SUBROUTINE ALLOCATE_CFHALO
 
 END SUBROUTINE MESH_CC_EXCHANGE
 
@@ -7936,6 +7802,7 @@ CALL CC_SET_CFL_ROWS
 CALL CC_SET_THERMO_ROWS
 CALL CC_SET_CVCHEM_LISTS
 CALL CC_SET_DENSITY_LISTS
+CALL CC_SET_CF_HALO_LISTS
 IF (GET_CUTCELLS_VERBOSE .AND. MY_RANK==0) THEN
    CALL CPU_TIME(TDEL)
    WRITE(LU_ERR,'(A,F8.3,A)') ' Executing SET_CFACES_P1_RDN. Time taken : ',TDEL-TNOW,' sec.'
@@ -18658,9 +18525,8 @@ INTEGER :: NM,NOM,IERR
 TYPE (MESH_TYPE), POINTER :: M
 TYPE (OMESH_TYPE), POINTER :: M2,M3
 TYPE (MPI_REQUEST), ALLOCATABLE, DIMENSION(:) :: REQ0,REQ0DUM
-INTEGER :: N_REQ0, NICC_R, ICC, ICC1, NICF_R, ICF, NICC_VALID, NUNKZ_VALID, N_MASK
-INTEGER :: IIO,JJO,KKO,IOR,IW,IIOF,JJOF,KKOF,X1AXIS
-INTEGER, ALLOCATABLE, DIMENSION(:) :: INT1D
+INTEGER :: N_REQ0, NICC_R, ICC, ICC1, NICC_VALID, NUNKZ_VALID, N_MASK
+INTEGER :: IIO,JJO,KKO,IOR,IW
 
 
 ! First allocate buffers to receive UNKZ information:
@@ -18710,89 +18576,6 @@ DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                M3%ICC_UNKZ_CC_R(3*NICC_R-2:3*NICC_R) = (/ IIO, JJO, KKO /) ! Note : This ICC index refers to NOM==NM mesh.
             ENDIF
          ENDDO EXTERNAL_WALL_LOOP_1A
-      ENDIF
-
-      ! Count and add interpolated boundary cut-faces:
-      MESHES(NM)%OMESH(NOM)%NICF_R(1) = 0
-      MESHES(NM)%OMESH(NOM)%NICF_R(2) = 0
-      CALL POINT_TO_MESH(NM)
-      ! Loop over cut-cells:
-      DO IW=1,N_EXTERNAL_WALL_CELLS
-         WC=>WALL(IW); IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE
-         EWC=>EXTERNAL_WALL(IW); IF (EWC%NOM/=NOM) CYCLE
-         BC=>BOUNDARY_COORD(WC%BC_INDEX)
-         ! A regular face on this side can still overlap a cut-face on the neighbor (grid refinement).
-         DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
-            DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
-               DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
-                SELECT CASE(-BC%IOR)
-                CASE( IAXIS); ICF=MESHES(NOM)%FCVAR(IIO-1,JJO  ,KKO  ,CC_IDCF,IAXIS)
-                CASE(-IAXIS); ICF=MESHES(NOM)%FCVAR(IIO  ,JJO  ,KKO  ,CC_IDCF,IAXIS)
-                CASE( JAXIS); ICF=MESHES(NOM)%FCVAR(IIO  ,JJO-1,KKO  ,CC_IDCF,JAXIS)
-                CASE(-JAXIS); ICF=MESHES(NOM)%FCVAR(IIO  ,JJO  ,KKO  ,CC_IDCF,JAXIS)
-                CASE( KAXIS); ICF=MESHES(NOM)%FCVAR(IIO  ,JJO  ,KKO-1,CC_IDCF,KAXIS)
-                CASE(-KAXIS); ICF=MESHES(NOM)%FCVAR(IIO  ,JJO  ,KKO  ,CC_IDCF,KAXIS)
-                END SELECT
-                IF (ICF > 0) THEN
-                   MESHES(NM)%OMESH(NOM)%NICF_R(1) = MESHES(NM)%OMESH(NOM)%NICF_R(1) + 1
-                   MESHES(NM)%OMESH(NOM)%NICF_R(2) = MESHES(NM)%OMESH(NOM)%NICF_R(2) + &
-                                                     MESHES(NOM)%CUT_FACE(ICF)%NFACE
-                ENDIF
-               ENDDO
-            ENDDO
-         ENDDO
-      ENDDO
-      CALL L2_ADD_GUARD_CF_REQUEST(NM,NOM,.FALSE.,0)
-      IF (MESHES(NM)%OMESH(NOM)%NICF_R(1)>0) THEN
-         M3 => MESHES(NM)%OMESH(NOM)
-         ALLOCATE(M3%ICF_UFFB_CF_R(4*M3%NICF_R(1)))
-         ! Dump cut-cell indexes on sending mesh NOM, whose info will be received:
-         NICF_R = 0
-         CALL POINT_TO_MESH(NM)
-         ! Loop over cut-cells:
-         EXTERNAL_WALL_LOOP_1B : DO IW=1,N_EXTERNAL_WALL_CELLS
-            WC=>WALL(IW)
-            IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE EXTERNAL_WALL_LOOP_1B
-            EWC=>EXTERNAL_WALL(IW); IF (EWC%NOM/=NOM) CYCLE EXTERNAL_WALL_LOOP_1B
-            BC=>BOUNDARY_COORD(WC%BC_INDEX)
-            DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
-               DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
-                  DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
-                   IIOF=IIO; JJOF=JJO; KKOF=KKO
-                   SELECT CASE(-BC%IOR)
-                   CASE( IAXIS); IIOF=IIO-1
-                   CASE( JAXIS); JJOF=JJO-1
-                   CASE( KAXIS); KKOF=KKO-1
-                   END SELECT
-                   ICF=MESHES(NOM)%FCVAR(IIOF,JJOF,KKOF,CC_IDCF,ABS(BC%IOR))
-                   IF (ICF > 0) THEN
-                      NICF_R = NICF_R + 1
-                      M3%ICF_UFFB_CF_R(4*NICF_R-3:4*NICF_R) = (/IIOF,JJOF,KKOF,ABS(BC%IOR)/) ! Note:ICF index refers to NOM mesh
-                   ENDIF
-                  ENDDO
-               ENDDO
-            ENDDO
-         ENDDO EXTERNAL_WALL_LOOP_1B
-         CALL L2_ADD_GUARD_CF_REQUEST(NM,NOM,.TRUE.,NICF_R)
-      ENDIF
-
-      ! Here allocate in M3 U_LNK,V_LNK,W_LNK if necessary:
-      ! Here test should be done to figure out if any of the faces exchanged is actually a linked face.
-      ! For now assume there are:
-      IF (MESHES(NM)%OMESH(NOM)%NIC_R > 0) THEN ! There are velocity variables to receive from NOM.
-         M3 => MESHES(NM)%OMESH(NOM)
-         M3%NLKF_R = (M3%I_MAX_R-M3%I_MIN_R+1)*(M3%J_MAX_R-M3%J_MIN_R+1)*(M3%K_MAX_R-M3%K_MIN_R+1)
-         IF(ALLOCATED(M3%U_LNK)) DEALLOCATE(M3%U_LNK)
-         IF(ALLOCATED(M3%V_LNK)) DEALLOCATE(M3%V_LNK)
-         IF(ALLOCATED(M3%W_LNK)) DEALLOCATE(M3%W_LNK)
-         ALLOCATE(M3%U_LNK(M3%I_MIN_R:M3%I_MAX_R,M3%J_MIN_R:M3%J_MAX_R,M3%K_MIN_R:M3%K_MAX_R))
-         ALLOCATE(M3%V_LNK(M3%I_MIN_R:M3%I_MAX_R,M3%J_MIN_R:M3%J_MAX_R,M3%K_MIN_R:M3%K_MAX_R))
-         ALLOCATE(M3%W_LNK(M3%I_MIN_R:M3%I_MAX_R,M3%J_MIN_R:M3%J_MAX_R,M3%K_MIN_R:M3%K_MAX_R))
-         M3%U_LNK = 0._EB; M3%V_LNK = 0._EB; M3%W_LNK = 0._EB
-      ENDIF
-      IF (MESHES(NM)%OMESH(NOM)%NIC_S>0) THEN
-         M3 => MESHES(NM)%OMESH(NOM)
-         M3%NLKF_S = (M3%I_MAX_S-M3%I_MIN_S+1)*(M3%J_MAX_S-M3%J_MIN_S+1)*(M3%K_MAX_S-M3%K_MIN_S+1)
       ENDIF
    ENDDO
 ENDDO
@@ -18979,112 +18762,6 @@ DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          ICC = M3%ICC_UNKZ_CC_R(ICC1)
          IF (ICC>=1 .AND. ICC<=N_MASK) M3%ICC_UNKZ_CC_R_MASK(ICC) = .TRUE.
       ENDDO
-   ENDDO
-ENDDO
-
-! Then exchange cut-face ICF values:
-N_REQ0 = 0
-DO NM=1,NMESHES
-   DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-      IF (N_MPI_PROCESSES>1 .AND. NM/=NOM .AND. PROCESS(NM)/=MY_RANK .AND. MESHES(NOM)%CONNECTED_MESH(NM)) THEN
-         M2 => MESHES(NOM)%OMESH(NM)
-         N_REQ0 = N_REQ0 + 1; CALL CHECK_REQ0_SIZE
-         CALL MPI_IRECV(M2%NICF_S(1),2,MPI_INTEGER,PROCESS(NM),NM,MPI_COMM_WORLD,REQ0(N_REQ0),IERR)
-      ENDIF
-   ENDDO
-ENDDO
-DO NM=1,NMESHES
-   CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)  ! This call orders the sending mesh by mesh.
-   IF (PROCESS(NM)/=MY_RANK) CYCLE
-   DO NOM=1,NMESHES
-      IF (NM/=NOM .AND. .NOT.MESHES(NM)%CONNECTED_MESH(NOM)) CYCLE
-      M3 => MESHES(NM)%OMESH(NOM)
-      IF (N_MPI_PROCESSES>1 .AND. NM/=NOM .AND. PROCESS(NOM)/=MY_RANK .AND. MESHES(NM)%CONNECTED_MESH(NOM)) THEN
-         N_REQ0 = N_REQ0 + 1; CALL CHECK_REQ0_SIZE
-         CALL MPI_ISEND(M3%NICF_R(1),2,MPI_INTEGER,PROCESS(NOM),NM,MPI_COMM_WORLD,REQ0(N_REQ0),IERR)
-      ELSE
-         ! 2D, NM/NOM, CONNECTED_MESH=F and Several MPI process run.
-         IF(.NOT. ALLOCATED(MESHES(NOM)%OMESH)) CYCLE
-         M2 => MESHES(NOM)%OMESH(NM)
-         M2%NICF_S(1:2) = M3%NICF_R(1:2)
-      ENDIF
-   ENDDO
-ENDDO
-IF ((N_REQ0>0) .AND. (N_MPI_PROCESSES>1)) CALL MPI_WAITALL(N_REQ0,REQ0(1:N_REQ0),MPI_STATUSES_IGNORE,IERR)
-
-! Now allocate buffers to send ICF information:
-DO NM=1,NMESHES
-   DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-      IF (MESHES(NOM)%OMESH(NM)%NICF_S(1)>0) THEN
-         M2 => MESHES(NOM)%OMESH(NM)
-         ALLOCATE(M2%ICF_UFFB_CF_S(4*M2%NICF_S(1)))
-      ENDIF
-   ENDDO
-ENDDO
-N_REQ0 = 0
-DO NM=1,NMESHES
-   DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-      M2 => MESHES(NOM)%OMESH(NM)
-      IF (N_MPI_PROCESSES>1 .AND. NM/=NOM .AND. PROCESS(NM)/=MY_RANK .AND. M2%NICF_S(1)>0) THEN
-         N_REQ0 = N_REQ0 + 1; CALL CHECK_REQ0_SIZE
-         CALL MPI_IRECV(M2%ICF_UFFB_CF_S(1),4*M2%NICF_S(1),MPI_INTEGER,PROCESS(NM),NM,MPI_COMM_WORLD,REQ0(N_REQ0),IERR)
-      ENDIF
-   ENDDO
-ENDDO
-DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-   DO NOM=1,NMESHES
-      M3 => MESHES(NM)%OMESH(NOM)
-      IF (M3%NICF_R(1)<1) CYCLE
-      IF (PROCESS(NOM)/=MY_RANK) THEN
-         N_REQ0 = N_REQ0 + 1; CALL CHECK_REQ0_SIZE
-         CALL MPI_ISEND(M3%ICF_UFFB_CF_R(1),4*M3%NICF_R(1),MPI_INTEGER,PROCESS(NOM),NM,MPI_COMM_WORLD,REQ0(N_REQ0),IERR)
-      ELSE
-         M2 => MESHES(NOM)%OMESH(NM)
-         M2%ICF_UFFB_CF_S(1:4*M2%NICF_S(1)) = M3%ICF_UFFB_CF_R(1:4*M3%NICF_R(1))
-         ! Here write the ICF into ICF_UFFB_CF_S for OMESH NM:
-         M => MESHES(NOM); DO ICF=1,M2%NICF_S(1)
-            IIOF= M2%ICF_UFFB_CF_S(4*ICF-3)
-            JJOF= M2%ICF_UFFB_CF_S(4*ICF-2)
-            KKOF= M2%ICF_UFFB_CF_S(4*ICF-1)
-            X1AXIS=M2%ICF_UFFB_CF_S(4*ICF)
-            M2%ICF_UFFB_CF_S(ICF) = M%FCVAR(IIOF,JJOF,KKOF,CC_IDCF,X1AXIS)
-         ENDDO
-         ALLOCATE(INT1D(1:M2%NICF_S(1))); INT1D(1:M2%NICF_S(1)) = M2%ICF_UFFB_CF_S(1:M2%NICF_S(1))
-         CALL MOVE_ALLOC(FROM=INT1D,TO=M2%ICF_UFFB_CF_S)
-      ENDIF
-   ENDDO
-ENDDO
-IF ((N_REQ0>0) .AND. (N_MPI_PROCESSES>1)) CALL MPI_WAITALL(N_REQ0,REQ0(1:N_REQ0),MPI_STATUSES_IGNORE,IERR)
-DO NM=1,NMESHES
-   DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-      M2 => MESHES(NOM)%OMESH(NM)
-      IF (N_MPI_PROCESSES>1 .AND. NM/=NOM .AND. PROCESS(NM)/=MY_RANK .AND. M2%NICF_S(1)>0) THEN
-         ! Here write the ICF into ICF_UFFB_CF_S for OMESH NM:
-         M => MESHES(NOM); DO ICF=1,M2%NICF_S(1)
-            IIOF= M2%ICF_UFFB_CF_S(4*ICF-3)
-            JJOF= M2%ICF_UFFB_CF_S(4*ICF-2)
-            KKOF= M2%ICF_UFFB_CF_S(4*ICF-1)
-            X1AXIS=M2%ICF_UFFB_CF_S(4*ICF)
-            M2%ICF_UFFB_CF_S(ICF) = M%FCVAR(IIOF,JJOF,KKOF,CC_IDCF,X1AXIS)
-         ENDDO
-         ALLOCATE(INT1D(1:M2%NICF_S(1))); INT1D(1:M2%NICF_S(1)) = M2%ICF_UFFB_CF_S(1:M2%NICF_S(1))
-         CALL MOVE_ALLOC(FROM=INT1D,TO=M2%ICF_UFFB_CF_S)
-      ENDIF
-   ENDDO
-ENDDO
-DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-   DO NOM=1,NMESHES
-      M3 => MESHES(NM)%OMESH(NOM)
-      IF (M3%NICF_R(1)<1) CYCLE
-      M => MESHES(NOM); DO ICF=1,M3%NICF_R(1)
-         IIOF= M3%ICF_UFFB_CF_R(4*ICF-3)
-         JJOF= M3%ICF_UFFB_CF_R(4*ICF-2)
-         KKOF= M3%ICF_UFFB_CF_R(4*ICF-1)
-         X1AXIS=M3%ICF_UFFB_CF_R(4*ICF)
-         M3%ICF_UFFB_CF_R(ICF) = M%FCVAR(IIOF,JJOF,KKOF,CC_IDCF,X1AXIS)
-      ENDDO
-      ALLOCATE(INT1D(1:M3%NICF_R(1))); INT1D(1:M3%NICF_R(1)) = M3%ICF_UFFB_CF_R(1:M3%NICF_R(1))
-      CALL MOVE_ALLOC(FROM=INT1D,TO=M3%ICF_UFFB_CF_R)
    ENDDO
 ENDDO
 
