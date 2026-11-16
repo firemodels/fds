@@ -1529,12 +1529,34 @@ TYPE CC_FACE_TYPE
    INTEGER,  ALLOCATABLE, DIMENSION(:,:,:) :: JDH       !< (2,2,1:N) cached pressure-matrix column slots.
 END TYPE CC_FACE_TYPE
 
+!> \brief Non-orthogonal correction of the two-point scalar fluxes on cut and RC faces (CC_SET_SKEW_ROWS, per stage
+!> CC_SKEW_GRADIENTS). Listed rows: t = d RDN - n is not zero. Gradient slots: 0 zero, 1:NG computed here, NG+1:NG+NGR
+!> received over the guard pairing. Value points 1:NVC are FV%CV rows (GCELL VIG), NVC+1:NV Cartesian cells (VIJK).
+
+TYPE CC_SKEW_TYPE
+   INTEGER :: N=0,NG=0,NGR=0,NVC=0,NV=0
+   INTEGER,  ALLOCATABLE, DIMENSION(:)     :: ROW  !< (1:FACE%N_INT) list position of a FACE row, 0 if not listed.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)   :: GS   !< (1:2,1:N) gradient slots of the owner and neighbor CVs.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: TW   !< (IAXIS:KAXIS,1:2,1:N) (1-W) t and W t, positive axis.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)     :: SRC  !< Slot of each guard source of this mesh (GD_SC, then GD_SR).
+   INTEGER,  ALLOCATABLE, DIMENSION(:)     :: VIG  !< (1:NVC) GCELL of a value point.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)   :: VIJK !< (IAXIS:KAXIS,NVC+1:NV) Cartesian value point.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)     :: SELF !< (1:NG) value point of the CV.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)     :: PTR  !< (1:NG+1) CSR offsets into SP and W.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)     :: SP   !< Value point of each sample.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)   :: W    !< (IAXIS:KAXIS,:) least-squares weights of the samples.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)   :: V    !< (0:N_TOTAL_SCALARS,1:NV) T and Z at the value points.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: G    !< (IAXIS:KAXIS,0:N_TOTAL_SCALARS,0:NG+NGR) gradients of T and Z.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)   :: C    !< (0:N_TOTAL_SCALARS,0:N) t.g_f on the positive axis; column 0 is 0.
+END TYPE CC_SKEW_TYPE
+
 !> \brief Mesh-owned finite-volume container for the unstructured active region.
 
 TYPE CC_FV_TYPE
    TYPE(CC_GCELL_TYPE) :: GCELL
    TYPE(CC_CV_TYPE)    :: CV
    TYPE(CC_FACE_TYPE)  :: FACE
+   TYPE(CC_SKEW_TYPE)  :: SK
 END TYPE CC_FV_TYPE
 
 !> \brief Phase-5 CV merge proposal SoA (ALLGATHER).

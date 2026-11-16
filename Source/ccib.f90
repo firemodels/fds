@@ -32,7 +32,7 @@ USE PRECISION_PARAMETERS
 USE GLOBAL_CONSTANTS
 USE MESH_POINTERS
 USE MESH_VARIABLES, ONLY: MESHES, MESH_TYPE
-USE TYPES, ONLY: CC_FV_TYPE, CC_FACE_TYPE
+USE TYPES, ONLY: CC_FV_TYPE, CC_FACE_TYPE, CC_SKEW_TYPE
 USE COMP_FUNCTIONS, ONLY: CURRENT_TIME, GET_FILE_NUMBER
 USE MATH_FUNCTIONS, ONLY: GET_SCALAR_FACE_VALUE
 USE PHYSICAL_FUNCTIONS, ONLY: GET_SENSIBLE_ENTHALPY
@@ -216,10 +216,11 @@ INTEGER, SAVE, ALLOCATABLE, DIMENSION(:) :: TH_OSLOT
 !< this process, the GD_NREM columns for other processes first (to GD_SDEST). Per source mesh (pointers GD_PC, GD_PR):
 !< its cut pieces GD_SC = (GCELL, C) and gas cells GD_SR = (I,J,K, C). Per guard mesh (GD_PDR, GD_PDL): the guard
 !< GCELLs GD_DR, GD_DL = (GCELL, C) that take column C of the received records, or of the send buffer (same process).
-!< GD_PEER: the processes with guard traffic either way.
+!< GD_XR, GD_XL (GD_PXR, GD_PXL) = (-FACE row, C): a remote RC face, whose cell across takes only the gradients of the
+!< skew correction (CC_SKEW_GRADIENTS). GD_PEER: the processes with guard traffic either way.
 INTEGER, SAVE :: GD_NREM=0,GD_NS=0
-INTEGER, SAVE, ALLOCATABLE, DIMENSION(:) :: GD_SDEST,GD_PEER,GD_PC,GD_PR,GD_PDR,GD_PDL
-INTEGER, SAVE, ALLOCATABLE, DIMENSION(:,:) :: GD_SC,GD_SR,GD_DR,GD_DL
+INTEGER, SAVE, ALLOCATABLE, DIMENSION(:) :: GD_SDEST,GD_PEER,GD_PC,GD_PR,GD_PDR,GD_PDL,GD_PXR,GD_PXL
+INTEGER, SAVE, ALLOCATABLE, DIMENSION(:,:) :: GD_SC,GD_SR,GD_DR,GD_DL,GD_XR,GD_XL
 !< Per mesh, the members of its link groups that it holds, in one global order (axis, x, y, z): M(1)=1-3 (Cartesian
 !< face, axis) or 4 (own cut piece), M(2)=link number, M(3:5)=I,J,K or ICF,JCF, M(6)=1 when this mesh counts the
 !< member in the cross-mesh sum; A=area. XG(IL)=this rank's slot for link IL, 0 when one mesh holds it all.
@@ -4275,15 +4276,17 @@ SUBROUTINE CC_SET_GUARD_ROWS
 ! what one mesh sees. Set once: each guard piece sends a request to its owner mesh's process (a same-process owner
 ! answers at once), which picks the source and echoes the request in the order it will send the states. Request:
 ! owner mesh, the cells IIO_MIN,IIO_MAX,JJO_MIN,JJO_MAX,KKO_MIN,KKO_MAX, the piece's centroid, the ghost cell's
-! centre, NM, IG, the process.
+! centre, NM, IG, the process. The regular cell across a remote RC face asks the same way, with its centre and -(FACE
+! row): it takes no state, only the skew-correction gradient of its source (CC_SKEW_GRADIENTS).
 
-INTEGER :: NM,IW,ICC,JCC,IG,L,N,NS,NR,NB,NL,NSC,NSR,NDL,KND,P,IX(IAXIS:KAXIS)
+INTEGER :: NM,IW,ICC,JCC,IG,L,N,NS,NR,NB,NL,NSC,NSR,NDL,KND,P,IX(IAXIS:KAXIS),IF_
 INTEGER, ALLOCATABLE :: DEST(:),SC(:,:),SR(:,:),DL(:,:),DR(:,:)
 REAL(EB) :: Q(16)
 REAL(EB), ALLOCATABLE :: SB(:,:),RB(:,:),LB(:,:)
 TYPE(MESH_TYPE), POINTER :: M
 
-N = SUM(MESHES(LOWER_MESH_INDEX:UPPER_MESH_INDEX)%FV%GCELL%N_CUT_GHOST)
+N = SUM(MESHES(LOWER_MESH_INDEX:UPPER_MESH_INDEX)%FV%GCELL%N_CUT_GHOST)+ &
+    SUM(MESHES(LOWER_MESH_INDEX:UPPER_MESH_INDEX)%FV%FACE%N_INT)
 ALLOCATE(SB(16,MAX(1,N)),LB(16,MAX(1,N)),DEST(MAX(1,N)))
 NS = 0; NL = 0
 DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
@@ -4305,6 +4308,21 @@ DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             NS = NS+1; SB(:,NS) = Q; DEST(NS) = PROCESS(EWC%NOM)
          ENDIF
       ENDDO
+   ENDDO
+   DO IF_=1,M%FV%FACE%N_INT
+      IW = M%FV%FACE%IWC(IF_)
+      IF (M%FV%FACE%KIND(IF_)/=CC_FACE_KIND_REMOTE .OR. M%FV%FACE%FTYPE(IF_)/=CC_FTYPE_RCGAS .OR. &
+          M%FV%FACE%NBR_GCELL(IF_)>0 .OR. IW<1) CYCLE
+      IF (M%WALL(IW)%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE
+      BC => M%BOUNDARY_COORD(M%WALL(IW)%BC_INDEX); EWC => M%EXTERNAL_WALL(IW)
+      Q = (/REAL(EWC%NOM,EB),REAL(EWC%IIO_MIN,EB),REAL(EWC%IIO_MAX,EB),REAL(EWC%JJO_MIN,EB),REAL(EWC%JJO_MAX,EB), &
+            REAL(EWC%KKO_MIN,EB),REAL(EWC%KKO_MAX,EB),M%XC(BC%II),M%YC(BC%JJ),M%ZC(BC%KK), &
+            M%XC(BC%II),M%YC(BC%JJ),M%ZC(BC%KK),REAL(NM,EB),REAL(-IF_,EB),REAL(MY_RANK,EB)/)
+      IF (PROCESS(EWC%NOM)==MY_RANK) THEN
+         NL = NL+1; LB(:,NL) = Q
+      ELSE
+         NS = NS+1; SB(:,NS) = Q; DEST(NS) = PROCESS(EWC%NOM)
+      ENDIF
    ENDDO
 ENDDO
 CALL CC_GRID_SEAM_EXCHANGE(16,NS,SB,DEST,NR,RB)
@@ -4342,7 +4360,9 @@ DO L=1,NB
    DR(:,L) = (/NINT(RB(1,L)),NINT(RB(2,L)),L/)
 ENDDO
 CALL GROUP(SC(:,1:NSC),GD_SC,GD_PC); CALL GROUP(SR(:,1:NSR),GD_SR,GD_PR)
-CALL GROUP(DR,GD_DR,GD_PDR); CALL GROUP(DL(:,1:NDL),GD_DL,GD_PDL)
+CALL GROUP(DR(:,PACK([(L,L=1,NB)],DR(2,:)>0)),GD_DR,GD_PDR); CALL GROUP(DR(:,PACK([(L,L=1,NB)],DR(2,:)<0)),GD_XR,GD_PXR)
+CALL GROUP(DL(:,PACK([(L,L=1,NDL)],DL(2,1:NDL)>0)),GD_DL,GD_PDL)
+CALL GROUP(DL(:,PACK([(L,L=1,NDL)],DL(2,1:NDL)<0)),GD_XL,GD_PXL)
 
 CONTAINS
 
@@ -4483,6 +4503,420 @@ ENDDO
 END SUBROUTINE PUT_ROWS
 
 END SUBROUTINE FILL_GUARD_ROWS
+
+
+! ---------------------------- CC_SET_SKEW_ROWS -------------------------------------
+
+SUBROUTINE CC_SET_SKEW_ROWS
+
+! Non-orthogonal correction of the two-point flux of the gas walks of CC_CONDUCTION_HEAT_FLUX and
+! CC_DIFFUSIVE_MASS_FLUXES on cut and RC faces: k A [(phi_N-phi_O) RDN - t.g_f], t = d RDN - n (d from X_FACE_REF to
+! XN_FACE_REF, n = NVEC), g_f = (1-W) g_O + W g_N (W = INTERP_W), g the least-squares gradient of the CV. Set once, per
+! mesh: the gradient CVs, each of this mesh only (no member on another), those that are sources of guard rows first
+! (their gradients go over the guard pairing, CC_SKEW_GRADIENTS) and then those of the listed rows; the rows where d
+! has a part along the face (between two Cartesian centres t = 0), whose two CVs have a gradient here or in a guard
+! row, with (1-W) t and W t on the positive axis; the stencil of each CV: the other points of its gas faces and the
+! values the walks read there, weights 1/|d|^2, the minimum-norm fit where they do not span a direction.
+
+TYPE MAP_TYPE
+   INTEGER, ALLOCATABLE :: S(:),GR(:),XR(:)
+   LOGICAL, ALLOCATABLE :: OK(:)
+END TYPE MAP_TYPE
+TYPE(MAP_TYPE), ALLOCATABLE :: MP(:)
+INTEGER :: NM,IF_,L,K,S,E,C,J,AX,NPC,NPR,KO,KN
+INTEGER, ALLOCATABLE :: GS(:,:),CVK(:),CNT(:),PIG(:),PIJK(:,:,:),VR(:,:)
+REAL(EB) :: DV(IAXIS:KAXIS),TP(IAXIS:KAXIS),A(3,3),PM(3,3)
+REAL(EB), ALLOCATABLE :: TW(:,:,:)
+TYPE(MESH_TYPE), POINTER :: M
+TYPE(CC_SKEW_TYPE), POINTER :: SK
+
+! Guard pairing: a slot for each source of this mesh (0: no gradient), a receive slot for each guard row or remote RC
+! face; the receive slots learn which sources have a gradient.
+ALLOCATE(MP(LOWER_MESH_INDEX:UPPER_MESH_INDEX))
+DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   M => MESHES(NM); SK => M%FV%SK
+   ALLOCATE(MP(NM)%S(M%FV%CV%N),MP(NM)%GR(M%FV%GCELL%N),MP(NM)%XR(M%FV%FACE%N_INT))
+   MP(NM)%S = 0; MP(NM)%GR = 0; MP(NM)%XR = 0
+   ALLOCATE(PIJK(0:M%IBP1,0:M%JBP1,0:M%KBP1)); PIJK = 0
+   DO L=1,M%FV%GCELL%N_INT
+      IF (M%FV%GCELL%CELL_TYPE(L)/=CC_GCELL_CUT) PIJK(M%FV%GCELL%IJK(IAXIS,L),M%FV%GCELL%IJK(JAXIS,L), &
+                                                     M%FV%GCELL%IJK(KAXIS,L)) = L
+   ENDDO
+   ALLOCATE(SK%SRC(GD_PC(NM+1)-GD_PC(NM)+GD_PR(NM+1)-GD_PR(NM)))
+   DO L=GD_PC(NM),GD_PC(NM+1)-1
+      SK%SRC(L-GD_PC(NM)+1) = SLOT(GCELL_CV(GD_SC(1,L)))
+   ENDDO
+   DO L=GD_PR(NM),GD_PR(NM+1)-1
+      SK%SRC(GD_PC(NM+1)-GD_PC(NM)+L-GD_PR(NM)+1) = SLOT(GCELL_CV(PIJK(GD_SR(IAXIS,L),GD_SR(JAXIS,L),GD_SR(KAXIS,L))))
+   ENDDO
+   DEALLOCATE(PIJK)
+   DO L=GD_PDR(NM),GD_PDR(NM+1)-1
+      SK%NGR = SK%NGR+1; MP(NM)%GR(GD_DR(1,L)) = SK%NGR
+   ENDDO
+   DO L=GD_PDL(NM),GD_PDL(NM+1)-1
+      SK%NGR = SK%NGR+1; MP(NM)%GR(GD_DL(1,L)) = SK%NGR
+   ENDDO
+   DO L=GD_PXR(NM),GD_PXR(NM+1)-1
+      SK%NGR = SK%NGR+1; MP(NM)%XR(-GD_XR(1,L)) = SK%NGR
+   ENDDO
+   DO L=GD_PXL(NM),GD_PXL(NM+1)-1
+      SK%NGR = SK%NGR+1; MP(NM)%XR(-GD_XL(1,L)) = SK%NGR
+   ENDDO
+   ALLOCATE(SK%G(IAXIS:KAXIS,0:0,0:SK%NG+SK%NGR)); SK%G = 0._EB; SK%G(:,:,1:SK%NG) = 1._EB
+ENDDO
+CALL SKEW_GUARD_EXCHANGE(0)
+DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   SK => MESHES(NM)%FV%SK
+   MP(NM)%OK = SK%G(IAXIS,0,SK%NG+1:SK%NG+SK%NGR)>0._EB
+   DEALLOCATE(SK%G)
+ENDDO
+
+DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   M => MESHES(NM); SK => M%FV%SK
+
+   ! Listed rows. A remote neighbor is a guard row (or the cell across a remote RC face): slot -(receive slot).
+   ALLOCATE(SK%ROW(M%FV%FACE%N_INT),GS(2,M%FV%FACE%N_INT),TW(IAXIS:KAXIS,2,M%FV%FACE%N_INT))
+   SK%ROW = 0
+   DO IF_=1,M%FV%FACE%N_INT
+      IF (.NOT.GAS_ROW(IF_) .OR. M%FV%FACE%FTYPE(IF_)==CC_FTYPE_RGGAS .OR. M%FV%FACE%RDN(IF_)<=0._EB) CYCLE
+      AX = M%FV%FACE%X1AXIS(IF_)
+      DV = M%FV%FACE%XN_FACE_REF(IAXIS:KAXIS,IF_)-M%FV%FACE%X_FACE_REF(IAXIS:KAXIS,IF_)
+      TP = DV; TP(AX) = 0._EB
+      IF (ALL(TP==0._EB) .OR. GCELL_CV(M%FV%FACE%OWNER_GCELL(IF_))==0) CYCLE
+      IF (M%FV%FACE%KIND(IF_)==CC_FACE_KIND_REMOTE) THEN
+         IF (M%FV%FACE%NBR_GCELL(IF_)>0) THEN; J = MP(NM)%GR(M%FV%FACE%NBR_GCELL(IF_)); ELSE; J = MP(NM)%XR(IF_); ENDIF
+         IF (J==0) CYCLE
+         IF (.NOT.MP(NM)%OK(J)) CYCLE
+         KN = -J
+      ELSE
+         IF (GCELL_CV(M%FV%FACE%NBR_GCELL(IF_))==0) CYCLE
+         KN = SLOT(GCELL_CV(M%FV%FACE%NBR_GCELL(IF_)))
+      ENDIF
+      KO = SLOT(GCELL_CV(M%FV%FACE%OWNER_GCELL(IF_)))
+      SK%N = SK%N+1; SK%ROW(IF_) = SK%N; GS(:,SK%N) = (/KO,KN/)
+      TP = SIGN(1._EB,M%FV%FACE%NVEC(AX,IF_))*(DV*M%FV%FACE%RDN(IF_)-M%FV%FACE%NVEC(IAXIS:KAXIS,IF_))
+      TW(:,1,SK%N) = (1._EB-M%FV%FACE%INTERP_W(IF_))*TP
+      TW(:,2,SK%N) = M%FV%FACE%INTERP_W(IF_)*TP
+   ENDDO
+   ALLOCATE(SK%GS(2,SK%N),SK%TW(IAXIS:KAXIS,2,SK%N))
+   SK%GS = GS(:,1:SK%N); SK%TW = TW(:,:,1:SK%N)
+   WHERE (SK%GS<0) SK%GS = SK%NG-SK%GS
+   DEALLOCATE(GS,TW)
+
+   ! Stencils. Value points: FV%CV rows of cut GCELLs (guard pieces included), then Cartesian cells.
+   ALLOCATE(CVK(SK%NG),CNT(SK%NG),SK%PTR(SK%NG+1),SK%SELF(SK%NG))
+   DO C=1,M%FV%CV%N
+      IF (MP(NM)%S(C)>0) CVK(MP(NM)%S(C)) = C
+   ENDDO
+   CNT = 0
+   DO IF_=1,M%FV%FACE%N_INT
+      IF (.NOT.GAS_ROW(IF_)) CYCLE
+      DO E=1,2
+         K = SIDE_SLOT(IF_,E); IF (K>0) CNT(K) = CNT(K)+1
+      ENDDO
+   ENDDO
+   SK%PTR(1) = 1
+   DO K=1,SK%NG
+      SK%PTR(K+1) = SK%PTR(K)+CNT(K)
+   ENDDO
+   K = SK%PTR(SK%NG+1)-1
+   ALLOCATE(SK%SP(K),SK%W(IAXIS:KAXIS,K))
+   ALLOCATE(PIG(M%FV%GCELL%N),PIJK(0:M%IBP1,0:M%JBP1,0:M%KBP1),VR(IAXIS:KAXIS,K+SK%NG))
+   PIG = 0; PIJK = 0; NPC = 0; NPR = 0
+   CNT = SK%PTR(1:SK%NG)
+   DO IF_=1,M%FV%FACE%N_INT
+      IF (.NOT.GAS_ROW(IF_)) CYCLE
+      DV = M%FV%FACE%XN_FACE_REF(IAXIS:KAXIS,IF_)-M%FV%FACE%X_FACE_REF(IAXIS:KAXIS,IF_)
+      DO E=1,2
+         K = SIDE_SLOT(IF_,E); IF (K<1) CYCLE
+         S = CNT(K); CNT(K) = S+1
+         SK%SP(S) = SIDE_POINT(IF_,3-E); SK%W(:,S) = REAL(3-2*E,EB)*DV
+      ENDDO
+   ENDDO
+   DO K=1,SK%NG
+      C = CVK(K)
+      IF (M%FV%CV%CELL_TYPE(C)==CC_GCELL_CUT) THEN
+         SK%SELF(K) = CV_POINT(C)
+      ELSE
+         SK%SELF(K) = CART_POINT(M%FV%CV%IJK(IAXIS,C),M%FV%CV%IJK(JAXIS,C),M%FV%CV%IJK(KAXIS,C))
+      ENDIF
+      ! Weighted least squares: g = (sum d d^T/|d|^2)^+ sum d (phi_s-phi_c)/|d|^2; W holds the weights of phi_s-phi_c.
+      A = 0._EB
+      DO S=SK%PTR(K),SK%PTR(K+1)-1
+         DV = SK%W(:,S); SK%W(:,S) = 0._EB
+         IF (ALL(DV==0._EB)) CYCLE
+         SK%W(:,S) = DV/DOT_PRODUCT(DV,DV)
+         A = A+SPREAD(SK%W(:,S),2,3)*SPREAD(DV,1,3)
+      ENDDO
+      CALL PINV3(A,PM)
+      DO S=SK%PTR(K),SK%PTR(K+1)-1
+         SK%W(:,S) = MATMUL(PM,SK%W(:,S))
+      ENDDO
+   ENDDO
+   SK%NVC = NPC; SK%NV = NPC+NPR
+   ALLOCATE(SK%VIG(NPC),SK%VIJK(IAXIS:KAXIS,NPC+1:SK%NV))
+   DO C=1,M%FV%GCELL%N
+      IF (PIG(C)>0) SK%VIG(PIG(C)) = C
+   ENDDO
+   SK%VIJK = VR(:,1:NPR)
+   WHERE (SK%SP<0) SK%SP = NPC-SK%SP
+   WHERE (SK%SELF<0) SK%SELF = NPC-SK%SELF
+   ALLOCATE(SK%V(0:N_TOTAL_SCALARS,SK%NV),SK%G(IAXIS:KAXIS,0:N_TOTAL_SCALARS,0:SK%NG+SK%NGR))
+   ALLOCATE(SK%C(0:N_TOTAL_SCALARS,0:SK%N))
+   SK%G = 0._EB; SK%C = 0._EB
+   DEALLOCATE(CVK,CNT,PIG,PIJK,VR)
+ENDDO
+
+CONTAINS
+
+LOGICAL FUNCTION GAS_ROW(IF_)
+! A face between two gas CVs that the gas walks compute (their wall, RC and cut-face tests), or a remote face.
+INTEGER, INTENT(IN) :: IF_
+INTEGER :: IW
+GAS_ROW = .FALSE.
+IF (M%FV%FACE%ROLE(IF_)/=CC_FACE_ROLE_EXTERNAL) RETURN
+SELECT CASE(M%FV%FACE%KIND(IF_))
+CASE(CC_FACE_KIND_GAS,CC_FACE_KIND_REMOTE,CC_FACE_KIND_COUPLING)
+CASE DEFAULT
+   RETURN
+END SELECT
+IW = M%FV%FACE%IWC(IF_)
+IF (IW>0) THEN
+   IF (M%WALL(IW)%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) RETURN
+ENDIF
+SELECT CASE(M%FV%FACE%FTYPE(IF_))
+CASE(CC_FTYPE_RGGAS)
+   GAS_ROW = .TRUE.
+CASE(CC_FTYPE_RCGAS)
+   GAS_ROW = M%FV%FACE%SRC_IRC(IF_)>=1 .AND. M%FV%FACE%SRC_IRC(IF_)<=M%CC_NRCFACE_Z
+CASE(CC_FTYPE_CFGAS)
+   IF (M%FV%FACE%SRC_ICF(IF_)<1 .OR. M%FV%FACE%SRC_ICF(IF_)>M%N_CUTFACE_MESH) RETURN
+   GAS_ROW = M%CUT_FACE(M%FV%FACE%SRC_ICF(IF_))%STATUS==CC_GASPHASE
+END SELECT
+END FUNCTION GAS_ROW
+
+INTEGER FUNCTION GCELL_CV(IG)
+! The CV of GCELL IG when this mesh holds all of it (active, every member here), else 0.
+INTEGER, INTENT(IN) :: IG
+INTEGER :: IC
+GCELL_CV = 0
+IF (IG<1 .OR. IG>M%FV%GCELL%N_INT) RETURN
+IF (M%FV%CV%GCELL_TO_CV_NM(IG)/=NM) RETURN
+IC = M%FV%CV%GCELL_TO_CV(IG)
+IF (M%FV%CV%N_MEMBER(IC)<1) RETURN
+IF (ANY(M%FV%CV%MEMBER_NM(1:M%FV%CV%N_MEMBER(IC),IC)/=NM)) RETURN
+GCELL_CV = IC
+END FUNCTION GCELL_CV
+
+INTEGER FUNCTION SLOT(IC)
+! Gradient slot of CV IC (a new one if it has none); 0 for IC = 0.
+INTEGER, INTENT(IN) :: IC
+SLOT = 0
+IF (IC<1) RETURN
+IF (MP(NM)%S(IC)==0) THEN
+   SK%NG = SK%NG+1; MP(NM)%S(IC) = SK%NG
+ENDIF
+SLOT = MP(NM)%S(IC)
+END FUNCTION SLOT
+
+INTEGER FUNCTION SIDE_SLOT(IF_,E)
+! Gradient slot of the CV on side E (1 owner, 2 neighbor) of row IF_ when this mesh computes it, else 0.
+INTEGER, INTENT(IN) :: IF_,E
+INTEGER :: ENM,ECV
+SIDE_SLOT = 0
+IF (E==1) THEN
+   ENM = M%FV%FACE%OWNER_CV_NM(IF_); ECV = M%FV%FACE%OWNER_CV(IF_)
+ELSE
+   ENM = M%FV%FACE%NBR_CV_NM(IF_); ECV = M%FV%FACE%NBR_CV(IF_)
+ENDIF
+IF (ENM/=NM .OR. ECV<1 .OR. ECV>M%FV%CV%N) RETURN
+SIDE_SLOT = MP(NM)%S(ECV)
+END FUNCTION SIDE_SLOT
+
+INTEGER FUNCTION SIDE_POINT(IF_,E)
+! The value the walks read on side E of row IF_: the FV%CV row of a cut GCELL, else the Cartesian cell. With no GCELL,
+! the cell across the face; if it is cut, its active piece nearest the face (a guard piece across a mesh seam).
+INTEGER, INTENT(IN) :: IF_,E
+INTEGER :: IG,I,J,K,ICC,JCC
+REAL(EB) :: D,DMIN
+IF (E==1) THEN; IG = M%FV%FACE%OWNER_GCELL(IF_); ELSE; IG = M%FV%FACE%NBR_GCELL(IF_); ENDIF
+IF (IG>=1 .AND. IG<=M%FV%GCELL%N) THEN
+   IF (M%FV%GCELL%CELL_TYPE(IG)==CC_GCELL_CUT) THEN
+      SIDE_POINT = CV_POINT(IG)
+   ELSE
+      SIDE_POINT = CART_POINT(M%FV%GCELL%IJK(IAXIS,IG),M%FV%GCELL%IJK(JAXIS,IG),M%FV%GCELL%IJK(KAXIS,IG))
+   ENDIF
+   RETURN
+ENDIF
+I = M%FV%FACE%IJK_FACE(IAXIS,IF_); J = M%FV%FACE%IJK_FACE(JAXIS,IF_); K = M%FV%FACE%IJK_FACE(KAXIS,IF_)
+IF ((E==2) .EQV. (M%FV%FACE%NVEC(M%FV%FACE%X1AXIS(IF_),IF_)>=0._EB)) THEN
+   SELECT CASE(M%FV%FACE%X1AXIS(IF_))
+   CASE(IAXIS); I = I+1
+   CASE(JAXIS); J = J+1
+   CASE(KAXIS); K = K+1
+   END SELECT
+ENDIF
+SIDE_POINT = CART_POINT(I,J,K)
+IF (M%CCVAR(I,J,K,CC_CGSC)/=CC_CUTCFE) RETURN
+ICC = M%CCVAR(I,J,K,CC_IDCC); IF (ICC<1) RETURN
+DMIN = HUGE(DMIN)
+DO JCC=1,M%CUT_CELL(ICC)%NCELL
+   IG = M%CUT_CELL(ICC)%IG(JCC); IF (IG<1) CYCLE
+   D = NORM2(M%CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,JCC)-M%FV%FACE%XYZCEN(IAXIS:KAXIS,IF_))
+   IF (D<DMIN) THEN
+      DMIN = D; SIDE_POINT = CV_POINT(IG)
+   ENDIF
+ENDDO
+END FUNCTION SIDE_POINT
+
+INTEGER FUNCTION CV_POINT(IG)
+INTEGER, INTENT(IN) :: IG
+IF (PIG(IG)==0) THEN
+   NPC = NPC+1; PIG(IG) = NPC
+ENDIF
+CV_POINT = PIG(IG)
+END FUNCTION CV_POINT
+
+INTEGER FUNCTION CART_POINT(I,J,K)
+! Negative until the CV points are counted.
+INTEGER, INTENT(IN) :: I,J,K
+IF (PIJK(I,J,K)==0) THEN
+   NPR = NPR+1; PIJK(I,J,K) = -NPR; VR(:,NPR) = (/I,J,K/)
+ENDIF
+CART_POINT = PIJK(I,J,K)
+END FUNCTION CART_POINT
+
+END SUBROUTINE CC_SET_SKEW_ROWS
+
+
+SUBROUTINE PINV3(A,P)
+! Pseudo-inverse of a symmetric positive semidefinite 3 x 3 matrix (Jacobi rotations). Eigenvalues below 1E-12 of the
+! largest count as zero: the least-squares gradient has no component along those directions (minimum norm).
+REAL(EB), INTENT(IN) :: A(3,3)
+REAL(EB), INTENT(OUT) :: P(3,3)
+INTEGER :: SWEEP,L,IP,IQ,IR
+INTEGER, PARAMETER :: PQ(2,3) = RESHAPE((/1,2,1,3,2,3/),(/2,3/))
+REAL(EB) :: S(3,3),V(3,3),TH,T,C,SN,TAU,G,H,DMAX
+S = A; V = 0._EB; V(1,1) = 1._EB; V(2,2) = 1._EB; V(3,3) = 1._EB
+DO SWEEP=1,50
+   IF (ABS(S(1,2))+ABS(S(1,3))+ABS(S(2,3))==0._EB) EXIT
+   DO L=1,3
+      IP = PQ(1,L); IQ = PQ(2,L); IR = 6-IP-IQ
+      IF (ABS(S(IP,IQ))<=1.E-3_EB*EPSILON(1._EB)*(ABS(S(IP,IP))+ABS(S(IQ,IQ)))) THEN
+         S(IP,IQ) = 0._EB; S(IQ,IP) = 0._EB; CYCLE
+      ENDIF
+      TH = 0.5_EB*(S(IQ,IQ)-S(IP,IP))/S(IP,IQ)
+      T = SIGN(1._EB,TH)/(ABS(TH)+SQRT(TH**2+1._EB))
+      C = 1._EB/SQRT(T**2+1._EB); SN = T*C; TAU = SN/(1._EB+C)
+      H = T*S(IP,IQ)
+      S(IP,IP) = S(IP,IP)-H; S(IQ,IQ) = S(IQ,IQ)+H; S(IP,IQ) = 0._EB; S(IQ,IP) = 0._EB
+      G = S(IR,IP); H = S(IR,IQ)
+      S(IR,IP) = G-SN*(H+G*TAU); S(IP,IR) = S(IR,IP)
+      S(IR,IQ) = H+SN*(G-H*TAU); S(IQ,IR) = S(IR,IQ)
+      DO IR=1,3
+         G = V(IR,IP); H = V(IR,IQ)
+         V(IR,IP) = G-SN*(H+G*TAU); V(IR,IQ) = H+SN*(G-H*TAU)
+      ENDDO
+   ENDDO
+ENDDO
+P = 0._EB
+DMAX = MAX(S(1,1),S(2,2),S(3,3))
+DO L=1,3
+   IF (DMAX>0._EB .AND. S(L,L)>1.E-12_EB*DMAX) P = P+SPREAD(V(:,L),2,3)*SPREAD(V(:,L),1,3)/S(L,L)
+ENDDO
+END SUBROUTINE PINV3
+
+
+! --------------------------- CC_SKEW_GRADIENTS -------------------------------------
+
+SUBROUTINE CC_SKEW_GRADIENTS
+
+! Per stage, before the scalar flux walks: the least-squares gradients of T and Z (the values the walks read; Z when
+! the species diffuse) of each mesh's gradient CVs, those of guard sources sent to the guard rows, then t.g_f of every
+! listed row (CC_SET_SKEW_ROWS). Called with fresh guard rows and ghost cells.
+
+INTEGER :: NM,L,K,S,J,N,N1
+REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP
+REAL(EB), POINTER, DIMENSION(:,:) :: CVZZ
+TYPE(MESH_TYPE), POINTER :: M
+TYPE(CC_SKEW_TYPE), POINTER :: SK
+
+IF (.NOT.ALLOCATED(GD_PEER)) RETURN
+N1 = 0; IF (N_TOTAL_SCALARS>1) N1 = N_TOTAL_SCALARS
+DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   M => MESHES(NM); SK => M%FV%SK
+   IF (SK%NV==0) CYCLE
+   IF (PREDICTOR) THEN
+      ZZP => M%ZZS; CVZZ => M%FV%CV%ZZS
+   ELSE
+      ZZP => M%ZZ; CVZZ => M%FV%CV%ZZ
+   ENDIF
+   DO L=1,SK%NVC
+      SK%V(0,L) = M%FV%CV%TMP(SK%VIG(L)); SK%V(1:N1,L) = CVZZ(1:N1,SK%VIG(L))
+   ENDDO
+   DO L=SK%NVC+1,SK%NV
+      SK%V(0,L) = M%TMP(SK%VIJK(IAXIS,L),SK%VIJK(JAXIS,L),SK%VIJK(KAXIS,L))
+      SK%V(1:N1,L) = ZZP(SK%VIJK(IAXIS,L),SK%VIJK(JAXIS,L),SK%VIJK(KAXIS,L),1:N1)
+   ENDDO
+   DO K=1,SK%NG
+      SK%G(:,0:N1,K) = 0._EB
+      DO S=SK%PTR(K),SK%PTR(K+1)-1
+         DO N=0,N1
+            SK%G(:,N,K) = SK%G(:,N,K)+SK%W(:,S)*(SK%V(N,SK%SP(S))-SK%V(N,SK%SELF(K)))
+         ENDDO
+      ENDDO
+   ENDDO
+ENDDO
+CALL SKEW_GUARD_EXCHANGE(N1)
+DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   SK => MESHES(NM)%FV%SK
+   DO J=1,SK%N
+      DO N=0,N1
+         SK%C(N,J) = DOT_PRODUCT(SK%TW(:,1,J),SK%G(:,N,SK%GS(1,J)))+DOT_PRODUCT(SK%TW(:,2,J),SK%G(:,N,SK%GS(2,J)))
+      ENDDO
+   ENDDO
+ENDDO
+
+END SUBROUTINE CC_SKEW_GRADIENTS
+
+
+SUBROUTINE SKEW_GUARD_EXCHANGE(N1)
+! Over the guard pairing (CC_SET_GUARD_ROWS): each source sends the gradient in its slot (slot 0: zero), each guard
+! row, then each remote RC face, takes it in the next receive slot of its mesh.
+INTEGER, INTENT(IN) :: N1
+INTEGER :: NM,L,J,NR,NC
+REAL(EB), ALLOCATABLE :: SB(:,:),RB(:,:)
+TYPE(CC_SKEW_TYPE), POINTER :: SK
+
+ALLOCATE(SB(3*(N1+1),MAX(1,GD_NS)))
+DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   SK => MESHES(NM)%FV%SK
+   NC = GD_PC(NM+1)-GD_PC(NM)
+   DO L=GD_PC(NM),GD_PC(NM+1)-1
+      SB(:,GD_SC(2,L)) = RESHAPE(SK%G(:,0:N1,SK%SRC(L-GD_PC(NM)+1)),(/3*(N1+1)/))
+   ENDDO
+   DO L=GD_PR(NM),GD_PR(NM+1)-1
+      SB(:,GD_SR(4,L)) = RESHAPE(SK%G(:,0:N1,SK%SRC(NC+L-GD_PR(NM)+1)),(/3*(N1+1)/))
+   ENDDO
+ENDDO
+CALL CC_GRID_SEAM_EXCHANGE(3*(N1+1),GD_NREM,SB,GD_SDEST,NR,RB,GD_PEER)
+DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   SK => MESHES(NM)%FV%SK
+   J = SK%NG
+   DO L=GD_PDR(NM),GD_PDR(NM+1)-1
+      J = J+1; SK%G(:,0:N1,J) = RESHAPE(RB(:,GD_DR(2,L)),(/3,N1+1/))
+   ENDDO
+   DO L=GD_PDL(NM),GD_PDL(NM+1)-1
+      J = J+1; SK%G(:,0:N1,J) = RESHAPE(SB(:,GD_DL(2,L)),(/3,N1+1/))
+   ENDDO
+   DO L=GD_PXR(NM),GD_PXR(NM+1)-1
+      J = J+1; SK%G(:,0:N1,J) = RESHAPE(RB(:,GD_XR(2,L)),(/3,N1+1/))
+   ENDDO
+   DO L=GD_PXL(NM),GD_PXL(NM+1)-1
+      J = J+1; SK%G(:,0:N1,J) = RESHAPE(SB(:,GD_XL(2,L)),(/3,N1+1/))
+   ENDDO
+ENDDO
+END SUBROUTINE SKEW_GUARD_EXCHANGE
 
 
 
@@ -7593,6 +8027,7 @@ CALL CC_SET_CVCHEM_LISTS
 CALL CC_SET_DENSITY_LISTS
 CALL CC_SET_CF_HALO_LISTS
 CALL CC_SET_GUARD_ROWS
+CALL CC_SET_SKEW_ROWS
 IF (GET_CUTCELLS_VERBOSE .AND. MY_RANK==0) THEN
    CALL CPU_TIME(TDEL)
    WRITE(LU_ERR,'(A,F8.3,A)') ' Executing SET_CFACES_P1_RDN. Time taken : ',TDEL-TNOW,' sec.'
@@ -9812,6 +10247,7 @@ DO IF_=1,FV%FACE%N_INT
          CALL K_OF(KG,IG,II,JJ,KK,TMPV(ISIDE),KPV(ISIDE))
       ENDDO
       FD = (CCM1*KPV(-1)+CCP1*KPV(0))*(TMPV(0)-TMPV(-1))*IDX
+      FD = FD-(CCM1*KPV(-1)+CCP1*KPV(0))*FV%SK%C(0,FV%SK%ROW(IF_))
       CALL CC_FV_ADD_CONDUCTION_FACE(NM,IF_,FV%FACE%NVEC(FV%FACE%X1AXIS(IF_),IF_)*FD)
    CASE(CC_FTYPE_CFGAS)
       ICF = FV%FACE%SRC_ICF(IF_)
@@ -9847,6 +10283,7 @@ DO IF_=1,FV%FACE%N_INT
          CALL K_OF(KG,IG,II,JJ,KK,TMPV(ISIDE),KPV(ISIDE))
       ENDDO
       FD = (CCM1*KPV(-1)+CCP1*KPV(0))*(TMPV(0)-TMPV(-1))*IDX
+      FD = FD-(CCM1*KPV(-1)+CCP1*KPV(0))*FV%SK%C(0,FV%SK%ROW(IF_))
       CALL CC_FV_ADD_CONDUCTION_FACE(NM,IF_,FV%FACE%NVEC(FV%FACE%X1AXIS(IF_),IF_)*FD)
    END SELECT
 ENDDO
@@ -10191,6 +10628,7 @@ DO IF_=1,FV%FACE%N_INT
          ENDDO
          DIFF_FACE = CCM1*RHOPV(-1)*D_Z_TEMP(-1)+CCP1*RHOPV(0)*D_Z_TEMP(0)
          FLUX(N) = DIFF_FACE*IDX*(ZZPV(0)-ZZPV(-1))
+         FLUX(N) = FLUX(N)-DIFF_FACE*FV%SK%C(N,FV%SK%ROW(IF_))
          ZZF(N) = CCM1*ZZPV(-1)+CCP1*ZZPV(0)
       ENDDO
       TMP_FACE = CCM1*TMPV(-1)+CCP1*TMPV(0)
@@ -10257,6 +10695,7 @@ DO IF_=1,FV%FACE%N_INT
          ENDDO
          DIFF_FACE = CCM1*RHOPV(-1)*D_Z_TEMP(-1)+CCP1*RHOPV(0)*D_Z_TEMP(0)
          FLUX(N) = DIFF_FACE*IDX*(ZZPV(0)-ZZPV(-1))
+         FLUX(N) = FLUX(N)-DIFF_FACE*FV%SK%C(N,FV%SK%ROW(IF_))
          ZZF(N) = CCM1*ZZPV(-1)+CCP1*ZZPV(0)
       ENDDO
       TMP_FACE = CCM1*TMPV(-1)+CCP1*TMPV(0)
@@ -20656,10 +21095,12 @@ END SUBROUTINE END_FV_L2_SCALAR_RHS
 
 
 SUBROUTINE BEGIN_FV_L2_THERMODYNAMIC_ROWS
-! Face integrals of this process's thermodynamic rows (slots, CC_SET_THERMO_ROWS) start from zero.
+! Face integrals of this process's thermodynamic rows (slots, CC_SET_THERMO_ROWS) start from zero. The gradients of
+! the skew correction of the scalar fluxes, from the stage's values (guard rows and ghost cells already filled).
 IF (.NOT.CC_IBM) RETURN
 FV_L2_DVOL_FACE=0._EB
 FV_L2_DEL_RHO_D_DEL_Z_FACE=0._EB
+CALL CC_SKEW_GRADIENTS
 END SUBROUTINE BEGIN_FV_L2_THERMODYNAMIC_ROWS
 
 
