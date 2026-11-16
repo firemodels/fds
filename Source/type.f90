@@ -1058,18 +1058,10 @@ TYPE OMESH_TYPE
 
    ! CC_IBM data exchange arrays:
    ! NFEP_R(1:2) are unused (they counted the removed cut-face interpolation stencil); 3:5 are the cut-cell/edge stencils.
-   INTEGER :: NICC_S(2)=0, NICC_R(2)=0, NFCC_S(2)=0, NFCC_R(2)=0, NCC_INT_R=0, NFEP_R(5)=0
+   INTEGER :: NFCC_S(2)=0, NFCC_R(2)=0, NCC_INT_R=0, NFEP_R(5)=0
    REAL(EB), ALLOCATABLE, DIMENSION(:) ::                &
-         REAL_SEND_PKG11,REAL_SEND_PKG112,REAL_SEND_PKG115,REAL_SEND_PKG12,REAL_SEND_PKG13,&
-         REAL_RECV_PKG11,REAL_RECV_PKG112,REAL_RECV_PKG115,REAL_RECV_PKG12,REAL_RECV_PKG13
-   INTEGER, ALLOCATABLE, DIMENSION(:) :: ICC_UNKZ_CT_S, ICC_UNKZ_CC_S, ICC_UNKZ_CT_R, ICC_UNKZ_CC_R
-   LOGICAL, ALLOCATABLE, DIMENSION(:) :: ICC_UNKZ_CC_R_MASK  !< Replica ICC membership in ICC_UNKZ_CC_R
-   ! PKG11 receive halo: one SoA row per received gas polyhedron (NICC_R(2)).
-   ! Filled in addition to replica CUT_CELL writes; row identity matches the PKG11 unpack walk.
-   INTEGER, ALLOCATABLE, DIMENSION(:) :: CCHALO_ROW0            !< Replica ICC -> first halo row; 0 = no rows.
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: CCHALO_VOLUME         !< Replica cut-cell volume, filled at setup.
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: CCHALO_RHO, CCHALO_RHOS, CCHALO_TMP, CCHALO_RSUM, CCHALO_D, CCHALO_DS
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: CCHALO_ZZ, CCHALO_ZZS !< (1:N_TOTAL_SCALARS,1:NICC_R(2)), same order as FV%CV%ZZ.
+         REAL_SEND_PKG112,REAL_SEND_PKG115,REAL_SEND_PKG12,REAL_SEND_PKG13,&
+         REAL_RECV_PKG112,REAL_RECV_PKG115,REAL_RECV_PKG12,REAL_RECV_PKG13
    ! Cut-face halo of the interface planes (PKG112 at CODE 3/6, PKG115 at CODE 5; CC_SET_CF_HALO_LISTS). _S: this mesh
    ! sends to NOM, _R: it receives from NOM. A plane (0:6): normal axis, low (IAXIS:KAXIS) and high (3+IAXIS:3+KAXIS)
    ! face indices on the sender's grid. NCF: cut-face pieces on the planes, NPF: plane faces.

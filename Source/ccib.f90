@@ -12,7 +12,7 @@ USE COMPLEX_GEOMETRY, ONLY: GEOMEPS,LOOSEPS,GEOFCT,NGUARD,CCGUARD,CC_GASPHASE,CC
      CC_FGSC,CC_IDCF,CC_IDRC,CC_FROW,CC_CGSC,CC_IDCC,CC_UNKZ,CC_UNKH,CC_ETYPE_RGGAS, &
      CC_ETYPE_CFGAS,CC_FTYPE_RGGAS,CC_FTYPE_CFGAS,CC_FTYPE_CFINB,CC_FTYPE_SVERT,CC_FTYPE_RCGAS, &
      CC_FTYPE_CCGAS,CC_ETYPE_SCINB,CC_ETYPE_RCGAS,CC_ETYPE_EP,CC_MATVEC_DEFINED,NM_START, &
-     CALL_FOR_GLMAT,CALL_FROM_GLMAT_SETUP,N_REQ11,N_REQ12,N_REQ112,N_REQ115,N_REQ13,REQ11,REQ112,REQ115,REQ12,REQ13, &
+     CALL_FOR_GLMAT,CALL_FROM_GLMAT_SETUP,N_REQ12,N_REQ112,N_REQ115,N_REQ13,REQ112,REQ115,REQ12,REQ13, &
      WRITE_SET_CUTCELLS_TIMINGS,N_SET_CUTCELLS_3D_CALLS,SET_CUTCELLS_TIME_INDEX,GET_CARTCELL_CUTCELLS_TIME_INDEX, &
      CC_SET_DATA_TIME_INDEX,INIT_CUTCELL_DATA_TIME_INDEX,CCCOMPUTE_RADIATION_TIME_INDEX, &
      CC_DENSITY_TIME_INDEX,CC_VELOCITY_FLUX_TIME_INDEX,CC_COMPUTE_VISCOSITY_TIME_INDEX, &
@@ -212,6 +212,14 @@ LOGICAL, SAVE, ALLOCATABLE, DIMENSION(:) :: TH_CVM
 INTEGER, SAVE, ALLOCATABLE, DIMENSION(:,:) :: TH_CVMST
 !< The same slots serve the RHOZZ rows; TH_OSLOT(IROW) is the slot of this process's solve row IROW (RZ_Z), 0 if none.
 INTEGER, SAVE, ALLOCATABLE, DIMENSION(:) :: TH_OSLOT
+!< Guard cut pieces (CC_SET_GUARD_ROWS, FILL_GUARD_ROWS). Column C of the send buffer holds the state of a source of
+!< this process, the GD_NREM columns for other processes first (to GD_SDEST). Per source mesh (pointers GD_PC, GD_PR):
+!< its cut pieces GD_SC = (GCELL, C) and gas cells GD_SR = (I,J,K, C). Per guard mesh (GD_PDR, GD_PDL): the guard
+!< GCELLs GD_DR, GD_DL = (GCELL, C) that take column C of the received records, or of the send buffer (same process).
+!< GD_PEER: the processes with guard traffic either way.
+INTEGER, SAVE :: GD_NREM=0,GD_NS=0
+INTEGER, SAVE, ALLOCATABLE, DIMENSION(:) :: GD_SDEST,GD_PEER,GD_PC,GD_PR,GD_PDR,GD_PDL
+INTEGER, SAVE, ALLOCATABLE, DIMENSION(:,:) :: GD_SC,GD_SR,GD_DR,GD_DL
 !< Per mesh, the members of its link groups that it holds, in one global order (axis, x, y, z): M(1)=1-3 (Cartesian
 !< face, axis) or 4 (own cut piece), M(2)=link number, M(3:5)=I,J,K or ICF,JCF, M(6)=1 when this mesh counts the
 !< member in the cross-mesh sum; A=area. XG(IL)=this rank's slot for link IL, 0 when one mesh holds it all.
@@ -4257,6 +4265,226 @@ END SUBROUTINE CF_HALO_WALK
 END SUBROUTINE CC_SET_CF_HALO_LISTS
 
 
+! ---------------------------- CC_SET_GUARD_ROWS ----------------------------------
+
+SUBROUTINE CC_SET_GUARD_ROWS
+
+! Guard cut pieces: the pieces of the cut ghost cells of the INTERPOLATED external walls. Each takes, at CODE 1 and 4
+! (FILL_GUARD_ROWS), the state of the CV it lies in, read on the gas piece or cell of the other mesh, among the cells
+! its wall abuts, whose centroid is nearest its own: on a conforming interface the same piece, so every reader sees
+! what one mesh sees. Set once: each guard piece sends a request to its owner mesh's process (a same-process owner
+! answers at once), which picks the source and echoes the request in the order it will send the states. Request:
+! owner mesh, the cells IIO_MIN,IIO_MAX,JJO_MIN,JJO_MAX,KKO_MIN,KKO_MAX, the piece's centroid, the ghost cell's
+! centre, NM, IG, the process.
+
+INTEGER :: NM,IW,ICC,JCC,IG,L,N,NS,NR,NB,NL,NSC,NSR,NDL,KND,P,IX(IAXIS:KAXIS)
+INTEGER, ALLOCATABLE :: DEST(:),SC(:,:),SR(:,:),DL(:,:),DR(:,:)
+REAL(EB) :: Q(16)
+REAL(EB), ALLOCATABLE :: SB(:,:),RB(:,:),LB(:,:)
+TYPE(MESH_TYPE), POINTER :: M
+
+N = SUM(MESHES(LOWER_MESH_INDEX:UPPER_MESH_INDEX)%FV%GCELL%N_CUT_GHOST)
+ALLOCATE(SB(16,MAX(1,N)),LB(16,MAX(1,N)),DEST(MAX(1,N)))
+NS = 0; NL = 0
+DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   M => MESHES(NM)
+   DO IW=1,M%N_EXTERNAL_WALL_CELLS
+      IF (M%WALL(IW)%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE
+      BC => M%BOUNDARY_COORD(M%WALL(IW)%BC_INDEX)
+      IF (M%CCVAR(BC%II,BC%JJ,BC%KK,CC_CGSC)/=CC_CUTCFE) CYCLE
+      ICC = M%CCVAR(BC%II,BC%JJ,BC%KK,CC_IDCC); IF (ICC<1) CYCLE
+      EWC => M%EXTERNAL_WALL(IW)
+      DO JCC=1,M%CUT_CELL(ICC)%NCELL
+         IG = M%CUT_CELL(ICC)%IG(JCC); IF (IG<1) CYCLE
+         Q = (/REAL(EWC%NOM,EB),REAL(EWC%IIO_MIN,EB),REAL(EWC%IIO_MAX,EB),REAL(EWC%JJO_MIN,EB),REAL(EWC%JJO_MAX,EB), &
+               REAL(EWC%KKO_MIN,EB),REAL(EWC%KKO_MAX,EB),M%CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,JCC), &
+               M%XC(BC%II),M%YC(BC%JJ),M%ZC(BC%KK),REAL(NM,EB),REAL(IG,EB),REAL(MY_RANK,EB)/)
+         IF (PROCESS(EWC%NOM)==MY_RANK) THEN
+            NL = NL+1; LB(:,NL) = Q
+         ELSE
+            NS = NS+1; SB(:,NS) = Q; DEST(NS) = PROCESS(EWC%NOM)
+         ENDIF
+      ENDDO
+   ENDDO
+ENDDO
+CALL CC_GRID_SEAM_EXCHANGE(16,NS,SB,DEST,NR,RB)
+
+! The processes with guard traffic either way (symmetric, as the exchange needs).
+ALLOCATE(GD_PEER(0))
+DO L=1,NS+NR
+   IF (L<=NS) THEN; P = DEST(L); ELSE; P = NINT(RB(16,L-NS)); ENDIF
+   IF (.NOT.ANY(GD_PEER==P)) GD_PEER = (/GD_PEER,P/)
+ENDDO
+
+! Owner: the source of each request, those of other processes first (send columns 1:GD_NREM), then the local ones.
+DEALLOCATE(SB); ALLOCATE(SB(2,MAX(1,NR)),SC(3,NR+NL),SR(5,NR+NL),DL(3,NL),GD_SDEST(NR))
+GD_NS = 0; GD_NREM = 0; NSC = 0; NSR = 0; NDL = 0
+DO L=1,NR+NL
+   IF (L<=NR) THEN; Q = RB(:,L); ELSE; Q = LB(:,L-NR); ENDIF
+   CALL PICK_SOURCE(Q,KND,IX)
+   IF (KND==0) CYCLE
+   GD_NS = GD_NS+1
+   IF (KND==1) THEN
+      NSC = NSC+1; SC(:,NSC) = (/NINT(Q(1)),IX(IAXIS),GD_NS/)
+   ELSE
+      NSR = NSR+1; SR(:,NSR) = (/NINT(Q(1)),IX,GD_NS/)
+   ENDIF
+   IF (L<=NR) THEN
+      GD_NREM = GD_NS; GD_SDEST(GD_NS) = NINT(Q(16)); SB(:,GD_NS) = Q(14:15)
+   ELSE
+      NDL = NDL+1; DL(:,NDL) = (/NINT(Q(14)),NINT(Q(15)),GD_NS/)
+   ENDIF
+ENDDO
+GD_SDEST = GD_SDEST(1:GD_NREM)
+CALL CC_GRID_SEAM_EXCHANGE(2,GD_NREM,SB,GD_SDEST,NB,RB,GD_PEER)
+ALLOCATE(DR(3,NB))
+DO L=1,NB
+   DR(:,L) = (/NINT(RB(1,L)),NINT(RB(2,L)),L/)
+ENDDO
+CALL GROUP(SC(:,1:NSC),GD_SC,GD_PC); CALL GROUP(SR(:,1:NSR),GD_SR,GD_PR)
+CALL GROUP(DR,GD_DR,GD_PDR); CALL GROUP(DL(:,1:NDL),GD_DL,GD_PDL)
+
+CONTAINS
+
+SUBROUTINE PICK_SOURCE(R,KND,IX)
+! Of the owner cells request R names, the active cut piece (KND 1, IX(IAXIS) its GCELL) or gas cell (KND 2, IX=I,J,K;
+! a cut cell with no active piece counts as one) whose centroid is nearest the guard piece's; KND 0: none. On a
+! periodic wall the ghost cell's centre lies outside those cells: the guard centroid moves by that offset first.
+REAL(EB), INTENT(IN) :: R(16)
+INTEGER, INTENT(OUT) :: KND,IX(IAXIS:KAXIS)
+INTEGER :: I,J,K,AX,ICC,JCC,IG,B(6)
+REAL(EB) :: LO(IAXIS:KAXIS),HI(IAXIS:KAXIS),PT(IAXIS:KAXIS),D,DMIN
+LOGICAL :: ACTIVE
+TYPE(MESH_TYPE), POINTER :: MO
+MO => MESHES(NINT(R(1)))
+B = NINT(R(2:7))
+LO = (/MO%X(B(1)-1),MO%Y(B(3)-1),MO%Z(B(5)-1)/); HI = (/MO%X(B(2)),MO%Y(B(4)),MO%Z(B(6))/)
+PT = R(8:10)
+DO AX=IAXIS,KAXIS
+   IF (R(10+AX)<LO(AX) .OR. R(10+AX)>HI(AX)) PT(AX) = PT(AX)-R(10+AX)+0.5_EB*(LO(AX)+HI(AX))
+ENDDO
+KND = 0; IX = 0; DMIN = HUGE(DMIN)
+DO K=B(5),B(6)
+   DO J=B(3),B(4)
+      DO I=B(1),B(2)
+         IF (MO%CELL(MO%CELL_INDEX(I,J,K))%SOLID) CYCLE
+         ACTIVE = .FALSE.
+         SELECT CASE(MO%CCVAR(I,J,K,CC_CGSC))
+         CASE(CC_CUTCFE)
+            ICC = MO%CCVAR(I,J,K,CC_IDCC); IF (ICC<1) CYCLE
+            DO JCC=1,MO%CUT_CELL(ICC)%NCELL
+               IG = MO%CUT_CELL(ICC)%IG(JCC); IF (IG<1) CYCLE
+               ACTIVE = .TRUE.
+               D = NORM2(MO%CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,JCC)-PT)
+               IF (D<DMIN) THEN
+                  DMIN = D; KND = 1; IX = (/IG,0,0/)
+               ENDIF
+            ENDDO
+         CASE(CC_GASPHASE)
+         CASE DEFAULT
+            CYCLE
+         END SELECT
+         IF (ACTIVE) CYCLE
+         D = NORM2((/MO%XC(I),MO%YC(J),MO%ZC(K)/)-PT)
+         IF (D<DMIN) THEN
+            DMIN = D; KND = 2; IX = (/I,J,K/)
+         ENDIF
+      ENDDO
+   ENDDO
+ENDDO
+END SUBROUTINE PICK_SOURCE
+
+SUBROUTINE GROUP(A,B,PTR)
+! The columns A(2:,L) in the order of their mesh A(1,L), stable: mesh NM's are B(:,PTR(NM):PTR(NM+1)-1).
+INTEGER, INTENT(IN) :: A(:,:)
+INTEGER, ALLOCATABLE, INTENT(OUT) :: B(:,:),PTR(:)
+INTEGER :: L,NXT(LOWER_MESH_INDEX:UPPER_MESH_INDEX+1)
+ALLOCATE(B(SIZE(A,1)-1,SIZE(A,2)),PTR(LOWER_MESH_INDEX:UPPER_MESH_INDEX+1))
+NXT = 0
+DO L=1,SIZE(A,2)
+   NXT(A(1,L)+1) = NXT(A(1,L)+1)+1
+ENDDO
+NXT(LOWER_MESH_INDEX) = 1
+DO L=LOWER_MESH_INDEX+1,UPPER_MESH_INDEX+1
+   NXT(L) = NXT(L)+NXT(L-1)
+ENDDO
+PTR = NXT
+DO L=1,SIZE(A,2)
+   B(:,NXT(A(1,L))) = A(2:,L); NXT(A(1,L)) = NXT(A(1,L))+1
+ENDDO
+END SUBROUTINE GROUP
+
+END SUBROUTINE CC_SET_GUARD_ROWS
+
+
+! ----------------------------- FILL_GUARD_ROWS -------------------------------------
+
+SUBROUTINE FILL_GUARD_ROWS(CODE)
+
+! Guard cut pieces (CC_SET_GUARD_ROWS) take the state of their source: RHOS, TMP, RSUM, ZZS after the predictor
+! (CODE 1), RHO, TMP, RSUM, ZZ after the corrector (CODE 4). One message each way per process with guard traffic.
+
+INTEGER, INTENT(IN) :: CODE
+INTEGER :: NM,NR
+REAL(EB), ALLOCATABLE :: SB(:,:),RB(:,:)
+TYPE(MESH_TYPE), POINTER :: M
+
+ALLOCATE(SB(3+N_TOTAL_SCALARS,MAX(1,GD_NS)))
+DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   M => MESHES(NM)
+   IF (CODE==1) THEN
+      IF (GD_PC(NM+1)>GD_PC(NM)) CALL PACK_PIECES(M%FV%CV%RHOS,M%FV%CV%ZZS)
+      CALL PACK_CELLS(M%RHOS,M%ZZS)
+   ELSE
+      IF (GD_PC(NM+1)>GD_PC(NM)) CALL PACK_PIECES(M%FV%CV%RHO,M%FV%CV%ZZ)
+      CALL PACK_CELLS(M%RHO,M%ZZ)
+   ENDIF
+ENDDO
+CALL CC_GRID_SEAM_EXCHANGE(SIZE(SB,1),GD_NREM,SB,GD_SDEST,NR,RB,GD_PEER)
+DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   IF (GD_PDR(NM+1)-GD_PDR(NM)+GD_PDL(NM+1)-GD_PDL(NM)==0) CYCLE
+   M => MESHES(NM)
+   IF (CODE==1) THEN
+      CALL PUT_ROWS(M%FV%CV%RHOS,M%FV%CV%ZZS,RB,GD_DR,GD_PDR); CALL PUT_ROWS(M%FV%CV%RHOS,M%FV%CV%ZZS,SB,GD_DL,GD_PDL)
+   ELSE
+      CALL PUT_ROWS(M%FV%CV%RHO,M%FV%CV%ZZ,RB,GD_DR,GD_PDR); CALL PUT_ROWS(M%FV%CV%RHO,M%FV%CV%ZZ,SB,GD_DL,GD_PDL)
+   ENDIF
+ENDDO
+
+CONTAINS
+
+SUBROUTINE PACK_PIECES(RHOC,ZZC)
+REAL(EB), INTENT(IN) :: RHOC(:),ZZC(:,:)
+INTEGER :: L,IG,C
+DO L=GD_PC(NM),GD_PC(NM+1)-1
+   IG = GD_SC(1,L); C = GD_SC(2,L)
+   SB(1,C) = RHOC(IG); SB(2,C) = M%FV%CV%TMP(IG); SB(3,C) = M%FV%CV%RSUM(IG); SB(4:,C) = ZZC(:,IG)
+ENDDO
+END SUBROUTINE PACK_PIECES
+
+SUBROUTINE PACK_CELLS(RHOX,ZZX)
+REAL(EB), INTENT(IN) :: RHOX(0:,0:,0:),ZZX(0:,0:,0:,:)
+INTEGER :: L,I,J,K,C
+DO L=GD_PR(NM),GD_PR(NM+1)-1
+   I = GD_SR(IAXIS,L); J = GD_SR(JAXIS,L); K = GD_SR(KAXIS,L); C = GD_SR(4,L)
+   SB(1,C) = RHOX(I,J,K); SB(2,C) = M%TMP(I,J,K); SB(3,C) = M%RSUM(I,J,K); SB(4:,C) = ZZX(I,J,K,:)
+ENDDO
+END SUBROUTINE PACK_CELLS
+
+SUBROUTINE PUT_ROWS(RHOC,ZZC,BUF,D,P)
+REAL(EB), INTENT(INOUT) :: RHOC(:),ZZC(:,:)
+REAL(EB), INTENT(IN) :: BUF(:,:)
+INTEGER, INTENT(IN) :: D(:,:),P(LOWER_MESH_INDEX:)
+INTEGER :: L,IG,C
+DO L=P(NM),P(NM+1)-1
+   IG = D(1,L); C = D(2,L)
+   RHOC(IG) = BUF(1,C); M%FV%CV%TMP(IG) = BUF(2,C); M%FV%CV%RSUM(IG) = BUF(3,C); ZZC(:,IG) = BUF(4:,C)
+ENDDO
+END SUBROUTINE PUT_ROWS
+
+END SUBROUTINE FILL_GUARD_ROWS
+
+
 
 ! --------------------------- CC_RESTORE_UVW_UNLINKED -------------------------
 
@@ -4598,15 +4826,14 @@ INTEGER, INTENT(IN) :: CODE
 
 ! Local Variables:
 INTEGER :: NM,NOM,RNODE,SNODE,IERR
-INTEGER :: II1,JJ1,KK1,NCELL,ICC,ICC1,NQT2,JCC,LL,NN
-INTEGER :: I,J,K,IFC,X1AXIS,ICV,IG,IP,N
+INTEGER :: ICC,NQT2,LL
+INTEGER :: I,J,K,IFC,X1AXIS,IP,N
 TYPE (MESH_TYPE), POINTER :: M,M1
 TYPE (OMESH_TYPE), POINTER :: M2,M3
 TYPE (CC_FV_TYPE), POINTER :: FV
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UP,VP,WP,XP
 REAL(EB), POINTER, DIMENSION(:) :: BUF
 LOGICAL, SAVE :: INITIALIZE_CC_SCALARS_FORC=.TRUE.
-LOGICAL :: USE_FV
 
 INTEGER :: EP,INPE,INT_NPE_LO,INT_NPE_HI,VIND,ICELL,IEDGE,IFEP
 REAL(EB) :: TNOW,TINTP
@@ -4628,18 +4855,6 @@ TNOW = CURRENT_TIME()
 
 ! First Allocate and setup persistent send-receives for scalars:
 INITIALIZE_CC_SCALARS_FORC_COND : IF (INITIALIZE_CC_SCALARS_FORC) THEN
-
-   ! Allocate REQ11, for scalar transport quantities, reduced cycling conditionals:
-   N_REQ11=0
-   DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-      DO NOM=1,NMESHES
-         M3=>MESHES(NM)%OMESH(NOM)
-         IF (M3%NICC_S(1)==0 .AND. M3%NICC_R(1)==0) CYCLE
-         N_REQ11 = N_REQ11+1
-      ENDDO
-   ENDDO
-   ALLOCATE(REQ11(N_REQ11*4)); N_REQ11=0
-
 
    ! Allocate REQ112 (CODE 3/6) and REQ115 (CODE 5), the cut-face halo of the interface planes: at most one send and
    ! one receive per face neighbour (CC_SET_CF_HALO_LISTS).
@@ -4680,26 +4895,6 @@ INITIALIZE_CC_SCALARS_FORC_COND : IF (INITIALIZE_CC_SCALARS_FORC) THEN
    MESH_LOOP_1: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
       RNODE = PROCESS(NM)
-
-      ! REQ11:
-      OTHER_MESH_LOOP_11: DO NOM=1,NMESHES
-         M3=>MESHES(NM)%OMESH(NOM)
-         ! Drop leftover CCHALO rows before the NICC_R skip.
-         CALL DEALLOCATE_CCHALO(M3)
-         IF (M3%NICC_R(1)==0) CYCLE OTHER_MESH_LOOP_11
-         SNODE = PROCESS(NOM)
-         IF (M3%NICC_R(1)>0) THEN
-            ! Cell centered variables on cut-cells:
-            ALLOCATE(M3%REAL_RECV_PKG11(M3%NICC_R(2)*(4+N_TOTAL_SCALARS)))
-            ! Halo rows use the same NICC_R(2) and N_TOTAL_SCALARS as the buffer.
-            IF (M3%NICC_R(2)>=1) CALL ALLOCATE_CCHALO(M3,NM,NOM)
-            IF (RNODE/=SNODE) THEN
-               N_REQ11 = N_REQ11 + 1
-               CALL MPI_RECV_INIT(M3%REAL_RECV_PKG11(1),SIZE(M3%REAL_RECV_PKG11),MPI_DOUBLE_PRECISION, &
-                                  SNODE,NOM,MPI_COMM_WORLD,REQ11(N_REQ11),IERR)
-            ENDIF
-         ENDIF
-      ENDDO OTHER_MESH_LOOP_11
 
       ! REQ112: VEL(S) and VEL_LNK of the pieces, then one value per plane face. REQ115: FN of the pieces.
       ! A same-rank sender packs straight into these buffers.
@@ -4753,19 +4948,6 @@ INITIALIZE_CC_SCALARS_FORC_COND : IF (INITIALIZE_CC_SCALARS_FORC) THEN
 
       RNODE = PROCESS(NM)
       M =>MESHES(NM)
-
-      ! REQ11:
-      RECEIVING_MESH_LOOP_11: DO NOM=1,NMESHES
-         M3=>MESHES(NM)%OMESH(NOM)
-         SNODE = PROCESS(NOM)
-         ! Initialize persistent send requests
-         IF (M3%NICC_S(1)>0 .AND. RNODE/=SNODE) THEN
-            ALLOCATE(M3%REAL_SEND_PKG11(M3%NICC_S(2)*(4+N_TOTAL_SCALARS)))
-            N_REQ11 = N_REQ11 + 1
-            CALL MPI_SEND_INIT(M3%REAL_SEND_PKG11(1),SIZE(M3%REAL_SEND_PKG11),MPI_DOUBLE_PRECISION, &
-                               SNODE,NM,MPI_COMM_WORLD,REQ11(N_REQ11),IERR)
-         ENDIF
-      ENDDO RECEIVING_MESH_LOOP_11
 
       ! REQ112, REQ115:
       RECEIVING_MESH_LOOP_112: DO NOM=1,NMESHES
@@ -4822,8 +5004,6 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
    M =>MESHES(NM)
    FV=>M%FV
-   ! CV pack is on whenever CV thermo is allocated.
-   USE_FV = ALLOCATED(FV%CV%RHO)
    RECEIVING_MESH_LOOP_2: DO NOM=1,NMESHES
 
       M1=>MESHES(NOM)
@@ -4831,49 +5011,6 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
       SNODE = PROCESS(NOM)
       RNODE = PROCESS(NM)
-
-      ! Exchange of density and species mass fractions following the PREDICTOR update
-
-      IF (CODE==1 .AND. M3%NICC_S(1)>0) THEN
-         NQT2 = 4+N_TOTAL_SCALARS
-         LL = 0
-         IF (RNODE/=SNODE) THEN
-            PACK_REAL_SEND_PKG11: DO ICC1=1,M3%NICC_S(1)
-               ICC=M3%ICC_UNKZ_CC_S(ICC1)
-               NCELL=M%CUT_CELL(ICC)%NCELL
-               II1=M%CUT_CELL(ICC)%IJK(IAXIS)
-               JJ1=M%CUT_CELL(ICC)%IJK(JAXIS)
-               KK1=M%CUT_CELL(ICC)%IJK(KAXIS)
-               DO JCC=1,NCELL
-                  LL = LL + 1
-                  ICV=0
-                  IG = M%CUT_CELL(ICC)%IG(JCC)
-                  IF (USE_FV) CALL GET_FV_CV_FOR_CUTCELL(NM,ICC,JCC,ICV)
-                  IF (IG>=1) THEN
-                     M3%REAL_SEND_PKG11(NQT2*(LL-1)+1) = FV%CV%RHOS(IG)
-                     M3%REAL_SEND_PKG11(NQT2*(LL-1)+2) = FV%CV%TMP(IG)
-                     M3%REAL_SEND_PKG11(NQT2*(LL-1)+3) = FV%CV%RSUM(IG)
-                     IF (ICV>0) THEN
-                        M3%REAL_SEND_PKG11(NQT2*(LL-1)+4) = FV%CV%D(ICV)
-                     ELSE
-                        M3%REAL_SEND_PKG11(NQT2*(LL-1)+4) = FV%CV%D(IG)
-                     ENDIF
-                     DO NN=1,N_TOTAL_SCALARS
-                        M3%REAL_SEND_PKG11(NQT2*(LL-1)+4+NN) = FV%CV%ZZS(NN,IG)
-                     ENDDO
-                  ELSE
-                     M3%REAL_SEND_PKG11(NQT2*(LL-1)+1) = M%RHOS(II1,JJ1,KK1)
-                     M3%REAL_SEND_PKG11(NQT2*(LL-1)+2) = M%TMP(II1,JJ1,KK1)
-                     M3%REAL_SEND_PKG11(NQT2*(LL-1)+3) = M%RSUM(II1,JJ1,KK1)
-                     M3%REAL_SEND_PKG11(NQT2*(LL-1)+4) = M%D(II1,JJ1,KK1)
-                     DO NN=1,N_TOTAL_SCALARS
-                        M3%REAL_SEND_PKG11(NQT2*(LL-1)+4+NN) = M%ZZS(II1,JJ1,KK1,NN)
-                     ENDDO
-                  ENDIF
-               ENDDO
-            ENDDO PACK_REAL_SEND_PKG11
-         ENDIF
-      ENDIF
 
       ! Cut-face halo of the interface planes: FN of the pieces at CODE 5; at CODE 3 (6) VELS (VEL) and VEL_LNK of the
       ! pieces, then the velocity of every plane face, the linked velocity written over it where the face is linked.
@@ -4964,49 +5101,6 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                   M1%CC_IBEDGE(IEDGE)%INT_FVARS(INT_VEL_IND,INPE) = M%WS(I,J,K)               ! W^* in z face I,J,K
                END SELECT
             ENDDO PACK_REAL_RECV_PKG121EIB
-         ENDIF
-      ENDIF
-
-      ! Exchange of density and species mass fractions following the CORRECTOR update
-
-      IF (CODE==4 .AND. M3%NICC_S(1)>0) THEN
-         NQT2 = 4+N_TOTAL_SCALARS
-         LL = 0
-         IF (RNODE/=SNODE) THEN
-            PACK_REAL_SEND_PKG111: DO ICC1=1,M3%NICC_S(1)
-               ICC=M3%ICC_UNKZ_CC_S(ICC1)
-               NCELL=M%CUT_CELL(ICC)%NCELL
-               II1=M%CUT_CELL(ICC)%IJK(IAXIS)
-               JJ1=M%CUT_CELL(ICC)%IJK(JAXIS)
-               KK1=M%CUT_CELL(ICC)%IJK(KAXIS)
-               DO JCC=1,NCELL
-                  LL = LL + 1
-                  ICV=0
-                  IG = M%CUT_CELL(ICC)%IG(JCC)
-                  IF (USE_FV) CALL GET_FV_CV_FOR_CUTCELL(NM,ICC,JCC,ICV)
-                  IF (IG>=1) THEN
-                     M3%REAL_SEND_PKG11(NQT2*(LL-1)+1) = FV%CV%RHO(IG)
-                     M3%REAL_SEND_PKG11(NQT2*(LL-1)+2) = FV%CV%TMP(IG)
-                     M3%REAL_SEND_PKG11(NQT2*(LL-1)+3) = FV%CV%RSUM(IG)
-                     IF (ICV>0) THEN
-                        M3%REAL_SEND_PKG11(NQT2*(LL-1)+4) = FV%CV%DS(ICV)
-                     ELSE
-                        M3%REAL_SEND_PKG11(NQT2*(LL-1)+4) = FV%CV%DS(IG)
-                     ENDIF
-                     DO NN=1,N_TOTAL_SCALARS
-                        M3%REAL_SEND_PKG11(NQT2*(LL-1)+4+NN) = FV%CV%ZZ(NN,IG)
-                     ENDDO
-                  ELSE
-                     M3%REAL_SEND_PKG11(NQT2*(LL-1)+1) = M%RHO(II1,JJ1,KK1)
-                     M3%REAL_SEND_PKG11(NQT2*(LL-1)+2) = M%TMP(II1,JJ1,KK1)
-                     M3%REAL_SEND_PKG11(NQT2*(LL-1)+3) = M%RSUM(II1,JJ1,KK1)
-                     M3%REAL_SEND_PKG11(NQT2*(LL-1)+4) = M%DS(II1,JJ1,KK1)
-                     DO NN=1,N_TOTAL_SCALARS
-                        M3%REAL_SEND_PKG11(NQT2*(LL-1)+4+NN) = M%ZZ(II1,JJ1,KK1,NN)
-                     ENDDO
-                  ENDIF
-               ENDDO
-            ENDDO PACK_REAL_SEND_PKG111
          ENDIF
       ENDIF
 
@@ -5134,12 +5228,6 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    ENDDO RECEIVING_MESH_LOOP_2
 ENDDO SENDING_MESH_LOOP_2
 
-! Exchange Scalars:
-IF (N_MPI_PROCESSES>1 .AND. (CODE==1.OR.CODE==4) .AND. N_REQ11>0) THEN
-   CALL MPI_STARTALL(N_REQ11,REQ11(1:N_REQ11),IERR)
-   CALL CC_TIMEOUT('REQ11',N_REQ11,REQ11(1:N_REQ11))
-ENDIF
-
 ! Exchange the cut-face halo of the interface planes: FN at CODE 5, velocities at CODE 3 and 6.
 IF (N_MPI_PROCESSES>1 .AND. CODE==5 .AND. N_REQ115>0) THEN
    CALL MPI_STARTALL(N_REQ115,REQ115(1:N_REQ115),IERR)
@@ -5177,31 +5265,6 @@ RECV_MESH_LOOP: DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
       RNODE_SNODE_IF: IF (RNODE/=SNODE) THEN
 
-         ! Unpack densities and species mass fractions following PREDICTOR exchange
-
-         IF (CODE==1 .AND. M2%NICC_R(1)>0) THEN
-            NQT2 = 4+N_TOTAL_SCALARS
-            LL   = 0
-            ! Unpack from sender-validated ICC_UNKZ_CC_R list (avoids stale CCVAR for ghost cut-cells
-            ! rejected by the sender's validation pass).
-            DO ICC1=1,M2%NICC_R(1)
-               ICC = M2%ICC_UNKZ_CC_R(ICC1)
-               IF (ICC < 1) CYCLE
-               DO JCC=1,MESHES(NM)%CUT_CELL(ICC)%NCELL
-                  LL = LL + 1
-                  IF (ALLOCATED(M2%CCHALO_RHOS)) THEN
-                     M2%CCHALO_RHOS(LL) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+1)
-                     M2%CCHALO_TMP(LL)  = M2%REAL_RECV_PKG11(NQT2*(LL-1)+2)
-                     M2%CCHALO_RSUM(LL) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+3)
-                     M2%CCHALO_D(LL)    = M2%REAL_RECV_PKG11(NQT2*(LL-1)+4)
-                     DO NN=1,N_TOTAL_SCALARS
-                        M2%CCHALO_ZZS(NN,LL) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+4+NN)
-                     ENDDO
-                  ENDIF
-               ENDDO
-            ENDDO
-         ENDIF
-
          IF (CODE==3 .AND. M2%NFCC_R(1)>0) THEN
             NQT2 = 1
             ! Second Loop cut-edges:
@@ -5216,31 +5279,6 @@ RECV_MESH_LOOP: DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                INPE = M2%IFEP_R_4(HIGH_IND,IFEP)
                LL   = M%CC_IBEDGE(IEDGE)%INT_NOMIND(HIGH_IND,INPE)
                M%CC_IBEDGE(IEDGE)%INT_FVARS(INT_VEL_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) ! Vel^*, added to INT_VEL_IND pos.
-            ENDDO
-         ENDIF
-
-         ! Unpack densities and species mass fractions following CORRECTOR exchange
-
-         IF (CODE==4 .AND. M2%NICC_R(1)>0) THEN
-            NQT2 = 4+N_TOTAL_SCALARS
-            LL   = 0
-            ! Unpack from sender-validated ICC_UNKZ_CC_R list (avoids stale CCVAR for ghost cut-cells
-            ! rejected by the sender's validation pass).
-            DO ICC1=1,M2%NICC_R(1)
-               ICC = M2%ICC_UNKZ_CC_R(ICC1)
-               IF (ICC < 1) CYCLE
-               DO JCC=1,MESHES(NM)%CUT_CELL(ICC)%NCELL
-                  LL = LL + 1
-                  IF (ALLOCATED(M2%CCHALO_RHO)) THEN
-                     M2%CCHALO_RHO(LL)  = M2%REAL_RECV_PKG11(NQT2*(LL-1)+1)
-                     M2%CCHALO_TMP(LL)  = M2%REAL_RECV_PKG11(NQT2*(LL-1)+2)
-                     M2%CCHALO_RSUM(LL) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+3)
-                     M2%CCHALO_DS(LL)   = M2%REAL_RECV_PKG11(NQT2*(LL-1)+4)
-                     DO NN=1,N_TOTAL_SCALARS
-                        M2%CCHALO_ZZ(NN,LL) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+4+NN)
-                     ENDDO
-                  ENDIF
-               ENDDO
             ENDDO
          ENDIF
 
@@ -5327,7 +5365,7 @@ T_USED(11) = T_USED(11) + CURRENT_TIME() - TNOW ! Add communication time to COMM
 
 TINTP= CURRENT_TIME()
 IF(CODE==1 .OR. CODE==4) THEN
-  CALL FILL_GCCUTCELL_SPECIES
+   CALL FILL_GUARD_ROWS(CODE)
 ELSEIF(CODE==3 .OR. CODE==6) THEN
    CALL CC_H_INTERP
    CALL CC_RHO0W_INTERP
@@ -5339,198 +5377,6 @@ IF (TIME_CC_IBM) T_CC_USED(MESH_CC_EXCHANGE_TIME_INDEX) = T_CC_USED(MESH_CC_EXCH
 RETURN
 
 CONTAINS
-
-SUBROUTINE FILL_GCCUTCELL_SPECIES
-
-
-REAL(EB):: VCELL, RHO_CC, TMP_CC, RSUM_CC, D_CC, ZZ_CC(1:N_TOTAL_SCALARS), VOL
-TYPE(CC_CUTCELL_TYPE), POINTER :: OCC
-TYPE(CC_FV_TYPE), POINTER :: FV_SRC,FV_DST
-TYPE(OMESH_TYPE), POINTER :: OM
-INTEGER :: NM,NOM,NN,ICC,JCC,IW,IIO,JJO,KKO,ICV,IROW,IG
-LOGICAL :: VALID_SOURCE_CC,USE_FV_SRC,SOURCE_REMOTE,USE_CCHALO
-
-! Here inject OMESH cut-cell info obtained in MESH_CC_EXCHANGE into ghost-cell cc containers:
-MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-   CALL POINT_TO_MESH(NM)
-   FV_DST=>MESHES(NM)%FV
-   EXTERNAL_WALL_LOOP : DO IW=1,N_EXTERNAL_WALL_CELLS
-      WC=>WALL(IW)
-      IF (.NOT.(WC%BOUNDARY_TYPE == INTERPOLATED_BOUNDARY)) CYCLE EXTERNAL_WALL_LOOP
-      BC=>BOUNDARY_COORD(WC%BC_INDEX)
-      EWC=>EXTERNAL_WALL(IW)
-      IF (CCVAR(BC%II,BC%JJ,BC%KK,CC_CGSC) /= CC_CUTCFE) CYCLE EXTERNAL_WALL_LOOP
-      ! Do volume average to a cell container for ghost cell II,JJ,KK:
-      NOM = EWC%NOM
-      FV_SRC=>MESHES(NOM)%FV
-      USE_FV_SRC = ALLOCATED(FV_SRC%CV%RHO)
-      RHO_CC=0._EB; TMP_CC=0._EB; RSUM_CC=0._EB; D_CC=0._EB; ZZ_CC(1:N_TOTAL_SCALARS)=0._EB; VOL=0._EB
-      DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
-         DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
-            DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
-              IF (MESHES(NOM)%CELL(MESHES(NOM)%CELL_INDEX(IIO,JJO,KKO))%SOLID) CYCLE
-              ICC   = MESHES(NOM)%CCVAR(IIO,JJO,KKO,CC_IDCC)
-              ! For remote NOM, only accept the cut-cell entry if it appears in the sender-validated
-              ! ICC_UNKZ_CC_R list. Otherwise the OMESH cut-cell scalars haven't been filled by
-              ! MESH_CC_EXCHANGE and reading them would mix in stale/zero state.
-              VALID_SOURCE_CC = ICC > 0 .AND. (PROCESS(NOM)==MY_RANK .OR. NM==NOM)
-              IF (ICC > 0 .AND. .NOT.VALID_SOURCE_CC .AND. ALLOCATED(MESHES(NM)%OMESH(NOM)%ICC_UNKZ_CC_R)) THEN
-                 IF (ALLOCATED(MESHES(NM)%OMESH(NOM)%ICC_UNKZ_CC_R_MASK)) THEN
-                    IF (ICC <= SIZE(MESHES(NM)%OMESH(NOM)%ICC_UNKZ_CC_R_MASK)) &
-                       VALID_SOURCE_CC = MESHES(NM)%OMESH(NOM)%ICC_UNKZ_CC_R_MASK(ICC)
-                 ENDIF
-              ENDIF
-              IF (VALID_SOURCE_CC) THEN ! Cut-cells:
-                 OCC => MESHES(NOM)%CUT_CELL(ICC)
-                 ! PKG11 (and therefore CCHALO state) is populated only for a remote
-                 ! source: the same-rank test is PROCESS(NOM)==MY_RANK .OR. NM==NOM.
-                 SOURCE_REMOTE = .NOT.(PROCESS(NOM)==MY_RANK .OR. NM==NOM)
-                 USE_CCHALO = .FALSE.
-                 IF (SOURCE_REMOTE) THEN
-                    OM => MESHES(NM)%OMESH(NOM)
-                    IF (ALLOCATED(OM%CCHALO_ROW0) .AND. ALLOCATED(OM%CCHALO_VOLUME) .AND. &
-                        ALLOCATED(OM%CCHALO_TMP) .AND. ALLOCATED(OM%CCHALO_RSUM)) THEN
-                       IF (PREDICTOR) THEN
-                          USE_CCHALO = ALLOCATED(OM%CCHALO_RHOS) .AND. ALLOCATED(OM%CCHALO_D) .AND. &
-                                       ALLOCATED(OM%CCHALO_ZZS)
-                       ELSE
-                          USE_CCHALO = ALLOCATED(OM%CCHALO_RHO) .AND. ALLOCATED(OM%CCHALO_DS) .AND. &
-                                       ALLOCATED(OM%CCHALO_ZZ)
-                       ENDIF
-                       IF (USE_CCHALO) THEN
-                          IF (ICC<1 .OR. ICC>SIZE(OM%CCHALO_ROW0)) THEN
-                             USE_CCHALO = .FALSE.
-                          ELSEIF (OM%CCHALO_ROW0(ICC)<1) THEN
-                             USE_CCHALO = .FALSE.
-                          ENDIF
-                       ENDIF
-                    ENDIF
-                 ENDIF
-                 DO JCC=1,OCC%NCELL
-                    IROW = 0
-                    IF (USE_CCHALO) THEN
-                       IROW = OM%CCHALO_ROW0(ICC) + JCC - 1
-                       IF (IROW<1 .OR. IROW>OM%NICC_R(2)) IROW = 0
-                    ENDIF
-                    IF (IROW>0) THEN
-                       VCELL   = OM%CCHALO_VOLUME(IROW)
-                       TMP_CC  = TMP_CC  + OM%CCHALO_TMP(IROW)*VCELL
-                       RSUM_CC = RSUM_CC + OM%CCHALO_RSUM(IROW)*VCELL
-                       IF (PREDICTOR) THEN
-                          RHO_CC = RHO_CC + OM%CCHALO_RHOS(IROW)*VCELL
-                          D_CC   = D_CC   + OM%CCHALO_D(IROW)*VCELL
-                          DO NN=1,N_TOTAL_SCALARS
-                             ZZ_CC(NN) = ZZ_CC(NN) + OM%CCHALO_ZZS(NN,IROW)*VCELL
-                          ENDDO
-                       ELSE
-                          RHO_CC = RHO_CC + OM%CCHALO_RHO(IROW)*VCELL
-                          D_CC   = D_CC   + OM%CCHALO_DS(IROW)*VCELL
-                          DO NN=1,N_TOTAL_SCALARS
-                             ZZ_CC(NN) = ZZ_CC(NN) + OM%CCHALO_ZZ(NN,IROW)*VCELL
-                          ENDDO
-                       ENDIF
-                       VOL = VOL + VCELL
-                    ELSE IF (.NOT.SOURCE_REMOTE) THEN
-                       VCELL   = OCC%VOLUME(JCC)
-                       ICV=0
-                       IG = OCC%IG(JCC)
-                       IF (USE_FV_SRC) CALL GET_FV_CV_FOR_CUTCELL(NOM,ICC,JCC,ICV)
-                       IF (IG>=1) THEN
-                          TMP_CC  = TMP_CC  + FV_SRC%CV%TMP(IG)*VCELL
-                          RSUM_CC = RSUM_CC + FV_SRC%CV%RSUM(IG)*VCELL
-                          IF (PREDICTOR) THEN
-                             RHO_CC = RHO_CC + FV_SRC%CV%RHOS(IG)*VCELL
-                             DO NN=1,N_TOTAL_SCALARS
-                                ZZ_CC(NN) = ZZ_CC(NN) + FV_SRC%CV%ZZS(NN,IG)*VCELL
-                             ENDDO
-                             IF (ICV>0) THEN
-                                D_CC = D_CC + FV_SRC%CV%D(ICV)*VCELL
-                             ELSE
-                                D_CC = D_CC + FV_SRC%CV%D(IG)*VCELL
-                             ENDIF
-                          ELSE
-                             RHO_CC = RHO_CC + FV_SRC%CV%RHO(IG)*VCELL
-                             DO NN=1,N_TOTAL_SCALARS
-                                ZZ_CC(NN) = ZZ_CC(NN) + FV_SRC%CV%ZZ(NN,IG)*VCELL
-                             ENDDO
-                             IF (ICV>0) THEN
-                                D_CC = D_CC + FV_SRC%CV%DS(ICV)*VCELL
-                             ELSE
-                                D_CC = D_CC + FV_SRC%CV%DS(IG)*VCELL
-                             ENDIF
-                          ENDIF
-                       ELSE
-                          TMP_CC  = TMP_CC  + MESHES(NOM)%TMP(IIO,JJO,KKO)*VCELL
-                          RSUM_CC = RSUM_CC + MESHES(NOM)%RSUM(IIO,JJO,KKO)*VCELL
-                          IF (PREDICTOR) THEN
-                             RHO_CC = RHO_CC + MESHES(NOM)%RHOS(IIO,JJO,KKO)*VCELL
-                             D_CC   = D_CC   + MESHES(NOM)%D(IIO,JJO,KKO)*VCELL
-                             DO NN=1,N_TOTAL_SCALARS
-                                ZZ_CC(NN) = ZZ_CC(NN) + MESHES(NOM)%ZZS(IIO,JJO,KKO,NN)*VCELL
-                             ENDDO
-                          ELSE
-                             RHO_CC = RHO_CC + MESHES(NOM)%RHO(IIO,JJO,KKO)*VCELL
-                             D_CC   = D_CC   + MESHES(NOM)%DS(IIO,JJO,KKO)*VCELL
-                             DO NN=1,N_TOTAL_SCALARS
-                                ZZ_CC(NN) = ZZ_CC(NN) + MESHES(NOM)%ZZ(IIO,JJO,KKO,NN)*VCELL
-                             ENDDO
-                          ENDIF
-                       ENDIF
-                       VOL = VOL + VCELL
-                    ENDIF
-                 ENDDO
-              ELSEIF(MESHES(NOM)%CCVAR(IIO,JJO,KKO,CC_CGSC) == CC_GASPHASE .OR. ICC > 0) THEN
-                 ! Regular cell or unvalidated remote cut-cell.
-                 VCELL = MESHES(NOM)%DX(IIO)*MESHES(NOM)%DY(JJO)*MESHES(NOM)%DZ(KKO)
-                 TMP_CC  = TMP_CC + TMP(BC%II,BC%JJ,BC%KK)*VCELL
-                 IF (PREDICTOR) THEN
-                    RHO_CC = RHO_CC + RHOS(BC%II,BC%JJ,BC%KK)*VCELL
-                    D_CC   = D_CC   + D(BC%II,BC%JJ,BC%KK)*VCELL
-                    DO NN=1,N_TOTAL_SCALARS
-                       ZZ_CC(NN) = ZZ_CC(NN) + ZZS(BC%II,BC%JJ,BC%KK,NN)*VCELL
-                    ENDDO
-                 ELSE
-                    RHO_CC = RHO_CC + RHO(BC%II,BC%JJ,BC%KK)*VCELL
-                    D_CC   = D_CC   + DS(BC%II,BC%JJ,BC%KK)*VCELL
-                    DO NN=1,N_TOTAL_SCALARS
-                       ZZ_CC(NN) = ZZ_CC(NN) + ZZ(BC%II,BC%JJ,BC%KK,NN)*VCELL
-                    ENDDO
-                 ENDIF
-                 VOL     = VOL + VCELL
-              ENDIF
-            ENDDO
-         ENDDO
-      ENDDO
-      ! Add volume averaged variables into ghost cut-cell; publish mapped rows to FV first:
-      ICC   = CCVAR(BC%II,BC%JJ,BC%KK,CC_IDCC)
-      IF (PREDICTOR) THEN
-         DO JCC=1,CUT_CELL(ICC)%NCELL
-            IG = CUT_CELL(ICC)%IG(JCC)
-            IF (IG>=1) THEN
-               FV_DST%CV%RHOS(IG) = RHO_CC/VOL
-               FV_DST%CV%TMP(IG)  = TMP_CC/VOL
-               FV_DST%CV%RSUM(IG) = RSUM_CC/VOL
-               FV_DST%CV%ZZS(1:N_TOTAL_SCALARS,IG) = ZZ_CC(1:N_TOTAL_SCALARS)/VOL
-               FV_DST%CV%D(IG)    = D_CC/VOL
-            ENDIF
-         ENDDO
-      ELSE
-         DO JCC=1,CUT_CELL(ICC)%NCELL
-            IG = CUT_CELL(ICC)%IG(JCC)
-            IF (IG>=1) THEN
-               FV_DST%CV%RHO(IG) = RHO_CC/VOL
-               FV_DST%CV%TMP(IG)  = TMP_CC/VOL
-               FV_DST%CV%ZZ(1:N_TOTAL_SCALARS,IG) = ZZ_CC(1:N_TOTAL_SCALARS)/VOL
-               FV_DST%CV%DS(IG)   = D_CC/VOL
-            ENDIF
-         ENDDO
-     ENDIF
-   ENDDO EXTERNAL_WALL_LOOP
-ENDDO MESH_LOOP
-
-
-END SUBROUTINE FILL_GCCUTCELL_SPECIES
-
 
 SUBROUTINE CC_TIMEOUT(RNAME,NR,RR)
 
@@ -5559,63 +5405,6 @@ ELSE
 ENDIF
 
 END SUBROUTINE CC_TIMEOUT
-
-SUBROUTINE DEALLOCATE_CCHALO(OM)
-TYPE(OMESH_TYPE), INTENT(INOUT) :: OM
-IF (ALLOCATED(OM%CCHALO_VOLUME)) DEALLOCATE(OM%CCHALO_VOLUME)
-IF (ALLOCATED(OM%CCHALO_RHO))    DEALLOCATE(OM%CCHALO_RHO)
-IF (ALLOCATED(OM%CCHALO_RHOS))   DEALLOCATE(OM%CCHALO_RHOS)
-IF (ALLOCATED(OM%CCHALO_TMP))    DEALLOCATE(OM%CCHALO_TMP)
-IF (ALLOCATED(OM%CCHALO_RSUM))   DEALLOCATE(OM%CCHALO_RSUM)
-IF (ALLOCATED(OM%CCHALO_D))      DEALLOCATE(OM%CCHALO_D)
-IF (ALLOCATED(OM%CCHALO_DS))     DEALLOCATE(OM%CCHALO_DS)
-IF (ALLOCATED(OM%CCHALO_ZZ))     DEALLOCATE(OM%CCHALO_ZZ)
-IF (ALLOCATED(OM%CCHALO_ZZS))    DEALLOCATE(OM%CCHALO_ZZS)
-IF (ALLOCATED(OM%CCHALO_ROW0))   DEALLOCATE(OM%CCHALO_ROW0)
-END SUBROUTINE DEALLOCATE_CCHALO
-
-SUBROUTINE ALLOCATE_CCHALO(OM,NM_RECV,NOM_SEND)
-TYPE(OMESH_TYPE), INTENT(INOUT) :: OM
-INTEGER, INTENT(IN) :: NM_RECV,NOM_SEND
-INTEGER :: ICC1,ICC,JCC,IROW,N_ROW0
-IF (NM_RECV<1 .OR. NOM_SEND<1) RETURN
-IROW = 0
-N_ROW0 = MESHES(NOM_SEND)%N_CUTCELL_MESH + MESHES(NOM_SEND)%N_GCCUTCELL_MESH
-ALLOCATE(OM%CCHALO_VOLUME(OM%NICC_R(2)))
-ALLOCATE(OM%CCHALO_RHO(OM%NICC_R(2)))
-ALLOCATE(OM%CCHALO_RHOS(OM%NICC_R(2)))
-ALLOCATE(OM%CCHALO_TMP(OM%NICC_R(2)))
-ALLOCATE(OM%CCHALO_RSUM(OM%NICC_R(2)))
-ALLOCATE(OM%CCHALO_D(OM%NICC_R(2)))
-ALLOCATE(OM%CCHALO_DS(OM%NICC_R(2)))
-ALLOCATE(OM%CCHALO_ZZ(1:N_TOTAL_SCALARS,1:OM%NICC_R(2)))
-ALLOCATE(OM%CCHALO_ZZS(1:N_TOTAL_SCALARS,1:OM%NICC_R(2)))
-ALLOCATE(OM%CCHALO_ROW0(N_ROW0))
-OM%CCHALO_VOLUME = 0._EB
-OM%CCHALO_RHO = 0._EB
-OM%CCHALO_RHOS = 0._EB
-OM%CCHALO_TMP = 0._EB
-OM%CCHALO_RSUM = 0._EB
-OM%CCHALO_D = 0._EB
-OM%CCHALO_DS = 0._EB
-OM%CCHALO_ZZ = 0._EB
-OM%CCHALO_ZZS = 0._EB
-OM%CCHALO_ROW0 = 0
-! Same walk as the PKG11 unpack: ICC1 over NICC_R(1), ICC=ICC_UNKZ_CC_R(ICC1),
-! skip ICC<1 without advancing the row counter, then JCC=1..NCELL.
-! CCHALO_ROW0(ICC) is the first row of that contiguous JCC=1..NCELL block.
-DO ICC1=1,OM%NICC_R(1)
-   ICC = OM%ICC_UNKZ_CC_R(ICC1)
-   IF (ICC < 1) CYCLE
-   DO JCC=1,MESHES(NOM_SEND)%CUT_CELL(ICC)%NCELL
-      IROW = IROW + 1
-      OM%CCHALO_VOLUME(IROW) = MESHES(NOM_SEND)%CUT_CELL(ICC)%VOLUME(JCC)
-      IF (ICC<=N_ROW0) THEN
-         IF (OM%CCHALO_ROW0(ICC)==0) OM%CCHALO_ROW0(ICC) = IROW
-      ENDIF
-   ENDDO
-ENDDO
-END SUBROUTINE ALLOCATE_CCHALO
 
 END SUBROUTINE MESH_CC_EXCHANGE
 
@@ -7803,6 +7592,7 @@ CALL CC_SET_THERMO_ROWS
 CALL CC_SET_CVCHEM_LISTS
 CALL CC_SET_DENSITY_LISTS
 CALL CC_SET_CF_HALO_LISTS
+CALL CC_SET_GUARD_ROWS
 IF (GET_CUTCELLS_VERBOSE .AND. MY_RANK==0) THEN
    CALL CPU_TIME(TDEL)
    WRITE(LU_ERR,'(A,F8.3,A)') ' Executing SET_CFACES_P1_RDN. Time taken : ',TDEL-TNOW,' sec.'
@@ -8683,7 +8473,6 @@ IF (TIME_CC_IBM) THEN
 ENDIF
 
 ! Release Requests:
-DO I=1,N_REQ11  ; CALL MPI_REQUEST_FREE(REQ11(I) ,IERR) ; ENDDO
 DO I=1,N_REQ12  ; CALL MPI_REQUEST_FREE(REQ12(I) ,IERR) ; ENDDO
 DO I=1,N_REQ13  ; CALL MPI_REQUEST_FREE(REQ13(I) ,IERR) ; ENDDO
 
@@ -18515,274 +18304,6 @@ SUBROUTINE GET_BOUNDFACE_GEOM_INFO_H
 RETURN
 END SUBROUTINE GET_BOUNDFACE_GEOM_INFO_H
 
-! ----------------------- FILL_UNKZ_GUARDCELLS ---------------------------------
-SUBROUTINE FILL_UNKZ_GUARDCELLS
-
-USE MPI_F08
-
-! Local Variables:
-INTEGER :: NM,NOM,IERR
-TYPE (MESH_TYPE), POINTER :: M
-TYPE (OMESH_TYPE), POINTER :: M2,M3
-TYPE (MPI_REQUEST), ALLOCATABLE, DIMENSION(:) :: REQ0,REQ0DUM
-INTEGER :: N_REQ0, NICC_R, ICC, ICC1, NICC_VALID, NUNKZ_VALID, N_MASK
-INTEGER :: IIO,JJO,KKO,IOR,IW
-
-
-! First allocate buffers to receive UNKZ information:
-DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-   DO NOM=1,NMESHES
-      IF (MESHES(NM)%OMESH(NOM)%NICC_R(1)>0) THEN
-         M3 => MESHES(NM)%OMESH(NOM)
-         ALLOCATE(M3%ICC_UNKZ_CC_R(3*M3%NICC_R(1))); M3%ICC_UNKZ_CC_R = CC_UNDEFINED
-
-         ! Dump cut-cell indexes on sending mesh NOM, whose info will be received:
-         NICC_R = 0
-         CALL POINT_TO_MESH(NM)
-         ! Loop over cut-cells:
-         EXTERNAL_WALL_LOOP_1A : DO IW=1,N_EXTERNAL_WALL_CELLS
-            WC=>WALL(IW)
-            IF (.NOT.ANY(WC%BOUNDARY_TYPE==(/INTERPOLATED_BOUNDARY,MIRROR_BOUNDARY/))) CYCLE EXTERNAL_WALL_LOOP_1A
-            EWC=>EXTERNAL_WALL(IW); BC=>BOUNDARY_COORD(WC%BC_INDEX)
-            IF ( WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY ) THEN
-               IF (EWC%NOM/=NOM) CYCLE EXTERNAL_WALL_LOOP_1A
-               IF (CCVAR(BC%II,BC%JJ,BC%KK,CC_CGSC) /= CC_CUTCFE) CYCLE EXTERNAL_WALL_LOOP_1A
-               DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
-                  DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
-                     DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
-                       ICC   = MESHES(NOM)%CCVAR(IIO,JJO,KKO,CC_IDCC)
-                       IF (ICC > 0) THEN
-                          NICC_R = NICC_R + 1
-                          M3%ICC_UNKZ_CC_R(3*NICC_R-2:3*NICC_R) = (/ IIO, JJO, KKO /) ! Note : This ICC index refers to NOM mesh.
-                       ENDIF
-                     ENDDO
-                  ENDDO
-               ENDDO
-            ELSEIF ( WC%BOUNDARY_TYPE==MIRROR_BOUNDARY ) THEN
-               IF (NM/=NOM) CYCLE EXTERNAL_WALL_LOOP_1A
-               IF (CCVAR(BC%II,BC%JJ,BC%KK,CC_CGSC) /= CC_CUTCFE) CYCLE EXTERNAL_WALL_LOOP_1A
-               IIO = BC%IIG; JJO = BC%JJG; KKO = BC%KKG; IOR = BC%IOR
-               ! CYCLE if OBJECT face is in the Mirror Boundary, normal out into ghost-cell:
-               SELECT CASE(IOR)
-               CASE( IAXIS); IF(FCVAR(IIO-1,JJO  ,KKO  ,CC_FGSC,IAXIS) == CC_SOLID) CYCLE EXTERNAL_WALL_LOOP_1A
-               CASE(-IAXIS); IF(FCVAR(IIO  ,JJO  ,KKO  ,CC_FGSC,IAXIS) == CC_SOLID) CYCLE EXTERNAL_WALL_LOOP_1A
-               CASE( JAXIS); IF(FCVAR(IIO  ,JJO-1,KKO  ,CC_FGSC,JAXIS) == CC_SOLID) CYCLE EXTERNAL_WALL_LOOP_1A
-               CASE(-JAXIS); IF(FCVAR(IIO  ,JJO  ,KKO  ,CC_FGSC,JAXIS) == CC_SOLID) CYCLE EXTERNAL_WALL_LOOP_1A
-               CASE( KAXIS); IF(FCVAR(IIO  ,JJO  ,KKO-1,CC_FGSC,KAXIS) == CC_SOLID) CYCLE EXTERNAL_WALL_LOOP_1A
-               CASE(-KAXIS); IF(FCVAR(IIO  ,JJO  ,KKO  ,CC_FGSC,KAXIS) == CC_SOLID) CYCLE EXTERNAL_WALL_LOOP_1A
-               END SELECT
-               ICC = MESHES(NOM)%CCVAR(IIO,JJO,KKO,CC_IDCC); IF (ICC<1) CYCLE
-               NICC_R = NICC_R + 1
-               M3%ICC_UNKZ_CC_R(3*NICC_R-2:3*NICC_R) = (/ IIO, JJO, KKO /) ! Note : This ICC index refers to NOM==NM mesh.
-            ENDIF
-         ENDDO EXTERNAL_WALL_LOOP_1A
-      ENDIF
-   ENDDO
-ENDDO
-
-CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
-
-IF (N_MPI_PROCESSES>1) ALLOCATE(REQ0(NMESHES))
-! Exchange number of cut-cells information to be exchanged between MESH and OMESHES:
-N_REQ0 = 0
-DO NM=1,NMESHES
-   DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-      IF (N_MPI_PROCESSES>1 .AND. NM/=NOM .AND. PROCESS(NM)/=MY_RANK .AND. MESHES(NOM)%CONNECTED_MESH(NM)) THEN
-         M2 => MESHES(NOM)%OMESH(NM)
-         N_REQ0 = N_REQ0 + 1; CALL CHECK_REQ0_SIZE
-         CALL MPI_IRECV(M2%NICC_S(1),2,MPI_INTEGER,PROCESS(NM),NM,MPI_COMM_WORLD,REQ0(N_REQ0),IERR)
-      ENDIF
-   ENDDO
-ENDDO
-! DEFINITION NCC_S:   MESHES(NOM)%OMESH(NM)%NCC_S   = MESHES(NM)%OMESH(NOM)%NCC_R
-DO NM=1,NMESHES
-   CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)  ! This call orders the sending mesh by mesh.
-   IF (PROCESS(NM)/=MY_RANK) CYCLE
-   DO NOM=1,NMESHES
-      IF (NM/=NOM .AND. .NOT.MESHES(NM)%CONNECTED_MESH(NOM)) CYCLE
-      M3 => MESHES(NM)%OMESH(NOM)
-      IF (N_MPI_PROCESSES>1 .AND. NM/=NOM .AND. PROCESS(NOM)/=MY_RANK .AND. MESHES(NM)%CONNECTED_MESH(NOM)) THEN
-         N_REQ0 = N_REQ0 + 1; CALL CHECK_REQ0_SIZE
-         CALL MPI_ISEND(M3%NICC_R(1),2,MPI_INTEGER,PROCESS(NOM),NM,MPI_COMM_WORLD,REQ0(N_REQ0),IERR)
-      ELSE
-         ! 2D, NM/NOM, CONNECTED_MESH=F and Several MPI process run.
-         IF(.NOT. ALLOCATED(MESHES(NOM)%OMESH)) CYCLE
-         M2 => MESHES(NOM)%OMESH(NM)
-         M2%NICC_S(1:2) = M3%NICC_R(1:2)
-      ENDIF
-   ENDDO
-ENDDO
-IF ((N_REQ0>0) .AND. (N_MPI_PROCESSES>1)) CALL MPI_WAITALL(N_REQ0,REQ0(1:N_REQ0),MPI_STATUSES_IGNORE,IERR)
-! At this point values of M2%NICC_S should have been received.
-! Now allocate buffers to send UNKZ information:
-DO NM=1,NMESHES
-   DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-      IF (MESHES(NOM)%OMESH(NM)%NICC_S(1)>0) THEN
-         M2 => MESHES(NOM)%OMESH(NM)
-         ALLOCATE(M2%ICC_UNKZ_CC_S(3*M2%NICC_S(1))); M2%ICC_UNKZ_CC_S = CC_UNDEFINED
-      ENDIF
-   ENDDO
-ENDDO
-
-! Exchange list of cutcells in ICC_UNKZ_CC_S/R:
-N_REQ0 = 0
-DO NM=1,NMESHES
-   DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-      M2 => MESHES(NOM)%OMESH(NM)
-      IF (N_MPI_PROCESSES>1 .AND. NM/=NOM .AND. PROCESS(NM)/=MY_RANK .AND. M2%NICC_S(1)>0) THEN
-         N_REQ0 = N_REQ0 + 1; CALL CHECK_REQ0_SIZE
-         CALL MPI_IRECV(M2%ICC_UNKZ_CC_S(1),3*M2%NICC_S(1),MPI_INTEGER,PROCESS(NM),NM,MPI_COMM_WORLD,REQ0(N_REQ0),IERR)
-      ENDIF
-   ENDDO
-ENDDO
-DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-   DO NOM=1,NMESHES
-      M3 => MESHES(NM)%OMESH(NOM)
-      IF (M3%NICC_R(1)<1) CYCLE
-      IF (PROCESS(NOM)/=MY_RANK) THEN
-         N_REQ0 = N_REQ0 + 1; CALL CHECK_REQ0_SIZE
-         CALL MPI_ISEND(M3%ICC_UNKZ_CC_R(1),3*M3%NICC_R(1),MPI_INTEGER,PROCESS(NOM),NM,MPI_COMM_WORLD,REQ0(N_REQ0),IERR)
-      ELSE
-         M2 => MESHES(NOM)%OMESH(NM)
-         M2%ICC_UNKZ_CC_S(1:3*M2%NICC_S(1)) = M3%ICC_UNKZ_CC_R(1:3*M3%NICC_R(1))
-      ENDIF
-   ENDDO
-ENDDO
-IF ((N_REQ0>0) .AND. (N_MPI_PROCESSES>1)) CALL MPI_WAITALL(N_REQ0,REQ0(1:N_REQ0),MPI_STATUSES_IGNORE,IERR)
-
-DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-   M => MESHES(NM)
-   DO NOM=1,NMESHES
-      M3 => MESHES(NM)%OMESH(NOM)
-      IF (.NOT.ALLOCATED(M3%ICC_UNKZ_CC_S)) CYCLE
-      NICC_VALID  = 0
-      NUNKZ_VALID = 0
-      DO ICC1=1,M3%NICC_S(1)
-         IIO = M3%ICC_UNKZ_CC_S(3*ICC1-2)
-         JJO = M3%ICC_UNKZ_CC_S(3*ICC1-1)
-         KKO = M3%ICC_UNKZ_CC_S(3*ICC1  )
-         ICC = M%CCVAR(IIO,JJO,KKO,CC_IDCC)
-         IF (ICC<1 .OR. M%CCVAR(IIO,JJO,KKO,CC_CGSC)/=CC_CUTCFE) CYCLE
-         NICC_VALID = NICC_VALID + 1
-         M3%ICC_UNKZ_CC_S(3*NICC_VALID-2:3*NICC_VALID) = (/ IIO, JJO, KKO /)
-         NUNKZ_VALID = NUNKZ_VALID + M%CUT_CELL(ICC)%NCELL
-      ENDDO
-      M3%NICC_S(1) = NICC_VALID
-      M3%NICC_S(2) = NUNKZ_VALID
-   ENDDO
-ENDDO
-
-! Exchange the sender-validated cut-cell counts back to the receivers.
-N_REQ0 = 0
-DO NM=1,NMESHES
-   DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-      M2 => MESHES(NOM)%OMESH(NM)
-      IF (N_MPI_PROCESSES>1 .AND. NM/=NOM .AND. PROCESS(NM)/=MY_RANK .AND. M2%NICC_R(1)>0) THEN
-         N_REQ0 = N_REQ0 + 1; CALL CHECK_REQ0_SIZE
-         CALL MPI_IRECV(M2%NICC_R(1),2,MPI_INTEGER,PROCESS(NM),NM,MPI_COMM_WORLD,REQ0(N_REQ0),IERR)
-      ENDIF
-   ENDDO
-ENDDO
-DO NM=1,NMESHES
-   CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)
-   IF (PROCESS(NM)/=MY_RANK) CYCLE
-   DO NOM=1,NMESHES
-      IF (NM/=NOM .AND. .NOT.MESHES(NM)%CONNECTED_MESH(NOM)) CYCLE
-      M3 => MESHES(NM)%OMESH(NOM)
-      IF (.NOT.ALLOCATED(M3%ICC_UNKZ_CC_S)) CYCLE
-      IF (N_MPI_PROCESSES>1 .AND. NM/=NOM .AND. PROCESS(NOM)/=MY_RANK) THEN
-         N_REQ0 = N_REQ0 + 1; CALL CHECK_REQ0_SIZE
-         CALL MPI_ISEND(M3%NICC_S(1),2,MPI_INTEGER,PROCESS(NOM),NM,MPI_COMM_WORLD,REQ0(N_REQ0),IERR)
-      ELSE
-         IF(.NOT. ALLOCATED(MESHES(NOM)%OMESH)) CYCLE
-         M2 => MESHES(NOM)%OMESH(NM)
-         M2%NICC_R(1:2) = M3%NICC_S(1:2)
-      ENDIF
-   ENDDO
-ENDDO
-IF ((N_REQ0>0) .AND. (N_MPI_PROCESSES>1)) CALL MPI_WAITALL(N_REQ0,REQ0(1:N_REQ0),MPI_STATUSES_IGNORE,IERR)
-
-! Exchange the compacted cut-cell coordinate list back to the receivers.
-N_REQ0 = 0
-DO NM=1,NMESHES
-   DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-      M2 => MESHES(NOM)%OMESH(NM)
-      IF (N_MPI_PROCESSES>1 .AND. NM/=NOM .AND. PROCESS(NM)/=MY_RANK .AND. ALLOCATED(M2%ICC_UNKZ_CC_R)) THEN
-         N_REQ0 = N_REQ0 + 1; CALL CHECK_REQ0_SIZE
-         CALL MPI_IRECV(M2%ICC_UNKZ_CC_R(1),3*M2%NICC_R(1),MPI_INTEGER,PROCESS(NM),NM,MPI_COMM_WORLD,REQ0(N_REQ0),IERR)
-      ENDIF
-   ENDDO
-ENDDO
-DO NM=1,NMESHES
-   CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)
-   IF (PROCESS(NM)/=MY_RANK) CYCLE
-   DO NOM=1,NMESHES
-      IF (NM/=NOM .AND. .NOT.MESHES(NM)%CONNECTED_MESH(NOM)) CYCLE
-      M3 => MESHES(NM)%OMESH(NOM)
-      IF (.NOT.ALLOCATED(M3%ICC_UNKZ_CC_S)) CYCLE
-      IF (N_MPI_PROCESSES>1 .AND. NM/=NOM .AND. PROCESS(NOM)/=MY_RANK) THEN
-         N_REQ0 = N_REQ0 + 1; CALL CHECK_REQ0_SIZE
-         CALL MPI_ISEND(M3%ICC_UNKZ_CC_S(1),3*M3%NICC_S(1),MPI_INTEGER,PROCESS(NOM),NM,MPI_COMM_WORLD,REQ0(N_REQ0),IERR)
-      ELSE
-         IF(.NOT. ALLOCATED(MESHES(NOM)%OMESH)) CYCLE
-         M2 => MESHES(NOM)%OMESH(NM)
-         IF (M2%NICC_R(1)>0) M2%ICC_UNKZ_CC_R(1:3*M2%NICC_R(1)) = M3%ICC_UNKZ_CC_S(1:3*M3%NICC_S(1))
-      ENDIF
-   ENDDO
-ENDDO
-IF ((N_REQ0>0) .AND. (N_MPI_PROCESSES>1)) CALL MPI_WAITALL(N_REQ0,REQ0(1:N_REQ0),MPI_STATUSES_IGNORE,IERR)
-
-! Convert compacted coordinate lists to local ICC indices on sender and receiver.
-DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-   M => MESHES(NM)
-   DO NOM=1,NMESHES
-      M3 => MESHES(NM)%OMESH(NOM)
-      IF (M3%NICC_S(1)<1) CYCLE
-      DO ICC1=1,M3%NICC_S(1)
-         IIO = M3%ICC_UNKZ_CC_S(3*ICC1-2)
-         JJO = M3%ICC_UNKZ_CC_S(3*ICC1-1)
-         KKO = M3%ICC_UNKZ_CC_S(3*ICC1  )
-         M3%ICC_UNKZ_CC_S(ICC1) = M%CCVAR(IIO,JJO,KKO,CC_IDCC)
-      ENDDO
-   ENDDO
-ENDDO
-DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-   DO NOM=1,NMESHES
-      M3 => MESHES(NM)%OMESH(NOM)
-      IF (ALLOCATED(M3%ICC_UNKZ_CC_R_MASK)) DEALLOCATE(M3%ICC_UNKZ_CC_R_MASK)
-      IF (M3%NICC_R(1)<1) CYCLE
-      M => MESHES(NOM)
-      N_MASK = M%N_CUTCELL_MESH + M%N_GCCUTCELL_MESH
-      ALLOCATE(M3%ICC_UNKZ_CC_R_MASK(N_MASK)); M3%ICC_UNKZ_CC_R_MASK = .FALSE.
-      DO ICC1=1,M3%NICC_R(1)
-         IIO = M3%ICC_UNKZ_CC_R(3*ICC1-2)
-         JJO = M3%ICC_UNKZ_CC_R(3*ICC1-1)
-         KKO = M3%ICC_UNKZ_CC_R(3*ICC1  )
-         M3%ICC_UNKZ_CC_R(ICC1) = M%CCVAR(IIO,JJO,KKO,CC_IDCC)
-         ICC = M3%ICC_UNKZ_CC_R(ICC1)
-         IF (ICC>=1 .AND. ICC<=N_MASK) M3%ICC_UNKZ_CC_R_MASK(ICC) = .TRUE.
-      ENDDO
-   ENDDO
-ENDDO
-
-IF (N_MPI_PROCESSES>1) THEN
-   DEALLOCATE(REQ0)
-   CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)
-ENDIF
-
-RETURN
-
-CONTAINS
-SUBROUTINE CHECK_REQ0_SIZE
-IF(N_REQ0>SIZE(REQ0,DIM=1)) THEN
-   ALLOCATE(REQ0DUM(SIZE(REQ0,DIM=1)+NMESHES))
-   REQ0DUM(1:N_REQ0-1) = REQ0(1:N_REQ0-1)
-   CALL MOVE_ALLOC(REQ0DUM,REQ0)
-ENDIF
-END SUBROUTINE CHECK_REQ0_SIZE
-
-END SUBROUTINE FILL_UNKZ_GUARDCELLS
-
 ! ----------------------------- GET_CC_UNKH ------------------------------------
 
 SUBROUTINE GET_CC_UNKH(I,J,K,IUNKH)
@@ -22115,9 +21636,6 @@ ENDDO
       CALL SYNC_FV_SCALAR_UNKNOWNS(NM)
    ENDDO
    CALL SYNC_FV_SCALAR_UNKNOWNS_GLOBAL
-
-! Exchange Guardcell + guard cc information on CC_UNKZ:
-CALL FILL_UNKZ_GUARDCELLS
 
 ! Finally set to solid Gasphase cut-faces which have a surrounding cut-cell inside an OBST:
 DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
