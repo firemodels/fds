@@ -2187,7 +2187,7 @@ EDGE_LOOP: DO IE=1,EDGE_COUNT(NM)
             ENDIF WIND_NO_WIND_IF
 
             IF (CC_IBM) CALL GET_OPENBC_TANGENTIAL_CUTFACE_VEL(APPLY_TO_ESTIMATED_VARIABLES,UPWIND_BOUNDARY,&
-                                                               INFLOW_BOUNDARY,IEC,II,JJ,KK,IOR,UU,VV,WW)
+                                                               INFLOW_BOUNDARY,IEC,II,JJ,KK,IOR,UU,VV,WW,NM)
 
             IF (IWM/=0 .AND. IWP/=0) THEN
                CYCLE EDGE_LOOP  ! Do no further processing of this edge if both cell faces are OPEN
