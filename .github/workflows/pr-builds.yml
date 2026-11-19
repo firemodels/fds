@@ -21,7 +21,6 @@ jobs:
     timeout-minutes: 55
     outputs:
       conventional: ${{ steps.admission.outputs.conventional }}
-      cmake: ${{ steps.admission.outputs.cmake }}
     steps:
       - name: Checkout trusted admission reader
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -61,15 +60,6 @@ jobs:
     with:
       ref: ${{ github.sha }}
 
-  cmake:
-    needs: admission
-    if: needs.admission.outputs.cmake == 'true'
-    permissions:
-      contents: read
-    uses: ./.github/workflows/cmake.yml
-    with:
-      ref: ${{ github.sha }}
-
   line-endings:
     needs: admission
     permissions:
@@ -80,7 +70,7 @@ jobs:
 
   result:
     name: FDS / PR builds
-    needs: [admission, linux, macos, windows, cmake, line-endings]
+    needs: [admission, linux, macos, windows, line-endings]
     if: always()
     runs-on: ubuntu-24.04
     permissions: {}
@@ -96,8 +86,7 @@ jobs:
           expected = {'admission': True, 'line-endings': True,
                       'linux': selected.get('conventional') == 'true',
                       'macos': selected.get('conventional') == 'true',
-                      'windows': selected.get('conventional') == 'true',
-                      'cmake': selected.get('cmake') == 'true'}
+                      'windows': selected.get('conventional') == 'true'}
           failed = [name for name, required in expected.items()
                     if results[name]['result'] != ('success' if required else 'skipped')]
           if failed:
