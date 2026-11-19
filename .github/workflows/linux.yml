@@ -66,12 +66,48 @@ jobs:
 
     name: linux gnu openmpi
     runs-on: [ubuntu-latest]
+    env:
+      UBUNTU_MIRRORS: |
+        http://azure.archive.ubuntu.com/ubuntu
+        http://archive.ubuntu.com/ubuntu
+        http://mirrors.edge.kernel.org/ubuntu
+        http://mirrors.mit.edu/ubuntu
+        http://mirror.math.princeton.edu/pub/ubuntu
+        http://ubuntu.osuosl.org/ubuntu
 
     steps:
     - name: install openmpi
       run: |
-        sudo apt-get update
-        sudo apt-get install libopenmpi-dev openmpi-bin
+        # Check Ubuntu's signed indexes before choosing a mirror.
+        root=()
+        if [ "$EUID" -ne 0 ]; then root=(sudo); fi
+        sources=/etc/apt/sources.list.d/ubuntu.sources
+        if [ ! -f "$sources" ]; then sources=/etc/apt/sources.list; fi
+        original_sources=$(cat "$sources")
+        mirror_ready=false
+        for mirror in $UBUNTU_MIRRORS; do
+          echo "Trying Ubuntu mirror: $mirror"
+          # Handle both direct Ubuntu URLs and the hosted runner's mirror-list URI.
+          printf '%s\n' "$original_sources" |
+            sed -E "s@(https?://([[:alnum:].-]*archive\.ubuntu\.com|security\.ubuntu\.com)/ubuntu/?|mirror\+file:/etc/apt/apt-mirrors\.txt)@$mirror/@g" |
+            "${root[@]}" tee "$sources" > /dev/null
+          if "${root[@]}" timeout --kill-after=5s 90s apt-get \
+            -o Dir::Etc::sourcelist="$sources" -o Dir::Etc::sourceparts="-" \
+            -o APT::Update::Error-Mode=any -o Acquire::Retries=0 \
+            -o Acquire::http::Timeout=15 -o Acquire::https::Timeout=15 update
+          then
+            echo "Using Ubuntu mirror: $mirror"
+            echo "Ubuntu mirror: $mirror" >> "$GITHUB_STEP_SUMMARY"
+            mirror_ready=true
+            break
+          fi
+          echo "::warning title=Ubuntu mirror unavailable::$mirror could not supply the package indexes; continuing to the next mirror."
+        done
+        if [ "$mirror_ready" != true ]; then
+          echo "::error title=Ubuntu dependency setup unavailable::None of the six mirrors supplied the package indexes. FDS was not built."
+          exit 1
+        fi
+        sudo apt-get -y install libopenmpi-dev openmpi-bin
     - uses: marcfehling/setup-oneapi@v0
       with:
         components: |

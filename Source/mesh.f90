@@ -246,7 +246,7 @@ TYPE MESH_TYPE
    TYPE(CC_CUTFACE_TYPE),   ALLOCATABLE, DIMENSION(:) :: CUT_FACE
    TYPE(CC_CUTCELL_TYPE),   ALLOCATABLE, DIMENSION(:) :: CUT_CELL
 
-   TYPE(CC_GCELL_TYPE) :: GCELL
+   TYPE(CC_FV_TYPE) :: FV   ! Unstructured active-region container: FV%GCELL, FV%CV, FV%FACE.
 
    INTEGER :: CC_NREGFACE_Z(MAX_DIM)=0, CC_NBBREGFACE_Z(MAX_DIM)=0
    TYPE(CC_REGFACEZ_TYPE), ALLOCATABLE, DIMENSION(:) :: CC_REGFACE_IAXIS_Z, CC_REGFACE_JAXIS_Z, CC_REGFACE_KAXIS_Z
@@ -273,6 +273,31 @@ TYPE MESH_TYPE
 
    ! Linked face velocity arrays:
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: EWC_UN_LNK, UN_LNK, UN_ULNK
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: LNK_CART, LNK_PIECE !< FACE rows of the linked Cartesian faces and cut pieces.
+   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: GRAV_FACE !< (I,J,K) of the regular gas faces beside a scalar CV, by axis.
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: GRAV_PTR    !< GRAV_FACE(:,GRAV_PTR(AX):GRAV_PTR(AX+1)-1) are the AX faces.
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: INB_CF,INB_PTR !< In-boundary cut faces with a solid face and cell behind.
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: CF_GAS,CF_INB !< Gas and in-boundary cut faces of the mesh.
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: CF_GSV,CF_PRJ !< Gas cut faces in 0:IBP1 (guard ones from CF_GSV_G); those the
+                                                        !< projection updates (inside, FCVAR names them).
+   INTEGER :: CF_GSV_G=1
+   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: INB_SF,INB_ZF !< (I,J,K,axis): those faces by INB_PTR; all solid faces.
+   INTEGER :: CFL_NSLOT=0 !< Scalar CV rows with a member here (linked-cell CFL check), as slots in global row order.
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: CFL_SROW !< Global row of each slot (setup only).
+   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: CFL_REG,CFL_CUT !< (I,J,K,slot) and (ICC,JCC,slot) of the CV members.
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: CFL_XSLOT,CFL_XOWN,CFL_XMAP !< Cross-mesh rows: slot, owner, owner's entry.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: CFL_XQ !< (4,:) Their partial sums of UVWA, MURA, VOL, DIVG.
+   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: TH_REG,TH_CUT,TH_OCV !< Thermodynamic rows: (I,J,K,slot), (JCC,slot),
+                                                                !< (ICV,slot) of the members and owned CVs.
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: TH_CPTR !< TH_CUT(:,TH_CPTR(ICC):TH_CPTR(ICC+1)-1) are cut cell ICC's.
+   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: TH_FSLOT !< (owner side, neighbor side) slot of each FACE row, 0 if none.
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: H_RPTR,H_CPTR !< H_REG(:,H_RPTR(IPZ):H_RPTR(IPZ+1)-1) and H_CUT of zone IPZ.
+   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: H_REG !< (I,J,K) of regular pressure unknowns, grouped by zone.
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: H_CUT !< Cut-cell indexes of each zone, in cut-cell order.
+   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: CVC_REG,CVC_CUT !< Combustion per CV: the members held here of CVs with
+                                              !< members > 1, (I,J,K,slot,master) and (ICC,JCC,slot,master); master 1 or 0.
+   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: TH_PIECE !< (ICC,JCC) of every cut piece with a GCELL, in ICC/JCC order.
+   LOGICAL, ALLOCATABLE, DIMENSION(:) :: FV_ROW !< Scalar rows of this mesh carried by an owned CV.
 
    ! Array with boundary cut-face areas pes cut-cell, for use in cut-cell blocking.
    TYPE(CC_INBCF_AREA_TYPE), ALLOCATABLE, DIMENSION(:,:,:) :: INBCF_AREA
@@ -436,6 +461,8 @@ TYPE(CC_CUTEDGE_TYPE),   POINTER, DIMENSION(:) :: CUT_EDGE
 TYPE(CC_CUTFACE_TYPE),   POINTER, DIMENSION(:) :: CUT_FACE
 TYPE(CC_CUTCELL_TYPE),   POINTER, DIMENSION(:) :: CUT_CELL
 TYPE(CC_GCELL_TYPE),     POINTER              :: GCELL
+TYPE(CC_CV_TYPE),        POINTER              :: CV
+TYPE(CC_FACE_TYPE),      POINTER              :: FACE
 TYPE(CC_REGFACEZ_TYPE),  POINTER, DIMENSION(:) :: CC_REGFACE_IAXIS_Z, CC_REGFACE_JAXIS_Z, CC_REGFACE_KAXIS_Z
 TYPE(CC_RCFACE_TYPE), POINTER, DIMENSION(:):: RC_FACE
 TYPE(CC_EDGE_TYPE), POINTER, DIMENSION(:):: CC_RCEDGE, CC_IBEDGE
@@ -786,7 +813,9 @@ CCVAR=>M%CCVAR
 CUT_EDGE=>M%CUT_EDGE
 CUT_FACE=>M%CUT_FACE
 CUT_CELL=>M%CUT_CELL
-GCELL=>M%GCELL
+GCELL=>M%FV%GCELL
+CV=>M%FV%CV
+FACE=>M%FV%FACE
 CC_REGFACE_IAXIS_Z=>M%CC_REGFACE_IAXIS_Z
 CC_REGFACE_JAXIS_Z=>M%CC_REGFACE_JAXIS_Z
 CC_REGFACE_KAXIS_Z=>M%CC_REGFACE_KAXIS_Z

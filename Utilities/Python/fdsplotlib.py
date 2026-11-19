@@ -569,9 +569,10 @@ def dataplot(config_filename, **kwargs):
         start_idx = int(pp.d2_Data_Row - pp.d2_Col_Name_Row - 1)
 
         version_string = revision
-        if pp.VerStr_Filename:
+        version_filename = safe_strip(pp.VerStr_Filename)
+        if version_filename and version_filename.lower() != 'null':
             try:
-                with open(cmpdir + pp.VerStr_Filename, "r") as fver:
+                with open(cmpdir + version_filename, "r") as fver:
                     Lines = fver.readlines()
                     if Lines:
                         version_string = Lines[0].strip()

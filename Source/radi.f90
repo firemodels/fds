@@ -3401,7 +3401,7 @@ DO I=1,NRT
       ENDDO
    ENDDO
 ENDDO
- 
+
 
 END SUBROUTINE CALCULATE_FVM_ANGLES
 
@@ -4547,7 +4547,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                            DO IFACE=1,CF%NFACE
                               CFA => CFACE(CF%CFACE_INDEX(IFACE))
                               BC => BOUNDARY_COORD(CFA%BC_INDEX)
-                              DLF = DOT_PRODUCT(CF%NVEC_RAD(IAXIS:KAXIS,IFACE),DLA) ! Geometric normal: cut-cell balance closes.
+                              DLF = DOT_PRODUCT(FACE%NVEC_RAD(IAXIS:KAXIS,CF%FC(IFACE)),DLA)
                               IF (DLF>0._EB) THEN ! upwind
                                  BR  => BOUNDARY_RADIA(CFA%BR_INDEX)
                                  AILFU = AILFU + DLF*CFA%AREA*BR%BAND(IBND)%ILW(N)
@@ -4963,10 +4963,15 @@ END SUBROUTINE CALC_PARTICLE_TEMP_ORIENTATION
 
 SUBROUTINE ADD_VOLUMETRIC_HEAT_SOURCE(MODE)
 
+USE CC_SCALARS, ONLY: GET_FV_CV_FOR_CUTCELL
+USE TYPES, ONLY: CC_CV_TYPE
 INTEGER, INTENT(IN) :: MODE
 REAL(EB) :: TIME_RAMP_FACTOR,RR
 INTEGER :: N,I,J,K,ICC,JCC
 TYPE(INITIALIZATION_TYPE), POINTER :: IN
+TYPE(CC_CV_TYPE), POINTER :: CV
+
+IF (CC_IBM) CV => MESHES(NM)%FV%CV
 
 DO N=1,N_INIT
    IN => INITIALIZATION(N)
@@ -5000,7 +5005,7 @@ DO N=1,N_INIT
                IF (CCVAR(I,J,K,CC_IDCC) > 0) THEN ! we have a cutcell
                   ICC=CCVAR(I,J,K,CC_IDCC)
                   DO JCC=1,CUT_CELL(ICC)%NCELL
-                     CUT_CELL(ICC)%Q(JCC) = CUT_CELL(ICC)%Q(JCC) + TIME_RAMP_FACTOR*IN%HRRPUV
+                     CV%Q(CUT_CELL(ICC)%IG(JCC))=CV%Q(CUT_CELL(ICC)%IG(JCC))+TIME_RAMP_FACTOR*IN%HRRPUV
                   ENDDO
                ENDIF
             ENDIF CC_IBM_IF

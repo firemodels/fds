@@ -1,7 +1,8 @@
 export HYPRE_INSTALL_PREFIX=$FIREMODELS/libs/hypre/$HYPRE_VERSION
 
 if [[ "$FDS_BUILD_TARGET" == *"osx"* ]]; then
-   C_FLAGS="-O3"
+   # -ftrapping-math: COMP_CC is Apple clang, which defaults to -ffp-exception-behavior=ignore. Force GCC behavior.
+   C_FLAGS="-O3 -ftrapping-math"
 elif [[ "$FDS_BUILD_TARGET" == *"intel"* ]]; then
    C_FLAGS="-O3 -fno-unsafe-math-optimizations -fp-model=precise"
 else
