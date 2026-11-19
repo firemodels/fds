@@ -8173,7 +8173,7 @@ A similar \ct{QUANTITY} is \ct{'TRANSMISSIVITY'} which is given by the following
 \be
  \tau = \exp \left( -K_{\rm m} \frac{L_0}{L} \sum_{i=1}^N {\rho_{{\rm s},i}\; \Delta x_i} \right)  \times 100  \; \; \unit{\percent/m}
 \ee
-Note that the transmissivity is given in units of \%/m rather than \% like obscuration. $L$ is the total path length of the beam, and $L_0$ is the reference dimension of 1~m.
+Note that \cd{'TRANSMISSIVITY'} is given in units of \%/m rather than \% like \ct{'PATH OBSCURATION'}. $L$ is the total path length of the beam, and $L_0$ is the reference dimension of 1~m.
 
 
 
@@ -10423,7 +10423,7 @@ The gas phase output quantity \ct{'EXTINCTION COEFFICIENT'} is $K$. A similar qu
 
 Note that FDS cannot report a visibility of infinity, but rather reports a \ct{MAXIMUM_VISIBILITY} that you can control via the \ct{MISC} line. The default is 30~m.
 
-The quantities \ct{'VISIBILITY'}, \ct{'EXTINCTION COEFFICIENT'}, and \ct{'OPTICAL DENSITY'} can reported in different ways. To obtain a contour plot of \ct{'VISIBILITY'}, for example, add the following line to the input file
+The quantities \ct{'VISIBILITY'}, \ct{'EXTINCTION COEFFICIENT'}, and \ct{'OPTICAL DENSITY'} can be reported in different ways. To obtain a contour plot of \ct{'VISIBILITY'}, for example, add the following line to the input file
 \begin{lstlisting}
 &SLCF ..., QUANTITY='VISIBILITY' /
 \end{lstlisting}
