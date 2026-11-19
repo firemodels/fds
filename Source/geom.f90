@@ -12663,6 +12663,8 @@ IF ( DO_RAY_TRACING) THEN
          IIG = BC%IIG;JJG = BC%JJG;KKG = BC%KKG;
          II  = BC%II; JJ  = BC%JJ; KK  = BC%KK; IOR = BC%IOR; X1AXIS=ABS(IOR)
          NOM = EWC%NOM; IF(NOM<1 .OR. NOM==NM) CYCLE EXT_WALL_LOOP_1
+         ! The tests below compare positions on both meshes, which a periodic boundary offsets: skip it, as one mesh does.
+         IF (CC_GRID_IS_PERIODIC_INTERFACE_WALL(NM,NOM,IOR)) CYCLE EXT_WALL_LOOP_1
          IIF=II; JJF=JJ; KKF=KK
          SELECT CASE(IOR)
          CASE(-IAXIS); IIF=IIF-1;
