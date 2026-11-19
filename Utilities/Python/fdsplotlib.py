@@ -2657,7 +2657,7 @@ def statistics_output(
                 for j in range(i * 8, min((i + 1) * 8, n)):
                     end = "&" if (j % 2) == 0 else "\\\\"
                     fid.write(
-                        f"\\includegraphics[height=2.2in]"
+                        f"\\includegraphics[height=1.9in]"
                         f"{{SCRIPT_FIGURES/Scatterplots/{Output_Histograms[j]}}} {end}\n"
                     )
                 fid.write("\\end{tabular*}\n")
@@ -2687,7 +2687,7 @@ def histogram_output(Histogram_Tex_Output, Output_Histograms):
 
             for j in range(i * 8, min((i + 1) * 8, n)):
                 end = "&" if j % 2 == 0 else "\\\\"
-                fid.write(f"\\includegraphics[height=2.2in]"
+                fid.write(f"\\includegraphics[height=1.9in]"
                           f"{{SCRIPT_FIGURES/Scatterplots/{Output_Histograms[j]}}} {end}\n")
 
             fid.write("\\end{tabular*}\n")
