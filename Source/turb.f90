@@ -2768,53 +2768,49 @@ SUBROUTINE fourier_f2003(data3,nn,ndim,isign,iform,work)
 !     reference--
 !     ieee audio transactions (june 1967), special issue on the fft.
 
-      INTEGER, INTENT(IN) :: nn(3),ndim,isign,iform
-      COMPLEX(EB), INTENT(INOUT) :: data3(nn(1),nn(2),nn(3))
-      REAL(EB), INTENT (INOUT) :: work(2*nn(1))
+INTEGER, INTENT(IN) :: nn(3),ndim,isign,iform
+COMPLEX(EB), INTENT(INOUT) :: data3(nn(1),nn(2),nn(3))
+REAL(EB), INTENT (INOUT) :: work(2*nn(1))
 
-      INTEGER :: ifact(32),ntot,idim,np1,n,np2,m,ntwo,iif,idiv,iquot,irem,inon2,     &
-                 icase,ifmin,i1rng,i,j,k,np2hf,i2,i1max,i1,i3,j3,nwork,ifp2,ifp1,    &
-                 i2max,np1tw,ipar,k1,k2,mmax,lmax,l,kmin,kdif,kstep,k3,k4,np1hf,     &
-                 j1min,j1,j2min,j2max,j2,j2rng,j1max,j3max,jmin,jmax,iconj,nhalf,    &
-                 imin,imax,nprev=0,np0=0
+INTEGER :: ifact(32),ntot,idim,np1,n,np2,m,ntwo,iif,idiv,iquot,irem,inon2,     &
+    icase,ifmin,i1rng,i,j,k,np2hf,i2,i1max,i1,i3,j3,nwork,ifp2,ifp1,    &
+    i2max,np1tw,ipar,k1,k2,mmax,lmax,l,kmin,kdif,kstep,k3,k4,np1hf,     &
+    j1min,j1,j2min,j2max,j2,j2rng,j1max,j3max,jmin,jmax,iconj,nhalf,    &
+    imin,imax,nprev=0,np0=0
 
-      REAL(EB) :: data(2*nn(1)*nn(2)*nn(3)),tempr,tempi,u1r,u1i,u2r,u2i,u3r,         &
-                  u3i,u4r,u4i,t2r,t2i,t3r,t3i,t4r,t4i,sumr,sumi,oldsr,oldsi,         &
-                  difr,difi,theta,wr,wi,w2r,w2i,w3r,w3i,wstpr,wstpi,twowr
+REAL(EB) :: data(2*nn(1)*nn(2)*nn(3)),tempr,tempi,u1r,u1i,u2r,u2i,u3r,         &
+    u3i,u4r,u4i,t2r,t2i,t3r,t3i,t4r,t4i,sumr,sumi,oldsr,oldsi,         &
+    difr,difi,theta,wr,wi,w2r,w2i,w3r,w3i,wstpr,wstpi,twowr
 
-      REAL(EB), PARAMETER :: twopi=6.2831853071796, rthlf=0.70710678118655
+REAL(EB), PARAMETER :: twopi=6.2831853071796, rthlf=0.70710678118655
 
-      ! reshape data3 to 1D array
-      data=0._EB
-      n=1
-      do k=1,nn(3)
-        do j=1,nn(2)
-          do i=1,nn(1)
-            data(n)=real(data3(i,j,k),EB)
-            data(n+1)=aimag(data3(i,j,k))
-            n=n+2
-          enddo
-        enddo
+! reshape data3 to 1D array
+data=0._EB
+n=1
+do k=1,nn(3)
+   do j=1,nn(2)
+      do i=1,nn(1)
+         data(n)=real(data3(i,j,k),EB)
+         data(n+1)=aimag(data3(i,j,k))
+         n=n+2
       enddo
+   enddo
+enddo
 
-      if(ndim-1.lt.0) goto 920
-      ntot=2
-      do idim=1,ndim
-      if(nn(idim).le.0) goto 920
-      ntot=ntot*nn(idim)
-      enddo
+if(ndim.lt.1) return
+ntot=2
+do idim=1,ndim
+   if(nn(idim).le.0) return
+   ntot=ntot*nn(idim)
+enddo
 !
 !     main loop for each dimension
 !
-      np1=2
-      do idim=1,ndim
-      n=nn(idim)
-      np2=np1*n
-      if(n-1.lt.0) then
-         goto 920
-      elseif(n-1.eq.0) then
-         goto 900
-      endif
+np1=2
+do idim=1,ndim
+   n=nn(idim)
+   np2=np1*n
+   if(n.gt.1) then
 !
 !     is n a power of two and if not, what are its factors
 !
@@ -2822,32 +2818,38 @@ SUBROUTINE fourier_f2003(data3,nn,ndim,isign,iform,work)
       ntwo=np1
       iif=1
       idiv=2
-10    iquot=m/idiv
-      irem=m-idiv*iquot
-      if(iquot-idiv.lt.0) goto 50
-      if(irem.ne.0) goto 20
-      ntwo=ntwo+ntwo
-      ifact(iif)=idiv
-      iif=iif+1
-      m=iquot
-      go to 10
-20    idiv=3
+      do
+         iquot=m/idiv
+         irem=m-idiv*iquot
+         if(iquot.lt.idiv .or. irem.ne.0) exit
+         ntwo=ntwo+ntwo
+         ifact(iif)=idiv
+         iif=iif+1
+         m=iquot
+      enddo
       inon2=iif
-30    iquot=m/idiv
-      irem=m-idiv*iquot
-      if(iquot-idiv.lt.0) goto 60
-      if(irem.ne.0) goto 40
-      ifact(iif)=idiv
-      iif=iif+1
-      m=iquot
-      go to 30
-40    idiv=idiv+2
-      go to 30
-50    inon2=iif
-      if(irem.ne.0) goto 60
-      ntwo=ntwo+ntwo
-      go to 70
-60    ifact(iif)=m
+      if(iquot.lt.idiv) then
+         if(irem.eq.0) then
+            ntwo=ntwo+ntwo
+         else
+            ifact(iif)=m
+         endif
+      else
+         idiv=3
+         do
+            iquot=m/idiv
+            irem=m-idiv*iquot
+            if(iquot.lt.idiv) exit
+            if(irem.eq.0) then
+               ifact(iif)=idiv
+               iif=iif+1
+               m=iquot
+            else
+               idiv=idiv+2
+            endif
+         enddo
+         ifact(iif)=m
+      endif
 !
 !     separate four cases--
 !        1. complex transform or real transform for the 4th, 9th,etc.
@@ -2863,452 +2865,464 @@ SUBROUTINE fourier_f2003(data3,nn,ndim,isign,iform,work)
 !           are the odd numbered real values.  separate and supply
 !           the second half by conjugate symmetry.
 !
-70    icase=1
+      icase=1
       ifmin=1
       i1rng=np1
-      if(idim-4.ge.0) goto 100
-      if(iform.gt.0) goto 100
-      icase=2
-      i1rng=np0*(1+nprev/2)
-      if(idim-1.gt.0) goto 100
-      icase=3
-      i1rng=np1
-      if(ntwo-np1.le.0) goto 100
-      icase=4
-      ifmin=2
-      ntwo=ntwo/2
-      n=n/2
-      np2=np2/2
-      ntot=ntot/2
-      i=1
-      do j=1,ntot
-      data(j)=data(i)
-      i=i+2
-      enddo
+      if(idim.lt.4 .and. iform.le.0) then
+         icase=2
+         i1rng=np0*(1+nprev/2)
+         if(idim.eq.1) then
+            icase=3
+            i1rng=np1
+            if(ntwo.gt.np1) then
+               icase=4
+               ifmin=2
+               ntwo=ntwo/2
+               n=n/2
+               np2=np2/2
+               ntot=ntot/2
+               i=1
+               do j=1,ntot
+                  data(j)=data(i)
+                  i=i+2
+               enddo
+            endif
+         endif
+      endif
 !
 !     shuffle data by bit reversal, since n=2**k.  as the shuffling
 !     can be done by simple interchange, no working array is needed
 !
-100   if(ntwo-np2.lt.0) goto 200
-      np2hf=np2/2
-      j=1
-      do i2=1,np2,np1
-      if(j-i2.ge.0) goto 130
-      i1max=i2+np1-2
-      do i1=i2,i1max,2
-         do i3=i1,ntot,np2
-            j3=j+i3-i2
-            tempr=data(i3)
-            tempi=data(i3+1)
-            data(i3)=data(j3)
-            data(i3+1)=data(j3+1)
-            data(j3)=tempr
-            data(j3+1)=tempi
+      if(ntwo.ge.np2) then
+         np2hf=np2/2
+         j=1
+         do i2=1,np2,np1
+            if(j.lt.i2) then
+               i1max=i2+np1-2
+               do i1=i2,i1max,2
+                  do i3=i1,ntot,np2
+                     j3=j+i3-i2
+                     tempr=data(i3)
+                     tempi=data(i3+1)
+                     data(i3)=data(j3)
+                     data(i3+1)=data(j3+1)
+                     data(j3)=tempr
+                     data(j3+1)=tempi
+                  enddo
+               enddo
+            endif
+            m=np2hf
+            do
+               if(j.le.m) exit
+               j=j-m
+               m=m/2
+               if(m.lt.np1) exit
+            enddo
+            j=j+m
          enddo
-      enddo
-130   m=np2hf
-140   if(j-m.le.0) goto 150
-      j=j-m
-      m=m/2
-      if(m-np1.ge.0) goto 140
-150   j=j+m
-      enddo
-      goto 300
+      else
 !
 !     shuffle data by digit reversal for general n
 !
-200   nwork=2*n
-      do i1=1,np1,2
-      do i3=i1,ntot,np2
-      j=i3
-      loop_260: do i=1,nwork,2
-      if(icase-3.ne.0) goto 220
-      work(i)=data(j)
-      work(i+1)=data(j+1)
-      go to 230
-220   work(i)=data(j)
-      work(i+1)=0._EB
-230   ifp2=np2
-      iif=ifmin
-240   ifp1=ifp2/ifact(iif)
-      j=j+ifp1
-      if(j-i3-ifp2.lt.0) cycle loop_260
-      j=j-ifp2
-      ifp2=ifp1
-      iif=iif+1
-      if(ifp2-np1.gt.0) goto 240
-      enddo loop_260
-      i2max=i3+np2-np1
-      i=1
-      do i2=i3,i2max,np1
-      data(i2)=work(i)
-      data(i2+1)=work(i+1)
-      i=i+2
-      enddo
-      enddo
-      enddo
+         nwork=2*n
+         do i1=1,np1,2
+            do i3=i1,ntot,np2
+               j=i3
+               loop_260: do i=1,nwork,2
+                  if(icase.eq.3) then
+                     work(i)=data(j)
+                     work(i+1)=data(j+1)
+                  else
+                     work(i)=data(j)
+                     work(i+1)=0._EB
+                  endif
+                  ifp2=np2
+                  iif=ifmin
+                  do
+                     ifp1=ifp2/ifact(iif)
+                     j=j+ifp1
+                     if(j-i3-ifp2.lt.0) cycle loop_260
+                     j=j-ifp2
+                     ifp2=ifp1
+                     iif=iif+1
+                     if(ifp2.le.np1) exit
+                  enddo
+               enddo loop_260
+               i2max=i3+np2-np1
+               i=1
+               do i2=i3,i2max,np1
+                  data(i2)=work(i)
+                  data(i2+1)=work(i+1)
+                  i=i+2
+               enddo
+            enddo
+         enddo
+      endif
 !
 !     main loop for factors of two.  perform fourier transforms of
 !     length four, with one of length two if needed.  the twiddle factor
 !     w=exp(isign*2*pi*sqrt(-1)*m/(4*mmax)).  check for w=isign*sqrt(-1)
 !     and repeat for w=w*(1+isign*sqrt(-1))/sqrt(2).
 !
-300   if(ntwo-np1.le.0) goto 600
-      np1tw=np1+np1
-      ipar=ntwo/np1
-310   if(ipar-2.lt.0) then
-         goto 350
-      elseif(ipar-2.eq.0) then
-         goto 330
+      if(ntwo.gt.np1) then
+         np1tw=np1+np1
+         ipar=ntwo/np1
+         do while(ipar.gt.2)
+            ipar=ipar/4
+         enddo
+         if(ipar.eq.2) then
+            do i1=1,i1rng,2
+               do k1=i1,ntot,np1tw
+                  k2=k1+np1
+                  tempr=data(k2)
+                  tempi=data(k2+1)
+                  data(k2)=data(k1)-tempr
+                  data(k2+1)=data(k1+1)-tempi
+                  data(k1)=data(k1)+tempr
+                  data(k1+1)=data(k1+1)+tempi
+               enddo
+            enddo
+         endif
+         mmax=np1
+         do while(mmax.lt.ntwo/2)
+            lmax=max(np1tw,mmax/2)
+            loop_570: do l=np1,lmax,np1tw
+               m=l
+               if(mmax.gt.np1) then
+                  theta=-twopi*REAL(l,EB)/REAL(4*mmax,EB)
+                  if(isign.ge.0) theta=-theta
+                  wr=cos(theta)
+                  wi=sin(theta)
+               endif
+               do
+                  if(mmax.gt.np1) then
+                     w2r=wr*wr-wi*wi
+                     w2i=2._EB*wr*wi
+                     w3r=w2r*wr-w2i*wi
+                     w3i=w2r*wi+w2i*wr
+                  endif
+                  loop_530: do i1=1,i1rng,2
+                     kmin=i1+ipar*m
+                     if(mmax.le.np1) kmin=i1
+                     kdif=ipar*mmax
+                     do
+                        kstep=4*kdif
+                        if(kstep.gt.ntwo) exit
+                        do k1=kmin,ntot,kstep
+                           k2=k1+kdif
+                           k3=k2+kdif
+                           k4=k3+kdif
+                           if(mmax.le.np1) then
+                              u1r=data(k1)+data(k2)
+                              u1i=data(k1+1)+data(k2+1)
+                              u2r=data(k3)+data(k4)
+                              u2i=data(k3+1)+data(k4+1)
+                              u3r=data(k1)-data(k2)
+                              u3i=data(k1+1)-data(k2+1)
+                              if(isign.lt.0) then
+                                 u4r=data(k3+1)-data(k4+1)
+                                 u4i=data(k4)-data(k3)
+                              else
+                                 u4r=data(k4+1)-data(k3+1)
+                                 u4i=data(k3)-data(k4)
+                              endif
+                           else
+                              t2r=w2r*data(k2)-w2i*data(k2+1)
+                              t2i=w2r*data(k2+1)+w2i*data(k2)
+                              t3r=wr*data(k3)-wi*data(k3+1)
+                              t3i=wr*data(k3+1)+wi*data(k3)
+                              t4r=w3r*data(k4)-w3i*data(k4+1)
+                              t4i=w3r*data(k4+1)+w3i*data(k4)
+                              u1r=data(k1)+t2r
+                              u1i=data(k1+1)+t2i
+                              u2r=t3r+t4r
+                              u2i=t3i+t4i
+                              u3r=data(k1)-t2r
+                              u3i=data(k1+1)-t2i
+                              if(isign.lt.0) then
+                                 u4r=t3i-t4i
+                                 u4i=t4r-t3r
+                              else
+                                 u4r=t4i-t3i
+                                 u4i=t3r-t4r
+                              endif
+                           endif
+                           data(k1)=u1r+u2r
+                           data(k1+1)=u1i+u2i
+                           data(k2)=u3r+u4r
+                           data(k2+1)=u3i+u4i
+                           data(k3)=u1r-u2r
+                           data(k3+1)=u1i-u2i
+                           data(k4)=u3r-u4r
+                           data(k4+1)=u3i-u4i
+                        enddo
+                        kdif=kstep
+                        kmin=4*(kmin-i1)+i1
+                     enddo
+                  enddo loop_530
+                  m=m+lmax
+                  if(m.gt.mmax) exit
+                  if(isign.lt.0) then
+                     tempr=wr
+                     wr=(wr+wi)*rthlf
+                     wi=(wi-tempr)*rthlf
+                  else
+                     tempr=wr
+                     wr=(wr-wi)*rthlf
+                     wi=(tempr+wi)*rthlf
+                  endif
+               enddo
+            enddo loop_570
+            ipar=3-ipar
+            mmax=mmax+mmax
+         enddo
       endif
-      ipar=ipar/4
-      go to 310
-330   do i1=1,i1rng,2
-      do k1=i1,ntot,np1tw
-      k2=k1+np1
-      tempr=data(k2)
-      tempi=data(k2+1)
-      data(k2)=data(k1)-tempr
-      data(k2+1)=data(k1+1)-tempi
-      data(k1)=data(k1)+tempr
-      data(k1+1)=data(k1+1)+tempi
-      enddo
-      enddo
-350   mmax=np1
-360   if(mmax-ntwo/2.ge.0) goto 600
-      lmax=max(np1tw,mmax/2)
-      loop_570: do l=np1,lmax,np1tw
-      m=l
-      if(mmax-np1.le.0) goto 420
-      theta=-twopi*REAL(l,EB)/REAL(4*mmax,EB)
-      if(isign.lt.0) goto 400
-      theta=-theta
-400   wr=cos(theta)
-      wi=sin(theta)
-410   w2r=wr*wr-wi*wi
-      w2i=2._EB*wr*wi
-      w3r=w2r*wr-w2i*wi
-      w3i=w2r*wi+w2i*wr
-420   loop_530: do i1=1,i1rng,2
-      kmin=i1+ipar*m
-      if(mmax-np1.gt.0) goto 440
-      kmin=i1
-440   kdif=ipar*mmax
-450   kstep=4*kdif
-      if(kstep-ntwo.gt.0) cycle loop_530
-      do k1=kmin,ntot,kstep
-      k2=k1+kdif
-      k3=k2+kdif
-      k4=k3+kdif
-      if(mmax-np1.gt.0) goto 480
-      u1r=data(k1)+data(k2)
-      u1i=data(k1+1)+data(k2+1)
-      u2r=data(k3)+data(k4)
-      u2i=data(k3+1)+data(k4+1)
-      u3r=data(k1)-data(k2)
-      u3i=data(k1+1)-data(k2+1)
-      if(isign.ge.0) goto 472
-      u4r=data(k3+1)-data(k4+1)
-      u4i=data(k4)-data(k3)
-      go to 510
-472   u4r=data(k4+1)-data(k3+1)
-      u4i=data(k3)-data(k4)
-      go to 510
-480   t2r=w2r*data(k2)-w2i*data(k2+1)
-      t2i=w2r*data(k2+1)+w2i*data(k2)
-      t3r=wr*data(k3)-wi*data(k3+1)
-      t3i=wr*data(k3+1)+wi*data(k3)
-      t4r=w3r*data(k4)-w3i*data(k4+1)
-      t4i=w3r*data(k4+1)+w3i*data(k4)
-      u1r=data(k1)+t2r
-      u1i=data(k1+1)+t2i
-      u2r=t3r+t4r
-      u2i=t3i+t4i
-      u3r=data(k1)-t2r
-      u3i=data(k1+1)-t2i
-      if(isign.ge.0) goto 500
-      u4r=t3i-t4i
-      u4i=t4r-t3r
-      go to 510
-500   u4r=t4i-t3i
-      u4i=t3r-t4r
-510   data(k1)=u1r+u2r
-      data(k1+1)=u1i+u2i
-      data(k2)=u3r+u4r
-      data(k2+1)=u3i+u4i
-      data(k3)=u1r-u2r
-      data(k3+1)=u1i-u2i
-      data(k4)=u3r-u4r
-      data(k4+1)=u3i-u4i
-      enddo
-      kdif=kstep
-      kmin=4*(kmin-i1)+i1
-      go to 450
-      enddo loop_530
-      m=m+lmax
-      if(m-mmax.gt.0) cycle loop_570
-      if(isign.ge.0) goto 560
-      tempr=wr
-      wr=(wr+wi)*rthlf
-      wi=(wi-tempr)*rthlf
-      go to 410
-560   tempr=wr
-      wr=(wr-wi)*rthlf
-      wi=(tempr+wi)*rthlf
-      go to 410
-      enddo loop_570
-      ipar=3-ipar
-      mmax=mmax+mmax
-      go to 360
 !
 !     main loop for factors not equal to two.  apply the twiddle factor
 !     w=exp(isign*2*pi*sqrt(-1)*(j1-1)*(j2-j1)/(ifp1+ifp2)), then
 !     perform a fourier transform of length ifact(iif), making use of
 !     conjugate symmetries.
 !
-600   if(ntwo-np2.ge.0) goto 700
-      ifp1=ntwo
-      iif=inon2
-      np1hf=np1/2
-610   ifp2=ifact(iif)*ifp1
-      j1min=np1+1
-      if(j1min-ifp1.gt.0) goto 640
-      do j1=j1min,ifp1,np1
-      theta=-twopi*REAL(j1-1,EB)/REAL(ifp2,EB)
-      if(isign.lt.0) goto 625
-      theta=-theta
-625   wstpr=cos(theta)
-      wstpi=sin(theta)
-      wr=wstpr
-      wi=wstpi
-      j2min=j1+ifp1
-      j2max=j1+ifp2-ifp1
-      do j2=j2min,j2max,ifp1
-      i1max=j2+i1rng-2
-      do i1=j2,i1max,2
-      do j3=i1,ntot,ifp2
-      tempr=data(j3)
-      data(j3)=data(j3)*wr-data(j3+1)*wi
-      data(j3+1)=tempr*wi+data(j3+1)*wr
-      enddo
-      enddo
-      tempr=wr
-      wr=wr*wstpr-wi*wstpi
-      wi=tempr*wstpi+wi*wstpr
-      enddo
-      enddo
-640   theta=-twopi/REAL(ifact(iif),EB)
-      if(isign.lt.0) goto 650
-      theta=-theta
-650   wstpr=cos(theta)
-      wstpi=sin(theta)
-      j2rng=ifp1*(1+ifact(iif)/2)
-      do i1=1,i1rng,2
-      do i3=i1,ntot,np2
-      j2max=i3+j2rng-ifp1
-      do j2=i3,j2max,ifp1
-      j1max=j2+ifp1-np1
-      do j1=j2,j1max,np1
-      j3max=j1+np2-ifp2
-      do j3=j1,j3max,ifp2
-      jmin=j3-j2+i3
-      jmax=jmin+ifp2-ifp1
-      i=1+(j3-i3)/np1hf
-      if(j2-i3.gt.0) goto 665
-      sumr=0._EB
-      sumi=0._EB
-      do j=jmin,jmax,ifp1
-      sumr=sumr+data(j)
-      sumi=sumi+data(j+1)
-      enddo
-      work(i)=sumr
-      work(i+1)=sumi
-      go to 680
-665   iconj=1+(ifp2-2*j2+i3+j3)/np1hf
-      j=jmax
-      sumr=data(j)
-      sumi=data(j+1)
-      oldsr=0._EB
-      oldsi=0._EB
-      j=j-ifp1
-670   tempr=sumr
-      tempi=sumi
-      sumr=twowr*sumr-oldsr+data(j)
-      sumi=twowr*sumi-oldsi+data(j+1)
-      oldsr=tempr
-      oldsi=tempi
-      j=j-ifp1
-      if(j-jmin.gt.0) goto 670
-      tempr=wr*sumr-oldsr+data(j)
-      tempi=wi*sumi
-      work(i)=tempr-tempi
-      work(iconj)=tempr+tempi
-      tempr=wr*sumi-oldsi+data(j+1)
-      tempi=wi*sumr
-      work(i+1)=tempr+tempi
-      work(iconj+1)=tempr-tempi
-680   continue
-      enddo
-      enddo
-      if(j2-i3.gt.0) goto 686
-      wr=wstpr
-      wi=wstpi
-      go to 690
-686   tempr=wr
-      wr=wr*wstpr-wi*wstpi
-      wi=tempr*wstpi+wi*wstpr
-690   twowr=wr+wr
-      enddo
-      i=1
-      i2max=i3+np2-np1
-      do i2=i3,i2max,np1
-      data(i2)=work(i)
-      data(i2+1)=work(i+1)
-      i=i+2
-      enddo
-      enddo
-      enddo
-      iif=iif+1
-      ifp1=ifp2
-      if(ifp1-np2.lt.0) goto 610
+      if(ntwo.lt.np2) then
+         ifp1=ntwo
+         iif=inon2
+         np1hf=np1/2
+         do
+            ifp2=ifact(iif)*ifp1
+            j1min=np1+1
+            do j1=j1min,ifp1,np1
+               theta=-twopi*REAL(j1-1,EB)/REAL(ifp2,EB)
+               if(isign.ge.0) theta=-theta
+               wstpr=cos(theta)
+               wstpi=sin(theta)
+               wr=wstpr
+               wi=wstpi
+               j2min=j1+ifp1
+               j2max=j1+ifp2-ifp1
+               do j2=j2min,j2max,ifp1
+                  i1max=j2+i1rng-2
+                  do i1=j2,i1max,2
+                     do j3=i1,ntot,ifp2
+                        tempr=data(j3)
+                        data(j3)=data(j3)*wr-data(j3+1)*wi
+                        data(j3+1)=tempr*wi+data(j3+1)*wr
+                     enddo
+                  enddo
+                  tempr=wr
+                  wr=wr*wstpr-wi*wstpi
+                  wi=tempr*wstpi+wi*wstpr
+               enddo
+            enddo
+            theta=-twopi/REAL(ifact(iif),EB)
+            if(isign.ge.0) theta=-theta
+            wstpr=cos(theta)
+            wstpi=sin(theta)
+            j2rng=ifp1*(1+ifact(iif)/2)
+            do i1=1,i1rng,2
+               do i3=i1,ntot,np2
+                  j2max=i3+j2rng-ifp1
+                  do j2=i3,j2max,ifp1
+                     j1max=j2+ifp1-np1
+                     do j1=j2,j1max,np1
+                        j3max=j1+np2-ifp2
+                        do j3=j1,j3max,ifp2
+                           jmin=j3-j2+i3
+                           jmax=jmin+ifp2-ifp1
+                           i=1+(j3-i3)/np1hf
+                           if(j2.le.i3) then
+                              sumr=0._EB
+                              sumi=0._EB
+                              do j=jmin,jmax,ifp1
+                                 sumr=sumr+data(j)
+                                 sumi=sumi+data(j+1)
+                              enddo
+                              work(i)=sumr
+                              work(i+1)=sumi
+                           else
+                              iconj=1+(ifp2-2*j2+i3+j3)/np1hf
+                              j=jmax
+                              sumr=data(j)
+                              sumi=data(j+1)
+                              oldsr=0._EB
+                              oldsi=0._EB
+                              j=j-ifp1
+                              do
+                                 tempr=sumr
+                                 tempi=sumi
+                                 sumr=twowr*sumr-oldsr+data(j)
+                                 sumi=twowr*sumi-oldsi+data(j+1)
+                                 oldsr=tempr
+                                 oldsi=tempi
+                                 j=j-ifp1
+                                 if(j.le.jmin) exit
+                              enddo
+                              tempr=wr*sumr-oldsr+data(j)
+                              tempi=wi*sumi
+                              work(i)=tempr-tempi
+                              work(iconj)=tempr+tempi
+                              tempr=wr*sumi-oldsi+data(j+1)
+                              tempi=wi*sumr
+                              work(i+1)=tempr+tempi
+                              work(iconj+1)=tempr-tempi
+                           endif
+                        enddo
+                     enddo
+                     if(j2.le.i3) then
+                        wr=wstpr
+                        wi=wstpi
+                     else
+                        tempr=wr
+                        wr=wr*wstpr-wi*wstpi
+                        wi=tempr*wstpi+wi*wstpr
+                     endif
+                     twowr=wr+wr
+                  enddo
+                  i=1
+                  i2max=i3+np2-np1
+                  do i2=i3,i2max,np1
+                     data(i2)=work(i)
+                     data(i2+1)=work(i+1)
+                     i=i+2
+                  enddo
+               enddo
+            enddo
+            iif=iif+1
+            ifp1=ifp2
+            if(ifp1.ge.np2) exit
+         enddo
+      endif
 !
 !     complete a real transform in the 1st dimension, n even, by con-
 !     jugate symmetries.
 !
-700   select case(icase)
-         case(1,3)
-            goto 900
-         case(2)
-            goto 800
-         case(4)
-            goto 701
-      end select
-701   nhalf=n
-      n=n+n
-      theta=-twopi/REAL(n,EB)
-      if(isign.lt.0) goto 703
-      theta=-theta
-703   wstpr=cos(theta)
-      wstpi=sin(theta)
-      wr=wstpr
-      wi=wstpi
-      imin=3
-      jmin=2*nhalf-1
-      go to 725
-710   j=jmin
-      do i=imin,ntot,np2
-      sumr=(data(i)+data(j))/2._EB
-      sumi=(data(i+1)+data(j+1))/2._EB
-      difr=(data(i)-data(j))/2._EB
-      difi=(data(i+1)-data(j+1))/2._EB
-      tempr=wr*sumi+wi*difr
-      tempi=wi*sumi-wr*difr
-      data(i)=sumr+tempr
-      data(i+1)=difi+tempi
-      data(j)=sumr-tempr
-      data(j+1)=-difi+tempi
-      j=j+np2
-      enddo
-      imin=imin+2
-      jmin=jmin-2
-      tempr=wr
-      wr=wr*wstpr-wi*wstpi
-      wi=tempr*wstpi+wi*wstpr
-725   if(imin-jmin.lt.0) then
-         goto 710
-      elseif(imin-jmin.gt.0) then
-         goto 740
-      endif
-      if(isign.ge.0) goto 740
-      do i=imin,ntot,np2
-      data(i+1)=-data(i+1)
-      enddo
-740   np2=np2+np2
-      ntot=ntot+ntot
-      j=ntot+1
-      imax=ntot/2+1
-745   imin=imax-2*nhalf
-      i=imin
-      go to 755
-750   data(j)=data(i)
-      data(j+1)=-data(i+1)
-755   i=i+2
-      j=j-2
-      if(i-imax.lt.0) goto 750
-      data(j)=data(imin)-data(imin+1)
-      data(j+1)=0._EB
-      if(i-j.lt.0) then
-         goto 770
-      else
-         goto 780
-      endif
-765   data(j)=data(i)
-      data(j+1)=data(i+1)
-770   i=i-2
-      j=j-2
-      if(i-imin.gt.0) goto 765
-      data(j)=data(imin)+data(imin+1)
-      data(j+1)=0._EB
-      imax=imin
-      go to 745
-780   data(1)=data(1)+data(2)
-      data(2)=0._EB
-      go to 900
+      select case(icase)
+      case(4)
+         nhalf=n
+         n=n+n
+         theta=-twopi/REAL(n,EB)
+         if(isign.ge.0) theta=-theta
+         wstpr=cos(theta)
+         wstpi=sin(theta)
+         wr=wstpr
+         wi=wstpi
+         imin=3
+         jmin=2*nhalf-1
+         do while(imin.lt.jmin)
+            j=jmin
+            do i=imin,ntot,np2
+               sumr=(data(i)+data(j))/2._EB
+               sumi=(data(i+1)+data(j+1))/2._EB
+               difr=(data(i)-data(j))/2._EB
+               difi=(data(i+1)-data(j+1))/2._EB
+               tempr=wr*sumi+wi*difr
+               tempi=wi*sumi-wr*difr
+               data(i)=sumr+tempr
+               data(i+1)=difi+tempi
+               data(j)=sumr-tempr
+               data(j+1)=-difi+tempi
+               j=j+np2
+            enddo
+            imin=imin+2
+            jmin=jmin-2
+            tempr=wr
+            wr=wr*wstpr-wi*wstpi
+            wi=tempr*wstpi+wi*wstpr
+         enddo
+         if(imin.eq.jmin .and. isign.lt.0) then
+            do i=imin,ntot,np2
+               data(i+1)=-data(i+1)
+            enddo
+         endif
+         np2=np2+np2
+         ntot=ntot+ntot
+         j=ntot+1
+         imax=ntot/2+1
+         do
+            imin=imax-2*nhalf
+            i=imin
+            do
+               i=i+2
+               j=j-2
+               if(i.ge.imax) exit
+               data(j)=data(i)
+               data(j+1)=-data(i+1)
+            enddo
+            data(j)=data(imin)-data(imin+1)
+            data(j+1)=0._EB
+            if(i.ge.j) exit
+            do
+               i=i-2
+               j=j-2
+               if(i.le.imin) exit
+               data(j)=data(i)
+               data(j+1)=data(i+1)
+            enddo
+            data(j)=data(imin)+data(imin+1)
+            data(j+1)=0._EB
+            imax=imin
+         enddo
+         data(1)=data(1)+data(2)
+         data(2)=0._EB
+
 !
 !     complete a real transform for the 2nd or 3rd dimension by
 !     conjugate symmetries.
 !
-800   if(i1rng-np1.ge.0) goto 900
-      do i3=1,ntot,np2
-      i2max=i3+np2-np1
-      do i2=i3,i2max,np1
-      imin=i2+i1rng
-      imax=i2+np1-2
-      jmax=2*i3+np1-imin
-      if(i2-i3.le.0) goto 820
-      jmax=jmax+np2
-820   if(idim-2.le.0) goto 850
-      j=jmax+np0
-      do i=imin,imax,2
-      data(i)=data(j)
-      data(i+1)=-data(j+1)
-      j=j-2
-      enddo
-850   j=jmax
-      do i=imin,imax,np0
-      data(i)=data(j)
-      data(i+1)=-data(j+1)
-      j=j-np0
-      enddo
-      enddo
-      enddo
+      case(2)
+         if(i1rng.lt.np1) then
+            do i3=1,ntot,np2
+               i2max=i3+np2-np1
+               do i2=i3,i2max,np1
+                  imin=i2+i1rng
+                  imax=i2+np1-2
+                  jmax=2*i3+np1-imin
+                  if(i2.gt.i3) jmax=jmax+np2
+                  if(idim.gt.2) then
+                     j=jmax+np0
+                     do i=imin,imax,2
+                        data(i)=data(j)
+                        data(i+1)=-data(j+1)
+                        j=j-2
+                     enddo
+                  endif
+                  j=jmax
+                  do i=imin,imax,np0
+                     data(i)=data(j)
+                     data(i+1)=-data(j+1)
+                     j=j-np0
+                  enddo
+               enddo
+            enddo
+         endif
+      end select
+   endif
 !
 !     end of loop on each dimension
 !
-900   np0=np1
-      np1=np2
-      nprev=n
+   np0=np1
+   np1=np2
+   nprev=n
+enddo
+
+! reshape data back to 3D complex array
+
+!! for debug purposes
+!print *,size(data)
+!do i=1,size(data)
+!   print *,data(i)
+!enddo
+!stop
+
+n=1
+do k=1,nn(3)
+   do j=1,nn(2)
+      do i=1,nn(1)
+         data3(i,j,k)=cmplx(data(n),data(n+1),kind=EB)
+         n=n+2
       enddo
-
-      ! reshape data back to 3D complex array
-
-      !! for debug purposes (move to 920)
-      !print *,size(data)
-      !do i=1,size(data)
-      !   print *,data(i)
-      !enddo
-      !stop
-
-920   n=1
-      do k=1,nn(3)
-        do j=1,nn(2)
-          do i=1,nn(1)
-            data3(i,j,k)=cmplx(data(n),data(n+1),kind=EB)
-            n=n+2
-          enddo
-        enddo
-      enddo
-      return
+   enddo
+enddo
+return
 
 END SUBROUTINE fourier_f2003
 
