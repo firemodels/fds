@@ -326,6 +326,34 @@ Starting in 2007 with FDS version 5, the FDS development team adopted GoogleCode
 The FDS manuals are typeset using \LaTeX, specifically, pdf\LaTeX. The \LaTeX\ files are essentially text files that are under version control. The figures are either PDF (Portable Document Format) or PNG (Portable Network Graphics) files, depending on whether they are vector or raster images. There are a variety of \LaTeX\ packages available, including MiKTeX, that can be used to compile the \LaTeX\ into PDF files. The FDS developers edit the manuals as part of the day to day upkeep of the model. Different editions of the manuals are distinguished by a specific Git hash tag.
 
 
+\subsection{Online Manuals and Accessibility}
+\label{sec:online_manuals_accessibility}
+
+\subsubsection{Source Control and Build Process}
+
+The online manuals are generated HTML editions of the existing \LaTeX\ manuals. The \LaTeX\ files remain the source of the scientific content; developers do not maintain a separate set of chapters for the website. The shared build interface selects the User Guide or one of the four volumes of the Technical Reference Guide. Each manual has its own output directory, search index, and registry of successfully built language editions. Each new manual conversion requires validation and visual review before publication.
+
+The conversion uses make4ht/TeX4ht and Python scripts to produce chapter pages with navigation, search, cross-references, figures, and mathematical expressions represented in MathML. A link provides access to the PDF manual. The converter and shared reader templates are maintained under version control in \path{Manuals/Online_Docs}. Python package requirements are maintained in \path{.github/requirements.txt}. Generated HTML, converted figures, translation caches, and audit reports are build products and are excluded from source control. Changes to scientific notation must preserve the distinctions in the original source, following NIST Special Publication~811.
+
+English is built first. Other language editions are generated from the completed English HTML using an installed offline Argos Translate model. Mathematical markup, code, link targets, and reference anchors are protected during translation. Translated editions are identified as machine translations and require technical and linguistic review. Figure artwork and the linked PDF retain their original language. The language selector lists only editions that have been successfully built and contain the selected page.
+
+Build records identify the source revision and input hashes; translation caches also record the model and runtime information used. Reproducible publication requires retention of the corresponding inputs, figure assets, converter dependencies, and translation model. A failed conversion or validation must not replace the last successful edition. Scheduled builds and deployment through GitHub Actions are planned. The current build uses local figure inputs; automatic retrieval of figure archives from the Fire Models test-bundle releases is not yet integrated.
+
+\subsubsection{Accessibility Objectives and Current Status}
+
+Section~508 of the Rehabilitation Act applies to information and communication technology developed, procured, maintained, or used by Federal agencies. For public-facing electronic content, the Revised 508 Standards incorporate the Level~A and Level~AA success criteria and conformance requirements of the Web Content Accessibility Guidelines (WCAG)~2.0.\footnote{U.S. Access Board, Revised 508 Standards, Sections E205.2 and E205.4: \url{https://www.access-board.gov/ict/}.} The online reader uses WCAG~2.2 Level~AA as its development target.\footnote{World Wide Web Consortium, Web Content Accessibility Guidelines (WCAG)~2.2: \url{https://www.w3.org/TR/WCAG22/}.} This development target does not itself establish compliance with Section~508.
+
+The initial accessibility work provides ordered HTML headings, named navigation regions, a skip-to-content link, keyboard controls, visible focus indicators, improved text contrast, and scrollable containers for wide equations and tables. Figures are associated with their captions. Tables with recognized, unambiguous header structures receive explicit header associations; equation-layout tables are distinguished from data tables. Mathematical expressions remain structured MathML rather than equation images.
+
+As of October~2026, these provisions constitute an initial accessibility implementation, not a finding of full Section~508 compliance. Caption associations do not establish that a figure has a sufficient text alternative. Complex diagrams and plots require review and, where necessary, supplemental descriptions for the online edition. Complex table headers also require review. Screen-reader interpretation of mathematical notation, including accents, scripts, and drawn overlines, has not yet been established across supported browser and assistive-technology combinations. Each translated HTML edition requires its own accessibility evaluation. This work applies to the online HTML editions only; it does not retrofit the original \LaTeX\ files or PDF production for accessibility. The linked PDF is outside the scope of this work, and accessibility of an HTML edition does not establish accessibility of its PDF counterpart.
+
+\subsubsection{Verification and Maintenance}
+
+The repository includes a static accessibility audit and a browser audit using Playwright and axe-core. The checks examine structural markup, missing or ambiguous description references, heading order, keyboard interactions, and narrow-screen reflow. Reports distinguish automatically detected errors from items requiring human review. Automated browser and assistive-technology testing of the initial implementation remain to be completed; a successful automated scan alone is insufficient to establish conformance.
+
+Before making a conformance claim, the development team must evaluate the applicable requirements for the specific published edition. The evaluation must include keyboard-only operation, focus visibility and order, browser and text enlargement, screen-reader navigation and mathematical reading, figure alternatives, table relationships, and each available language. The assessment record should identify the source revision, tested pages and languages, tool and browser versions, assistive technologies, results, and unresolved defects. Accessibility defects are reported and corrected through the same issue-tracking and review process as other documentation defects. Relevant checks must be repeated after changes to the source content, converter, reader, or translation system.
+
+
 \subsection{Project Repository}
 
 Currently, FDS and Smokeview make use of GitHub, a free service to support software development for open source applications. GitHub uses Git version control software. Under this system a centralized repository containing all project files resides on an external server.   A record of version number when a specific file was last changed is maintained. As an open source program, any individual can obtain a copy of the repository or retrieve specific versions of the repository.
@@ -467,12 +495,39 @@ GitHub Actions provide automated checks of changes submitted to the \texttt{fds}
 
 \item[CMake builds:] \path{cmake.yml} builds FDS on Linux, macOS, and Windows across compiler, debug/release, and OpenMP configurations. CTest checks that the resulting executable starts. The platform and CMake workflows run for relevant source, build, or workflow changes.
 
-\item[PR security:] \path{pr-security.yml} coordinates admission and build checks for FDS pull requests, while \path{virus-scan.yml} uses ClamAV to scan the submitted and proposed merge snapshots. Outside contributions must pass scanning before build checks begin; approved developers' scans run independently, including after merging. Section~\ref{sec:pr-virus-scanning} describes this process and its repository settings.
+\item[PR security:] \path{pr-security.yml} checks the PR author against the approved account list and runs ClamAV scans of the submitted and proposed merge snapshots. Listed authors may merge and start builds before scanning finishes; other authors must pass scanning first. The separate \path{pr-builds.yml} workflow coordinates build checks. Scans and selected builds continue independently of merging. Section~\ref{sec:pr-virus-scanning} describes this process and its repository settings.
 
 \item[Line endings:] \path{Line_Endings.yml} in both repositories reports an error if text files contain DOS-style line endings.
 
 \item[Validation revisions:] \path{Git_Revisions.yml} in \texttt{out} checks only tracked \path{*_git.txt} files and reports an error if a revision string contains \texttt{dirty}, indicating uncommitted changes in the source used to generate the results.
 \end{description}
+
+Figure~\ref{fig:pr-build-dependencies} shows the dependencies within the \texttt{PR builds} workflow, defined in \path{pr-builds.yml}. After admission passes, the selected build and check jobs run in parallel as runners become available. The CMake matrix expands into combinations of operating system, compiler, Debug/Release configuration, and OpenMP settings. Jobs not selected for the changed files are skipped.
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    stage/.style={draw, rounded corners=2pt, align=center, font=\small,
+                  text width=3cm, minimum height=1cm, inner sep=5pt},
+    check/.style={stage, text width=4cm},
+    dependency/.style={-{Latex}, thick}]
+    \node[stage] (admission) at (0,0) {Check PR admission};
+    \node[check] (linux) at (5,2.6) {Linux builds +\\Python import check};
+    \node[check] (macos) at (5,1.3) {macOS build};
+    \node[check] (windows) at (5,0) {Windows build};
+    \node[check] (cmake) at (5,-1.3) {CMake build combinations};
+    \node[check] (endings) at (5,-2.6) {Line-ending check};
+    \node[stage] (result) at (10,0) {\texttt{FDS / PR builds}\\Combined result};
+    \foreach \job in {linux,macos,windows,cmake,endings} {
+        \draw[dependency] (admission.east) -- (\job.west);
+        \draw[dependency] (\job.east) -- (result.west);
+    }
+\end{tikzpicture}
+\caption[PR build dependencies]{Dependencies within the PR builds workflow. The middle jobs run independently after admission; the final job combines their results.}
+\label{fig:pr-build-dependencies}
+\end{figure}
+
+The workflow name \texttt{PR builds} refers to this entire process. The final job, \texttt{FDS / PR builds}, reports whether the selected checks passed; it does not perform another compilation. Passing admission allows listed authors to merge while these jobs continue, subject to the repository conditions described in Section~\ref{sec:pr-virus-scanning}.
 
 \section{Firebot: Automated Software Quality Testing}
 
@@ -570,11 +625,11 @@ NIST management approval is required prior to destruction of old or out-of-date 
 \section{Virus Scanning of Pull Requests}
 \label{sec:pr-virus-scanning}
 
-GitHub Actions use ClamAV to scan pull requests to FDS and participating developers' forks. These checks examine repository content and do not replace release-bundle scans. Security code and approved account IDs come from the receiving repository's trusted revision. When both the author and event sender are approved developers, scanning proceeds in the background, including after merging; other pull requests must pass scanning before admission to build checks.
+GitHub Actions use ClamAV to scan pull requests to FDS and participating developers' forks. These checks examine repository content and do not replace release-bundle scans. Security code and approved account IDs come from the receiving repository's trusted revision. The PR author's stable GitHub account ID is checked against \path{.github/security/trusted-developers.json}; the event sender is not used to grant approval. Listed authors receive admission without waiting for scans or builds to finish and may merge once admission and any other required repository conditions are satisfied. Other authors must pass scanning before admission to merge or start builds. Scans and selected builds continue after merging.
 
-Disposable GitHub-hosted runners update signatures, test detection with EICAR, and scan the submitted and merge snapshots. Files are verified against Git's file list and hashes. Scanner jobs use read-only permissions, receive no project secrets, and never execute submitted code. Detections, errors, timeouts, and incomplete scans block outside contributions.
+Disposable GitHub-hosted runners update signatures, test detection with EICAR\footnote{EICAR stands for European Institute for Computer Antivirus Research. Its standard antivirus test file is harmless but deliberately triggers detection, allowing the scanning workflow to be tested without real malware.}, and scan the submitted and merge snapshots. Files are verified against Git's file list and hashes. Scanner jobs use read-only permissions, receive no project secrets, and never execute submitted code. Detections, errors, timeouts, and incomplete scans block outside contributions.
 
-Each receiving repository must require \texttt{FDS / PR admission} and \texttt{FDS / PR builds} through branch protection, require workflow approval for all outside collaborators, and require maintainer review of security changes. The separate \texttt{FDS / ClamAV scan} status reports scan results. External testing systems must enforce admission independently. A clean scan does not establish that code is benign; code review and isolated testing remain necessary.
+Each receiving repository must require \texttt{FDS / PR admission} through branch protection. The \texttt{FDS / PR builds} and \texttt{FDS / ClamAV scan} statuses report results separately and must not be required merge checks, so listed authors can merge while these jobs continue. Repositories must require workflow approval for all outside collaborators and maintainer review of security changes. External testing systems must enforce admission independently. A clean scan does not establish that code is benign; code review and isolated testing remain necessary.
 
 \section{Securing the FDS/Smokeview Installation Files}
 

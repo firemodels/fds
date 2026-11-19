@@ -34,7 +34,7 @@ jobs:
           ref: ${{ github.workflow_sha }}
           persist-credentials: false
           # Only the receiving repository's trusted revision is checked out here.
-          allow-unsafe-checkout: true
+          allow-unsafe-pr-checkout: true
       - name: Admit listed authors immediately; leave others pending
         id: prepare
         env:
@@ -55,7 +55,7 @@ jobs:
         with:
           ref: ${{ github.workflow_sha }}
           persist-credentials: false
-          allow-unsafe-checkout: true
+          allow-unsafe-pr-checkout: true
       - name: Install ClamAV and update signatures
         run: |
           sudo apt-get update
@@ -87,7 +87,7 @@ jobs:
         with:
           ref: ${{ github.workflow_sha }}
           persist-credentials: false
-          allow-unsafe-checkout: true
+          allow-unsafe-pr-checkout: true
       - name: Report scan and admit other authors only on success
         env:
           GH_TOKEN: ${{ github.token }}

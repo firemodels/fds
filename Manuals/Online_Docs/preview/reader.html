@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{TITLE}} — FDS {{MANUAL_TITLE}}</title>
+  <link rel="stylesheet" href="assets/tex4ht.css">
+  <link rel="stylesheet" href="assets/reader.css">
+  <script src="assets/reader.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+  <header class="site-header">
+    <button class="menu-toggle" aria-label="Open chapter navigation" aria-controls="chapter-sidebar" aria-expanded="false">☰</button>
+    <a class="brand" href="{{MANUAL_ENTRY}}"><span class="brand-mark">FDS<span></span></span><span class="brand-name">Fire Dynamics Simulator<span>TECHNICAL DOCUMENTATION</span></span></a>
+    <div class="header-links"><span class="edition">SIXTH EDITION</span><a href="full-guide.pdf">PDF manual <span aria-hidden="true">↗</span></a></div>
+  </header>
+  <aside class="sidebar" id="chapter-sidebar" aria-label="Chapter navigation">
+    <div class="manual-name">{{MANUAL_TITLE}}</div>
+    <div class="volume">{{MANUAL_SUBTITLE}}</div>
+    <button class="search-trigger"><span>⌕ &nbsp; Search this manual</span><kbd>⌘ K</kbd></button>
+    <div class="nav-heading">IN THIS PREVIEW</div>
+    <nav class="chapter-nav" aria-label="Chapter navigation">{{NAV}}</nav>
+    <div class="sidebar-footer"><span class="status-dot"></span> Local preview<p>Selected chapters from the<br>FDS {{MANUAL_TITLE}}.</p><a href="full-guide.pdf">Download the full PDF ↓</a></div>
+  </aside>
+  <div class="page-layout">
+    <main id="main-content" tabindex="-1">
+      <div class="breadcrumb"><a href="{{MANUAL_ENTRY}}">{{MANUAL_TITLE}}</a><span>/</span><span>{{MANUAL_SUBTITLE}}</span></div>
+      <div class="eyebrow">{{EYEBROW}}</div>
+      <article>{{CONTENT}}</article>
+      <nav class="page-navigation" aria-label="Previous and next pages">{{PAGER}}</nav>
+      <footer class="page-footer"><span>FDS · {{MANUAL_TITLE}}</span><span>Source revision {{REVISION}}</span>{{SOURCE}}</footer>
+    </main>
+    <aside class="page-toc" aria-label="On this page"><div>ON THIS PAGE</div><nav aria-label="On this page">{{TOC}}</nav><a class="back-top" href="#main-content">Back to top ↑</a></aside>
+  </div>
+  <dialog id="search-dialog" aria-labelledby="search-title">
+    <form method="dialog" class="search-top"><label for="search-input" id="search-title">Search the manual</label><button aria-label="Close search">Esc</button></form>
+    <input id="search-input" aria-describedby="search-status" type="search" placeholder="Try “staggered grid” or “particle size”…" autocomplete="off">
+    <div id="search-status" role="status">Search the chapters included in this preview.</div>
+    <div id="search-results"></div>
+  </dialog>
+</body>
+</html>

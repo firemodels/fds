@@ -92,6 +92,7 @@ print("freecon_sphere...");                 safe_run("./scripts/freecon_sphere.p
 print("geom_channel_test...");              safe_run("./scripts/geom_channel_test.py")
 print("geom_positive_errors...");           safe_run("./scripts/geom_positive_errors.py")
 print("heated_channel...");                 safe_run("./scripts/heated_channel.py")
+print("hot_chimney...");                    safe_run("./scripts/hot_chimney.py")
 print('hot_layer_collapse...');             safe_run("./scripts/hot_layer_collapse.py")
 print("ht3d_sphere...");                    safe_run("./scripts/ht3d_sphere.py")
 print('hvac_mass_transport...');            safe_run("./scripts/hvac_mass_transport.py")

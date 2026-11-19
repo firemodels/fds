@@ -898,7 +898,6 @@ TYPE SURFACE_TYPE
    REAL(EB) :: FIRE_SPREAD_RATE                        ! Defines speed (m/s) of spread from XYZ
    REAL(EB) :: INNER_RADIUS=0._EB                      ! Inner radius when SURF GEOMETRY = CYLINDRICAL
    REAL(EB) :: MASS_FLUX_VAR=-1._EB
-   REAL(EB) :: VEL_BULK
    REAL(EB) :: VEL_PART
    REAL(EB) :: PARTICLE_SURFACE_DENSITY=-1._EB
    REAL(EB) :: DRAG_COEFFICIENT=2.8_EB
@@ -1058,22 +1057,28 @@ TYPE OMESH_TYPE
    INTEGER,  ALLOCATABLE, DIMENSION(:)   :: CFACE_QUERY_FRONT !< Front CFACE index (in NM) associated with each query
 
    ! CC_IBM data exchange arrays:
-   INTEGER :: NICC_S(2)=0, NICC_R(2)=0, NICF_S(2)=0, NICF_R(2)=0, NLKF_S=0, NLKF_R=0, &
-              NFCC_S(2)=0, NFCC_R(2)=0, NCC_INT_R=0, NFEP_R(5)=0, NFEP_R_G=0
+   ! NFEP_R(1:2) are unused (they counted the removed cut-face interpolation stencil); 3:5 are the cut-cell/edge stencils.
+   INTEGER :: NFCC_S(2)=0, NFCC_R(2)=0, NCC_INT_R=0, NFEP_R(5)=0
    REAL(EB), ALLOCATABLE, DIMENSION(:) ::                &
-         REAL_SEND_PKG11,REAL_SEND_PKG112,REAL_SEND_PKG12,REAL_SEND_PKG13,&
-         REAL_RECV_PKG11,REAL_RECV_PKG112,REAL_RECV_PKG12,REAL_RECV_PKG13
-   INTEGER, ALLOCATABLE, DIMENSION(:) :: ICC_UNKZ_CT_S, ICC_UNKZ_CC_S, ICC_UNKZ_CT_R, ICC_UNKZ_CC_R,&
-                                         ICF_UFFB_CF_S, ICF_UFFB_CF_R
-   INTEGER, ALLOCATABLE, DIMENSION(:) :: UNKZ_CT_S, UNKZ_CC_S, UNKZ_CT_R, UNKZ_CC_R
+         REAL_SEND_PKG112,REAL_SEND_PKG115,REAL_SEND_PKG12,REAL_SEND_PKG13,&
+         REAL_RECV_PKG112,REAL_RECV_PKG115,REAL_RECV_PKG12,REAL_RECV_PKG13
+   ! Cut-face halo of the interface planes (PKG112 at CODE 3/6, PKG115 at CODE 5; CC_SET_CF_HALO_LISTS). _S: this mesh
+   ! sends to NOM, _R: it receives from NOM. A plane (0:6): normal axis, low (IAXIS:KAXIS) and high (3+IAXIS:3+KAXIS)
+   ! face indices on the sender's grid. NCF: cut-face pieces on the planes, NPF: plane faces.
+   INTEGER :: NCF_S=0, NCF_R=0, NPF_S=0, NPF_R=0
+   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: CF_PLANE_S, CF_PLANE_R
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: CF_FC_S               !< FACE row of each piece sent, in set order.
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: LNK_POS_S, LNK_UNK_S  !< Linked plane faces: PKG112 slot, link number.
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: CFHALO_VEL, CFHALO_VELS, CFHALO_VEL_LNK, CFHALO_FN !< (1:NCF_R), set order.
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: CFHALO_ROW0 !< Copy ICF -> first row; 0 = not on the planes.
    INTEGER, ALLOCATABLE, DIMENSION(:,:,:) :: MUNKH,GSCH,EWC_TYPE
 
    ! Face variables data (velocities):
    INTEGER, ALLOCATABLE, DIMENSION(:) :: IIO_FC_R,JJO_FC_R,KKO_FC_R,AXS_FC_R,IIO_FC_S,JJO_FC_S,KKO_FC_S,AXS_FC_S
    INTEGER, ALLOCATABLE, DIMENSION(:) :: IIO_CC_R,JJO_CC_R,KKO_CC_R,IIO_CC_S,JJO_CC_S,KKO_CC_S
    INTEGER, ALLOCATABLE, DIMENSION(:) :: IIO_LF_R,JJO_LF_R,KKO_LF_R,AXS_LF_R,IIO_LF_S,JJO_LF_S,KKO_LF_S,AXS_LF_S
-   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: IFEP_R_1, IFEP_R_2, IFEP_R_3, IFEP_R_4, IFEP_R_5
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: U_LNK, V_LNK, W_LNK
+   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: IFEP_R_3, IFEP_R_4, IFEP_R_5
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: U_LNK, V_LNK, W_LNK !< Receive box shape; set on the plane faces only.
 
    ! Level Set
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: PHI_LS,PHI1_LS,U_LS,V_LS,Z_LS
@@ -1311,46 +1316,13 @@ TYPE CC_CUTFACE_TYPE
    INTEGER,  ALLOCATABLE, DIMENSION(:)   :: CFACE_ORIGIN !< In boundary face origin (built, blocked small cell, blocked split cell).
    INTEGER,  ALLOCATABLE, DIMENSION(:,:) ::       NOMICF !< For external boundary boundary cutfaces, NOM and cut-face list.
 
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:) ::         UNKH !< Low and high side cut-cell H unknown number. (LOW:HIGH,1:NFACE)
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:) ::         UNKZ !< Low and high side cut-cell Z unknown number. (LOW:HIGH,1:NFACE)
-   INTEGER,  ALLOCATABLE, DIMENSION(:)   ::         UNKF !< Momentum unknown number, used for face linking. (1:NFACE)
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   ::           FC !< (1:NFACE) FV FACE index; 0 if not in FACE inventory.
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) ::      XCENLOW !< Centroid position for cut-cells in low side. (IAXIS:KAXIS,1:NFACE)
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) ::     XCENHIGH !< Centroid position for cut-cells in high side. (IAXIS:KAXIS,1:NFACE)
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:) ::      ZZ_FACE !< Scalar values interpolated to cut-faces.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)   ::     TMP_FACE !< Gas phase cut-face temperature array. (1:NFACE)
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:) ::   RHO_D_DZDN !< Diffusive mass flux for species and cut-faces.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: H_RHO_D_DZDN !< Heat flux due to diffusive mass flux for species and cut-faces.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)   ::          VEL !< Corrector velocity normal to cut-faces. (1:NFACE)
-   REAL(EB), ALLOCATABLE, DIMENSION(:)   ::         VELS !< Predictor velocity normal to cut-faces. (1:NFACE)
-   REAL(EB), ALLOCATABLE, DIMENSION(:)   ::           FN !< Momentum RHS in cut-faces (Advective+diffusive+body+...).
-   REAL(EB), ALLOCATABLE, DIMENSION(:)   ::         FN_B !< Baroclinic Force RHS in cut-faces.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)   ::     VEL_SAVE !< Saved unlinked velocities container for cut-faces.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)   ::      VEL_LNK !< Linked velocity container for cut-faces.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)   ::    VEL_OMESH !< OMESH Corrector velocity normal to cut-faces of MESHES(NOM).
-   REAL(EB), ALLOCATABLE, DIMENSION(:)   ::   VELS_OMESH !< OMESH Predictor velocity normal to cut-faces. (1:NFACE)
-   REAL(EB), ALLOCATABLE, DIMENSION(:)   ::VEL_LNK_OMESH !< OMESH Linked velocities.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)   ::     FN_OMESH !< OMESH Momentum RHS.
    INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)::         JDH !< Index matrix per cutface in H Poisson matrix.
    REAL(EB) :: FV=0._EB,FV_B=0._EB                       !< Momentum RHS and baroclinic torque in Cartesian face.
    REAL(EB) :: ALPHA_CF=1._EB                            !< Area fraction for all gas cut-faces in a given cartesian face.
    REAL(EB) :: VEL_CF=0._EB,VEL_CRT=0._EB                !< Average cut-face velocity, cartesian velocity containers.
-
-   ! Here: VIND=IAXIS:KAXIS, EP=1:INT_N_EXT_PTS,
-   ! INT_VEL_IND = 1; INT_VELS_IND = 2; INT_FV_IND = 3; INT_DHDX_IND = 4; N_INT_FVARS = 4;
-   ! INT_NPE_LO = INT_NPE(LOW,VIND,EP,IFACE); INT_NPE_HI = INT_NPE(HIGH,VIND,EP,IFACE).
-   ! Interpolation of variables for boundary cut-faces (CFACEs).
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)    :: INT_IJK        !< Interpolation (IAXIS:KAXIS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
-   REAL(EB), ALLOCATABLE, DIMENSION(:)      :: INT_COEF       !< Interpolation (INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)    :: INT_DCOEF      !< Interpolation (IAXIS:KAXIS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)    :: INT_XYZBF,INT_NOUT !< Interpolation (IAXIS:KAXIS,0:NFACE)
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)    :: INT_INBFC      !< Interpolation (1:3,0:NFACE)
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:,:,:):: INT_NPE        !< Interpolation (LOW:HIGH,VIND,EP,0:NFACE)
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)    :: INT_XN,INT_CN  !< Interpolation (0:INT_N_EXT_PTS,0:NFACE) !0 is interp point.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)    :: INT_FVARS      !< Interp (1:N_INT_FVARS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)    :: INT_NOMIND     !< Interp (LOW_IND:HIGH_IND,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
-   ! Fields used in INBOUNDARY faces:
-   ! Here: VIND=0, EP=1:INT_N_EXT_PTS, INT_H_IND=1, etc. N_INT_CVARS=INT_P_IND+N_TRACKED_SPECIES
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)    :: INT_CVARS      !< Interpolation (1:N_INT_CVARS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
 
 END TYPE CC_CUTFACE_TYPE
 
@@ -1406,41 +1378,14 @@ TYPE CC_CUTCELL_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:)      ::           VOLUME !< Cut-cell volumes. (1:NCELL)
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)    ::           XYZCEN !< Cut-cell centroid locations. (IAXIS:KAXIS,1:NCELL)
    INTEGER,  ALLOCATABLE, DIMENSION(:)      ::             UNKZ !< Cut-cells unknown number for scalars.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)      ::               IG !< (1:NCELL) FV GCELL index; 0 if not in GCELL inventory.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)      ::              ICV !< (1:NCELL) active owner CV on this mesh; 0: inactive or remote.
    INTEGER,  ALLOCATABLE, DIMENSION(:)      ::        NOADVANCE !< Array to define if cut-cell should be blocked. (1:NCELL)
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)    ::     BODTRI_DONOR !< Donor body/triangle for blocked-cell generated inboundary faces. (1:2,1:NCELL)
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)    ::     BODTRI_DONOR !< (1:2,1:NCELL) donor body/triangle of faces made by blocking.
    INTEGER                                  ::       N_NOMICC=0 !< Number of entries in NOMICC
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)    ::           NOMICC !< OMESH cut-cells array. (1:2,1:N_NOMICC)
 
-   REAL(EB), ALLOCATABLE, DIMENSION(:)      ::              RHO !< Corrector cut-cell densities. (1:NCELL)
-   REAL(EB), ALLOCATABLE, DIMENSION(:)      ::             RHOS !< Predictor cut-cell densities.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)      ::             RSUM !< Cut-cells RSUM container. (1:NCELL)
-   REAL(EB), ALLOCATABLE, DIMENSION(:)      ::              TMP !< Cut-cells temperatures. (1:NCELL)
-   REAL(EB), ALLOCATABLE, DIMENSION(:)      ::                D !< Corrector cut-cells thermodynamic divg. (1:NCELL)
-   REAL(EB), ALLOCATABLE, DIMENSION(:)      ::               DS !< Predictor cut-cells thermodynamic divg.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)      ::             DVOL !< Cut-cells thermodynamic divg*vol.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)      ::          DVOL_PR !< Predictor cut-cell thermodynamic divg*vol.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)      ::                Q !< Cut-cells volumetric heat source. (1:NCELL)
-   REAL(EB), ALLOCATABLE, DIMENSION(:)      ::               QR !< Cut-cells volumetric radiative heat source.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)      ::         D_SOURCE !< Cut-cells divergence source terms.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)      ::            CHI_R !< Cut-cells radiative fraction.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)      ::         MIX_TIME !< Cut-cells species mixing time.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)    ::           Q_REAC !< Cut-cells volumetric heat source due to reaction.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)    :: REAC_SOURCE_TERM !< Cut-cells species source term. (1:N_TOTAL_SCALARS,1:NCELL)
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)    ::               ZZ !< Corrector cut-cells mass fractions.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)    ::              ZZS !< Predictor cut-cells mass fractions.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)    ::        M_DOT_PPP !< Cut-cells mass source term.
-
    INTEGER,  ALLOCATABLE, DIMENSION(:)      ::             UNKH !< Cut-cells unknown number for pressure H. (1:NCELL)
-   REAL(EB), ALLOCATABLE, DIMENSION(:)      ::             KRES !< Cut-cells turbulent kinetic energy.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)      ::                H !< Cut-cells predictor pressure values.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)      ::               HS !< Cut-cells corrector pressure values.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)      ::             RTRM !< Cut-cells 1/(rho*c_p*T).
-   REAL(EB), ALLOCATABLE, DIMENSION(:)      ::            R_H_G !< Cut-cells 1/(c_p*T)
-   REAL(EB), ALLOCATABLE, DIMENSION(:)      ::            RHO_0 !< Cut-cells background density.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)      ::             WVEL !< Cut-cells centroid vertical velocity.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)      ::          DDDTVOL !< Cut-cells dD/dT * vol.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)      ::        DELTA_RHO !< Cut-cells density change used in check mass density.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)      ::     DELTA_RHO_ZZ !< Cut-cells species density change used in check mass density.
 
    ! Here: VIND=0, EP=1:INT_N_EXT_PTS, interpolation stencils for WVEL, RHO_0 into cut-cell centroids.
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)    :: INT_IJK          !< Interpolation (IAXIS:KAXIS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
@@ -1452,25 +1397,180 @@ TYPE CC_CUTCELL_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)    :: INT_CCVARS       !< Interpolation (1:N_INT_CCVARS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)    :: INT_NOMIND       !< Interp. (LOW_IND:HIGH_IND,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
 
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)    :: DEL_RHO_D_DEL_Z_VOL !< Cut-cells DEL_RHO_D_DEL_Z * VOL
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)    :: U_DOT_DEL_RHO_Z_VOL !< Cut-cells U_DOT_DEL_RHO_Z * VOL
 END TYPE CC_CUTCELL_TYPE
 
-
 !> \brief Mesh-owned GCELL storage in SoA form.
-!! One GCELL slot IG = one connected gas polyhedron in the active complex-geometry region.
 
 TYPE CC_GCELL_TYPE
    INTEGER :: N = 0
+   INTEGER :: N_CUT = 0
+   INTEGER :: N_REG = 0
+   INTEGER :: N_CUT_GHOST = 0
+   INTEGER :: N_REG_GHOST = 0
+   INTEGER :: N_INT = 0
    INTEGER,  ALLOCATABLE, DIMENSION(:)   :: CELL_TYPE !< (1:N) CC_GCELL_CUT or CC_GCELL_REG.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: LAYER     !< (1:N) face-neighbor distance from cut region; cut GCELLs are 0.
    INTEGER,  ALLOCATABLE, DIMENSION(:,:) :: IJK       !< (IAXIS:KAXIS,1:N) host Cartesian cell indices.
    INTEGER,  ALLOCATABLE, DIMENSION(:)   :: ICC       !< (1:N) CUT_CELL index (0 if regular cell).
    INTEGER,  ALLOCATABLE, DIMENSION(:)   :: JCC       !< (1:N) sub-cell index within CUT_CELL (0 if regular).
    INTEGER,  ALLOCATABLE, DIMENSION(:)   :: STATUS    !< (1:N) active / blocked.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: MASTER_NM !< (1:N) provisional master mesh number.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: MASTER_CELL_TYPE !< (1:N) provisional master cell kind.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: MASTER_IG !< (1:N) provisional same-mesh master GCELL index.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:) :: MASTER_IJK !< (IAXIS:KAXIS,1:N) provisional master host indices.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: MASTER_ICC !< (1:N) provisional master CUT_CELL index.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: MASTER_JCC !< (1:N) provisional master sub-cell index.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: CV_DECISION !< (1:N) provisional CV merge/block decision.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: CENTER_SOURCE !< (1:N) selected XCV source policy.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: CONN_AXIS !< (1:N) selected child/master connection direction.
    REAL(EB), ALLOCATABLE, DIMENSION(:)   :: VOLUME    !< (1:N) cached volume.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   :: CV_VOLUME !< (1:N) provisional merged CV volume.
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: XYZCEN    !< (IAXIS:KAXIS,1:N) cached centroid.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: XCV       !< (IAXIS:KAXIS,1:N) provisional solver center.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: XBAR_CV   !< (IAXIS:KAXIS,1:N) provisional merged-volume centroid.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   :: CONN_AREA !< (1:N) selected child/master connecting face area.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   :: MAX_THETA !< (1:N) selected merge non-orthogonality metric.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   :: MAX_SKEW  !< (1:N) selected merge skew metric.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   :: MIN_DFDIAM !< (1:N) selected merge normalized face-distance metric.
+   LOGICAL, ALLOCATABLE, DIMENSION(:) :: ABSORBED !< (1:N) child already absorbed; setup-only occupancy.
+   LOGICAL, ALLOCATABLE, DIMENSION(:) :: CLAIMED  !< (1:N) CV root claimed this proposal round; setup-only occupancy.
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: ROW_Z !< (1:N) owner CV scalar row; 0 when that CV has none.
 END TYPE CC_GCELL_TYPE
 
+!> \brief Mesh-owned CV storage in SoA form.
+
+TYPE CC_CV_TYPE
+   INTEGER :: N = 0
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: GCELL_TO_CV_NM !< (1:NGCELL) owner mesh of the CV containing each local GCELL.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: GCELL_TO_CV    !< (1:NGCELL) owner CV index containing each local GCELL.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: OWNER_NM    !< (1:N) mesh number that owns the CV row.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: OWNER_GCELL !< (1:N) identity owner/member GCELL index.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: N_MEMBER    !< (1:N) GCELL members; 0 = agglomeration child, skip in CELL_TYPE loops.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:) :: MEMBER_NM   !< (1:MAX_MEMBERS,1:N) member meshes; MAX_MEMBERS = max(2, members per CV).
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:) :: MEMBER_GCELL !< (1:MAX_MEMBERS,1:N) diagnostic member GCELL indices.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: CELL_TYPE   !< (1:N) identity source type, CC_GCELL_CUT or CC_GCELL_REG.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:) :: IJK         !< (IAXIS:KAXIS,1:N) identity host Cartesian cell indices.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: ICC         !< (1:N) identity source CUT_CELL index, 0 for regular.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: JCC         !< (1:N) identity source sub-cell index, 0 for regular.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: STATUS      !< (1:N) active / blocked.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: CENTER_SOURCE !< (1:N) selected XCV source policy.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: UNKH        !< (1:N) global pressure unknown carried by this CV.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: UNKZ        !< (1:N) global scalar unknown carried by this CV.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   :: VOLUME      !< (1:N) CV volume.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: XCV         !< (IAXIS:KAXIS,1:N) solver reference center.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: XBAR_CV     !< (IAXIS:KAXIS,1:N) true volume centroid.
+   ! Runtime cell-centered scalar/thermodynamic state. At identity scope these arrays are synchronized
+   ! with the legacy Cartesian/CUT_CELL containers at the boundary of kernels that have not migrated yet.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   :: RHO, RHOS, TMP, RSUM, RTRM, R_H_G, RHO_0, WVEL
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   :: H, HS, KRES
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   :: D, DS, DVOL, DVOL_PR, DDDTVOL !< DDDTVOL is intensive dD/dT; volume applied at deposit.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   :: Q, QR, CHI_R, MIX_TIME, D_SOURCE
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   :: DELTA_RHO, DELTA_RHO_ZZ
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: Q_REAC !< (1:N_REACTIONS,1:N) per-reaction HRRPUV.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: ZZ, ZZS
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: M_DOT_PPP
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: DEL_RHO_D_DEL_Z_VOL
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: U_DOT_DEL_RHO_Z_VOL
+   ! CV -> FACE incidence (CSR): faces bounding CV ICV are FACE_LIST(FACE_PTR(ICV):FACE_PTR(ICV+1)-1).
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: FACE_PTR    !< (1:N+1) CSR offsets into FACE_LIST.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: FACE_LIST   !< (1:sum incident faces) FACE indices bounding each CV.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: MEMBER_PTR   !< (1:N+1) CSR start offsets into MEMBER_LIST.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: MEMBER_LIST  !< Local GCELL members of each CV, ascending within a CV.
+END TYPE CC_CV_TYPE
+
+!> \brief Mesh-owned finite-volume FACE storage in SoA form.
+
+TYPE CC_FACE_TYPE
+   INTEGER :: N = 0
+   INTEGER :: N_INT = 0 !< Last interior row. The tail is guard and orphan cut faces, then seam RC faces, then regular faces.
+   INTEGER :: SEAM_RC_LO = 0 !< First seam RC tail row, else 0.
+   INTEGER :: SEAM_RC_HI = 0 !< Last seam RC tail row, else 0.
+   ! --- CV topology ---
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: OWNER_CV_NM !< (1:N) mesh owning OWNER_CV.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: OWNER_CV    !< (1:N) owner CV index; normal points owner->neighbor.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: NBR_CV_NM   !< (1:N) mesh owning NBR_CV, 0 if boundary face.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: NBR_CV      !< (1:N) neighbor CV index, 0 if boundary face.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: OWNER_GCELL !< (1:N) owner-side GCELL index (support/provenance).
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: NBR_GCELL   !< (1:N) neighbor-side GCELL index, 0 if boundary.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: KIND        !< (1:N) CC_FACE_KIND_* (gas / wall / ext-domain / remote / refine).
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: ROLE        !< (1:N) CC_FACE_ROLE_EXTERNAL or CC_FACE_ROLE_INTERNAL.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: PARTNER     !< (1:N) FACE row of the same face on the mesh across, else 0.
+   ! --- provenance back to legacy faces ---
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: FTYPE       !< (1:N) legacy source kind CC_FTYPE_RCGAS/CFGAS/CFINB/RGGAS.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: SRC_IRC     !< (1:N) RC_FACE of an RCGAS row (GET_GASPHASE_REGRCFACES_DATA).
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: SRC_IREG    !< (1:N) CC_REGFACE_*_Z of an RGGAS row (GET_GASPHASE_REGRCFACES_DATA).
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: SRC_ICF     !< (1:N) source CUT_FACE index for cut-face-based faces, else 0.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: SRC_JCF     !< (1:N) source CUT_FACE polygon for cut-face-based faces, else 0.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: IWC         !< (1:N) owner-side WALL index of a wall-bearing face, else 0.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: X1AXIS      !< (1:N) axis (IAXIS:KAXIS) for Cartesian-aligned faces, else 0.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:) :: IJK_FACE    !< (IAXIS:KAXIS,1:N) Cartesian face locator for axis faces.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:) :: NBR_IJK     !< (IAXIS:KAXIS,1:N) outside Cartesian cell for FV/structured coupling.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: UNKF        !< (1:N) link number. The only copy.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: UNKZ_OWN, UNKZ_NBR !< (1:N) scalar row of the owner and neighbor CV.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: UNKH_OWN, UNKH_NBR !< (1:N) pressure row of the owner and neighbor CV.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: ZONE_OWN, ZONE_NBR !< (1:N) pressure zone of the owner and neighbor CV.
+   ! --- geometry ---
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   :: AREA        !< (1:N) face area.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   :: FLUX_AREA   !< (1:N) legacy-exact area used by identity-scope flux operators.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: NVEC        !< (IAXIS:KAXIS,1:N) outward unit normal (owner -> neighbor).
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: NVEC_RAD    !< (IAXIS:KAXIS,1:N) cut-cell radiation normal; in-boundary rows only.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: XYZCEN      !< (IAXIS:KAXIS,1:N) face centroid.
+   ! --- precomputed stencil coefficients (filled after topology is frozen) ---
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: X_FACE_REF  !< (IAXIS:KAXIS,1:N) selected owner-side support point.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: XN_FACE_REF !< (IAXIS:KAXIS,1:N) selected neighbor-side support point (if neighbor CV).
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   :: D_LR        !< (1:N) compact owner-neighbor support distance.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   :: RDN        !< (1:N) 1/D_LR; WALL/CFACE-consistent inverse normal spacing.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   :: INTERP_W    !< (1:N) owner-side linear interpolation weight.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   :: VEL, VELS   !< (1:N) corrector and predictor owner-normal velocity.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   :: FN, FN_B    !< (1:N) momentum RHS and baroclinic component.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   :: VEL_SAVE, VEL_LNK !< (1:N) pre-average and linked cut-face velocity.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: DIFF_FLUX   !< (1:N_TOTAL_SCALARS,1:N) positive-axis rho*D*grad(Z) flux.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   :: DIFF_H_FLUX !< (1:N) positive-axis sensible-enthalpy diffusion flux.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:,:) :: JDH       !< (2,2,1:N) cached pressure-matrix column slots.
+END TYPE CC_FACE_TYPE
+
+!> \brief Non-orthogonal correction of the two-point scalar fluxes on cut and RC faces (CC_SET_SKEW_ROWS, per stage
+!> CC_SKEW_GRADIENTS). Listed rows: t = d RDN - n is not zero. Gradient slots: 0 zero, 1:NG computed here, NG+1:NG+NGR
+!> received over the guard pairing. Value points 1:NVC are FV%CV rows (GCELL VIG), NVC+1:NV Cartesian cells (VIJK).
+
+TYPE CC_SKEW_TYPE
+   INTEGER :: N=0,NG=0,NGR=0,NVC=0,NV=0
+   INTEGER,  ALLOCATABLE, DIMENSION(:)     :: ROW  !< (1:FACE%N_INT) list position of a FACE row, 0 if not listed.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)   :: GS   !< (1:2,1:N) gradient slots of the owner and neighbor CVs.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: TW   !< (IAXIS:KAXIS,1:2,1:N) (1-W) t and W t, positive axis.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)     :: SRC  !< Slot of each guard source of this mesh (GD_SC, then GD_SR).
+   INTEGER,  ALLOCATABLE, DIMENSION(:)     :: VIG  !< (1:NVC) GCELL of a value point.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)   :: VIJK !< (IAXIS:KAXIS,NVC+1:NV) Cartesian value point.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)     :: SELF !< (1:NG) value point of the CV.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)     :: PTR  !< (1:NG+1) CSR offsets into SP and W.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)     :: SP   !< Value point of each sample.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)   :: W    !< (IAXIS:KAXIS,:) least-squares weights of the samples.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)   :: V    !< (0:N_TOTAL_SCALARS,1:NV) T and Z at the value points.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: G    !< (IAXIS:KAXIS,0:N_TOTAL_SCALARS,0:NG+NGR) gradients of T and Z.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)   :: C    !< (0:N_TOTAL_SCALARS,0:N) t.g_f on the positive axis; column 0 is 0.
+END TYPE CC_SKEW_TYPE
+
+!> \brief Mesh-owned finite-volume container for the unstructured active region.
+
+TYPE CC_FV_TYPE
+   TYPE(CC_GCELL_TYPE) :: GCELL
+   TYPE(CC_CV_TYPE)    :: CV
+   TYPE(CC_FACE_TYPE)  :: FACE
+   TYPE(CC_SKEW_TYPE)  :: SK
+END TYPE CC_FV_TYPE
+
+!> \brief Phase-5 CV merge proposal SoA (ALLGATHER).
+
+TYPE CC_CV_PROPOSAL_BUFFER_TYPE
+   INTEGER, ALLOCATABLE, DIMENSION(:)   :: CHILD_NM,CHILD_IG,CHILD_ICC,CHILD_JCC
+   INTEGER, ALLOCATABLE, DIMENSION(:)   :: MASTER_NM,MASTER_CELL_TYPE,MASTER_ICC,MASTER_JCC,MASTER_IG
+   INTEGER, ALLOCATABLE, DIMENSION(:)   :: CENTER_SOURCE,CONN_AXIS,IS_ALT,ROOT_NM,ROOT_IG,SLOT
+   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: CHILD_IJK,MASTER_IJK
+   REAL(EB), ALLOCATABLE, DIMENSION(:)  :: THETA,SKEW,DFDIAM,CONN_AREA,VOLUME
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:):: XCV,XBAR_CV
+   REAL(EB), ALLOCATABLE, DIMENSION(:)  :: CHILD_VOLUME,MASTER_VOLUME
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:):: CHILD_XYZCEN,MASTER_XYZCEN
+END TYPE CC_CV_PROPOSAL_BUFFER_TYPE
 
 !> \brief Regular faces type that contains indexes for construction of H Poisson discretization matrix.
 
@@ -1487,31 +1587,20 @@ TYPE CC_REGFACEZ_TYPE
    LOGICAL                               ::    DO_HI_IND=.FALSE. !< Defines if fluxes are to be assigned in high side cell.
    INTEGER,  DIMENSION(MAX_DIM)          ::                  IJK !< Location indexes [ I J K ] of X,Y,Z REG face.
    INTEGER                               ::                IWC=0 !< WALL CELL index (if present) in location of REG Face.
+   INTEGER                               ::                 FC=0 !< FV FACE index; 0 if not in FACE inventory.
    INTEGER,  ALLOCATABLE, DIMENSION(:,:) ::               NOMICF !< OMESH face info for mesh boundary REG face.
-   REAL(EB)                              ::         FN_H_S=0._EB !< Stores components FX_H_S, FY_H_S, FZ_H_S as needed.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)   ::              RHOZZ_U !< Stores computed FX(I,J,K,N)*UU(I,J,K), etc. as needed.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)   ::                FN_ZZ !< Stores computed FX_ZZ(I,J,K), etc. as needed.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)   ::           RHO_D_DZDN !< Species diffusive mass fluxes in REG face.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)   ::         H_RHO_D_DZDN !< OMESH face info for mesh boundary REG face.
 END TYPE CC_REGFACEZ_TYPE
 
 !> \brief Regular faces type, contains information for reg faces connecting regular and cut-cells.
 
 TYPE CC_RCFACE_TYPE
-   LOGICAL                                         ::    SHAREDZ=.FALSE. !< Notes if RC face connects cells with same UNKZ.
    INTEGER                                         ::              IWC=0 !< WALL CELL index (if present) in location of RC Face.
    INTEGER                                         ::       PRES_ZONE=-1 !< Pressure zone where RC face is.
    INTEGER,  DIMENSION(MAX_DIM+1)                  ::                IJK !< Location indexes and axis of RC face. [ I J K X1AXIS]
-   INTEGER                                         ::             UNKF=0 !< Momentum unknown number if face is linked.
-   INTEGER,  DIMENSION(LOW_IND:HIGH_IND)           ::               UNKZ !< Scalar transport unknown numbers in connected cells.
-   INTEGER,  DIMENSION(LOW_IND:HIGH_IND)           ::               UNKH !< Pressure unknown numbers in connected cells.
+   INTEGER                                         ::               FC=0 !< FV FACE index. Every RC face has a row.
    REAL(EB), DIMENSION(MAX_DIM,LOW_IND:HIGH_IND)   ::               XCEN !< Centroid location of connected cells.
    INTEGER,  DIMENSION(1:2,1:2)                    ::                JDH !< Index matrix for H Poisson matrix coefficients.
    INTEGER,  DIMENSION(MAX_DIM+1,LOW_IND:HIGH_IND) ::          CELL_LIST !< Cell type/location of connected cells. [RC_TYPE I J K ]
-   REAL(EB)                                        ::     TMP_FACE=0._EB !< Temperature in RC face.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)             ::            ZZ_FACE !< Species mass fractions in RC face.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)             ::         RHO_D_DZDN !< Species diffusive mass fluxes in RC face.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)             ::       H_RHO_D_DZDN !< Species heat fluxes due to RHO_D_DZDN in RC face.
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::             NOMICF !< OMESH face info for mesh boundary RC face.
 END TYPE CC_RCFACE_TYPE
 

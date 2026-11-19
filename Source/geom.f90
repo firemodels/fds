@@ -66,7 +66,7 @@ INTEGER,  PARAMETER :: CC_IDCF   = 3 ! MESHES(N)%CUT_FACE data struct entry inde
                                      ! CC_INBOUNDCF type cut-faces.
 INTEGER,  PARAMETER :: CC_IDRC   = 4 ! In GET_CRTCFCC_INT_STENCILS Flag used to define faces.
                                      ! After SET_CC_MATVEC_DATA, position in RC_FACE of I,J,K,IAXIS face.
-INTEGER,  PARAMETER :: CC_UNKF   = 5 ! Momentum Force indexing.
+INTEGER,  PARAMETER :: CC_FROW   = 5 ! FACE row of a regular face, set by the linker.
 INTEGER,  PARAMETER :: CC_NFVARS = 5 ! Number of face variables in MESHES(N)%FCVAR.
 
 ! Cartesian Cell centered variables:
@@ -119,8 +119,8 @@ LOGICAL :: CALL_FROM_GLMAT_SETUP = .FALSE. ! Flag to avoid MESH_CC_EXCHANGE(3) w
 
 ! Communication variables:
 
-INTEGER :: N_REQ11=0, N_REQ12=0, N_REQ112=0, N_REQ13=0
-TYPE (MPI_REQUEST), SAVE, ALLOCATABLE, DIMENSION(:) :: REQ11, REQ112, REQ12, REQ13
+INTEGER :: N_REQ12=0, N_REQ112=0, N_REQ115=0, N_REQ13=0
+TYPE (MPI_REQUEST), SAVE, ALLOCATABLE, DIMENSION(:) :: REQ112, REQ115, REQ12, REQ13
 
 ! Timings variables:
 LOGICAL, SAVE :: WRITE_SET_CUTCELLS_TIMINGS = .FALSE.
@@ -159,7 +159,7 @@ REAL(EB) :: VAL_TESTX_LOW,VAL_TESTX_HIGH,VAL_TESTY_LOW,VAL_TESTY_HIGH,VAL_TESTZ_
 ! End Variable declaration for CC_IBM.
 ! ---------------------------------------------------------------------------------
 
-PUBLIC :: GEOFCT,CALL_FOR_GLMAT,CALL_FROM_GLMAT_SETUP,CCGUARD,CC_MATVEC_DEFINED, &
+PUBLIC :: GEOFCT,GEOMQUALITYFCT,CALL_FOR_GLMAT,CALL_FROM_GLMAT_SETUP,CCGUARD,CC_MATVEC_DEFINED, &
           GEOMEPS,DEBUG_WAIT,SET_CUTCELLS_TIME_INDEX,GET_BODINT_PLANE_TIME_INDEX,GET_X2_INTERSECTIONS_TIME_INDEX, &
           GET_X2_VERTVAR_TIME_INDEX,GET_CARTEDGE_CUTEDGES_TIME_INDEX,GET_BODX2X3_INTERSECTIONS_TIME_INDEX, &
           GET_CARTFACE_CUTEDGES_TIME_INDEX,GET_CARTCELL_CUTEDGES_TIME_INDEX,GET_CARTFACE_CUTFACES_TIME_INDEX, &
@@ -168,14 +168,14 @@ PUBLIC :: GEOFCT,CALL_FOR_GLMAT,CALL_FROM_GLMAT_SETUP,CCGUARD,CC_MATVEC_DEFINED,
           READ_GEOM,ROTATION_MATRIX,WRITE_GEOM,WRITE_GEOM_ALL, &
           CC_SOLID,CC_VGSC,CC_CGSC,CC_FGSC,CC_IDCF,CC_UNKZ,CC_GASPHASE,CC_CUTCFE,CC_IDRC,CC_FTYPE_CFGAS, &
           CC_FTYPE_CFINB,CC_FTYPE_RGGAS,CC_IDCC,CC_EGSC,CC_IDCE,CC_ECRS,CC_INBOUNDARY,CC_UNDEFINED, &
-          CC_GG,CC_SS,CC_GS,CC_SG,CC_NCVARS,CC_UNKH,CC_UNKF,CC_ETYPE_EP,CC_ETYPE_SCINB,CC_FTYPE_SVERT,CC_ETYPE_RCGAS, &
+          CC_GG,CC_SS,CC_GS,CC_SG,CC_NCVARS,CC_UNKH,CC_FROW,CC_ETYPE_EP,CC_ETYPE_SCINB,CC_FTYPE_SVERT,CC_ETYPE_RCGAS, &
           CC_ETYPE_RGGAS,CC_ETYPE_CFGAS,CC_FTYPE_RCGAS,CC_FTYPE_CCGAS,LOOSEPS,LU_SETCC,MESH_CC_EXCHANGE_TIME_INDEX, &
           CCCOMPUTE_RADIATION_TIME_INDEX,CC_DENSITY_TIME_INDEX,CC_SET_DATA_TIME_INDEX, &
           INIT_CUTCELL_DATA_TIME_INDEX,CC_VELOCITY_FLUX_TIME_INDEX,CC_COMPUTE_VISCOSITY_TIME_INDEX, &
           CC_INTERP_FACE_VEL_TIME_INDEX,CC_DIVERGENCE_PART_1_TIME_INDEX,CC_END_STEP_TIME_INDEX, &
           CC_TARGET_VELOCITY_TIME_INDEX,CC_NO_FLUX_TIME_INDEX,CC_COMPUTE_VELOCITY_ERROR_TIME_INDEX,NGUARD, &
-          N_SET_CUTCELLS_3D_CALLS,NM_START,N_REQ11,N_REQ12,N_REQ112,N_REQ13,REQ11,REQ112,REQ12,REQ13, &
-          POINT_IN_POLYGON,TEST_PT_INPOLY,RAY_TRIANGLE_INTERSECT_PT,SEARCH_OTHER_MESHES_FACE,CC_INIT_GEOM, &
+          N_SET_CUTCELLS_3D_CALLS,NM_START,N_REQ12,N_REQ112,N_REQ115,N_REQ13,REQ112,REQ115,REQ12,REQ13, &
+          POINT_IN_POLYGON,TEST_PT_INPOLY,RAY_TRIANGLE_INTERSECT_PT,POINT_IN_BB,SEARCH_OTHER_MESHES_FACE,CC_INIT_GEOM, &
           GET_SEGSEG_INTERSECTION,LINE_INTERSECT_COORDPLANE,TRIANGULATE,TRILINEAR,VALID_TRIANGLE,VAL_TESTX_LOW,VAL_TESTX_HIGH,&
           VAL_TESTY_LOW,VAL_TESTY_HIGH,VAL_TESTZ_LOW,VAL_TESTZ_HIGH,T_CC_USED, &
           WRITE_SET_CUTCELLS_TIMINGS,MAKE_UNIQUE_VERT_ARRAY,AVERAGE_FACE_VALUES,CC_INBOUNDCC,CC_INBOUNDCF, &
@@ -1174,7 +1174,11 @@ COUNT_GEOM_LOOP: DO
    GEOM_LINE(N_GEOMETRY) = INPUT_FILE_LINE_NUMBER
 ENDDO COUNT_GEOM_LOOP
 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
-IF (N_GEOMETRY==0) RETURN
+! No cut-cell region: pressure is not per member.
+IF (N_GEOMETRY==0 .AND. .NOT.CC_IBM) THEN
+   CC_CV_H_PER_MEMBER = .FALSE.
+   RETURN
+ENDIF
 
 ! Allocate GEOMETRY array
 
@@ -5316,11 +5320,12 @@ USE GLOBAL_CONSTANTS
 USE MESH_POINTERS
 USE COMP_FUNCTIONS, ONLY: CURRENT_TIME, GET_FILE_NUMBER, SHUTDOWN
 USE TYPES, ONLY: BOUNDARY_COORD_TYPE, BOUNDARY_PROP1_TYPE, CFACE_TYPE, CC_CUTCELL_TYPE, CC_CUTFACE_TYPE, &
-                 CC_CUTEDGE_TYPE, CC_EDGECROSS_TYPE, CC_INBCF_AREA_TYPE, WALL_TYPE, EXTERNAL_WALL_TYPE, TBAXIS_TYPE
+                 CC_CUTEDGE_TYPE, CC_EDGECROSS_TYPE, CC_INBCF_AREA_TYPE, WALL_TYPE, EXTERNAL_WALL_TYPE, TBAXIS_TYPE, &
+                 CC_CV_PROPOSAL_BUFFER_TYPE, CC_GCELL_TYPE, CC_CV_TYPE, CC_FACE_TYPE
 
-USE COMPLEX_GEOMETRY, ONLY: GEOMEPS,LOOSEPS,NGUARD,CCGUARD,CC_INBOUNDCC,CC_INBOUNDCF,CC_GASPHASE, &
+USE COMPLEX_GEOMETRY, ONLY: GEOMEPS,LOOSEPS,GEOMQUALITYFCT,NGUARD,CCGUARD,CC_INBOUNDCC,CC_INBOUNDCF,CC_GASPHASE, &
      CC_CUTCFE,CC_SOLID,CC_INBOUNDARY,CC_UNDEFINED,CC_GCELL_CUT,CC_GCELL_REG,CC_GG,CC_SS,CC_GS,CC_SG,CC_VGSC,CC_NVVARS, &
-     CC_EGSC,CC_IDCE,CC_ECRS,CC_NEVARS,CC_FGSC,CC_IDCF,CC_IDRC,CC_UNKF,CC_NFVARS,CC_CGSC, &
+     CC_EGSC,CC_IDCE,CC_ECRS,CC_NEVARS,CC_FGSC,CC_IDCF,CC_IDRC,CC_NFVARS,CC_CGSC, &
      CC_IDCC,CC_UNKZ,CC_UNKH,CC_NCVARS,CC_VTYPE_VGAS,CC_VTYPE_VINB,CC_VTYPE_NINB,CC_ETYPE_RGGAS, &
      CC_ETYPE_CFGAS,CC_ETYPE_CFINB,CC_FTYPE_RGGAS,CC_FTYPE_CFGAS,CC_FTYPE_CFINB,CC_FTYPE_SVERT, &
      CC_FTYPE_RCGAS,CC_FTYPE_CCGAS,CC_ETYPE_SCINB,CC_ETYPE_RCGAS,CC_ETYPE_EP,NODS_WSEL,EDGS_WSEL, &
@@ -5331,7 +5336,7 @@ USE COMPLEX_GEOMETRY, ONLY: GEOMEPS,LOOSEPS,NGUARD,CCGUARD,CC_INBOUNDCC,CC_INBOU
      T_CC_USED,VAL_TESTX_LOW,VAL_TESTX_HIGH,VAL_TESTY_LOW,VAL_TESTY_HIGH,VAL_TESTZ_LOW,VAL_TESTZ_HIGH, &
      SEARCH_OTHER_MESHES_FACE,POINT_IN_POLYGON,TEST_PT_INPOLY,GET_SEGSEG_INTERSECTION, &
      LINE_INTERSECT_COORDPLANE,CC_INIT_GEOM,DEBUG_WAIT,VALID_TRIANGLE,TRIANGULATE,TRILINEAR, &
-     RAY_TRIANGLE_INTERSECT_PT,LU_SETCC
+     RAY_TRIANGLE_INTERSECT_PT,POINT_IN_BB,LU_SETCC
 
 IMPLICIT NONE (TYPE,EXTERNAL)
 PRIVATE
@@ -5348,6 +5353,11 @@ REAL(EB), PARAMETER :: ADIFF_INFO_FACTOR = 1.E-1_EB
 REAL(EB), PARAMETER :: SNAP_DIST_FACTOR  = 1.E-4_EB
 REAL(EB), PARAMETER :: MIN_LENGTH_FACTOR = 1.E-2_EB
 
+! Face record sent across a mesh face: mesh, face, owner mesh, owner CV,
+! then area, normal(3), centroid(3), owner point(3).
+INTEGER, PARAMETER :: CC_SEAM_NW=14
+INTEGER, PARAMETER :: CC_CV_NW=40
+
 ! Engage NOADVANCE for small cut-cells to be dropped:
 LOGICAL, PARAMETER :: DO_NOADVANCE = .TRUE.
 
@@ -5356,6 +5366,20 @@ INTEGER, SAVE :: CC_NEDGECROSS, CC_NCUTEDGE, CC_NCUTFACE, CC_NCUTCELL
 INTEGER, SAVE :: ILO_CELL,IHI_CELL,JLO_CELL,JHI_CELL,KLO_CELL,KHI_CELL
 INTEGER, SAVE :: ILO_FACE,IHI_FACE,JLO_FACE,JHI_FACE,KLO_FACE,KHI_FACE
 INTEGER, SAVE :: NXB, NYB, NZB
+
+! Remote-only Phase-5 occupancy. Local GCELLs use CC_GCELL_TYPE%ABSORBED/%CLAIMED;
+! these lists are consulted only when IG cannot be resolved on this rank.
+INTEGER, SAVE :: N_REMOTE_ABS = 0, N_REMOTE_CLAIM = 0
+INTEGER, ALLOCATABLE, DIMENSION(:)    :: REMOTE_ABS_NM, REMOTE_ABS_CELL_TYPE, REMOTE_ABS_ICC, REMOTE_ABS_JCC
+INTEGER, ALLOCATABLE, DIMENSION(:,:)  :: REMOTE_ABS_IJK
+INTEGER, ALLOCATABLE, DIMENSION(:)    :: REMOTE_ABS_GTYPE
+REAL(EB), ALLOCATABLE, DIMENSION(:)   :: REMOTE_ABS_VOL
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: REMOTE_ABS_XYZ
+INTEGER, ALLOCATABLE, DIMENSION(:)    :: REMOTE_CLAIM_NM, REMOTE_CLAIM_CELL_TYPE, REMOTE_CLAIM_ICC, REMOTE_CLAIM_JCC
+INTEGER, ALLOCATABLE, DIMENSION(:,:)  :: REMOTE_CLAIM_IJK
+INTEGER, ALLOCATABLE, DIMENSION(:)    :: REMOTE_CLAIM_GTYPE
+REAL(EB), ALLOCATABLE, DIMENSION(:)   :: REMOTE_CLAIM_VOL
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: REMOTE_CLAIM_XYZ
 
 ! Auxiliary variables:
 REAL(EB), PARAMETER :: GAMMA_MULT = 1._EB
@@ -5460,10 +5484,7 @@ INTEGER, PARAMETER :: INT_RHO0_IND=1, INT_WCEN_IND=3
 INTEGER, SAVE ::      NQT2C = INT_P_IND+2   ! The +2 is because we pass RHO0, WCEN.
 
 ! Max numbers of link attempts for small faces and cut-cells:
-INTEGER, PARAMETER :: N_LINK_ATTMP = 1, N_LINK_ATTMP_F=50
-! Number of digits in loose precision used in normals definition for linking.
-INTEGER, PARAMETER :: LINK_DIGITS = 8
-REAL(EB),PARAMETER :: LINK_FCT    = REAL(10**LINK_DIGITS,EB)
+INTEGER, PARAMETER :: N_LINK_ATTMP_F=50
 
 ! Areas per SURF and GEOM:
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: FDS_AREA_GEOM
@@ -5473,13 +5494,41 @@ INTEGER, PARAMETER :: NOT_BLOCKED        = 0
 INTEGER, PARAMETER :: BLOCKED_SMALL_CELL = 1
 INTEGER, PARAMETER :: BLOCKED_SPLIT_CELL = 2
 INTEGER, PARAMETER :: BLOCKED_REFI_INTER = 3
-INTEGER, PARAMETER :: BLOCKED_CAVITY_CELL= 4
-INTEGER, PARAMETER :: BLOCKED_UNLINK_CELL= 5
 INTEGER, PARAMETER :: BLOCKED_SPECIAL_CELL=6
 
-PUBLIC :: GET_CFACE_INDEX, POINT_IN_CFACE, RANDOM_CFACE_XYZ, SET_CUTCELLS_3D, SET_CVS_3D, &
+! Future CV merge/block policy parameters:
+INTEGER, PARAMETER :: CC_CV_DECISION_NONE  = -1
+INTEGER, PARAMETER :: CC_CV_DECISION_BLOCK = 0
+INTEGER, PARAMETER :: CC_CV_DECISION_MERGE = 1
+INTEGER, PARAMETER :: CC_CV_CENTER_MASTER_CENTROID = 1
+INTEGER, PARAMETER :: CC_CV_CENTER_VOLUME_CENTROID = 2
+INTEGER, PARAMETER :: CC_CV_CENTER_BEST_ADMISSIBLE = 3
+REAL(EB), PARAMETER :: CC_CV_CANON_VOLUME_TOL = 1.E-10_EB
+! Domain-scaled after GEOMEPS *= MAX_DIST (see CC_GRID_SET_CV_CANON_XYZ_TOL). Initial value
+! matches GEOMEPS0*GEOMQUALITYFCT = 1.E-12*1000 before MAX_DIST scaling.
+REAL(EB), SAVE :: CC_CV_CANON_XYZ_TOL = 1.E-9_EB
+INTEGER, PARAMETER :: CC_FV_GCELL_HALO_LAYERS = 2 ! One agglomeration layer plus one Cartesian coupling buffer.
+INTEGER, PARAMETER :: CC_CV_REJECT_NONE = 0
+INTEGER, PARAMETER :: CC_CV_REJECT_OUTSIDE = 1
+INTEGER, PARAMETER :: CC_CV_REJECT_NOT_STAR_SHAPED = 2
+INTEGER, PARAMETER :: CC_CV_REJECT_THETA = 3
+INTEGER, PARAMETER :: CC_CV_REJECT_SKEW = 4
+INTEGER, PARAMETER :: CC_CV_REJECT_DFDIAM = 5
+REAL(EB), PARAMETER :: CC_CV_THETA_PREF = 60._EB
+REAL(EB), PARAMETER :: CC_CV_THETA_MAX  = 70._EB
+REAL(EB), PARAMETER :: CC_CV_SKEW_PREF  = 0.5_EB
+REAL(EB), PARAMETER :: CC_CV_SKEW_MAX   = 1._EB
+REAL(EB), PARAMETER :: CC_CV_DFDIAM_PREF = 0.10_EB
+REAL(EB), PARAMETER :: CC_CV_DFDIAM_MIN  = 0.05_EB
+REAL(EB), PARAMETER :: CC_CV_FACEAREA_TIE_EPS = 1.E-12_EB
+
+
+PUBLIC :: GET_CFACE_INDEX, POINT_IN_CFACE, RANDOM_CFACE_XYZ, SET_CVS_3D, &
           BLOCK_CC_SOLID_EXTWALLCELLS, INIT_CFACE_CELL, GET_REGULAR_CUT_EDGES_BC, GET_SOLID_CUTCELL_EDGES_BC, &
-          GET_BACK_CFACE_INDEX
+          GET_BACK_CFACE_INDEX, CC_GRID_DECIDE_CV_MERGE_OR_BLOCK, CC_GRID_EVALUATE_CV_CENTER_CANDIDATES, &
+          CC_CV_GET_SOLVER_KEY, CC_CV_CELL_IS_CV_MASTER, CC_GRID_SET_CV_CANON_XYZ_TOL, CC_CV_CANON_XYZ_TOL, &
+          CC_GRID_WALL_IS_THIN_BARRIER, CC_GRID_APPEND_REGFACE_TAIL, CC_GRID_APPEND_SEAM_RCFACE
+PUBLIC :: CC_GRID_SEAM_EXCHANGE
 PUBLIC :: DELTA_INT, DELTA_VERT, DIST_THRES, FDS_AREA_GEOM, INDEX_UNDEFINED, INT_N_EXT_PTS, INT_P_IND, &
           INT_TMP_IND, INT_VEL_IND, INT_RHO_IND, INT_H_IND, INT_RSUM_IND, INT_MU_IND, INT_MUDNS_IND, &
           INT_RHO0_IND, INT_WCEN_IND, INT_VELS_IND, MAX_INTERP_POINTS, NQT2C, N_CUTCELLS_PROC, &
@@ -5487,6 +5536,11 @@ PUBLIC :: DELTA_INT, DELTA_VERT, DIST_THRES, FDS_AREA_GEOM, INDEX_UNDEFINED, INT
           GLOBAL_DELTA_CELL, GLOBAL_DELTA_EDGE, GLOBAL_DELTA_FACE
 
 CONTAINS
+
+SUBROUTINE CC_GRID_SET_CV_CANON_XYZ_TOL
+! Call after GEOMEPS has been scaled by MAX_DIST. Same length band as GEOM quality checks.
+CC_CV_CANON_XYZ_TOL = GEOMEPS * GEOMQUALITYFCT
+END SUBROUTINE CC_GRID_SET_CV_CANON_XYZ_TOL
 
 ! ----------------------- CHECK_WALL_CELL_PLANE_MATCH ----------------------------
 
@@ -5623,33 +5677,6 @@ SUBROUTINE EXCHANGE_CC_NOADVANCE_INFO
    CALL EXCHANGE_CC_BLOCKED_LISTS
 
 END SUBROUTINE EXCHANGE_CC_NOADVANCE_INFO
-
-! ----------------------- EXCHANGE_CC_ELIMINATED_INFO ---------------------------
-
-SUBROUTINE EXCHANGE_CC_ELIMINATED_INFO
-
-   INTEGER :: NM,ICELL,NPACK
-   TYPE(MESH_TYPE), POINTER :: M
-   DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-      CALL POINT_TO_MESH(NM)
-      M => MESHES(NM)
-      NPACK = M%N_CC_ELIMINATED
-      M%N_CC_BLOCKED = NPACK
-      IF (NPACK>0) THEN
-         IF(ALLOCATED(M%XYZ_CC_BLOCKED)) DEALLOCATE(M%XYZ_CC_BLOCKED)
-         IF(ALLOCATED(M%JBT_CC_BLOCKED)) DEALLOCATE(M%JBT_CC_BLOCKED)
-         ALLOCATE(M%XYZ_CC_BLOCKED(3,NPACK))
-         ALLOCATE(M%JBT_CC_BLOCKED(4,NPACK))
-         DO ICELL=1,NPACK
-            M%XYZ_CC_BLOCKED(1:3,ICELL) = M%XYZ_CC_ELIMINATED(1:3,ICELL)
-            M%JBT_CC_BLOCKED(1:4,ICELL) = M%JBT_CC_ELIMINATED(1:4,ICELL)
-         ENDDO
-      ELSE
-         M%N_CC_BLOCKED = 0
-      ENDIF
-   ENDDO
-   CALL EXCHANGE_CC_BLOCKED_LISTS
-END SUBROUTINE EXCHANGE_CC_ELIMINATED_INFO
 
 ! ----------------------- EXCHANGE_CC_BLOCKED_LISTS -----------------------------
 
@@ -5807,601 +5834,6 @@ END SUBROUTINE REGISTER_ELIMINATED_CUTCELL
 
 ! -------------------------- GET_CELL_LINK_INFO -----------------------------------
 
-SUBROUTINE CC_GRID_RESET_LINK_STATE_AND_TAG_SLIVERS(NM)
-
-INTEGER, INTENT(IN) :: NM
-
-INTEGER :: ICC,JCC,I,J,K,DUM,AX_MIN,AX_OTHERS(2)
-REAL(EB) :: XYZCELL(IAXIS:KAXIS,LOW_IND:HIGH_IND),MINMAX_XYZ_CC(IAXIS:KAXIS,LOW_IND:HIGH_IND),CELL_DELTA(IAXIS:KAXIS)
-LOGICAL :: BLOCK_SLIM_IF,SOLID_FACES
-TYPE (MESH_TYPE), POINTER :: M
-TYPE (CC_CUTCELL_TYPE), POINTER :: CC
-
-M => MESHES(NM)
-
-! Initialize UNKZ, used here to define if cell has been noted in linking hierarchy. Assume CCVAR has been allocated:
-M%CCVAR(:,:,:,CC_UNKZ) = CC_UNDEFINED
-DO ICC=1,M%N_CUTCELL_MESH+M%N_GCCUTCELL_MESH
-   CC => M%CUT_CELL(ICC)
-   I = CC%IJK(IAXIS)
-   J = CC%IJK(JAXIS)
-   K = CC%IJK(KAXIS)
-   ! Test for sliver trapped cells blocking:
-   XYZCELL(IAXIS,LOW_IND) = XFACE(I-1); XYZCELL(IAXIS,HIGH_IND) = XFACE(I)
-   XYZCELL(JAXIS,LOW_IND) = YFACE(J-1); XYZCELL(JAXIS,HIGH_IND) = YFACE(J)
-   XYZCELL(KAXIS,LOW_IND) = ZFACE(K-1); XYZCELL(KAXIS,HIGH_IND) = ZFACE(K)
-   MINMAX_XYZ_CC(IAXIS:KAXIS,LOW_IND) =  HUGE(EB)
-   MINMAX_XYZ_CC(IAXIS:KAXIS,HIGH_IND)= -HUGE(EB)
-   DO JCC=1,CC%NCELL
-      ! Get cut-cell bounding box:
-      CALL CUT_CELL_BOUNDING_BOX(NM,ICC,JCC,XYZCELL,MINMAX_XYZ_CC)
-      ! Perform tests:
-      DO DUM=IAXIS,KAXIS
-         CELL_DELTA(DUM) = ABS(MINMAX_XYZ_CC(DUM,HIGH_IND)-MINMAX_XYZ_CC(DUM,LOW_IND))
-      ENDDO
-      ! Axis with minimum width:
-      AX_MIN = MINLOC(CELL_DELTA(IAXIS:KAXIS),DIM=1)
-      SELECT CASE(AX_MIN)
-      CASE(IAXIS); AX_OTHERS(1:2) = (/ JAXIS, KAXIS /); SOLID_FACES = ALL(M%FCVAR(I-1:I,J,K,CC_FGSC,IAXIS)==CC_SOLID)
-      CASE(JAXIS); AX_OTHERS(1:2) = (/ IAXIS, KAXIS /); SOLID_FACES = ALL(M%FCVAR(I,J-1:J,K,CC_FGSC,JAXIS)==CC_SOLID)
-      CASE(KAXIS); AX_OTHERS(1:2) = (/ IAXIS, JAXIS /); SOLID_FACES = ALL(M%FCVAR(I,J,K-1:K,CC_FGSC,KAXIS)==CC_SOLID)
-      END SELECT
-      BLOCK_SLIM_IF = (CELL_DELTA(AX_MIN)<10._EB*MIN_LENGTH_FACTOR*CELL_DELTA(AX_OTHERS(1))) .AND. &
-                      (CELL_DELTA(AX_MIN)<10._EB*MIN_LENGTH_FACTOR*CELL_DELTA(AX_OTHERS(2)))
-      IF(BLOCK_SLIM_IF .AND. SOLID_FACES) CC%NOADVANCE(JCC) = BLOCKED_SMALL_CELL
-   ENDDO
-   CC%UNKZ(:) = CC_UNDEFINED
-   DO JCC=1,CC%NCELL
-      IF (CC%NOADVANCE(JCC)>0) CC%IJK_LINK(1,JCC) = CC_SOLID
-   ENDDO
-ENDDO
-
-END SUBROUTINE CC_GRID_RESET_LINK_STATE_AND_TAG_SLIVERS
-
-SUBROUTINE CC_GRID_SEED_LINK_UNKZ(NM)
-
-INTEGER, INTENT(IN) :: NM
-
-INTEGER :: ICC,JCC,I,J,K,INGH,JNGH,KNGH
-REAL(EB) :: CCVOL_THRES
-TYPE (MESH_TYPE), POINTER :: M
-
-M => MESHES(NM)
-
-! Loop on Cartesian cells, number unknowns for cells type CC_CUTCFE and surrounding CC_GASPHASE:
-DO K=0,M%KBP1
-   DO J=0,M%JBP1
-      DO I=0,M%IBP1
-         IF (M%CCVAR(I,J,K,CC_CGSC) /= CC_CUTCFE) CYCLE
-         ! First add the cut-cell
-         ICC = M%CCVAR(I,J,K,CC_IDCC)
-         IF (ICC <= M%N_CUTCELL_MESH .AND. .NOT. M%CELL(M%CELL_INDEX(I,J,K))%SOLID) THEN ! Don't number GC cut-cells,
-                                                                                           ! or cutcells inside an OBST.
-            CCVOL_THRES = CCVOL_LINK * (M%DX(I)*M%DY(J)*M%DZ(K))
-            DO JCC=1,M%CUT_CELL(ICC)%NCELL
-               IF (M%CUT_CELL(ICC)%NOADVANCE(JCC)>0) CYCLE
-               IF (M%CUT_CELL(ICC)%VOLUME(JCC) > CCVOL_THRES) M%CUT_CELL(ICC)%UNKZ(JCC) = 1
-            ENDDO
-         ENDIF
-         ! Run over neighbors: case 27 cells. Only internal cells for the mesh in the stencil (I-1:I+1,J-1:J+1,K-1:K+1)
-         ! around Cartesian cell I,J,K of type CC_CUTCFE:
-         DO KNGH=K-1,K+1
-            IF ( (KNGH < 1) .OR. (KNGH > M%KBAR) ) CYCLE
-            DO JNGH=J-1,J+1
-               IF ( (JNGH < 1) .OR. (JNGH > M%JBAR) ) CYCLE
-               DO INGH=I-1,I+1
-                  ! Either not GASPHASE or already counted:
-                  IF ((M%CCVAR(INGH,JNGH,KNGH,CC_CGSC)/=CC_GASPHASE) .OR. (M%CCVAR(INGH,JNGH,KNGH,CC_UNKZ)>0)) CYCLE
-                  IF ( (INGH < 1) .OR. (INGH > M%IBAR) ) CYCLE
-                  IF (M%CELL(CELL_INDEX(INGH,JNGH,KNGH))%SOLID) CYCLE
-                  M%CCVAR(INGH,JNGH,KNGH,CC_UNKZ) = 1
-               ENDDO
-            ENDDO
-         ENDDO
-      ENDDO
-   ENDDO
-ENDDO
-
-END SUBROUTINE CC_GRID_SEED_LINK_UNKZ
-
-SUBROUTINE GET_ICC2_JCC2(NM,ICC,IFACE,INXT,JNXT,KNXT,ICC2,JCC2)
-
-INTEGER, INTENT(IN) :: NM,ICC,IFACE,INXT,JNXT,KNXT
-INTEGER, INTENT(OUT):: ICC2, JCC2
-
-INTEGER :: IFC, IFACE2
-TYPE (MESH_TYPE), POINTER :: M
-TYPE(CC_CUTCELL_TYPE), POINTER :: CC2
-
-M => MESHES(NM)
-
-ICC2 = 0
-JCC2 = 0
-ICC2=M%CCVAR(INXT,JNXT,KNXT,CC_IDCC)
-IF (ICC2<=0) RETURN
-CC2 => M%CUT_CELL(ICC2)
-DO JCC2=1,CC2%NCELL
-   ! Loop faces and test:
-   DO IFC=1,CC2%CCELEM(1,JCC2)
-      IFACE2 = CC2%CCELEM(IFC+1,JCC2)
-      ! If face type in face_list is not CC_FTYPE_RCGAS, drop:
-      IF(CC2%FACE_LIST(1,IFACE2) /= CC_FTYPE_RCGAS) CYCLE
-      ! Does X1AXIS match and LOWHIGH are different?
-      IF(CC2%FACE_LIST(3,IFACE2) /= M%CUT_CELL(ICC)%FACE_LIST(3,IFACE)) CYCLE ! X1AXIS is different.
-      IF(ABS(CC2%FACE_LIST(2,IFACE2)  - M%CUT_CELL(ICC)%FACE_LIST(2,IFACE)) < 1) CYCLE ! Same LOWHIGH.
-      ! Found the cut-cell ICC2,JCC2 on the other side of IFACE for cut-cell ICC,JCC.
-      RETURN
-   ENDDO
-ENDDO
-JCC2=0
-RETURN
-END SUBROUTINE GET_ICC2_JCC2
-
-SUBROUTINE GET_CELL_LINK_INFO(NM)
-
-! Small cell linking subroutine in the mesh. Builds linking information for cutcell ICC,JCC:
-! CUT_CELL(ICC)%IJK_LINK(1:KAXIS+2,JCC) of cell linked to, and CUT_CELL(ICC)%LINK_LEV(JCC) level within link tree.
-
-INTEGER, INTENT(IN) :: NM
-
-! Local Variables:
-INTEGER :: ICC,JCC,ICC2,JCC2,JCC_LNK,I,J,K,I_LNK,J_LNK,K_LNK,IFC,IFC2,IFACE,IFACE2,IFACE3,IBOD,IWSEL,VAL_UNKZ,&
-           LINK_ITER,X1AXIS,ILH,INRM(1:3),DUM,LNK_LEV,ULINK_COUNT,LINK_LEV_UP
-REAL(EB):: AREA,AF,NRML(IAXIS:KAXIS),VAL_CVOL,CCVOL_THRES
-LOGICAL :: QUITLINK_FLG,CRTCELL_FLG,MASK(IAXIS:KAXIS)
-CHARACTER(MESSAGE_LENGTH) :: UNLINKED_FILE
-INTEGER, SAVE :: LU_UNLNK
-LOGICAL, SAVE :: UNLINKED_1ST_CALL=.TRUE.
-TYPE (MESH_TYPE), POINTER :: M
-TYPE (CC_CUTCELL_TYPE), POINTER :: CC
-
-M => MESHES(NM)
-
-CALL CC_GRID_RESET_LINK_STATE_AND_TAG_SLIVERS(NM)
-CALL CC_GRID_SEED_LINK_UNKZ(NM)
-
-! Now link small cells to surrounding cells in the mesh:
-! NOTE: This scheme links two unknowns local to the mesh, therefore parallel consistency is not maintained.
-! 1. Try linking them to adjacent regular cell with UNKZ > 0. Attempt going in surface normal direction first.
-! 2. Try linking to adjacent cut-cell with UNKZ > 0. Attempt going in surface normal direction first.
-! 3. If cut-cell could not be linked after N_LINK_ATTMP, block it.
-LINK_ITER = 0; LINK_LEV_UP = 0
-LINK_LOOP : DO ! Cut-cell linking loop for small cells. -> Algo defined by CCVOL_LINK.
-   QUITLINK_FLG = .TRUE.
-
-   IF (LINK_ITER==0) THEN
-   ICC_LOOP_1 : DO ICC=1,M%N_CUTCELL_MESH
-      CC => M%CUT_CELL(ICC); I = CC%IJK(IAXIS); J = CC%IJK(JAXIS); K = CC%IJK(KAXIS)
-      IF (M%CELL(M%CELL_INDEX(I,J,K))%SOLID) CYCLE
-      CCVOL_THRES = CCVOL_LINK * (M%DX(I)*M%DY(J)*M%DZ(K))
-
-      JCC_LOOP_1 : DO JCC=1,CC%NCELL
-         IF ( CC%NOADVANCE(JCC)>0 .OR. CC%UNKZ(JCC)>0 ) CYCLE
-         CRTCELL_FLG = .FALSE.
-         VAL_UNKZ = CC_UNDEFINED
-         VAL_CVOL = CCVOL_THRES
-         ! Find area averaged body surface normal:
-         NRML(IAXIS:KAXIS) = 0._EB; AREA = 0._EB
-         DO IFC=1,CC%CCELEM(1,JCC)
-            IFACE   = CC%CCELEM(IFC+1,JCC)
-            IF(CC%FACE_LIST(1,IFACE)/=CC_FTYPE_CFINB) CYCLE
-            IFC2    = CC%FACE_LIST(4,IFACE)
-            IFACE2  = CC%FACE_LIST(5,IFACE)
-            IBOD    = M%CUT_FACE(IFC2)%BODTRI(1,IFACE2)
-            IWSEL   = M%CUT_FACE(IFC2)%BODTRI(2,IFACE2)
-            IF (.NOT.VALID_GEOMETRY_FACE_DONOR(IBOD,IWSEL)) CYCLE
-            AF      = M%CUT_FACE(IFC2)%AREA(    IFACE2)
-            NRML(IAXIS:KAXIS) = NRML(IAXIS:KAXIS) + GEOMETRY(IBOD)%FACES_NORMAL(IAXIS:KAXIS,IWSEL)*AF
-            AREA    = AREA + AF
-         ENDDO
-
-         ! With the surface normal search for a Regular Gasphase face in that direction.
-         AREA_IF_1 : IF (AREA > TWENTY_EPSILON_EB) THEN
-            NRML = NRML / AREA ! Normalize unit vector:
-            ! Normalize NRML vector to LINK_DIGITS:
-            DO DUM=IAXIS,KAXIS
-               NRML(DUM) = REAL(INT(LINK_FCT*NRML(DUM)),EB)/LINK_FCT
-            ENDDO
-            MASK(IAXIS:KAXIS) = .TRUE.
-            INRM(1) = MAXLOC(ABS(NRML(IAXIS:KAXIS)),MASK=MASK,DIM=1); MASK(INRM(1))=.FALSE.
-            INRM(2) = MAXLOC(ABS(NRML(IAXIS:KAXIS)),MASK=MASK,DIM=1); MASK(INRM(2))=.FALSE.
-            INRM(3) = MAXLOC(ABS(NRML(IAXIS:KAXIS)),MASK=MASK,DIM=1)
-            AXIS_LOOP_1 : DO DUM=IAXIS,KAXIS
-               X1AXIS=INRM(DUM)
-               IFC_LOOP_1 : DO IFC=1,CC%CCELEM(1,JCC)
-                  IFACE   = CC%CCELEM(IFC+1,JCC)
-                  ILH     = 2*CC%FACE_LIST(2,IFACE) - 3 ! -1 for LOW_IND, 1 for HIGH_IND
-                  IF( (X1AXIS /= CC%FACE_LIST(3,IFACE)) .OR. &
-                      (CC%FACE_LIST(1,IFACE) /= CC_FTYPE_RCGAS) .OR. &
-                      (ILH /= INT(SIGN(1._EB,NRML(X1AXIS)))) ) CYCLE IFC_LOOP_1
-                  SELECT CASE(X1AXIS)
-                  CASE(IAXIS)
-                     I_LNK = I+ILH; J_LNK = J; K_LNK = K
-                     IF(M%CCVAR(I_LNK,J_LNK,K_LNK,CC_UNKZ) > 0) THEN ! Regular Cartesian Cell
-                        VAL_UNKZ = M%CCVAR(I_LNK,J_LNK,K_LNK,CC_UNKZ)
-                        CRTCELL_FLG = .TRUE.
-                     ENDIF
-                  CASE(JAXIS)
-                     I_LNK = I; J_LNK = J+ILH; K_LNK = K
-                     IF(M%CCVAR(I_LNK,J_LNK,K_LNK,CC_UNKZ) > 0) THEN ! Regular Cartesian Cell
-                        VAL_UNKZ = M%CCVAR(I_LNK,J_LNK,K_LNK,CC_UNKZ)
-                        CRTCELL_FLG = .TRUE.
-                     ENDIF
-                  CASE(KAXIS)
-                     I_LNK = I; J_LNK = J; K_LNK = K+ILH
-                     IF(M%CCVAR(I_LNK,J_LNK,K_LNK,CC_UNKZ) > 0) THEN ! Regular Cartesian Cell
-                        VAL_UNKZ = M%CCVAR(I_LNK,J_LNK,K_LNK,CC_UNKZ)
-                        CRTCELL_FLG = .TRUE.
-                     ENDIF
-                  END SELECT
-                  IF ( CRTCELL_FLG ) EXIT AXIS_LOOP_1
-               ENDDO IFC_LOOP_1
-            ENDDO AXIS_LOOP_1
-         ENDIF AREA_IF_1
-
-         ! If not successful try any Regular Gasphase face.
-         ! Small cells, get CC_UNKZ from a large cell neighbor:
-         IF (.NOT. CRTCELL_FLG) THEN
-            IFC_LOOP_2 : DO IFC=1,CC%CCELEM(1,JCC)
-               IFACE   = CC%CCELEM(IFC+1,JCC)
-               ILH     = 2*CC%FACE_LIST(2,IFACE) - 3
-               IF(CC%FACE_LIST(1,IFACE)/=CC_FTYPE_RCGAS) CYCLE IFC_LOOP_2
-               X1AXIS  = CC%FACE_LIST(3,IFACE)
-               SELECT CASE(X1AXIS)
-               CASE(IAXIS)
-                  I_LNK = I+ILH; J_LNK = J; K_LNK = K
-                  IF(M%CCVAR(I_LNK,J_LNK,K_LNK,CC_UNKZ) > 0) THEN ! Regular Cartesian Cell
-                     VAL_UNKZ = M%CCVAR(I_LNK,J_LNK,K_LNK,CC_UNKZ)
-                     CRTCELL_FLG = .TRUE.
-                  ENDIF
-               CASE(JAXIS)
-                  I_LNK = I; J_LNK = J+ILH; K_LNK = K
-                  IF(M%CCVAR(I_LNK,J_LNK,K_LNK,CC_UNKZ) > 0) THEN ! Regular Cartesian Cell
-                     VAL_UNKZ = M%CCVAR(I_LNK,J_LNK,K_LNK,CC_UNKZ)
-                     CRTCELL_FLG = .TRUE.
-                  ENDIF
-               CASE(KAXIS)
-                  I_LNK = I; J_LNK = J; K_LNK = K+ILH
-                  IF(M%CCVAR(I_LNK,J_LNK,K_LNK,CC_UNKZ) > 0) THEN ! Regular Cartesian Cell
-                     VAL_UNKZ = M%CCVAR(I_LNK,J_LNK,K_LNK,CC_UNKZ)
-                     CRTCELL_FLG = .TRUE.
-                  ENDIF
-               END SELECT
-               IF ( CRTCELL_FLG ) EXIT IFC_LOOP_2
-            ENDDO IFC_LOOP_2
-         ENDIF
-         IF (VAL_UNKZ>0) THEN
-            CC%FACE_LIST(6,IFACE)      = INTEGER_ONE ! This face is shared with master.
-            CC%UNKZ(JCC) = VAL_UNKZ     !(/    Cell Type,     I,     J,     K, JCC_LNK /)
-            CC%IJK_LINK(1:KAXIS+2,JCC) = (/ CC_GASPHASE, I_LNK, J_LNK, K_LNK,       0 /)
-            CC%LINK_LEV(JCC)           = -1 ! One link hierarchy level below regular cells (at LNK_LEV=0).
-         ENDIF
-      ENDDO JCC_LOOP_1
-   ENDDO ICC_LOOP_1
-   ENDIF
-
-
-   ! Then attempt to connect to large cut-cells, or already connected small cells (CUT_CELL(ICC)%UNKZ(JCC) > 0):
-   ICC_LOOP_2 : DO ICC=1,M%N_CUTCELL_MESH
-      CC => M%CUT_CELL(ICC); I = CC%IJK(IAXIS); J = CC%IJK(JAXIS); K = CC%IJK(KAXIS)
-      IF (M%CELL(M%CELL_INDEX(I,J,K))%SOLID) CYCLE
-      CCVOL_THRES = CCVOL_LINK * (M%DX(I)*M%DY(J)*M%DZ(K))
-
-      JCC_LOOP_2 : DO JCC=1,CC%NCELL
-         IF ( CC%NOADVANCE(JCC)>0 .OR. CC%UNKZ(JCC)>0 ) CYCLE
-         VAL_UNKZ = CC_UNDEFINED
-         VAL_CVOL = -GEOMEPS
-
-         ! Find area averaged body surface normal:
-         NRML(IAXIS:KAXIS) = 0._EB; AREA = 0._EB
-         DO IFC=1,CC%CCELEM(1,JCC)
-            IFACE   = CC%CCELEM(IFC+1,JCC)
-            IF(CC%FACE_LIST(1,IFACE)/=CC_FTYPE_CFINB) CYCLE
-            IFC2    = CC%FACE_LIST(4,IFACE)
-            IFACE2  = CC%FACE_LIST(5,IFACE)
-            IBOD    = M%CUT_FACE(IFC2)%BODTRI(1,IFACE2)
-            IWSEL   = M%CUT_FACE(IFC2)%BODTRI(2,IFACE2)
-            IF (.NOT.VALID_GEOMETRY_FACE_DONOR(IBOD,IWSEL)) CYCLE
-            AF      = M%CUT_FACE(IFC2)%AREA(    IFACE2)
-            NRML(IAXIS:KAXIS) = NRML(IAXIS:KAXIS) + GEOMETRY(IBOD)%FACES_NORMAL(IAXIS:KAXIS,IWSEL)*AF
-            AREA    = AREA + AF
-         ENDDO
-
-         AREA_IF_2 : IF (AREA > TWENTY_EPSILON_EB) THEN
-            NRML = NRML / AREA ! Normalize unit vector:
-            ! Normalize NRML vector to LINK_DIGITS:
-            DO DUM=IAXIS,KAXIS
-               NRML(DUM) = REAL(INT(LINK_FCT*NRML(DUM)),EB)/LINK_FCT
-            ENDDO
-            MASK(IAXIS:KAXIS) = .TRUE.
-            INRM(1) = MAXLOC(ABS(NRML(IAXIS:KAXIS)),MASK=MASK,DIM=1); MASK(INRM(1))=.FALSE.
-            INRM(2) = MAXLOC(ABS(NRML(IAXIS:KAXIS)),MASK=MASK,DIM=1); MASK(INRM(2))=.FALSE.
-            INRM(3) = MAXLOC(ABS(NRML(IAXIS:KAXIS)),MASK=MASK,DIM=1)
-            AXIS_LOOP_2 : DO DUM=IAXIS,KAXIS
-               X1AXIS=INRM(DUM)
-               IFC_LOOP_3 : DO IFC=1,CC%CCELEM(1,JCC)
-                  IFACE   = CC%CCELEM(IFC+1,JCC)
-                  IF((CC%FACE_LIST(1,IFACE)==CC_FTYPE_CFINB) .OR. &
-                     (CC%FACE_LIST(1,IFACE)==CC_FTYPE_SVERT)) CYCLE IFC_LOOP_3
-                  ILH     = 2*CC%FACE_LIST(2,IFACE) - 3 ! -1 for LOW_IND, 1 for HIGH_IND
-                  IF( (X1AXIS /= CC%FACE_LIST(3,IFACE)) .OR. &
-                      (ILH /= INT(SIGN(1._EB,NRML(X1AXIS)))) ) CYCLE IFC_LOOP_3
-                  SELECT CASE(X1AXIS)
-                  CASE(IAXIS)
-                     IF( (I+ILH < 1) .OR. (I+ILH > M%IBAR) ) CYCLE IFC_LOOP_3 ! Drop if outside the mesh.
-                  CASE(JAXIS)
-                     IF( (J+ILH < 1) .OR. (J+ILH > M%JBAR) ) CYCLE IFC_LOOP_3
-                  CASE(KAXIS)
-                     IF( (K+ILH < 1) .OR. (K+ILH > M%KBAR) ) CYCLE IFC_LOOP_3
-                  END SELECT
-                  SELECT CASE(CC%FACE_LIST(1,IFACE)) ! 1. Check if a surrounding cell is a regular cell:
-                  CASE(CC_FTYPE_RCGAS) ! REGULAR GASPHASE
-                     SELECT CASE(X1AXIS)
-                     CASE(IAXIS)
-                        IF(M%CCVAR(I+ILH,J,K,CC_UNKZ) <= 0) THEN ! Cut - cell.
-                           CALL GET_ICC2_JCC2(NM,ICC,IFACE,I+ILH,J,K,ICC2,JCC2)
-                           IF(ANY((/ICC2,JCC2/)==0))CYCLE IFC_LOOP_3; IF(M%CUT_CELL(ICC2)%UNKZ(JCC2)<1)CYCLE IFC_LOOP_3
-                           IF(M%CUT_CELL(ICC2)%LINK_LEV(JCC2)/=LINK_LEV_UP)CYCLE IFC_LOOP_3
-                           I_LNK = I+ILH; J_LNK = J; K_LNK = K; JCC_LNK = JCC2
-                           VAL_UNKZ = M%CUT_CELL(ICC2)%UNKZ(JCC2); LNK_LEV=M%CUT_CELL(ICC2)%LINK_LEV(JCC2);
-                           EXIT AXIS_LOOP_2
-                        ENDIF
-                     CASE(JAXIS)
-                        IF(M%CCVAR(I,J+ILH,K,CC_UNKZ) <= 0) THEN ! Cut - cell.
-                           CALL GET_ICC2_JCC2(NM,ICC,IFACE,I,J+ILH,K,ICC2,JCC2)
-                           IF(ANY((/ICC2,JCC2/)==0))CYCLE IFC_LOOP_3; IF(M%CUT_CELL(ICC2)%UNKZ(JCC2)<1)CYCLE IFC_LOOP_3
-                           IF(M%CUT_CELL(ICC2)%LINK_LEV(JCC2)/=LINK_LEV_UP)CYCLE IFC_LOOP_3
-                           I_LNK = I; J_LNK = J+ILH; K_LNK = K; JCC_LNK = JCC2
-                           VAL_UNKZ = M%CUT_CELL(ICC2)%UNKZ(JCC2); LNK_LEV=M%CUT_CELL(ICC2)%LINK_LEV(JCC2);
-                           EXIT AXIS_LOOP_2
-                        ENDIF
-                     CASE(KAXIS)
-                        IF(M%CCVAR(I,J,K+ILH,CC_UNKZ) <= 0) THEN ! Cut - cell.
-                           CALL GET_ICC2_JCC2(NM,ICC,IFACE,I,J,K+ILH,ICC2,JCC2)
-                           IF(ANY((/ICC2,JCC2/)==0))CYCLE IFC_LOOP_3; IF(M%CUT_CELL(ICC2)%UNKZ(JCC2)<1)CYCLE IFC_LOOP_3
-                           IF(M%CUT_CELL(ICC2)%LINK_LEV(JCC2)/=LINK_LEV_UP)CYCLE IFC_LOOP_3
-                           I_LNK = I; J_LNK = J; K_LNK = K+ILH; JCC_LNK = JCC2
-                           VAL_UNKZ=M%CUT_CELL(ICC2)%UNKZ(JCC2); LNK_LEV=M%CUT_CELL(ICC2)%LINK_LEV(JCC2);
-                           EXIT AXIS_LOOP_2
-                        ENDIF
-                     END SELECT
-                  CASE(CC_FTYPE_CFGAS) ! 2. Check for large surrounding cut-cells:
-                     IFC2    = CC%FACE_LIST(4,IFACE)
-                     IFACE2  = CC%FACE_LIST(5,IFACE)
-                     ICC2    = M%CUT_FACE(IFC2)%CELL_LIST(2,CC%FACE_LIST(2,IFACE),IFACE2)
-                     JCC2    = M%CUT_FACE(IFC2)%CELL_LIST(3,CC%FACE_LIST(2,IFACE),IFACE2)
-                     IF (M%CUT_CELL(ICC2)%UNKZ(JCC2)<1) CYCLE IFC_LOOP_3
-                     IF (M%CUT_CELL(ICC2)%LINK_LEV(JCC2)/=LINK_LEV_UP)CYCLE IFC_LOOP_3
-                     I_LNK    = M%CUT_CELL(ICC2)%IJK(IAXIS); J_LNK   = M%CUT_CELL(ICC2)%IJK(JAXIS);
-                     K_LNK    = M%CUT_CELL(ICC2)%IJK(KAXIS); JCC_LNK = JCC2
-                     VAL_UNKZ = M%CUT_CELL(ICC2)%UNKZ(JCC2); LNK_LEV=M%CUT_CELL(ICC2)%LINK_LEV(JCC2); EXIT AXIS_LOOP_2
-                  END SELECT
-               ENDDO IFC_LOOP_3
-            ENDDO AXIS_LOOP_2
-            IF (VAL_UNKZ > 0) THEN
-               CC%FACE_LIST(6,IFACE)      = INTEGER_ONE ! This face is shared with master.
-               CC%UNKZ(JCC)               = VAL_UNKZ
-               CC%IJK_LINK(1:KAXIS+2,JCC) = (/ CC_CUTCFE, I_LNK, J_LNK, K_LNK, JCC_LNK /)
-               CC%LINK_LEV(JCC)           = LNK_LEV-1 ! One link hierarchy level below master cell.
-               CYCLE JCC_LOOP_2
-            ENDIF
-         ENDIF AREA_IF_2
-
-         ! Small cells, get CC_UNKZ from a large cell neighbor:
-         IFACE3 = CC_UNDEFINED
-         IFC_LOOP_4 : DO IFC=1,CC%CCELEM(1,JCC)
-            IFACE   = CC%CCELEM(IFC+1,JCC)
-            IF((CC%FACE_LIST(1,IFACE)==CC_FTYPE_CFINB) .OR. &
-               (CC%FACE_LIST(1,IFACE)==CC_FTYPE_SVERT)) CYCLE IFC_LOOP_4
-            ILH     = 2*CC%FACE_LIST(2,IFACE) - 3 ! -1 for LOW_IND, 1 for HIGH_IND
-
-            ! Cycle if surrounding cell is located in the guard-cell region, if so drop, as we don't have
-            ! at this point unknown numbers on guard-cells/guard-cell ccs:
-            X1AXIS  = CC%FACE_LIST(3,IFACE)
-            SELECT CASE(X1AXIS)
-            CASE(IAXIS)
-               IF( (I+ILH < 1) .OR. (I+ILH > M%IBAR) ) CYCLE IFC_LOOP_4
-            CASE(JAXIS)
-               IF( (J+ILH < 1) .OR. (J+ILH > M%JBAR) ) CYCLE IFC_LOOP_4
-            CASE(KAXIS)
-               IF( (K+ILH < 1) .OR. (K+ILH > M%KBAR) ) CYCLE IFC_LOOP_4
-            END SELECT
-
-            SELECT CASE(CC%FACE_LIST(1,IFACE)) ! 1. Check if a surrounding cell is a regular cell:
-            CASE(CC_FTYPE_RCGAS) ! REGULAR GASPHASE
-               SELECT CASE(X1AXIS)
-               CASE(IAXIS)
-                  IF(M%CCVAR(I+ILH,J,K,CC_UNKZ) <= 0) THEN ! Cut - cell.
-                     CALL GET_ICC2_JCC2(NM,ICC,IFACE,I+ILH,J,K,ICC2,JCC2)
-                     IF(ANY((/ ICC2, JCC2 /) == 0)) CYCLE IFC_LOOP_4
-                     IF(M%CUT_CELL(ICC2)%VOLUME(JCC2)<VAL_CVOL .OR. M%CUT_CELL(ICC2)%UNKZ(JCC2)<1) CYCLE IFC_LOOP_4
-                     IF(M%CUT_CELL(ICC2)%LINK_LEV(JCC2)/=LINK_LEV_UP)CYCLE IFC_LOOP_4
-                     I_LNK = I+ILH; J_LNK = J; K_LNK = K; JCC_LNK = JCC2
-                     VAL_CVOL = M%CUT_CELL(ICC2)%VOLUME(JCC2); VAL_UNKZ = M%CUT_CELL(ICC2)%UNKZ(JCC2)
-                     LNK_LEV  = M%CUT_CELL(ICC2)%LINK_LEV(JCC2); IFACE3 = IFACE
-                  ENDIF
-               CASE(JAXIS)
-                  IF(M%CCVAR(I,J+ILH,K,CC_UNKZ) <= 0) THEN ! Cut - cell.
-                     CALL GET_ICC2_JCC2(NM,ICC,IFACE,I,J+ILH,K,ICC2,JCC2)
-                     IF(ANY((/ ICC2, JCC2 /) == 0)) CYCLE IFC_LOOP_4
-                     IF(M%CUT_CELL(ICC2)%VOLUME(JCC2)<VAL_CVOL .OR. M%CUT_CELL(ICC2)%UNKZ(JCC2)<1) CYCLE IFC_LOOP_4
-                     IF(M%CUT_CELL(ICC2)%LINK_LEV(JCC2)/=LINK_LEV_UP)CYCLE IFC_LOOP_4
-                     I_LNK = I; J_LNK = J+ILH; K_LNK = K; JCC_LNK = JCC2
-                     VAL_CVOL = M%CUT_CELL(ICC2)%VOLUME(JCC2); VAL_UNKZ = M%CUT_CELL(ICC2)%UNKZ(JCC2)
-                     LNK_LEV  = M%CUT_CELL(ICC2)%LINK_LEV(JCC2); IFACE3 = IFACE
-                  ENDIF
-               CASE(KAXIS)
-                  IF(M%CCVAR(I,J,K+ILH,CC_UNKZ) <= 0) THEN ! Cut - cell.
-                     CALL GET_ICC2_JCC2(NM,ICC,IFACE,I,J,K+ILH,ICC2,JCC2)
-                     IF(ANY((/ ICC2, JCC2 /) == 0)) CYCLE IFC_LOOP_4
-                     IF(M%CUT_CELL(ICC2)%VOLUME(JCC2)<VAL_CVOL .OR. M%CUT_CELL(ICC2)%UNKZ(JCC2)<1) CYCLE IFC_LOOP_4
-                     IF(M%CUT_CELL(ICC2)%LINK_LEV(JCC2)/=LINK_LEV_UP)CYCLE IFC_LOOP_4
-                     I_LNK = I; J_LNK = J; K_LNK = K+ILH; JCC_LNK = JCC2
-                     VAL_CVOL = M%CUT_CELL(ICC2)%VOLUME(JCC2); VAL_UNKZ = M%CUT_CELL(ICC2)%UNKZ(JCC2)
-                     LNK_LEV  = M%CUT_CELL(ICC2)%LINK_LEV(JCC2); IFACE3 = IFACE
-                  ENDIF
-               END SELECT
-            CASE(CC_FTYPE_CFGAS) ! 2. Check for large surrounding cut-cells:
-               IFC2    = CC%FACE_LIST(4,IFACE)
-               IFACE2  = CC%FACE_LIST(5,IFACE)
-               ICC2    = M%CUT_FACE(IFC2)%CELL_LIST(2,CC%FACE_LIST(2,IFACE),IFACE2)
-               JCC2    = M%CUT_FACE(IFC2)%CELL_LIST(3,CC%FACE_LIST(2,IFACE),IFACE2)
-               IF(M%CUT_CELL(ICC2)%VOLUME(JCC2)<VAL_CVOL .OR. M%CUT_CELL(ICC2)%UNKZ(JCC2)<1) CYCLE IFC_LOOP_4
-               IF(M%CUT_CELL(ICC2)%LINK_LEV(JCC2)/=LINK_LEV_UP)CYCLE IFC_LOOP_4
-               I_LNK=M%CUT_CELL(ICC2)%IJK(IAXIS); J_LNK=M%CUT_CELL(ICC2)%IJK(JAXIS); K_LNK=M%CUT_CELL(ICC2)%IJK(KAXIS)
-               JCC_LNK  = JCC2; VAL_CVOL = M%CUT_CELL(ICC2)%VOLUME(JCC2);
-               VAL_UNKZ = M%CUT_CELL(ICC2)%UNKZ(JCC2); LNK_LEV  = M%CUT_CELL(ICC2)%LINK_LEV(JCC2); IFACE3 = IFACE
-            END SELECT
-         ENDDO IFC_LOOP_4
-
-         ! This small cut-cell still has an undefined unknown, redo link-loop to test for updated unknown number on
-         ! neighbors:
-         IF (VAL_UNKZ > 0) THEN
-            CC%FACE_LIST(6,IFACE3)     = INTEGER_ONE ! This face is shared with master.
-            CC%UNKZ(JCC)               = VAL_UNKZ
-            CC%IJK_LINK(1:KAXIS+2,JCC) = (/ CC_CUTCFE, I_LNK, J_LNK, K_LNK, JCC_LNK /)
-            CC%LINK_LEV(JCC)           = LNK_LEV-1 ! One link hierarchy level below master cell.
-         ELSE
-            QUITLINK_FLG = .FALSE.
-         ENDIF
-      ENDDO JCC_LOOP_2
-   ENDDO ICC_LOOP_2
-
-   ! Then fuse cut-cell unknowns if several ccs in one Cartesian cell and one of them has CUT_CELL(ICC)%UNKZ(JCC)>0:
-   ! IF(.NOT. ONE_UNKH_PER_CUTCELL) THEN
-   !    DO ICC=1,M%N_CUTCELL_MESH
-   !       CC => M%CUT_CELL(ICC); I = CC%IJK(IAXIS); J = CC%IJK(JAXIS); K = CC%IJK(KAXIS)
-   !       ! Don't attempt to link cut-cells inside an OBST:
-   !       IF ( M%CELL(M%CELL_INDEX(I,J,K))%SOLID ) CYCLE
-   !       ! Cases with more than one cut-cell: define UNKZ of all cells to be the one of first cut-cell with UNKZ > 0:
-   !       DO JCC=1,CC%NCELL; IF(CC%UNKZ(JCC)>0) EXIT; ENDDO
-   !       JCC_LNK = JCC
-   !       IF (JCC_LNK <= CC%NCELL) THEN
-   !          DO JCC=1,CC%NCELL
-   !             IF ( CC%NOADVANCE(JCC)>0 .OR. JCC==JCC_LNK ) CYCLE
-   !             CC%UNKZ(JCC)               = CC%UNKZ(JCC_LNK)
-   !             CC%IJK_LINK(1:KAXIS+2,JCC) = (/ CC_CUTCFE, I, J, K, JCC_LNK /)
-   !             CC%LINK_LEV(JCC)           = CC%LINK_LEV(JCC_LNK) - 1
-   !          ENDDO
-   !       ENDIF
-   !    ENDDO
-   ! ENDIF
-
-   IF (QUITLINK_FLG) EXIT LINK_LOOP
-
-   LINK_LEV_UP = LINK_LEV_UP - 1
-
-   LINK_ITER = LINK_ITER + 1
-   BLOCK_CELL_IF : IF (LINK_ITER > N_LINK_ATTMP) THEN
-       ! Count how many unlinked cells we have in this mesh:
-       ULINK_COUNT = 0
-       DO ICC=1,M%N_CUTCELL_MESH
-          CC => M%CUT_CELL(ICC); I = CC%IJK(IAXIS); J = CC%IJK(JAXIS); K = CC%IJK(KAXIS)
-          IF (M%CELL(M%CELL_INDEX(I,J,K))%SOLID) CYCLE
-          DO JCC=1,CC%NCELL
-             IF ( CC%NOADVANCE(JCC)>0 .OR. CC%UNKZ(JCC)>0 ) CYCLE
-             ULINK_COUNT = ULINK_COUNT + 1
-          ENDDO
-       ENDDO
-
-       IF (GET_CUTCELLS_VERBOSE) THEN
-          ! Write out unlinked cells properties:
-          ! Open file to write unlinked cells:
-          WRITE(UNLINKED_FILE,'(A,A,I0,A)') TRIM(RESULTS_DIR)//TRIM(CHID),'_unlinked_',MY_RANK,'.log'
-          ! Create file:
-          IF (UNLINKED_1ST_CALL) THEN
-             LU_UNLNK = GET_FILE_NUMBER()
-             OPEN(UNIT=LU_UNLNK,FILE=TRIM(UNLINKED_FILE),STATUS='UNKNOWN')
-             WRITE(LU_UNLNK,*) 'Unlinked cut-cell Information for Process=',MY_RANK
-             CLOSE(LU_UNLNK)
-             UNLINKED_1ST_CALL = .FALSE.
-          ENDIF
-          ! Open file to write unlinked cell information:
-          OPEN(UNIT=LU_UNLNK,FILE=TRIM(UNLINKED_FILE),STATUS='OLD',POSITION='APPEND')
-          WRITE(LU_UNLNK,*) ' '
-          WRITE(LU_UNLNK,'(A,I4,A,I4)') ' Mesh NM=',NM,', number of unlinked cells=',ULINK_COUNT
-
-          ! Dump info:
-          ULINK_COUNT = 0
-          DO ICC=1,M%N_CUTCELL_MESH
-             CC => M%CUT_CELL(ICC); I = CC%IJK(IAXIS); J = CC%IJK(JAXIS); K = CC%IJK(KAXIS)
-             IF (M%CELL(M%CELL_INDEX(I,J,K))%SOLID) CYCLE
-             DO JCC=1,CC%NCELL
-                IF (CC%NOADVANCE(JCC)>0 .OR. CC%UNKZ(JCC)>0) CYCLE
-                ULINK_COUNT = ULINK_COUNT + 1
-                WRITE(LU_UNLNK,'(I8,A,5I8,A,5F22.8)') &
-                ULINK_COUNT,', I,J,K,ICC,JCC=',I,J,K,ICC,JCC,', X,Y,Z,CCVOL,CCVOL_CRT=',M%X(I),M%Y(J),M%Z(K), &
-                CC%VOLUME(JCC),M%DX(I)*M%DY(J)*M%DZ(K)
-             ENDDO
-          ENDDO
-          CLOSE(LU_UNLNK)
-       ENDIF
-
-       ! Unlinked cells get blocked, inboundary cut-faces are dropped, shared gas cut-faces are made inboundary faces
-       ! for neighbors. If no cut-cells left in location I,J,K => CCVAR(I,J,K,CC_CGSC) is set to CC_SOLID.
-       DO ICC=1,M%N_CUTCELL_MESH
-          DO JCC=1,M%CUT_CELL(ICC)%NCELL
-             IF ( M%CUT_CELL(ICC)%UNKZ(JCC) > 0 ) CYCLE
-             M%CUT_CELL(ICC)%IJK_LINK(1,JCC) = CC_SOLID ! Flag for Blocking after main mesh loop in SET_CUTCELLS_3D
-          ENDDO
-       ENDDO
-
-       ! Recount unlinked cells (i.e. no other viable cells in the mesh).
-       ULINK_COUNT = 0
-       DO ICC=1,M%N_CUTCELL_MESH
-          CC => M%CUT_CELL(ICC); I = CC%IJK(IAXIS); J = CC%IJK(JAXIS); K = CC%IJK(KAXIS)
-          IF (M%CELL(M%CELL_INDEX(I,J,K))%SOLID) CYCLE
-          DO JCC=1,CC%NCELL
-             IF ( CC%UNKZ(JCC) > 0 .OR. CC%IJK_LINK(1,JCC)==CC_SOLID) CYCLE
-             ULINK_COUNT = ULINK_COUNT + 1
-          ENDDO
-       ENDDO
-
-       IF (GET_CUTCELLS_VERBOSE) THEN
-          ! Write out remaining unlinked cells properties.
-          ! Open file to write unlinked cell information:
-          OPEN(UNIT=LU_UNLNK,FILE=TRIM(UNLINKED_FILE),STATUS='OLD',POSITION='APPEND')
-          WRITE(LU_UNLNK,*) ' '
-          WRITE(LU_UNLNK,*) 'STATUS AFTER BLOCKING SMALL UNLINKED CUT-CELLS:'
-          WRITE(LU_UNLNK,'(A,I4,A,I4)') ' Mesh NM=',NM,', number of unlinked cells after blocking=',ULINK_COUNT
-          IF(ULINK_COUNT > 0) THEN
-             ! Dump info:
-             ULINK_COUNT = 0
-             DO ICC=1,M%N_CUTCELL_MESH
-                CC => M%CUT_CELL(ICC); I = CC%IJK(IAXIS); J = CC%IJK(JAXIS); K = CC%IJK(KAXIS)
-                IF (M%CELL(M%CELL_INDEX(I,J,K))%SOLID) CYCLE
-                DO JCC=1,CC%NCELL
-                   IF (CC%UNKZ(JCC)>0) CYCLE
-                   ULINK_COUNT = ULINK_COUNT + 1
-                   WRITE(LU_UNLNK,'(I8,A,5I8,A,5F22.8)') &
-                   ULINK_COUNT,', I,J,K,ICC,JCC=',I,J,K,ICC,JCC,', X,Y,Z,CCVOL,CCVOL_CRT=',M%X(I),M%Y(J),M%Z(K), &
-                   CC%VOLUME(JCC),M%DX(I)*M%DY(J)*M%DZ(K)
-                ENDDO
-             ENDDO
-          ENDIF
-          CLOSE(LU_UNLNK)
-       ENDIF
-       EXIT LINK_LOOP
-   ENDIF BLOCK_CELL_IF
-ENDDO LINK_LOOP
-
-! Finally compute M%FINEST_LINK_LEV:
-DO ICC=1,M%N_CUTCELL_MESH
-   DO JCC=1,M%CUT_CELL(ICC)%NCELL
-      IF(M%CUT_CELL(ICC)%IJK_LINK(1,JCC)==CC_SOLID) THEN
-         IF(M%CUT_CELL(ICC)%NOADVANCE(JCC)==NOT_BLOCKED) M%CUT_CELL(ICC)%NOADVANCE(JCC) = BLOCKED_UNLINK_CELL
-         M%CUT_CELL(ICC)%LINK_LEV(JCC)  = CC_UNDEFINED
-         M%CUT_CELL(ICC)%IJK_LINK(2:5,JCC)= CC_UNDEFINED
-      ELSEIF(M%CUT_CELL(ICC)%LINK_LEV(JCC) < M%FINEST_LINK_LEV) THEN
-         M%FINEST_LINK_LEV = M%CUT_CELL(ICC)%LINK_LEV(JCC)
-      ENDIF
-   ENDDO
-ENDDO
-
-RETURN
-
-END SUBROUTINE GET_CELL_LINK_INFO
-
 
 
 ! --------------------- BLOCK_CC_SOLID_EXTWALLCELLS -----------------------------
@@ -6478,7 +5910,7 @@ INTEGER, OPTIONAL, INTENT(IN) :: IW
 ! Local Variables:
 TYPE(BOUNDARY_COORD_TYPE), POINTER :: BC,WC_BC
 TYPE(BOUNDARY_PROP1_TYPE), POINTER :: B1,WC_B1
-INTEGER :: IBOD, IWSEL, ICC, JCC
+INTEGER :: IBOD, IWSEL, ICC, JCC, I_CC, J_CC, K_CC, IV, NV
 
 INTEGER :: IG, TRI, WSELEM(NOD1:NOD3), NOM, IIO, JJO, KKO, ICFACE, IOR, X1AXIS, IWSEL_BACK
 REAL(EB):: XP(IAXIS:KAXIS),RDIR(IAXIS:KAXIS),V1(IAXIS:KAXIS),V2(IAXIS:KAXIS),V3(IAXIS:KAXIS),POS(IAXIS:KAXIS)
@@ -6518,12 +5950,17 @@ CASE(INTEGER_ONE) ! Geometry information for CFACE.
    CFA%CUT_FACE_IND2 = IFACE
 
    INS_INB_COND_1 : IF (IS_INB) THEN
-      B1%VEL_ERR_NEW=CF%VEL(IFACE) - 0._EB ! Assumes zero velocity of solid.
+      B1%VEL_ERR_NEW=0._EB ! Stage 1: the INB FACE%VEL is still its allocation zero, and the solid is at rest.
 
-      ! Normal to cut-face:
-      V2(IAXIS:KAXIS) = CF%XYZVERT(IAXIS:KAXIS,CF%CFELEM(2,IFACE))-CF%XYZCEN(IAXIS:KAXIS,IFACE)
-      V3(IAXIS:KAXIS) = CF%XYZVERT(IAXIS:KAXIS,CF%CFELEM(3,IFACE))-CF%XYZCEN(IAXIS:KAXIS,IFACE)
-      CALL CROSS_PRODUCT(BC%NVEC(IAXIS:KAXIS),V2,V3)
+      ! Normal to cut-face, from the polygon area vector (exact for non-convex polygons):
+      BC%NVEC(IAXIS:KAXIS) = 0._EB
+      NV = CF%CFELEM(1,IFACE)
+      DO IV=1,NV
+         V2(IAXIS:KAXIS) = CF%XYZVERT(IAXIS:KAXIS,CF%CFELEM(IV+1,IFACE))-CF%XYZCEN(IAXIS:KAXIS,IFACE)
+         V3(IAXIS:KAXIS) = CF%XYZVERT(IAXIS:KAXIS,CF%CFELEM(MOD(IV,NV)+2,IFACE))-CF%XYZCEN(IAXIS:KAXIS,IFACE)
+         CALL CROSS_PRODUCT(V1,V2,V3)
+         BC%NVEC(IAXIS:KAXIS) = BC%NVEC(IAXIS:KAXIS) + V1(IAXIS:KAXIS)
+      ENDDO
       IF(NORM2(BC%NVEC)>TWENTY_EPSILON_EB .AND. CF%CFACE_ORIGIN(IFACE)==BLOCKED_SPLIT_CELL) THEN
          BC%NVEC(IAXIS:KAXIS) = BC%NVEC(IAXIS:KAXIS)/NORM2(BC%NVEC)
       ELSE
@@ -6666,9 +6103,13 @@ CASE(INTEGER_THREE)
    INS_INB_COND_3 : IF (IS_INB) THEN
 
       ! Associated cut-cell location in CUT_CELL array.
-      ! This CFACE initialization assumes TMP,RHO,ZZ have been initialized in cut-cell ICC,JCC.
+      ! This CFACE initialization assumes TMP,RHO,ZZ have been initialized on the piece CV row.
       ICC = CF%CELL_LIST(2,LOW_IND,IFACE)
       JCC = CF%CELL_LIST(3,LOW_IND,IFACE)
+      IG  = CUT_CELL(ICC)%IG(JCC)
+      I_CC = CUT_CELL(ICC)%IJK(IAXIS)
+      J_CC = CUT_CELL(ICC)%IJK(JAXIS)
+      K_CC = CUT_CELL(ICC)%IJK(KAXIS)
 
       ! Set TMP_F to Surface value and rest to ambient in underlying cartesian cell.
       B1%TMP_G = TMP_0(CF%IJK(KAXIS))
@@ -6678,9 +6119,15 @@ CASE(INTEGER_THREE)
          B1%TMP_F = B1%TMP_G
       ENDIF
 
-      B1%RHO_F = CUT_CELL(ICC)%RHO(JCC)
-      B1%RHO_G = CUT_CELL(ICC)%RHO(JCC)
-      B1%ZZ_F(1:N_TOTAL_SCALARS)  = CUT_CELL(ICC)%ZZ(1:N_TOTAL_SCALARS,JCC)
+      IF (IG>=1) THEN
+         B1%RHO_F = M%FV%CV%RHO(IG)
+         B1%RHO_G = M%FV%CV%RHO(IG)
+         B1%ZZ_F(1:N_TOTAL_SCALARS)  = M%FV%CV%ZZ(1:N_TOTAL_SCALARS,IG)
+      ELSE
+         B1%RHO_F = M%RHO(I_CC,J_CC,K_CC)
+         B1%RHO_G = M%RHO(I_CC,J_CC,K_CC)
+         B1%ZZ_F(1:N_TOTAL_SCALARS)  = M%ZZ(I_CC,J_CC,K_CC,1:N_TOTAL_SCALARS)
+      ENDIF
       ! Reinitialize CFACE cell outgoing radiation for change in TMP_F
       IF (RADIATION) THEN
          B1%Q_RAD_OUT = B1%EMISSIVITY*SIGMA*B1%TMP_F**4
@@ -8242,37 +7689,10 @@ CALL MOVE_ALLOC(FROM=CUT_CELL_FROM%LINK_LEV         ,TO=CUT_CELL_TO%LINK_LEV)
 CALL MOVE_ALLOC(FROM=CUT_CELL_FROM%VOLUME           ,TO=CUT_CELL_TO%VOLUME)
 CALL MOVE_ALLOC(FROM=CUT_CELL_FROM%XYZCEN           ,TO=CUT_CELL_TO%XYZCEN)
 
-CALL MOVE_ALLOC(FROM=CUT_CELL_FROM%RHO              ,TO=CUT_CELL_TO%RHO)
-CALL MOVE_ALLOC(FROM=CUT_CELL_FROM%RHOS             ,TO=CUT_CELL_TO%RHOS)
-CALL MOVE_ALLOC(FROM=CUT_CELL_FROM%RSUM             ,TO=CUT_CELL_TO%RSUM)
-CALL MOVE_ALLOC(FROM=CUT_CELL_FROM%TMP              ,TO=CUT_CELL_TO%TMP)
-CALL MOVE_ALLOC(FROM=CUT_CELL_FROM%D                ,TO=CUT_CELL_TO%D)
-CALL MOVE_ALLOC(FROM=CUT_CELL_FROM%DS               ,TO=CUT_CELL_TO%DS)
-CALL MOVE_ALLOC(FROM=CUT_CELL_FROM%DVOL             ,TO=CUT_CELL_TO%DVOL)
-CALL MOVE_ALLOC(FROM=CUT_CELL_FROM%DVOL_PR          ,TO=CUT_CELL_TO%DVOL_PR)
-CALL MOVE_ALLOC(FROM=CUT_CELL_FROM%Q                ,TO=CUT_CELL_TO%Q)
-CALL MOVE_ALLOC(FROM=CUT_CELL_FROM%QR               ,TO=CUT_CELL_TO%QR)
-CALL MOVE_ALLOC(FROM=CUT_CELL_FROM%D_SOURCE         ,TO=CUT_CELL_TO%D_SOURCE)
-CALL MOVE_ALLOC(FROM=CUT_CELL_FROM%CHI_R            ,TO=CUT_CELL_TO%CHI_R)
-CALL MOVE_ALLOC(FROM=CUT_CELL_FROM%MIX_TIME         ,TO=CUT_CELL_TO%MIX_TIME)
-CALL MOVE_ALLOC(FROM=CUT_CELL_FROM%Q_REAC           ,TO=CUT_CELL_TO%Q_REAC)
-CALL MOVE_ALLOC(FROM=CUT_CELL_FROM%REAC_SOURCE_TERM ,TO=CUT_CELL_TO%REAC_SOURCE_TERM)
-CALL MOVE_ALLOC(FROM=CUT_CELL_FROM%ZZ               ,TO=CUT_CELL_TO%ZZ)
-CALL MOVE_ALLOC(FROM=CUT_CELL_FROM%ZZS              ,TO=CUT_CELL_TO%ZZS)
-CALL MOVE_ALLOC(FROM=CUT_CELL_FROM%M_DOT_PPP        ,TO=CUT_CELL_TO%M_DOT_PPP)
 CALL MOVE_ALLOC(FROM=CUT_CELL_FROM%UNKH             ,TO=CUT_CELL_TO%UNKH)
 CALL MOVE_ALLOC(FROM=CUT_CELL_FROM%UNKZ             ,TO=CUT_CELL_TO%UNKZ)
-CALL MOVE_ALLOC(FROM=CUT_CELL_FROM%KRES             ,TO=CUT_CELL_TO%KRES)
-CALL MOVE_ALLOC(FROM=CUT_CELL_FROM%H                ,TO=CUT_CELL_TO%H)
-CALL MOVE_ALLOC(FROM=CUT_CELL_FROM%HS               ,TO=CUT_CELL_TO%HS)
-
-CALL MOVE_ALLOC(FROM=CUT_CELL_FROM%RTRM             ,TO=CUT_CELL_TO%RTRM)
-CALL MOVE_ALLOC(FROM=CUT_CELL_FROM%R_H_G            ,TO=CUT_CELL_TO%R_H_G)
-CALL MOVE_ALLOC(FROM=CUT_CELL_FROM%RHO_0            ,TO=CUT_CELL_TO%RHO_0)
-CALL MOVE_ALLOC(FROM=CUT_CELL_FROM%WVEL             ,TO=CUT_CELL_TO%WVEL)
-CALL MOVE_ALLOC(FROM=CUT_CELL_FROM%DDDTVOL          ,TO=CUT_CELL_TO%DDDTVOL)
-CALL MOVE_ALLOC(FROM=CUT_CELL_FROM%DELTA_RHO        ,TO=CUT_CELL_TO%DELTA_RHO)
-CALL MOVE_ALLOC(FROM=CUT_CELL_FROM%DELTA_RHO_ZZ     ,TO=CUT_CELL_TO%DELTA_RHO_ZZ)
+CALL MOVE_ALLOC(FROM=CUT_CELL_FROM%IG               ,TO=CUT_CELL_TO%IG)
+CALL MOVE_ALLOC(FROM=CUT_CELL_FROM%ICV              ,TO=CUT_CELL_TO%ICV)
 
 CALL MOVE_ALLOC(FROM=CUT_CELL_FROM%INT_IJK         ,TO=CUT_CELL_TO%INT_IJK   )
 CALL MOVE_ALLOC(FROM=CUT_CELL_FROM%INT_COEF        ,TO=CUT_CELL_TO%INT_COEF  )
@@ -8285,8 +7705,6 @@ CALL MOVE_ALLOC(FROM=CUT_CELL_FROM%INT_CN          ,TO=CUT_CELL_TO%INT_CN    )
 CALL MOVE_ALLOC(FROM=CUT_CELL_FROM%INT_CCVARS      ,TO=CUT_CELL_TO%INT_CCVARS)
 CALL MOVE_ALLOC(FROM=CUT_CELL_FROM%INT_NOMIND      ,TO=CUT_CELL_TO%INT_NOMIND)
 
-CALL MOVE_ALLOC(FROM=CUT_CELL_FROM%DEL_RHO_D_DEL_Z_VOL  ,TO=CUT_CELL_TO%DEL_RHO_D_DEL_Z_VOL)
-CALL MOVE_ALLOC(FROM=CUT_CELL_FROM%U_DOT_DEL_RHO_Z_VOL  ,TO=CUT_CELL_TO%U_DOT_DEL_RHO_Z_VOL)
 CALL MOVE_ALLOC(FROM=CUT_CELL_FROM%NOADVANCE            ,TO=CUT_CELL_TO%NOADVANCE)
 CALL MOVE_ALLOC(FROM=CUT_CELL_FROM%BODTRI_DONOR         ,TO=CUT_CELL_TO%BODTRI_DONOR)
 CALL MOVE_ALLOC(FROM=CUT_CELL_FROM%NOMICC               ,TO=CUT_CELL_TO%NOMICC)
@@ -8396,6 +7814,8 @@ DEALLOCATE(MESHES(NM)%CUT_CELL(ICC)%FACE_LIST)
 DEALLOCATE(MESHES(NM)%CUT_CELL(ICC)%IJK_LINK,MESHES(NM)%CUT_CELL(ICC)%LINK_LEV)
 DEALLOCATE(MESHES(NM)%CUT_CELL(ICC)%VOLUME, MESHES(NM)%CUT_CELL(ICC)%XYZCEN)
 DEALLOCATE(MESHES(NM)%CUT_CELL(ICC)%NOADVANCE,MESHES(NM)%CUT_CELL(ICC)%UNKZ)
+IF (ALLOCATED(MESHES(NM)%CUT_CELL(ICC)%IG)) DEALLOCATE(MESHES(NM)%CUT_CELL(ICC)%IG)
+IF (ALLOCATED(MESHES(NM)%CUT_CELL(ICC)%ICV)) DEALLOCATE(MESHES(NM)%CUT_CELL(ICC)%ICV)
 IF (ALLOCATED(MESHES(NM)%CUT_CELL(ICC)%BODTRI_DONOR)) DEALLOCATE(MESHES(NM)%CUT_CELL(ICC)%BODTRI_DONOR)
 
 RETURN
@@ -8426,6 +7846,9 @@ MESHES(NM)%CUT_CELL(ICC)%BODTRI_DONOR = 0
 ALLOCATE(MESHES(NM)%CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,1:NCELL))
 MESHES(NM)%CUT_CELL(ICC)%XYZCEN = 0._EB
 ALLOCATE(MESHES(NM)%CUT_CELL(ICC)%UNKZ(1:NCELL)); MESHES(NM)%CUT_CELL(ICC)%UNKZ = CC_UNDEFINED
+ALLOCATE(MESHES(NM)%CUT_CELL(ICC)%IG(1:NCELL),MESHES(NM)%CUT_CELL(ICC)%ICV(1:NCELL))
+MESHES(NM)%CUT_CELL(ICC)%IG = 0
+MESHES(NM)%CUT_CELL(ICC)%ICV = 0
 RETURN
 END SUBROUTINE NEW_CELL_ALLOC
 
@@ -8436,56 +7859,6 @@ SUBROUTINE ALLOC_CELL_STATE_VARS(NM,ICC,NCELL)
 INTEGER, INTENT(IN) :: NM,ICC,NCELL
 
 ! Allocate ICC entries:
-ALLOCATE(MESHES(NM)%CUT_CELL(ICC)%RHO(1:NCELL),      &
-         MESHES(NM)%CUT_CELL(ICC)%RHOS(1:NCELL),     MESHES(NM)%CUT_CELL(ICC)%RSUM(1:NCELL),      &
-         MESHES(NM)%CUT_CELL(ICC)%TMP(1:NCELL),      MESHES(NM)%CUT_CELL(ICC)%D(1:NCELL),         &
-         MESHES(NM)%CUT_CELL(ICC)%DVOL(1:NCELL),     MESHES(NM)%CUT_CELL(ICC)%DVOL_PR(1:NCELL),   &
-         MESHES(NM)%CUT_CELL(ICC)%Q(1:NCELL),                                                     &
-         MESHES(NM)%CUT_CELL(ICC)%QR(1:NCELL),       MESHES(NM)%CUT_CELL(ICC)%D_SOURCE(1:NCELL),  &
-         MESHES(NM)%CUT_CELL(ICC)%CHI_R(1:NCELL),    MESHES(NM)%CUT_CELL(ICC)%DS(1:NCELL),        &
-         MESHES(NM)%CUT_CELL(ICC)%MIX_TIME(1:NCELL), MESHES(NM)%CUT_CELL(ICC)%H(1:NCELL),         &
-         MESHES(NM)%CUT_CELL(ICC)%HS(1:NCELL),       MESHES(NM)%CUT_CELL(ICC)%RTRM(1:NCELL),      &
-         MESHES(NM)%CUT_CELL(ICC)%R_H_G(1:NCELL),    MESHES(NM)%CUT_CELL(ICC)%RHO_0(1:NCELL),     &
-         MESHES(NM)%CUT_CELL(ICC)%WVEL(1:NCELL),     &
-         MESHES(NM)%CUT_CELL(ICC)%KRES(1:NCELL),     MESHES(NM)%CUT_CELL(ICC)%DDDTVOL(1:NCELL),   &
-         MESHES(NM)%CUT_CELL(ICC)%DELTA_RHO(1:NCELL),MESHES(NM)%CUT_CELL(ICC)%DELTA_RHO_ZZ(1:NCELL))
-
-MESHES(NM)%CUT_CELL(ICC)%RHO      = 0._EB
-MESHES(NM)%CUT_CELL(ICC)%RHOS     = 0._EB
-MESHES(NM)%CUT_CELL(ICC)%RSUM     = 0._EB
-MESHES(NM)%CUT_CELL(ICC)%TMP      = 0._EB
-MESHES(NM)%CUT_CELL(ICC)%D        = 0._EB
-MESHES(NM)%CUT_CELL(ICC)%DS       = 0._EB
-MESHES(NM)%CUT_CELL(ICC)%DVOL     = 0._EB
-MESHES(NM)%CUT_CELL(ICC)%DVOL_PR  = 0._EB
-MESHES(NM)%CUT_CELL(ICC)%Q        = 0._EB
-MESHES(NM)%CUT_CELL(ICC)%QR       = 0._EB
-MESHES(NM)%CUT_CELL(ICC)%D_SOURCE = 0._EB
-MESHES(NM)%CUT_CELL(ICC)%CHI_R    = 0._EB
-MESHES(NM)%CUT_CELL(ICC)%MIX_TIME = 0._EB
-MESHES(NM)%CUT_CELL(ICC)%KRES     = 0._EB
-MESHES(NM)%CUT_CELL(ICC)%H        = 0._EB
-MESHES(NM)%CUT_CELL(ICC)%HS       = 0._EB
-MESHES(NM)%CUT_CELL(ICC)%RTRM     = 0._EB
-MESHES(NM)%CUT_CELL(ICC)%R_H_G    = 0._EB
-MESHES(NM)%CUT_CELL(ICC)%RHO_0    = 0._EB
-MESHES(NM)%CUT_CELL(ICC)%WVEL     = 0._EB
-MESHES(NM)%CUT_CELL(ICC)%DDDTVOL  = 0._EB
-MESHES(NM)%CUT_CELL(ICC)%DELTA_RHO= 0._EB
-MESHES(NM)%CUT_CELL(ICC)%DELTA_RHO_ZZ= 0._EB
-
-ALLOCATE(MESHES(NM)%CUT_CELL(ICC)%Q_REAC(1:N_REACTIONS,1:NCELL))
-MESHES(NM)%CUT_CELL(ICC)%Q_REAC = 0._EB
-
-ALLOCATE(MESHES(NM)%CUT_CELL(ICC)%REAC_SOURCE_TERM(1:N_TOTAL_SCALARS,1:NCELL), &
-         MESHES(NM)%CUT_CELL(ICC)%ZZ(1:N_TOTAL_SCALARS,1:NCELL),               &
-         MESHES(NM)%CUT_CELL(ICC)%ZZS(1:N_TOTAL_SCALARS,1:NCELL),              &
-         MESHES(NM)%CUT_CELL(ICC)%M_DOT_PPP(1:N_TOTAL_SCALARS,1:NCELL))
-MESHES(NM)%CUT_CELL(ICC)%REAC_SOURCE_TERM = 0._EB
-MESHES(NM)%CUT_CELL(ICC)%ZZ               = 0._EB
-MESHES(NM)%CUT_CELL(ICC)%ZZS              = 0._EB
-MESHES(NM)%CUT_CELL(ICC)%M_DOT_PPP        = 0._EB
-
 ALLOCATE(MESHES(NM)%CUT_CELL(ICC)%UNKH(1:NCELL)); MESHES(NM)%CUT_CELL(ICC)%UNKH = CC_UNDEFINED
 ALLOCATE(MESHES(NM)%CUT_CELL(ICC)%INT_IJK(IAXIS:KAXIS,(NCELL+1)*DELTA_INT))
 ALLOCATE(MESHES(NM)%CUT_CELL(ICC)%INT_COEF((NCELL+1)*DELTA_INT))
@@ -8509,103 +7882,153 @@ MESHES(NM)%CUT_CELL(ICC)%INT_CN    =  0._EB
 MESHES(NM)%CUT_CELL(ICC)%INT_CCVARS=  0._EB
 MESHES(NM)%CUT_CELL(ICC)%INT_NOMIND=  CC_UNDEFINED
 
-ALLOCATE(MESHES(NM)%CUT_CELL(ICC)%DEL_RHO_D_DEL_Z_VOL(1:N_TOTAL_SCALARS,1:NCELL), &
-         MESHES(NM)%CUT_CELL(ICC)%U_DOT_DEL_RHO_Z_VOL(1:N_TOTAL_SCALARS,1:NCELL))
-MESHES(NM)%CUT_CELL(ICC)%DEL_RHO_D_DEL_Z_VOL = 0._EB; MESHES(NM)%CUT_CELL(ICC)%U_DOT_DEL_RHO_Z_VOL = 0._EB
-
 RETURN
 
 END SUBROUTINE ALLOC_CELL_STATE_VARS
 
 SUBROUTINE SET_CVS_3D
 
-INTEGER :: ISTR, IEND, JSTR, JEND, KSTR, KEND
+INTEGER :: ISTR, IEND, JSTR, JEND, KSTR, KEND, NM
+INTEGER :: ICC, JCC, N_INACTIVE
 LOGICAL, ALLOCATABLE, DIMENSION(:) :: CC_COMPUTE_MESH
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: GEOM_ZMAX_AUX
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: GEOM_AREA_SURF_OLD,GEOM_AREA_SURF_NEW
 REAL(EB) :: TNOW, CPUTIME_START_MESH
 LOGICAL, SAVE :: FIRST_CALL_ARG=.TRUE., FIRST_CALL_ARG2=.TRUE.
+CHARACTER(200) :: VERBOSE_FILE
+LOGICAL :: EARLY_RETURN_FROM_SET_CUTCELLS
+INTEGER, SAVE :: CALL_COUNT = 0
 
-! Skeleton for the future control-volume driver.
-!
+IF (.NOT.CC_CV_H_PER_MEMBER) THEN
+   IF (PRES_FLAG/=UGLMAT_FLAG) THEN
+      CALL SHUTDOWN('ERROR: per-CV pressure solve (CC_CV_H_PER_MEMBER=.FALSE.) requires the global UGLMAT pressure solver.')
+      RETURN
+   ENDIF
+ENDIF
+
+! Construction is unconditional. Blocking is CVS-neutral.
+
 ! Phase 1 now reuses the shared raw cut-cell build path.
 CALL CC_GRID_BUILD_RAW_CUTCELLS(ISTR,IEND,JSTR,JEND,KSTR,KEND,CC_COMPUTE_MESH,GEOM_ZMAX_AUX, &
                                 TNOW,CPUTIME_START_MESH,GEOM_AREA_SURF_OLD,GEOM_AREA_SURF_NEW, &
                                 FIRST_CALL_ARG,FIRST_CALL_ARG2)
 IF (STOP_STATUS==SETUP_STOP) RETURN
 
-! Phase 2: build mesh-owned GCELL map from raw cut-cell data.
+IF (GET_CUTCELLS_VERBOSE) THEN
+   WRITE(VERBOSE_FILE,'(A,A,I0,A)') TRIM(RESULTS_DIR)//TRIM(CHID),'_cvsetup_',MY_RANK,'.log'
+   OPEN(UNIT=LU_SETCC,FILE=TRIM(VERBOSE_FILE),STATUS='UNKNOWN')
+   WRITE(LU_SETCC,*) ' '
+   WRITE(LU_SETCC,'(A)') ' SET_CVS_3D : setup log'
+   WRITE(LU_SETCC,'(A,I4,A)') ' Process MY_RANK=',MY_RANK,'.'
+   FLUSH(LU_SETCC)
+ENDIF
+
+! CVS-neutral blocking so FV agglomeration, not a legacy link tree,
+! owns the reduced control-volume topology.
+! A coarse cell over a fine sliver the raw build blocked is blocked before the slivers are dropped.
+ALLOCATE(FM_PENDING_BLOCK_SCAN(1:NMESHES)); FM_PENDING_BLOCK_SCAN = .FALSE.
+DO NM=1,NMESHES
+   IF (CC_GRID_SHOULD_PROCESS_MESH(NM,CC_COMPUTE_MESH)) CALL PROMOTE_REFINEMENT_FOOTPRINTS_FROM_BLOCKED_FINE(NM)
+ENDDO
+DO NM=1,NMESHES
+   IF (CC_GRID_SHOULD_PROCESS_MESH(NM,CC_COMPUTE_MESH)) THEN
+      CALL CC_GRID_APPLY_SPECIAL_CELL_BLOCKING(NM)
+      CALL POINT_TO_MESH(NM)
+      CALL CC_GRID_ENFORCE_ONE_CC_PER_CARTESIAN_CELL(NM)
+   ENDIF
+   CALL CC_GRID_CVS_REBUILD_MESH_AFTER_BLOCK_TAGS(NM,CC_COMPUTE_MESH,ISTR,IEND,JSTR,JEND,KSTR,KEND,GEOM_AREA_SURF_OLD,.TRUE.)
+   IF (STOP_STATUS==SETUP_STOP) THEN
+      IF (GET_CUTCELLS_VERBOSE) CLOSE(LU_SETCC)
+      RETURN
+   ENDIF
+ENDDO
+
+CALL CC_GRID_CVS_EXCHANGE_AND_REBUILD_BLOCKS(CC_COMPUTE_MESH,ISTR,IEND,JSTR,JEND,KSTR,KEND,GEOM_AREA_SURF_OLD)
+DEALLOCATE(FM_PENDING_BLOCK_SCAN)
+
+IF (STOP_STATUS==SETUP_STOP) THEN
+   IF (GET_CUTCELLS_VERBOSE) CLOSE(LU_SETCC)
+   RETURN
+ENDIF
+
+DO NM=1,NMESHES
+   CALL CC_GRID_POSTPROCESS_AND_CLEANUP(NM,CC_COMPUTE_MESH,GEOM_AREA_SURF_NEW)
+ENDDO
+DO NM=1,NMESHES
+   CALL CC_GRID_ALLOCATE_STATE_VARS(NM,CC_COMPUTE_MESH)
+ENDDO
+CALL CC_GRID_LOG_PROCESSING_TIME(TNOW,CPUTIME_START_MESH)
+CALL CC_GRID_UPDATE_INBOUNDARY_AREA_ADJUST(GEOM_AREA_SURF_OLD,GEOM_AREA_SURF_NEW)
+CALL SET_GC_CUTCELLS_3D
+IF(PERIODIC_TEST/=105) CALL GET_EXT_INB_CUTFACES_TO_CFACE
+
+! Phase 3: build mesh-owned GCELL map from frozen cut-cell data.
 CALL CC_GRID_BUILD_GCELLS
-!
-! Future:
-!    BLOCK ONLY INVALID/SPECIAL CELLS
-!    BUILD FACE TOPOLOGY
-!    BUILD IDENTITY CVS
-!    APPLY SAME-MESH AND INTER-MESH CV LINKING
+
+! Phase 4: identity CV map, one control volume per GCELL.
+CALL CC_GRID_BUILD_IDENTITY_CVS
+
+! Phase 5 builds the FV aggregation map without mutating the legacy CUT_CELL geometry.
+CALL CC_GRID_EVALUATE_CV_MERGE_CANDIDATES
+IF (STOP_STATUS==SETUP_STOP) THEN
+   IF (GET_CUTCELLS_VERBOSE) CLOSE(LU_SETCC)
+   RETURN
+ENDIF
+CALL CC_GRID_APPLY_PAIRWISE_CV_AGGLOMERATION
+IF (STOP_STATUS==SETUP_STOP) THEN
+   IF (GET_CUTCELLS_VERBOSE) CLOSE(LU_SETCC)
+   RETURN
+ENDIF
+
+! Phase 5b: local CV->GCELL membership CSR, after agglomeration has frozen GCELL_TO_CV.
+CALL CC_GRID_BUILD_CV_MEMBER_LISTS
+IF (STOP_STATUS==SETUP_STOP) THEN
+   IF (GET_CUTCELLS_VERBOSE) CLOSE(LU_SETCC)
+   RETURN
+ENDIF
+CALL CC_GRID_CHECK_CV_LINK_FRACTION
+IF (STOP_STATUS==SETUP_STOP) THEN
+   IF (GET_CUTCELLS_VERBOSE) CLOSE(LU_SETCC)
+   RETURN
+ENDIF
+
+! Phase 6: build the finite-volume FACE topology on the frozen CV map (external + intra-CV faces).
+CALL CC_GRID_BUILD_FACES
+IF (STOP_STATUS==SETUP_STOP) THEN
+   IF (GET_CUTCELLS_VERBOSE) CLOSE(LU_SETCC)
+   RETURN
+ENDIF
+
+! Phase 7: dump the per-CV setup map for the partition-invariance regression.
+IF (GET_CUTCELLS_VERBOSE) CALL CC_GRID_DUMP_CV_MAP
+! Verbose: cut pieces with no active CV (pieces in OBST-solid cells), per mesh. The obst_geom gate suite reads it.
+IF (GET_CUTCELLS_VERBOSE) THEN
+   DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+      N_INACTIVE = 0
+      DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+         DO JCC=1,MESHES(NM)%CUT_CELL(ICC)%NCELL
+            IF (.NOT.CC_GRID_CUT_PIECE_IS_ACTIVE(NM,ICC,JCC)) N_INACTIVE = N_INACTIVE+1
+         ENDDO
+      ENDDO
+      WRITE(LU_SETCC,'(A,I5,A,I10)') '   E mesh NM=',NM,' n_inactive=',N_INACTIVE
+   ENDDO
+ENDIF
+
+CALL CC_GRID_FINALIZE_BOOKKEEPING(CC_COMPUTE_MESH,CALL_COUNT,EARLY_RETURN_FROM_SET_CUTCELLS,'SET_CVS_3D')
+IF (EARLY_RETURN_FROM_SET_CUTCELLS) THEN
+   IF (GET_CUTCELLS_VERBOSE) CLOSE(LU_SETCC)
+   RETURN
+ENDIF
+
+
+IF (GET_CUTCELLS_VERBOSE) THEN
+   CALL CC_GRID_DUMP_RAW_GEOMETRY
+   CALL CC_GRID_WRITE_VERBOSE_SUMMARY
+   CLOSE(LU_SETCC)
+ENDIF
 
 RETURN
 END SUBROUTINE SET_CVS_3D
-
-SUBROUTINE SET_CUTCELLS_3D
-USE MPI_F08
-
-INTEGER :: ISTR, IEND, JSTR, JEND, KSTR, KEND
-INTEGER :: NM
-
-! Miscellaneous:
-LOGICAL, ALLOCATABLE, DIMENSION(:) :: CC_COMPUTE_MESH
-REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: GEOM_ZMAX_AUX
-
-REAL(EB) :: TNOW
-
-LOGICAL :: EARLY_RETURN_FROM_SET_CUTCELLS
-
-INTEGER, SAVE :: CALL_COUNT = 0
-
-! GET_CUTCELL_VERBOSE variables:
-REAL(EB) :: CPUTIME_START_MESH
-REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: GEOM_AREA_SURF_OLD,GEOM_AREA_SURF_NEW
-
-LOGICAL, SAVE :: FIRST_CALL_ARG=.TRUE., FIRST_CALL_ARG2=.TRUE.
-CALL CC_GRID_BUILD_RAW_CUTCELLS(ISTR,IEND,JSTR,JEND,KSTR,KEND,CC_COMPUTE_MESH,GEOM_ZMAX_AUX, &
-                                TNOW,CPUTIME_START_MESH,GEOM_AREA_SURF_OLD,GEOM_AREA_SURF_NEW, &
-                                FIRST_CALL_ARG,FIRST_CALL_ARG2)
-IF (STOP_STATUS==SETUP_STOP) RETURN
-
-POSTBUILD_MESH_LOOP : DO NM=1,NMESHES
-   CALL CC_GRID_POSTBUILD_BLOCK_AND_LINK_MESH(NM,CC_COMPUTE_MESH,ISTR,IEND,JSTR,JEND,KSTR,KEND,GEOM_AREA_SURF_OLD)
-   IF (STOP_STATUS==SETUP_STOP) RETURN
-ENDDO POSTBUILD_MESH_LOOP
-
-CALL CC_GRID_EXCHANGE_AND_REBLOCK(CC_COMPUTE_MESH,ISTR,IEND,JSTR,JEND,KSTR,KEND)
-
-MAIN_MESH_LOOP_3 : DO NM=1,NMESHES
-   CALL CC_GRID_POSTPROCESS_AND_CLEANUP(NM,CC_COMPUTE_MESH,GEOM_AREA_SURF_NEW)
-ENDDO MAIN_MESH_LOOP_3
-
-! Finally allocate Face and cell variables, compute area and volume factors:
-MAIN_MESH_LOOP_4 : DO NM=1,NMESHES
-   CALL CC_GRID_ALLOCATE_STATE_VARS(NM,CC_COMPUTE_MESH)
-ENDDO MAIN_MESH_LOOP_4
-
-CALL CC_GRID_LOG_PROCESSING_TIME(TNOW,CPUTIME_START_MESH)
-
-CALL CC_GRID_UPDATE_INBOUNDARY_AREA_ADJUST(GEOM_AREA_SURF_OLD,GEOM_AREA_SURF_NEW)
-
-! Fill Guardcells for CCVAR CC_CGSC and CUT_CELL for meshes assigned to MPI process:
-CALL SET_GC_CUTCELLS_3D
-
-! Allocate and define entries for solid side CFACES:
-IF(PERIODIC_TEST/=105) CALL GET_EXT_INB_CUTFACES_TO_CFACE
-
-CALL CC_GRID_FINALIZE_BOOKKEEPING(CC_COMPUTE_MESH,CALL_COUNT,EARLY_RETURN_FROM_SET_CUTCELLS)
-IF (EARLY_RETURN_FROM_SET_CUTCELLS) RETURN
-
-CALL CC_GRID_WRITE_VERBOSE_SUMMARY
-
-RETURN
-
-END SUBROUTINE SET_CUTCELLS_3D
 
 ! ------------- Refinement-interface blocking helpers (ported from master) -------------
 
@@ -8996,6 +8419,7 @@ USE TRAN, ONLY: GET_IJK
 LOGICAL, INTENT(IN), DIMENSION(:) :: CC_COMPUTE_MESH
 INTEGER :: NM_LOC,ICELL,JCC_LOC,I_LOC,J_LOC,K_LOC,BLOCK_TAG,ICC_LOC
 REAL(EB) :: XCO,YCO,ZCO,X1,Y1,Z1
+LOGICAL :: CELL_CHANGED
 
 MESH_LOOP_APPLY : DO NM_LOC=1,NMESHES
    IF (.NOT.CC_COMPUTE_MESH(NM_LOC)) CYCLE          ! Only meshes with state on this rank.
@@ -9012,7 +8436,11 @@ MESH_LOOP_APPLY : DO NM_LOC=1,NMESHES
       IF (I_LOC<1 .OR. I_LOC>MESHES(NM_LOC)%IBAR .OR. J_LOC<1 .OR. J_LOC>MESHES(NM_LOC)%JBAR .OR. &
           K_LOC<1 .OR. K_LOC>MESHES(NM_LOC)%KBAR) CYCLE
       ICC_LOC = MESHES(NM_LOC)%CCVAR(I_LOC,J_LOC,K_LOC,CC_IDCC)
-      IF (ICC_LOC<=0) CYCLE                            ! No matching cut-cell on this replica.
+      IF (ICC_LOC<=0) THEN ! Regular cell here: the owner inserted a blocked cut-cell (refinement interface).
+         CALL TAG_CELL_BLOCKED_BY_REFINEMENT_FOOTPRINT(NM_LOC,I_LOC,J_LOC,K_LOC,BLOCK_TAG, &
+              MESHES(NM_LOC)%JBT_CC_BLOCKED(3,ICELL),MESHES(NM_LOC)%JBT_CC_BLOCKED(4,ICELL),CELL_CHANGED)
+         CYCLE
+      ENDIF
       IF (MESHES(NM_LOC)%CUT_CELL(ICC_LOC)%NOADVANCE(JCC_LOC)==NOT_BLOCKED) THEN
          MESHES(NM_LOC)%CUT_CELL(ICC_LOC)%NOADVANCE(JCC_LOC) = BLOCK_TAG
          IF (MESHES(NM_LOC)%JBT_CC_BLOCKED(3,ICELL)>0 .AND. MESHES(NM_LOC)%JBT_CC_BLOCKED(4,ICELL)>0) &
@@ -9437,9 +8865,9 @@ DO KDUM=-CCGUARD,MESHES(NM)%KBAR+CCGUARD
 ENDDO
 DO ICF=1,MESHES(NM)%N_CUTFACE_MESH+MESHES(NM)%N_GCCUTFACE_MESH
    DO JCF=1,MESHES(NM)%CUT_FACE(ICF)%NFACE
-      IF(MESHES(NM)%CUT_FACE(ICF)%CELL_LIST(2,LOW_IND,JCF)>ICC) &
+      IF(MESHES(NM)%CUT_FACE(ICF)%CELL_LIST(2,LOW_IND,JCF)>=ICC) &
       MESHES(NM)%CUT_FACE(ICF)%CELL_LIST(2,LOW_IND,JCF)  = MESHES(NM)%CUT_FACE(ICF)%CELL_LIST(2, LOW_IND,JCF) + 1
-      IF(MESHES(NM)%CUT_FACE(ICF)%CELL_LIST(2,HIGH_IND,JCF)>ICC) &
+      IF(MESHES(NM)%CUT_FACE(ICF)%CELL_LIST(2,HIGH_IND,JCF)>=ICC) &
       MESHES(NM)%CUT_FACE(ICF)%CELL_LIST(2,HIGH_IND,JCF) = MESHES(NM)%CUT_FACE(ICF)%CELL_LIST(2,HIGH_IND,JCF) + 1
    ENDDO
 ENDDO
@@ -12229,7 +11657,6 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          SURF_INDEX = CF%SURF_INDEX(IFACE)
          CALL INIT_CFACE_CELL(NM,ICF,IFACE,CFACE_INDEX_LOCAL,SURF_INDEX,INTEGER_ONE,IS_INB=.TRUE.)
       ENDDO
-      IF(ALLOCATED(CF%CFACE_ORIGIN)) DEALLOCATE(CF%CFACE_ORIGIN)
    ENDDO
    MESHES(NM)%N_INTERNAL_CFACE_CELLS   = CFACE_INDEX_LOCAL - MESHES(NM)%INTERNAL_CFACE_CELLS_LB
 ENDDO MESH_LOOP_1
@@ -12317,6 +11744,110 @@ ENDIF
 RETURN
 END SUBROUTINE GET_EXT_INB_CUTFACES_TO_CFACE
 
+LOGICAL FUNCTION CC_GRID_IS_PERIODIC_INTERFACE_WALL(NM,NOM,IOR)
+INTEGER, INTENT(IN) :: NM,NOM,IOR
+
+REAL(EB) :: XNM, XNOM
+CC_GRID_IS_PERIODIC_INTERFACE_WALL = .FALSE.
+
+SELECT CASE(IOR)
+CASE(-IAXIS) ! High X wall cell.
+   XNM = 0.5_EB*(MESHES(NM)%XS+MESHES(NM)%XF)
+   XNOM= 0.5_EB*(MESHES(NOM)%XS+MESHES(NOM)%XF)
+   IF ((XNOM-XNM) <  TWENTY_EPSILON_EB) CC_GRID_IS_PERIODIC_INTERFACE_WALL = .TRUE.
+CASE( IAXIS) ! Low X wall cell.
+   XNM = 0.5_EB*(MESHES(NM)%XS+MESHES(NM)%XF)
+   XNOM= 0.5_EB*(MESHES(NOM)%XS+MESHES(NOM)%XF)
+   IF ((XNOM-XNM) > -TWENTY_EPSILON_EB) CC_GRID_IS_PERIODIC_INTERFACE_WALL = .TRUE.
+CASE(-JAXIS) ! High Y wall cell.
+   XNM = 0.5_EB*(MESHES(NM)%YS+MESHES(NM)%YF)
+   XNOM= 0.5_EB*(MESHES(NOM)%YS+MESHES(NOM)%YF)
+   IF ((XNOM-XNM) <  TWENTY_EPSILON_EB) CC_GRID_IS_PERIODIC_INTERFACE_WALL = .TRUE.
+CASE( JAXIS) ! Low Y wall cell.
+   XNM = 0.5_EB*(MESHES(NM)%YS+MESHES(NM)%YF)
+   XNOM= 0.5_EB*(MESHES(NOM)%YS+MESHES(NOM)%YF)
+   IF ((XNOM-XNM) > -TWENTY_EPSILON_EB) CC_GRID_IS_PERIODIC_INTERFACE_WALL = .TRUE.
+CASE(-KAXIS) ! High Z wall cell.
+   XNM = 0.5_EB*(MESHES(NM)%ZS+MESHES(NM)%ZF)
+   XNOM= 0.5_EB*(MESHES(NOM)%ZS+MESHES(NOM)%ZF)
+   IF ((XNOM-XNM) <  TWENTY_EPSILON_EB) CC_GRID_IS_PERIODIC_INTERFACE_WALL = .TRUE.
+CASE( KAXIS) ! Low Z wall cell.
+   XNM = 0.5_EB*(MESHES(NM)%ZS+MESHES(NM)%ZF)
+   XNOM= 0.5_EB*(MESHES(NOM)%ZS+MESHES(NOM)%ZF)
+   IF ((XNOM-XNM) > -TWENTY_EPSILON_EB) CC_GRID_IS_PERIODIC_INTERFACE_WALL = .TRUE.
+END SELECT
+END FUNCTION CC_GRID_IS_PERIODIC_INTERFACE_WALL
+
+SUBROUTINE CC_GRID_QUERY_INTERP_BOUNDARY_REMOTE_CUTCELLS(NOM,EWC,N_MATCHES,REMOTE_ICC, &
+                                                         ALL_REMOTE_IDCC_UNDEFINED,HAS_REMOTE_SOLID)
+! Transitional query helper: identify remote cut-cell correspondences for one interpolated boundary
+! stencil without applying legacy bookkeeping side effects in SET_GC_CUTCELLS_3D.
+INTEGER, INTENT(IN) :: NOM
+TYPE(EXTERNAL_WALL_TYPE), POINTER, INTENT(IN) :: EWC
+INTEGER, INTENT(OUT) :: N_MATCHES
+INTEGER, ALLOCATABLE, DIMENSION(:), INTENT(OUT) :: REMOTE_ICC
+LOGICAL, INTENT(OUT) :: ALL_REMOTE_IDCC_UNDEFINED,HAS_REMOTE_SOLID
+
+INTEGER :: IIO,JJO,KKO,ICC,IMATCH
+N_MATCHES = 0
+ALL_REMOTE_IDCC_UNDEFINED = .TRUE.
+HAS_REMOTE_SOLID = .FALSE.
+
+DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
+   DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
+      DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
+         ICC = MESHES(NOM)%CCVAR(IIO,JJO,KKO,CC_IDCC)
+         ALL_REMOTE_IDCC_UNDEFINED = ALL_REMOTE_IDCC_UNDEFINED .AND. (ICC <= 0)
+         IF (MESHES(NOM)%CCVAR(IIO,JJO,KKO,CC_CGSC)==CC_SOLID) HAS_REMOTE_SOLID = .TRUE.
+         IF (ICC > 0) N_MATCHES = N_MATCHES + 1
+      ENDDO
+   ENDDO
+ENDDO
+
+IF (N_MATCHES < 1) RETURN
+ALLOCATE(REMOTE_ICC(1:N_MATCHES))
+IMATCH = 0
+DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
+   DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
+      DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
+         ICC = MESHES(NOM)%CCVAR(IIO,JJO,KKO,CC_IDCC)
+         IF (ICC <= 0) CYCLE
+         IMATCH = IMATCH + 1
+         REMOTE_ICC(IMATCH) = ICC
+      ENDDO
+   ENDDO
+ENDDO
+END SUBROUTINE CC_GRID_QUERY_INTERP_BOUNDARY_REMOTE_CUTCELLS
+
+SUBROUTINE CC_GRID_QUERY_MIRROR_BOUNDARY_REMOTE_CUTCELL(NM,IOR,IIO,JJO,KKO,HAS_MATCH,REMOTE_ICC)
+! Transitional query helper: return the same-mesh cut-cell correspondence across a mirror boundary
+! when the mirrored-side face remains gas-phase.
+INTEGER, INTENT(IN) :: NM,IOR,IIO,JJO,KKO
+LOGICAL, INTENT(OUT) :: HAS_MATCH
+INTEGER, INTENT(OUT) :: REMOTE_ICC
+
+HAS_MATCH = .FALSE.
+REMOTE_ICC = 0
+! Return if OBJECT face is in the mirror boundary, normal out into ghost-cell.
+SELECT CASE(IOR)
+CASE( IAXIS)
+   IF(MESHES(NM)%FCVAR(IIO-1,JJO  ,KKO  ,CC_FGSC,IAXIS) == CC_SOLID) RETURN
+CASE(-IAXIS)
+   IF(MESHES(NM)%FCVAR(IIO  ,JJO  ,KKO  ,CC_FGSC,IAXIS) == CC_SOLID) RETURN
+CASE( JAXIS)
+   IF(MESHES(NM)%FCVAR(IIO  ,JJO-1,KKO  ,CC_FGSC,JAXIS) == CC_SOLID) RETURN
+CASE(-JAXIS)
+   IF(MESHES(NM)%FCVAR(IIO  ,JJO  ,KKO  ,CC_FGSC,JAXIS) == CC_SOLID) RETURN
+CASE( KAXIS)
+   IF(MESHES(NM)%FCVAR(IIO  ,JJO  ,KKO-1,CC_FGSC,KAXIS) == CC_SOLID) RETURN
+CASE(-KAXIS)
+   IF(MESHES(NM)%FCVAR(IIO  ,JJO  ,KKO  ,CC_FGSC,KAXIS) == CC_SOLID) RETURN
+END SELECT
+REMOTE_ICC = MESHES(NM)%CCVAR(IIO,JJO,KKO,CC_IDCC); IF (REMOTE_ICC < 1) RETURN
+HAS_MATCH = .TRUE.
+
+END SUBROUTINE CC_GRID_QUERY_MIRROR_BOUNDARY_REMOTE_CUTCELL
+
 
 ! ------------------------- SET_GC_CUTCELLS_3D -----------------------------------
 
@@ -12324,16 +11855,15 @@ SUBROUTINE SET_GC_CUTCELLS_3D
 
 ! Local Variables:
 INTEGER :: IW,II,JJ,KK,IOR,IIO,JJO,KKO,IIF,JJF,KKF,IIOF,JJOF,KKOF,ICF,ICOF,X1AXIS,ICC,NMICC,NOFC,N_CF,N_CRT
-REAL(EB):: XNM, XNOM
 TYPE (WALL_TYPE), POINTER :: WC
 TYPE (EXTERNAL_WALL_TYPE), POINTER :: EWC
-LOGICAL :: WC_PERIODIC, TEST_ICC
 REAL(EB):: AREA_NM, AREA_NOM, AREA_CRT
-INTEGER :: NM,NOM,NCELL
+INTEGER :: NM,NOM,IMATCH,N_MATCHES
 REAL(EB) :: CPUTIME_START, CPUTIME
 TYPE(BOUNDARY_COORD_TYPE), POINTER :: BC
 TYPE(BOUNDARY_PROP1_TYPE), POINTER :: B1
-
+INTEGER, ALLOCATABLE, DIMENSION(:) :: REMOTE_ICC
+LOGICAL :: ALL_REMOTE_IDCC_UNDEFINED,HAS_REMOTE_SOLID,HAS_MATCH
 
 IF (CCGUARD == 0) RETURN
 
@@ -12449,11 +11979,8 @@ ENDDO MESH_LOOP_1
 ! Second mesh loop:
 ! Define cut-cell data on guard-cell region to be communicated:
 MESH_LOOP_2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-
    IF ((MESHES(NM)%N_CUTCELL_MESH+MESHES(NM)%N_GCCUTCELL_MESH)==0) CYCLE MESH_LOOP_2
-
    CALL POINT_TO_MESH(NM)
-
    EXTERNAL_WALL_LOOP_2 : DO IW=1,N_EXTERNAL_WALL_CELLS
 
       WC=>WALL(IW)
@@ -12494,118 +12021,47 @@ MESH_LOOP_2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          IF(FCVAR(IIF,JJF,KKF,CC_FGSC,X1AXIS) == CC_SOLID) CYCLE EXTERNAL_WALL_LOOP_2
 
          IF (MESHES(NM)%CCVAR(II,JJ,KK,CC_CGSC) == CC_CUTCFE) THEN
-            TEST_ICC = .TRUE.
-            DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
-               DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
-                  DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
-                     TEST_ICC = TEST_ICC .AND. (MESHES(NOM)%CCVAR(IIO,JJO,KKO,CC_IDCC) <= 0)
-                  ENDDO
-               ENDDO
-            ENDDO
-
             NMICC = MESHES(NM)%CCVAR(II,JJ,KK,CC_IDCC)
+            CALL CC_GRID_QUERY_INTERP_BOUNDARY_REMOTE_CUTCELLS(NOM,EWC,N_MATCHES,REMOTE_ICC, &
+                                                               ALL_REMOTE_IDCC_UNDEFINED,HAS_REMOTE_SOLID)
             ! Do test for PERIODIC boundaries. Note: PERIODIC boundaries at this point have been redefined as INTERPOLATED_BOUNDARY,
             ! so we test using the Mesh center relative locations.
-            IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY .AND. NMICC > 0 .AND. TEST_ICC) THEN
-               WC_PERIODIC=.FALSE.
-               SELECT CASE(IOR)
-               CASE(-IAXIS) ! High X wall cell.
-                  XNM =0.5_EB*(MESHES(NM)%XS+MESHES(NM)%XF); XNOM=0.5_EB*(MESHES(NOM)%XS+MESHES(NOM)%XF)
-                  IF( (XNOM-XNM) <  TWENTY_EPSILON_EB ) WC_PERIODIC=.TRUE.
-               CASE( IAXIS) ! Low X wall cell.
-                  XNM =0.5_EB*(MESHES(NM)%XS+MESHES(NM)%XF); XNOM=0.5_EB*(MESHES(NOM)%XS+MESHES(NOM)%XF)
-                  IF( (XNOM-XNM) > -TWENTY_EPSILON_EB ) WC_PERIODIC=.TRUE.
-               CASE(-JAXIS) ! High Y wall cell.
-                  XNM =0.5_EB*(MESHES(NM)%YS+MESHES(NM)%YF); XNOM=0.5_EB*(MESHES(NOM)%YS+MESHES(NOM)%YF)
-                  IF( (XNOM-XNM) <  TWENTY_EPSILON_EB ) WC_PERIODIC=.TRUE.
-               CASE( JAXIS) ! Low Y wall cell.
-                  XNM =0.5_EB*(MESHES(NM)%YS+MESHES(NM)%YF); XNOM=0.5_EB*(MESHES(NOM)%YS+MESHES(NOM)%YF)
-                  IF( (XNOM-XNM) > -TWENTY_EPSILON_EB ) WC_PERIODIC=.TRUE.
-               CASE(-KAXIS) ! High Z wall cell.
-                  XNM =0.5_EB*(MESHES(NM)%ZS+MESHES(NM)%ZF); XNOM=0.5_EB*(MESHES(NOM)%ZS+MESHES(NOM)%ZF)
-                  IF( (XNOM-XNM) < TWENTY_EPSILON_EB ) WC_PERIODIC=.TRUE.
-               CASE( KAXIS) ! Low Z wall cell.
-                  XNM =0.5_EB*(MESHES(NM)%ZS+MESHES(NM)%ZF); XNOM=0.5_EB*(MESHES(NOM)%ZS+MESHES(NOM)%ZF)
-                  IF( (XNOM-XNM) > -TWENTY_EPSILON_EB ) WC_PERIODIC=.TRUE.
-               END SELECT
-               IF (WC_PERIODIC) THEN
+            IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY .AND. NMICC > 0 .AND. ALL_REMOTE_IDCC_UNDEFINED) THEN
+               IF (CC_GRID_IS_PERIODIC_INTERFACE_WALL(NM,NOM,IOR)) THEN
                   MESHES(NM)%CCVAR(II,JJ,KK,CC_IDCC) = 0 ! Set NMICC = 0.
-                  DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
-                     DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
-                        DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
-                           IF(MESHES(NOM)%CCVAR(IIO,JJO,KKO,CC_CGSC)==CC_SOLID) THEN
-                              MESHES(NM)%CCVAR(II,JJ,KK,CC_CGSC)=CC_SOLID ! set to Solid.
-                              CYCLE EXTERNAL_WALL_LOOP_2
-                           ENDIF
-                        ENDDO
-                     ENDDO
-                  ENDDO
+                  IF(HAS_REMOTE_SOLID) THEN
+                     MESHES(NM)%CCVAR(II,JJ,KK,CC_CGSC)=CC_SOLID ! set to Solid.
+                     CYCLE EXTERNAL_WALL_LOOP_2
+                  ENDIF
                ENDIF
             ENDIF
 
             NOFC = EWC%NIC_MAX - EWC%NIC_MIN + 1
             ALLOCATE(MESHES(NM)%CUT_CELL(NMICC)%NOMICC(2,NOFC)); MESHES(NM)%CUT_CELL(NMICC)%NOMICC(1:2,1:NOFC) = 0
-            N_CF = 0
-            DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
-               DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
-                  DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
-                    ICC   = MESHES(NOM)%CCVAR(IIO,JJO,KKO,CC_IDCC)
-                    IF (ICC > 0 .AND. MESHES(NOM)%CCVAR(IIO,JJO,KKO,CC_CGSC)==CC_CUTCFE) THEN
-                       N_CF = N_CF + 1
-                       MESHES(NM)%CUT_CELL(NMICC)%NOMICC(1:2,N_CF) = (/ NOM, ICC /)
-                       NCELL = MESHES(NOM)%CUT_CELL(ICC)%NCELL
-                       ! Add NCELL cut-cells to OM%NCC_R:
-                       MESHES(NM)%OMESH(NOM)%NICC_R(1) = MESHES(NM)%OMESH(NOM)%NICC_R(1) + 1
-                       MESHES(NM)%OMESH(NOM)%NICC_R(2) = MESHES(NM)%OMESH(NOM)%NICC_R(2) + NCELL
-                    ENDIF
-                  ENDDO
-               ENDDO
+            DO IMATCH=1,N_MATCHES
+               ICC = REMOTE_ICC(IMATCH)
+               MESHES(NM)%CUT_CELL(NMICC)%NOMICC(1:2,IMATCH) = (/ NOM, ICC /)
             ENDDO
-            MESHES(NM)%CUT_CELL(NMICC)%N_NOMICC = N_CF
+            MESHES(NM)%CUT_CELL(NMICC)%N_NOMICC = N_MATCHES
          ENDIF
-
-         ! Here add cut or regular faces to every face on this wall cell:
-         ! This requires defining the sets of cut and regular faces within the area of each cut or
-         ! regular face. Option : Use POINT_IN_POLYGON with centroids. To do.
 
       ELSEIF(WC%BOUNDARY_TYPE == MIRROR_BOUNDARY) THEN
          NOM = NM ! Use gas cell data, same mesh.
          IIO = BC%IIG
          JJO = BC%JJG
          KKO = BC%KKG
-         ! CYCLE if OBJECT face is in the Mirror Boundary, normal out into ghost-cell:
-         SELECT CASE(IOR)
-         CASE( IAXIS)
-            IF(FCVAR(IIO-1,JJO  ,KKO  ,CC_FGSC,IAXIS) == CC_SOLID) CYCLE
-         CASE(-IAXIS)
-            IF(FCVAR(IIO  ,JJO  ,KKO  ,CC_FGSC,IAXIS) == CC_SOLID) CYCLE
-         CASE( JAXIS)
-            IF(FCVAR(IIO  ,JJO-1,KKO  ,CC_FGSC,JAXIS) == CC_SOLID) CYCLE
-         CASE(-JAXIS)
-            IF(FCVAR(IIO  ,JJO  ,KKO  ,CC_FGSC,JAXIS) == CC_SOLID) CYCLE
-         CASE( KAXIS)
-            IF(FCVAR(IIO  ,JJO  ,KKO-1,CC_FGSC,KAXIS) == CC_SOLID) CYCLE
-         CASE(-KAXIS)
-            IF(FCVAR(IIO  ,JJO  ,KKO  ,CC_FGSC,KAXIS) == CC_SOLID) CYCLE
-         END SELECT
          IF (MESHES(NM)%CCVAR(II,JJ,KK,CC_CGSC) == CC_CUTCFE) THEN
-            ICC   = MESHES(NOM)%CCVAR(IIO,JJO,KKO,CC_IDCC)
-            IF (ICC<1 .OR. MESHES(NOM)%CCVAR(IIO,JJO,KKO,CC_CGSC)/=CC_CUTCFE) CYCLE
+            CALL CC_GRID_QUERY_MIRROR_BOUNDARY_REMOTE_CUTCELL(NM,IOR,IIO,JJO,KKO,HAS_MATCH,ICC)
+            IF (.NOT.HAS_MATCH) CYCLE
             NMICC = MESHES(NM)%CCVAR(II,JJ,KK,CC_IDCC)
             NOFC  = 1
             ALLOCATE(MESHES(NM)%CUT_CELL(NMICC)%NOMICC(2,NOFC)); MESHES(NM)%CUT_CELL(NMICC)%NOMICC(1:2,1:NOFC) = 0
             MESHES(NM)%CUT_CELL(NMICC)%NOMICC(1:2,NOFC) = (/ NOM, ICC /)
             MESHES(NM)%CUT_CELL(NMICC)%N_NOMICC = NOFC
-            NCELL = MESHES(NOM)%CUT_CELL(ICC)%NCELL
-            ! Add NCELL cut-cells to OM%NCC_R:
-            MESHES(NM)%OMESH(NOM)%NICC_R(1) = MESHES(NM)%OMESH(NOM)%NICC_R(1) + 1
-            MESHES(NM)%OMESH(NOM)%NICC_R(2) = MESHES(NM)%OMESH(NOM)%NICC_R(2) + NCELL
          ENDIF
       ENDIF
 
-
    ENDDO EXTERNAL_WALL_LOOP_2
-
 ENDDO MESH_LOOP_2
 
 IF(GET_CUTCELLS_VERBOSE) THEN
@@ -12620,140 +12076,78 @@ RETURN
 
 END SUBROUTINE SET_GC_CUTCELLS_3D
 
-SUBROUTINE CC_GRID_REBUILD_PHASE2_FACE_AND_LINK_INFO(NM)
-
+SUBROUTINE CC_GRID_PREPARE_BLOCKED_CUT_PIECES_FOR_DROP(NM,N_READY)
 INTEGER, INTENT(IN) :: NM
+INTEGER, INTENT(OUT) :: N_READY
 
-CALL GET_CC_FACE_CELL_LIST_INFO(NM,PHASE=2)
-
-! Here: 1,2. Define Linking information for cut-cells.
-CALL GET_CELL_LINK_INFO(NM)
-
-END SUBROUTINE CC_GRID_REBUILD_PHASE2_FACE_AND_LINK_INFO
-
-SUBROUTINE CC_GRID_TAG_CAVITY_CUTCELLS(NM,N_CAVITY_CELLS)
-
-INTEGER, INTENT(IN) :: NM
-INTEGER, INTENT(OUT) :: N_CAVITY_CELLS
-
-INTEGER :: ICC1,J,I,IFACE,SIDE,X1AXIS,IIF,JJF,KKF,SUM_FACE,SUM_CCELL,ICF1
-REAL(EB) :: ACRT
-LOGICAL :: MESH_BOUNDARY_FACE
 TYPE(CC_CUTCELL_TYPE), POINTER :: CC
-TYPE(CC_CUTFACE_TYPE), POINTER :: CF
-TYPE(MESH_TYPE), POINTER :: M
-INTEGER, PARAMETER :: ADDI(LOW_IND:HIGH_IND,IAXIS:KAXIS) = RESHAPE((/-1,0, 0,0, 0,0/),(/2,3/))
-INTEGER, PARAMETER :: ADDJ(LOW_IND:HIGH_IND,IAXIS:KAXIS) = RESHAPE((/ 0,0,-1,0, 0,0/),(/2,3/))
-INTEGER, PARAMETER :: ADDK(LOW_IND:HIGH_IND,IAXIS:KAXIS) = RESHAPE((/ 0,0, 0,0,-1,0/),(/2,3/))
+INTEGER :: ICC,JCC
 
-N_CAVITY_CELLS = 0
-M => MESHES(NM)
-
-! Block any cells that contain only one gas cut-face (cavity type cut-cells):
-DO ICC1=1,M%N_CUTCELL_MESH+M%N_GCCUTCELL_MESH
-   CC=>M%CUT_CELL(ICC1)
-   DO J=1,CC%NCELL
-      SUM_FACE=0; SUM_CCELL=0
-      DO I=2,CC%CCELEM(1,J)
-         SELECT CASE(CC%FACE_LIST(1,CC%CCELEM(I,J)))
-         CASE(CC_FTYPE_CFGAS); SUM_FACE = SUM_FACE+1
-         CASE(CC_FTYPE_RCGAS); SUM_CCELL=SUM_CCELL+1
-         END SELECT
-      ENDDO
-      IF(SUM_FACE>1 .OR. SUM_CCELL>0) CYCLE
-      IF(CC%NOADVANCE(J)==NOT_BLOCKED) CC%NOADVANCE(J)=BLOCKED_CAVITY_CELL
-      N_CAVITY_CELLS = N_CAVITY_CELLS + 1
+N_READY = 0
+DO ICC=1,MESHES(NM)%N_CUTCELL_MESH+MESHES(NM)%N_GCCUTCELL_MESH
+   CC => MESHES(NM)%CUT_CELL(ICC)
+   DO JCC=1,CC%NCELL
+      IF (CC%NOADVANCE(JCC) < 1) CYCLE
+      N_READY = N_READY + 1
+      CC%LINK_LEV(JCC) = CC_UNDEFINED
+      CC%IJK_LINK(1:5,JCC) = CC_UNDEFINED
+      CC%IJK_LINK(1,JCC) = CC_SOLID
    ENDDO
 ENDDO
+END SUBROUTINE CC_GRID_PREPARE_BLOCKED_CUT_PIECES_FOR_DROP
 
-! Block cells trapped against a mesh boundary whose only same-mesh gas opening is a small cut-face.
-DO ICC1=1,M%N_CUTCELL_MESH+M%N_GCCUTCELL_MESH
-   CC=>M%CUT_CELL(ICC1)
-   DO J=1,CC%NCELL
-      IF(CC%NOADVANCE(J)/=NOT_BLOCKED) CYCLE
-      SUM_FACE=0; SUM_CCELL=0; ICF1=0
-      DO I=1,CC%CCELEM(1,J)
-         IFACE  = CC%CCELEM(I+1,J)
-         SELECT CASE(CC%FACE_LIST(1,IFACE))
-         CASE(CC_FTYPE_CFGAS,CC_FTYPE_RCGAS)
-            SIDE   = CC%FACE_LIST(2,IFACE)
-            X1AXIS = CC%FACE_LIST(3,IFACE)
-            IIF = CC%IJK(IAXIS) + ADDI(SIDE,X1AXIS)
-            JJF = CC%IJK(JAXIS) + ADDJ(SIDE,X1AXIS)
-            KKF = CC%IJK(KAXIS) + ADDK(SIDE,X1AXIS)
-            MESH_BOUNDARY_FACE = .FALSE.
-            SELECT CASE(X1AXIS)
-            CASE(IAXIS); MESH_BOUNDARY_FACE = IIF==0 .OR. IIF==M%IBAR
-            CASE(JAXIS); MESH_BOUNDARY_FACE = JJF==0 .OR. JJF==M%JBAR
-            CASE(KAXIS); MESH_BOUNDARY_FACE = KKF==0 .OR. KKF==M%KBAR
-            END SELECT
-            IF(MESH_BOUNDARY_FACE) CYCLE
-            SELECT CASE(CC%FACE_LIST(1,IFACE))
-            CASE(CC_FTYPE_CFGAS)
-               SUM_FACE = SUM_FACE+1
-               ICF1     = CC%FACE_LIST(4,IFACE)
-            CASE(CC_FTYPE_RCGAS)
-               SUM_CCELL = SUM_CCELL+1
-            END SELECT
-         END SELECT
-      ENDDO
-      IF(SUM_FACE/=1 .OR. SUM_CCELL>0) CYCLE
-      CF => M%CUT_FACE(ICF1)
-      IIF=CF%IJK(IAXIS); JJF=CF%IJK(JAXIS); KKF=CF%IJK(KAXIS)
-      SELECT CASE(CF%IJK(KAXIS+1))
-      CASE(IAXIS); ACRT = DYFACE(JJF)*DZFACE(KKF)
-      CASE(JAXIS); ACRT = DZFACE(KKF)*DXFACE(IIF)
-      CASE(KAXIS); ACRT = DXFACE(IIF)*DYFACE(JJF)
-      END SELECT
-      IF(SUM(CF%AREA(1:CF%NFACE))/ACRT>=CCVOL_LINK) CYCLE
-      CC%NOADVANCE(J)=BLOCKED_CAVITY_CELL
-      N_CAVITY_CELLS = N_CAVITY_CELLS + 1
-   ENDDO
-ENDDO
-
-END SUBROUTINE CC_GRID_TAG_CAVITY_CUTCELLS
-
-SUBROUTINE CC_GRID_REBLOCK_MESH_AFTER_NEIGHBOR_EXCHANGE(NM,ISTR,IEND,JSTR,JEND,KSTR,KEND)
+SUBROUTINE CC_GRID_CVS_REBUILD_MESH_AFTER_BLOCK_TAGS(NM,CC_COMPUTE_MESH,ISTR,IEND,JSTR,JEND,KSTR,KEND,GEOM_AREA_SURF_OLD, &
+                                                    FORCE_FACE_REBUILD)
 
 INTEGER, INTENT(IN) :: NM
+LOGICAL, INTENT(IN), DIMENSION(:) :: CC_COMPUTE_MESH
 INTEGER, INTENT(INOUT) :: ISTR, IEND, JSTR, JEND, KSTR, KEND
+REAL(EB), ALLOCATABLE, INTENT(INOUT), DIMENSION(:,:) :: GEOM_AREA_SURF_OLD
+LOGICAL, INTENT(IN) :: FORCE_FACE_REBUILD
 
-INTEGER :: SUM_CCELL,N_CAVITY_CELLS
+INTEGER :: N_READY,NBLKCELLS
+IF (.NOT.CC_GRID_SHOULD_PROCESS_MESH(NM,CC_COMPUTE_MESH)) RETURN
 
 CALL POINT_TO_MESH(NM)
 CALL DEFINE_XYZFACE_CELL(NM,ALLOC_FLG=.TRUE.,ISTR=ISTR,IEND=IEND,JSTR=JSTR,JEND=JEND,KSTR=KSTR,KEND=KEND)
 
-! Block cut-cells whose volume factor is less than MIN_VOL_FACTOR, or remain unlinked:
-CALL BLOCK_SMALL_UNLINKED_CUTCELLS(NM,SUM_CCELL)
-IF(SUM_CCELL>0) CALL CC_GRID_REBUILD_PHASE2_FACE_AND_LINK_INFO(NM)
-
-! Block any cells that contain only one gas cut-face (cavity type cut-cells).
-CALL CC_GRID_TAG_CAVITY_CUTCELLS(NM,N_CAVITY_CELLS)
-IF (N_CAVITY_CELLS>0) FM_PENDING_BLOCK_SCAN(NM) = .TRUE.
+IF (FORCE_FACE_REBUILD) CALL GET_CC_FACE_CELL_LIST_INFO(NM,PHASE=2)
+CALL CC_GRID_PREPARE_BLOCKED_CUT_PIECES_FOR_DROP(NM,N_READY)
+NBLKCELLS = 0
+IF (N_READY > 0) THEN
+   CALL CC_GRID_ACCUMULATE_BLOCKED_INB_AREA_OLD(NM,GEOM_AREA_SURF_OLD)
+   CALL BLOCK_SMALL_UNLINKED_CUTCELLS(NM,NBLKCELLS)
+   CALL GET_CC_FACE_CELL_LIST_INFO(NM,PHASE=2)
+ENDIF
 
 CALL DEFINE_XYZFACE_CELL(NM,ALLOC_FLG=.FALSE.,ISTR=ISTR,IEND=IEND,JSTR=JSTR,JEND=JEND,KSTR=KSTR,KEND=KEND)
+END SUBROUTINE CC_GRID_CVS_REBUILD_MESH_AFTER_BLOCK_TAGS
 
-END SUBROUTINE CC_GRID_REBLOCK_MESH_AFTER_NEIGHBOR_EXCHANGE
-
-SUBROUTINE CC_GRID_FINAL_REBLOCK_MESH(NM,ISTR,IEND,JSTR,JEND,KSTR,KEND)
-
-INTEGER, INTENT(IN) :: NM
+SUBROUTINE CC_GRID_CVS_EXCHANGE_AND_REBUILD_BLOCKS(CC_COMPUTE_MESH,ISTR,IEND,JSTR,JEND,KSTR,KEND,GEOM_AREA_SURF_OLD)
 INTEGER, INTENT(INOUT) :: ISTR, IEND, JSTR, JEND, KSTR, KEND
+LOGICAL, INTENT(IN), DIMENSION(:) :: CC_COMPUTE_MESH
+REAL(EB), ALLOCATABLE, INTENT(INOUT), DIMENSION(:,:) :: GEOM_AREA_SURF_OLD
+INTEGER :: NM,IDIM
 
-INTEGER :: SUM_CCELL
-
-CALL POINT_TO_MESH(NM)
-CALL DEFINE_XYZFACE_CELL(NM,ALLOC_FLG=.TRUE.,ISTR=ISTR,IEND=IEND,JSTR=JSTR,JEND=JEND,KSTR=KSTR,KEND=KEND)
-
-CALL CC_GRID_REBUILD_PHASE2_FACE_AND_LINK_INFO(NM)
-
-! Block cut-cells whose volume factor is less than MIN_VOL_FACTOR, or remain unlinked:
-CALL BLOCK_SMALL_UNLINKED_CUTCELLS(NM,SUM_CCELL)
-IF(SUM_CCELL>0) CALL CC_GRID_REBUILD_PHASE2_FACE_AND_LINK_INFO(NM)
-
-CALL DEFINE_XYZFACE_CELL(NM,ALLOC_FLG=.FALSE.,ISTR=ISTR,IEND=IEND,JSTR=JSTR,JEND=JEND,KSTR=KSTR,KEND=KEND)
-
-END SUBROUTINE CC_GRID_FINAL_REBLOCK_MESH
+! Both sides of a coarse/fine interface must see the same wall: a coarse cell over a blocked fine footprint is
+! blocked, and the fine cells under a blocked coarse cell (the interface blocking, without a small-cell reblock).
+DO IDIM=1,MAX_DIM
+   CALL EXCHANGE_CC_NOADVANCE_INFO
+   CALL APPLY_OWN_BLOCKED_TO_REPLICAS(CC_COMPUTE_MESH)
+   CALL ADD_NEIGHBOR_BLOCKED_CELLS(CC_COMPUTE_MESH,ISTR,IEND,JSTR,JEND,KSTR,KEND)
+   DO WHILE (ANY(FM_PENDING_BLOCK_SCAN))
+      DO NM=1,NMESHES
+         IF (.NOT.FM_PENDING_BLOCK_SCAN(NM)) CYCLE
+         FM_PENDING_BLOCK_SCAN(NM) = .FALSE.
+         CALL PROMOTE_REFINEMENT_FOOTPRINTS_FROM_BLOCKED_FINE(NM)
+      ENDDO
+   ENDDO
+   CALL TAG_CC_BLOCKING_REFINEMENT
+   DO NM=1,NMESHES
+      CALL CC_GRID_CVS_REBUILD_MESH_AFTER_BLOCK_TAGS(NM,CC_COMPUTE_MESH,ISTR,IEND,JSTR,JEND,KSTR,KEND,GEOM_AREA_SURF_OLD,.FALSE.)
+   ENDDO
+ENDDO
+END SUBROUTINE CC_GRID_CVS_EXCHANGE_AND_REBUILD_BLOCKS
 
 LOGICAL FUNCTION CC_GRID_SHOULD_PROCESS_MESH(NM,CC_COMPUTE_MESH)
 
@@ -12764,106 +12158,6 @@ CC_GRID_SHOULD_PROCESS_MESH = CC_COMPUTE_MESH(NM)
 IF (PERIODIC_TEST==105 .AND. PROCESS(NM)/=MY_RANK) CC_GRID_SHOULD_PROCESS_MESH = .FALSE.
 
 END FUNCTION CC_GRID_SHOULD_PROCESS_MESH
-
-SUBROUTINE CC_GRID_EXCHANGE_REBLOCK_PASS(CC_COMPUTE_MESH,ISTR,IEND,JSTR,JEND,KSTR,KEND)
-
-INTEGER, INTENT(INOUT) :: ISTR, IEND, JSTR, JEND, KSTR, KEND
-LOGICAL, INTENT(IN), DIMENSION(:) :: CC_COMPUTE_MESH
-INTEGER :: NM
-
-FM_PENDING_BLOCK_SCAN = .FALSE.
-DO NM=1,NMESHES; MESHES(NM)%N_CC_ELIMINATED = 0; ENDDO
-
-! Exchange CC%NOADVANCE(JCC)>0 information among NEIGHBOURING meshes:
-CALL EXCHANGE_CC_NOADVANCE_INFO
-! Mirror owner-side NOADVANCE flags onto OMESH replicas of the same mesh:
-CALL APPLY_OWN_BLOCKED_TO_REPLICAS(CC_COMPUTE_MESH)
-! Add CC%NOADVANCE(JCC) where needed:
-CALL ADD_NEIGHBOR_BLOCKED_CELLS(CC_COMPUTE_MESH,ISTR,IEND,JSTR,JEND,KSTR,KEND)
-
-! Reblock each mesh (block small/unlinked cut-cells + cavity cut-cells); sets FM_PENDING_BLOCK_SCAN:
-DO NM=1,NMESHES
-   IF (.NOT.CC_GRID_SHOULD_PROCESS_MESH(NM,CC_COMPUTE_MESH)) CYCLE
-   CALL CC_GRID_REBLOCK_MESH_AFTER_NEIGHBOR_EXCHANGE(NM,ISTR,IEND,JSTR,JEND,KSTR,KEND)
-ENDDO
-
-! Propagate DROP_CUTCELL eliminations (fine interior, NCELL==1) to coarse ghost band;
-! ghost solidifies, then TAG_CC_BLOCKING_REFINEMENT closes fine footprint.
-CALL EXCHANGE_CC_ELIMINATED_INFO
-CALL APPLY_OWN_BLOCKED_TO_REPLICAS(CC_COMPUTE_MESH)
-CALL ADD_NEIGHBOR_BLOCKED_CELLS(CC_COMPUTE_MESH,ISTR,IEND,JSTR,JEND,KSTR,KEND)
-DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-   IF (MESHES(NM)%N_CC_ELIMINATED>0) FM_PENDING_BLOCK_SCAN(NM) = .TRUE.
-ENDDO
-DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX; MESHES(NM)%N_CC_ELIMINATED = 0; ENDDO
-
-! Promote refinement footprints from blocked fine cells, then relink affected meshes:
-IF (ANY(FM_PENDING_BLOCK_SCAN)) THEN
-   DO WHILE (ANY(FM_PENDING_BLOCK_SCAN))
-      DO NM=1,NMESHES
-         IF (.NOT.FM_PENDING_BLOCK_SCAN(NM)) CYCLE
-         FM_PENDING_BLOCK_SCAN(NM) = .FALSE.
-         CALL PROMOTE_REFINEMENT_FOOTPRINTS_FROM_BLOCKED_FINE(NM)
-      ENDDO
-   ENDDO
-   FM_PENDING_BLOCK_SCAN = .FALSE.
-   DO NM=1,NMESHES
-      IF (.NOT.CC_GRID_SHOULD_PROCESS_MESH(NM,CC_COMPUTE_MESH)) CYCLE
-      CALL CC_GRID_FINAL_REBLOCK_MESH(NM,ISTR,IEND,JSTR,JEND,KSTR,KEND)
-   ENDDO
-ENDIF
-CALL EXCHANGE_CC_NOADVANCE_INFO
-CALL APPLY_OWN_BLOCKED_TO_REPLICAS(CC_COMPUTE_MESH)
-CALL ADD_NEIGHBOR_BLOCKED_CELLS(CC_COMPUTE_MESH,ISTR,IEND,JSTR,JEND,KSTR,KEND)
-
-! Call tag boundary cut-cells for blocking in refinement interfaces:
-CALL TAG_CC_BLOCKING_REFINEMENT
-
-END SUBROUTINE CC_GRID_EXCHANGE_REBLOCK_PASS
-
-SUBROUTINE CC_GRID_FINAL_REBLOCK_PASS(CC_COMPUTE_MESH,ISTR,IEND,JSTR,JEND,KSTR,KEND)
-
-INTEGER, INTENT(INOUT) :: ISTR, IEND, JSTR, JEND, KSTR, KEND
-LOGICAL, INTENT(IN), DIMENSION(:) :: CC_COMPUTE_MESH
-INTEGER :: NM
-
-! Propagate TAG_CC_BLOCKING_REFINEMENT effects across ranks before the final BLOCK_SMALL pass:
-CALL EXCHANGE_CC_NOADVANCE_INFO
-CALL APPLY_OWN_BLOCKED_TO_REPLICAS(CC_COMPUTE_MESH)
-CALL ADD_NEIGHBOR_BLOCKED_CELLS(CC_COMPUTE_MESH,ISTR,IEND,JSTR,JEND,KSTR,KEND)
-
-DO NM=1,NMESHES
-   IF (.NOT.CC_GRID_SHOULD_PROCESS_MESH(NM,CC_COMPUTE_MESH)) CYCLE
-   CALL CC_GRID_FINAL_REBLOCK_MESH(NM,ISTR,IEND,JSTR,JEND,KSTR,KEND)
-ENDDO
-
-END SUBROUTINE CC_GRID_FINAL_REBLOCK_PASS
-
-SUBROUTINE CC_GRID_EXCHANGE_AND_REBLOCK(CC_COMPUTE_MESH,ISTR,IEND,JSTR,JEND,KSTR,KEND)
-
-INTEGER, INTENT(INOUT) :: ISTR, IEND, JSTR, JEND, KSTR, KEND
-LOGICAL, INTENT(IN), DIMENSION(:) :: CC_COMPUTE_MESH
-INTEGER :: IDIM,NM
-
-IF (ALLOCATED(FM_PENDING_BLOCK_SCAN)) DEALLOCATE(FM_PENDING_BLOCK_SCAN)
-ALLOCATE(FM_PENDING_BLOCK_SCAN(1:NMESHES)); FM_PENDING_BLOCK_SCAN = .FALSE.
-
-! Promote refinement footprints from initially blocked fine cells (e.g., slivers tagged
-! BLOCKED_SMALL_CELL in GET_CARTCELL_CUTCELLS / GET_CELL_LINK_INFO):
-DO NM=1,NMESHES
-   IF (.NOT.CC_GRID_SHOULD_PROCESS_MESH(NM,CC_COMPUTE_MESH)) CYCLE
-   CALL PROMOTE_REFINEMENT_FOOTPRINTS_FROM_BLOCKED_FINE(NM)
-ENDDO
-
-DO IDIM=1,MAX_DIM
-   CALL CC_GRID_EXCHANGE_REBLOCK_PASS(CC_COMPUTE_MESH,ISTR,IEND,JSTR,JEND,KSTR,KEND)
-ENDDO
-
-CALL CC_GRID_FINAL_REBLOCK_PASS(CC_COMPUTE_MESH,ISTR,IEND,JSTR,JEND,KSTR,KEND)
-
-IF (ALLOCATED(FM_PENDING_BLOCK_SCAN)) DEALLOCATE(FM_PENDING_BLOCK_SCAN)
-
-END SUBROUTINE CC_GRID_EXCHANGE_AND_REBLOCK
 
 SUBROUTINE CC_GRID_TAG_COARSE_CELL_FROM_NEIGHBOR_BLOCK(NM,M,M2,I2,J2,K2,XCO,YCO,ZCO,BLOCK_TAG,IBOD_DONOR,ITRI_DONOR)
 
@@ -12917,13 +12211,15 @@ ENDIF
 
 END SUBROUTINE CC_GRID_TAG_COARSE_CELL_FROM_NEIGHBOR_BLOCK
 
-SUBROUTINE CC_GRID_TAG_NEIGHBOR_BLOCK_BY_CENTROID(M,XCO,YCO,ZCO,REMOTE_JCC,BLOCK_TAG,IBOD_DONOR,ITRI_DONOR)
+SUBROUTINE CC_GRID_TAG_NEIGHBOR_BLOCK_BY_CENTROID(NM,M,XCO,YCO,ZCO,REMOTE_JCC,BLOCK_TAG,IBOD_DONOR,ITRI_DONOR)
 
+INTEGER, INTENT(IN) :: NM
 TYPE(MESH_TYPE), POINTER :: M
 REAL(EB), INTENT(IN) :: XCO,YCO,ZCO
 INTEGER, INTENT(IN) :: REMOTE_JCC,BLOCK_TAG,IBOD_DONOR,ITRI_DONOR
 
 INTEGER :: I,J,K,ICC
+LOGICAL :: CELL_CHANGED
 
 I = MINLOC(ABS(XCELL(ILO_CELL-1:IHI_CELL+1)-XCO),DIM=1) + ILO_CELL - 2
 J = MINLOC(ABS(YCELL(JLO_CELL-1:JHI_CELL+1)-YCO),DIM=1) + JLO_CELL - 2
@@ -12941,6 +12237,8 @@ IF (ICC>0) THEN
             M%CUT_CELL(ICC)%BODTRI_DONOR(1:2,REMOTE_JCC) = (/IBOD_DONOR,ITRI_DONOR/)
       ENDIF
    ENDIF
+ELSEIF (REMOTE_JCC>0) THEN ! Regular cell here: NOM inserted a blocked cut-cell (refinement interface).
+   CALL TAG_CELL_BLOCKED_BY_REFINEMENT_FOOTPRINT(NM,I,J,K,BLOCK_TAG,IBOD_DONOR,ITRI_DONOR,CELL_CHANGED)
 ENDIF
 
 END SUBROUTINE CC_GRID_TAG_NEIGHBOR_BLOCK_BY_CENTROID
@@ -12975,7 +12273,7 @@ ELSEIF (VOL_NOM > 1.5_EB * VOL_NM) THEN ! NM is FINE, NOM is COARSE
    CALL TAG_FINE_CELLS_IN_COARSE_CELL_VOLUME(NOM,I2,J2,K2,NM,BLOCK_TAG,IBOD_DONOR,ITRI_DONOR)
 ELSE
    ! Same refinement level (or refinement handled by EXT_WALL_LOOP) - use centroid matching
-   CALL CC_GRID_TAG_NEIGHBOR_BLOCK_BY_CENTROID(M,XCO,YCO,ZCO,REMOTE_JCC,BLOCK_TAG,IBOD_DONOR,ITRI_DONOR)
+   CALL CC_GRID_TAG_NEIGHBOR_BLOCK_BY_CENTROID(NM,M,XCO,YCO,ZCO,REMOTE_JCC,BLOCK_TAG,IBOD_DONOR,ITRI_DONOR)
 ENDIF
 
 END SUBROUTINE CC_GRID_PROCESS_NEIGHBOR_BLOCKED_CELL
@@ -13024,16 +12322,6 @@ ENDDO MESH_LOOP
 
 END SUBROUTINE ADD_NEIGHBOR_BLOCKED_CELLS
 
-SUBROUTINE CC_GRID_TAG_BLOCK_CELL_PAIR(NM,NOM,II,JJ,KK,IIG,JJG,KKG,IIO,JJO,KKO,IIOG,JJOG,KKOG,FINE_CELL)
-
-INTEGER, INTENT(IN) :: NM,NOM,II,JJ,KK,IIG,JJG,KKG,IIO,JJO,KKO,IIOG,JJOG,KKOG
-LOGICAL, INTENT(IN) :: FINE_CELL
-
-CALL TAG_BLOCK_CELL(NM,II ,JJ ,KK ,NOM,IIO ,JJO ,KKO ,FINE_CELL=FINE_CELL)
-CALL TAG_BLOCK_CELL(NM,IIG,JJG,KKG,NOM,IIOG,JJOG,KKOG,FINE_CELL=FINE_CELL)
-
-END SUBROUTINE CC_GRID_TAG_BLOCK_CELL_PAIR
-
 SUBROUTINE CC_GRID_TAG_RAYTRACE_SINGLE_COVER_WALL(NM,NOM,IOR,X1AXIS,EWC,II,JJ,KK,IIG,JJG,KKG,SKIP_WALL)
 
 INTEGER, INTENT(IN) :: NM,NOM,IOR,X1AXIS,II,JJ,KK,IIG,JJG,KKG
@@ -13061,7 +12349,8 @@ CASE(-KAXIS); KKOG=KKO-1
 END SELECT
 
 ! Test for cut/reg-cells in II,JJ,KK, respect to IIO,JJO,KKO, AND IIG,JJG,KKG respect to IIOG,JJOG,KKOG:
-CALL CC_GRID_TAG_BLOCK_CELL_PAIR(NM,NOM,II,JJ,KK,IIG,JJG,KKG,IIO,JJO,KKO,IIOG,JJOG,KKOG,FINE_CELL=.TRUE.)
+CALL TAG_BLOCK_CELL(NM,II ,JJ ,KK ,NOM,IIO ,JJO ,KKO ,FINE_CELL=.TRUE.)
+CALL TAG_BLOCK_CELL(NM,IIG,JJG,KKG,NOM,IIOG,JJOG,KKOG,FINE_CELL=.TRUE.)
 
 ! Test for cut/reg-cells in corner respect to OMESH underlying cell if needed:
 IIO = EWC%IIO_MIN; JJO = EWC%JJO_MIN; KKO = EWC%KKO_MIN
@@ -13105,8 +12394,8 @@ CASE(KAXIS)
 END SELECT
 
 ! Test for cut/reg-cells in II,JJ,KK, respect to IIO,JJO,KKO, AND IIG,JJG,KKG respect to IIOG,JJOG,KKOG:
-CALL CC_GRID_TAG_BLOCK_CELL_PAIR(NM,NOM,II_LOC,JJ_LOC,KK_LOC,IIG_LOC,JJG_LOC,KKG_LOC, &
-                                 IIO,JJO,KKO,IIOG,JJOG,KKOG,FINE_CELL=.TRUE.)
+CALL TAG_BLOCK_CELL(NM,II_LOC ,JJ_LOC ,KK_LOC ,NOM,IIO ,JJO ,KKO ,FINE_CELL=.TRUE.)
+CALL TAG_BLOCK_CELL(NM,IIG_LOC,JJG_LOC,KKG_LOC,NOM,IIOG,JJOG,KKOG,FINE_CELL=.TRUE.)
 
 END SUBROUTINE CC_GRID_TAG_RAYTRACE_SINGLE_COVER_WALL
 
@@ -13137,7 +12426,8 @@ DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
          CASE( KAXIS); KKOG=KKO+1
          CASE(-KAXIS); KKOG=KKO-1
          END SELECT
-         CALL CC_GRID_TAG_BLOCK_CELL_PAIR(NM,NOM,II,JJ,KK,IIG,JJG,KKG,IIO,JJO,KKO,IIOG,JJOG,KKOG,FINE_CELL=.FALSE.)
+         CALL TAG_BLOCK_CELL(NM,II ,JJ ,KK ,NOM,IIO ,JJO ,KKO ,FINE_CELL=.FALSE.)
+         CALL TAG_BLOCK_CELL(NM,IIG,JJG,KKG,NOM,IIOG,JJOG,KKOG,FINE_CELL=.FALSE.)
 
          ! Test for OMESH cut/reg-cells in corner respect to this mesh underlying cell if needed:
          IIO2=IIO; JJO2=JJO; KKO2=KKO
@@ -13168,7 +12458,8 @@ DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
             JJOG= JJO2; JJG=JJ
          END SELECT
          ! Test for cut/reg-cells in II,JJ,KK, respect to IIO,JJO,KKO, AND IIG,JJG,KKG respect to IIOG,JJOG,KKOG:
-         CALL CC_GRID_TAG_BLOCK_CELL_PAIR(NM,NOM,II,JJ,KK,IIG,JJG,KKG,IIO2,JJO2,KKO2,IIOG,JJOG,KKOG,FINE_CELL=.FALSE.)
+         CALL TAG_BLOCK_CELL(NM,II ,JJ ,KK ,NOM,IIO2 ,JJO2 ,KKO2 ,FINE_CELL=.FALSE.)
+         CALL TAG_BLOCK_CELL(NM,IIG,JJG,KKG,NOM,IIOG,JJOG,KKOG,FINE_CELL=.FALSE.)
       ENDDO
    ENDDO
 ENDDO
@@ -13431,6 +12722,7 @@ SUBROUTINE CC_GRID_TAG_BLOCK_FINE_CELL_CASE(NM,II1,JJ1,KK1,NOM,IIO1,JJO1,KKO1)
 INTEGER, INTENT(IN) :: NM,II1,JJ1,KK1,NOM,IIO1,JJO1,KKO1
 
 INTEGER :: ICC,ICC2,JCC_LOC,IBOD_LOC,ITRI_LOC
+LOGICAL :: CELL_CHANGED
 TYPE(MESH_TYPE), POINTER :: M,M2
 
 M =>MESHES( NM)
@@ -13441,8 +12733,10 @@ ICC  = 0
 IF ( ICC2 > 0 .OR. M2%CCVAR(IIO1,JJO1,KKO1,CC_CGSC)==CC_SOLID) THEN ! There are cut-cells in omesh cartesian cell.
    CALL GET_REFINEMENT_CELL_DONOR(NOM,IIO1,JJO1,KKO1,IBOD_LOC,ITRI_LOC)
    IF(M%CCVAR(II1,JJ1,KK1,CC_CGSC)==CC_GASPHASE) THEN
-      ! Skip rank-asymmetric cut-cell insertion (owner-only); keep CC_GASPHASE on all ranks.
-      ! The gasphase footprint is closed later via TAG_CELL_BLOCKED_BY_REFINEMENT_FOOTPRINT.
+      ! Regular gas cell over a solid omesh cell: insert it blocked. APPLY_OWN_BLOCKED_TO_REPLICAS inserts
+      ! the same cell in the replicas of NM at the next exchange.
+      IF(M2%CCVAR(IIO1,JJO1,KKO1,CC_CGSC)==CC_SOLID) &
+         CALL TAG_CELL_BLOCKED_BY_REFINEMENT_FOOTPRINT(NM,II1,JJ1,KK1,BLOCKED_REFI_INTER,IBOD_LOC,ITRI_LOC,CELL_CHANGED)
       ICC = 0
    ELSEIF(M%CCVAR(II1,JJ1,KK1,CC_IDCC)>0) THEN
       ICC = M%CCVAR(II1,JJ1,KK1,CC_IDCC)
@@ -14288,17 +13582,6 @@ ENDDO
 
 END SUBROUTINE CC_GRID_ENFORCE_ONE_CC_PER_CARTESIAN_CELL
 
-SUBROUTINE CC_GRID_REBUILD_LOCAL_FACE_AND_LINK_INFO(NM)
-
-INTEGER, INTENT(IN) :: NM
-
-CALL GET_CC_FACE_CELL_LIST_INFO(NM,PHASE=1)
-
-! Here: 1,2. Define Linking information for cut-cells.
-CALL GET_CELL_LINK_INFO(NM)
-
-END SUBROUTINE CC_GRID_REBUILD_LOCAL_FACE_AND_LINK_INFO
-
 SUBROUTINE CC_GRID_ACCUMULATE_BLOCKED_INB_AREA_OLD(NM,GEOM_AREA_SURF_OLD)
 
 INTEGER, INTENT(IN) :: NM
@@ -14309,12 +13592,14 @@ TYPE(MESH_TYPE), POINTER :: M
 TYPE(CC_CUTCELL_TYPE), POINTER :: CC
 TYPE(CC_CUTFACE_TYPE), POINTER :: CF
 
+IF (.NOT.ALLOCATED(GEOM_AREA_SURF_OLD)) RETURN
 IF(PROCESS(NM)/=MY_RANK) RETURN
 
 M => MESHES(NM)
 
 ! Here Add Blocked Areas per SURF_ID:
-ALLOCATE(MESHES(NM)%INBCF_AREA(0:MESHES(NM)%IBP1,0:MESHES(NM)%JBP1,0:MESHES(NM)%KBP1))
+IF (.NOT.ALLOCATED(MESHES(NM)%INBCF_AREA)) &
+   ALLOCATE(MESHES(NM)%INBCF_AREA(0:MESHES(NM)%IBP1,0:MESHES(NM)%JBP1,0:MESHES(NM)%KBP1))
 DO K=1,M%KBAR
    DO J=1,M%JBAR
       DO I=1,M%IBAR
@@ -14335,27 +13620,6 @@ DO K=1,M%KBAR
 ENDDO
 
 END SUBROUTINE CC_GRID_ACCUMULATE_BLOCKED_INB_AREA_OLD
-
-SUBROUTINE CC_GRID_POSTBUILD_BLOCK_AND_LINK_MESH(NM,CC_COMPUTE_MESH,ISTR,IEND,JSTR,JEND,KSTR,KEND,GEOM_AREA_SURF_OLD)
-
-INTEGER, INTENT(IN) :: NM
-LOGICAL, INTENT(IN), DIMENSION(:) :: CC_COMPUTE_MESH
-INTEGER, INTENT(INOUT) :: ISTR, IEND, JSTR, JEND, KSTR, KEND
-REAL(EB), ALLOCATABLE, INTENT(INOUT), DIMENSION(:,:) :: GEOM_AREA_SURF_OLD
-
-IF (.NOT.CC_COMPUTE_MESH(NM)) RETURN ! Only MESHES assigned to processor and OMESHES of these.
-IF (PERIODIC_TEST==105 .AND. PROCESS(NM)/=MY_RANK) RETURN ! Don't do OMESHES for PERIODIC_TEST==105
-
-CALL DEFINE_XYZFACE_CELL(NM,ALLOC_FLG=.TRUE.,ISTR=ISTR,IEND=IEND,JSTR=JSTR,JEND=JEND,KSTR=KSTR,KEND=KEND)
-
-CALL CC_GRID_APPLY_SPECIAL_CELL_BLOCKING(NM)
-CALL CC_GRID_ENFORCE_ONE_CC_PER_CARTESIAN_CELL(NM)
-CALL CC_GRID_REBUILD_LOCAL_FACE_AND_LINK_INFO(NM)
-CALL CC_GRID_ACCUMULATE_BLOCKED_INB_AREA_OLD(NM,GEOM_AREA_SURF_OLD)
-
-CALL DEFINE_XYZFACE_CELL(NM,ALLOC_FLG=.FALSE.,ISTR=ISTR,IEND=IEND,JSTR=JSTR,JEND=JEND,KSTR=KSTR,KEND=KEND)
-
-END SUBROUTINE CC_GRID_POSTBUILD_BLOCK_AND_LINK_MESH
 
 SUBROUTINE CC_GRID_POSTPROCESS_AND_CLEANUP(NM,CC_COMPUTE_MESH,GEOM_AREA_SURF_NEW)
 
@@ -14557,23 +13821,27 @@ ENDIF
 
 END SUBROUTINE CC_GRID_LOG_PROCESSING_TIME
 
-SUBROUTINE CC_GRID_FINALIZE_BOOKKEEPING(CC_COMPUTE_MESH,CALL_COUNT,EARLY_RETURN)
+SUBROUTINE CC_GRID_FINALIZE_BOOKKEEPING(CC_COMPUTE_MESH,CALL_COUNT,EARLY_RETURN,DRIVER_NAME)
 
 LOGICAL, ALLOCATABLE, INTENT(INOUT), DIMENSION(:) :: CC_COMPUTE_MESH
 INTEGER, INTENT(INOUT) :: CALL_COUNT
 LOGICAL, INTENT(OUT) :: EARLY_RETURN
+CHARACTER(*), INTENT(IN), OPTIONAL :: DRIVER_NAME
 
 INTEGER :: IERR
+CHARACTER(32) :: DRIVER_LABEL
 
 EARLY_RETURN = .FALSE.
+DRIVER_LABEL = 'SET_CUTCELLS_3D'
+IF (PRESENT(DRIVER_NAME)) DRIVER_LABEL = DRIVER_NAME
 
 IF(ALLOCATED(CC_COMPUTE_MESH)) DEALLOCATE(CC_COMPUTE_MESH)
 
 IF(GET_CUTCELLS_VERBOSE) THEN
-   WRITE(LU_SETCC,'(A)') ' SET_CUTCELLS_3D : Cut-cell definition finished.'
+   WRITE(LU_SETCC,'(A,A,A)') ' ',TRIM(DRIVER_LABEL),' : Cut-cell definition finished.'
    WRITE(LU_SETCC,'(A)') ' '
    IF (MY_RANK==0) THEN
-      WRITE(LU_ERR  ,'(A)') ' SET_CUTCELLS_3D : Cut-cell definition finished.'
+      WRITE(LU_ERR  ,'(A,A,A)') ' ',TRIM(DRIVER_LABEL),' : Cut-cell definition finished.'
       WRITE(LU_ERR  ,'(A)') ' '
    ENDIF
 ENDIF
@@ -14620,7 +13888,7 @@ DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          CF%AREA_ADJUST(J) = CF%AREA_ADJUST(J)*GEOM_AREA_SURF_NEW(CF%SURF_INDEX(J),CF%BODTRI(1,J))
       ENDDO
    ENDDO
-   DEALLOCATE(MESHES(NM)%INBCF_AREA)
+   IF (ALLOCATED(MESHES(NM)%INBCF_AREA)) DEALLOCATE(MESHES(NM)%INBCF_AREA)
 ENDDO
 
 ! GEOM_AREA_SURF_NEW = 0._EB
@@ -14644,29 +13912,83 @@ IF(ALLOCATED(GEOM_AREA_SURF_OLD)) DEALLOCATE(GEOM_AREA_SURF_OLD,GEOM_AREA_SURF_N
 
 END SUBROUTINE CC_GRID_UPDATE_INBOUNDARY_AREA_ADJUST
 
+
+SUBROUTINE CC_GRID_DUMP_RAW_GEOMETRY
+
+! Dump the finalized legacy CUT_CELL/CUT_FACE inventory for physical-keyed comparison between
+! SET_CVS_3D and SET_CUTCELLS_3D. These tables do not depend on FV indexing.
+INTEGER :: LU,NM,ICC,JCC,ICF,JCF,I,J,K,X1AXIS
+REAL(EB) :: AVEC(IAXIS:KAXIS),VOL
+CHARACTER(255) :: FN
+TYPE(CC_CUTFACE_TYPE), POINTER :: CF
+IF (.NOT.GET_CUTCELLS_VERBOSE) RETURN
+
+LU=GET_FILE_NUMBER()
+WRITE(FN,'(A,A,I0,A)') TRIM(RESULTS_DIR)//TRIM(CHID),'_raw_gcell_',MY_RANK,'.csv'
+OPEN(UNIT=LU,FILE=TRIM(FN),STATUS='REPLACE')
+WRITE(LU,'(A)') 'mesh_nm,cell_type,i,j,k,icc,jcc,volume,x,y,z'
+DO NM=1,NMESHES
+   IF (PROCESS(NM)/=MY_RANK) CYCLE
+   DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+      I=MESHES(NM)%CUT_CELL(ICC)%IJK(IAXIS)
+      J=MESHES(NM)%CUT_CELL(ICC)%IJK(JAXIS)
+      K=MESHES(NM)%CUT_CELL(ICC)%IJK(KAXIS)
+      DO JCC=1,MESHES(NM)%CUT_CELL(ICC)%NCELL
+         WRITE(LU,'(I0,6(",",I0),4(",",ES23.15))') NM,CC_GCELL_CUT,I,J,K,ICC,JCC, &
+            MESHES(NM)%CUT_CELL(ICC)%VOLUME(JCC),MESHES(NM)%CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,JCC)
+      ENDDO
+   ENDDO
+   DO K=1,MESHES(NM)%KBAR
+      DO J=1,MESHES(NM)%JBAR
+         DO I=1,MESHES(NM)%IBAR
+            IF (MESHES(NM)%CCVAR(I,J,K,CC_CGSC)/=CC_GASPHASE) CYCLE
+            VOL=MESHES(NM)%DX(I)*MESHES(NM)%DY(J)*MESHES(NM)%DZ(K)
+            WRITE(LU,'(I0,6(",",I0),4(",",ES23.15))') NM,CC_GCELL_REG,I,J,K,0,0,VOL, &
+               MESHES(NM)%XC(I),MESHES(NM)%YC(J),MESHES(NM)%ZC(K)
+         ENDDO
+      ENDDO
+   ENDDO
+ENDDO
+CLOSE(LU)
+
+LU=GET_FILE_NUMBER()
+WRITE(FN,'(A,A,I0,A)') TRIM(RESULTS_DIR)//TRIM(CHID),'_raw_cfinb_',MY_RANK,'.csv'
+OPEN(UNIT=LU,FILE=TRIM(FN),STATUS='REPLACE')
+WRITE(LU,'(A)') 'mesh_nm,icf,jface,area,x,y,z,newell_ax,newell_ay,newell_az'
+DO NM=1,NMESHES
+   IF (PROCESS(NM)/=MY_RANK) CYCLE
+   DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
+      CF=>MESHES(NM)%CUT_FACE(ICF)
+      IF (CF%STATUS/=CC_INBOUNDARY) CYCLE
+      DO JCF=1,CF%NFACE
+         CALL CC_GRID_GET_CUTFACE_AREA_VECTOR(CF,JCF,AVEC)
+         DO X1AXIS=IAXIS,KAXIS
+            IF (ABS(AVEC(X1AXIS))<=TWO_EPSILON_EB) CYCLE
+            IF (AVEC(X1AXIS)<0._EB) AVEC=-AVEC
+            EXIT
+         ENDDO
+         WRITE(LU,'(I0,2(",",I0),7(",",ES23.15))') NM,ICF,JCF,CF%AREA(JCF), &
+            CF%XYZCEN(IAXIS:KAXIS,JCF),AVEC(IAXIS:KAXIS)
+      ENDDO
+   ENDDO
+ENDDO
+CLOSE(LU)
+END SUBROUTINE CC_GRID_DUMP_RAW_GEOMETRY
+
+
 SUBROUTINE CC_GRID_WRITE_VERBOSE_SUMMARY
 
-INTEGER :: NM, I, J, K, IG, IEDGE, NEDGE, IFACE, ICF, ICF1, ICF2, JCF, JCF2, ICC1, ICC2, NCELL, NFACE
-INTEGER :: X1AXIS, ILH, FTYPE, SURF_INDEX, IERR, NCUTFACE_IAXIS, NCUTFACE_JAXIS, NCUTFACE_KAXIS, NCUTFACE_INB
-INTEGER :: NCUTEDGE_IBCC, NCUTEDGE_IBCF, ICE1, N_SPCELLCF_TOT, N_SPCELL_TOT
-INTEGER :: SEG(NOD1:NOD2), MIN_CC_IJK_ICCJCC(1:5), MAX_CC_IJK_ICCJCC(1:5)
-LOGICAL :: WRITE_CFACE_STATS = .FALSE.
-REAL(EB) :: SLEN_GEOM, AREA_GEOM, VOLUME_GEOM, SLEN_IBCC, SLEN, DV(MAX_DIM), XYZCEN_GEOM(MAX_DIM), &
+INTEGER :: NM, I, J, K, IG, IEDGE, ICF, ICF1, ICC1, ICC2, NCELL, NFACE
+INTEGER :: SURF_INDEX, IERR, NCUTFACE_INB, N_SPCELLCF_TOT, N_SPCELL_TOT
+INTEGER :: SEG(NOD1:NOD2)
+REAL(EB) :: SLEN_GEOM, AREA_GEOM, VOLUME_GEOM, SLEN, DV(MAX_DIM), XYZCEN_GEOM(MAX_DIM), &
             DM_XYZCEN(MAX_DIM), CCGP_XYZCEN(MAX_DIM), DM_XYZCEN_AUX(MAX_DIM), CCGP_XYZCEN_AUX(MAX_DIM)
-REAL(EB) :: CF_AREA_IAXIS=0._EB, CF_AREA_JAXIS=0._EB, CF_AREA_KAXIS=0._EB, &
-            CF_INXAREA_IAXIS=0._EB,CF_INXAREA_JAXIS=0._EB,CF_INXAREA_KAXIS=0._EB, &
-            CF_INXSQAREA_IAXIS=0._EB,CF_INXSQAREA_JAXIS=0._EB,CF_INXSQAREA_KAXIS=0._EB, &
-            CF_JNYSQAREA_IAXIS=0._EB,CF_JNYSQAREA_JAXIS=0._EB,CF_JNYSQAREA_KAXIS=0._EB, &
-            CF_KNZSQAREA_IAXIS=0._EB,CF_KNZSQAREA_JAXIS=0._EB,CF_KNZSQAREA_KAXIS=0._EB
-REAL(EB) :: CF_AREA_INB=0._EB, CF_INXAREA_INB=0._EB, CF_INXSQAREA_INB=0._EB, &
-            CF_JNYSQAREA_INB=0._EB, CF_KNZSQAREA_INB=0._EB, CF_AREA_INB_AUX=0._EB, ACRT
+REAL(EB) :: CF_AREA_INB=0._EB, CF_AREA_INB_AUX=0._EB
 REAL(EB) :: CC_VOLUME_INB=0._EB, DM_VOLUME=0._EB, GP_VOLUME=0._EB, &
             CC_VOLUME_INB_AUX=0._EB, DM_VOLUME_AUX=0._EB, GP_VOLUME_AUX=0._EB
-REAL(EB) :: MIN_CC_VOL, MAX_CC_VOL, MIN_ALPHA_CV, MAX_ALPHA_CV
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: GEOM_AREA_SURF
 INTEGER, ALLOCATABLE, DIMENSION(:) :: GEOM_SURF
 TYPE(CFACE_TYPE), POINTER :: CFA
-TYPE(CC_CUTCELL_TYPE), POINTER :: CC
 
 ! Loop over geometry:
 CCVERBOSE_COND : IF(GET_CUTCELLS_VERBOSE) THEN
@@ -14841,168 +14163,7 @@ CCVERBOSE_COND : IF(GET_CUTCELLS_VERBOSE) THEN
    CALL MPI_ALLREDUCE(MPI_IN_PLACE, N_SPCELL_TOT,      1, MPI_INTEGER,          MPI_SUM, MPI_COMM_WORLD, IERR)
    IF (MY_RANK==0) WRITE(LU_ERR,"(A,2I8)") 'Total Number of Special Cells CF, Total=',N_SPCELLCF_TOT,N_SPCELL_TOT
 
-   ! Write out more detailed stats:
-   WRITE_CFACE_STATS_COND : IF (WRITE_CFACE_STATS) THEN
-      ! Loop over meshes:
-      TESTS_MESH_LOOP_2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-         CALL POINT_TO_MESH(NM)
-         NCUTEDGE_IBCC = 0; SLEN_IBCC = 0._EB
-         NCUTEDGE_IBCF = 0
-         ! Number of CUT_EDGE for this mesh:
-         IF(ALLOCATED(MESHES(NM)%CUT_EDGE)) THEN
-            DO ICE1 = 1,MESHES(NM)%N_CUTEDGE_MESH
-               SELECT CASE(MESHES(NM)%CUT_EDGE(ICE1)%STATUS)
-               CASE(CC_INBOUNDCC)
-                  NEDGE = MESHES(NM)%CUT_EDGE(ICE1)%NEDGE
-                  NCUTEDGE_IBCC = NCUTEDGE_IBCC + NEDGE
-                  DO IEDGE=1,NEDGE
-                     SEG(NOD1:NOD2)  = MESHES(NM)%CUT_EDGE(ICE1)%CEELEM(NOD1:NOD2,IEDGE)
-                     DV(IAXIS:KAXIS) = MESHES(NM)%CUT_EDGE(ICE1)%XYZVERT(IAXIS:KAXIS,SEG(NOD2)) - &
-                                       MESHES(NM)%CUT_EDGE(ICE1)%XYZVERT(IAXIS:KAXIS,SEG(NOD1))
-                     SLEN = SQRT( DV(IAXIS)**2._EB + DV(JAXIS)**2._EB + DV(KAXIS)**2._EB )
-                     SLEN_IBCC = SLEN_IBCC + SLEN
-                  ENDDO
-               CASE(CC_INBOUNDCF)
-                  SELECT CASE(MESHES(NM)%CUT_EDGE(ICE1)%IJK(4))
-                       CASE(IAXIS)
-                           IF(MESHES(NM)%CUT_EDGE(ICE1)%IJK(IAXIS) == IBAR) CYCLE
-                       CASE(JAXIS)
-                           IF(MESHES(NM)%CUT_EDGE(ICE1)%IJK(JAXIS) == JBAR) CYCLE
-                       CASE(KAXIS)
-                           IF(MESHES(NM)%CUT_EDGE(ICE1)%IJK(KAXIS) == KBAR) CYCLE
-                  END SELECT
-                  NCUTEDGE_IBCF = NCUTEDGE_IBCF + MESHES(NM)%CUT_EDGE(ICE1)%NEDGE
-               END SELECT
-            ENDDO
-         ENDIF
-
-         WRITE(LU_SETCC,*) ' '
-         WRITE(LU_SETCC,*) 'MESH=',NM
-         WRITE(LU_SETCC,*) 'CUTEDGE=',PROCESS(NM),NM,MESHES(NM)%N_CUTEDGE_MESH,MESHES(NM)%N_EDGE_CROSS
-         !WRITE(LU_SETCC,*) 'NCUTEDGE_IBCF =',NCUTEDGE_IBCF
-         !WRITE(LU_SETCC,*) 'NCUTEDGE_IBCC =',NCUTEDGE_IBCC, ', SLEN_IBCC =',SLEN_IBCC,', SLEN_GEOM =',SLEN_GEOM
-
-         NCUTFACE_IAXIS = 0
-         NCUTFACE_JAXIS = 0
-         NCUTFACE_KAXIS = 0
-         CF_AREA_IAXIS=0._EB;      CF_AREA_JAXIS=0._EB;      CF_AREA_KAXIS=0._EB
-         CF_INXAREA_IAXIS=0._EB;   CF_INXAREA_JAXIS=0._EB;   CF_INXAREA_KAXIS=0._EB
-         CF_INXSQAREA_IAXIS=0._EB; CF_INXSQAREA_JAXIS=0._EB; CF_INXSQAREA_KAXIS=0._EB
-         CF_JNYSQAREA_IAXIS=0._EB; CF_JNYSQAREA_JAXIS=0._EB; CF_JNYSQAREA_KAXIS=0._EB
-         CF_KNZSQAREA_IAXIS=0._EB; CF_KNZSQAREA_JAXIS=0._EB; CF_KNZSQAREA_KAXIS=0._EB
-         NCUTFACE_INB = 0
-         CF_AREA_INB=0._EB; CF_INXAREA_INB=0._EB;
-         CF_INXSQAREA_INB=0._EB; CF_JNYSQAREA_INB=0._EB; CF_KNZSQAREA_INB=0._EB
-         DO ICF1 = 1,MESHES(NM)%N_CUTFACE_MESH
-           IF (CUT_FACE(ICF1)%STATUS == CC_GASPHASE) THEN
-              NFACE = CUT_FACE(ICF1)%NFACE
-              X1AXIS= CUT_FACE(ICF1)%IJK(MAX_DIM+1)
-              SELECT CASE(X1AXIS)
-                 CASE(IAXIS)
-                    NCUTFACE_IAXIS = NCUTFACE_IAXIS + NFACE
-                    CF_AREA_IAXIS = CF_AREA_IAXIS + SUM(CUT_FACE(ICF1)%AREA(1:NFACE))
-                    CF_INXAREA_IAXIS = CF_INXAREA_IAXIS + SUM(CUT_FACE(ICF1)%INXAREA(1:NFACE))
-                    CF_INXSQAREA_IAXIS=CF_INXSQAREA_IAXIS+SUM(CUT_FACE(ICF1)%INXSQAREA(1:NFACE))
-                    CF_JNYSQAREA_IAXIS=CF_JNYSQAREA_IAXIS+SUM(CUT_FACE(ICF1)%JNYSQAREA(1:NFACE))
-                    CF_KNZSQAREA_IAXIS=CF_KNZSQAREA_IAXIS+SUM(CUT_FACE(ICF1)%KNZSQAREA(1:NFACE))
-                 CASE(JAXIS)
-                    NCUTFACE_JAXIS = NCUTFACE_JAXIS + NFACE
-                    CF_AREA_JAXIS = CF_AREA_JAXIS + SUM(CUT_FACE(ICF1)%AREA(1:NFACE))
-                    CF_INXAREA_JAXIS = CF_INXAREA_JAXIS + SUM(CUT_FACE(ICF1)%INXAREA(1:NFACE))
-                    CF_INXSQAREA_JAXIS=CF_INXSQAREA_JAXIS+SUM(CUT_FACE(ICF1)%INXSQAREA(1:NFACE))
-                    CF_JNYSQAREA_JAXIS=CF_JNYSQAREA_JAXIS+SUM(CUT_FACE(ICF1)%JNYSQAREA(1:NFACE))
-                    CF_KNZSQAREA_JAXIS=CF_KNZSQAREA_JAXIS+SUM(CUT_FACE(ICF1)%KNZSQAREA(1:NFACE))
-                 CASE(KAXIS)
-                    NCUTFACE_KAXIS = NCUTFACE_KAXIS + NFACE
-                    CF_AREA_KAXIS = CF_AREA_KAXIS + SUM(CUT_FACE(ICF1)%AREA(1:NFACE))
-                    CF_INXAREA_KAXIS = CF_INXAREA_KAXIS + SUM(CUT_FACE(ICF1)%INXAREA(1:NFACE))
-                    CF_INXSQAREA_KAXIS=CF_INXSQAREA_KAXIS+SUM(CUT_FACE(ICF1)%INXSQAREA(1:NFACE))
-                    CF_JNYSQAREA_KAXIS=CF_JNYSQAREA_KAXIS+SUM(CUT_FACE(ICF1)%JNYSQAREA(1:NFACE))
-                    CF_KNZSQAREA_KAXIS=CF_KNZSQAREA_KAXIS+SUM(CUT_FACE(ICF1)%KNZSQAREA(1:NFACE))
-              END SELECT
-           ELSE ! CC_INBOUNDARY..
-              NFACE = CUT_FACE(ICF1)%NFACE
-              CF_AREA_INB = CF_AREA_INB + SUM(CUT_FACE(ICF1)%AREA(1:NFACE))
-              CF_INXAREA_INB = CF_INXAREA_INB + SUM(CUT_FACE(ICF1)%INXAREA(1:NFACE))
-              CF_INXSQAREA_INB=CF_INXSQAREA_INB+SUM(CUT_FACE(ICF1)%INXSQAREA(1:NFACE))
-              CF_JNYSQAREA_INB=CF_JNYSQAREA_INB+SUM(CUT_FACE(ICF1)%JNYSQAREA(1:NFACE))
-              CF_KNZSQAREA_INB=CF_KNZSQAREA_INB+SUM(CUT_FACE(ICF1)%KNZSQAREA(1:NFACE))
-           ENDIF
-         ENDDO
-         WRITE(LU_SETCC,*) 'CUTFACE=',PROCESS(NM),NM,MESHES(NM)%N_CUTFACE_MESH
-         WRITE(LU_SETCC,*) 'CUTFACE X Y Z=',NCUTFACE_IAXIS,NCUTFACE_JAXIS,NCUTFACE_KAXIS
-         WRITE(LU_SETCC,*) 'CUTFACE INB=',NCUTFACE_INB
-
-         ! Cut-cells:
-         MIN_CC_IJK_ICCJCC(1:5) = 0
-         MAX_CC_IJK_ICCJCC(1:5) = 0
-         MIN_CC_VOL = 1.E20_EB; MIN_ALPHA_CV = 1.E20_EB
-         MAX_CC_VOL =-1.E20_EB; MAX_ALPHA_CV =-1.E20_EB
-         DO ICC1=1,MESHES(NM)%N_CUTCELL_MESH
-            CC => CUT_CELL(ICC1)
-            DO ICC2=1,CC%NCELL
-               IF(CC%VOLUME(ICC2) < MIN_CC_VOL) THEN
-                  MIN_CC_VOL   = CC%VOLUME(ICC2)
-                  MIN_ALPHA_CV = MIN_CC_VOL / ( DX(CC%IJK(IAXIS))*DY(CC%IJK(JAXIS))*DZ(CC%IJK(KAXIS)) )
-                  MIN_CC_IJK_ICCJCC(1:5) = (/ CC%IJK(1:3), ICC1, ICC2  /)
-               ENDIF
-               IF(CC%VOLUME(ICC2) > MAX_CC_VOL) THEN
-                  MAX_CC_VOL   = CC%VOLUME(ICC2)
-                  MAX_ALPHA_CV = MAX_CC_VOL / ( DX(CC%IJK(IAXIS))*DY(CC%IJK(JAXIS))*DZ(CC%IJK(KAXIS)) )
-                  MAX_CC_IJK_ICCJCC(1:5) = (/ CC%IJK(1:3), ICC1, ICC2  /)
-               ENDIF
-            ENDDO
-         ENDDO
-         WRITE(LU_SETCC,*) ' '
-         WRITE(LU_SETCC,*) 'CUTCELL=',PROCESS(NM),NM,MESHES(NM)%N_CUTCELL_MESH
-         WRITE(LU_SETCC,*) 'MIN VOL=',MIN_CC_IJK_ICCJCC(1:5),MIN_CC_VOL,MIN_ALPHA_CV
-         WRITE(LU_SETCC,*) 'MAX VOL=',MAX_CC_IJK_ICCJCC(1:5),MAX_CC_VOL,MAX_ALPHA_CV
-
-         ! Dump info for Max Size Cut-cell:
-         DO IG=1,2
-            IF(IG==1) THEN; ICC1 = MIN_CC_IJK_ICCJCC(4); ICC2 = MIN_CC_IJK_ICCJCC(5); ENDIF
-            IF(IG==2) THEN; ICC1 = MAX_CC_IJK_ICCJCC(4); ICC2 = MAX_CC_IJK_ICCJCC(5); ENDIF
-            IF(ICC1==0) CYCLE
-            CC => CUT_CELL(ICC1)
-            I = CC%IJK(IAXIS); J = CC%IJK(JAXIS); K = CC%IJK(KAXIS)
-            IF(IG==1) THEN; WRITE(LU_SETCC,*) 'MIN VOL CC cut-faces:',I,J,K; ENDIF
-            IF(IG==2) THEN; WRITE(LU_SETCC,*) 'MAX VOL CC cut-faces:',I,J,K; ENDIF
-            DO JCF=2,CC%CCELEM(1,ICC2)+1
-               IFACE = CC%CCELEM(JCF,ICC2)
-               FTYPE = CC%FACE_LIST(1,IFACE)
-               ILH   = CC%FACE_LIST(2,IFACE) - 2 ! -1 for LOW_IND, 0 for HIGH_IND
-               X1AXIS= CC%FACE_LIST(3,IFACE)
-               SELECT CASE(FTYPE)
-               CASE(CC_FTYPE_RCGAS)
-                  SELECT CASE(X1AXIS)
-                  CASE(IAXIS); I=CC%IJK(IAXIS)+ILH; ACRT = DY(CC%IJK(JAXIS))*DZ(CC%IJK(KAXIS))
-                  CASE(JAXIS); J=CC%IJK(JAXIS)+ILH; ACRT = DX(CC%IJK(IAXIS))*DZ(CC%IJK(KAXIS))
-                  CASE(KAXIS); K=CC%IJK(KAXIS)+ILH; ACRT = DY(CC%IJK(JAXIS))*DX(CC%IJK(IAXIS))
-                  END SELECT
-                  WRITE(LU_SETCC,*) JCF-1,' RCGAS ',I,J,K,X1AXIS,ACRT,ACRT/ACRT
-               CASE(CC_FTYPE_CFGAS)
-                  SELECT CASE(X1AXIS)
-                  CASE(IAXIS); ACRT = DY(J)*DZ(K)
-                  CASE(JAXIS); ACRT = DX(I)*DZ(K)
-                  CASE(KAXIS); ACRT = DY(J)*DX(I)
-                  END SELECT
-                  ICF2  = CC%FACE_LIST(4,IFACE)
-                  JCF2  = CC%FACE_LIST(5,IFACE)
-                  WRITE(LU_SETCC,*) JCF-1,' CFGAS ',CUT_FACE(ICF2)%IJK(1:KAXIS+1),CUT_FACE(ICF2)%AREA(JCF2),&
-                  CUT_FACE(ICF2)%AREA(JCF2)/ACRT
-               CASE(CC_FTYPE_CFINB)
-                  ICF2  = CC%FACE_LIST(4,IFACE)
-                  JCF2  = CC%FACE_LIST(5,IFACE)
-                  ACRT = 1._EB/3._EB*(DY(J)*DZ(K)+DX(I)*DZ(K)+DY(J)*DX(I))
-                  WRITE(LU_SETCC,*) JCF-1,' CFINB ',CUT_FACE(ICF2)%IJK(1:KAXIS+1),CUT_FACE(ICF2)%AREA(JCF2)
-               END SELECT
-            ENDDO
-         ENDDO
-
-      ENDDO TESTS_MESH_LOOP_2
-   ENDIF WRITE_CFACE_STATS_COND
 ENDIF CCVERBOSE_COND
-
 END SUBROUTINE CC_GRID_WRITE_VERBOSE_SUMMARY
 
 SUBROUTINE CC_GRID_BUILD_RAW_CUTCELLS(ISTR,IEND,JSTR,JEND,KSTR,KEND,CC_COMPUTE_MESH,GEOM_ZMAX_AUX, &
@@ -15029,74 +14190,5885 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
    IF (STOP_STATUS==SETUP_STOP) RETURN
 ENDDO MAIN_MESH_LOOP
 
+IF (GET_CUTCELLS_VERBOSE) THEN
+   WRITE(LU_SETCC,'(A)') ' Raw build: mesh loop done'
+   FLUSH(LU_SETCC)
+ENDIF
+
 CALL CC_GRID_RELEASE_BUILD_SCRATCH_WORK
+
+IF (GET_CUTCELLS_VERBOSE) THEN
+   WRITE(LU_SETCC,'(A)') ' Raw build: scratch release done'
+   FLUSH(LU_SETCC)
+ENDIF
 
 END SUBROUTINE CC_GRID_BUILD_RAW_CUTCELLS
 
+SUBROUTINE CC_GRID_GET_CV_CENTER_CANDIDATES(N_MEMBER,MASTER_MEMBER,MEMBER_VOLUME,MEMBER_XYZCEN,X_MASTER,XBAR_CV)
+! Compact center-candidate builder for future CV merge policy.
+! Candidate 1 = master GCELL centroid, candidate 2 = volume-averaged merged centroid.
+INTEGER, INTENT(IN) :: N_MEMBER,MASTER_MEMBER
+REAL(EB), INTENT(IN) :: MEMBER_VOLUME(1:N_MEMBER)
+REAL(EB), INTENT(IN) :: MEMBER_XYZCEN(IAXIS:KAXIS,1:N_MEMBER)
+REAL(EB), INTENT(OUT) :: X_MASTER(IAXIS:KAXIS),XBAR_CV(IAXIS:KAXIS)
+INTEGER :: IMEMBER
+REAL(EB) :: TOTAL_VOLUME
 
-! ----------------------------- CC_GRID_BUILD_GCELLS -------------------------------------------
-
-SUBROUTINE CC_GRID_BUILD_GCELLS
-
-! Build the mesh-owned GCELL storage in SoA form from raw cut-cell data.
-! Each CUT_CELL(ICC) sub-cell JCC=1..NCELL becomes one GCELL slot.
-
-INTEGER :: NM, ICC, JCC, IG
-TYPE(MESH_TYPE), POINTER :: M
-
-DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-   CALL POINT_TO_MESH(NM)
-   M => MESHES(NM)
-
-   IF (ALLOCATED(M%GCELL%CELL_TYPE)) DEALLOCATE(M%GCELL%CELL_TYPE)
-   IF (ALLOCATED(M%GCELL%IJK))       DEALLOCATE(M%GCELL%IJK)
-   IF (ALLOCATED(M%GCELL%ICC))       DEALLOCATE(M%GCELL%ICC)
-   IF (ALLOCATED(M%GCELL%JCC))       DEALLOCATE(M%GCELL%JCC)
-   IF (ALLOCATED(M%GCELL%STATUS))    DEALLOCATE(M%GCELL%STATUS)
-   IF (ALLOCATED(M%GCELL%VOLUME))    DEALLOCATE(M%GCELL%VOLUME)
-   IF (ALLOCATED(M%GCELL%XYZCEN))    DEALLOCATE(M%GCELL%XYZCEN)
-
-   ! Count GCELLs: one per cut-cell sub-cell.
-   M%GCELL%N = 0
-   DO ICC=1,M%N_CUTCELL_MESH
-      M%GCELL%N = M%GCELL%N + CUT_CELL(ICC)%NCELL
+X_MASTER = 0._EB; XBAR_CV = 0._EB; IF (N_MEMBER < 1) RETURN
+X_MASTER(IAXIS:KAXIS) = MEMBER_XYZCEN(IAXIS:KAXIS,MASTER_MEMBER)
+TOTAL_VOLUME = SUM(MEMBER_VOLUME(1:N_MEMBER))
+IF (TOTAL_VOLUME > TWO_EPSILON_EB) THEN
+   DO IMEMBER=1,N_MEMBER
+      XBAR_CV(IAXIS:KAXIS) = XBAR_CV(IAXIS:KAXIS) + MEMBER_VOLUME(IMEMBER)*MEMBER_XYZCEN(IAXIS:KAXIS,IMEMBER)
    ENDDO
+   XBAR_CV(IAXIS:KAXIS) = XBAR_CV(IAXIS:KAXIS) / TOTAL_VOLUME
+ELSE
+   XBAR_CV(IAXIS:KAXIS) = X_MASTER(IAXIS:KAXIS)
+ENDIF
+END SUBROUTINE CC_GRID_GET_CV_CENTER_CANDIDATES
 
-   IF (M%GCELL%N == 0) CYCLE
+SUBROUTINE CC_GRID_EVALUATE_SINGLE_CV_CENTER_METRICS(X,CV_DIAM,N_FACE,FACE_XYZCEN,FACE_NVEC,FACE_HAS_NEIGHBOR, &
+                                                     FACE_NEIGHBOR_XYZCEN,CENTER_INSIDE,CENTER_STAR_SHAPED, &
+                                                     MAX_THETA,MAX_SKEW,MIN_DFDIAM,MAX_SKEW_IFACE)
+! Face-based admissibility metric evaluator for one candidate CV center.
+! All external faces contribute to inside/visibility and minimum signed face distance.
+! Only external gas faces with neighboring CVs contribute to skewness and non-orthogonality.
+INTEGER, INTENT(IN) :: N_FACE
+REAL(EB), INTENT(IN) :: X(IAXIS:KAXIS),CV_DIAM,FACE_XYZCEN(IAXIS:KAXIS,1:N_FACE),FACE_NVEC(IAXIS:KAXIS,1:N_FACE), &
+                        FACE_NEIGHBOR_XYZCEN(IAXIS:KAXIS,1:N_FACE)
+LOGICAL, INTENT(IN) :: FACE_HAS_NEIGHBOR(1:N_FACE)
+LOGICAL, INTENT(OUT) :: CENTER_INSIDE,CENTER_STAR_SHAPED
+REAL(EB), INTENT(OUT) :: MAX_THETA,MAX_SKEW,MIN_DFDIAM
+INTEGER, INTENT(OUT), OPTIONAL :: MAX_SKEW_IFACE
+INTEGER :: IFACE
+REAL(EB) :: D_F,DFDIAM,NMAG,DNMAG,COS_THETA,THETA_DEG,SKEW
+REAL(EB) :: N_UNIT(IAXIS:KAXIS),FACE_VEC(IAXIS:KAXIS),DN(IAXIS:KAXIS),TANG(IAXIS:KAXIS)
 
-   ALLOCATE(M%GCELL%CELL_TYPE(1:M%GCELL%N))
-   ALLOCATE(M%GCELL%IJK(IAXIS:KAXIS,1:M%GCELL%N))
-   ALLOCATE(M%GCELL%ICC(1:M%GCELL%N))
-   ALLOCATE(M%GCELL%JCC(1:M%GCELL%N))
-   ALLOCATE(M%GCELL%STATUS(1:M%GCELL%N))
-   ALLOCATE(M%GCELL%VOLUME(1:M%GCELL%N))
-   ALLOCATE(M%GCELL%XYZCEN(IAXIS:KAXIS,1:M%GCELL%N))
+CENTER_INSIDE = .FALSE.; CENTER_STAR_SHAPED = .FALSE.
+MAX_THETA = HUGE(MAX_THETA); MAX_SKEW  = HUGE(MAX_SKEW); MIN_DFDIAM = -HUGE(MIN_DFDIAM)
+IF (PRESENT(MAX_SKEW_IFACE)) MAX_SKEW_IFACE = 0
 
-   M%GCELL%CELL_TYPE = CC_UNDEFINED
-   M%GCELL%IJK       = 0
-   M%GCELL%ICC       = 0
-   M%GCELL%JCC       = 0
-   M%GCELL%STATUS    = 0
-   M%GCELL%VOLUME    = 0._EB
-   M%GCELL%XYZCEN    = 0._EB
+IF (N_FACE < 1 .OR. CV_DIAM <= TWO_EPSILON_EB) RETURN
+CENTER_INSIDE = .TRUE.; CENTER_STAR_SHAPED = .TRUE.; MAX_THETA = 0._EB; MAX_SKEW  = 0._EB; MIN_DFDIAM = HUGE(MIN_DFDIAM)
+IF (PRESENT(MAX_SKEW_IFACE)) MAX_SKEW_IFACE = 0
+DO IFACE=1,N_FACE
+   N_UNIT(IAXIS:KAXIS) = FACE_NVEC(IAXIS:KAXIS,IFACE)
+   NMAG = NORM2(N_UNIT(IAXIS:KAXIS))
+   IF (NMAG <= TWO_EPSILON_EB) THEN
+      CENTER_INSIDE = .FALSE.; CENTER_STAR_SHAPED = .FALSE.
+      MAX_THETA = HUGE(MAX_THETA); MAX_SKEW  = HUGE(MAX_SKEW); MIN_DFDIAM = -HUGE(MIN_DFDIAM)
+      IF (PRESENT(MAX_SKEW_IFACE)) MAX_SKEW_IFACE = IFACE
+      RETURN
+   ENDIF
+   N_UNIT(IAXIS:KAXIS) = N_UNIT(IAXIS:KAXIS) / NMAG
 
-   IG = 0
-   DO ICC=1,M%N_CUTCELL_MESH
-      DO JCC=1,CUT_CELL(ICC)%NCELL
-         IG = IG + 1
-         M%GCELL%CELL_TYPE(IG)        = CC_GCELL_CUT
-         M%GCELL%IJK(IAXIS:KAXIS,IG)  = CUT_CELL(ICC)%IJK(IAXIS:KAXIS)
-         M%GCELL%ICC(IG)              = ICC
-         M%GCELL%JCC(IG)              = JCC
-         M%GCELL%STATUS(IG)           = 0
-         M%GCELL%VOLUME(IG)           = CUT_CELL(ICC)%VOLUME(JCC)
-         M%GCELL%XYZCEN(IAXIS:KAXIS,IG) = CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,JCC)
+   FACE_VEC(IAXIS:KAXIS) = FACE_XYZCEN(IAXIS:KAXIS,IFACE) - X(IAXIS:KAXIS)
+   D_F = DOT_PRODUCT(N_UNIT(IAXIS:KAXIS),FACE_VEC(IAXIS:KAXIS))
+   DFDIAM = D_F / CV_DIAM
+   MIN_DFDIAM = MIN(MIN_DFDIAM,DFDIAM)
+   ! A wall facet has no neighbour. Star-shapedness is the two-point flux, so only a neighbour face can fail it.
+   IF (FACE_HAS_NEIGHBOR(IFACE)) THEN
+      IF (D_F <= TWO_EPSILON_EB) THEN
+         CENTER_STAR_SHAPED = .FALSE.
+      ELSE
+         TANG(IAXIS:KAXIS) = FACE_VEC(IAXIS:KAXIS) - D_F*N_UNIT(IAXIS:KAXIS)
+         SKEW = NORM2(TANG(IAXIS:KAXIS))/D_F
+         IF (SKEW > MAX_SKEW + TWO_EPSILON_EB) THEN
+            MAX_SKEW = SKEW
+            IF (PRESENT(MAX_SKEW_IFACE)) MAX_SKEW_IFACE = IFACE
+         ENDIF
+      ENDIF
+   ENDIF
+   IF (.NOT.FACE_HAS_NEIGHBOR(IFACE)) CYCLE
+
+   DN(IAXIS:KAXIS) = FACE_NEIGHBOR_XYZCEN(IAXIS:KAXIS,IFACE) - X(IAXIS:KAXIS)
+   DNMAG = NORM2(DN(IAXIS:KAXIS))
+   IF (DNMAG <= TWO_EPSILON_EB) THEN
+      MAX_THETA = HUGE(MAX_THETA)
+      CYCLE
+   ENDIF
+   COS_THETA = DOT_PRODUCT(N_UNIT(IAXIS:KAXIS),DN(IAXIS:KAXIS)) / DNMAG
+   COS_THETA = MIN(1._EB,MAX(-1._EB,COS_THETA))
+   THETA_DEG = ACOS(COS_THETA) * 180._EB / PI
+   MAX_THETA = MAX(MAX_THETA,THETA_DEG)
+ENDDO
+IF (.NOT.CENTER_INSIDE) THEN
+   ! The current star-shaped flag is a face-half-space visibility proxy.
+   CENTER_STAR_SHAPED = .FALSE.
+ENDIF
+END SUBROUTINE CC_GRID_EVALUATE_SINGLE_CV_CENTER_METRICS
+
+LOGICAL FUNCTION CC_GRID_MEMBER_FACE_SUPPORT_GEOMETRY_IS_STABLE(X_PRIMARY,MEMBER_XYZCEN,N_FACE,N_MEMBER,MASTER_MEMBER, &
+                                                               FACE_MEMBER,FACE_XYZCEN,FACE_NVEC,FACE_HAS_NEIGHBOR, &
+                                                               FACE_NEIGHBOR_XYZCEN)
+
+! Master-centroid skew is fatal on a master-owned face. On any other member's
+! face, remeasure skew and theta from that member's own centroid.
+INTEGER, INTENT(IN) :: N_FACE,N_MEMBER,MASTER_MEMBER
+INTEGER, INTENT(IN) :: FACE_MEMBER(1:N_FACE)
+REAL(EB), INTENT(IN) :: X_PRIMARY(IAXIS:KAXIS),MEMBER_XYZCEN(IAXIS:KAXIS,1:N_MEMBER), &
+                        FACE_XYZCEN(IAXIS:KAXIS,1:N_FACE),FACE_NVEC(IAXIS:KAXIS,1:N_FACE), &
+                        FACE_NEIGHBOR_XYZCEN(IAXIS:KAXIS,1:N_FACE)
+LOGICAL, INTENT(IN) :: FACE_HAS_NEIGHBOR(1:N_FACE)
+INTEGER :: IFACE,OWNER
+LOGICAL :: SUPPORT_NEEDED
+REAL(EB) :: D_F,NMAG,DNMAG,COS_THETA,THETA_DEG,PRIMARY_SKEW,SUPPORT_SKEW
+REAL(EB) :: N_UNIT(IAXIS:KAXIS),FACE_VEC(IAXIS:KAXIS),DN(IAXIS:KAXIS),TANG(IAXIS:KAXIS)
+
+CC_GRID_MEMBER_FACE_SUPPORT_GEOMETRY_IS_STABLE = .FALSE.
+SUPPORT_NEEDED = .FALSE.
+IF (N_FACE < 1 .OR. N_MEMBER < 1) RETURN
+! Nothing to retry: every face already belongs to the master.
+IF (.NOT.ANY(FACE_MEMBER(1:N_FACE) /= MASTER_MEMBER)) RETURN
+
+DO IFACE=1,N_FACE
+   IF (.NOT.FACE_HAS_NEIGHBOR(IFACE)) CYCLE
+
+   N_UNIT(IAXIS:KAXIS) = FACE_NVEC(IAXIS:KAXIS,IFACE)
+   NMAG = NORM2(N_UNIT(IAXIS:KAXIS))
+   IF (NMAG <= TWO_EPSILON_EB) RETURN
+   N_UNIT(IAXIS:KAXIS) = N_UNIT(IAXIS:KAXIS) / NMAG
+
+   FACE_VEC(IAXIS:KAXIS) = FACE_XYZCEN(IAXIS:KAXIS,IFACE) - X_PRIMARY(IAXIS:KAXIS)
+   D_F = DOT_PRODUCT(N_UNIT(IAXIS:KAXIS),FACE_VEC(IAXIS:KAXIS))
+   IF (D_F <= TWO_EPSILON_EB) RETURN
+   TANG(IAXIS:KAXIS) = FACE_VEC(IAXIS:KAXIS) - D_F*N_UNIT(IAXIS:KAXIS)
+   PRIMARY_SKEW = NORM2(TANG(IAXIS:KAXIS)) / D_F
+   IF (PRIMARY_SKEW <= CC_CV_SKEW_MAX + TWO_EPSILON_EB) CYCLE
+
+   OWNER = FACE_MEMBER(IFACE)
+   IF (OWNER < 1 .OR. OWNER > N_MEMBER) RETURN
+   IF (OWNER == MASTER_MEMBER) RETURN
+   SUPPORT_NEEDED = .TRUE.
+
+   FACE_VEC(IAXIS:KAXIS) = FACE_XYZCEN(IAXIS:KAXIS,IFACE) - MEMBER_XYZCEN(IAXIS:KAXIS,OWNER)
+   D_F = DOT_PRODUCT(N_UNIT(IAXIS:KAXIS),FACE_VEC(IAXIS:KAXIS))
+   IF (D_F <= TWO_EPSILON_EB) RETURN
+   TANG(IAXIS:KAXIS) = FACE_VEC(IAXIS:KAXIS) - D_F*N_UNIT(IAXIS:KAXIS)
+   SUPPORT_SKEW = NORM2(TANG(IAXIS:KAXIS)) / D_F
+   IF (SUPPORT_SKEW > CC_CV_SKEW_MAX + TWO_EPSILON_EB) RETURN
+
+   DN(IAXIS:KAXIS) = FACE_NEIGHBOR_XYZCEN(IAXIS:KAXIS,IFACE) - MEMBER_XYZCEN(IAXIS:KAXIS,OWNER)
+   DNMAG = NORM2(DN(IAXIS:KAXIS))
+   IF (DNMAG <= TWO_EPSILON_EB) RETURN
+   COS_THETA = DOT_PRODUCT(N_UNIT(IAXIS:KAXIS),DN(IAXIS:KAXIS)) / DNMAG
+   COS_THETA = MIN(1._EB,MAX(-1._EB,COS_THETA))
+   THETA_DEG = ACOS(COS_THETA) * 180._EB / PI
+   IF (THETA_DEG > CC_CV_THETA_MAX + TWO_EPSILON_EB) RETURN
+ENDDO
+CC_GRID_MEMBER_FACE_SUPPORT_GEOMETRY_IS_STABLE = SUPPORT_NEEDED
+
+END FUNCTION CC_GRID_MEMBER_FACE_SUPPORT_GEOMETRY_IS_STABLE
+
+
+SUBROUTINE CC_GRID_EVALUATE_CV_CENTER_CANDIDATES(N_MEMBER,MASTER_MEMBER,MEMBER_VOLUME,MEMBER_XYZCEN,CV_DIAM, &
+                                                 N_FACE,FACE_XYZCEN,FACE_NVEC,FACE_HAS_NEIGHBOR,FACE_NEIGHBOR_XYZCEN, &
+                                                 X_MASTER,XBAR_CV,CENTER_INSIDE,CENTER_STAR_SHAPED, &
+                                                 CENTER_MAX_THETA,CENTER_MAX_SKEW,CENTER_MIN_DFDIAM,CENTER_MAX_SKEW_IFACE)
+! Evaluate the supported solver-center candidates for the future CV merge/block policy:
+! 1. master GCELL centroid
+! 2. merged volume centroid
+INTEGER, INTENT(IN) :: N_MEMBER,MASTER_MEMBER,N_FACE
+REAL(EB), INTENT(IN) :: MEMBER_VOLUME(1:N_MEMBER),CV_DIAM,MEMBER_XYZCEN(IAXIS:KAXIS,1:N_MEMBER), &
+                        FACE_XYZCEN(IAXIS:KAXIS,1:N_FACE),FACE_NVEC(IAXIS:KAXIS,1:N_FACE), &
+                        FACE_NEIGHBOR_XYZCEN(IAXIS:KAXIS,1:N_FACE)
+LOGICAL, INTENT(IN) :: FACE_HAS_NEIGHBOR(1:N_FACE)
+LOGICAL, INTENT(OUT) :: CENTER_INSIDE(1:2),CENTER_STAR_SHAPED(1:2)
+REAL(EB), INTENT(OUT) :: X_MASTER(IAXIS:KAXIS),XBAR_CV(IAXIS:KAXIS),CENTER_MAX_THETA(1:2), &
+                         CENTER_MAX_SKEW(1:2),CENTER_MIN_DFDIAM(1:2)
+INTEGER, INTENT(OUT), OPTIONAL :: CENTER_MAX_SKEW_IFACE(1:2)
+INTEGER :: ICANDIDATE
+REAL(EB) :: CANDIDATE_XYZ(IAXIS:KAXIS,1:2)
+
+CALL CC_GRID_GET_CV_CENTER_CANDIDATES(N_MEMBER,MASTER_MEMBER,MEMBER_VOLUME,MEMBER_XYZCEN,X_MASTER,XBAR_CV)
+CANDIDATE_XYZ(IAXIS:KAXIS,1) = X_MASTER(IAXIS:KAXIS)
+CANDIDATE_XYZ(IAXIS:KAXIS,2) = XBAR_CV(IAXIS:KAXIS)
+
+DO ICANDIDATE=1,2
+   IF (PRESENT(CENTER_MAX_SKEW_IFACE)) THEN
+      CALL CC_GRID_EVALUATE_SINGLE_CV_CENTER_METRICS(CANDIDATE_XYZ(IAXIS:KAXIS,ICANDIDATE),CV_DIAM,N_FACE,FACE_XYZCEN, &
+                                                     FACE_NVEC,FACE_HAS_NEIGHBOR,FACE_NEIGHBOR_XYZCEN, &
+                                                     CENTER_INSIDE(ICANDIDATE),CENTER_STAR_SHAPED(ICANDIDATE), &
+                                                     CENTER_MAX_THETA(ICANDIDATE),CENTER_MAX_SKEW(ICANDIDATE), &
+                                                     CENTER_MIN_DFDIAM(ICANDIDATE), &
+                                                     MAX_SKEW_IFACE=CENTER_MAX_SKEW_IFACE(ICANDIDATE))
+   ELSE
+      CALL CC_GRID_EVALUATE_SINGLE_CV_CENTER_METRICS(CANDIDATE_XYZ(IAXIS:KAXIS,ICANDIDATE),CV_DIAM,N_FACE,FACE_XYZCEN, &
+                                                     FACE_NVEC,FACE_HAS_NEIGHBOR,FACE_NEIGHBOR_XYZCEN, &
+                                                     CENTER_INSIDE(ICANDIDATE),CENTER_STAR_SHAPED(ICANDIDATE), &
+                                                     CENTER_MAX_THETA(ICANDIDATE),CENTER_MAX_SKEW(ICANDIDATE), &
+                                                     CENTER_MIN_DFDIAM(ICANDIDATE))
+   ENDIF
+ENDDO
+END SUBROUTINE CC_GRID_EVALUATE_CV_CENTER_CANDIDATES
+
+LOGICAL FUNCTION CC_GRID_CV_CENTER_IS_ADMISSIBLE(CENTER_INSIDE,CENTER_STAR_SHAPED,MAX_THETA,MAX_SKEW,MIN_DFDIAM)
+LOGICAL, INTENT(IN) :: CENTER_INSIDE,CENTER_STAR_SHAPED
+REAL(EB), INTENT(IN) :: MAX_THETA,MAX_SKEW,MIN_DFDIAM
+CC_GRID_CV_CENTER_IS_ADMISSIBLE = CENTER_INSIDE .AND. CENTER_STAR_SHAPED; IF (.NOT.CC_GRID_CV_CENTER_IS_ADMISSIBLE) RETURN
+CC_GRID_CV_CENTER_IS_ADMISSIBLE = (MAX_THETA <= CC_CV_THETA_MAX + TWO_EPSILON_EB) .AND. &
+                                  (MAX_SKEW  <= CC_CV_SKEW_MAX  + TWO_EPSILON_EB) .AND. &
+                                  (MIN_DFDIAM >= CC_CV_DFDIAM_MIN - TWO_EPSILON_EB)
+END FUNCTION CC_GRID_CV_CENTER_IS_ADMISSIBLE
+
+INTEGER FUNCTION CC_GRID_GET_CV_CENTER_REJECT_REASON(CENTER_INSIDE,CENTER_STAR_SHAPED,MAX_THETA,MAX_SKEW,MIN_DFDIAM)
+LOGICAL, INTENT(IN) :: CENTER_INSIDE,CENTER_STAR_SHAPED
+REAL(EB), INTENT(IN) :: MAX_THETA,MAX_SKEW,MIN_DFDIAM
+
+CC_GRID_GET_CV_CENTER_REJECT_REASON = CC_CV_REJECT_NONE
+IF (.NOT.CENTER_INSIDE) THEN
+   CC_GRID_GET_CV_CENTER_REJECT_REASON = CC_CV_REJECT_OUTSIDE
+   RETURN
+ENDIF
+IF (.NOT.CENTER_STAR_SHAPED) THEN
+   CC_GRID_GET_CV_CENTER_REJECT_REASON = CC_CV_REJECT_NOT_STAR_SHAPED
+   RETURN
+ENDIF
+IF (MAX_THETA > CC_CV_THETA_MAX + TWO_EPSILON_EB) THEN
+   CC_GRID_GET_CV_CENTER_REJECT_REASON = CC_CV_REJECT_THETA
+   RETURN
+ENDIF
+IF (MAX_SKEW > CC_CV_SKEW_MAX + TWO_EPSILON_EB) THEN
+   CC_GRID_GET_CV_CENTER_REJECT_REASON = CC_CV_REJECT_SKEW
+   RETURN
+ENDIF
+IF (MIN_DFDIAM < CC_CV_DFDIAM_MIN - TWO_EPSILON_EB) THEN
+   CC_GRID_GET_CV_CENTER_REJECT_REASON = CC_CV_REJECT_DFDIAM
+   RETURN
+ENDIF
+END FUNCTION CC_GRID_GET_CV_CENTER_REJECT_REASON
+
+LOGICAL FUNCTION CC_GRID_CV_CENTER_IS_BETTER(MAX_THETA_A,MAX_SKEW_A,MIN_DFDIAM_A,MAX_THETA_B,MAX_SKEW_B,MIN_DFDIAM_B)
+REAL(EB), INTENT(IN) :: MAX_THETA_A,MAX_SKEW_A,MIN_DFDIAM_A
+REAL(EB), INTENT(IN) :: MAX_THETA_B,MAX_SKEW_B,MIN_DFDIAM_B
+CC_GRID_CV_CENTER_IS_BETTER = .FALSE.
+IF (MAX_THETA_A < MAX_THETA_B - TWO_EPSILON_EB) THEN
+   CC_GRID_CV_CENTER_IS_BETTER = .TRUE.
+   RETURN
+ENDIF
+IF (MAX_THETA_A > MAX_THETA_B + TWO_EPSILON_EB) RETURN
+
+IF (MAX_SKEW_A < MAX_SKEW_B - TWO_EPSILON_EB) THEN
+   CC_GRID_CV_CENTER_IS_BETTER = .TRUE.
+   RETURN
+ENDIF
+IF (MAX_SKEW_A > MAX_SKEW_B + TWO_EPSILON_EB) RETURN
+IF (MIN_DFDIAM_A > MIN_DFDIAM_B + TWO_EPSILON_EB) CC_GRID_CV_CENTER_IS_BETTER = .TRUE.
+END FUNCTION CC_GRID_CV_CENTER_IS_BETTER
+
+INTEGER FUNCTION CC_GRID_GET_CV_DIRECTION_PRIORITY(X1AXIS)
+INTEGER, INTENT(IN) :: X1AXIS
+SELECT CASE(X1AXIS)
+CASE(IAXIS)
+   CC_GRID_GET_CV_DIRECTION_PRIORITY = 1
+CASE(JAXIS)
+   CC_GRID_GET_CV_DIRECTION_PRIORITY = 2
+CASE(KAXIS)
+   CC_GRID_GET_CV_DIRECTION_PRIORITY = 3
+CASE DEFAULT
+   CC_GRID_GET_CV_DIRECTION_PRIORITY = HUGE(CC_GRID_GET_CV_DIRECTION_PRIORITY)
+END SELECT
+END FUNCTION CC_GRID_GET_CV_DIRECTION_PRIORITY
+
+LOGICAL FUNCTION CC_GRID_CV_MERGE_CANDIDATE_IS_BETTER(AXIS_A,FACE_AREA_A,MAX_THETA_A,MAX_SKEW_A,MIN_DFDIAM_A, &
+                                                      AXIS_B,FACE_AREA_B,MAX_THETA_B,MAX_SKEW_B,MIN_DFDIAM_B)
+INTEGER, INTENT(IN) :: AXIS_A,AXIS_B
+REAL(EB), INTENT(IN) :: FACE_AREA_A,FACE_AREA_B,MAX_THETA_A,MAX_SKEW_A,MIN_DFDIAM_A, &
+                        MAX_THETA_B,MAX_SKEW_B,MIN_DFDIAM_B
+INTEGER :: DIR_A,DIR_B
+REAL(EB) :: AREA_EPS
+
+CC_GRID_CV_MERGE_CANDIDATE_IS_BETTER = .FALSE.
+AREA_EPS = CC_CV_FACEAREA_TIE_EPS*MAX(1._EB,FACE_AREA_A,FACE_AREA_B)
+IF (FACE_AREA_A > FACE_AREA_B + AREA_EPS) THEN
+   CC_GRID_CV_MERGE_CANDIDATE_IS_BETTER = .TRUE.
+   RETURN
+ENDIF
+IF (FACE_AREA_A < FACE_AREA_B - AREA_EPS) RETURN
+
+IF (CC_GRID_CV_CENTER_IS_BETTER(MAX_THETA_A,MAX_SKEW_A,MIN_DFDIAM_A,MAX_THETA_B,MAX_SKEW_B,MIN_DFDIAM_B)) THEN
+   CC_GRID_CV_MERGE_CANDIDATE_IS_BETTER = .TRUE.
+   RETURN
+ENDIF
+IF (CC_GRID_CV_CENTER_IS_BETTER(MAX_THETA_B,MAX_SKEW_B,MIN_DFDIAM_B,MAX_THETA_A,MAX_SKEW_A,MIN_DFDIAM_A)) RETURN
+
+! Axis order is only a deterministic final tie-breaker.
+DIR_A = CC_GRID_GET_CV_DIRECTION_PRIORITY(AXIS_A)
+DIR_B = CC_GRID_GET_CV_DIRECTION_PRIORITY(AXIS_B)
+IF (DIR_A < DIR_B) CC_GRID_CV_MERGE_CANDIDATE_IS_BETTER = .TRUE.
+END FUNCTION CC_GRID_CV_MERGE_CANDIDATE_IS_BETTER
+
+
+LOGICAL FUNCTION CC_GRID_CUT_PIECE_REQUIRES_MERGE(NM,ICC,JCC)
+INTEGER, INTENT(IN) :: NM,ICC,JCC
+TYPE(MESH_TYPE), POINTER :: M
+INTEGER :: I,J,K
+
+M => MESHES(NM)
+CC_GRID_CUT_PIECE_REQUIRES_MERGE = .FALSE.
+IF (.NOT.CC_GRID_CUT_PIECE_IS_ACTIVE(NM,ICC,JCC)) RETURN
+
+I = M%CUT_CELL(ICC)%IJK(IAXIS); J = M%CUT_CELL(ICC)%IJK(JAXIS); K = M%CUT_CELL(ICC)%IJK(KAXIS)
+CC_GRID_CUT_PIECE_REQUIRES_MERGE = (M%CUT_CELL(ICC)%VOLUME(JCC) < CCVOL_LINK * (M%DX(I)*M%DY(J)*M%DZ(K)))
+END FUNCTION CC_GRID_CUT_PIECE_REQUIRES_MERGE
+
+LOGICAL FUNCTION CC_GRID_GCELL_REQUIRES_MERGE(NM,IG)
+INTEGER, INTENT(IN) :: NM,IG
+TYPE(MESH_TYPE), POINTER :: M
+CC_GRID_GCELL_REQUIRES_MERGE = .FALSE.
+M => MESHES(NM)
+IF (M%FV%GCELL%CELL_TYPE(IG) /= CC_GCELL_CUT) RETURN
+IF (M%FV%GCELL%STATUS(IG) /= NOT_BLOCKED) RETURN
+CC_GRID_GCELL_REQUIRES_MERGE = CC_GRID_CUT_PIECE_REQUIRES_MERGE(NM,M%FV%GCELL%ICC(IG),M%FV%GCELL%JCC(IG))
+END FUNCTION CC_GRID_GCELL_REQUIRES_MERGE
+
+LOGICAL FUNCTION CC_GRID_CV_ENTITY_KEYS_MATCH(NM_A,CELL_TYPE_A,IJK_A,ICC_A,JCC_A,NM_B,CELL_TYPE_B,IJK_B,ICC_B,JCC_B)
+INTEGER, INTENT(IN) :: NM_A,CELL_TYPE_A,ICC_A,JCC_A,NM_B,CELL_TYPE_B,ICC_B,JCC_B
+INTEGER, INTENT(IN) :: IJK_A(IAXIS:KAXIS),IJK_B(IAXIS:KAXIS)
+CC_GRID_CV_ENTITY_KEYS_MATCH = .FALSE.
+IF (NM_A /= NM_B .OR. CELL_TYPE_A /= CELL_TYPE_B) RETURN
+SELECT CASE(CELL_TYPE_A)
+CASE(CC_GCELL_CUT)
+   CC_GRID_CV_ENTITY_KEYS_MATCH = (ICC_A == ICC_B .AND. JCC_A == JCC_B)
+CASE(CC_GCELL_REG)
+   CC_GRID_CV_ENTITY_KEYS_MATCH = ALL(IJK_A(IAXIS:KAXIS) == IJK_B(IAXIS:KAXIS))
+END SELECT
+END FUNCTION CC_GRID_CV_ENTITY_KEYS_MATCH
+
+
+SUBROUTINE CC_GRID_GET_CV_ENTITY_GEOM_KEY(NM,CELL_TYPE,IJK,ICC,JCC,FOUND,VOLUME,XYZCEN)
+INTEGER, INTENT(IN) :: NM,CELL_TYPE,ICC,JCC,IJK(IAXIS:KAXIS)
+LOGICAL, INTENT(OUT) :: FOUND
+REAL(EB), INTENT(OUT) :: VOLUME,XYZCEN(IAXIS:KAXIS)
+TYPE(MESH_TYPE), POINTER :: M
+INTEGER :: I,J,K
+
+FOUND = .FALSE.; VOLUME = 0._EB; XYZCEN = 0._EB
+M => MESHES(NM)
+SELECT CASE(CELL_TYPE)
+CASE(CC_GCELL_CUT)
+   VOLUME = M%CUT_CELL(ICC)%VOLUME(JCC)
+   XYZCEN(IAXIS:KAXIS) = M%CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,JCC)
+   FOUND = .TRUE.
+CASE(CC_GCELL_REG)
+   I = IJK(IAXIS); J = IJK(JAXIS); K = IJK(KAXIS)
+   VOLUME = M%DX(I)*M%DY(J)*M%DZ(K)
+   XYZCEN(IAXIS:KAXIS) = (/ M%XC(I), M%YC(J), M%ZC(K) /)
+   FOUND = .TRUE.
+END SELECT
+END SUBROUTINE CC_GRID_GET_CV_ENTITY_GEOM_KEY
+
+LOGICAL FUNCTION CC_GRID_CV_ENTITY_KEY_IS_BETTER(NM_A,CELL_TYPE_A,IJK_A,ICC_A,JCC_A,NM_B,CELL_TYPE_B,IJK_B,ICC_B,JCC_B)
+INTEGER, INTENT(IN) :: NM_A,CELL_TYPE_A,ICC_A,JCC_A,NM_B,CELL_TYPE_B,ICC_B,JCC_B
+INTEGER, INTENT(IN) :: IJK_A(IAXIS:KAXIS),IJK_B(IAXIS:KAXIS)
+INTEGER :: AX
+LOGICAL :: FOUND_A,FOUND_B
+REAL(EB) :: VOL_A,VOL_B,XYZ_A(IAXIS:KAXIS),XYZ_B(IAXIS:KAXIS),TOL
+
+CC_GRID_CV_ENTITY_KEY_IS_BETTER = .FALSE.
+FOUND_A = .FALSE.; FOUND_B = .FALSE.; VOL_A = 0._EB; VOL_B = 0._EB; XYZ_A = 0._EB; XYZ_B = 0._EB
+! GEOM_KEY indexes mesh-owned cut-cell / grid arrays; only call it for meshes on this rank.
+IF (NM_A >= LOWER_MESH_INDEX .AND. NM_A <= UPPER_MESH_INDEX) &
+   CALL CC_GRID_GET_CV_ENTITY_GEOM_KEY(NM_A,CELL_TYPE_A,IJK_A,ICC_A,JCC_A,FOUND_A,VOL_A,XYZ_A)
+IF (NM_B >= LOWER_MESH_INDEX .AND. NM_B <= UPPER_MESH_INDEX) &
+   CALL CC_GRID_GET_CV_ENTITY_GEOM_KEY(NM_B,CELL_TYPE_B,IJK_B,ICC_B,JCC_B,FOUND_B,VOL_B,XYZ_B)
+IF (FOUND_A .AND. FOUND_B) THEN
+   TOL = CC_CV_CANON_XYZ_TOL
+   DO AX=IAXIS,KAXIS
+      IF (XYZ_A(AX) < XYZ_B(AX)-TOL) THEN
+         CC_GRID_CV_ENTITY_KEY_IS_BETTER = .TRUE.
+         RETURN
+      ENDIF
+      IF (XYZ_A(AX) > XYZ_B(AX)+TOL) RETURN
+   ENDDO
+   TOL = MAX(CC_CV_CANON_VOLUME_TOL,CC_CV_CANON_VOLUME_TOL*MAX(ABS(VOL_A),ABS(VOL_B)))
+   IF (VOL_A < VOL_B-TOL) THEN
+      CC_GRID_CV_ENTITY_KEY_IS_BETTER = .TRUE.
+      RETURN
+   ENDIF
+   IF (VOL_A > VOL_B+TOL) RETURN
+ENDIF
+
+IF (NM_A < NM_B) THEN
+   CC_GRID_CV_ENTITY_KEY_IS_BETTER = .TRUE.
+   RETURN
+ENDIF
+IF (NM_A > NM_B) RETURN
+
+IF (CELL_TYPE_A < CELL_TYPE_B) THEN
+   CC_GRID_CV_ENTITY_KEY_IS_BETTER = .TRUE.
+   RETURN
+ENDIF
+IF (CELL_TYPE_A > CELL_TYPE_B) RETURN
+
+DO AX=IAXIS,KAXIS
+   IF (IJK_A(AX) < IJK_B(AX)) THEN
+      CC_GRID_CV_ENTITY_KEY_IS_BETTER = .TRUE.
+      RETURN
+   ENDIF
+   IF (IJK_A(AX) > IJK_B(AX)) RETURN
+ENDDO
+
+IF (ICC_A < ICC_B) THEN
+   CC_GRID_CV_ENTITY_KEY_IS_BETTER = .TRUE.
+   RETURN
+ENDIF
+IF (ICC_A > ICC_B) RETURN
+IF (JCC_A < JCC_B) CC_GRID_CV_ENTITY_KEY_IS_BETTER = .TRUE.
+
+END FUNCTION CC_GRID_CV_ENTITY_KEY_IS_BETTER
+
+LOGICAL FUNCTION CC_GRID_WALL_CONFORMS(NM,IW)
+! .TRUE. when the interpolated wall cell IW of mesh NM faces one cell of equal area. A coarse/fine interface is
+! mesh-local: no CV is merged across it.
+INTEGER, INTENT(IN) :: NM,IW
+CC_GRID_WALL_CONFORMS = MESHES(NM)%EXTERNAL_WALL(IW)%NIC==1 .AND. &
+                        ABS(MESHES(NM)%EXTERNAL_WALL(IW)%AREA_RATIO-1._EB)<=1.E-10_EB
+END FUNCTION CC_GRID_WALL_CONFORMS
+
+
+LOGICAL FUNCTION CC_GRID_CANONICALIZE_CV_ENTITY(GEOM_NM,GEOM_CELL_TYPE,GEOM_IJK,GEOM_ICC,GEOM_JCC, &
+                                                OWNER_NM,OWNER_CELL_TYPE,OWNER_IJK,OWNER_ICC,OWNER_JCC)
+INTEGER, INTENT(IN) :: GEOM_NM,GEOM_CELL_TYPE,GEOM_ICC,GEOM_JCC
+INTEGER, INTENT(IN) :: GEOM_IJK(IAXIS:KAXIS)
+INTEGER, INTENT(OUT) :: OWNER_NM,OWNER_CELL_TYPE,OWNER_IJK(IAXIS:KAXIS),OWNER_ICC,OWNER_JCC
+
+TYPE(MESH_TYPE), POINTER :: M_GEOM,M_OWNER
+TYPE(CC_CUTCELL_TYPE), POINTER :: CC_GEOM
+INTEGER :: INOM,NOM,ICC_REMOTE,JCC_REMOTE,N_MATCH,ICC_HOST
+REAL(EB) :: VOL_GEOM,VOL_REMOTE,VOL_TOL,XYZ_DIST
+
+CC_GRID_CANONICALIZE_CV_ENTITY = .FALSE.
+
+OWNER_NM = GEOM_NM
+OWNER_CELL_TYPE = GEOM_CELL_TYPE
+OWNER_IJK(IAXIS:KAXIS) = GEOM_IJK(IAXIS:KAXIS)
+OWNER_ICC = GEOM_ICC
+OWNER_JCC = GEOM_JCC
+
+IF (GEOM_NM < 1 .OR. GEOM_NM > NMESHES) RETURN
+SELECT CASE(GEOM_CELL_TYPE)
+CASE(CC_GCELL_REG)
+   ! A full face can border a cell the cut-cell geometry made a one-piece cut cell (a boundary on its
+   ! face). Its GCELL is that cut piece. Several pieces cannot be told apart from the face: no candidate.
+   CC_GRID_CANONICALIZE_CV_ENTITY = .TRUE.
+   M_GEOM => MESHES(GEOM_NM)
+   ICC_HOST = M_GEOM%CCVAR(GEOM_IJK(IAXIS),GEOM_IJK(JAXIS),GEOM_IJK(KAXIS),CC_IDCC)
+   IF (ICC_HOST < 1) RETURN
+   CC_GRID_CANONICALIZE_CV_ENTITY = M_GEOM%CUT_CELL(ICC_HOST)%NCELL == 1
+   OWNER_CELL_TYPE = CC_GCELL_CUT
+   OWNER_ICC = ICC_HOST
+   OWNER_JCC = 1
+
+CASE(CC_GCELL_CUT)
+   M_GEOM => MESHES(GEOM_NM)
+   IF (GEOM_ICC < 1 .OR. GEOM_ICC > M_GEOM%N_CUTCELL_MESH+M_GEOM%N_GCCUTCELL_MESH) RETURN
+   IF (GEOM_JCC < 1 .OR. GEOM_JCC > M_GEOM%CUT_CELL(GEOM_ICC)%NCELL) RETURN
+   IF (GEOM_ICC <= M_GEOM%N_CUTCELL_MESH) THEN
+      ! In-mesh cut cell is already its own canonical owner.
+      CC_GRID_CANONICALIZE_CV_ENTITY = .TRUE.
+      RETURN
+   ENDIF
+
+   CC_GEOM => M_GEOM%CUT_CELL(GEOM_ICC)
+   ! Guard cut-cell remote-owner data is populated by Phase 2d SET_GC_CUTCELLS_3D.
+   IF (CC_GEOM%N_NOMICC < 1 .OR. .NOT.ALLOCATED(CC_GEOM%NOMICC)) RETURN
+
+   VOL_GEOM = CC_GEOM%VOLUME(GEOM_JCC)
+   N_MATCH = 0
+   DO INOM=1,CC_GEOM%N_NOMICC
+      NOM = CC_GEOM%NOMICC(1,INOM)
+      ICC_REMOTE = CC_GEOM%NOMICC(2,INOM)
+      IF (NOM < 1 .OR. NOM > NMESHES) CYCLE
+      M_OWNER => MESHES(NOM)
+      IF (ICC_REMOTE < 1 .OR. ICC_REMOTE > M_OWNER%N_CUTCELL_MESH+M_OWNER%N_GCCUTCELL_MESH) CYCLE
+      DO JCC_REMOTE=1,M_OWNER%CUT_CELL(ICC_REMOTE)%NCELL
+         VOL_REMOTE = M_OWNER%CUT_CELL(ICC_REMOTE)%VOLUME(JCC_REMOTE)
+         VOL_TOL = MAX(CC_CV_CANON_VOLUME_TOL,CC_CV_CANON_VOLUME_TOL*MAX(ABS(VOL_GEOM),ABS(VOL_REMOTE)))
+         IF (ABS(VOL_GEOM-VOL_REMOTE) > VOL_TOL) CYCLE
+         XYZ_DIST = NORM2(CC_GEOM%XYZCEN(IAXIS:KAXIS,GEOM_JCC) - &
+                          M_OWNER%CUT_CELL(ICC_REMOTE)%XYZCEN(IAXIS:KAXIS,JCC_REMOTE))
+         IF (XYZ_DIST > CC_CV_CANON_XYZ_TOL) CYCLE
+         N_MATCH = N_MATCH + 1
+         OWNER_NM = NOM
+         OWNER_CELL_TYPE = CC_GCELL_CUT
+         OWNER_IJK(IAXIS:KAXIS) = M_OWNER%CUT_CELL(ICC_REMOTE)%IJK(IAXIS:KAXIS)
+         OWNER_ICC = ICC_REMOTE
+         OWNER_JCC = JCC_REMOTE
+      ENDDO
+   ENDDO
+   CC_GRID_CANONICALIZE_CV_ENTITY = (N_MATCH == 1)
+END SELECT
+END FUNCTION CC_GRID_CANONICALIZE_CV_ENTITY
+
+LOGICAL FUNCTION CC_GRID_CV_CANDIDATE_RANKS_BEFORE(AXIS_A,FACE_AREA_A,MAX_THETA_A,MAX_SKEW_A,MIN_DFDIAM_A, &
+                                                   NM_A,CELL_TYPE_A,IJK_A,ICC_A,JCC_A, &
+                                                   AXIS_B,FACE_AREA_B,MAX_THETA_B,MAX_SKEW_B,MIN_DFDIAM_B, &
+                                                   NM_B,CELL_TYPE_B,IJK_B,ICC_B,JCC_B)
+INTEGER, INTENT(IN) :: AXIS_A,NM_A,CELL_TYPE_A,ICC_A,JCC_A
+INTEGER, INTENT(IN) :: AXIS_B,NM_B,CELL_TYPE_B,ICC_B,JCC_B
+INTEGER, INTENT(IN) :: IJK_A(IAXIS:KAXIS),IJK_B(IAXIS:KAXIS)
+REAL(EB), INTENT(IN) :: FACE_AREA_A,MAX_THETA_A,MAX_SKEW_A,MIN_DFDIAM_A
+REAL(EB), INTENT(IN) :: FACE_AREA_B,MAX_THETA_B,MAX_SKEW_B,MIN_DFDIAM_B
+
+CC_GRID_CV_CANDIDATE_RANKS_BEFORE = .FALSE.
+IF (CC_GRID_CV_MERGE_CANDIDATE_IS_BETTER(AXIS_A,FACE_AREA_A,MAX_THETA_A,MAX_SKEW_A,MIN_DFDIAM_A, &
+                                         AXIS_B,FACE_AREA_B,MAX_THETA_B,MAX_SKEW_B,MIN_DFDIAM_B)) THEN
+   CC_GRID_CV_CANDIDATE_RANKS_BEFORE = .TRUE.
+   RETURN
+ENDIF
+IF (CC_GRID_CV_MERGE_CANDIDATE_IS_BETTER(AXIS_B,FACE_AREA_B,MAX_THETA_B,MAX_SKEW_B,MIN_DFDIAM_B, &
+                                         AXIS_A,FACE_AREA_A,MAX_THETA_A,MAX_SKEW_A,MIN_DFDIAM_A)) RETURN
+
+CC_GRID_CV_CANDIDATE_RANKS_BEFORE = CC_GRID_CV_ENTITY_KEY_IS_BETTER(NM_A,CELL_TYPE_A,IJK_A,ICC_A,JCC_A, &
+                                                                    NM_B,CELL_TYPE_B,IJK_B,ICC_B,JCC_B)
+END FUNCTION CC_GRID_CV_CANDIDATE_RANKS_BEFORE
+
+INTEGER FUNCTION CC_GRID_CV_OCC_LOOKUP_IG(NM,CELL_TYPE,IJK,ICC,JCC,VOLUME,XYZCEN,FOUND_GEOM)
+INTEGER, INTENT(IN) :: NM,CELL_TYPE,ICC,JCC
+INTEGER, INTENT(IN) :: IJK(IAXIS:KAXIS)
+REAL(EB), INTENT(IN) :: VOLUME,XYZCEN(IAXIS:KAXIS)
+LOGICAL, INTENT(IN) :: FOUND_GEOM
+INTEGER :: IG
+
+IG = CC_GRID_GET_GCELL_INDEX_FROM_ENTITY(NM,CELL_TYPE,IJK,ICC,JCC)
+IF (IG < 1 .AND. FOUND_GEOM) IG = CC_GRID_GET_GCELL_INDEX_FROM_GEOM(NM,CELL_TYPE,VOLUME,XYZCEN)
+CC_GRID_CV_OCC_LOOKUP_IG = IG
+END FUNCTION CC_GRID_CV_OCC_LOOKUP_IG
+
+LOGICAL FUNCTION CC_GRID_CV_OCC_FLAG_READY(NM,IG)
+INTEGER, INTENT(IN) :: NM,IG
+CC_GRID_CV_OCC_FLAG_READY = .FALSE.
+IF (NM < 1 .OR. NM > NMESHES) RETURN
+IF (IG < 1) RETURN
+IF (.NOT.ALLOCATED(MESHES(NM)%FV%GCELL%ABSORBED)) RETURN
+IF (.NOT.ALLOCATED(MESHES(NM)%FV%GCELL%CLAIMED)) RETURN
+IF (IG > MESHES(NM)%FV%GCELL%N) RETURN
+CC_GRID_CV_OCC_FLAG_READY = .TRUE.
+END FUNCTION CC_GRID_CV_OCC_FLAG_READY
+
+LOGICAL FUNCTION CC_GRID_CV_REMOTE_GEOM_MATCHES(CELL_TYPE,VOLUME,XYZCEN,OCC_CELL_TYPE,OCC_VOLUME,OCC_XYZCEN)
+INTEGER, INTENT(IN) :: CELL_TYPE,OCC_CELL_TYPE
+REAL(EB), INTENT(IN) :: VOLUME,XYZCEN(IAXIS:KAXIS),OCC_VOLUME,OCC_XYZCEN(IAXIS:KAXIS)
+REAL(EB) :: VOL_TOL
+CC_GRID_CV_REMOTE_GEOM_MATCHES = .FALSE.
+IF (OCC_CELL_TYPE /= CELL_TYPE) RETURN
+VOL_TOL = MAX(CC_CV_CANON_VOLUME_TOL,CC_CV_CANON_VOLUME_TOL*MAX(ABS(VOLUME),ABS(OCC_VOLUME)))
+IF (ABS(OCC_VOLUME-VOLUME) > VOL_TOL) RETURN
+IF (NORM2(OCC_XYZCEN(IAXIS:KAXIS)-XYZCEN(IAXIS:KAXIS)) > CC_CV_CANON_XYZ_TOL) RETURN
+CC_GRID_CV_REMOTE_GEOM_MATCHES = .TRUE.
+END FUNCTION CC_GRID_CV_REMOTE_GEOM_MATCHES
+
+LOGICAL FUNCTION CC_GRID_CV_IS_ABSORBED(NM,CELL_TYPE,IJK,ICC,JCC,VOLUME,XYZCEN,FOUND_GEOM)
+INTEGER, INTENT(IN) :: NM,CELL_TYPE,ICC,JCC
+INTEGER, INTENT(IN) :: IJK(IAXIS:KAXIS)
+REAL(EB), INTENT(IN) :: VOLUME,XYZCEN(IAXIS:KAXIS)
+LOGICAL, INTENT(IN) :: FOUND_GEOM
+INTEGER :: IG,IOCC
+
+IG = CC_GRID_CV_OCC_LOOKUP_IG(NM,CELL_TYPE,IJK,ICC,JCC,VOLUME,XYZCEN,FOUND_GEOM)
+IF (CC_GRID_CV_OCC_FLAG_READY(NM,IG)) THEN
+   CC_GRID_CV_IS_ABSORBED = MESHES(NM)%FV%GCELL%ABSORBED(IG)
+   RETURN
+ENDIF
+CC_GRID_CV_IS_ABSORBED = .FALSE.
+DO IOCC=1,N_REMOTE_ABS
+   IF (CC_GRID_CV_ENTITY_KEYS_MATCH(NM,CELL_TYPE,IJK,ICC,JCC,REMOTE_ABS_NM(IOCC),REMOTE_ABS_CELL_TYPE(IOCC), &
+                                    REMOTE_ABS_IJK(IAXIS:KAXIS,IOCC),REMOTE_ABS_ICC(IOCC),REMOTE_ABS_JCC(IOCC))) THEN
+      CC_GRID_CV_IS_ABSORBED = .TRUE.
+      RETURN
+   ENDIF
+ENDDO
+IF (.NOT.FOUND_GEOM) RETURN
+DO IOCC=1,N_REMOTE_ABS
+   IF (CC_GRID_CV_REMOTE_GEOM_MATCHES(CELL_TYPE,VOLUME,XYZCEN,REMOTE_ABS_GTYPE(IOCC), &
+                                     REMOTE_ABS_VOL(IOCC),REMOTE_ABS_XYZ(IAXIS:KAXIS,IOCC))) THEN
+      CC_GRID_CV_IS_ABSORBED = .TRUE.
+      RETURN
+   ENDIF
+ENDDO
+END FUNCTION CC_GRID_CV_IS_ABSORBED
+
+LOGICAL FUNCTION CC_GRID_CV_IS_CLAIMED(NM,CELL_TYPE,IJK,ICC,JCC,VOLUME,XYZCEN,FOUND_GEOM)
+INTEGER, INTENT(IN) :: NM,CELL_TYPE,ICC,JCC
+INTEGER, INTENT(IN) :: IJK(IAXIS:KAXIS)
+REAL(EB), INTENT(IN) :: VOLUME,XYZCEN(IAXIS:KAXIS)
+LOGICAL, INTENT(IN) :: FOUND_GEOM
+INTEGER :: IG,IOCC
+
+IG = CC_GRID_CV_OCC_LOOKUP_IG(NM,CELL_TYPE,IJK,ICC,JCC,VOLUME,XYZCEN,FOUND_GEOM)
+IF (CC_GRID_CV_OCC_FLAG_READY(NM,IG)) THEN
+   CC_GRID_CV_IS_CLAIMED = MESHES(NM)%FV%GCELL%CLAIMED(IG)
+   RETURN
+ENDIF
+CC_GRID_CV_IS_CLAIMED = .FALSE.
+DO IOCC=1,N_REMOTE_CLAIM
+   IF (CC_GRID_CV_ENTITY_KEYS_MATCH(NM,CELL_TYPE,IJK,ICC,JCC,REMOTE_CLAIM_NM(IOCC),REMOTE_CLAIM_CELL_TYPE(IOCC), &
+                                    REMOTE_CLAIM_IJK(IAXIS:KAXIS,IOCC),REMOTE_CLAIM_ICC(IOCC),REMOTE_CLAIM_JCC(IOCC))) THEN
+      CC_GRID_CV_IS_CLAIMED = .TRUE.
+      RETURN
+   ENDIF
+ENDDO
+IF (.NOT.FOUND_GEOM) RETURN
+DO IOCC=1,N_REMOTE_CLAIM
+   IF (CC_GRID_CV_REMOTE_GEOM_MATCHES(CELL_TYPE,VOLUME,XYZCEN,REMOTE_CLAIM_GTYPE(IOCC), &
+                                     REMOTE_CLAIM_VOL(IOCC),REMOTE_CLAIM_XYZ(IAXIS:KAXIS,IOCC))) THEN
+      CC_GRID_CV_IS_CLAIMED = .TRUE.
+      RETURN
+   ENDIF
+ENDDO
+END FUNCTION CC_GRID_CV_IS_CLAIMED
+
+SUBROUTINE CC_GRID_CV_MARK_ABSORBED(NM,CELL_TYPE,IJK,ICC,JCC,VOLUME,XYZCEN,FOUND_GEOM)
+INTEGER, INTENT(IN) :: NM,CELL_TYPE,ICC,JCC
+INTEGER, INTENT(IN) :: IJK(IAXIS:KAXIS)
+REAL(EB), INTENT(IN) :: VOLUME,XYZCEN(IAXIS:KAXIS)
+LOGICAL, INTENT(IN) :: FOUND_GEOM
+INTEGER :: IG
+
+IG = CC_GRID_CV_OCC_LOOKUP_IG(NM,CELL_TYPE,IJK,ICC,JCC,VOLUME,XYZCEN,FOUND_GEOM)
+IF (CC_GRID_CV_OCC_FLAG_READY(NM,IG)) THEN
+   MESHES(NM)%FV%GCELL%ABSORBED(IG) = .TRUE.
+   RETURN
+ENDIF
+IF (CC_GRID_CV_IS_ABSORBED(NM,CELL_TYPE,IJK,ICC,JCC,VOLUME,XYZCEN,FOUND_GEOM)) RETURN
+IF (.NOT.ALLOCATED(REMOTE_ABS_NM)) THEN
+   WRITE(LU_ERR,'(A)') 'ERROR: Phase 5 CV remote ABSORBED list is not allocated.'
+   STOP_STATUS = SETUP_STOP
+   RETURN
+ENDIF
+IF (N_REMOTE_ABS >= SIZE(REMOTE_ABS_NM)) THEN
+   WRITE(LU_ERR,'(A,2I10)') 'ERROR: Phase 5 CV remote ABSORBED buffer overflow:',N_REMOTE_ABS,SIZE(REMOTE_ABS_NM)
+   STOP_STATUS = SETUP_STOP
+   RETURN
+ENDIF
+N_REMOTE_ABS = N_REMOTE_ABS + 1
+REMOTE_ABS_NM(N_REMOTE_ABS) = NM
+REMOTE_ABS_CELL_TYPE(N_REMOTE_ABS) = CELL_TYPE
+REMOTE_ABS_IJK(IAXIS:KAXIS,N_REMOTE_ABS) = IJK(IAXIS:KAXIS)
+REMOTE_ABS_ICC(N_REMOTE_ABS) = ICC
+REMOTE_ABS_JCC(N_REMOTE_ABS) = JCC
+IF (FOUND_GEOM) THEN
+   REMOTE_ABS_GTYPE(N_REMOTE_ABS) = CELL_TYPE
+   REMOTE_ABS_VOL(N_REMOTE_ABS) = VOLUME
+   REMOTE_ABS_XYZ(IAXIS:KAXIS,N_REMOTE_ABS) = XYZCEN(IAXIS:KAXIS)
+ELSE
+   REMOTE_ABS_GTYPE(N_REMOTE_ABS) = 0
+   REMOTE_ABS_VOL(N_REMOTE_ABS) = 0._EB
+   REMOTE_ABS_XYZ(IAXIS:KAXIS,N_REMOTE_ABS) = 0._EB
+ENDIF
+END SUBROUTINE CC_GRID_CV_MARK_ABSORBED
+
+SUBROUTINE CC_GRID_CV_MARK_CLAIMED(NM,CELL_TYPE,IJK,ICC,JCC,VOLUME,XYZCEN,FOUND_GEOM)
+INTEGER, INTENT(IN) :: NM,CELL_TYPE,ICC,JCC
+INTEGER, INTENT(IN) :: IJK(IAXIS:KAXIS)
+REAL(EB), INTENT(IN) :: VOLUME,XYZCEN(IAXIS:KAXIS)
+LOGICAL, INTENT(IN) :: FOUND_GEOM
+INTEGER :: IG
+
+IG = CC_GRID_CV_OCC_LOOKUP_IG(NM,CELL_TYPE,IJK,ICC,JCC,VOLUME,XYZCEN,FOUND_GEOM)
+IF (CC_GRID_CV_OCC_FLAG_READY(NM,IG)) THEN
+   MESHES(NM)%FV%GCELL%CLAIMED(IG) = .TRUE.
+   RETURN
+ENDIF
+IF (CC_GRID_CV_IS_CLAIMED(NM,CELL_TYPE,IJK,ICC,JCC,VOLUME,XYZCEN,FOUND_GEOM)) RETURN
+IF (.NOT.ALLOCATED(REMOTE_CLAIM_NM)) THEN
+   WRITE(LU_ERR,'(A)') 'ERROR: Phase 5 CV remote CLAIMED list is not allocated.'
+   STOP_STATUS = SETUP_STOP
+   RETURN
+ENDIF
+IF (N_REMOTE_CLAIM >= SIZE(REMOTE_CLAIM_NM)) THEN
+   WRITE(LU_ERR,'(A,2I10)') 'ERROR: Phase 5 CV remote CLAIMED buffer overflow:',N_REMOTE_CLAIM,SIZE(REMOTE_CLAIM_NM)
+   STOP_STATUS = SETUP_STOP
+   RETURN
+ENDIF
+N_REMOTE_CLAIM = N_REMOTE_CLAIM + 1
+REMOTE_CLAIM_NM(N_REMOTE_CLAIM) = NM
+REMOTE_CLAIM_CELL_TYPE(N_REMOTE_CLAIM) = CELL_TYPE
+REMOTE_CLAIM_IJK(IAXIS:KAXIS,N_REMOTE_CLAIM) = IJK(IAXIS:KAXIS)
+REMOTE_CLAIM_ICC(N_REMOTE_CLAIM) = ICC
+REMOTE_CLAIM_JCC(N_REMOTE_CLAIM) = JCC
+IF (FOUND_GEOM) THEN
+   REMOTE_CLAIM_GTYPE(N_REMOTE_CLAIM) = CELL_TYPE
+   REMOTE_CLAIM_VOL(N_REMOTE_CLAIM) = VOLUME
+   REMOTE_CLAIM_XYZ(IAXIS:KAXIS,N_REMOTE_CLAIM) = XYZCEN(IAXIS:KAXIS)
+ELSE
+   REMOTE_CLAIM_GTYPE(N_REMOTE_CLAIM) = 0
+   REMOTE_CLAIM_VOL(N_REMOTE_CLAIM) = 0._EB
+   REMOTE_CLAIM_XYZ(IAXIS:KAXIS,N_REMOTE_CLAIM) = 0._EB
+ENDIF
+END SUBROUTINE CC_GRID_CV_MARK_CLAIMED
+
+SUBROUTINE CC_GRID_CV_OCC_DEALLOCATE_REMOTES
+IF (ALLOCATED(REMOTE_ABS_NM)) DEALLOCATE(REMOTE_ABS_NM,REMOTE_ABS_CELL_TYPE,REMOTE_ABS_ICC,REMOTE_ABS_JCC)
+IF (ALLOCATED(REMOTE_ABS_IJK)) DEALLOCATE(REMOTE_ABS_IJK)
+IF (ALLOCATED(REMOTE_ABS_GTYPE)) DEALLOCATE(REMOTE_ABS_GTYPE,REMOTE_ABS_VOL,REMOTE_ABS_XYZ)
+IF (ALLOCATED(REMOTE_CLAIM_NM)) DEALLOCATE(REMOTE_CLAIM_NM,REMOTE_CLAIM_CELL_TYPE,REMOTE_CLAIM_ICC,REMOTE_CLAIM_JCC)
+IF (ALLOCATED(REMOTE_CLAIM_IJK)) DEALLOCATE(REMOTE_CLAIM_IJK)
+IF (ALLOCATED(REMOTE_CLAIM_GTYPE)) &
+   DEALLOCATE(REMOTE_CLAIM_GTYPE,REMOTE_CLAIM_VOL,REMOTE_CLAIM_XYZ)
+N_REMOTE_ABS = 0
+N_REMOTE_CLAIM = 0
+END SUBROUTINE CC_GRID_CV_OCC_DEALLOCATE_REMOTES
+
+SUBROUTINE CC_GRID_CV_OCC_ALLOCATE_REMOTES(N)
+INTEGER, INTENT(IN) :: N
+INTEGER :: NALLOC
+CALL CC_GRID_CV_OCC_DEALLOCATE_REMOTES
+NALLOC = MAX(1,N)
+ALLOCATE(REMOTE_ABS_NM(1:NALLOC),REMOTE_ABS_CELL_TYPE(1:NALLOC),REMOTE_ABS_ICC(1:NALLOC),REMOTE_ABS_JCC(1:NALLOC))
+ALLOCATE(REMOTE_ABS_IJK(IAXIS:KAXIS,1:NALLOC))
+ALLOCATE(REMOTE_ABS_GTYPE(1:NALLOC),REMOTE_ABS_VOL(1:NALLOC),REMOTE_ABS_XYZ(IAXIS:KAXIS,1:NALLOC))
+ALLOCATE(REMOTE_CLAIM_NM(1:NALLOC),REMOTE_CLAIM_CELL_TYPE(1:NALLOC),REMOTE_CLAIM_ICC(1:NALLOC),REMOTE_CLAIM_JCC(1:NALLOC))
+ALLOCATE(REMOTE_CLAIM_IJK(IAXIS:KAXIS,1:NALLOC))
+ALLOCATE(REMOTE_CLAIM_GTYPE(1:NALLOC),REMOTE_CLAIM_VOL(1:NALLOC),REMOTE_CLAIM_XYZ(IAXIS:KAXIS,1:NALLOC))
+REMOTE_ABS_NM = 0; REMOTE_ABS_CELL_TYPE = 0; REMOTE_ABS_ICC = 0; REMOTE_ABS_JCC = 0; REMOTE_ABS_IJK = 0
+REMOTE_ABS_GTYPE = 0; REMOTE_ABS_VOL = 0._EB; REMOTE_ABS_XYZ = 0._EB
+REMOTE_CLAIM_NM = 0; REMOTE_CLAIM_CELL_TYPE = 0; REMOTE_CLAIM_ICC = 0; REMOTE_CLAIM_JCC = 0; REMOTE_CLAIM_IJK = 0
+REMOTE_CLAIM_GTYPE = 0; REMOTE_CLAIM_VOL = 0._EB; REMOTE_CLAIM_XYZ = 0._EB
+END SUBROUTINE CC_GRID_CV_OCC_ALLOCATE_REMOTES
+
+SUBROUTINE CC_GRID_ALLOCATE_CV_PROPOSAL_BUFFER(PROPOSAL,N)
+
+TYPE(CC_CV_PROPOSAL_BUFFER_TYPE), INTENT(INOUT) :: PROPOSAL
+INTEGER, INTENT(IN) :: N
+
+CALL CC_GRID_DEALLOCATE_CV_PROPOSAL_BUFFER(PROPOSAL)
+IF (N < 1) RETURN
+
+ALLOCATE(PROPOSAL%CHILD_NM(1:N),PROPOSAL%CHILD_IG(1:N),PROPOSAL%CHILD_ICC(1:N),PROPOSAL%CHILD_JCC(1:N))
+ALLOCATE(PROPOSAL%MASTER_NM(1:N),PROPOSAL%MASTER_CELL_TYPE(1:N),PROPOSAL%MASTER_ICC(1:N), &
+         PROPOSAL%MASTER_JCC(1:N),PROPOSAL%MASTER_IG(1:N))
+ALLOCATE(PROPOSAL%CENTER_SOURCE(1:N),PROPOSAL%CONN_AXIS(1:N),PROPOSAL%IS_ALT(1:N))
+ALLOCATE(PROPOSAL%ROOT_NM(1:N),PROPOSAL%ROOT_IG(1:N),PROPOSAL%SLOT(1:N))
+ALLOCATE(PROPOSAL%CHILD_IJK(IAXIS:KAXIS,1:N),PROPOSAL%MASTER_IJK(IAXIS:KAXIS,1:N))
+ALLOCATE(PROPOSAL%THETA(1:N),PROPOSAL%SKEW(1:N),PROPOSAL%DFDIAM(1:N),PROPOSAL%CONN_AREA(1:N),PROPOSAL%VOLUME(1:N))
+ALLOCATE(PROPOSAL%XCV(IAXIS:KAXIS,1:N),PROPOSAL%XBAR_CV(IAXIS:KAXIS,1:N))
+ALLOCATE(PROPOSAL%CHILD_VOLUME(1:N),PROPOSAL%MASTER_VOLUME(1:N))
+ALLOCATE(PROPOSAL%CHILD_XYZCEN(IAXIS:KAXIS,1:N),PROPOSAL%MASTER_XYZCEN(IAXIS:KAXIS,1:N))
+
+PROPOSAL%CHILD_NM = 0; PROPOSAL%CHILD_IG = 0; PROPOSAL%CHILD_ICC = 0; PROPOSAL%CHILD_JCC = 0
+PROPOSAL%MASTER_NM = 0; PROPOSAL%MASTER_CELL_TYPE = 0; PROPOSAL%MASTER_ICC = 0; PROPOSAL%MASTER_JCC = 0; PROPOSAL%MASTER_IG = 0
+PROPOSAL%CENTER_SOURCE = 0; PROPOSAL%CONN_AXIS = 0; PROPOSAL%IS_ALT = 0
+PROPOSAL%ROOT_NM = 0; PROPOSAL%ROOT_IG = 0; PROPOSAL%SLOT = 0
+PROPOSAL%CHILD_IJK = 0; PROPOSAL%MASTER_IJK = 0
+PROPOSAL%THETA = 0._EB; PROPOSAL%SKEW = 0._EB; PROPOSAL%DFDIAM = 0._EB; PROPOSAL%CONN_AREA = 0._EB; PROPOSAL%VOLUME = 0._EB
+PROPOSAL%XCV = 0._EB; PROPOSAL%XBAR_CV = 0._EB
+PROPOSAL%CHILD_VOLUME = 0._EB; PROPOSAL%MASTER_VOLUME = 0._EB
+PROPOSAL%CHILD_XYZCEN = 0._EB; PROPOSAL%MASTER_XYZCEN = 0._EB
+
+END SUBROUTINE CC_GRID_ALLOCATE_CV_PROPOSAL_BUFFER
+
+SUBROUTINE CC_GRID_DEALLOCATE_CV_PROPOSAL_BUFFER(PROPOSAL)
+
+TYPE(CC_CV_PROPOSAL_BUFFER_TYPE), INTENT(INOUT) :: PROPOSAL
+
+IF (ALLOCATED(PROPOSAL%CHILD_NM)) DEALLOCATE(PROPOSAL%CHILD_NM,PROPOSAL%CHILD_IG,PROPOSAL%CHILD_ICC,PROPOSAL%CHILD_JCC)
+IF (ALLOCATED(PROPOSAL%MASTER_NM)) DEALLOCATE(PROPOSAL%MASTER_NM,PROPOSAL%MASTER_CELL_TYPE,PROPOSAL%MASTER_ICC, &
+                                              PROPOSAL%MASTER_JCC,PROPOSAL%MASTER_IG)
+IF (ALLOCATED(PROPOSAL%CENTER_SOURCE)) DEALLOCATE(PROPOSAL%CENTER_SOURCE,PROPOSAL%CONN_AXIS)
+IF (ALLOCATED(PROPOSAL%IS_ALT)) DEALLOCATE(PROPOSAL%IS_ALT)
+IF (ALLOCATED(PROPOSAL%ROOT_NM)) DEALLOCATE(PROPOSAL%ROOT_NM,PROPOSAL%ROOT_IG,PROPOSAL%SLOT)
+IF (ALLOCATED(PROPOSAL%CHILD_IJK)) DEALLOCATE(PROPOSAL%CHILD_IJK,PROPOSAL%MASTER_IJK)
+IF (ALLOCATED(PROPOSAL%THETA)) DEALLOCATE(PROPOSAL%THETA,PROPOSAL%SKEW,PROPOSAL%DFDIAM,PROPOSAL%CONN_AREA,PROPOSAL%VOLUME)
+IF (ALLOCATED(PROPOSAL%XCV)) DEALLOCATE(PROPOSAL%XCV,PROPOSAL%XBAR_CV)
+IF (ALLOCATED(PROPOSAL%CHILD_VOLUME)) DEALLOCATE(PROPOSAL%CHILD_VOLUME,PROPOSAL%MASTER_VOLUME)
+IF (ALLOCATED(PROPOSAL%CHILD_XYZCEN)) DEALLOCATE(PROPOSAL%CHILD_XYZCEN,PROPOSAL%MASTER_XYZCEN)
+
+END SUBROUTINE CC_GRID_DEALLOCATE_CV_PROPOSAL_BUFFER
+
+SUBROUTINE CC_GRID_PACK_CV_PROPOSAL(P,I,REC)
+! One proposal as reals for CC_GRID_SEAM_EXCHANGE. 1:7 child nm,ig,i,j,k,icc,jcc.
+! 8:15 master nm,type,i,j,k,icc,jcc,ig. 16:18 center, axis, alt. 19:23 theta, skew, dfdiam, area, volume.
+! 24:26 xcv. 27:29 xbar. 30:33 child volume, xyz. 34:37 master volume, xyz. 38:40 root nm, ig, slot.
+TYPE(CC_CV_PROPOSAL_BUFFER_TYPE), INTENT(IN) :: P
+INTEGER, INTENT(IN) :: I
+REAL(EB), INTENT(OUT) :: REC(CC_CV_NW)
+REC = 0._EB
+REC(1) = REAL(P%CHILD_NM(I),EB); REC(2) = REAL(P%CHILD_IG(I),EB)
+REC(3) = REAL(P%CHILD_IJK(IAXIS,I),EB); REC(4) = REAL(P%CHILD_IJK(JAXIS,I),EB); REC(5) = REAL(P%CHILD_IJK(KAXIS,I),EB)
+REC(6) = REAL(P%CHILD_ICC(I),EB); REC(7) = REAL(P%CHILD_JCC(I),EB)
+REC(8) = REAL(P%MASTER_NM(I),EB); REC(9) = REAL(P%MASTER_CELL_TYPE(I),EB)
+REC(10) = REAL(P%MASTER_IJK(IAXIS,I),EB); REC(11) = REAL(P%MASTER_IJK(JAXIS,I),EB); REC(12) = REAL(P%MASTER_IJK(KAXIS,I),EB)
+REC(13) = REAL(P%MASTER_ICC(I),EB); REC(14) = REAL(P%MASTER_JCC(I),EB); REC(15) = REAL(P%MASTER_IG(I),EB)
+REC(16) = REAL(P%CENTER_SOURCE(I),EB); REC(17) = REAL(P%CONN_AXIS(I),EB); REC(18) = REAL(P%IS_ALT(I),EB)
+REC(19) = P%THETA(I); REC(20) = P%SKEW(I); REC(21) = P%DFDIAM(I); REC(22) = P%CONN_AREA(I); REC(23) = P%VOLUME(I)
+REC(24) = P%XCV(IAXIS,I); REC(25) = P%XCV(JAXIS,I); REC(26) = P%XCV(KAXIS,I)
+REC(27) = P%XBAR_CV(IAXIS,I); REC(28) = P%XBAR_CV(JAXIS,I); REC(29) = P%XBAR_CV(KAXIS,I)
+REC(30) = P%CHILD_VOLUME(I)
+REC(31) = P%CHILD_XYZCEN(IAXIS,I); REC(32) = P%CHILD_XYZCEN(JAXIS,I); REC(33) = P%CHILD_XYZCEN(KAXIS,I)
+REC(34) = P%MASTER_VOLUME(I)
+REC(35) = P%MASTER_XYZCEN(IAXIS,I); REC(36) = P%MASTER_XYZCEN(JAXIS,I); REC(37) = P%MASTER_XYZCEN(KAXIS,I)
+REC(38) = REAL(P%ROOT_NM(I),EB); REC(39) = REAL(P%ROOT_IG(I),EB); REC(40) = REAL(P%SLOT(I),EB)
+END SUBROUTINE CC_GRID_PACK_CV_PROPOSAL
+
+SUBROUTINE CC_GRID_UNPACK_CV_PROPOSAL(P,I,REC)
+TYPE(CC_CV_PROPOSAL_BUFFER_TYPE), INTENT(INOUT) :: P
+INTEGER, INTENT(IN) :: I
+REAL(EB), INTENT(IN) :: REC(CC_CV_NW)
+P%CHILD_NM(I) = NINT(REC(1)); P%CHILD_IG(I) = NINT(REC(2))
+P%CHILD_IJK(IAXIS,I) = NINT(REC(3)); P%CHILD_IJK(JAXIS,I) = NINT(REC(4)); P%CHILD_IJK(KAXIS,I) = NINT(REC(5))
+P%CHILD_ICC(I) = NINT(REC(6)); P%CHILD_JCC(I) = NINT(REC(7))
+P%MASTER_NM(I) = NINT(REC(8)); P%MASTER_CELL_TYPE(I) = NINT(REC(9))
+P%MASTER_IJK(IAXIS,I) = NINT(REC(10)); P%MASTER_IJK(JAXIS,I) = NINT(REC(11)); P%MASTER_IJK(KAXIS,I) = NINT(REC(12))
+P%MASTER_ICC(I) = NINT(REC(13)); P%MASTER_JCC(I) = NINT(REC(14)); P%MASTER_IG(I) = NINT(REC(15))
+P%CENTER_SOURCE(I) = NINT(REC(16)); P%CONN_AXIS(I) = NINT(REC(17)); P%IS_ALT(I) = NINT(REC(18))
+P%THETA(I) = REC(19); P%SKEW(I) = REC(20); P%DFDIAM(I) = REC(21); P%CONN_AREA(I) = REC(22); P%VOLUME(I) = REC(23)
+P%XCV(IAXIS,I) = REC(24); P%XCV(JAXIS,I) = REC(25); P%XCV(KAXIS,I) = REC(26)
+P%XBAR_CV(IAXIS,I) = REC(27); P%XBAR_CV(JAXIS,I) = REC(28); P%XBAR_CV(KAXIS,I) = REC(29)
+P%CHILD_VOLUME(I) = REC(30)
+P%CHILD_XYZCEN(IAXIS,I) = REC(31); P%CHILD_XYZCEN(JAXIS,I) = REC(32); P%CHILD_XYZCEN(KAXIS,I) = REC(33)
+P%MASTER_VOLUME(I) = REC(34)
+P%MASTER_XYZCEN(IAXIS,I) = REC(35); P%MASTER_XYZCEN(JAXIS,I) = REC(36); P%MASTER_XYZCEN(KAXIS,I) = REC(37)
+P%ROOT_NM(I) = NINT(REC(38)); P%ROOT_IG(I) = NINT(REC(39)); P%SLOT(I) = NINT(REC(40))
+END SUBROUTINE CC_GRID_UNPACK_CV_PROPOSAL
+
+SUBROUTINE CC_GRID_GROW_CV_PROPOSALS(P,USED,NEED)
+! One new buffer at NEED. Slots 1:USED are copied; the caller fills the rest.
+TYPE(CC_CV_PROPOSAL_BUFFER_TYPE), INTENT(INOUT) :: P
+INTEGER, INTENT(IN) :: USED,NEED
+TYPE(CC_CV_PROPOSAL_BUFFER_TYPE) :: TMP
+REAL(EB) :: REC(CC_CV_NW)
+INTEGER :: I
+IF (NEED < 1) RETURN
+IF (ALLOCATED(P%CHILD_NM)) THEN
+   IF (NEED <= SIZE(P%CHILD_NM)) RETURN
+ENDIF
+CALL CC_GRID_ALLOCATE_CV_PROPOSAL_BUFFER(TMP,NEED)
+DO I=1,USED
+   CALL CC_GRID_PACK_CV_PROPOSAL(P,I,REC)
+   CALL CC_GRID_UNPACK_CV_PROPOSAL(TMP,I,REC)
+ENDDO
+P = TMP
+END SUBROUTINE CC_GRID_GROW_CV_PROPOSALS
+
+SUBROUTINE CC_GRID_SET_PROPOSAL_MASTER_GEOM(P,I)
+! The rank that holds the master mesh writes that GCELL into the proposal.
+TYPE(CC_CV_PROPOSAL_BUFFER_TYPE), INTENT(INOUT) :: P
+INTEGER, INTENT(IN) :: I
+TYPE(MESH_TYPE), POINTER :: M
+INTEGER :: NM,IG,IJK(IAXIS:KAXIS)
+LOGICAL :: FOUND
+NM = P%MASTER_NM(I)
+IF (NM < LOWER_MESH_INDEX .OR. NM > UPPER_MESH_INDEX) RETURN
+M => MESHES(NM)
+IF (.NOT.ALLOCATED(M%FV%GCELL%CELL_TYPE)) THEN
+   CALL CC_GRID_CLEAR_PROPOSAL_MASTER_FIELDS(P,I); P%MASTER_IG(I) = 0; RETURN
+ENDIF
+IJK(IAXIS:KAXIS) = P%MASTER_IJK(IAXIS:KAXIS,I)
+CALL CC_GRID_GET_CV_ENTITY_GEOM_KEY(NM,P%MASTER_CELL_TYPE(I),IJK,P%MASTER_ICC(I),P%MASTER_JCC(I), &
+                                    FOUND,P%MASTER_VOLUME(I),P%MASTER_XYZCEN(IAXIS:KAXIS,I))
+IF (.NOT.FOUND) THEN
+   CALL CC_GRID_CLEAR_PROPOSAL_MASTER_FIELDS(P,I); P%MASTER_IG(I) = 0; RETURN
+ENDIF
+IG = CC_GRID_GET_GCELL_INDEX_FROM_GEOM(NM,P%MASTER_CELL_TYPE(I),P%MASTER_VOLUME(I),P%MASTER_XYZCEN(IAXIS:KAXIS,I))
+P%MASTER_IG(I) = IG
+IF (IG < 1 .OR. IG > M%FV%GCELL%N) THEN
+   CALL CC_GRID_CLEAR_PROPOSAL_MASTER_FIELDS(P,I); P%MASTER_IG(I) = 0; RETURN
+ENDIF
+P%MASTER_CELL_TYPE(I) = M%FV%GCELL%CELL_TYPE(IG)
+P%MASTER_IJK(IAXIS:KAXIS,I) = M%FV%GCELL%IJK(IAXIS:KAXIS,IG)
+P%MASTER_ICC(I) = M%FV%GCELL%ICC(IG); P%MASTER_JCC(I) = M%FV%GCELL%JCC(IG)
+P%MASTER_VOLUME(I) = M%FV%GCELL%VOLUME(IG)
+P%MASTER_XYZCEN(IAXIS:KAXIS,I) = M%FV%GCELL%XYZCEN(IAXIS:KAXIS,IG)
+END SUBROUTINE CC_GRID_SET_PROPOSAL_MASTER_GEOM
+
+FUNCTION CC_GRID_CV_KEY(NM,TY,I,J,K,ICC,JCC) RESULT(KEY)
+INTEGER, INTENT(IN) :: NM,TY,I,J,K,ICC,JCC
+INTEGER :: KEY(7)
+KEY = (/NM,TY,I,J,K,ICC,JCC/)
+END FUNCTION CC_GRID_CV_KEY
+
+LOGICAL FUNCTION CC_GRID_CV_PROPOSAL_CONFLICTS(P,I,J)
+! Child, master, or one proposal's child equal to the other's master.
+TYPE(CC_CV_PROPOSAL_BUFFER_TYPE), INTENT(IN) :: P
+INTEGER, INTENT(IN) :: I,J
+INTEGER :: A(7),B(7),C(7),D(7)
+A = CC_GRID_CV_KEY(P%CHILD_NM(I),CC_GCELL_CUT,P%CHILD_IJK(IAXIS,I),P%CHILD_IJK(JAXIS,I),P%CHILD_IJK(KAXIS,I), &
+                   P%CHILD_ICC(I),P%CHILD_JCC(I))
+B = CC_GRID_CV_KEY(P%CHILD_NM(J),CC_GCELL_CUT,P%CHILD_IJK(IAXIS,J),P%CHILD_IJK(JAXIS,J),P%CHILD_IJK(KAXIS,J), &
+                   P%CHILD_ICC(J),P%CHILD_JCC(J))
+C = CC_GRID_CV_KEY(P%MASTER_NM(I),P%MASTER_CELL_TYPE(I),P%MASTER_IJK(IAXIS,I),P%MASTER_IJK(JAXIS,I), &
+                   P%MASTER_IJK(KAXIS,I),P%MASTER_ICC(I),P%MASTER_JCC(I))
+D = CC_GRID_CV_KEY(P%MASTER_NM(J),P%MASTER_CELL_TYPE(J),P%MASTER_IJK(IAXIS,J),P%MASTER_IJK(JAXIS,J), &
+                   P%MASTER_IJK(KAXIS,J),P%MASTER_ICC(J),P%MASTER_JCC(J))
+CC_GRID_CV_PROPOSAL_CONFLICTS = ALL(A==B) .OR. ALL(C==D) .OR. ALL(A==D) .OR. ALL(C==B)
+END FUNCTION CC_GRID_CV_PROPOSAL_CONFLICTS
+
+LOGICAL FUNCTION CC_GRID_CV_PROPOSAL_BEFORE(P,I,J)
+TYPE(CC_CV_PROPOSAL_BUFFER_TYPE), INTENT(IN) :: P
+INTEGER, INTENT(IN) :: I,J
+INTEGER :: AI(IAXIS:KAXIS),BJ(IAXIS:KAXIS)
+AI(IAXIS:KAXIS) = P%CHILD_IJK(IAXIS:KAXIS,I)
+BJ(IAXIS:KAXIS) = P%CHILD_IJK(IAXIS:KAXIS,J)
+CC_GRID_CV_PROPOSAL_BEFORE = CC_GRID_CV_CANDIDATE_RANKS_BEFORE( &
+   P%CONN_AXIS(I),P%CONN_AREA(I),P%THETA(I),P%SKEW(I),P%DFDIAM(I),P%CHILD_NM(I),CC_GCELL_CUT,AI,P%CHILD_ICC(I),P%CHILD_JCC(I), &
+   P%CONN_AXIS(J),P%CONN_AREA(J),P%THETA(J),P%SKEW(J),P%DFDIAM(J),P%CHILD_NM(J),CC_GCELL_CUT,BJ,P%CHILD_ICC(J),P%CHILD_JCC(J))
+END FUNCTION CC_GRID_CV_PROPOSAL_BEFORE
+
+LOGICAL FUNCTION CC_GRID_CV_PROPOSAL_TAKEN(P,I)
+TYPE(CC_CV_PROPOSAL_BUFFER_TYPE), INTENT(IN) :: P
+INTEGER, INTENT(IN) :: I
+INTEGER :: CI(IAXIS:KAXIS),MI(IAXIS:KAXIS)
+CI(IAXIS:KAXIS) = P%CHILD_IJK(IAXIS:KAXIS,I)
+MI(IAXIS:KAXIS) = P%MASTER_IJK(IAXIS:KAXIS,I)
+CC_GRID_CV_PROPOSAL_TAKEN = &
+   CC_GRID_CV_IS_ABSORBED(P%CHILD_NM(I),CC_GCELL_CUT,CI,P%CHILD_ICC(I),P%CHILD_JCC(I), &
+                          P%CHILD_VOLUME(I),P%CHILD_XYZCEN(IAXIS:KAXIS,I),.TRUE.) .OR. &
+   CC_GRID_CV_IS_CLAIMED(P%CHILD_NM(I),CC_GCELL_CUT,CI,P%CHILD_ICC(I),P%CHILD_JCC(I), &
+                         P%CHILD_VOLUME(I),P%CHILD_XYZCEN(IAXIS:KAXIS,I),.TRUE.) .OR. &
+   CC_GRID_CV_IS_ABSORBED(P%MASTER_NM(I),P%MASTER_CELL_TYPE(I),MI,P%MASTER_ICC(I),P%MASTER_JCC(I), &
+                          P%MASTER_VOLUME(I),P%MASTER_XYZCEN(IAXIS:KAXIS,I),.TRUE.) .OR. &
+   CC_GRID_CV_IS_CLAIMED(P%MASTER_NM(I),P%MASTER_CELL_TYPE(I),MI,P%MASTER_ICC(I),P%MASTER_JCC(I), &
+                         P%MASTER_VOLUME(I),P%MASTER_XYZCEN(IAXIS:KAXIS,I),.TRUE.)
+END FUNCTION CC_GRID_CV_PROPOSAL_TAKEN
+
+SUBROUTINE CC_GRID_CONVERGE_CV_ROOTS(START,ROOT_NM,ROOT_IG)
+! Each merged GCELL takes its parent's root. A remote parent is one seam, then the answer comes back.
+INTEGER, ALLOCATABLE, INTENT(OUT) :: START(:),ROOT_NM(:),ROOT_IG(:)
+INTEGER :: NM,IG,K,NT,NS,NR,PASS,NCHANGE,NCHANGE_G,NCELLS,NCELLS_G,IERR,NEXT_NM,PARENT_IG
+INTEGER :: IJK(IAXIS:KAXIS)
+INTEGER, ALLOCATABLE :: CUR_NM(:),CUR_IG(:),SNAP_NM(:),SNAP_IG(:),NEW_NM(:),NEW_IG(:),DEST(:),ADEST(:)
+REAL(EB), ALLOCATABLE :: SB(:,:),RB(:,:),AB(:,:),AR(:,:)
+TYPE(MESH_TYPE), POINTER :: M
+ALLOCATE(START(LOWER_MESH_INDEX:UPPER_MESH_INDEX)); START = 0
+NT = 0
+DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   IF (.NOT.ALLOCATED(MESHES(NM)%FV%GCELL%CELL_TYPE)) CYCLE
+   IF (MESHES(NM)%FV%GCELL%N_INT < 1) CYCLE
+   START(NM) = NT+1
+   NT = NT+MESHES(NM)%FV%GCELL%N_INT
+ENDDO
+NCELLS = NT
+CALL MPI_ALLREDUCE(NCELLS,NCELLS_G,1,MPI_INTEGER,MPI_SUM,MPI_COMM_WORLD,IERR)
+IF (NCELLS_G < 1) THEN
+   ALLOCATE(ROOT_NM(1),ROOT_IG(1)); ROOT_NM = 0; ROOT_IG = 0
+   RETURN
+ENDIF
+ALLOCATE(CUR_NM(MAX(NT,1)),CUR_IG(MAX(NT,1)),SNAP_NM(MAX(NT,1)),SNAP_IG(MAX(NT,1)))
+ALLOCATE(NEW_NM(MAX(NT,1)),NEW_IG(MAX(NT,1)),SB(9,MAX(NT,1)),DEST(MAX(NT,1)))
+CUR_NM = 0; CUR_IG = 0
+K = 0
+DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   IF (START(NM) < 1) CYCLE
+   DO IG=1,MESHES(NM)%FV%GCELL%N_INT
+      K = K+1; CUR_NM(K) = NM; CUR_IG(K) = IG
+   ENDDO
+ENDDO
+NCHANGE_G = 1
+DO PASS=1,NCELLS_G
+   SNAP_NM = CUR_NM; SNAP_IG = CUR_IG; NEW_NM = CUR_NM; NEW_IG = CUR_IG
+   NS = 0
+   DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+      IF (START(NM) < 1) CYCLE
+      M => MESHES(NM)
+      IF (.NOT.ALLOCATED(M%FV%GCELL%CV_DECISION)) CYCLE
+      DO IG=1,M%FV%GCELL%N_INT
+         K = START(NM)+IG-1
+         IF (M%FV%GCELL%CV_DECISION(IG) /= CC_CV_DECISION_MERGE) CYCLE
+         NEXT_NM = M%FV%GCELL%MASTER_NM(IG)
+         IF (NEXT_NM >= LOWER_MESH_INDEX .AND. NEXT_NM <= UPPER_MESH_INDEX) THEN
+            IJK(IAXIS:KAXIS) = M%FV%GCELL%MASTER_IJK(IAXIS:KAXIS,IG)
+            PARENT_IG = CC_GRID_GET_GCELL_INDEX_FROM_ENTITY(NEXT_NM,M%FV%GCELL%MASTER_CELL_TYPE(IG),IJK, &
+                                                           M%FV%GCELL%MASTER_ICC(IG),M%FV%GCELL%MASTER_JCC(IG))
+            IF (START(NEXT_NM) >= 1 .AND. PARENT_IG >= 1) THEN
+               IF (PARENT_IG <= MESHES(NEXT_NM)%FV%GCELL%N_INT) THEN
+                  NEW_NM(K) = SNAP_NM(START(NEXT_NM)+PARENT_IG-1)
+                  NEW_IG(K) = SNAP_IG(START(NEXT_NM)+PARENT_IG-1)
+               ENDIF
+            ENDIF
+         ELSEIF (NEXT_NM >= 1 .AND. NEXT_NM <= NMESHES) THEN
+            IF (PROCESS(NEXT_NM) /= MY_RANK) THEN
+               NS = NS+1
+               SB(1,NS) = REAL(NM,EB); SB(2,NS) = REAL(IG,EB); SB(3,NS) = REAL(NEXT_NM,EB)
+               SB(4,NS) = REAL(M%FV%GCELL%MASTER_CELL_TYPE(IG),EB)
+               SB(5,NS) = REAL(M%FV%GCELL%MASTER_IJK(IAXIS,IG),EB)
+               SB(6,NS) = REAL(M%FV%GCELL%MASTER_IJK(JAXIS,IG),EB)
+               SB(7,NS) = REAL(M%FV%GCELL%MASTER_IJK(KAXIS,IG),EB)
+               SB(8,NS) = REAL(M%FV%GCELL%MASTER_ICC(IG),EB); SB(9,NS) = REAL(M%FV%GCELL%MASTER_JCC(IG),EB)
+               DEST(NS) = PROCESS(NEXT_NM)
+            ENDIF
+         ENDIF
+      ENDDO
+   ENDDO
+   CALL CC_GRID_SEAM_EXCHANGE(9,NS,SB,DEST,NR,RB)
+   ALLOCATE(AB(4,MAX(NR,1)),ADEST(MAX(NR,1)))
+   NS = 0
+   DO K=1,NR
+      NEXT_NM = NINT(RB(3,K))
+      IF (NEXT_NM < LOWER_MESH_INDEX .OR. NEXT_NM > UPPER_MESH_INDEX) CYCLE
+      IF (START(NEXT_NM) < 1) CYCLE
+      IJK(IAXIS) = NINT(RB(5,K)); IJK(JAXIS) = NINT(RB(6,K)); IJK(KAXIS) = NINT(RB(7,K))
+      PARENT_IG = CC_GRID_GET_GCELL_INDEX_FROM_ENTITY(NEXT_NM,NINT(RB(4,K)),IJK,NINT(RB(8,K)),NINT(RB(9,K)))
+      IF (PARENT_IG < 1 .OR. PARENT_IG > MESHES(NEXT_NM)%FV%GCELL%N_INT) CYCLE
+      NM = NINT(RB(1,K))
+      NS = NS+1
+      AB(1,NS) = RB(1,K); AB(2,NS) = RB(2,K)
+      AB(3,NS) = REAL(SNAP_NM(START(NEXT_NM)+PARENT_IG-1),EB)
+      AB(4,NS) = REAL(SNAP_IG(START(NEXT_NM)+PARENT_IG-1),EB)
+      ADEST(NS) = PROCESS(NM)
+   ENDDO
+   CALL CC_GRID_SEAM_EXCHANGE(4,NS,AB,ADEST,NR,AR)
+   DO K=1,NR
+      NM = NINT(AR(1,K)); IG = NINT(AR(2,K))
+      IF (NM < LOWER_MESH_INDEX .OR. NM > UPPER_MESH_INDEX) CYCLE
+      IF (START(NM) < 1 .OR. IG < 1) CYCLE
+      IF (IG > MESHES(NM)%FV%GCELL%N_INT) CYCLE
+      NEW_NM(START(NM)+IG-1) = NINT(AR(3,K))
+      NEW_IG(START(NM)+IG-1) = NINT(AR(4,K))
+   ENDDO
+   NCHANGE = 0
+   DO K=1,NT
+      IF (NEW_NM(K) /= CUR_NM(K) .OR. NEW_IG(K) /= CUR_IG(K)) THEN
+         CUR_NM(K) = NEW_NM(K); CUR_IG(K) = NEW_IG(K); NCHANGE = NCHANGE+1
+      ENDIF
+   ENDDO
+   CALL MPI_ALLREDUCE(NCHANGE,NCHANGE_G,1,MPI_INTEGER,MPI_SUM,MPI_COMM_WORLD,IERR)
+   DEALLOCATE(AB,ADEST)
+   IF (NCHANGE_G == 0) EXIT
+ENDDO
+IF (NCHANGE_G /= 0) THEN
+   WRITE(LU_ERR,'(A)') 'ERROR: CC_GRID_CONVERGE_CV_ROOTS: chain did not settle'
+   STOP_STATUS = SETUP_STOP
+ENDIF
+ALLOCATE(ROOT_NM(MAX(NT,1)),ROOT_IG(MAX(NT,1))); ROOT_NM = 0; ROOT_IG = 0
+IF (NT > 0) THEN
+   ROOT_NM(1:NT) = CUR_NM(1:NT); ROOT_IG(1:NT) = CUR_IG(1:NT)
+ENDIF
+END SUBROUTINE CC_GRID_CONVERGE_CV_ROOTS
+
+SUBROUTINE CC_GRID_SEND_PROPOSALS(P,I1,I2,WHO,NR,RB)
+! WHO 1 master, 2 child, 3 root. Root sends only from the rank that holds the master. Field 40 is SLOT.
+TYPE(CC_CV_PROPOSAL_BUFFER_TYPE), INTENT(IN) :: P
+INTEGER, INTENT(IN) :: I1,I2,WHO
+INTEGER, INTENT(OUT) :: NR
+REAL(EB), ALLOCATABLE, INTENT(OUT) :: RB(:,:)
+INTEGER :: I,NS,IR,NLOC
+INTEGER, ALLOCATABLE :: DEST(:)
+REAL(EB), ALLOCATABLE :: SB(:,:)
+REAL(EB) :: REC(CC_CV_NW)
+NLOC = 0
+IF (I2 >= I1) NLOC = I2-I1+1
+ALLOCATE(SB(CC_CV_NW,MAX(NLOC,1)),DEST(MAX(NLOC,1)))
+NS = 0
+DO I=I1,I2
+   IF (WHO == 3) THEN
+      IF (P%MASTER_NM(I) < LOWER_MESH_INDEX .OR. P%MASTER_NM(I) > UPPER_MESH_INDEX) CYCLE
+      IR = P%ROOT_NM(I)
+   ELSEIF (WHO == 2) THEN
+      IR = P%CHILD_NM(I)
+   ELSE
+      IR = P%MASTER_NM(I)
+   ENDIF
+   IF (IR < 1) CYCLE
+   IF (PROCESS(IR) == MY_RANK) CYCLE
+   NS = NS+1
+   CALL CC_GRID_PACK_CV_PROPOSAL(P,I,REC)
+   SB(:,NS) = REC
+   DEST(NS) = PROCESS(IR)
+ENDDO
+CALL CC_GRID_SEAM_EXCHANGE(CC_CV_NW,NS,SB,DEST,NR,RB)
+END SUBROUTINE CC_GRID_SEND_PROPOSALS
+
+SUBROUTINE CC_GRID_RECV_PROPOSALS(P,N,NR,RB,APPEND)
+! APPEND stores the records after N. Otherwise field 40 is the caller's proposal index.
+TYPE(CC_CV_PROPOSAL_BUFFER_TYPE), INTENT(INOUT) :: P
+INTEGER, INTENT(INOUT) :: N
+INTEGER, INTENT(IN) :: NR
+REAL(EB), INTENT(IN) :: RB(:,:)
+LOGICAL, INTENT(IN) :: APPEND
+INTEGER :: I,J
+REAL(EB) :: REC(CC_CV_NW)
+IF (NR < 1) RETURN
+IF (APPEND) CALL CC_GRID_GROW_CV_PROPOSALS(P,N,N+NR)
+DO J=1,NR
+   IF (APPEND) THEN
+      I = N+J
+   ELSE
+      I = NINT(RB(40,J))
+   ENDIF
+   REC = RB(:,J)
+   CALL CC_GRID_UNPACK_CV_PROPOSAL(P,I,REC)
+ENDDO
+IF (APPEND) N = N+NR
+END SUBROUTINE CC_GRID_RECV_PROPOSALS
+
+SUBROUTINE CC_GRID_SETTLE_CV_PROPOSALS(NL,P,N_ACCEPTED,N_FORCE)
+! Accept a proposal when no better active proposal shares an endpoint. The blocked bit is the OR of the two ranks.
+INTEGER, INTENT(IN) :: NL
+TYPE(CC_CV_PROPOSAL_BUFFER_TYPE), INTENT(INOUT) :: P
+INTEGER, INTENT(OUT) :: N_ACCEPTED
+INTEGER, INTENT(INOUT) :: N_FORCE
+INTEGER :: I,J,NS,NR,NWORK,PASS,GCAP,NCHANGE,NCHANGE_G,NACC,IERR,NMARK,IR
+INTEGER :: CI(IAXIS:KAXIS),MI(IAXIS:KAXIS)
+INTEGER, ALLOCATABLE :: DEST(:),ST(:)
+LOGICAL, ALLOCATABLE :: BLK(:)
+REAL(EB), ALLOCATABLE :: SB(:,:),RB(:,:),MB(:,:)
+REAL(EB) :: XYZ(IAXIS:KAXIS)
+DO I=1,NL
+   P%SLOT(I) = I
+ENDDO
+CALL CC_GRID_SEND_PROPOSALS(P,1,NL,1,NR,RB)
+NWORK = NL
+CALL CC_GRID_RECV_PROPOSALS(P,NWORK,NR,RB,.TRUE.)
+DO I=1,NWORK
+   CALL CC_GRID_SET_PROPOSAL_MASTER_GEOM(P,I)
+ENDDO
+CALL CC_GRID_SEND_PROPOSALS(P,NL+1,NWORK,2,NR,RB)
+CALL CC_GRID_RECV_PROPOSALS(P,NWORK,NR,RB,.FALSE.)
+NCHANGE = NWORK
+CALL MPI_ALLREDUCE(NCHANGE,GCAP,1,MPI_INTEGER,MPI_SUM,MPI_COMM_WORLD,IERR)
+ALLOCATE(ST(MAX(NWORK,1)),BLK(MAX(NWORK,1)))
+IF (NWORK > 0) ST(1:NWORK) = 0
+NACC = 0
+NCHANGE_G = 1
+DO PASS=1,GCAP+2
+   DO I=1,NWORK
+      BLK(I) = .FALSE.
+      IF (ST(I) /= 0) CYCLE
+      DO J=1,NWORK
+         IF (J == I .OR. ST(J) /= 0) CYCLE
+         IF (CC_GRID_CV_PROPOSAL_CONFLICTS(P,I,J)) THEN
+            IF (CC_GRID_CV_PROPOSAL_BEFORE(P,J,I)) BLK(I) = .TRUE.
+         ENDIF
+      ENDDO
+   ENDDO
+   ALLOCATE(SB(3,MAX(NWORK,1)),DEST(MAX(NWORK,1)))
+   NS = 0
+   DO I=1,NWORK
+      IF (ST(I) /= 0) CYCLE
+      IR = P%MASTER_NM(I)
+      IF (I > NL) IR = P%CHILD_NM(I)
+      IF (IR < 1) CYCLE
+      IF (PROCESS(IR) == MY_RANK) CYCLE
+      NS = NS+1
+      SB(1,NS) = REAL(P%CHILD_NM(I),EB); SB(2,NS) = REAL(P%CHILD_IG(I),EB); SB(3,NS) = 0._EB
+      IF (BLK(I)) SB(3,NS) = 1._EB
+      DEST(NS) = PROCESS(IR)
+   ENDDO
+   CALL CC_GRID_SEAM_EXCHANGE(3,NS,SB,DEST,NR,RB)
+   DO J=1,NR
+      IF (NINT(RB(3,J)) == 0) CYCLE
+      DO I=1,NWORK
+         IF (P%CHILD_NM(I) == NINT(RB(1,J)) .AND. P%CHILD_IG(I) == NINT(RB(2,J))) BLK(I) = .TRUE.
+      ENDDO
+   ENDDO
+   DEALLOCATE(SB,DEST)
+   NCHANGE = 0; NMARK = 0
+   ALLOCATE(MB(12,MAX(2*NWORK,1)))
+   DO I=1,NWORK
+      IF (ST(I) /= 0 .OR. BLK(I)) CYCLE
+      ST(I) = 1; NCHANGE = NCHANGE+1
+      CI(IAXIS:KAXIS) = P%CHILD_IJK(IAXIS:KAXIS,I)
+      MI(IAXIS:KAXIS) = P%MASTER_IJK(IAXIS:KAXIS,I)
+      IF (P%CHILD_NM(I) >= LOWER_MESH_INDEX .AND. P%CHILD_NM(I) <= UPPER_MESH_INDEX) THEN
+         CALL CC_GRID_APPLY_GCELL_MERGE_DECISION_FROM_PROPOSAL(P,I)
+         IF (P%IS_ALT(I) /= 0) N_FORCE = N_FORCE+1
+         NACC = NACC+1
+      ENDIF
+      CALL CC_GRID_CV_MARK_ABSORBED(P%CHILD_NM(I),CC_GCELL_CUT,CI,P%CHILD_ICC(I),P%CHILD_JCC(I), &
+                                    P%CHILD_VOLUME(I),P%CHILD_XYZCEN(IAXIS:KAXIS,I),.TRUE.)
+      CALL CC_GRID_CV_MARK_CLAIMED(P%MASTER_NM(I),P%MASTER_CELL_TYPE(I),MI,P%MASTER_ICC(I),P%MASTER_JCC(I), &
+                                   P%MASTER_VOLUME(I),P%MASTER_XYZCEN(IAXIS:KAXIS,I),.TRUE.)
+      NMARK = NMARK+1
+      MB(1,NMARK) = 1._EB; MB(2,NMARK) = REAL(P%CHILD_NM(I),EB); MB(3,NMARK) = REAL(CC_GCELL_CUT,EB)
+      MB(4,NMARK) = REAL(CI(IAXIS),EB); MB(5,NMARK) = REAL(CI(JAXIS),EB); MB(6,NMARK) = REAL(CI(KAXIS),EB)
+      MB(7,NMARK) = REAL(P%CHILD_ICC(I),EB); MB(8,NMARK) = REAL(P%CHILD_JCC(I),EB); MB(9,NMARK) = P%CHILD_VOLUME(I)
+      MB(10,NMARK) = P%CHILD_XYZCEN(IAXIS,I); MB(11,NMARK) = P%CHILD_XYZCEN(JAXIS,I)
+      MB(12,NMARK) = P%CHILD_XYZCEN(KAXIS,I)
+      NMARK = NMARK+1
+      MB(1,NMARK) = 2._EB; MB(2,NMARK) = REAL(P%MASTER_NM(I),EB); MB(3,NMARK) = REAL(P%MASTER_CELL_TYPE(I),EB)
+      MB(4,NMARK) = REAL(MI(IAXIS),EB); MB(5,NMARK) = REAL(MI(JAXIS),EB); MB(6,NMARK) = REAL(MI(KAXIS),EB)
+      MB(7,NMARK) = REAL(P%MASTER_ICC(I),EB); MB(8,NMARK) = REAL(P%MASTER_JCC(I),EB); MB(9,NMARK) = P%MASTER_VOLUME(I)
+      MB(10,NMARK) = P%MASTER_XYZCEN(IAXIS,I); MB(11,NMARK) = P%MASTER_XYZCEN(JAXIS,I)
+      MB(12,NMARK) = P%MASTER_XYZCEN(KAXIS,I)
+   ENDDO
+   ALLOCATE(SB(12,MAX(NMARK,1)),DEST(MAX(NMARK,1)))
+   DO I=1,NMARK
+      SB(:,I) = MB(:,I); DEST(I) = -1
+   ENDDO
+   CALL CC_GRID_SEAM_EXCHANGE(12,NMARK,SB,DEST,NR,RB)
+   DO J=1,NR
+      CI(IAXIS) = NINT(RB(4,J)); CI(JAXIS) = NINT(RB(5,J)); CI(KAXIS) = NINT(RB(6,J))
+      XYZ(IAXIS) = RB(10,J); XYZ(JAXIS) = RB(11,J); XYZ(KAXIS) = RB(12,J)
+      IF (NINT(RB(1,J)) == 1) THEN
+         CALL CC_GRID_CV_MARK_ABSORBED(NINT(RB(2,J)),NINT(RB(3,J)),CI,NINT(RB(7,J)),NINT(RB(8,J)), &
+                                       RB(9,J),XYZ,.TRUE.)
+      ELSE
+         CALL CC_GRID_CV_MARK_CLAIMED(NINT(RB(2,J)),NINT(RB(3,J)),CI,NINT(RB(7,J)),NINT(RB(8,J)), &
+                                      RB(9,J),XYZ,.TRUE.)
+      ENDIF
+   ENDDO
+   DEALLOCATE(SB,DEST,MB)
+   DO I=1,NWORK
+      IF (ST(I) /= 0) CYCLE
+      IF (CC_GRID_CV_PROPOSAL_TAKEN(P,I)) THEN
+         ST(I) = 2; NCHANGE = NCHANGE+1
+      ENDIF
+   ENDDO
+   CALL MPI_ALLREDUCE(NCHANGE,NCHANGE_G,1,MPI_INTEGER,MPI_SUM,MPI_COMM_WORLD,IERR)
+   IF (NCHANGE_G == 0) EXIT
+ENDDO
+IF (NCHANGE_G /= 0) THEN
+   WRITE(LU_ERR,'(A)') 'ERROR: CC_GRID_SETTLE_CV_PROPOSALS: proposals did not settle'
+   STOP_STATUS = SETUP_STOP
+ENDIF
+NCHANGE = NACC
+CALL MPI_ALLREDUCE(NCHANGE,N_ACCEPTED,1,MPI_INTEGER,MPI_SUM,MPI_COMM_WORLD,IERR)
+DEALLOCATE(ST,BLK)
+END SUBROUTINE CC_GRID_SETTLE_CV_PROPOSALS
+
+SUBROUTINE CC_GRID_EXCHANGE_CV_OWNERSHIP(N,P)
+! Master rank fills the master and the root, sends them back, and forwards a root that lives on a third rank.
+INTEGER, INTENT(INOUT) :: N
+TYPE(CC_CV_PROPOSAL_BUFFER_TYPE), INTENT(INOUT) :: P
+INTEGER :: I,NR,NL,NM,IG,K
+INTEGER, ALLOCATABLE :: START(:),RNM(:),RIG(:)
+REAL(EB), ALLOCATABLE :: RB(:,:)
+CALL CC_GRID_CONVERGE_CV_ROOTS(START,RNM,RIG)
+IF (STOP_STATUS /= NO_STOP) RETURN
+NL = N
+DO I=1,NL
+   P%SLOT(I) = I
+ENDDO
+CALL CC_GRID_SEND_PROPOSALS(P,1,NL,1,NR,RB)
+CALL CC_GRID_RECV_PROPOSALS(P,N,NR,RB,.TRUE.)
+DO I=1,N
+   P%ROOT_NM(I) = 0; P%ROOT_IG(I) = 0
+   CALL CC_GRID_SET_PROPOSAL_MASTER_GEOM(P,I)
+   NM = P%MASTER_NM(I); IG = P%MASTER_IG(I)
+   IF (NM < LOWER_MESH_INDEX .OR. NM > UPPER_MESH_INDEX) CYCLE
+   IF (IG < 1 .OR. START(NM) < 1) CYCLE
+   IF (IG > MESHES(NM)%FV%GCELL%N_INT) CYCLE
+   K = START(NM)+IG-1
+   P%ROOT_NM(I) = RNM(K); P%ROOT_IG(I) = RIG(K)
+ENDDO
+CALL CC_GRID_SEND_PROPOSALS(P,NL+1,N,2,NR,RB)
+CALL CC_GRID_RECV_PROPOSALS(P,N,NR,RB,.FALSE.)
+CALL CC_GRID_SEND_PROPOSALS(P,1,N,3,NR,RB)
+CALL CC_GRID_RECV_PROPOSALS(P,N,NR,RB,.TRUE.)
+END SUBROUTINE CC_GRID_EXCHANGE_CV_OWNERSHIP
+
+
+
+SUBROUTINE CC_GRID_DECIDE_CV_MERGE_OR_BLOCK(CENTER_POLICY,N_MEMBER,MASTER_MEMBER,MEMBER_VOLUME,MEMBER_XYZCEN, &
+                                            CENTER_INSIDE,CENTER_STAR_SHAPED,CENTER_MAX_THETA,CENTER_MAX_SKEW, &
+                                            CENTER_MIN_DFDIAM,DECISION,CENTER_SOURCE,X_MASTER,XBAR_CV,XCV, &
+                                            CENTER_OK_OUT,CENTER_REJECT_REASON)
+
+! Merge vs block from precomputed center metrics (master centroid, volume centroid).
+
+INTEGER, INTENT(IN) :: CENTER_POLICY,N_MEMBER,MASTER_MEMBER
+REAL(EB), INTENT(IN) :: MEMBER_VOLUME(1:N_MEMBER)
+REAL(EB), INTENT(IN) :: MEMBER_XYZCEN(IAXIS:KAXIS,1:N_MEMBER)
+LOGICAL, INTENT(IN) :: CENTER_INSIDE(1:2),CENTER_STAR_SHAPED(1:2)
+REAL(EB), INTENT(IN) :: CENTER_MAX_THETA(1:2),CENTER_MAX_SKEW(1:2),CENTER_MIN_DFDIAM(1:2)
+INTEGER, INTENT(OUT) :: DECISION,CENTER_SOURCE
+REAL(EB), INTENT(OUT) :: X_MASTER(IAXIS:KAXIS),XBAR_CV(IAXIS:KAXIS),XCV(IAXIS:KAXIS)
+LOGICAL, INTENT(OUT), OPTIONAL :: CENTER_OK_OUT(1:2)
+INTEGER, INTENT(OUT), OPTIONAL :: CENTER_REJECT_REASON(1:2)
+
+INTEGER :: ICANDIDATE,IBEST
+LOGICAL :: CENTER_OK(1:2)
+REAL(EB) :: CANDIDATE_XYZ(IAXIS:KAXIS,1:2)
+
+CALL CC_GRID_GET_CV_CENTER_CANDIDATES(N_MEMBER,MASTER_MEMBER,MEMBER_VOLUME,MEMBER_XYZCEN,X_MASTER,XBAR_CV)
+
+CANDIDATE_XYZ(IAXIS:KAXIS,1) = X_MASTER(IAXIS:KAXIS)
+CANDIDATE_XYZ(IAXIS:KAXIS,2) = XBAR_CV(IAXIS:KAXIS)
+
+DO ICANDIDATE=1,2
+   CENTER_OK(ICANDIDATE) = CC_GRID_CV_CENTER_IS_ADMISSIBLE(CENTER_INSIDE(ICANDIDATE), &
+                                                           CENTER_STAR_SHAPED(ICANDIDATE), &
+                                                           CENTER_MAX_THETA(ICANDIDATE), &
+                                                           CENTER_MAX_SKEW(ICANDIDATE), &
+                                                           CENTER_MIN_DFDIAM(ICANDIDATE))
+   IF (PRESENT(CENTER_REJECT_REASON)) THEN
+      CENTER_REJECT_REASON(ICANDIDATE) = CC_GRID_GET_CV_CENTER_REJECT_REASON(CENTER_INSIDE(ICANDIDATE), &
+                                                                             CENTER_STAR_SHAPED(ICANDIDATE), &
+                                                                             CENTER_MAX_THETA(ICANDIDATE), &
+                                                                             CENTER_MAX_SKEW(ICANDIDATE), &
+                                                                             CENTER_MIN_DFDIAM(ICANDIDATE))
+   ENDIF
+ENDDO
+
+IF (PRESENT(CENTER_OK_OUT)) CENTER_OK_OUT(1:2) = CENTER_OK(1:2)
+
+DECISION = CC_CV_DECISION_BLOCK
+CENTER_SOURCE = 0
+XCV = 0._EB
+
+SELECT CASE(CENTER_POLICY)
+CASE(CC_CV_CENTER_MASTER_CENTROID)
+   IF (.NOT.CENTER_OK(1)) RETURN
+   DECISION = CC_CV_DECISION_MERGE
+   CENTER_SOURCE = CC_CV_CENTER_MASTER_CENTROID
+   XCV(IAXIS:KAXIS) = CANDIDATE_XYZ(IAXIS:KAXIS,1)
+
+CASE(CC_CV_CENTER_VOLUME_CENTROID)
+   IF (.NOT.CENTER_OK(2)) RETURN
+   DECISION = CC_CV_DECISION_MERGE
+   CENTER_SOURCE = CC_CV_CENTER_VOLUME_CENTROID
+   XCV(IAXIS:KAXIS) = CANDIDATE_XYZ(IAXIS:KAXIS,2)
+
+CASE(CC_CV_CENTER_BEST_ADMISSIBLE)
+   IBEST = 0
+   DO ICANDIDATE=1,2
+      IF (.NOT.CENTER_OK(ICANDIDATE)) CYCLE
+      IF (IBEST == 0) THEN
+         IBEST = ICANDIDATE
+      ELSEIF (CC_GRID_CV_CENTER_IS_BETTER(CENTER_MAX_THETA(ICANDIDATE),CENTER_MAX_SKEW(ICANDIDATE), &
+                                          CENTER_MIN_DFDIAM(ICANDIDATE),CENTER_MAX_THETA(IBEST), &
+                                          CENTER_MAX_SKEW(IBEST),CENTER_MIN_DFDIAM(IBEST))) THEN
+         IBEST = ICANDIDATE
+      ENDIF
+   ENDDO
+   IF (IBEST < 1) RETURN
+   DECISION = CC_CV_DECISION_MERGE
+   CENTER_SOURCE = IBEST
+   XCV(IAXIS:KAXIS) = CANDIDATE_XYZ(IAXIS:KAXIS,IBEST)
+
+CASE DEFAULT
+   IF (.NOT.CENTER_OK(1)) RETURN
+   DECISION = CC_CV_DECISION_MERGE
+   CENTER_SOURCE = CC_CV_CENTER_MASTER_CENTROID
+   XCV(IAXIS:KAXIS) = CANDIDATE_XYZ(IAXIS:KAXIS,1)
+END SELECT
+
+END SUBROUTINE CC_GRID_DECIDE_CV_MERGE_OR_BLOCK
+
+LOGICAL FUNCTION CC_GRID_INTERP_CANDIDATE_OVERLAPS_CHILD(NM_CHILD,ICC_CHILD,IW,CAND_NM,CAND_CELL_TYPE,CAND_IJK,CAND_ICC)
+
+INTEGER, INTENT(IN) :: NM_CHILD,ICC_CHILD,IW,CAND_NM,CAND_CELL_TYPE,CAND_IJK(IAXIS:KAXIS),CAND_ICC
+
+TYPE(WALL_TYPE), POINTER :: WC
+TYPE(BOUNDARY_COORD_TYPE), POINTER :: BC
+TYPE(MESH_TYPE), POINTER :: M_CHILD,M_CAND
+INTEGER :: AX,SHARED_AXIS,I,J,K
+REAL(EB) :: CHILD_BOX(IAXIS:KAXIS,LOW_IND:HIGH_IND),CAND_BOX(IAXIS:KAXIS,LOW_IND:HIGH_IND)
+REAL(EB) :: XYZCELL(IAXIS:KAXIS,LOW_IND:HIGH_IND),TOL
+
+CC_GRID_INTERP_CANDIDATE_OVERLAPS_CHILD = .FALSE.
+
+CALL POINT_TO_MESH(NM_CHILD)
+WC => WALL(IW)
+BC => BOUNDARY_COORD(WC%BC_INDEX)
+SHARED_AXIS = ABS(BC%IOR)
+
+M_CHILD => MESHES(NM_CHILD)
+I = M_CHILD%CUT_CELL(ICC_CHILD)%IJK(IAXIS)
+J = M_CHILD%CUT_CELL(ICC_CHILD)%IJK(JAXIS)
+K = M_CHILD%CUT_CELL(ICC_CHILD)%IJK(KAXIS)
+XYZCELL(IAXIS,LOW_IND) = M_CHILD%X(I-1); XYZCELL(IAXIS,HIGH_IND) = M_CHILD%X(I)
+XYZCELL(JAXIS,LOW_IND) = M_CHILD%Y(J-1); XYZCELL(JAXIS,HIGH_IND) = M_CHILD%Y(J)
+XYZCELL(KAXIS,LOW_IND) = M_CHILD%Z(K-1); XYZCELL(KAXIS,HIGH_IND) = M_CHILD%Z(K)
+CHILD_BOX = XYZCELL
+
+M_CAND => MESHES(CAND_NM)
+SELECT CASE(CAND_CELL_TYPE)
+CASE(CC_GCELL_CUT)
+   I = M_CAND%CUT_CELL(CAND_ICC)%IJK(IAXIS)
+   J = M_CAND%CUT_CELL(CAND_ICC)%IJK(JAXIS)
+   K = M_CAND%CUT_CELL(CAND_ICC)%IJK(KAXIS)
+   XYZCELL(IAXIS,LOW_IND) = M_CAND%X(I-1); XYZCELL(IAXIS,HIGH_IND) = M_CAND%X(I)
+   XYZCELL(JAXIS,LOW_IND) = M_CAND%Y(J-1); XYZCELL(JAXIS,HIGH_IND) = M_CAND%Y(J)
+   XYZCELL(KAXIS,LOW_IND) = M_CAND%Z(K-1); XYZCELL(KAXIS,HIGH_IND) = M_CAND%Z(K)
+   CAND_BOX = XYZCELL
+
+CASE(CC_GCELL_REG)
+   I = CAND_IJK(IAXIS); J = CAND_IJK(JAXIS); K = CAND_IJK(KAXIS)
+   IF (I < 1 .OR. I > M_CAND%IBAR) RETURN
+   IF (J < 1 .OR. J > M_CAND%JBAR) RETURN
+   IF (K < 1 .OR. K > M_CAND%KBAR) RETURN
+   CAND_BOX(IAXIS,LOW_IND) = M_CAND%X(I-1); CAND_BOX(IAXIS,HIGH_IND) = M_CAND%X(I)
+   CAND_BOX(JAXIS,LOW_IND) = M_CAND%Y(J-1); CAND_BOX(JAXIS,HIGH_IND) = M_CAND%Y(J)
+   CAND_BOX(KAXIS,LOW_IND) = M_CAND%Z(K-1); CAND_BOX(KAXIS,HIGH_IND) = M_CAND%Z(K)
+
+CASE DEFAULT
+   RETURN
+END SELECT
+
+TOL = CC_CV_CANON_XYZ_TOL
+IF (MAX(CHILD_BOX(SHARED_AXIS,LOW_IND),CAND_BOX(SHARED_AXIS,LOW_IND)) > &
+    MIN(CHILD_BOX(SHARED_AXIS,HIGH_IND),CAND_BOX(SHARED_AXIS,HIGH_IND)) + TOL) RETURN
+
+DO AX=IAXIS,KAXIS
+   IF (AX == SHARED_AXIS) CYCLE
+   ! Pairwise CV merging requires a one-to-one conforming interface. Partial overlap across
+   ! coarse/fine or otherwise nonconforming meshes cannot be represented by the current
+   ! one-neighbor FACE reconciliation.
+   IF (ABS(CHILD_BOX(AX,LOW_IND)-CAND_BOX(AX,LOW_IND)) > TOL) RETURN
+   IF (ABS(CHILD_BOX(AX,HIGH_IND)-CAND_BOX(AX,HIGH_IND)) > TOL) RETURN
+ENDDO
+
+CC_GRID_INTERP_CANDIDATE_OVERLAPS_CHILD = .TRUE.
+
+END FUNCTION CC_GRID_INTERP_CANDIDATE_OVERLAPS_CHILD
+
+LOGICAL FUNCTION CC_GRID_CANDIDATE_OVERLAPS_CHILD_AXIS(NM_CHILD,ICC_CHILD,CAND_NM,CAND_CELL_TYPE,CAND_IJK,CAND_ICC,SHARED_AXIS)
+
+INTEGER, INTENT(IN) :: NM_CHILD,ICC_CHILD,CAND_NM,CAND_CELL_TYPE,CAND_IJK(IAXIS:KAXIS),CAND_ICC,SHARED_AXIS
+
+TYPE(MESH_TYPE), POINTER :: M_CHILD,M_CAND
+INTEGER :: AX,I,J,K
+REAL(EB) :: CHILD_BOX(IAXIS:KAXIS,LOW_IND:HIGH_IND),CAND_BOX(IAXIS:KAXIS,LOW_IND:HIGH_IND)
+REAL(EB) :: XYZCELL(IAXIS:KAXIS,LOW_IND:HIGH_IND),TOL
+
+CC_GRID_CANDIDATE_OVERLAPS_CHILD_AXIS = .FALSE.
+
+M_CHILD => MESHES(NM_CHILD)
+I = M_CHILD%CUT_CELL(ICC_CHILD)%IJK(IAXIS)
+J = M_CHILD%CUT_CELL(ICC_CHILD)%IJK(JAXIS)
+K = M_CHILD%CUT_CELL(ICC_CHILD)%IJK(KAXIS)
+XYZCELL(IAXIS,LOW_IND) = M_CHILD%X(I-1); XYZCELL(IAXIS,HIGH_IND) = M_CHILD%X(I)
+XYZCELL(JAXIS,LOW_IND) = M_CHILD%Y(J-1); XYZCELL(JAXIS,HIGH_IND) = M_CHILD%Y(J)
+XYZCELL(KAXIS,LOW_IND) = M_CHILD%Z(K-1); XYZCELL(KAXIS,HIGH_IND) = M_CHILD%Z(K)
+CHILD_BOX = XYZCELL
+
+M_CAND => MESHES(CAND_NM)
+SELECT CASE(CAND_CELL_TYPE)
+CASE(CC_GCELL_CUT)
+   I = M_CAND%CUT_CELL(CAND_ICC)%IJK(IAXIS)
+   J = M_CAND%CUT_CELL(CAND_ICC)%IJK(JAXIS)
+   K = M_CAND%CUT_CELL(CAND_ICC)%IJK(KAXIS)
+   XYZCELL(IAXIS,LOW_IND) = M_CAND%X(I-1); XYZCELL(IAXIS,HIGH_IND) = M_CAND%X(I)
+   XYZCELL(JAXIS,LOW_IND) = M_CAND%Y(J-1); XYZCELL(JAXIS,HIGH_IND) = M_CAND%Y(J)
+   XYZCELL(KAXIS,LOW_IND) = M_CAND%Z(K-1); XYZCELL(KAXIS,HIGH_IND) = M_CAND%Z(K)
+   CAND_BOX = XYZCELL
+
+CASE(CC_GCELL_REG)
+   I = CAND_IJK(IAXIS); J = CAND_IJK(JAXIS); K = CAND_IJK(KAXIS)
+   IF (I < 1 .OR. I > M_CAND%IBAR) RETURN
+   IF (J < 1 .OR. J > M_CAND%JBAR) RETURN
+   IF (K < 1 .OR. K > M_CAND%KBAR) RETURN
+   CAND_BOX(IAXIS,LOW_IND) = M_CAND%X(I-1); CAND_BOX(IAXIS,HIGH_IND) = M_CAND%X(I)
+   CAND_BOX(JAXIS,LOW_IND) = M_CAND%Y(J-1); CAND_BOX(JAXIS,HIGH_IND) = M_CAND%Y(J)
+   CAND_BOX(KAXIS,LOW_IND) = M_CAND%Z(K-1); CAND_BOX(KAXIS,HIGH_IND) = M_CAND%Z(K)
+
+CASE DEFAULT
+   RETURN
+END SELECT
+
+TOL = CC_CV_CANON_XYZ_TOL
+IF (MAX(CHILD_BOX(SHARED_AXIS,LOW_IND),CAND_BOX(SHARED_AXIS,LOW_IND)) > &
+    MIN(CHILD_BOX(SHARED_AXIS,HIGH_IND),CAND_BOX(SHARED_AXIS,HIGH_IND)) + TOL) RETURN
+
+DO AX=IAXIS,KAXIS
+   IF (AX == SHARED_AXIS) CYCLE
+   IF (ABS(CHILD_BOX(AX,LOW_IND)-CAND_BOX(AX,LOW_IND)) > TOL) RETURN
+   IF (ABS(CHILD_BOX(AX,HIGH_IND)-CAND_BOX(AX,HIGH_IND)) > TOL) RETURN
+ENDDO
+
+CC_GRID_CANDIDATE_OVERLAPS_CHILD_AXIS = .TRUE.
+
+END FUNCTION CC_GRID_CANDIDATE_OVERLAPS_CHILD_AXIS
+
+INTEGER FUNCTION CC_GRID_GET_CHILD_INTERP_SHARED_SIDE(IOR)
+
+INTEGER, INTENT(IN) :: IOR
+
+CC_GRID_GET_CHILD_INTERP_SHARED_SIDE = HIGH_IND
+IF (IOR > 0) CC_GRID_GET_CHILD_INTERP_SHARED_SIDE = LOW_IND
+
+END FUNCTION CC_GRID_GET_CHILD_INTERP_SHARED_SIDE
+
+INTEGER FUNCTION CC_GRID_GET_CUTCELL_RCGAS_IFACE(NM,ICC,JCC,X1AXIS,SIDE)
+
+INTEGER, INTENT(IN) :: NM,ICC,JCC,X1AXIS,SIDE
+
+TYPE(CC_CUTCELL_TYPE), POINTER :: CC
+INTEGER :: IFC,IFACE
+
+CC_GRID_GET_CUTCELL_RCGAS_IFACE = 0
+CC => MESHES(NM)%CUT_CELL(ICC)
+
+DO IFC=1,CC%CCELEM(1,JCC)
+   IFACE = CC%CCELEM(IFC+1,JCC)
+   IF (CC%FACE_LIST(1,IFACE) /= CC_FTYPE_RCGAS) CYCLE
+   IF (CC%FACE_LIST(2,IFACE) /= SIDE) CYCLE
+   IF (CC%FACE_LIST(3,IFACE) /= X1AXIS) CYCLE
+   CC_GRID_GET_CUTCELL_RCGAS_IFACE = IFACE
+   RETURN
+ENDDO
+
+END FUNCTION CC_GRID_GET_CUTCELL_RCGAS_IFACE
+
+INTEGER FUNCTION CC_GRID_GET_CUTCELL_BOUNDARY_IFACE(NM,ICC,JCC,X1AXIS,SIDE)
+
+INTEGER, INTENT(IN) :: NM,ICC,JCC,X1AXIS,SIDE
+
+TYPE(MESH_TYPE), POINTER :: M
+TYPE(CC_CUTCELL_TYPE), POINTER :: CC
+TYPE(CC_CUTFACE_TYPE), POINTER :: CF
+INTEGER :: IFC,IFACE,ICFX,JFCX,I,J,K
+REAL(EB) :: XPLANE,TOL
+
+CC_GRID_GET_CUTCELL_BOUNDARY_IFACE = CC_GRID_GET_CUTCELL_RCGAS_IFACE(NM,ICC,JCC,X1AXIS,SIDE)
+IF (CC_GRID_GET_CUTCELL_BOUNDARY_IFACE > 0) RETURN
+
+M => MESHES(NM)
+CC => M%CUT_CELL(ICC)
+I = CC%IJK(IAXIS); J = CC%IJK(JAXIS); K = CC%IJK(KAXIS)
+
+SELECT CASE(X1AXIS)
+CASE(IAXIS)
+   XPLANE = M%X(MAX(0,MIN(M%IBAR,I-1)))
+   IF (SIDE == HIGH_IND) XPLANE = M%X(MAX(0,MIN(M%IBAR,I)))
+CASE(JAXIS)
+   XPLANE = M%Y(MAX(0,MIN(M%JBAR,J-1)))
+   IF (SIDE == HIGH_IND) XPLANE = M%Y(MAX(0,MIN(M%JBAR,J)))
+CASE(KAXIS)
+   XPLANE = M%Z(MAX(0,MIN(M%KBAR,K-1)))
+   IF (SIDE == HIGH_IND) XPLANE = M%Z(MAX(0,MIN(M%KBAR,K)))
+CASE DEFAULT
+   RETURN
+END SELECT
+
+TOL = CC_CV_CANON_XYZ_TOL
+DO IFC=1,CC%CCELEM(1,JCC)
+   IFACE = CC%CCELEM(IFC+1,JCC)
+   IF (CC%FACE_LIST(1,IFACE) /= CC_FTYPE_CFGAS) CYCLE
+   ICFX = CC%FACE_LIST(4,IFACE)
+   JFCX = CC%FACE_LIST(5,IFACE)
+   CF => M%CUT_FACE(ICFX)
+   IF (ABS(CF%XYZCEN(X1AXIS,JFCX)-XPLANE) > TOL) CYCLE
+   CC_GRID_GET_CUTCELL_BOUNDARY_IFACE = IFACE
+   RETURN
+ENDDO
+
+END FUNCTION CC_GRID_GET_CUTCELL_BOUNDARY_IFACE
+
+INTEGER FUNCTION CC_GRID_GET_CUTCELL_BOUNDARY_IFACE_EITHER_SIDE(NM,ICC,JCC,X1AXIS,SIDE)
+
+INTEGER, INTENT(IN) :: NM,ICC,JCC,X1AXIS,SIDE
+
+INTEGER :: OPP_SIDE
+
+CC_GRID_GET_CUTCELL_BOUNDARY_IFACE_EITHER_SIDE = CC_GRID_GET_CUTCELL_BOUNDARY_IFACE(NM,ICC,JCC,X1AXIS,SIDE)
+IF (CC_GRID_GET_CUTCELL_BOUNDARY_IFACE_EITHER_SIDE > 0) RETURN
+
+OPP_SIDE = LOW_IND + HIGH_IND - SIDE
+IF (OPP_SIDE == SIDE) RETURN
+CC_GRID_GET_CUTCELL_BOUNDARY_IFACE_EITHER_SIDE = CC_GRID_GET_CUTCELL_BOUNDARY_IFACE(NM,ICC,JCC,X1AXIS,OPP_SIDE)
+
+END FUNCTION CC_GRID_GET_CUTCELL_BOUNDARY_IFACE_EITHER_SIDE
+
+INTEGER FUNCTION CC_GRID_GET_CHILD_INTERP_SKIP_IFACE(NM,ICC,JCC,IW)
+
+INTEGER, INTENT(IN) :: NM,ICC,JCC,IW
+
+TYPE(WALL_TYPE), POINTER :: WC
+TYPE(BOUNDARY_COORD_TYPE), POINTER :: BC
+
+CC_GRID_GET_CHILD_INTERP_SKIP_IFACE = 0
+CALL POINT_TO_MESH(NM)
+WC => WALL(IW)
+BC => BOUNDARY_COORD(WC%BC_INDEX)
+
+CC_GRID_GET_CHILD_INTERP_SKIP_IFACE = CC_GRID_GET_CUTCELL_BOUNDARY_IFACE_EITHER_SIDE(NM,ICC,JCC,ABS(BC%IOR), &
+                                                    CC_GRID_GET_CHILD_INTERP_SHARED_SIDE(BC%IOR))
+
+END FUNCTION CC_GRID_GET_CHILD_INTERP_SKIP_IFACE
+
+LOGICAL FUNCTION CC_GRID_FIND_LOCAL_GHOST_CUT_PROXY(NM,NOM,REMOTE_ICC,REMOTE_JCC,PROXY_ICC,PROXY_JCC)
+
+! Map remote cut piece to local guard CUT_CELL proxy (owner remains NOM).
+
+INTEGER, INTENT(IN) :: NM,NOM,REMOTE_ICC,REMOTE_JCC
+INTEGER, INTENT(OUT) :: PROXY_ICC,PROXY_JCC
+INTEGER :: ICC,JCC,INOM,N_MATCH
+REAL(EB) :: REMOTE_VOLUME,VOLUME_TOL,XYZ_DIST
+LOGICAL :: REFERENCES_REMOTE
+
+CC_GRID_FIND_LOCAL_GHOST_CUT_PROXY=.FALSE.
+PROXY_ICC=0
+PROXY_JCC=0
+IF (NM<1 .OR. NM>NMESHES .OR. NOM<1 .OR. NOM>NMESHES) RETURN
+IF (.NOT.ALLOCATED(MESHES(NM)%CUT_CELL)) RETURN
+IF (.NOT.ALLOCATED(MESHES(NOM)%CUT_CELL)) RETURN
+IF (REMOTE_ICC<1 .OR. REMOTE_ICC>SIZE(MESHES(NOM)%CUT_CELL)) RETURN
+IF (.NOT.ALLOCATED(MESHES(NOM)%CUT_CELL(REMOTE_ICC)%VOLUME) .OR. &
+    .NOT.ALLOCATED(MESHES(NOM)%CUT_CELL(REMOTE_ICC)%XYZCEN)) RETURN
+IF (REMOTE_JCC<1 .OR. REMOTE_JCC>SIZE(MESHES(NOM)%CUT_CELL(REMOTE_ICC)%VOLUME)) RETURN
+
+REMOTE_VOLUME=MESHES(NOM)%CUT_CELL(REMOTE_ICC)%VOLUME(REMOTE_JCC)
+N_MATCH=0
+DO ICC=MESHES(NM)%N_CUTCELL_MESH+1,MESHES(NM)%N_CUTCELL_MESH+MESHES(NM)%N_GCCUTCELL_MESH
+   IF (.NOT.ALLOCATED(MESHES(NM)%CUT_CELL(ICC)%NOMICC)) CYCLE
+   REFERENCES_REMOTE=.FALSE.
+   DO INOM=1,MESHES(NM)%CUT_CELL(ICC)%N_NOMICC
+      IF (MESHES(NM)%CUT_CELL(ICC)%NOMICC(1,INOM)==NOM .AND. &
+          MESHES(NM)%CUT_CELL(ICC)%NOMICC(2,INOM)==REMOTE_ICC) THEN
+         REFERENCES_REMOTE=.TRUE.
+         EXIT
+      ENDIF
+   ENDDO
+   IF (.NOT.REFERENCES_REMOTE) CYCLE
+   IF (.NOT.ALLOCATED(MESHES(NM)%CUT_CELL(ICC)%VOLUME) .OR. &
+       .NOT.ALLOCATED(MESHES(NM)%CUT_CELL(ICC)%XYZCEN)) CYCLE
+   DO JCC=1,MESHES(NM)%CUT_CELL(ICC)%NCELL
+      VOLUME_TOL=MAX(CC_CV_CANON_VOLUME_TOL,CC_CV_CANON_VOLUME_TOL* &
+                     MAX(ABS(REMOTE_VOLUME),ABS(MESHES(NM)%CUT_CELL(ICC)%VOLUME(JCC))))
+      IF (ABS(REMOTE_VOLUME-MESHES(NM)%CUT_CELL(ICC)%VOLUME(JCC))>VOLUME_TOL) CYCLE
+      XYZ_DIST=NORM2(MESHES(NOM)%CUT_CELL(REMOTE_ICC)%XYZCEN(IAXIS:KAXIS,REMOTE_JCC)- &
+                     MESHES(NM)%CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,JCC))
+      IF (XYZ_DIST>CC_CV_CANON_XYZ_TOL) CYCLE
+      N_MATCH=N_MATCH+1
+      PROXY_ICC=ICC
+      PROXY_JCC=JCC
+   ENDDO
+ENDDO
+
+CC_GRID_FIND_LOCAL_GHOST_CUT_PROXY=(N_MATCH==1)
+
+END FUNCTION CC_GRID_FIND_LOCAL_GHOST_CUT_PROXY
+
+SUBROUTINE CC_GRID_GET_ALL_CV_MERGE_CANDIDATES_FOR_CUT_PIECE(NM,ICC,JCC,N_CAND,CAND_NM,CAND_CELL_TYPE,CAND_IJK,CAND_ICC, &
+                                                             CAND_JCC,CAND_CHILD_IFACE,CAND_MASTER_IFC,CAND_WALL_IW, &
+                                                             CAND_CONN_AXIS,CAND_CONN_AREA,CAND_OWNER_NM, &
+                                                             CAND_OWNER_CELL_TYPE,CAND_OWNER_IJK,CAND_OWNER_ICC, &
+                                                             CAND_OWNER_JCC)
+
+INTEGER, INTENT(IN) :: NM,ICC,JCC
+INTEGER, INTENT(OUT) :: N_CAND
+INTEGER, ALLOCATABLE, DIMENSION(:), INTENT(OUT) :: CAND_NM,CAND_CELL_TYPE,CAND_ICC,CAND_JCC,CAND_CHILD_IFACE, &
+                                                    CAND_MASTER_IFC,CAND_WALL_IW,CAND_CONN_AXIS
+INTEGER, ALLOCATABLE, DIMENSION(:,:), INTENT(OUT) :: CAND_IJK
+REAL(EB), ALLOCATABLE, DIMENSION(:), INTENT(OUT) :: CAND_CONN_AREA
+INTEGER, ALLOCATABLE, DIMENSION(:), INTENT(OUT) :: CAND_OWNER_NM,CAND_OWNER_CELL_TYPE,CAND_OWNER_ICC,CAND_OWNER_JCC
+INTEGER, ALLOCATABLE, DIMENSION(:,:), INTENT(OUT) :: CAND_OWNER_IJK
+
+TYPE(MESH_TYPE), POINTER :: M
+TYPE(CC_CUTCELL_TYPE), POINTER :: CC
+TYPE(WALL_TYPE), POINTER :: WC
+TYPE(EXTERNAL_WALL_TYPE), POINTER :: EWC
+TYPE(CC_CUTFACE_TYPE), POINTER :: CF
+TYPE(BOUNDARY_COORD_TYPE), POINTER :: BC
+INTEGER :: IFC,IFACE,FTYPE,SIDE,X1AXIS,ILH,ICFX,JFCX,CUR_CF_SIDE,OPP_CF_SIDE,ICC2,JCC2,IFC2
+INTEGER :: IW,NOM,IIO,JJO,KKO,ICOUNT,CHILD_SKIP_IFACE,IOR_WALL,ICELL,PROXY_ICC,PROXY_JCC,IJK_O(IAXIS:KAXIS)
+
+CALL POINT_TO_MESH(NM)
+M => MESHES(NM)
+CC => M%CUT_CELL(ICC)
+ICELL = 0
+IF (CC%IJK(IAXIS) >= 1 .AND. CC%IJK(IAXIS) <= M%IBAR .AND. &
+    CC%IJK(JAXIS) >= 1 .AND. CC%IJK(JAXIS) <= M%JBAR .AND. &
+    CC%IJK(KAXIS) >= 1 .AND. CC%IJK(KAXIS) <= M%KBAR) ICELL = M%CELL_INDEX(CC%IJK(IAXIS),CC%IJK(JAXIS),CC%IJK(KAXIS))
+
+N_CAND = 0
+IF (CC%NCELL < 1) RETURN
+
+DO IFC=1,CC%CCELEM(1,JCC)
+   IFACE = CC%CCELEM(IFC+1,JCC)
+   FTYPE = CC%FACE_LIST(1,IFACE)
+
+   SELECT CASE(FTYPE)
+   CASE(CC_FTYPE_RCGAS)
+      N_CAND = N_CAND + 1
+
+   CASE(CC_FTYPE_CFGAS)
+      ICFX = CC%FACE_LIST(4,IFACE)
+      JFCX = CC%FACE_LIST(5,IFACE)
+      CF => M%CUT_FACE(ICFX)
+      CUR_CF_SIDE = LOW_IND
+      IF (CC%FACE_LIST(2,IFACE) == LOW_IND) CUR_CF_SIDE = HIGH_IND
+      OPP_CF_SIDE = LOW_IND + HIGH_IND - CUR_CF_SIDE
+      ICC2 = CF%CELL_LIST(2,OPP_CF_SIDE,JFCX)
+      JCC2 = CF%CELL_LIST(3,OPP_CF_SIDE,JFCX)
+      IF (ICC2 > 0 .AND. JCC2 > 0) THEN
+         IF (M%CUT_CELL(ICC2)%NOADVANCE(JCC2) == NOT_BLOCKED) N_CAND = N_CAND + 1
+      ENDIF
+
+   END SELECT
+
+ENDDO
+
+DO IOR_WALL=-KAXIS,KAXIS
+   IF (IOR_WALL == 0 .OR. ICELL < 1) CYCLE
+   IW = M%CELL(ICELL)%WALL_INDEX(IOR_WALL)
+   IF (IW < 1 .OR. IW > M%N_EXTERNAL_WALL_CELLS) CYCLE
+   WC => WALL(IW)
+   IF (WC%BOUNDARY_TYPE /= INTERPOLATED_BOUNDARY) CYCLE
+   BC => BOUNDARY_COORD(WC%BC_INDEX)
+   CHILD_SKIP_IFACE = CC_GRID_GET_CUTCELL_BOUNDARY_IFACE_EITHER_SIDE(NM,ICC,JCC,ABS(BC%IOR), &
+                                                                     CC_GRID_GET_CHILD_INTERP_SHARED_SIDE(BC%IOR))
+   IF (CHILD_SKIP_IFACE == 0) CYCLE
+   EWC => EXTERNAL_WALL(IW)
+   NOM = EWC%NOM
+   IF (NOM < 1 .OR. NOM == NM) CYCLE
+
+   DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
+      DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
+         DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
+            IJK_O = (/ IIO,JJO,KKO /)
+            ICC2 = MESHES(NOM)%CCVAR(IIO,JJO,KKO,CC_IDCC)
+            IF (ICC2>0) THEN
+               ! SET_CVS_3D builds deterministic CUT_CELL geometry for every mesh on every rank, so
+               ! remote-rank cut pieces are valid candidates and are later globally arbitrated.
+               IF (.NOT.ALLOCATED(MESHES(NOM)%CUT_CELL)) CYCLE
+               IF (ICC2 > MESHES(NOM)%N_CUTCELL_MESH+MESHES(NOM)%N_GCCUTCELL_MESH) CYCLE
+               IF (.NOT.ALLOCATED(MESHES(NOM)%CUT_CELL(ICC2)%NOADVANCE)) CYCLE
+               IF (.NOT.ALLOCATED(MESHES(NOM)%CUT_CELL(ICC2)%VOLUME)) CYCLE
+               IF (.NOT.ALLOCATED(MESHES(NOM)%CUT_CELL(ICC2)%XYZCEN)) CYCLE
+               DO JCC2=1,MESHES(NOM)%CUT_CELL(ICC2)%NCELL
+                  IF (MESHES(NOM)%CUT_CELL(ICC2)%NOADVANCE(JCC2) /= NOT_BLOCKED) CYCLE
+                  IF (NOM<LOWER_MESH_INDEX .OR. NOM>UPPER_MESH_INDEX) THEN
+                     IF (.NOT.CC_GRID_FIND_LOCAL_GHOST_CUT_PROXY(NM,NOM,ICC2,JCC2,PROXY_ICC,PROXY_JCC)) CYCLE
+                  ENDIF
+                  IF (.NOT.CC_GRID_INTERP_CANDIDATE_OVERLAPS_CHILD(NM,ICC,IW,NOM,CC_GCELL_CUT, &
+                                                                   IJK_O,ICC2)) CYCLE
+                  N_CAND = N_CAND + 1
+               ENDDO
+            ELSE
+               IF (.NOT.CC_GRID_INTERP_CANDIDATE_OVERLAPS_CHILD(NM,ICC,IW,NOM,CC_GCELL_REG,IJK_O,0)) CYCLE
+               N_CAND = N_CAND + 1
+            ENDIF
+         ENDDO
       ENDDO
    ENDDO
 ENDDO
 
+IF (N_CAND < 1) RETURN
+
+ALLOCATE(CAND_NM(1:N_CAND),CAND_CELL_TYPE(1:N_CAND),CAND_ICC(1:N_CAND),CAND_JCC(1:N_CAND), &
+         CAND_CHILD_IFACE(1:N_CAND),CAND_MASTER_IFC(1:N_CAND),CAND_WALL_IW(1:N_CAND),CAND_CONN_AXIS(1:N_CAND), &
+         CAND_CONN_AREA(1:N_CAND))
+ALLOCATE(CAND_IJK(IAXIS:KAXIS,1:N_CAND))
+ALLOCATE(CAND_OWNER_NM(1:N_CAND),CAND_OWNER_CELL_TYPE(1:N_CAND),CAND_OWNER_ICC(1:N_CAND),CAND_OWNER_JCC(1:N_CAND))
+ALLOCATE(CAND_OWNER_IJK(IAXIS:KAXIS,1:N_CAND))
+ICOUNT = 0
+
+CAND_NM = 0
+CAND_CELL_TYPE = 0
+CAND_ICC = 0
+CAND_JCC = 0
+CAND_OWNER_NM = 0
+CAND_OWNER_CELL_TYPE = 0
+CAND_OWNER_ICC = 0
+CAND_OWNER_JCC = 0
+CAND_CHILD_IFACE = 0
+CAND_MASTER_IFC = 0
+CAND_WALL_IW = 0
+CAND_CONN_AXIS = 0
+CAND_CONN_AREA = 0._EB
+CAND_IJK = 0
+CAND_OWNER_IJK = 0
+
+DO IFC=1,CC%CCELEM(1,JCC)
+   IFACE = CC%CCELEM(IFC+1,JCC)
+   FTYPE = CC%FACE_LIST(1,IFACE)
+
+   SELECT CASE(FTYPE)
+   CASE(CC_FTYPE_RCGAS)
+      SIDE = CC%FACE_LIST(2,IFACE)
+      X1AXIS = CC%FACE_LIST(3,IFACE)
+      ILH = 2*SIDE - 3
+      ICOUNT = ICOUNT + 1
+      CAND_NM(ICOUNT) = NM
+      CAND_CELL_TYPE(ICOUNT) = CC_GCELL_REG
+      CAND_IJK(IAXIS:KAXIS,ICOUNT) = CC%IJK(IAXIS:KAXIS)
+      CAND_IJK(X1AXIS,ICOUNT) = CAND_IJK(X1AXIS,ICOUNT) + ILH
+      IF (CAND_IJK(IAXIS,ICOUNT) < 1 .OR. CAND_IJK(IAXIS,ICOUNT) > MESHES(CAND_NM(ICOUNT))%IBAR .OR. &
+          CAND_IJK(JAXIS,ICOUNT) < 1 .OR. CAND_IJK(JAXIS,ICOUNT) > MESHES(CAND_NM(ICOUNT))%JBAR .OR. &
+          CAND_IJK(KAXIS,ICOUNT) < 1 .OR. CAND_IJK(KAXIS,ICOUNT) > MESHES(CAND_NM(ICOUNT))%KBAR) THEN
+         ICOUNT = ICOUNT - 1
+         CYCLE
+      ENDIF
+      CAND_CHILD_IFACE(ICOUNT) = IFACE
+      CAND_CONN_AXIS(ICOUNT) = X1AXIS
+      CAND_CONN_AREA(ICOUNT) = CC_GRID_GET_REGULAR_FACE_AREA(NM,CC%IJK(IAXIS),CC%IJK(JAXIS),CC%IJK(KAXIS),X1AXIS)
+      IF (.NOT.CC_GRID_CANONICALIZE_CV_ENTITY(CAND_NM(ICOUNT),CAND_CELL_TYPE(ICOUNT),CAND_IJK(IAXIS:KAXIS,ICOUNT), &
+                                               CAND_ICC(ICOUNT),CAND_JCC(ICOUNT),CAND_OWNER_NM(ICOUNT), &
+                                               CAND_OWNER_CELL_TYPE(ICOUNT),CAND_OWNER_IJK(IAXIS:KAXIS,ICOUNT), &
+                                               CAND_OWNER_ICC(ICOUNT),CAND_OWNER_JCC(ICOUNT))) THEN
+         ICOUNT = ICOUNT - 1
+         CYCLE
+      ENDIF
+
+   CASE(CC_FTYPE_CFGAS)
+      ICFX = CC%FACE_LIST(4,IFACE)
+      JFCX = CC%FACE_LIST(5,IFACE)
+      CF => M%CUT_FACE(ICFX)
+      CUR_CF_SIDE = LOW_IND
+      IF (CC%FACE_LIST(2,IFACE) == LOW_IND) CUR_CF_SIDE = HIGH_IND
+      OPP_CF_SIDE = LOW_IND + HIGH_IND - CUR_CF_SIDE
+      ICC2 = CF%CELL_LIST(2,OPP_CF_SIDE,JFCX)
+      JCC2 = CF%CELL_LIST(3,OPP_CF_SIDE,JFCX)
+      IFC2 = CF%CELL_LIST(4,OPP_CF_SIDE,JFCX)
+      IF (ICC2 <= 0 .OR. JCC2 <= 0) CYCLE
+      IF (M%CUT_CELL(ICC2)%NOADVANCE(JCC2) /= NOT_BLOCKED) CYCLE
+      ICOUNT = ICOUNT + 1
+      CAND_NM(ICOUNT) = NM
+      CAND_CELL_TYPE(ICOUNT) = CC_GCELL_CUT
+      CAND_IJK(IAXIS:KAXIS,ICOUNT) = M%CUT_CELL(ICC2)%IJK(IAXIS:KAXIS)
+      CAND_ICC(ICOUNT) = ICC2
+      CAND_JCC(ICOUNT) = JCC2
+      CAND_CHILD_IFACE(ICOUNT) = IFACE
+      CAND_MASTER_IFC(ICOUNT) = IFC2
+      CAND_CONN_AXIS(ICOUNT) = CC%FACE_LIST(3,IFACE)
+      CAND_CONN_AREA(ICOUNT) = CF%AREA(JFCX)
+      IF (.NOT.CC_GRID_CANONICALIZE_CV_ENTITY(CAND_NM(ICOUNT),CAND_CELL_TYPE(ICOUNT),CAND_IJK(IAXIS:KAXIS,ICOUNT), &
+                                               CAND_ICC(ICOUNT),CAND_JCC(ICOUNT),CAND_OWNER_NM(ICOUNT), &
+                                               CAND_OWNER_CELL_TYPE(ICOUNT),CAND_OWNER_IJK(IAXIS:KAXIS,ICOUNT), &
+                                               CAND_OWNER_ICC(ICOUNT),CAND_OWNER_JCC(ICOUNT))) THEN
+         ICOUNT = ICOUNT - 1
+         CYCLE
+      ENDIF
+      IF (CAND_OWNER_NM(ICOUNT) /= NM) THEN
+         IF (.NOT.CC_GRID_WALL_CONFORMS(NM,CC_GRID_GET_CARTESIAN_FACE_WALL(NM,CC%IJK(IAXIS),CC%IJK(JAXIS), &
+             CC%IJK(KAXIS),CC%FACE_LIST(3,IFACE),CC%FACE_LIST(2,IFACE)))) THEN
+            ICOUNT = ICOUNT - 1
+            CYCLE
+         ENDIF
+         IF (.NOT.CC_GRID_CANDIDATE_OVERLAPS_CHILD_AXIS(NM,ICC,CAND_OWNER_NM(ICOUNT),CAND_OWNER_CELL_TYPE(ICOUNT), &
+            CAND_OWNER_IJK(IAXIS:KAXIS,ICOUNT),CAND_OWNER_ICC(ICOUNT),CAND_CONN_AXIS(ICOUNT))) THEN
+            ICOUNT = ICOUNT - 1
+            CYCLE
+         ENDIF
+      ENDIF
+
+   END SELECT
+
+ENDDO
+
+DO IOR_WALL=-KAXIS,KAXIS
+   IF (IOR_WALL == 0 .OR. ICELL < 1) CYCLE
+   IW = M%CELL(ICELL)%WALL_INDEX(IOR_WALL)
+   IF (IW < 1 .OR. IW > M%N_EXTERNAL_WALL_CELLS) CYCLE
+   WC => WALL(IW)
+   IF (WC%BOUNDARY_TYPE /= INTERPOLATED_BOUNDARY) CYCLE
+   BC => BOUNDARY_COORD(WC%BC_INDEX)
+   CHILD_SKIP_IFACE = CC_GRID_GET_CUTCELL_BOUNDARY_IFACE_EITHER_SIDE(NM,ICC,JCC,ABS(BC%IOR), &
+                                                                     CC_GRID_GET_CHILD_INTERP_SHARED_SIDE(BC%IOR))
+   IF (CHILD_SKIP_IFACE == 0) CYCLE
+   EWC => EXTERNAL_WALL(IW)
+   NOM = EWC%NOM
+   IF (NOM < 1 .OR. NOM == NM) CYCLE
+   IF (.NOT.CC_GRID_WALL_CONFORMS(NM,IW)) CYCLE
+
+   DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
+      DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
+         DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
+            IJK_O = (/ IIO,JJO,KKO /)
+            ICC2 = MESHES(NOM)%CCVAR(IIO,JJO,KKO,CC_IDCC)
+            IF (ICC2>0) THEN
+               ! Cross-seam neighbor cut pieces remain available on remote ranks because CUT_CELL
+               ! geometry is constructed globally; ownership is resolved after proposal allgather.
+               IF (.NOT.ALLOCATED(MESHES(NOM)%CUT_CELL)) CYCLE
+               IF (ICC2 > MESHES(NOM)%N_CUTCELL_MESH+MESHES(NOM)%N_GCCUTCELL_MESH) CYCLE
+               IF (.NOT.ALLOCATED(MESHES(NOM)%CUT_CELL(ICC2)%NOADVANCE)) CYCLE
+               IF (.NOT.ALLOCATED(MESHES(NOM)%CUT_CELL(ICC2)%VOLUME)) CYCLE
+               IF (.NOT.ALLOCATED(MESHES(NOM)%CUT_CELL(ICC2)%XYZCEN)) CYCLE
+               DO JCC2=1,MESHES(NOM)%CUT_CELL(ICC2)%NCELL
+                  IF (MESHES(NOM)%CUT_CELL(ICC2)%NOADVANCE(JCC2) /= NOT_BLOCKED) CYCLE
+                  IF (NOM<LOWER_MESH_INDEX .OR. NOM>UPPER_MESH_INDEX) THEN
+                     IF (.NOT.CC_GRID_FIND_LOCAL_GHOST_CUT_PROXY(NM,NOM,ICC2,JCC2,PROXY_ICC,PROXY_JCC)) CYCLE
+                  ELSE
+                     PROXY_ICC=ICC2
+                     PROXY_JCC=JCC2
+                  ENDIF
+                  IF (.NOT.CC_GRID_INTERP_CANDIDATE_OVERLAPS_CHILD(NM,ICC,IW,NOM,CC_GCELL_CUT, &
+                                                                   IJK_O,ICC2)) CYCLE
+                  ICOUNT = ICOUNT + 1
+                  CAND_NM(ICOUNT) = NOM
+                  IF (NOM<LOWER_MESH_INDEX .OR. NOM>UPPER_MESH_INDEX) CAND_NM(ICOUNT)=NM
+                  CAND_CELL_TYPE(ICOUNT) = CC_GCELL_CUT
+                  CAND_IJK(IAXIS:KAXIS,ICOUNT) = MESHES(CAND_NM(ICOUNT))%CUT_CELL(PROXY_ICC)%IJK(IAXIS:KAXIS)
+                  CAND_ICC(ICOUNT) = PROXY_ICC
+                  CAND_JCC(ICOUNT) = PROXY_JCC
+                  CAND_CHILD_IFACE(ICOUNT) = 0
+                  CAND_WALL_IW(ICOUNT) = IW
+                  CAND_CONN_AXIS(ICOUNT) = ABS(BC%IOR)
+                  CAND_CONN_AREA(ICOUNT) = CC_GRID_GET_CUTCELL_FACE_AREA(NM,ICC,CHILD_SKIP_IFACE)
+                  IF (.NOT.CC_GRID_CANONICALIZE_CV_ENTITY(CAND_NM(ICOUNT),CAND_CELL_TYPE(ICOUNT), &
+                                                          CAND_IJK(IAXIS:KAXIS,ICOUNT),CAND_ICC(ICOUNT),CAND_JCC(ICOUNT), &
+                                                          CAND_OWNER_NM(ICOUNT),CAND_OWNER_CELL_TYPE(ICOUNT), &
+                                                          CAND_OWNER_IJK(IAXIS:KAXIS,ICOUNT),CAND_OWNER_ICC(ICOUNT), &
+                                                          CAND_OWNER_JCC(ICOUNT))) THEN
+                     ICOUNT = ICOUNT - 1
+                     CYCLE
+                  ENDIF
+               ENDDO
+            ELSE
+               IF (MESHES(NOM)%CCVAR(IIO,JJO,KKO,CC_CGSC)/=CC_GASPHASE) CYCLE
+               IF (.NOT.CC_GRID_INTERP_CANDIDATE_OVERLAPS_CHILD(NM,ICC,IW,NOM,CC_GCELL_REG,IJK_O,0)) CYCLE
+               ICOUNT = ICOUNT + 1
+               CAND_NM(ICOUNT) = NOM
+               CAND_CELL_TYPE(ICOUNT) = CC_GCELL_REG
+               CAND_IJK(IAXIS:KAXIS,ICOUNT) = (/ IIO, JJO, KKO /)
+               CAND_CHILD_IFACE(ICOUNT) = 0
+               CAND_WALL_IW(ICOUNT) = IW
+               CAND_CONN_AXIS(ICOUNT) = ABS(BC%IOR)
+               CAND_CONN_AREA(ICOUNT) = CC_GRID_GET_REGULAR_FACE_AREA(NOM,IIO,JJO,KKO,ABS(BC%IOR))
+               IF (.NOT.CC_GRID_CANONICALIZE_CV_ENTITY(CAND_NM(ICOUNT),CAND_CELL_TYPE(ICOUNT), &
+                                                        CAND_IJK(IAXIS:KAXIS,ICOUNT),CAND_ICC(ICOUNT),CAND_JCC(ICOUNT), &
+                                                        CAND_OWNER_NM(ICOUNT),CAND_OWNER_CELL_TYPE(ICOUNT), &
+                                                        CAND_OWNER_IJK(IAXIS:KAXIS,ICOUNT),CAND_OWNER_ICC(ICOUNT), &
+                                                        CAND_OWNER_JCC(ICOUNT))) THEN
+                  ICOUNT = ICOUNT - 1
+                  CYCLE
+               ENDIF
+            ENDIF
+         ENDDO
+      ENDDO
+   ENDDO
+ENDDO
+
+N_CAND = ICOUNT
+
+END SUBROUTINE CC_GRID_GET_ALL_CV_MERGE_CANDIDATES_FOR_CUT_PIECE
+
+LOGICAL FUNCTION CC_GRID_POINT_IN_CART_CELL(X,NM,I,J,K)
+! Closed Cartesian cell (I,J,K) on mesh NM: X(I-1)..X(I), Y(J-1)..Y(J), Z(K-1)..Z(K).
+REAL(EB), INTENT(IN) :: X(IAXIS:KAXIS)
+INTEGER, INTENT(IN) :: NM,I,J,K
+REAL(EB) :: BB(6)
+TYPE(MESH_TYPE), POINTER :: M
+CC_GRID_POINT_IN_CART_CELL = .FALSE.
+IF (NM < 1 .OR. NM > NMESHES) RETURN
+M => MESHES(NM)
+IF (.NOT.ALLOCATED(M%X) .OR. .NOT.ALLOCATED(M%Y) .OR. .NOT.ALLOCATED(M%Z)) RETURN
+IF (I < 1 .OR. I > M%IBAR) RETURN
+IF (J < 1 .OR. J > M%JBAR) RETURN
+IF (K < 1 .OR. K > M%KBAR) RETURN
+IF (I-1 < LBOUND(M%X,1) .OR. I > UBOUND(M%X,1)) RETURN
+IF (J-1 < LBOUND(M%Y,1) .OR. J > UBOUND(M%Y,1)) RETURN
+IF (K-1 < LBOUND(M%Z,1) .OR. K > UBOUND(M%Z,1)) RETURN
+BB(1) = M%X(I-1)
+BB(2) = M%X(I)
+BB(3) = M%Y(J-1)
+BB(4) = M%Y(J)
+BB(5) = M%Z(K-1)
+BB(6) = M%Z(K)
+CC_GRID_POINT_IN_CART_CELL = POINT_IN_BB(X,BB)
+END FUNCTION CC_GRID_POINT_IN_CART_CELL
+
+LOGICAL FUNCTION CC_GRID_CUT_PIECE_GAS_SIDE(X)
+! Even +X crossings are the gas side. The ray keeps y and z, so only the thinner of those bins can hit.
+REAL(EB), INTENT(IN) :: X(IAXIS:KAXIS)
+INTEGER :: IG,IWSEL,ITRI,N_HIT,AXIS,AX,IBIN,IB,NTL,BEST,WSELEM(NOD1:NOD3)
+REAL(EB) :: V1(IAXIS:KAXIS),V2(IAXIS:KAXIS),V3(IAXIS:KAXIS),POS(IAXIS:KAXIS),DRAY(IAXIS:KAXIS)
+REAL(EB) :: MIN_MESHGEOM
+LOGICAL :: HIT
+TYPE(GEOMETRY_TYPE), POINTER :: G
+CC_GRID_CUT_PIECE_GAS_SIDE = .TRUE.
+IF (N_GEOMETRY < 1) RETURN
+DRAY = (/1._EB,0._EB,0._EB/)
+N_HIT = 0
+DO IG=1,N_GEOMETRY
+   G => GEOMETRY(IG)
+   IF (.NOT.ALLOCATED(G%FACES) .OR. .NOT.ALLOCATED(G%VERTS)) CYCLE
+   IF (NODS_WSEL*G%N_FACES > SIZE(G%FACES)) CYCLE
+   AX = 0
+   BEST = HUGE(BEST)
+   DO AXIS=JAXIS,KAXIS
+      IF (G%TBAXIS(AXIS)%N_BINS < 1) CYCLE
+      MIN_MESHGEOM = G%TBAXIS(AXIS)%TRIBIN(1)%X1_LOW
+      IBIN = CEILING((X(AXIS)-MIN_MESHGEOM)/G%TBAXIS(AXIS)%DELBIN)
+      IF (IBIN < 1) IBIN = 1
+      IF (IBIN > G%TBAXIS(AXIS)%N_BINS) IBIN = G%TBAXIS(AXIS)%N_BINS
+      NTL = G%TBAXIS(AXIS)%TRIBIN(IBIN)%NTL
+      IF (AX == 0 .OR. NTL < BEST) THEN
+         BEST = NTL
+         AX = AXIS
+         IB = IBIN
+      ENDIF
+   ENDDO
+   IF (AX < 1) CYCLE
+   DO ITRI=1,G%TBAXIS(AX)%TRIBIN(IB)%NTL
+      IWSEL = G%TBAXIS(AX)%TRIBIN(IB)%TRI_LIST(ITRI)
+      WSELEM(NOD1:NOD3) = G%FACES(NODS_WSEL*(IWSEL-1)+1:NODS_WSEL*IWSEL)
+      V1(IAXIS:KAXIS) = G%VERTS(MAX_DIM*(WSELEM(NOD1)-1)+1:MAX_DIM*WSELEM(NOD1))
+      V2(IAXIS:KAXIS) = G%VERTS(MAX_DIM*(WSELEM(NOD2)-1)+1:MAX_DIM*WSELEM(NOD2))
+      V3(IAXIS:KAXIS) = G%VERTS(MAX_DIM*(WSELEM(NOD3)-1)+1:MAX_DIM*WSELEM(NOD3))
+      CALL RAY_TRIANGLE_INTERSECT_PT(V1,V2,V3,X,DRAY,HIT,POS)
+      IF (HIT) N_HIT = N_HIT + 1
+   ENDDO
+ENDDO
+CC_GRID_CUT_PIECE_GAS_SIDE = (MOD(N_HIT,2) == 0)
+END FUNCTION CC_GRID_CUT_PIECE_GAS_SIDE
+
+LOGICAL FUNCTION CC_GRID_POINT_IN_PROSPECTIVE_CV_GAS(X,NM_CHILD,ICC_CHILD,JCC_CHILD,N_TARGET, &
+                                                     TGT_NM,TGT_CELL_TYPE,TGT_IJK,TGT_ICC,TGT_JCC)
+! Inside when X is in a member Cartesian cell and on the gas side of the body.
+REAL(EB), INTENT(IN) :: X(IAXIS:KAXIS)
+INTEGER, INTENT(IN) :: NM_CHILD,ICC_CHILD,JCC_CHILD,N_TARGET
+INTEGER, INTENT(IN) :: TGT_NM(N_TARGET),TGT_CELL_TYPE(N_TARGET),TGT_ICC(N_TARGET),TGT_JCC(N_TARGET)
+INTEGER, INTENT(IN) :: TGT_IJK(IAXIS:KAXIS,N_TARGET)
+TYPE(MESH_TYPE), POINTER :: M
+TYPE(CC_CUTCELL_TYPE), POINTER :: CC
+INTEGER :: ITARGET,I,J,K,JPIECE
+LOGICAL :: SAW_REG,SAW_CUT,IN_BOX
+REAL(EB) :: PT(IAXIS:KAXIS)
+CC_GRID_POINT_IN_PROSPECTIVE_CV_GAS = .FALSE.
+IF (JCC_CHILD < 1) RETURN
+SAW_REG = .FALSE.
+SAW_CUT = .FALSE.
+IF (NM_CHILD >= 1) THEN
+   IF (NM_CHILD <= NMESHES) THEN
+      M => MESHES(NM_CHILD)
+      IF (ALLOCATED(M%CUT_CELL)) THEN
+         IF (ICC_CHILD >= 1) THEN
+            IF (ICC_CHILD <= SIZE(M%CUT_CELL)) THEN
+               CC => M%CUT_CELL(ICC_CHILD)
+               I = CC%IJK(IAXIS)
+               J = CC%IJK(JAXIS)
+               K = CC%IJK(KAXIS)
+               IN_BOX = CC_GRID_POINT_IN_CART_CELL(X,NM_CHILD,I,J,K)
+               IF (.NOT.IN_BOX .AND. ALLOCATED(CC%XYZCEN)) THEN
+                  IF (JCC_CHILD >= 1 .AND. JCC_CHILD <= SIZE(CC%XYZCEN,DIM=2)) THEN
+                     PT(IAXIS:KAXIS) = CC%XYZCEN(IAXIS:KAXIS,JCC_CHILD)
+                     IF (NORM2(X(IAXIS:KAXIS)-PT(IAXIS:KAXIS)) <= CC_CV_CANON_XYZ_TOL) IN_BOX = .TRUE.
+                  ENDIF
+               ENDIF
+               IF (IN_BOX) SAW_CUT = .TRUE.
+            ENDIF
+         ENDIF
+      ENDIF
+   ENDIF
+ENDIF
+DO ITARGET=1,N_TARGET
+   IF (TGT_NM(ITARGET) < 1) CYCLE
+   IF (TGT_NM(ITARGET) > NMESHES) CYCLE
+   IF (TGT_CELL_TYPE(ITARGET) == CC_GCELL_REG) THEN
+      I = TGT_IJK(IAXIS,ITARGET)
+      J = TGT_IJK(JAXIS,ITARGET)
+      K = TGT_IJK(KAXIS,ITARGET)
+      IN_BOX = CC_GRID_POINT_IN_CART_CELL(X,TGT_NM(ITARGET),I,J,K)
+      IF (IN_BOX) SAW_REG = .TRUE.
+   ENDIF
+   IF (TGT_CELL_TYPE(ITARGET) == CC_GCELL_CUT) THEN
+      IF (TGT_JCC(ITARGET) < 1) CYCLE
+      M => MESHES(TGT_NM(ITARGET))
+      IF (ALLOCATED(M%CUT_CELL)) THEN
+         IF (TGT_ICC(ITARGET) >= 1) THEN
+            IF (TGT_ICC(ITARGET) <= SIZE(M%CUT_CELL)) THEN
+               CC => M%CUT_CELL(TGT_ICC(ITARGET))
+               I = CC%IJK(IAXIS)
+               J = CC%IJK(JAXIS)
+               K = CC%IJK(KAXIS)
+               IN_BOX = CC_GRID_POINT_IN_CART_CELL(X,TGT_NM(ITARGET),I,J,K)
+               JPIECE = TGT_JCC(ITARGET)
+               IF (.NOT.IN_BOX .AND. ALLOCATED(CC%XYZCEN)) THEN
+                  IF (JPIECE >= 1 .AND. JPIECE <= SIZE(CC%XYZCEN,DIM=2)) THEN
+                     PT(IAXIS:KAXIS) = CC%XYZCEN(IAXIS:KAXIS,JPIECE)
+                     IF (NORM2(X(IAXIS:KAXIS)-PT(IAXIS:KAXIS)) <= CC_CV_CANON_XYZ_TOL) IN_BOX = .TRUE.
+                  ENDIF
+               ENDIF
+               IF (IN_BOX) SAW_CUT = .TRUE.
+            ENDIF
+         ENDIF
+      ENDIF
+   ENDIF
+ENDDO
+! Any containing regular member is all gas, so do not cast a ray.
+IF (SAW_REG) THEN
+   CC_GRID_POINT_IN_PROSPECTIVE_CV_GAS = .TRUE.
+   RETURN
+ENDIF
+IF (.NOT.SAW_CUT) RETURN
+! With split cells (NCELL>1, not reachable today) one Cartesian box can hold two gas
+! pieces, and the whole-body count does not name the piece.
+CC_GRID_POINT_IN_PROSPECTIVE_CV_GAS = CC_GRID_CUT_PIECE_GAS_SIDE(X)
+END FUNCTION CC_GRID_POINT_IN_PROSPECTIVE_CV_GAS
+
+SUBROUTINE CC_GRID_GET_CUT_CHILD_CV_PAIR_MERGE_GEOMETRY(NM_CHILD,ICC_CHILD,JCC_CHILD,N_TARGET, &
+                                                        TGT_NM,TGT_CELL_TYPE,TGT_IJK,TGT_ICC,TGT_JCC, &
+                                                        TGT_CHILD_IFACE,TGT_MASTER_IFC,TGT_WALL_IW, &
+                                                        MEMBER_VOLUME,MEMBER_XYZCEN,N_FACE,FACE_XYZCEN,FACE_NVEC, &
+                                                        FACE_HAS_NEIGHBOR,FACE_NEIGHBOR_XYZCEN,CV_DIAM,SUPPORTED, &
+                                                        N_MEMBER,MASTER_MEMBER,FACE_MEMBER, &
+                                                        IN_GAS_MASTER,IN_GAS_BAR,N_CHILD_FACE)
+
+INTEGER, INTENT(IN) :: NM_CHILD,ICC_CHILD,JCC_CHILD,N_TARGET
+INTEGER, INTENT(IN) :: TGT_NM(N_TARGET),TGT_CELL_TYPE(N_TARGET),TGT_IJK(IAXIS:KAXIS,N_TARGET)
+INTEGER, INTENT(IN) :: TGT_ICC(N_TARGET),TGT_JCC(N_TARGET)
+INTEGER, INTENT(IN) :: TGT_CHILD_IFACE(N_TARGET),TGT_MASTER_IFC(N_TARGET),TGT_WALL_IW(N_TARGET)
+REAL(EB), ALLOCATABLE, DIMENSION(:), INTENT(OUT) :: MEMBER_VOLUME
+REAL(EB), ALLOCATABLE, DIMENSION(:,:), INTENT(OUT) :: MEMBER_XYZCEN,FACE_XYZCEN,FACE_NVEC,FACE_NEIGHBOR_XYZCEN
+LOGICAL, ALLOCATABLE, DIMENSION(:), INTENT(OUT) :: FACE_HAS_NEIGHBOR
+INTEGER, ALLOCATABLE, DIMENSION(:), INTENT(OUT) :: FACE_MEMBER
+INTEGER, INTENT(OUT) :: N_FACE,N_MEMBER,MASTER_MEMBER
+REAL(EB), INTENT(OUT) :: CV_DIAM
+LOGICAL, INTENT(OUT) :: SUPPORTED
+LOGICAL, INTENT(OUT) :: IN_GAS_MASTER,IN_GAS_BAR
+INTEGER, INTENT(OUT), OPTIONAL :: N_CHILD_FACE
+
+TYPE(BOUNDARY_COORD_TYPE), POINTER :: BC
+TYPE(MESH_TYPE), POINTER :: M_CAND
+INTEGER :: SIDE,MAX_FACE,MASTER_IFACE,IFC,IMEMBER,AX,SHARED_AXIS
+INTEGER :: ITARGET,ISKIP,N_CHILD_SKIP,N_TGT_SKIP,CHILD_SKIP,N_FACE_BEFORE
+INTEGER :: CHILD_SKIP_IFACES(MAX(1,N_TARGET))
+INTEGER :: TGT_SKIP_IFACES(MAX(1,N_TARGET))
+INTEGER :: TGT_SKIP_AXIS(MAX(1,N_TARGET)),TGT_SKIP_SIDE(MAX(1,N_TARGET))
+INTEGER :: I_H,J_H,K_H
+LOGICAL :: SKIP_REG_FACE
+REAL(EB) :: X_MASTER(IAXIS:KAXIS),XBAR_CV(IAXIS:KAXIS),DIST,FACE_LEN_SCALE
+
+N_MEMBER = 1 + N_TARGET
+MASTER_MEMBER = 2
+SUPPORTED = .TRUE.
+N_FACE = 0
+CV_DIAM = 0._EB
+IF (PRESENT(N_CHILD_FACE)) N_CHILD_FACE = 0
+IN_GAS_MASTER = .FALSE.
+IN_GAS_BAR = .FALSE.
+
+ALLOCATE(MEMBER_VOLUME(1:N_MEMBER))
+ALLOCATE(MEMBER_XYZCEN(IAXIS:KAXIS,1:N_MEMBER))
+
+MEMBER_VOLUME(1) = MESHES(NM_CHILD)%CUT_CELL(ICC_CHILD)%VOLUME(JCC_CHILD)
+MEMBER_XYZCEN(IAXIS:KAXIS,1) = MESHES(NM_CHILD)%CUT_CELL(ICC_CHILD)%XYZCEN(IAXIS:KAXIS,JCC_CHILD)
+
+MAX_FACE = MESHES(NM_CHILD)%CUT_CELL(ICC_CHILD)%CCELEM(1,JCC_CHILD)
+DO ITARGET=1,N_TARGET
+   IMEMBER = 1 + ITARGET
+   SELECT CASE(TGT_CELL_TYPE(ITARGET))
+   CASE(CC_GCELL_REG)
+      M_CAND => MESHES(TGT_NM(ITARGET))
+      MEMBER_VOLUME(IMEMBER) = M_CAND%DX(TGT_IJK(IAXIS,ITARGET))*M_CAND%DY(TGT_IJK(JAXIS,ITARGET))* &
+                               M_CAND%DZ(TGT_IJK(KAXIS,ITARGET))
+      MEMBER_XYZCEN(IAXIS:KAXIS,IMEMBER) = (/ M_CAND%XC(TGT_IJK(IAXIS,ITARGET)), M_CAND%YC(TGT_IJK(JAXIS,ITARGET)), &
+                                              M_CAND%ZC(TGT_IJK(KAXIS,ITARGET)) /)
+      MAX_FACE = MAX_FACE + 6
+   CASE(CC_GCELL_CUT)
+      MEMBER_VOLUME(IMEMBER) = MESHES(TGT_NM(ITARGET))%CUT_CELL(TGT_ICC(ITARGET))%VOLUME(TGT_JCC(ITARGET))
+      MEMBER_XYZCEN(IAXIS:KAXIS,IMEMBER) = MESHES(TGT_NM(ITARGET))%CUT_CELL(TGT_ICC(ITARGET))%XYZCEN(IAXIS:KAXIS,TGT_JCC(ITARGET))
+      MAX_FACE = MAX_FACE + MESHES(TGT_NM(ITARGET))%CUT_CELL(TGT_ICC(ITARGET))%CCELEM(1,TGT_JCC(ITARGET))
+   CASE DEFAULT
+      SUPPORTED = .FALSE.
+   END SELECT
+ENDDO
+
+MAX_FACE = MAX(1,MAX_FACE)
+
+ALLOCATE(FACE_XYZCEN(IAXIS:KAXIS,1:MAX_FACE)); FACE_XYZCEN = 0._EB
+ALLOCATE(FACE_NVEC(IAXIS:KAXIS,1:MAX_FACE)); FACE_NVEC = 0._EB
+ALLOCATE(FACE_HAS_NEIGHBOR(1:MAX_FACE)); FACE_HAS_NEIGHBOR = .FALSE.
+ALLOCATE(FACE_NEIGHBOR_XYZCEN(IAXIS:KAXIS,1:MAX_FACE)); FACE_NEIGHBOR_XYZCEN = 0._EB
+ALLOCATE(FACE_MEMBER(1:MAX_FACE)); FACE_MEMBER = 0
+
+IF (.NOT.SUPPORTED) THEN
+   IN_GAS_MASTER = .FALSE.
+   IN_GAS_BAR = .FALSE.
+   RETURN
+ENDIF
+
+N_CHILD_SKIP = 0
+DO ITARGET=1,N_TARGET
+   CHILD_SKIP = TGT_CHILD_IFACE(ITARGET)
+   IF (TGT_WALL_IW(ITARGET) > 0) CHILD_SKIP = CC_GRID_GET_CHILD_INTERP_SKIP_IFACE(NM_CHILD,ICC_CHILD,JCC_CHILD, &
+                                                                                TGT_WALL_IW(ITARGET))
+   IF (TGT_WALL_IW(ITARGET) > 0 .AND. CHILD_SKIP == 0) THEN
+      SUPPORTED = .FALSE.
+      IN_GAS_MASTER = .FALSE.
+      IN_GAS_BAR = .FALSE.
+      RETURN
+   ENDIF
+   N_CHILD_SKIP = N_CHILD_SKIP + 1
+   CHILD_SKIP_IFACES(N_CHILD_SKIP) = CHILD_SKIP
+ENDDO
+
+CALL CC_GRID_APPEND_CUT_CELL_EXTERNAL_FACES(NM_CHILD,ICC_CHILD,JCC_CHILD,N_CHILD_SKIP,CHILD_SKIP_IFACES,N_FACE, &
+                                            FACE_XYZCEN,FACE_NVEC,FACE_HAS_NEIGHBOR,FACE_NEIGHBOR_XYZCEN,SUPPORTED)
+IF (.NOT.SUPPORTED) THEN
+   IN_GAS_MASTER = .FALSE.
+   IN_GAS_BAR = .FALSE.
+   RETURN
+ENDIF
+IF (PRESENT(N_CHILD_FACE)) N_CHILD_FACE = N_FACE
+DO IFC=1,N_FACE
+   FACE_MEMBER(IFC) = 1
+ENDDO
+
+DO ITARGET=1,N_TARGET
+   IMEMBER = 1 + ITARGET
+   N_FACE_BEFORE = N_FACE
+   SELECT CASE(TGT_CELL_TYPE(ITARGET))
+   CASE(CC_GCELL_REG)
+      N_TGT_SKIP = 0
+      SHARED_AXIS = 0
+      SIDE = 0
+      IF (TGT_WALL_IW(ITARGET) > 0) THEN
+         CALL POINT_TO_MESH(NM_CHILD)
+         BC => BOUNDARY_COORD(WALL(TGT_WALL_IW(ITARGET))%BC_INDEX)
+         SIDE = LOW_IND; IF (BC%IOR > 0) SIDE = HIGH_IND
+         SHARED_AXIS = ABS(BC%IOR)
+         N_TGT_SKIP = 1
+      ELSEIF (TGT_CHILD_IFACE(ITARGET) >= 1) THEN
+         SIDE = LOW_IND + HIGH_IND - MESHES(NM_CHILD)%CUT_CELL(ICC_CHILD)%FACE_LIST(2,TGT_CHILD_IFACE(ITARGET))
+         SHARED_AXIS = MESHES(NM_CHILD)%CUT_CELL(ICC_CHILD)%FACE_LIST(3,TGT_CHILD_IFACE(ITARGET))
+         N_TGT_SKIP = 1
+      ENDIF
+      IF (N_TGT_SKIP > 0) THEN
+         TGT_SKIP_AXIS(1) = SHARED_AXIS
+         TGT_SKIP_SIDE(1) = SIDE
+      ENDIF
+
+      DO AX=IAXIS,KAXIS
+         DO IFC=LOW_IND,HIGH_IND
+            SKIP_REG_FACE = .FALSE.
+            DO ISKIP=1,N_TGT_SKIP
+               IF (AX==TGT_SKIP_AXIS(ISKIP) .AND. IFC==TGT_SKIP_SIDE(ISKIP)) THEN
+                  SKIP_REG_FACE = .TRUE.
+                  EXIT
+               ENDIF
+            ENDDO
+            IF (SKIP_REG_FACE) CYCLE
+            N_FACE = N_FACE + 1
+            CALL CC_GRID_GET_REGULAR_CELL_FACE_GEOMETRY(TGT_NM(ITARGET),TGT_IJK(IAXIS,ITARGET),TGT_IJK(JAXIS,ITARGET), &
+                                                        TGT_IJK(KAXIS,ITARGET),IFC,AX,FACE_XYZCEN(IAXIS:KAXIS,N_FACE), &
+                                                        FACE_NVEC(IAXIS:KAXIS,N_FACE),FACE_HAS_NEIGHBOR(N_FACE), &
+                                                        FACE_NEIGHBOR_XYZCEN(IAXIS:KAXIS,N_FACE))
+            FACE_MEMBER(N_FACE) = IMEMBER
+         ENDDO
+      ENDDO
+
+   CASE(CC_GCELL_CUT)
+      MASTER_IFACE = 0
+      IF (TGT_WALL_IW(ITARGET) > 0) THEN
+         CALL POINT_TO_MESH(NM_CHILD)
+         BC => BOUNDARY_COORD(WALL(TGT_WALL_IW(ITARGET))%BC_INDEX)
+         SIDE = LOW_IND; IF (BC%IOR > 0) SIDE = HIGH_IND
+         MASTER_IFACE = CC_GRID_GET_CUTCELL_BOUNDARY_IFACE_EITHER_SIDE(TGT_NM(ITARGET),TGT_ICC(ITARGET),TGT_JCC(ITARGET), &
+                                                                      ABS(BC%IOR),SIDE)
+         IF (MASTER_IFACE == 0) THEN
+            SUPPORTED = .FALSE.
+            IN_GAS_MASTER = .FALSE.
+            IN_GAS_BAR = .FALSE.
+            RETURN
+         ENDIF
+      ELSEIF (TGT_MASTER_IFC(ITARGET) > 0) THEN
+         MASTER_IFACE = MESHES(TGT_NM(ITARGET))%CUT_CELL(TGT_ICC(ITARGET))%CCELEM(TGT_MASTER_IFC(ITARGET)+1,TGT_JCC(ITARGET))
+      ENDIF
+      N_TGT_SKIP = 1
+      TGT_SKIP_IFACES(1) = MASTER_IFACE
+      CALL CC_GRID_APPEND_CUT_CELL_EXTERNAL_FACES(TGT_NM(ITARGET),TGT_ICC(ITARGET),TGT_JCC(ITARGET),N_TGT_SKIP, &
+                                                  TGT_SKIP_IFACES,N_FACE,FACE_XYZCEN,FACE_NVEC,FACE_HAS_NEIGHBOR, &
+                                                  FACE_NEIGHBOR_XYZCEN,SUPPORTED)
+      IF (.NOT.SUPPORTED) THEN
+         IN_GAS_MASTER = .FALSE.
+         IN_GAS_BAR = .FALSE.
+         RETURN
+      ENDIF
+      DO IFC=N_FACE_BEFORE+1,N_FACE
+         FACE_MEMBER(IFC) = IMEMBER
+      ENDDO
+   END SELECT
+ENDDO
+
+I_H = MESHES(NM_CHILD)%CUT_CELL(ICC_CHILD)%IJK(IAXIS)
+J_H = MESHES(NM_CHILD)%CUT_CELL(ICC_CHILD)%IJK(JAXIS)
+K_H = MESHES(NM_CHILD)%CUT_CELL(ICC_CHILD)%IJK(KAXIS)
+FACE_LEN_SCALE = MAX(MESHES(NM_CHILD)%DX(I_H),MESHES(NM_CHILD)%DY(J_H),MESHES(NM_CHILD)%DZ(K_H))
+IF (PRESENT(N_CHILD_FACE)) THEN
+   CALL CC_GRID_REMOVE_CV_INTERNAL_FACE_PAIRS(N_FACE,FACE_XYZCEN,FACE_NVEC,FACE_HAS_NEIGHBOR, &
+                                              FACE_NEIGHBOR_XYZCEN,FACE_LEN_SCALE,FACE_MEMBER,N_CHILD_FACE)
+ELSE
+   CALL CC_GRID_REMOVE_CV_INTERNAL_FACE_PAIRS(N_FACE,FACE_XYZCEN,FACE_NVEC,FACE_HAS_NEIGHBOR, &
+                                              FACE_NEIGHBOR_XYZCEN,FACE_LEN_SCALE,FACE_MEMBER)
+ENDIF
+
+CALL CC_GRID_GET_CV_CENTER_CANDIDATES(N_MEMBER,MASTER_MEMBER,MEMBER_VOLUME,MEMBER_XYZCEN,X_MASTER,XBAR_CV)
+DO IMEMBER=1,N_MEMBER
+   DIST = NORM2(MEMBER_XYZCEN(IAXIS:KAXIS,IMEMBER)-XBAR_CV(IAXIS:KAXIS))
+   CV_DIAM = MAX(CV_DIAM,2._EB*DIST)
+ENDDO
+DO IFC=1,N_FACE
+   DIST = NORM2(FACE_XYZCEN(IAXIS:KAXIS,IFC)-XBAR_CV(IAXIS:KAXIS))
+   CV_DIAM = MAX(CV_DIAM,2._EB*DIST)
+ENDDO
+
+IN_GAS_MASTER = CC_GRID_POINT_IN_PROSPECTIVE_CV_GAS(X_MASTER,NM_CHILD,ICC_CHILD,JCC_CHILD,N_TARGET, &
+   TGT_NM,TGT_CELL_TYPE,TGT_IJK,TGT_ICC,TGT_JCC)
+IN_GAS_BAR = CC_GRID_POINT_IN_PROSPECTIVE_CV_GAS(XBAR_CV,NM_CHILD,ICC_CHILD,JCC_CHILD,N_TARGET, &
+   TGT_NM,TGT_CELL_TYPE,TGT_IJK,TGT_ICC,TGT_JCC)
+
+END SUBROUTINE CC_GRID_GET_CUT_CHILD_CV_PAIR_MERGE_GEOMETRY
+
+SUBROUTINE CC_GRID_REMOVE_CV_INTERNAL_FACE_PAIRS(N_FACE,FACE_XYZCEN,FACE_NVEC,FACE_HAS_NEIGHBOR, &
+                                                 FACE_NEIGHBOR_XYZCEN,LEN_SCALE,FACE_MEMBER,N_CHILD_FACE)
+
+! Remove coincident opposed gas-gas face pairs that lie interior to a prospective merged CV.
+! Both faces of a pair must have FACE_HAS_NEIGHBOR so thin-solid CFINB twins are kept.
+INTEGER, INTENT(INOUT) :: N_FACE
+REAL(EB), INTENT(INOUT) :: FACE_XYZCEN(:,:),FACE_NVEC(:,:),FACE_NEIGHBOR_XYZCEN(:,:)
+LOGICAL, INTENT(INOUT) :: FACE_HAS_NEIGHBOR(:)
+INTEGER, INTENT(INOUT) :: FACE_MEMBER(:)
+REAL(EB), INTENT(IN) :: LEN_SCALE
+INTEGER, INTENT(INOUT), OPTIONAL :: N_CHILD_FACE
+
+LOGICAL, ALLOCATABLE :: REMOVE(:)
+INTEGER :: IF1,IF2,IFACE,N_KEEP,N_CHILD_IN,N_CHILD_KEEP
+REAL(EB) :: SEP,DN,TOL_SEP,TOL_OPP
+
+IF (N_FACE < 2) RETURN
+
+TOL_SEP = 1.0E-8_EB * MAX(LEN_SCALE,TWO_EPSILON_EB)
+TOL_OPP = 1.0E-8_EB
+
+ALLOCATE(REMOVE(1:N_FACE)); REMOVE = .FALSE.
+
+DO IF1=1,N_FACE-1
+   IF (REMOVE(IF1)) CYCLE
+   IF (.NOT.FACE_HAS_NEIGHBOR(IF1)) CYCLE
+   DO IF2=IF1+1,N_FACE
+      IF (REMOVE(IF2)) CYCLE
+      IF (.NOT.FACE_HAS_NEIGHBOR(IF2)) CYCLE
+      SEP = NORM2(FACE_XYZCEN(IAXIS:KAXIS,IF1)-FACE_XYZCEN(IAXIS:KAXIS,IF2))
+      IF (SEP > TOL_SEP) CYCLE
+      DN = DOT_PRODUCT(FACE_NVEC(IAXIS:KAXIS,IF1),FACE_NVEC(IAXIS:KAXIS,IF2))
+      IF (ABS(DN + 1._EB) > TOL_OPP) CYCLE
+      REMOVE(IF1) = .TRUE.
+      REMOVE(IF2) = .TRUE.
+      EXIT
+   ENDDO
+ENDDO
+
+N_CHILD_IN = 0
+IF (PRESENT(N_CHILD_FACE)) N_CHILD_IN = N_CHILD_FACE
+
+N_KEEP = 0
+N_CHILD_KEEP = 0
+DO IFACE=1,N_FACE
+   IF (REMOVE(IFACE)) CYCLE
+   N_KEEP = N_KEEP + 1
+   IF (IFACE <= N_CHILD_IN) N_CHILD_KEEP = N_CHILD_KEEP + 1
+   IF (N_KEEP /= IFACE) THEN
+      FACE_XYZCEN(IAXIS:KAXIS,N_KEEP) = FACE_XYZCEN(IAXIS:KAXIS,IFACE)
+      FACE_NVEC(IAXIS:KAXIS,N_KEEP) = FACE_NVEC(IAXIS:KAXIS,IFACE)
+      FACE_HAS_NEIGHBOR(N_KEEP) = FACE_HAS_NEIGHBOR(IFACE)
+      FACE_NEIGHBOR_XYZCEN(IAXIS:KAXIS,N_KEEP) = FACE_NEIGHBOR_XYZCEN(IAXIS:KAXIS,IFACE)
+      FACE_MEMBER(N_KEEP) = FACE_MEMBER(IFACE)
+   ENDIF
+ENDDO
+N_FACE = N_KEEP
+IF (PRESENT(N_CHILD_FACE)) N_CHILD_FACE = N_CHILD_KEEP
+DEALLOCATE(REMOVE)
+
+END SUBROUTINE CC_GRID_REMOVE_CV_INTERNAL_FACE_PAIRS
+
+SUBROUTINE CC_GRID_DEALLOCATE_CV_PAIR_GEOMETRY(MEMBER_VOLUME,MEMBER_XYZCEN,FACE_XYZCEN,FACE_NVEC, &
+                                               FACE_HAS_NEIGHBOR,FACE_NEIGHBOR_XYZCEN,FACE_MEMBER)
+
+REAL(EB), ALLOCATABLE, INTENT(INOUT) :: MEMBER_VOLUME(:),MEMBER_XYZCEN(:,:)
+REAL(EB), ALLOCATABLE, INTENT(INOUT) :: FACE_XYZCEN(:,:),FACE_NVEC(:,:),FACE_NEIGHBOR_XYZCEN(:,:)
+LOGICAL, ALLOCATABLE, INTENT(INOUT) :: FACE_HAS_NEIGHBOR(:)
+INTEGER, ALLOCATABLE, INTENT(INOUT) :: FACE_MEMBER(:)
+
+IF (ALLOCATED(MEMBER_VOLUME)) DEALLOCATE(MEMBER_VOLUME)
+IF (ALLOCATED(MEMBER_XYZCEN)) DEALLOCATE(MEMBER_XYZCEN)
+IF (ALLOCATED(FACE_XYZCEN)) DEALLOCATE(FACE_XYZCEN)
+IF (ALLOCATED(FACE_NVEC)) DEALLOCATE(FACE_NVEC)
+IF (ALLOCATED(FACE_HAS_NEIGHBOR)) DEALLOCATE(FACE_HAS_NEIGHBOR)
+IF (ALLOCATED(FACE_NEIGHBOR_XYZCEN)) DEALLOCATE(FACE_NEIGHBOR_XYZCEN)
+IF (ALLOCATED(FACE_MEMBER)) DEALLOCATE(FACE_MEMBER)
+
+END SUBROUTINE CC_GRID_DEALLOCATE_CV_PAIR_GEOMETRY
+
+SUBROUTINE CC_GRID_EVALUATE_CV_PAIR_MERGE_DECISION(MEMBER_VOLUME,MEMBER_XYZCEN,CV_DIAM,N_FACE, &
+                                                   N_MEMBER,MASTER_MEMBER,FACE_MEMBER, &
+                                                   FACE_XYZCEN,FACE_NVEC,FACE_HAS_NEIGHBOR,FACE_NEIGHBOR_XYZCEN, &
+                                                   DECISION,CENTER_SOURCE,X_MASTER,XBAR_CV,XCV, &
+                                                   CENTER_MAX_THETA,CENTER_MAX_SKEW,CENTER_MIN_DFDIAM, &
+                                                   IN_GAS_MASTER,IN_GAS_BAR,REJECT_REASON)
+
+INTEGER, INTENT(IN) :: N_FACE,N_MEMBER,MASTER_MEMBER
+INTEGER, INTENT(IN) :: FACE_MEMBER(:)
+REAL(EB), INTENT(IN) :: MEMBER_VOLUME(:),MEMBER_XYZCEN(:,:),CV_DIAM
+REAL(EB), INTENT(IN) :: FACE_XYZCEN(:,:),FACE_NVEC(:,:),FACE_NEIGHBOR_XYZCEN(:,:)
+LOGICAL, INTENT(IN) :: FACE_HAS_NEIGHBOR(:)
+LOGICAL, INTENT(IN) :: IN_GAS_MASTER,IN_GAS_BAR
+INTEGER, INTENT(OUT), OPTIONAL :: REJECT_REASON
+INTEGER, INTENT(OUT) :: DECISION,CENTER_SOURCE
+REAL(EB), INTENT(OUT) :: X_MASTER(IAXIS:KAXIS),XBAR_CV(IAXIS:KAXIS),XCV(IAXIS:KAXIS)
+REAL(EB), INTENT(OUT) :: CENTER_MAX_THETA,CENTER_MAX_SKEW,CENTER_MIN_DFDIAM
+
+LOGICAL :: CENTER_INSIDE(1:2),CENTER_STAR_SHAPED(1:2),CENTER_OK(1:2),SUPPORT_STABLE
+REAL(EB) :: THETA(1:2),SKEW(1:2),DFDIAM(1:2),XBAR_EVAL(IAXIS:KAXIS)
+INTEGER :: CENTER_REJECT_REASON(1:2),CENTER_MAX_SKEW_IFACE(1:2)
+INTEGER :: SKEW_IFACE,SKEW_MEMBER
+SKEW_IFACE = 0
+SKEW_MEMBER = 0
+SUPPORT_STABLE = .FALSE.
+
+CALL CC_GRID_EVALUATE_CV_CENTER_CANDIDATES(N_MEMBER,MASTER_MEMBER,MEMBER_VOLUME,MEMBER_XYZCEN,CV_DIAM,N_FACE, &
+                                           FACE_XYZCEN(IAXIS:KAXIS,1:N_FACE),FACE_NVEC(IAXIS:KAXIS,1:N_FACE), &
+                                           FACE_HAS_NEIGHBOR(1:N_FACE),FACE_NEIGHBOR_XYZCEN(IAXIS:KAXIS,1:N_FACE), &
+                                           X_MASTER,XBAR_EVAL,CENTER_INSIDE,CENTER_STAR_SHAPED,THETA,SKEW,DFDIAM, &
+                                           CENTER_MAX_SKEW_IFACE)
+
+CENTER_INSIDE(1) = IN_GAS_MASTER
+CENTER_INSIDE(2) = IN_GAS_BAR
+
+CALL CC_GRID_DECIDE_CV_MERGE_OR_BLOCK(CC_CV_CENTER_MASTER_CENTROID,N_MEMBER,MASTER_MEMBER,MEMBER_VOLUME,MEMBER_XYZCEN, &
+                                      CENTER_INSIDE,CENTER_STAR_SHAPED,THETA,SKEW,DFDIAM,DECISION,CENTER_SOURCE, &
+                                      X_MASTER,XBAR_CV,XCV,CENTER_OK,CENTER_REJECT_REASON)
+
+CENTER_MAX_THETA = THETA(1)
+CENTER_MAX_SKEW = SKEW(1)
+CENTER_MIN_DFDIAM = DFDIAM(1)
+
+IF (DECISION /= CC_CV_DECISION_MERGE .AND. CENTER_REJECT_REASON(1) == CC_CV_REJECT_SKEW .AND. &
+    CENTER_MAX_SKEW_IFACE(1) >= 1 .AND. CENTER_MAX_SKEW_IFACE(1) <= N_FACE) THEN
+   SKEW_IFACE = CENTER_MAX_SKEW_IFACE(1)
+   SKEW_MEMBER = FACE_MEMBER(SKEW_IFACE)
+   IF (SKEW_MEMBER >= 1 .AND. SKEW_MEMBER <= N_MEMBER .AND. SKEW_MEMBER /= MASTER_MEMBER) THEN
+      SUPPORT_STABLE = CC_GRID_MEMBER_FACE_SUPPORT_GEOMETRY_IS_STABLE(X_MASTER, &
+                                                                     MEMBER_XYZCEN(IAXIS:KAXIS,1:N_MEMBER), &
+                                                                     N_FACE,N_MEMBER,MASTER_MEMBER,FACE_MEMBER(1:N_FACE), &
+                                                                     FACE_XYZCEN(IAXIS:KAXIS,1:N_FACE), &
+                                                                     FACE_NVEC(IAXIS:KAXIS,1:N_FACE), &
+                                                                     FACE_HAS_NEIGHBOR(1:N_FACE), &
+                                                                     FACE_NEIGHBOR_XYZCEN(IAXIS:KAXIS,1:N_FACE))
+      IF (SUPPORT_STABLE) THEN
+         DECISION = CC_CV_DECISION_MERGE
+         CENTER_SOURCE = CC_CV_CENTER_MASTER_CENTROID
+         XCV(IAXIS:KAXIS) = X_MASTER(IAXIS:KAXIS)
+         XBAR_CV(IAXIS:KAXIS) = XBAR_EVAL(IAXIS:KAXIS)
+      ENDIF
+   ENDIF
+ENDIF
+IF (PRESENT(REJECT_REASON)) THEN
+   IF (DECISION == CC_CV_DECISION_MERGE) THEN
+      REJECT_REASON = CC_CV_REJECT_NONE
+   ELSE
+      REJECT_REASON = CENTER_REJECT_REASON(1)
+   ENDIF
+ENDIF
+END SUBROUTINE CC_GRID_EVALUATE_CV_PAIR_MERGE_DECISION
+
+SUBROUTINE CC_GRID_CLEAR_PROPOSAL_MASTER_FIELDS(PROPOSAL,IPROPOSAL)
+
+TYPE(CC_CV_PROPOSAL_BUFFER_TYPE), INTENT(INOUT) :: PROPOSAL
+INTEGER, INTENT(IN) :: IPROPOSAL
+
+PROPOSAL%MASTER_CELL_TYPE(IPROPOSAL) = 0
+PROPOSAL%MASTER_IJK(IAXIS:KAXIS,IPROPOSAL) = 0
+PROPOSAL%MASTER_ICC(IPROPOSAL) = 0
+PROPOSAL%MASTER_JCC(IPROPOSAL) = 0
+PROPOSAL%MASTER_VOLUME(IPROPOSAL) = 0._EB
+PROPOSAL%MASTER_XYZCEN(IAXIS:KAXIS,IPROPOSAL) = 0._EB
+
+END SUBROUTINE CC_GRID_CLEAR_PROPOSAL_MASTER_FIELDS
+
+SUBROUTINE CC_GRID_APPLY_GCELL_MERGE_DECISION_FROM_PROPOSAL(PROPOSAL,IPROPOSAL)
+
+TYPE(CC_CV_PROPOSAL_BUFFER_TYPE), INTENT(IN) :: PROPOSAL
+INTEGER, INTENT(IN) :: IPROPOSAL
+TYPE(MESH_TYPE), POINTER :: M
+INTEGER :: IG
+
+IF (PROPOSAL%CHILD_NM(IPROPOSAL) < 1 .OR. PROPOSAL%CHILD_NM(IPROPOSAL) > NMESHES) RETURN
+M => MESHES(PROPOSAL%CHILD_NM(IPROPOSAL))
+IG = PROPOSAL%CHILD_IG(IPROPOSAL)
+IF (.NOT.ALLOCATED(M%FV%GCELL%CV_DECISION) .OR. IG < 1 .OR. IG > M%FV%GCELL%N) RETURN
+
+M%FV%GCELL%CV_DECISION(IG) = CC_CV_DECISION_MERGE
+M%FV%GCELL%CENTER_SOURCE(IG) = PROPOSAL%CENTER_SOURCE(IPROPOSAL)
+M%FV%GCELL%CONN_AXIS(IG) = PROPOSAL%CONN_AXIS(IPROPOSAL)
+M%FV%GCELL%MASTER_NM(IG) = PROPOSAL%MASTER_NM(IPROPOSAL)
+M%FV%GCELL%MASTER_CELL_TYPE(IG) = PROPOSAL%MASTER_CELL_TYPE(IPROPOSAL)
+M%FV%GCELL%MASTER_IG(IG) = 0
+M%FV%GCELL%MASTER_IJK(IAXIS:KAXIS,IG) = PROPOSAL%MASTER_IJK(IAXIS:KAXIS,IPROPOSAL)
+M%FV%GCELL%MASTER_ICC(IG) = PROPOSAL%MASTER_ICC(IPROPOSAL)
+M%FV%GCELL%MASTER_JCC(IG) = PROPOSAL%MASTER_JCC(IPROPOSAL)
+M%FV%GCELL%XCV(IAXIS:KAXIS,IG) = PROPOSAL%XCV(IAXIS:KAXIS,IPROPOSAL)
+M%FV%GCELL%XBAR_CV(IAXIS:KAXIS,IG) = PROPOSAL%XBAR_CV(IAXIS:KAXIS,IPROPOSAL)
+M%FV%GCELL%CONN_AREA(IG) = PROPOSAL%CONN_AREA(IPROPOSAL)
+M%FV%GCELL%CV_VOLUME(IG) = PROPOSAL%VOLUME(IPROPOSAL)
+M%FV%GCELL%MAX_THETA(IG) = PROPOSAL%THETA(IPROPOSAL)
+M%FV%GCELL%MAX_SKEW(IG) = PROPOSAL%SKEW(IPROPOSAL)
+M%FV%GCELL%MIN_DFDIAM(IG) = PROPOSAL%DFDIAM(IPROPOSAL)
+IF (PROPOSAL%MASTER_NM(IPROPOSAL) == PROPOSAL%CHILD_NM(IPROPOSAL) .AND. PROPOSAL%MASTER_CELL_TYPE(IPROPOSAL) == CC_GCELL_CUT) THEN
+   M%FV%GCELL%MASTER_IG(IG) = CC_GRID_GET_GCELL_INDEX_FROM_PIECE(M,PROPOSAL%MASTER_ICC(IPROPOSAL),PROPOSAL%MASTER_JCC(IPROPOSAL))
+ENDIF
+
+END SUBROUTINE CC_GRID_APPLY_GCELL_MERGE_DECISION_FROM_PROPOSAL
+
+SUBROUTINE CC_GRID_RECORD_MISSING_MASTER(PROPOSAL,IPROPOSAL,MASTER_NM,N_MISSING_MASTER,N_MISSING_CUT_MASTER, &
+                                         N_MISSING_REG_MASTER,N_MISSING_LOCAL_MASTER,N_MISSING_REMOTE_MASTER)
+
+TYPE(CC_CV_PROPOSAL_BUFFER_TYPE), INTENT(IN) :: PROPOSAL
+INTEGER, INTENT(IN) :: IPROPOSAL,MASTER_NM
+INTEGER, INTENT(INOUT) :: N_MISSING_MASTER,N_MISSING_CUT_MASTER,N_MISSING_REG_MASTER
+INTEGER, INTENT(INOUT) :: N_MISSING_LOCAL_MASTER,N_MISSING_REMOTE_MASTER
+
+N_MISSING_MASTER = N_MISSING_MASTER + 1
+IF (PROPOSAL%MASTER_CELL_TYPE(IPROPOSAL) == CC_GCELL_CUT) N_MISSING_CUT_MASTER = N_MISSING_CUT_MASTER + 1
+IF (PROPOSAL%MASTER_CELL_TYPE(IPROPOSAL) == CC_GCELL_REG) N_MISSING_REG_MASTER = N_MISSING_REG_MASTER + 1
+IF (MASTER_NM == PROPOSAL%CHILD_NM(IPROPOSAL)) THEN
+   N_MISSING_LOCAL_MASTER = N_MISSING_LOCAL_MASTER + 1
+ELSE
+   N_MISSING_REMOTE_MASTER = N_MISSING_REMOTE_MASTER + 1
+ENDIF
+
+END SUBROUTINE CC_GRID_RECORD_MISSING_MASTER
+
+SUBROUTINE CC_GRID_RESOLVE_GCELL_CV_ROOT(NM_IN,IG_IN,NM_OUT,IG_OUT)
+! Follow MASTER_* while the next GCELL is on this rank. A repeated cell ends the walk.
+INTEGER, INTENT(IN) :: NM_IN,IG_IN
+INTEGER, INTENT(OUT) :: NM_OUT,IG_OUT
+TYPE(MESH_TYPE), POINTER :: M
+INTEGER :: NM,IG,NEXT_NM,NEXT_IG,I,NS
+INTEGER :: IJK(IAXIS:KAXIS)
+INTEGER, ALLOCATABLE :: WNM(:),WIG(:),TNM(:),TIG(:)
+NM_OUT = NM_IN
+IG_OUT = IG_IN
+NM = NM_IN
+IG = IG_IN
+IF (NM < 1 .OR. NM > NMESHES .OR. IG < 1) RETURN
+NS = 0
+ALLOCATE(WNM(16),WIG(16))
+DO
+   DO I=1,NS
+      IF (WNM(I) == NM .AND. WIG(I) == IG) RETURN
+   ENDDO
+   M => MESHES(NM)
+   IF (.NOT.ALLOCATED(M%FV%GCELL%CV_DECISION)) RETURN
+   IF (IG < 1 .OR. IG > M%FV%GCELL%N) RETURN
+   IF (NS >= SIZE(WNM)) THEN
+      ALLOCATE(TNM(2*SIZE(WNM)),TIG(2*SIZE(WNM)))
+      TNM(1:NS) = WNM(1:NS)
+      TIG(1:NS) = WIG(1:NS)
+      CALL MOVE_ALLOC(TNM,WNM)
+      CALL MOVE_ALLOC(TIG,WIG)
+   ENDIF
+   NS = NS+1
+   WNM(NS) = NM
+   WIG(NS) = IG
+   NM_OUT = NM
+   IG_OUT = IG
+   IF (M%FV%GCELL%CV_DECISION(IG) /= CC_CV_DECISION_MERGE) RETURN
+   NEXT_NM = M%FV%GCELL%MASTER_NM(IG)
+   IJK(IAXIS:KAXIS) = M%FV%GCELL%MASTER_IJK(IAXIS:KAXIS,IG)
+   NEXT_IG = CC_GRID_GET_GCELL_INDEX_FROM_ENTITY(NEXT_NM,M%FV%GCELL%MASTER_CELL_TYPE(IG),IJK, &
+                                                M%FV%GCELL%MASTER_ICC(IG),M%FV%GCELL%MASTER_JCC(IG))
+   IF (NEXT_IG < 1) RETURN
+   IF (NEXT_NM == NM .AND. NEXT_IG == IG) RETURN
+   NM = NEXT_NM
+   IG = NEXT_IG
+ENDDO
+END SUBROUTINE CC_GRID_RESOLVE_GCELL_CV_ROOT
+
+SUBROUTINE CC_GRID_DEALLOCATE_CV_ROUND_MEMBER_CSR(GFLAT_START,GFLAT_NM,GFLAT_IG,GFLAT_ROOT,ROOT_PTR,ROOT_MEM)
+
+INTEGER, ALLOCATABLE, INTENT(INOUT) :: GFLAT_START(:),GFLAT_NM(:),GFLAT_IG(:),GFLAT_ROOT(:),ROOT_PTR(:),ROOT_MEM(:)
+
+IF (ALLOCATED(GFLAT_START)) DEALLOCATE(GFLAT_START)
+IF (ALLOCATED(GFLAT_NM)) DEALLOCATE(GFLAT_NM)
+IF (ALLOCATED(GFLAT_IG)) DEALLOCATE(GFLAT_IG)
+IF (ALLOCATED(GFLAT_ROOT)) DEALLOCATE(GFLAT_ROOT)
+IF (ALLOCATED(ROOT_PTR)) DEALLOCATE(ROOT_PTR)
+IF (ALLOCATED(ROOT_MEM)) DEALLOCATE(ROOT_MEM)
+
+END SUBROUTINE CC_GRID_DEALLOCATE_CV_ROUND_MEMBER_CSR
+
+SUBROUTINE CC_GRID_BUILD_CV_ROUND_MEMBER_CSR(N_GFLAT,GFLAT_START,GFLAT_NM,GFLAT_IG,GFLAT_ROOT,ROOT_PTR,ROOT_MEM)
+
+INTEGER, INTENT(OUT) :: N_GFLAT
+INTEGER, ALLOCATABLE, INTENT(INOUT) :: GFLAT_START(:),GFLAT_NM(:),GFLAT_IG(:),GFLAT_ROOT(:),ROOT_PTR(:),ROOT_MEM(:)
+TYPE(MESH_TYPE), POINTER :: M
+INTEGER :: NM,IG,I,R,K,ITMP,ROOT_NM,ROOT_IG,N_INT
+INTEGER, ALLOCATABLE, DIMENSION(:) :: CNT
+
+CALL CC_GRID_DEALLOCATE_CV_ROUND_MEMBER_CSR(GFLAT_START,GFLAT_NM,GFLAT_IG,GFLAT_ROOT,ROOT_PTR,ROOT_MEM)
+N_GFLAT = 0
+ALLOCATE(GFLAT_START(1:NMESHES)); GFLAT_START = 0
+DO NM=1,NMESHES
+   IF (.NOT.ALLOCATED(MESHES(NM)%FV%GCELL%CELL_TYPE)) CYCLE
+   N_INT = MESHES(NM)%FV%GCELL%N_INT
+   IF (N_INT < 1) CYCLE
+   GFLAT_START(NM) = N_GFLAT + 1
+   N_GFLAT = N_GFLAT + N_INT
+ENDDO
+IF (N_GFLAT < 1) THEN
+   ALLOCATE(GFLAT_NM(1),GFLAT_IG(1),GFLAT_ROOT(1),ROOT_PTR(1:2),ROOT_MEM(1))
+   GFLAT_NM = 0; GFLAT_IG = 0; GFLAT_ROOT = 1; ROOT_PTR = 1; ROOT_MEM = 0
+   RETURN
+ENDIF
+
+ALLOCATE(GFLAT_NM(1:N_GFLAT),GFLAT_IG(1:N_GFLAT),GFLAT_ROOT(1:N_GFLAT))
+I = 0
+DO NM=1,NMESHES
+   IF (GFLAT_START(NM) < 1) CYCLE
+   M => MESHES(NM)
+   N_INT = M%FV%GCELL%N_INT
+   DO IG=1,N_INT
+      I = I + 1
+      GFLAT_NM(I) = NM
+      GFLAT_IG(I) = IG
+   ENDDO
+ENDDO
+
+DO I=1,N_GFLAT
+   CALL CC_GRID_RESOLVE_GCELL_CV_ROOT(GFLAT_NM(I),GFLAT_IG(I),ROOT_NM,ROOT_IG)
+   IF (ROOT_NM >= 1 .AND. ROOT_NM <= NMESHES .AND. GFLAT_START(ROOT_NM) >= 1 .AND. ROOT_IG >= 1) THEN
+      GFLAT_ROOT(I) = GFLAT_START(ROOT_NM) + ROOT_IG - 1
+      IF (GFLAT_ROOT(I) < 1 .OR. GFLAT_ROOT(I) > N_GFLAT) GFLAT_ROOT(I) = I
+   ELSE
+      GFLAT_ROOT(I) = I
+   ENDIF
+ENDDO
+
+ALLOCATE(CNT(1:N_GFLAT)); CNT = 0
+DO I=1,N_GFLAT
+   CNT(GFLAT_ROOT(I)) = CNT(GFLAT_ROOT(I)) + 1
+ENDDO
+ALLOCATE(ROOT_PTR(1:N_GFLAT+1))
+ROOT_PTR(1) = 1
+DO I=1,N_GFLAT
+   ROOT_PTR(I+1) = ROOT_PTR(I) + CNT(I)
+ENDDO
+ALLOCATE(ROOT_MEM(1:N_GFLAT))
+CNT = 0
+DO I=1,N_GFLAT
+   R = GFLAT_ROOT(I)
+   ROOT_MEM(ROOT_PTR(R)+CNT(R)) = I
+   CNT(R) = CNT(R) + 1
+ENDDO
+DO R=1,N_GFLAT
+   IF (ROOT_PTR(R+1) <= ROOT_PTR(R)) CYCLE
+   DO K=ROOT_PTR(R),ROOT_PTR(R+1)-1
+      IF (ROOT_MEM(K) == R) THEN
+         ITMP = ROOT_MEM(ROOT_PTR(R))
+         ROOT_MEM(ROOT_PTR(R)) = R
+         ROOT_MEM(K) = ITMP
+         EXIT
+      ENDIF
+   ENDDO
+ENDDO
+DEALLOCATE(CNT)
+
+END SUBROUTINE CC_GRID_BUILD_CV_ROUND_MEMBER_CSR
+
+SUBROUTINE CC_GRID_SELECT_BEST_AVAILABLE_CV_MERGE_CANDIDATE(NM_CHILD,IG_CHILD,N_GFLAT,GFLAT_START, &
+                                                            GFLAT_NM,GFLAT_IG,GFLAT_ROOT,ROOT_PTR,ROOT_MEM,ACCEPT_FAILED, &
+                                                            FOUND,MASTER_NM,MASTER_CELL_TYPE,MASTER_IJK,MASTER_ICC,MASTER_JCC, &
+                                                            CENTER_SOURCE,XCV,XBAR_CV,BEST_THETA,BEST_SKEW,BEST_DFDIAM, &
+                                                            CONN_AXIS,CONN_AREA,CV_VOLUME,REJECT_CODE)
+
+INTEGER, INTENT(IN) :: NM_CHILD,IG_CHILD,N_GFLAT
+INTEGER, INTENT(IN) :: GFLAT_START(:),GFLAT_NM(:),GFLAT_IG(:),GFLAT_ROOT(:),ROOT_PTR(:),ROOT_MEM(:)
+LOGICAL, INTENT(IN) :: ACCEPT_FAILED
+LOGICAL, INTENT(OUT) :: FOUND
+INTEGER, INTENT(OUT) :: MASTER_NM,MASTER_CELL_TYPE,MASTER_IJK(IAXIS:KAXIS),MASTER_ICC,MASTER_JCC,CENTER_SOURCE,CONN_AXIS
+INTEGER, INTENT(OUT) :: REJECT_CODE
+REAL(EB), INTENT(OUT) :: XCV(IAXIS:KAXIS),XBAR_CV(IAXIS:KAXIS),BEST_THETA,BEST_SKEW,BEST_DFDIAM,CONN_AREA,CV_VOLUME
+
+TYPE(MESH_TYPE), POINTER :: M,MM
+INTEGER :: ICAND,N_CAND,DECISION,N_FACE,CUR_CENTER_SOURCE,N_MEMBER,MASTER_MEMBER,CUR_REJECT,CUR_ALT
+INTEGER :: N_TGT,ITGT,CAND_IG,ROOT_NM,ROOT_IG,ROOT_CELL_TYPE,ROOT_ICC,ROOT_JCC,IFLAT,IROOT,IMEM,MEM_NM,MEM_IG
+INTEGER :: ROOT_IJK(IAXIS:KAXIS)
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: MEMBER_VOLUME
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: MEMBER_XYZCEN,FACE_XYZCEN,FACE_NVEC,FACE_NEIGHBOR_XYZCEN
+LOGICAL, ALLOCATABLE, DIMENSION(:) :: FACE_HAS_NEIGHBOR
+INTEGER, ALLOCATABLE, DIMENSION(:) :: CAND_NM,CAND_CELL_TYPE,CAND_ICC,CAND_JCC,CAND_CHILD_IFACE,CAND_MASTER_IFC,CAND_WALL_IW, &
+                                      CAND_CONN_AXIS,CAND_OWNER_NM,CAND_OWNER_CELL_TYPE,CAND_OWNER_ICC,CAND_OWNER_JCC, &
+                                      FACE_MEMBER
+INTEGER, ALLOCATABLE, DIMENSION(:,:) :: CAND_IJK,CAND_OWNER_IJK
+INTEGER, ALLOCATABLE, DIMENSION(:) :: TGT_NM,TGT_CELL_TYPE,TGT_ICC,TGT_JCC,TGT_CHILD_IFACE,TGT_MASTER_IFC,TGT_WALL_IW
+INTEGER, ALLOCATABLE, DIMENSION(:,:) :: TGT_IJK
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: CAND_CONN_AREA
+LOGICAL :: SUPPORTED,CAND_ABSORBED,FOUND_ROOT_GEOM,IN_GAS_MASTER,IN_GAS_BAR
+REAL(EB) :: X_MASTER(IAXIS:KAXIS),CV_DIAM,CUR_XCV(IAXIS:KAXIS),CUR_XBAR_CV(IAXIS:KAXIS)
+REAL(EB) :: CUR_THETA,CUR_SKEW,CUR_DFDIAM,ROOT_VOLUME,ROOT_XYZCEN(IAXIS:KAXIS)
+INTEGER :: CHILD_IJK(IAXIS:KAXIS)
+
+M => MESHES(NM_CHILD)
+CHILD_IJK(IAXIS:KAXIS) = M%FV%GCELL%IJK(IAXIS:KAXIS,IG_CHILD)
+
+FOUND = .FALSE.
+REJECT_CODE = 0
+MASTER_NM = 0
+MASTER_CELL_TYPE = 0
+MASTER_IJK = 0
+MASTER_ICC = 0
+MASTER_JCC = 0
+CENTER_SOURCE = 0
+CONN_AXIS = 0
+CONN_AREA = 0._EB
+CV_VOLUME = 0._EB
+XCV = 0._EB
+XBAR_CV = 0._EB
+BEST_THETA = HUGE(BEST_THETA)
+BEST_SKEW = HUGE(BEST_SKEW)
+BEST_DFDIAM = -HUGE(BEST_DFDIAM)
+
+CALL CC_GRID_GET_ALL_CV_MERGE_CANDIDATES_FOR_CUT_PIECE(NM_CHILD,M%FV%GCELL%ICC(IG_CHILD),M%FV%GCELL%JCC(IG_CHILD), &
+                                                       N_CAND,CAND_NM,CAND_CELL_TYPE,CAND_IJK,CAND_ICC,CAND_JCC, &
+                                                       CAND_CHILD_IFACE,CAND_MASTER_IFC,CAND_WALL_IW,CAND_CONN_AXIS, &
+                                                       CAND_CONN_AREA,CAND_OWNER_NM,CAND_OWNER_CELL_TYPE,CAND_OWNER_IJK, &
+                                                       CAND_OWNER_ICC,CAND_OWNER_JCC)
+
+ALLOCATE(TGT_NM(1:MAX(1,N_GFLAT)),TGT_CELL_TYPE(1:MAX(1,N_GFLAT)),TGT_ICC(1:MAX(1,N_GFLAT)),TGT_JCC(1:MAX(1,N_GFLAT)), &
+         TGT_CHILD_IFACE(1:MAX(1,N_GFLAT)),TGT_MASTER_IFC(1:MAX(1,N_GFLAT)),TGT_WALL_IW(1:MAX(1,N_GFLAT)))
+ALLOCATE(TGT_IJK(IAXIS:KAXIS,1:MAX(1,N_GFLAT)))
+
+DO ICAND=1,N_CAND
+   IF (CC_GRID_CV_ENTITY_KEYS_MATCH(NM_CHILD,CC_GCELL_CUT,CHILD_IJK,M%FV%GCELL%ICC(IG_CHILD),M%FV%GCELL%JCC(IG_CHILD), &
+                                    CAND_OWNER_NM(ICAND),CAND_OWNER_CELL_TYPE(ICAND),CAND_OWNER_IJK(IAXIS:KAXIS,ICAND), &
+                                    CAND_OWNER_ICC(ICAND),CAND_OWNER_JCC(ICAND))) THEN
+      CYCLE
+   ENDIF
+
+   CALL CC_GRID_GET_CV_ENTITY_GEOM_KEY(CAND_OWNER_NM(ICAND),CAND_OWNER_CELL_TYPE(ICAND),CAND_OWNER_IJK(IAXIS:KAXIS,ICAND), &
+                                       CAND_OWNER_ICC(ICAND),CAND_OWNER_JCC(ICAND),FOUND_ROOT_GEOM,ROOT_VOLUME,ROOT_XYZCEN)
+   CAND_IG = CC_GRID_CV_OCC_LOOKUP_IG(CAND_OWNER_NM(ICAND),CAND_OWNER_CELL_TYPE(ICAND),CAND_OWNER_IJK(IAXIS:KAXIS,ICAND), &
+                                     CAND_OWNER_ICC(ICAND),CAND_OWNER_JCC(ICAND),ROOT_VOLUME,ROOT_XYZCEN,FOUND_ROOT_GEOM)
+   CAND_ABSORBED = CC_GRID_CV_IS_ABSORBED(CAND_OWNER_NM(ICAND),CAND_OWNER_CELL_TYPE(ICAND),CAND_OWNER_IJK(IAXIS:KAXIS,ICAND), &
+                                         CAND_OWNER_ICC(ICAND),CAND_OWNER_JCC(ICAND),ROOT_VOLUME,ROOT_XYZCEN,FOUND_ROOT_GEOM)
+   IF (CAND_ABSORBED .AND. CAND_IG < 1) THEN
+      CYCLE
+   ENDIF
+
+   ROOT_NM = CAND_OWNER_NM(ICAND)
+   ROOT_CELL_TYPE = CAND_OWNER_CELL_TYPE(ICAND)
+   ROOT_IJK(IAXIS:KAXIS) = CAND_OWNER_IJK(IAXIS:KAXIS,ICAND)
+   ROOT_ICC = CAND_OWNER_ICC(ICAND)
+   ROOT_JCC = CAND_OWNER_JCC(ICAND)
+   ROOT_IG = CAND_IG
+   IF (CAND_IG >= 1) THEN
+      CALL CC_GRID_RESOLVE_GCELL_CV_ROOT(CAND_OWNER_NM(ICAND),CAND_IG,ROOT_NM,ROOT_IG)
+      IF (ROOT_IG >= 1 .AND. ROOT_NM >= 1 .AND. ROOT_NM <= NMESHES) THEN
+         IF (ALLOCATED(MESHES(ROOT_NM)%FV%GCELL%CELL_TYPE)) THEN
+            MM => MESHES(ROOT_NM)
+            IF (ROOT_IG >= 1 .AND. ROOT_IG <= MM%FV%GCELL%N) THEN
+               ROOT_CELL_TYPE = MM%FV%GCELL%CELL_TYPE(ROOT_IG)
+               ROOT_IJK(IAXIS:KAXIS) = MM%FV%GCELL%IJK(IAXIS:KAXIS,ROOT_IG)
+               ROOT_ICC = MM%FV%GCELL%ICC(ROOT_IG)
+               ROOT_JCC = MM%FV%GCELL%JCC(ROOT_IG)
+            ENDIF
+         ENDIF
+      ENDIF
+   ENDIF
+
+   IF (CC_GRID_CV_ENTITY_KEYS_MATCH(NM_CHILD,CC_GCELL_CUT,CHILD_IJK,M%FV%GCELL%ICC(IG_CHILD),M%FV%GCELL%JCC(IG_CHILD), &
+                                    ROOT_NM,ROOT_CELL_TYPE,ROOT_IJK,ROOT_ICC,ROOT_JCC)) THEN
+      CYCLE
+   ENDIF
+
+   CALL CC_GRID_GET_CV_ENTITY_GEOM_KEY(ROOT_NM,ROOT_CELL_TYPE,ROOT_IJK,ROOT_ICC,ROOT_JCC,FOUND_ROOT_GEOM, &
+                                       ROOT_VOLUME,ROOT_XYZCEN)
+   IF (CC_GRID_CV_IS_CLAIMED(ROOT_NM,ROOT_CELL_TYPE,ROOT_IJK,ROOT_ICC,ROOT_JCC,ROOT_VOLUME,ROOT_XYZCEN,FOUND_ROOT_GEOM)) THEN
+      CYCLE
+   ENDIF
+
+   N_TGT = 1
+   TGT_NM(1) = CAND_NM(ICAND)
+   TGT_CELL_TYPE(1) = CAND_CELL_TYPE(ICAND)
+   TGT_IJK(IAXIS:KAXIS,1) = CAND_IJK(IAXIS:KAXIS,ICAND)
+   TGT_ICC(1) = CAND_ICC(ICAND)
+   TGT_JCC(1) = CAND_JCC(ICAND)
+   TGT_CHILD_IFACE(1) = CAND_CHILD_IFACE(ICAND)
+   TGT_MASTER_IFC(1) = CAND_MASTER_IFC(ICAND)
+   TGT_WALL_IW(1) = CAND_WALL_IW(ICAND)
+
+   IF (N_GFLAT >= 1 .AND. ROOT_NM >= 1 .AND. ROOT_NM <= NMESHES .AND. ROOT_IG >= 1) THEN
+      IF (GFLAT_START(ROOT_NM) >= 1) THEN
+         IFLAT = GFLAT_START(ROOT_NM) + ROOT_IG - 1
+         IF (IFLAT >= 1 .AND. IFLAT <= N_GFLAT) THEN
+            IROOT = GFLAT_ROOT(IFLAT)
+            N_TGT = ROOT_PTR(IROOT+1) - ROOT_PTR(IROOT)
+            IF (N_TGT < 1) N_TGT = 1
+            ITGT = 0
+            DO IMEM=ROOT_PTR(IROOT),ROOT_PTR(IROOT+1)-1
+               ITGT = ITGT + 1
+               MEM_NM = GFLAT_NM(ROOT_MEM(IMEM))
+               MEM_IG = GFLAT_IG(ROOT_MEM(IMEM))
+               MM => MESHES(MEM_NM)
+               TGT_NM(ITGT) = MEM_NM
+               TGT_CELL_TYPE(ITGT) = MM%FV%GCELL%CELL_TYPE(MEM_IG)
+               TGT_IJK(IAXIS:KAXIS,ITGT) = MM%FV%GCELL%IJK(IAXIS:KAXIS,MEM_IG)
+               TGT_ICC(ITGT) = MM%FV%GCELL%ICC(MEM_IG)
+               TGT_JCC(ITGT) = MM%FV%GCELL%JCC(MEM_IG)
+               TGT_CHILD_IFACE(ITGT) = 0
+               TGT_MASTER_IFC(ITGT) = 0
+               TGT_WALL_IW(ITGT) = 0
+               IF (CC_GRID_CV_ENTITY_KEYS_MATCH(MEM_NM,TGT_CELL_TYPE(ITGT),TGT_IJK(IAXIS:KAXIS,ITGT), &
+                                                TGT_ICC(ITGT),TGT_JCC(ITGT),CAND_OWNER_NM(ICAND), &
+                                                CAND_OWNER_CELL_TYPE(ICAND),CAND_OWNER_IJK(IAXIS:KAXIS,ICAND), &
+                                                CAND_OWNER_ICC(ICAND),CAND_OWNER_JCC(ICAND))) THEN
+                  TGT_NM(ITGT) = CAND_NM(ICAND)
+                  TGT_CELL_TYPE(ITGT) = CAND_CELL_TYPE(ICAND)
+                  TGT_IJK(IAXIS:KAXIS,ITGT) = CAND_IJK(IAXIS:KAXIS,ICAND)
+                  TGT_ICC(ITGT) = CAND_ICC(ICAND)
+                  TGT_JCC(ITGT) = CAND_JCC(ICAND)
+                  TGT_CHILD_IFACE(ITGT) = CAND_CHILD_IFACE(ICAND)
+                  TGT_MASTER_IFC(ITGT) = CAND_MASTER_IFC(ICAND)
+                  TGT_WALL_IW(ITGT) = CAND_WALL_IW(ICAND)
+               ENDIF
+            ENDDO
+            N_TGT = ITGT
+         ENDIF
+      ENDIF
+   ENDIF
+
+   CALL CC_GRID_GET_CUT_CHILD_CV_PAIR_MERGE_GEOMETRY(NM_CHILD,M%FV%GCELL%ICC(IG_CHILD),M%FV%GCELL%JCC(IG_CHILD),N_TGT, &
+                                                      TGT_NM(1:N_TGT),TGT_CELL_TYPE(1:N_TGT),TGT_IJK(IAXIS:KAXIS,1:N_TGT), &
+                                                      TGT_ICC(1:N_TGT),TGT_JCC(1:N_TGT),TGT_CHILD_IFACE(1:N_TGT), &
+                                                      TGT_MASTER_IFC(1:N_TGT),TGT_WALL_IW(1:N_TGT), &
+                                                      MEMBER_VOLUME,MEMBER_XYZCEN,N_FACE,FACE_XYZCEN, &
+                                                      FACE_NVEC,FACE_HAS_NEIGHBOR,FACE_NEIGHBOR_XYZCEN,CV_DIAM,SUPPORTED, &
+                                                      N_MEMBER,MASTER_MEMBER,FACE_MEMBER, &
+                                                      IN_GAS_MASTER,IN_GAS_BAR)
+   IF (.NOT.SUPPORTED .OR. N_FACE <= 0 .OR. CV_DIAM <= TWO_EPSILON_EB) THEN
+      CALL CC_GRID_DEALLOCATE_CV_PAIR_GEOMETRY(MEMBER_VOLUME,MEMBER_XYZCEN,FACE_XYZCEN,FACE_NVEC, &
+                                               FACE_HAS_NEIGHBOR,FACE_NEIGHBOR_XYZCEN,FACE_MEMBER)
+      CYCLE
+   ENDIF
+
+   CALL CC_GRID_EVALUATE_CV_PAIR_MERGE_DECISION(MEMBER_VOLUME,MEMBER_XYZCEN,CV_DIAM,N_FACE, &
+                                                N_MEMBER,MASTER_MEMBER,FACE_MEMBER, &
+                                                FACE_XYZCEN,FACE_NVEC,FACE_HAS_NEIGHBOR,FACE_NEIGHBOR_XYZCEN, &
+                                                DECISION,CUR_CENTER_SOURCE,X_MASTER,CUR_XBAR_CV,CUR_XCV, &
+                                                CUR_THETA,CUR_SKEW,CUR_DFDIAM, &
+                                                IN_GAS_MASTER,IN_GAS_BAR,CUR_REJECT)
+   CUR_ALT = 0
+   IF (DECISION /= CC_CV_DECISION_MERGE) THEN
+      IF (.NOT.ACCEPT_FAILED) THEN
+         CALL CC_GRID_DEALLOCATE_CV_PAIR_GEOMETRY(MEMBER_VOLUME,MEMBER_XYZCEN,FACE_XYZCEN,FACE_NVEC, &
+                                                  FACE_HAS_NEIGHBOR,FACE_NEIGHBOR_XYZCEN,FACE_MEMBER)
+         CYCLE
+      ENDIF
+      CUR_ALT = CUR_REJECT
+      IF (CUR_ALT == CC_CV_REJECT_NONE) CUR_ALT = -1
+      CUR_CENTER_SOURCE = CC_CV_CENTER_MASTER_CENTROID
+      CUR_XCV(IAXIS:KAXIS) = X_MASTER(IAXIS:KAXIS)
+   ENDIF
+
+   IF (.NOT.FOUND .OR. &
+       CC_GRID_CV_CANDIDATE_RANKS_BEFORE(CAND_CONN_AXIS(ICAND),CAND_CONN_AREA(ICAND),CUR_THETA,CUR_SKEW,CUR_DFDIAM, &
+                                         ROOT_NM,ROOT_CELL_TYPE,ROOT_IJK,ROOT_ICC,ROOT_JCC,CONN_AXIS,CONN_AREA, &
+                                         BEST_THETA,BEST_SKEW,BEST_DFDIAM,MASTER_NM,MASTER_CELL_TYPE,MASTER_IJK, &
+                                         MASTER_ICC,MASTER_JCC)) THEN
+      FOUND = .TRUE.
+      MASTER_NM = ROOT_NM
+      MASTER_CELL_TYPE = ROOT_CELL_TYPE
+      MASTER_IJK(IAXIS:KAXIS) = ROOT_IJK(IAXIS:KAXIS)
+      MASTER_ICC = ROOT_ICC
+      MASTER_JCC = ROOT_JCC
+      CONN_AXIS = CAND_CONN_AXIS(ICAND)
+      CONN_AREA = CAND_CONN_AREA(ICAND)
+      CENTER_SOURCE = CUR_CENTER_SOURCE
+      CV_VOLUME = SUM(MEMBER_VOLUME(1:N_MEMBER))
+      XCV(IAXIS:KAXIS) = CUR_XCV(IAXIS:KAXIS)
+      XBAR_CV(IAXIS:KAXIS) = CUR_XBAR_CV(IAXIS:KAXIS)
+      BEST_THETA = CUR_THETA
+      BEST_SKEW = CUR_SKEW
+      BEST_DFDIAM = CUR_DFDIAM
+      REJECT_CODE = CUR_ALT
+   ENDIF
+
+   CALL CC_GRID_DEALLOCATE_CV_PAIR_GEOMETRY(MEMBER_VOLUME,MEMBER_XYZCEN,FACE_XYZCEN,FACE_NVEC, &
+                                            FACE_HAS_NEIGHBOR,FACE_NEIGHBOR_XYZCEN,FACE_MEMBER)
+ENDDO
+
+IF (ALLOCATED(TGT_NM))  DEALLOCATE(TGT_NM,TGT_CELL_TYPE,TGT_ICC,TGT_JCC,TGT_CHILD_IFACE,TGT_MASTER_IFC,TGT_WALL_IW)
+IF (ALLOCATED(TGT_IJK)) DEALLOCATE(TGT_IJK)
+IF (ALLOCATED(CAND_NM)) DEALLOCATE(CAND_NM,CAND_CELL_TYPE,CAND_ICC,CAND_JCC,CAND_CHILD_IFACE,CAND_MASTER_IFC,CAND_WALL_IW, &
+                                   CAND_CONN_AXIS,CAND_OWNER_NM,CAND_OWNER_CELL_TYPE,CAND_OWNER_ICC,CAND_OWNER_JCC)
+IF (ALLOCATED(CAND_CONN_AREA)) DEALLOCATE(CAND_CONN_AREA)
+IF (ALLOCATED(CAND_IJK)) DEALLOCATE(CAND_IJK)
+IF (ALLOCATED(CAND_OWNER_IJK)) DEALLOCATE(CAND_OWNER_IJK)
+
+END SUBROUTINE CC_GRID_SELECT_BEST_AVAILABLE_CV_MERGE_CANDIDATE
+
+SUBROUTINE CC_GRID_EVALUATE_CV_MERGE_CANDIDATES
+
+TYPE(MESH_TYPE), POINTER :: M
+TYPE(CC_CV_PROPOSAL_BUFFER_TYPE) :: PROPOSAL
+INTEGER :: NM,IG,N_CHILD,N_CHILD_LOCAL,N_CHILD_GLOBAL,N_PROPOSAL,N_INT,IMEM,GI,GJ,GK
+INTEGER :: N_ACCEPTED,IERR,N_GFLAT,IFLAT,IROOT
+INTEGER :: CHILD_IJK(IAXIS:KAXIS)
+INTEGER, ALLOCATABLE, DIMENSION(:) :: GFLAT_START,GFLAT_NM,GFLAT_IG,GFLAT_ROOT,ROOT_PTR,ROOT_MEM
+LOGICAL :: FOUND,FOUND_MASTER,ACCEPT_FAILED
+INTEGER :: MASTER_NM,MASTER_CELL_TYPE,MASTER_IJK(IAXIS:KAXIS),MASTER_ICC,MASTER_JCC,CENTER_SOURCE,CONN_AXIS
+INTEGER :: REJECT_CODE,N_FORCE
+REAL(EB) :: XCV(IAXIS:KAXIS),XBAR_CV(IAXIS:KAXIS),BEST_THETA,BEST_SKEW,BEST_DFDIAM,CONN_AREA,CV_VOLUME,GROUP_VOL
+
+N_CHILD = 0
+DO NM=1,NMESHES
+   M => MESHES(NM)
+   IF (ALLOCATED(M%FV%GCELL%ABSORBED)) M%FV%GCELL%ABSORBED = .FALSE.
+   IF (ALLOCATED(M%FV%GCELL%CLAIMED)) M%FV%GCELL%CLAIMED = .FALSE.
+   N_INT = M%FV%GCELL%N_INT
+   IF (N_INT < 1) CYCLE
+   M%FV%GCELL%MASTER_NM = 0
+   M%FV%GCELL%MASTER_CELL_TYPE = 0
+   M%FV%GCELL%MASTER_IG = 0
+   M%FV%GCELL%MASTER_IJK = 0
+   M%FV%GCELL%MASTER_ICC = 0
+   M%FV%GCELL%MASTER_JCC = 0
+   M%FV%GCELL%CV_DECISION = CC_CV_DECISION_NONE
+   M%FV%GCELL%CENTER_SOURCE = 0
+   M%FV%GCELL%CONN_AXIS = 0
+   M%FV%GCELL%XCV = 0._EB
+   M%FV%GCELL%XBAR_CV = 0._EB
+   M%FV%GCELL%CONN_AREA = 0._EB
+   M%FV%GCELL%CV_VOLUME = 0._EB
+   M%FV%GCELL%MAX_THETA = 0._EB
+   M%FV%GCELL%MAX_SKEW = 0._EB
+   M%FV%GCELL%MIN_DFDIAM = 0._EB
+   DO IG=1,N_INT
+      IF (CC_GRID_GCELL_REQUIRES_MERGE(NM,IG)) N_CHILD = N_CHILD + 1
+   ENDDO
+ENDDO
+
+N_CHILD_LOCAL = N_CHILD
+N_CHILD_GLOBAL = N_CHILD_LOCAL
+IF (N_MPI_PROCESSES > 1) &
+   CALL MPI_ALLREDUCE(N_CHILD_LOCAL,N_CHILD_GLOBAL,1,MPI_INTEGER,MPI_SUM,MPI_COMM_WORLD,IERR)
+IF (N_CHILD_GLOBAL < 1) THEN
+   CALL CC_GRID_CV_OCC_DEALLOCATE_REMOTES
+   RETURN
+ENDIF
+CALL CC_GRID_ALLOCATE_CV_PROPOSAL_BUFFER(PROPOSAL,N_CHILD)
+CALL CC_GRID_CV_OCC_ALLOCATE_REMOTES(N_CHILD_GLOBAL)
+
+N_GFLAT = 0
+ACCEPT_FAILED = .FALSE.
+N_FORCE = 0
+REJECT_CODE = 0
+
+
+DO
+   N_REMOTE_CLAIM = 0
+   DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+      IF (ALLOCATED(MESHES(NM)%FV%GCELL%CLAIMED)) MESHES(NM)%FV%GCELL%CLAIMED = .FALSE.
+   ENDDO
+   CALL CC_GRID_BUILD_CV_ROUND_MEMBER_CSR(N_GFLAT,GFLAT_START,GFLAT_NM,GFLAT_IG,GFLAT_ROOT,ROOT_PTR,ROOT_MEM)
+   IF (STOP_STATUS/=NO_STOP) EXIT
+   N_PROPOSAL = 0
+   DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+      M => MESHES(NM)
+      N_INT = M%FV%GCELL%N_INT
+      IF (N_INT < 1) CYCLE
+      DO IG=1,N_INT
+         IF (.NOT.CC_GRID_GCELL_REQUIRES_MERGE(NM,IG)) CYCLE
+         IF (M%FV%GCELL%CV_DECISION(IG) == CC_CV_DECISION_MERGE) CYCLE
+         CHILD_IJK(IAXIS:KAXIS) = M%FV%GCELL%IJK(IAXIS:KAXIS,IG)
+         IF (ALLOCATED(M%FV%GCELL%ABSORBED)) THEN
+            IF (M%FV%GCELL%ABSORBED(IG)) CYCLE
+         ELSEIF (CC_GRID_CV_IS_ABSORBED(NM,CC_GCELL_CUT,CHILD_IJK,M%FV%GCELL%ICC(IG),M%FV%GCELL%JCC(IG), &
+                                        M%FV%GCELL%VOLUME(IG),M%FV%GCELL%XYZCEN(IAXIS:KAXIS,IG),.TRUE.)) THEN
+            CYCLE
+         ENDIF
+         IF (N_GFLAT >= 1 .AND. GFLAT_START(NM) >= 1) THEN
+            IFLAT = GFLAT_START(NM) + IG - 1
+            IF (IFLAT >= 1 .AND. IFLAT <= N_GFLAT) THEN
+               IROOT = GFLAT_ROOT(IFLAT)
+               IF (IROOT == IFLAT .AND. ROOT_PTR(IROOT+1)-ROOT_PTR(IROOT) > 1) THEN
+                  ! A group still under CCVOL_LINK keeps looking for a partner.
+                  GROUP_VOL = 0._EB
+                  DO IMEM=ROOT_PTR(IROOT),ROOT_PTR(IROOT+1)-1
+                     GROUP_VOL = GROUP_VOL + MESHES(GFLAT_NM(ROOT_MEM(IMEM)))%FV%GCELL%VOLUME(GFLAT_IG(ROOT_MEM(IMEM)))
+                  ENDDO
+                  GI = M%FV%GCELL%IJK(IAXIS,IG); GJ = M%FV%GCELL%IJK(JAXIS,IG); GK = M%FV%GCELL%IJK(KAXIS,IG)
+                  IF (GROUP_VOL >= CCVOL_LINK*M%DX(GI)*M%DY(GJ)*M%DZ(GK)) CYCLE
+               ENDIF
+            ENDIF
+         ENDIF
+
+         CALL CC_GRID_SELECT_BEST_AVAILABLE_CV_MERGE_CANDIDATE(NM,IG,N_GFLAT,GFLAT_START, &
+                                                               GFLAT_NM,GFLAT_IG,GFLAT_ROOT,ROOT_PTR,ROOT_MEM,ACCEPT_FAILED, &
+                                                               FOUND,MASTER_NM,MASTER_CELL_TYPE,MASTER_IJK,MASTER_ICC,MASTER_JCC, &
+                                                               CENTER_SOURCE,XCV,XBAR_CV,BEST_THETA,BEST_SKEW,BEST_DFDIAM, &
+                                                               CONN_AXIS,CONN_AREA,CV_VOLUME,REJECT_CODE)
+         IF (.NOT.FOUND) CYCLE
+
+         IF (N_PROPOSAL >= N_CHILD) THEN
+            WRITE(LU_ERR,'(A,2I10)') 'ERROR: Phase 5 CV proposal buffer too small:',N_PROPOSAL,N_CHILD
+            STOP_STATUS = SETUP_STOP
+            EXIT
+         ENDIF
+         N_PROPOSAL = N_PROPOSAL + 1
+         PROPOSAL%CHILD_NM(N_PROPOSAL) = NM
+         PROPOSAL%CHILD_IG(N_PROPOSAL) = IG
+         PROPOSAL%CHILD_IJK(IAXIS:KAXIS,N_PROPOSAL) = CHILD_IJK(IAXIS:KAXIS)
+         PROPOSAL%CHILD_ICC(N_PROPOSAL) = M%FV%GCELL%ICC(IG)
+         PROPOSAL%CHILD_JCC(N_PROPOSAL) = M%FV%GCELL%JCC(IG)
+         PROPOSAL%MASTER_NM(N_PROPOSAL) = MASTER_NM
+         PROPOSAL%MASTER_CELL_TYPE(N_PROPOSAL) = MASTER_CELL_TYPE
+         PROPOSAL%MASTER_IJK(IAXIS:KAXIS,N_PROPOSAL) = MASTER_IJK(IAXIS:KAXIS)
+         PROPOSAL%MASTER_ICC(N_PROPOSAL) = MASTER_ICC
+         PROPOSAL%MASTER_JCC(N_PROPOSAL) = MASTER_JCC
+         PROPOSAL%CENTER_SOURCE(N_PROPOSAL) = CENTER_SOURCE
+         PROPOSAL%CONN_AXIS(N_PROPOSAL) = CONN_AXIS
+         PROPOSAL%CONN_AREA(N_PROPOSAL) = CONN_AREA
+         PROPOSAL%THETA(N_PROPOSAL) = BEST_THETA
+         PROPOSAL%SKEW(N_PROPOSAL) = BEST_SKEW
+         PROPOSAL%DFDIAM(N_PROPOSAL) = BEST_DFDIAM
+         PROPOSAL%XCV(IAXIS:KAXIS,N_PROPOSAL) = XCV(IAXIS:KAXIS)
+         PROPOSAL%XBAR_CV(IAXIS:KAXIS,N_PROPOSAL) = XBAR_CV(IAXIS:KAXIS)
+         PROPOSAL%VOLUME(N_PROPOSAL) = CV_VOLUME
+         PROPOSAL%IS_ALT(N_PROPOSAL) = REJECT_CODE
+         PROPOSAL%CHILD_VOLUME(N_PROPOSAL) = M%FV%GCELL%VOLUME(IG)
+         PROPOSAL%CHILD_XYZCEN(IAXIS:KAXIS,N_PROPOSAL) = M%FV%GCELL%XYZCEN(IAXIS:KAXIS,IG)
+         PROPOSAL%MASTER_VOLUME(N_PROPOSAL) = 0._EB
+         PROPOSAL%MASTER_XYZCEN(IAXIS:KAXIS,N_PROPOSAL) = 0._EB
+         IF (MASTER_NM >= LOWER_MESH_INDEX .AND. MASTER_NM <= UPPER_MESH_INDEX) THEN
+            CALL CC_GRID_GET_CV_ENTITY_GEOM_KEY(MASTER_NM,MASTER_CELL_TYPE,MASTER_IJK,MASTER_ICC,MASTER_JCC,FOUND_MASTER, &
+                                                PROPOSAL%MASTER_VOLUME(N_PROPOSAL),PROPOSAL%MASTER_XYZCEN(IAXIS:KAXIS,N_PROPOSAL))
+         ENDIF
+      ENDDO
+      IF (STOP_STATUS/=NO_STOP) EXIT
+   ENDDO
+   IF (STOP_STATUS/=NO_STOP) EXIT
+
+   CALL CC_GRID_SETTLE_CV_PROPOSALS(N_PROPOSAL,PROPOSAL,N_ACCEPTED,N_FORCE)
+   IF (STOP_STATUS/=NO_STOP) EXIT
+
+   IF (N_ACCEPTED < 1) THEN
+      IF (ACCEPT_FAILED) EXIT
+      ACCEPT_FAILED = .TRUE.
+      CYCLE
+   ENDIF
+ENDDO
+
+N_ACCEPTED = N_FORCE
+CALL MPI_ALLREDUCE(N_ACCEPTED,N_FORCE,1,MPI_INTEGER,MPI_SUM,MPI_COMM_WORLD,IERR)
+IF (GET_CUTCELLS_VERBOSE .AND. MY_RANK==0) WRITE(LU_SETCC,'(A,I0)') 'CV force-link count = ',N_FORCE
+
+CALL CC_GRID_DEALLOCATE_CV_PROPOSAL_BUFFER(PROPOSAL)
+CALL CC_GRID_DEALLOCATE_CV_ROUND_MEMBER_CSR(GFLAT_START,GFLAT_NM,GFLAT_IG,GFLAT_ROOT,ROOT_PTR,ROOT_MEM)
+CALL CC_GRID_CV_OCC_DEALLOCATE_REMOTES
+
+END SUBROUTINE CC_GRID_EVALUATE_CV_MERGE_CANDIDATES
+
+SUBROUTINE CC_GRID_APPLY_PAIRWISE_CV_AGGLOMERATION
+
+! Apply GCELL merge decisions to CV ownership (geometry unchanged).
+
+TYPE(MESH_TYPE), POINTER :: MC,MM
+TYPE(CC_CV_PROPOSAL_BUFFER_TYPE) :: PROPOSAL
+INTEGER :: NM,IG,IPROPOSAL,N_PROPOSAL,N_PROPOSAL_GLOBAL,MASTER_NM,MASTER_IG,CHILD_ICV,OWNER_ICV,N_INT
+INTEGER :: N_OWNER_PAIR,N_CHILD_INACTIVE,N_MISSING_MASTER
+INTEGER :: N_LOCAL_MASTER,N_REMOTE_MASTER,N_MISSING_LOCAL_MASTER,N_MISSING_REMOTE_MASTER
+INTEGER :: N_MISSING_CUT_MASTER,N_MISSING_REG_MASTER,N_MISSING_SAMPLE,IERR
+INTEGER :: IBUF(7)
+INTEGER :: NEW_SLOT,MAX_MEMBERS
+INTEGER, ALLOCATABLE, DIMENSION(:) :: OWNER_MEMBER_COUNT
+REAL(EB) :: CANON_VOLUME,CANON_XBAR(IAXIS:KAXIS),CANON_XCV(IAXIS:KAXIS)
+LOGICAL :: FOUND_MASTER,REDIRECTED
+INTEGER :: ROOT_NM,ROOT_IG
+
+N_OWNER_PAIR = 0
+N_CHILD_INACTIVE = 0
+N_MISSING_MASTER = 0
+N_LOCAL_MASTER = 0
+N_REMOTE_MASTER = 0
+N_MISSING_LOCAL_MASTER = 0
+N_MISSING_REMOTE_MASTER = 0
+N_MISSING_CUT_MASTER = 0
+N_MISSING_REG_MASTER = 0
+N_MISSING_SAMPLE = 0
+
+N_PROPOSAL = 0
+DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   MC => MESHES(NM)
+   IF (.NOT.ALLOCATED(MC%FV%GCELL%CELL_TYPE)) CYCLE
+   N_INT = MC%FV%GCELL%N_INT
+   DO IG=1,N_INT
+      IF (MC%FV%GCELL%CV_DECISION(IG) /= CC_CV_DECISION_MERGE) CYCLE
+      N_PROPOSAL = N_PROPOSAL + 1
+   ENDDO
+ENDDO
+N_PROPOSAL_GLOBAL = N_PROPOSAL
+! Every rank must take part so the early return below is a collective decision.
+IF (N_MPI_PROCESSES > 1) &
+   CALL MPI_ALLREDUCE(N_PROPOSAL,N_PROPOSAL_GLOBAL,1,MPI_INTEGER,MPI_SUM,MPI_COMM_WORLD,IERR)
+IF (N_PROPOSAL_GLOBAL < 1) RETURN
+
+CALL CC_GRID_ALLOCATE_CV_PROPOSAL_BUFFER(PROPOSAL,N_PROPOSAL)
+N_PROPOSAL = 0
+DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   MC => MESHES(NM)
+   IF (.NOT.ALLOCATED(MC%FV%GCELL%CELL_TYPE)) CYCLE
+   N_INT = MC%FV%GCELL%N_INT
+   DO IG=1,N_INT
+      IF (MC%FV%GCELL%CV_DECISION(IG) /= CC_CV_DECISION_MERGE) CYCLE
+      N_PROPOSAL = N_PROPOSAL + 1
+      PROPOSAL%CHILD_NM(N_PROPOSAL) = NM
+      PROPOSAL%CHILD_IG(N_PROPOSAL) = IG
+      PROPOSAL%CHILD_IJK(IAXIS:KAXIS,N_PROPOSAL) = MC%FV%GCELL%IJK(IAXIS:KAXIS,IG)
+      PROPOSAL%CHILD_ICC(N_PROPOSAL) = MC%FV%GCELL%ICC(IG)
+      PROPOSAL%CHILD_JCC(N_PROPOSAL) = MC%FV%GCELL%JCC(IG)
+      PROPOSAL%MASTER_NM(N_PROPOSAL) = MC%FV%GCELL%MASTER_NM(IG)
+      PROPOSAL%MASTER_CELL_TYPE(N_PROPOSAL) = MC%FV%GCELL%MASTER_CELL_TYPE(IG)
+      PROPOSAL%MASTER_IJK(IAXIS:KAXIS,N_PROPOSAL) = MC%FV%GCELL%MASTER_IJK(IAXIS:KAXIS,IG)
+      PROPOSAL%MASTER_ICC(N_PROPOSAL) = MC%FV%GCELL%MASTER_ICC(IG)
+      PROPOSAL%MASTER_JCC(N_PROPOSAL) = MC%FV%GCELL%MASTER_JCC(IG)
+      PROPOSAL%CENTER_SOURCE(N_PROPOSAL) = MC%FV%GCELL%CENTER_SOURCE(IG)
+      PROPOSAL%CONN_AXIS(N_PROPOSAL) = MC%FV%GCELL%CONN_AXIS(IG)
+      PROPOSAL%CONN_AREA(N_PROPOSAL) = MC%FV%GCELL%CONN_AREA(IG)
+      PROPOSAL%VOLUME(N_PROPOSAL) = MC%FV%GCELL%CV_VOLUME(IG)
+      PROPOSAL%THETA(N_PROPOSAL) = MC%FV%GCELL%MAX_THETA(IG)
+      PROPOSAL%SKEW(N_PROPOSAL) = MC%FV%GCELL%MAX_SKEW(IG)
+      PROPOSAL%DFDIAM(N_PROPOSAL) = MC%FV%GCELL%MIN_DFDIAM(IG)
+      PROPOSAL%XCV(IAXIS:KAXIS,N_PROPOSAL) = MC%FV%GCELL%XCV(IAXIS:KAXIS,IG)
+      PROPOSAL%XBAR_CV(IAXIS:KAXIS,N_PROPOSAL) = MC%FV%GCELL%XBAR_CV(IAXIS:KAXIS,IG)
+   ENDDO
+ENDDO
+
+DO IPROPOSAL=1,N_PROPOSAL
+   IF (PROPOSAL%CHILD_NM(IPROPOSAL) >= 1 .AND. PROPOSAL%CHILD_NM(IPROPOSAL) <= NMESHES) THEN
+      MC => MESHES(PROPOSAL%CHILD_NM(IPROPOSAL))
+      IG = PROPOSAL%CHILD_IG(IPROPOSAL)
+      IF (ALLOCATED(MC%FV%GCELL%VOLUME)) THEN
+         IF (IG >= 1 .AND. IG <= MC%FV%GCELL%N) THEN
+            PROPOSAL%CHILD_VOLUME(IPROPOSAL) = MC%FV%GCELL%VOLUME(IG)
+            PROPOSAL%CHILD_XYZCEN(IAXIS:KAXIS,IPROPOSAL) = MC%FV%GCELL%XYZCEN(IAXIS:KAXIS,IG)
+         ENDIF
+      ENDIF
+   ENDIF
+   PROPOSAL%MASTER_VOLUME(IPROPOSAL) = 0._EB
+   PROPOSAL%MASTER_XYZCEN(IAXIS:KAXIS,IPROPOSAL) = 0._EB
+   MASTER_NM = PROPOSAL%MASTER_NM(IPROPOSAL)
+   IF (MASTER_NM >= LOWER_MESH_INDEX .AND. MASTER_NM <= UPPER_MESH_INDEX) THEN
+      CALL CC_GRID_GET_CV_ENTITY_GEOM_KEY(MASTER_NM,PROPOSAL%MASTER_CELL_TYPE(IPROPOSAL), &
+         PROPOSAL%MASTER_IJK(IAXIS:KAXIS,IPROPOSAL),PROPOSAL%MASTER_ICC(IPROPOSAL),PROPOSAL%MASTER_JCC(IPROPOSAL), &
+         FOUND_MASTER,PROPOSAL%MASTER_VOLUME(IPROPOSAL),PROPOSAL%MASTER_XYZCEN(IAXIS:KAXIS,IPROPOSAL))
+      IF (.NOT.FOUND_MASTER) THEN
+         PROPOSAL%MASTER_VOLUME(IPROPOSAL) = 0._EB
+         PROPOSAL%MASTER_XYZCEN(IAXIS:KAXIS,IPROPOSAL) = 0._EB
+      ENDIF
+   ENDIF
+ENDDO
+
+CALL CC_GRID_EXCHANGE_CV_OWNERSHIP(N_PROPOSAL,PROPOSAL)
+IF (STOP_STATUS/=NO_STOP) GOTO 900
+
+! Count members-per-CV from the same MASTER_IG/CHILD proposals the write loop
+! applies, then grow MEMBER_* past the identity floor of 2 before any write.
+DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   MM => MESHES(NM)
+   IF (.NOT.ALLOCATED(MM%FV%CV%N_MEMBER)) CYCLE
+   IF (MM%FV%CV%N < 1) CYCLE
+   ALLOCATE(OWNER_MEMBER_COUNT(1:MM%FV%CV%N))
+   OWNER_MEMBER_COUNT = 1
+   DO IPROPOSAL=1,N_PROPOSAL
+      MASTER_NM = PROPOSAL%MASTER_NM(IPROPOSAL)
+      MASTER_IG = PROPOSAL%MASTER_IG(IPROPOSAL)
+      IF (MASTER_NM < 1 .OR. MASTER_NM > NMESHES .OR. MASTER_IG < 1) CYCLE
+      ROOT_NM = PROPOSAL%ROOT_NM(IPROPOSAL)
+      ROOT_IG = PROPOSAL%ROOT_IG(IPROPOSAL)
+      IF (ROOT_NM /= NM .OR. ROOT_IG < 1 .OR. ROOT_IG > MM%FV%CV%N) CYCLE
+      OWNER_MEMBER_COUNT(ROOT_IG) = OWNER_MEMBER_COUNT(ROOT_IG) + 1
+   ENDDO
+   MAX_MEMBERS = MAX(2, MAXVAL(OWNER_MEMBER_COUNT))
+   CALL CC_GRID_ENSURE_CV_MEMBER_CAPACITY(MM,MAX_MEMBERS)
+   IF (GET_CUTCELLS_VERBOSE) WRITE(LU_SETCC,'(A,2I10)') &
+      '   Phase 5 CV MEMBER_* first extent / max members-per-CV =',NM,MAX_MEMBERS
+   DEALLOCATE(OWNER_MEMBER_COUNT)
+ENDDO
+
+DO IPROPOSAL=1,N_PROPOSAL
+
+      MASTER_NM = PROPOSAL%MASTER_NM(IPROPOSAL)
+      IF (MASTER_NM < 1 .OR. MASTER_NM > NMESHES) THEN
+         N_MISSING_MASTER = N_MISSING_MASTER + 1
+         CYCLE
+      ENDIF
+
+      MASTER_IG = PROPOSAL%MASTER_IG(IPROPOSAL)
+      IF (MASTER_IG < 1) THEN
+         CALL CC_GRID_RECORD_MISSING_MASTER(PROPOSAL,IPROPOSAL,MASTER_NM,N_MISSING_MASTER,N_MISSING_CUT_MASTER, &
+                                            N_MISSING_REG_MASTER,N_MISSING_LOCAL_MASTER,N_MISSING_REMOTE_MASTER)
+         IF (GET_CUTCELLS_VERBOSE .AND. N_MISSING_SAMPLE < 12) THEN
+            N_MISSING_SAMPLE = N_MISSING_SAMPLE + 1
+            WRITE(LU_SETCC,'(A,6I8)') '     missing master sample child nm/ig/icc/jcc/type/master_nm =', &
+                                      PROPOSAL%CHILD_NM(IPROPOSAL),PROPOSAL%CHILD_IG(IPROPOSAL), &
+                                      PROPOSAL%CHILD_ICC(IPROPOSAL),PROPOSAL%CHILD_JCC(IPROPOSAL), &
+                                      CC_GCELL_CUT,MASTER_NM
+            WRITE(LU_SETCC,'(A,I8,A,3I8,A,2I8)') '       master type=',PROPOSAL%MASTER_CELL_TYPE(IPROPOSAL), &
+                                      ' ijk=',PROPOSAL%MASTER_IJK(IAXIS:KAXIS,IPROPOSAL), &
+                                      ' icc/jcc=',PROPOSAL%MASTER_ICC(IPROPOSAL),PROPOSAL%MASTER_JCC(IPROPOSAL)
+         ENDIF
+         CYCLE
+      ENDIF
+      ROOT_NM = PROPOSAL%ROOT_NM(IPROPOSAL)
+      ROOT_IG = PROPOSAL%ROOT_IG(IPROPOSAL)
+      IF (ROOT_IG < 1 .OR. ROOT_NM < 1 .OR. ROOT_NM > NMESHES) THEN
+         CALL CC_GRID_RECORD_MISSING_MASTER(PROPOSAL,IPROPOSAL,MASTER_NM,N_MISSING_MASTER,N_MISSING_CUT_MASTER, &
+                                            N_MISSING_REG_MASTER,N_MISSING_LOCAL_MASTER,N_MISSING_REMOTE_MASTER)
+         CYCLE
+      ENDIF
+      REDIRECTED = ROOT_NM/=MASTER_NM .OR. ROOT_IG/=MASTER_IG
+      MASTER_NM = ROOT_NM; MASTER_IG = ROOT_IG
+
+      IF (PROPOSAL%CHILD_NM(IPROPOSAL) >= 1 .AND. PROPOSAL%CHILD_NM(IPROPOSAL) <= NMESHES) THEN
+         MC => MESHES(PROPOSAL%CHILD_NM(IPROPOSAL))
+         IG = PROPOSAL%CHILD_IG(IPROPOSAL)
+         CHILD_ICV = IG
+         IF (ALLOCATED(MC%FV%CV%GCELL_TO_CV)) THEN
+            IF (IG >= 1 .AND. IG <= SIZE(MC%FV%CV%GCELL_TO_CV)) THEN
+               MC%FV%CV%GCELL_TO_CV_NM(IG) = MASTER_NM
+               MC%FV%CV%GCELL_TO_CV(IG) = MASTER_IG
+            ENDIF
+         ENDIF
+         IF (ALLOCATED(MC%FV%CV%N_MEMBER)) THEN
+            IF (CHILD_ICV >= 1 .AND. CHILD_ICV <= MC%FV%CV%N) THEN
+               MC%FV%CV%N_MEMBER(CHILD_ICV) = 0
+               MC%FV%CV%OWNER_NM(CHILD_ICV) = MASTER_NM
+               MC%FV%CV%OWNER_GCELL(CHILD_ICV) = MASTER_IG
+               N_CHILD_INACTIVE = N_CHILD_INACTIVE + 1
+            ENDIF
+         ENDIF
+      ENDIF
+
+      MM => MESHES(MASTER_NM)
+      IF (.NOT.ALLOCATED(MM%FV%CV%OWNER_GCELL)) CYCLE
+      IF (MASTER_IG > MM%FV%CV%N) THEN
+         CALL CC_GRID_RECORD_MISSING_MASTER(PROPOSAL,IPROPOSAL,MASTER_NM,N_MISSING_MASTER,N_MISSING_CUT_MASTER, &
+                                            N_MISSING_REG_MASTER,N_MISSING_LOCAL_MASTER,N_MISSING_REMOTE_MASTER)
+         CYCLE
+      ENDIF
+
+      OWNER_ICV = MASTER_IG
+      MM%FV%CV%GCELL_TO_CV_NM(MASTER_IG) = MASTER_NM
+      MM%FV%CV%GCELL_TO_CV(MASTER_IG) = OWNER_ICV
+      MM%FV%CV%OWNER_NM(OWNER_ICV) = MASTER_NM
+      MM%FV%CV%OWNER_GCELL(OWNER_ICV) = MASTER_IG
+      IF (MM%FV%CV%N_MEMBER(OWNER_ICV) <= 1) THEN
+         CALL CC_GRID_WRITE_CV_MEMBER(MM,OWNER_ICV,1,MASTER_NM,MASTER_IG)
+         CALL CC_GRID_WRITE_CV_MEMBER(MM,OWNER_ICV,2,PROPOSAL%CHILD_NM(IPROPOSAL),PROPOSAL%CHILD_IG(IPROPOSAL))
+         IF (STOP_STATUS == SETUP_STOP) EXIT
+         MM%FV%CV%N_MEMBER(OWNER_ICV) = 2
+      ELSE
+         NEW_SLOT = MM%FV%CV%N_MEMBER(OWNER_ICV) + 1
+         CALL CC_GRID_WRITE_CV_MEMBER(MM,OWNER_ICV,NEW_SLOT,PROPOSAL%CHILD_NM(IPROPOSAL),PROPOSAL%CHILD_IG(IPROPOSAL))
+         IF (STOP_STATUS == SETUP_STOP) EXIT
+         MM%FV%CV%N_MEMBER(OWNER_ICV) = NEW_SLOT
+      ENDIF
+      CANON_VOLUME = MM%FV%CV%VOLUME(OWNER_ICV) + PROPOSAL%CHILD_VOLUME(IPROPOSAL)
+      IF (CANON_VOLUME > TWO_EPSILON_EB) THEN
+         CANON_XBAR(IAXIS:KAXIS) = (MM%FV%CV%VOLUME(OWNER_ICV)*MM%FV%CV%XBAR_CV(IAXIS:KAXIS,OWNER_ICV) + &
+                                    PROPOSAL%CHILD_VOLUME(IPROPOSAL)*PROPOSAL%CHILD_XYZCEN(IAXIS:KAXIS,IPROPOSAL))/CANON_VOLUME
+      ELSE
+         CANON_XBAR(IAXIS:KAXIS) = PROPOSAL%XBAR_CV(IAXIS:KAXIS,IPROPOSAL)
+      ENDIF
+      IF (REDIRECTED) THEN
+         CANON_XCV(IAXIS:KAXIS) = MM%FV%CV%XCV(IAXIS:KAXIS,OWNER_ICV)
+         IF (MM%FV%CV%CENTER_SOURCE(OWNER_ICV)==CC_CV_CENTER_VOLUME_CENTROID) CANON_XCV(IAXIS:KAXIS) = CANON_XBAR(IAXIS:KAXIS)
+      ELSE
+         SELECT CASE(PROPOSAL%CENTER_SOURCE(IPROPOSAL))
+         CASE(CC_CV_CENTER_VOLUME_CENTROID)
+            CANON_XCV(IAXIS:KAXIS) = CANON_XBAR(IAXIS:KAXIS)
+         CASE DEFAULT
+            CANON_XCV(IAXIS:KAXIS) = PROPOSAL%MASTER_XYZCEN(IAXIS:KAXIS,IPROPOSAL)
+         END SELECT
+         MM%FV%CV%CENTER_SOURCE(OWNER_ICV) = PROPOSAL%CENTER_SOURCE(IPROPOSAL)
+      ENDIF
+      MM%FV%CV%VOLUME(OWNER_ICV) = CANON_VOLUME
+      MM%FV%CV%XCV(IAXIS:KAXIS,OWNER_ICV) = CANON_XCV(IAXIS:KAXIS)
+      MM%FV%CV%XBAR_CV(IAXIS:KAXIS,OWNER_ICV) = CANON_XBAR(IAXIS:KAXIS)
+
+      N_OWNER_PAIR = N_OWNER_PAIR + 1
+      IF (MASTER_NM == PROPOSAL%CHILD_NM(IPROPOSAL)) THEN
+         N_LOCAL_MASTER = N_LOCAL_MASTER + 1
+      ELSE
+         N_REMOTE_MASTER = N_REMOTE_MASTER + 1
+      ENDIF
+ENDDO
+
+IF (GET_CUTCELLS_VERBOSE) THEN
+   WRITE(LU_SETCC,'(A,5I10)') '   Phase 5 CV pairs owner_rows, inactive_children, missing_master, local_master, remote_master =', &
+                              N_OWNER_PAIR,N_CHILD_INACTIVE,N_MISSING_MASTER,N_LOCAL_MASTER,N_REMOTE_MASTER
+   WRITE(LU_SETCC,'(A,2I10)') '   Phase 5 missing masters local, remote =', &
+                              N_MISSING_LOCAL_MASTER,N_MISSING_REMOTE_MASTER
+   WRITE(LU_SETCC,'(A,2I10)') '   Phase 5 missing masters cut, regular =', &
+                              N_MISSING_CUT_MASTER,N_MISSING_REG_MASTER
+ENDIF
+IBUF=(/N_OWNER_PAIR,N_CHILD_INACTIVE,N_MISSING_MASTER,N_LOCAL_MASTER,N_REMOTE_MASTER, &
+       N_MISSING_LOCAL_MASTER,N_MISSING_REMOTE_MASTER/)
+IF (N_MPI_PROCESSES>1) CALL MPI_ALLREDUCE(MPI_IN_PLACE,IBUF,7,MPI_INTEGER,MPI_SUM,MPI_COMM_WORLD,IERR)
+N_OWNER_PAIR=IBUF(1)
+N_CHILD_INACTIVE=IBUF(2)
+N_MISSING_MASTER=IBUF(3)
+N_LOCAL_MASTER=IBUF(4)
+N_REMOTE_MASTER=IBUF(5)
+N_MISSING_LOCAL_MASTER=IBUF(6)
+N_MISSING_REMOTE_MASTER=IBUF(7)
+IF (N_MISSING_MASTER>0 .OR. N_OWNER_PAIR/=N_PROPOSAL_GLOBAL .OR. N_CHILD_INACTIVE/=N_PROPOSAL_GLOBAL) THEN
+   IF (GET_CUTCELLS_VERBOSE) WRITE(LU_SETCC,'(A,4I10)') &
+      '   Phase 5 ownership reconciliation FAIL proposals/owners/children/missing =', &
+      N_PROPOSAL_GLOBAL,N_OWNER_PAIR,N_CHILD_INACTIVE,N_MISSING_MASTER
+   IF (MY_RANK==0) WRITE(LU_ERR,'(A,4I10)') &
+      'ERROR: SET_CVS_3D cross-rank CV ownership reconciliation failed: proposals/owners/children/missing =', &
+      N_PROPOSAL_GLOBAL,N_OWNER_PAIR,N_CHILD_INACTIVE,N_MISSING_MASTER
+   STOP_STATUS=SETUP_STOP
+ELSE
+   IF (GET_CUTCELLS_VERBOSE) WRITE(LU_SETCC,'(A,I10)') '   Phase 5 ownership reconciliation PASS proposals =',N_PROPOSAL_GLOBAL
+ENDIF
+IF (GET_CUTCELLS_VERBOSE) FLUSH(LU_SETCC)
+
+900 CONTINUE
+CALL CC_GRID_DEALLOCATE_CV_PROPOSAL_BUFFER(PROPOSAL)
+
+DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   CALL CC_GRID_SYNC_CUT_CELL_FV_INDEXES(NM)
+ENDDO
+
+END SUBROUTINE CC_GRID_APPLY_PAIRWISE_CV_AGGLOMERATION
+
+SUBROUTINE CC_GRID_ENSURE_CV_MEMBER_CAPACITY(M,MAX_MEMBERS)
+! Grow the diagnostic MEMBER_* first extent to MAX_MEMBERS, preserving existing slots.
+TYPE(MESH_TYPE), POINTER :: M
+INTEGER, INTENT(IN) :: MAX_MEMBERS
+INTEGER :: MAX_ALLOC,NCV
+INTEGER, ALLOCATABLE, DIMENSION(:,:) :: TMP_NM,TMP_GCELL
+
+IF (MAX_MEMBERS < 1) RETURN
+IF (.NOT.ALLOCATED(M%FV%CV%MEMBER_NM) .OR. .NOT.ALLOCATED(M%FV%CV%MEMBER_GCELL)) RETURN
+MAX_ALLOC = SIZE(M%FV%CV%MEMBER_NM,1)
+NCV = SIZE(M%FV%CV%MEMBER_NM,2)
+IF (MAX_MEMBERS <= MAX_ALLOC .OR. NCV < 1) RETURN
+
+ALLOCATE(TMP_NM(1:MAX_ALLOC,1:NCV))
+ALLOCATE(TMP_GCELL(1:MAX_ALLOC,1:NCV))
+TMP_NM = M%FV%CV%MEMBER_NM
+TMP_GCELL = M%FV%CV%MEMBER_GCELL
+DEALLOCATE(M%FV%CV%MEMBER_NM)
+DEALLOCATE(M%FV%CV%MEMBER_GCELL)
+ALLOCATE(M%FV%CV%MEMBER_NM(1:MAX_MEMBERS,1:NCV))
+ALLOCATE(M%FV%CV%MEMBER_GCELL(1:MAX_MEMBERS,1:NCV))
+M%FV%CV%MEMBER_NM = 0
+M%FV%CV%MEMBER_GCELL = 0
+M%FV%CV%MEMBER_NM(1:MAX_ALLOC,1:NCV) = TMP_NM
+M%FV%CV%MEMBER_GCELL(1:MAX_ALLOC,1:NCV) = TMP_GCELL
+DEALLOCATE(TMP_NM)
+DEALLOCATE(TMP_GCELL)
+
+END SUBROUTINE CC_GRID_ENSURE_CV_MEMBER_CAPACITY
+
+
+SUBROUTINE CC_GRID_WRITE_CV_MEMBER(M,OWNER_ICV,SLOT,MEM_NM,MEM_IG)
+! Record one diagnostic MEMBER_* slot. Never write past the allocated first extent.
+TYPE(MESH_TYPE), POINTER :: M
+INTEGER, INTENT(IN) :: OWNER_ICV,SLOT,MEM_NM,MEM_IG
+INTEGER :: MAX_ALLOC,N_MEMBER_NOW
+
+MAX_ALLOC = 0
+IF (ALLOCATED(M%FV%CV%MEMBER_NM)) MAX_ALLOC = SIZE(M%FV%CV%MEMBER_NM,1)
+N_MEMBER_NOW = 0
+IF (ALLOCATED(M%FV%CV%N_MEMBER)) THEN
+   IF (OWNER_ICV >= 1 .AND. OWNER_ICV <= SIZE(M%FV%CV%N_MEMBER)) N_MEMBER_NOW = M%FV%CV%N_MEMBER(OWNER_ICV)
+ENDIF
+IF (SLOT < 1 .OR. SLOT > MAX_ALLOC) THEN
+   WRITE(LU_ERR,'(A,4I10)') &
+      'ERROR: Phase 5 CV MEMBER_* write exceeds allocated first extent: icv,slot,extent,n_member =', &
+      OWNER_ICV,SLOT,MAX_ALLOC,N_MEMBER_NOW
+   STOP_STATUS = SETUP_STOP
+   RETURN
+ENDIF
+M%FV%CV%MEMBER_NM(SLOT,OWNER_ICV) = MEM_NM
+M%FV%CV%MEMBER_GCELL(SLOT,OWNER_ICV) = MEM_IG
+END SUBROUTINE CC_GRID_WRITE_CV_MEMBER
+
+REAL(EB) FUNCTION CC_GRID_GET_REGULAR_FACE_AREA(NM,I,J,K,X1AXIS)
+INTEGER, INTENT(IN) :: NM,I,J,K,X1AXIS
+TYPE(MESH_TYPE), POINTER :: M
+
+M => MESHES(NM)
+SELECT CASE(X1AXIS)
+CASE(IAXIS)
+   CC_GRID_GET_REGULAR_FACE_AREA = M%DY(J)*M%DZ(K)
+CASE(JAXIS)
+   CC_GRID_GET_REGULAR_FACE_AREA = M%DX(I)*M%DZ(K)
+CASE(KAXIS)
+   CC_GRID_GET_REGULAR_FACE_AREA = M%DX(I)*M%DY(J)
+CASE DEFAULT
+   CC_GRID_GET_REGULAR_FACE_AREA = 0._EB
+END SELECT
+END FUNCTION CC_GRID_GET_REGULAR_FACE_AREA
+
+REAL(EB) FUNCTION CC_GRID_GET_CUTCELL_FACE_AREA(NM,ICC,IFACE)
+INTEGER, INTENT(IN) :: NM,ICC,IFACE
+
+TYPE(MESH_TYPE), POINTER :: M
+TYPE(CC_CUTCELL_TYPE), POINTER :: CC
+INTEGER :: FTYPE,SIDE,X1AXIS,ICFX,JFCX
+CC_GRID_GET_CUTCELL_FACE_AREA = 0._EB
+M => MESHES(NM)
+CC => M%CUT_CELL(ICC)
+
+FTYPE = CC%FACE_LIST(1,IFACE)
+SELECT CASE(FTYPE)
+CASE(CC_FTYPE_RCGAS)
+   SIDE = CC%FACE_LIST(2,IFACE)
+   X1AXIS = CC%FACE_LIST(3,IFACE)
+   CC_GRID_GET_CUTCELL_FACE_AREA = CC_GRID_GET_REGULAR_FACE_AREA(NM,CC%IJK(IAXIS),CC%IJK(JAXIS),CC%IJK(KAXIS),X1AXIS)
+CASE(CC_FTYPE_CFGAS,CC_FTYPE_CFINB)
+   ICFX = CC%FACE_LIST(4,IFACE)
+   JFCX = CC%FACE_LIST(5,IFACE)
+   CC_GRID_GET_CUTCELL_FACE_AREA = M%CUT_FACE(ICFX)%AREA(JFCX)
+END SELECT
+END FUNCTION CC_GRID_GET_CUTCELL_FACE_AREA
+
+INTEGER FUNCTION CC_GRID_GET_GCELL_INDEX_FROM_PIECE(M,ICC,JCC)
+TYPE(MESH_TYPE), POINTER, INTENT(IN) :: M
+INTEGER, INTENT(IN) :: ICC,JCC
+CC_GRID_GET_GCELL_INDEX_FROM_PIECE = 0
+IF (.NOT.ALLOCATED(M%CUT_CELL(ICC)%IG)) RETURN
+CC_GRID_GET_GCELL_INDEX_FROM_PIECE = M%CUT_CELL(ICC)%IG(JCC)
+END FUNCTION CC_GRID_GET_GCELL_INDEX_FROM_PIECE
+
+
+SUBROUTINE CC_GRID_SYNC_CUT_CELL_FV_INDEXES(NM)
+! Refresh CUT_CELL(ICC)%ICV(JCC) from GCELL_TO_CV after identity or agglomeration.
+! ICV is nonzero when the mapped CV lives on this mesh: in-mesh owner, or a guard
+! storage row. Matches GET_FV_CV_FOR_CUTCELL.
+
+INTEGER, INTENT(IN) :: NM
+TYPE(MESH_TYPE), POINTER :: M
+INTEGER :: ICC,JCC,IG
+
+M => MESHES(NM)
+IF (.NOT.ALLOCATED(M%FV%CV%GCELL_TO_CV)) RETURN
+
+DO ICC=1,M%N_CUTCELL_MESH+M%N_GCCUTCELL_MESH
+   IF (.NOT.ALLOCATED(M%CUT_CELL(ICC)%IG)) THEN
+      ALLOCATE(M%CUT_CELL(ICC)%IG(1:M%CUT_CELL(ICC)%NCELL),M%CUT_CELL(ICC)%ICV(1:M%CUT_CELL(ICC)%NCELL))
+      M%CUT_CELL(ICC)%IG = 0
+   ENDIF
+   IF (.NOT.ALLOCATED(M%CUT_CELL(ICC)%ICV)) ALLOCATE(M%CUT_CELL(ICC)%ICV(1:M%CUT_CELL(ICC)%NCELL))
+   M%CUT_CELL(ICC)%ICV = 0
+   DO JCC=1,M%CUT_CELL(ICC)%NCELL
+      IG = M%CUT_CELL(ICC)%IG(JCC)
+      IF (IG >= 1 .AND. IG <= M%FV%GCELL%N) THEN
+         IF (M%FV%CV%GCELL_TO_CV_NM(IG) == NM) M%CUT_CELL(ICC)%ICV(JCC) = M%FV%CV%GCELL_TO_CV(IG)
+      ENDIF
+   ENDDO
+ENDDO
+END SUBROUTINE CC_GRID_SYNC_CUT_CELL_FV_INDEXES
+
+
+INTEGER FUNCTION CC_GRID_GET_GCELL_INDEX_FROM_ENTITY(NM,CELL_TYPE,IJK,ICC,JCC)
+INTEGER, INTENT(IN) :: NM,CELL_TYPE,ICC,JCC
+INTEGER, INTENT(IN) :: IJK(IAXIS:KAXIS)
+TYPE(MESH_TYPE), POINTER :: M
+INTEGER :: IG
+
+CC_GRID_GET_GCELL_INDEX_FROM_ENTITY = 0
+IF (NM < 1 .OR. NM > NMESHES) RETURN
+M => MESHES(NM)
+IF (.NOT.ALLOCATED(M%FV%GCELL%CELL_TYPE)) RETURN
+
+IF (CELL_TYPE == CC_GCELL_CUT) THEN
+   CC_GRID_GET_GCELL_INDEX_FROM_ENTITY = CC_GRID_GET_GCELL_INDEX_FROM_PIECE(M,ICC,JCC)
+   RETURN
+ENDIF
+DO IG=1,M%FV%GCELL%N_INT
+   IF (M%FV%GCELL%CELL_TYPE(IG) /= CELL_TYPE) CYCLE
+   IF (.NOT.CC_GRID_CV_ENTITY_KEYS_MATCH(NM,CELL_TYPE,IJK,ICC,JCC,NM,M%FV%GCELL%CELL_TYPE(IG), &
+                                         M%FV%GCELL%IJK(IAXIS:KAXIS,IG),M%FV%GCELL%ICC(IG),M%FV%GCELL%JCC(IG))) CYCLE
+   CC_GRID_GET_GCELL_INDEX_FROM_ENTITY = IG
+   RETURN
+ENDDO
+END FUNCTION CC_GRID_GET_GCELL_INDEX_FROM_ENTITY
+
+
+INTEGER FUNCTION CC_GRID_GET_GCELL_INDEX_FROM_GEOM(NM,CELL_TYPE,VOLUME,XYZCEN)
+INTEGER, INTENT(IN) :: NM,CELL_TYPE
+REAL(EB), INTENT(IN) :: VOLUME,XYZCEN(IAXIS:KAXIS)
+TYPE(MESH_TYPE), POINTER :: M
+INTEGER :: IG
+REAL(EB) :: VOL_TOL,XYZ_TOL
+
+CC_GRID_GET_GCELL_INDEX_FROM_GEOM = 0
+IF (NM < 1 .OR. NM > NMESHES) RETURN
+M => MESHES(NM)
+IF (.NOT.ALLOCATED(M%FV%GCELL%CELL_TYPE)) RETURN
+
+XYZ_TOL = CC_CV_CANON_XYZ_TOL
+DO IG=1,M%FV%GCELL%N_INT
+   IF (M%FV%GCELL%CELL_TYPE(IG) /= CELL_TYPE) CYCLE
+   VOL_TOL = MAX(CC_CV_CANON_VOLUME_TOL,CC_CV_CANON_VOLUME_TOL*MAX(ABS(VOLUME),ABS(M%FV%GCELL%VOLUME(IG))))
+   IF (ABS(M%FV%GCELL%VOLUME(IG)-VOLUME) > VOL_TOL) CYCLE
+   IF (NORM2(M%FV%GCELL%XYZCEN(IAXIS:KAXIS,IG)-XYZCEN(IAXIS:KAXIS)) > XYZ_TOL) CYCLE
+   CC_GRID_GET_GCELL_INDEX_FROM_GEOM = IG
+   RETURN
+ENDDO
+END FUNCTION CC_GRID_GET_GCELL_INDEX_FROM_GEOM
+
+
+SUBROUTINE CC_GRID_GET_CUTFACE_UNIT_NORMAL(CF,JFACE,FACE_NVEC)
+
+TYPE(CC_CUTFACE_TYPE), INTENT(IN) :: CF
+INTEGER, INTENT(IN) :: JFACE
+REAL(EB), INTENT(OUT) :: FACE_NVEC(IAXIS:KAXIS)
+REAL(EB) :: AVEC(IAXIS:KAXIS),ANORM
+
+CALL CC_GRID_GET_CUTFACE_AREA_VECTOR(CF,JFACE,AVEC)
+ANORM = NORM2(AVEC)
+FACE_NVEC = 0._EB
+IF (ANORM > TWO_EPSILON_EB) FACE_NVEC = AVEC/ANORM
+
+END SUBROUTINE CC_GRID_GET_CUTFACE_UNIT_NORMAL
+
+
+SUBROUTINE CC_GRID_GET_CUTFACE_AREA_VECTOR(CF,JFACE,AVEC)
+! Return the outward-consistent area vector A = INTEGRAL(n dA) of cut-face polygon JFACE using the
+! Newell / fan-from-centroid formula A = 1/2 SUM (v_i - c) x (v_{i+1} - c).
+USE MATH_FUNCTIONS, ONLY: CROSS_PRODUCT
+TYPE(CC_CUTFACE_TYPE), INTENT(IN) :: CF
+INTEGER, INTENT(IN) :: JFACE
+REAL(EB), INTENT(OUT) :: AVEC(IAXIS:KAXIS)
+INTEGER :: IP,IP1,IV1,IV2,NVFACE
+REAL(EB) :: FACE_XYZCEN(IAXIS:KAXIS),DV1(IAXIS:KAXIS),DV2(IAXIS:KAXIS),N(IAXIS:KAXIS)
+
+AVEC = 0._EB
+IF (.NOT.ALLOCATED(CF%CFELEM)) RETURN
+IF (.NOT.ALLOCATED(CF%XYZVERT)) RETURN
+NVFACE = CF%CFELEM(1,JFACE)
+IF (NVFACE < 3) RETURN
+
+FACE_XYZCEN(IAXIS:KAXIS) = CF%XYZCEN(IAXIS:KAXIS,JFACE)
+DO IP=1,NVFACE
+   IP1 = IP + 1
+   IF (IP==NVFACE) IP1 = 1
+   IV1 = CF%CFELEM(IP +1,JFACE)
+   IV2 = CF%CFELEM(IP1+1,JFACE)
+   DV1(IAXIS:KAXIS) = CF%XYZVERT(IAXIS:KAXIS,IV1) - FACE_XYZCEN(IAXIS:KAXIS)
+   DV2(IAXIS:KAXIS) = CF%XYZVERT(IAXIS:KAXIS,IV2) - FACE_XYZCEN(IAXIS:KAXIS)
+   CALL CROSS_PRODUCT(N,DV1,DV2)
+   AVEC(IAXIS:KAXIS) = AVEC(IAXIS:KAXIS) + 0.5_EB*N(IAXIS:KAXIS)
+ENDDO
+END SUBROUTINE CC_GRID_GET_CUTFACE_AREA_VECTOR
+
+
+SUBROUTINE CC_GRID_GET_RCGAS_FACE_GEOMETRY(NM,ICC,SIDE,X1AXIS,FACE_XYZCEN,FACE_NVEC,FACE_NEIGHBOR_XYZCEN)
+INTEGER, INTENT(IN) :: NM,ICC,SIDE,X1AXIS
+REAL(EB), INTENT(OUT) :: FACE_XYZCEN(IAXIS:KAXIS),FACE_NVEC(IAXIS:KAXIS),FACE_NEIGHBOR_XYZCEN(IAXIS:KAXIS)
+INTEGER :: I,J,K,ILH
+TYPE(MESH_TYPE), POINTER :: M
+REAL(EB) :: HOST_XYZ(IAXIS:KAXIS),CELL_WIDTH(IAXIS:KAXIS)
+
+M => MESHES(NM)
+I = M%CUT_CELL(ICC)%IJK(IAXIS)
+J = M%CUT_CELL(ICC)%IJK(JAXIS)
+K = M%CUT_CELL(ICC)%IJK(KAXIS)
+ILH = 2*SIDE - 3
+
+FACE_XYZCEN = 0._EB
+FACE_NVEC = 0._EB
+FACE_NEIGHBOR_XYZCEN = 0._EB
+CELL_WIDTH=(/M%DX(MAX(1,MIN(M%IBAR,I))),M%DY(MAX(1,MIN(M%JBAR,J))),M%DZ(MAX(1,MIN(M%KBAR,K)))/)
+HOST_XYZ=(/M%XC(MAX(1,MIN(M%IBAR,I))),M%YC(MAX(1,MIN(M%JBAR,J))),M%ZC(MAX(1,MIN(M%KBAR,K)))/)
+IF (I<1)      HOST_XYZ(IAXIS)=M%XC(1)     +REAL(I-1,EB)*CELL_WIDTH(IAXIS)
+IF (I>M%IBAR) HOST_XYZ(IAXIS)=M%XC(M%IBAR)+REAL(I-M%IBAR,EB)*CELL_WIDTH(IAXIS)
+IF (J<1)      HOST_XYZ(JAXIS)=M%YC(1)     +REAL(J-1,EB)*CELL_WIDTH(JAXIS)
+IF (J>M%JBAR) HOST_XYZ(JAXIS)=M%YC(M%JBAR)+REAL(J-M%JBAR,EB)*CELL_WIDTH(JAXIS)
+IF (K<1)      HOST_XYZ(KAXIS)=M%ZC(1)     +REAL(K-1,EB)*CELL_WIDTH(KAXIS)
+IF (K>M%KBAR) HOST_XYZ(KAXIS)=M%ZC(M%KBAR)+REAL(K-M%KBAR,EB)*CELL_WIDTH(KAXIS)
+SELECT CASE(X1AXIS)
+CASE(IAXIS)
+   FACE_XYZCEN(IAXIS:KAXIS)=HOST_XYZ
+   FACE_XYZCEN(IAXIS)=HOST_XYZ(IAXIS)+0.5_EB*REAL(ILH,EB)*CELL_WIDTH(IAXIS)
+   FACE_NVEC(IAXIS:KAXIS) = (/ REAL(ILH,EB), 0._EB, 0._EB /)
+   FACE_NEIGHBOR_XYZCEN(IAXIS:KAXIS)=HOST_XYZ
+   FACE_NEIGHBOR_XYZCEN(IAXIS)=HOST_XYZ(IAXIS)+REAL(ILH,EB)*CELL_WIDTH(IAXIS)
+CASE(JAXIS)
+   FACE_XYZCEN(IAXIS:KAXIS)=HOST_XYZ
+   FACE_XYZCEN(JAXIS)=HOST_XYZ(JAXIS)+0.5_EB*REAL(ILH,EB)*CELL_WIDTH(JAXIS)
+   FACE_NVEC(IAXIS:KAXIS) = (/ 0._EB, REAL(ILH,EB), 0._EB /)
+   FACE_NEIGHBOR_XYZCEN(IAXIS:KAXIS)=HOST_XYZ
+   FACE_NEIGHBOR_XYZCEN(JAXIS)=HOST_XYZ(JAXIS)+REAL(ILH,EB)*CELL_WIDTH(JAXIS)
+CASE(KAXIS)
+   FACE_XYZCEN(IAXIS:KAXIS)=HOST_XYZ
+   FACE_XYZCEN(KAXIS)=HOST_XYZ(KAXIS)+0.5_EB*REAL(ILH,EB)*CELL_WIDTH(KAXIS)
+   FACE_NVEC(IAXIS:KAXIS) = (/ 0._EB, 0._EB, REAL(ILH,EB) /)
+   FACE_NEIGHBOR_XYZCEN(IAXIS:KAXIS)=HOST_XYZ
+   FACE_NEIGHBOR_XYZCEN(KAXIS)=HOST_XYZ(KAXIS)+REAL(ILH,EB)*CELL_WIDTH(KAXIS)
+END SELECT
+END SUBROUTINE CC_GRID_GET_RCGAS_FACE_GEOMETRY
+
+SUBROUTINE CC_GRID_GET_REGULAR_CELL_FACE_GEOMETRY(NM,I,J,K,SIDE,X1AXIS,FACE_XYZCEN,FACE_NVEC,FACE_HAS_NEIGHBOR, &
+                                                  FACE_NEIGHBOR_XYZCEN)
+INTEGER, INTENT(IN) :: NM,I,J,K,SIDE,X1AXIS
+REAL(EB), INTENT(OUT) :: FACE_XYZCEN(IAXIS:KAXIS),FACE_NVEC(IAXIS:KAXIS),FACE_NEIGHBOR_XYZCEN(IAXIS:KAXIS)
+LOGICAL, INTENT(OUT) :: FACE_HAS_NEIGHBOR
+INTEGER :: ILH,IFACE_CART,IN,JN,KN,ICC_NEIGH
+TYPE(MESH_TYPE), POINTER :: M
+
+FACE_XYZCEN = 0._EB; FACE_NVEC = 0._EB; FACE_NEIGHBOR_XYZCEN = 0._EB; FACE_HAS_NEIGHBOR = .FALSE.
+IF (NM<1 .OR. NM>NMESHES) THEN
+   WRITE(LU_ERR,'(A,6I10)') &
+      'ERROR: CC_GRID_GET_REGULAR_CELL_FACE_GEOMETRY: mesh index out of range: NM,I,J,K,SIDE,X1AXIS =', &
+      NM,I,J,K,SIDE,X1AXIS
+   STOP_STATUS = SETUP_STOP
+   RETURN
+ENDIF
+M => MESHES(NM)
+IF (I<1 .OR. I>M%IBAR .OR. J<1 .OR. J>M%JBAR .OR. K<1 .OR. K>M%KBAR) THEN
+   WRITE(LU_ERR,'(A,9I10)') &
+      'ERROR: CC_GRID_GET_REGULAR_CELL_FACE_GEOMETRY: cell index out of range: NM,I,J,K,SIDE,X1AXIS,IBAR,JBAR,KBAR =', &
+      NM,I,J,K,SIDE,X1AXIS,M%IBAR,M%JBAR,M%KBAR
+   STOP_STATUS = SETUP_STOP
+   RETURN
+ENDIF
+ILH = 2*SIDE - 3
+IN = I; JN = J; KN = K
+SELECT CASE(X1AXIS)
+CASE(IAXIS)
+   IFACE_CART = I - 1
+   IF (SIDE==HIGH_IND) IFACE_CART = I
+   FACE_XYZCEN(IAXIS:KAXIS) = (/ M%X(IFACE_CART), M%YC(J), M%ZC(K) /)
+   FACE_NVEC(IAXIS:KAXIS) = (/ REAL(ILH,EB), 0._EB, 0._EB /)
+   IN = I + ILH
+CASE(JAXIS)
+   IFACE_CART = J - 1
+   IF (SIDE==HIGH_IND) IFACE_CART = J
+   FACE_XYZCEN(IAXIS:KAXIS) = (/ M%XC(I), M%Y(IFACE_CART), M%ZC(K) /)
+   FACE_NVEC(IAXIS:KAXIS) = (/ 0._EB, REAL(ILH,EB), 0._EB /)
+   JN = J + ILH
+CASE(KAXIS)
+   IFACE_CART = K - 1
+   IF (SIDE==HIGH_IND) IFACE_CART = K
+   FACE_XYZCEN(IAXIS:KAXIS) = (/ M%XC(I), M%YC(J), M%Z(IFACE_CART) /)
+   FACE_NVEC(IAXIS:KAXIS) = (/ 0._EB, 0._EB, REAL(ILH,EB) /)
+   KN = K + ILH
+END SELECT
+IF (IN<1 .OR. IN>M%IBAR .OR. JN<1 .OR. JN>M%JBAR .OR. KN<1 .OR. KN>M%KBAR) RETURN
+
+SELECT CASE(M%CCVAR(IN,JN,KN,CC_CGSC))
+CASE(CC_GASPHASE)
+   FACE_HAS_NEIGHBOR = .TRUE.
+   FACE_NEIGHBOR_XYZCEN(IAXIS:KAXIS) = (/ M%XC(IN), M%YC(JN), M%ZC(KN) /)
+CASE(CC_CUTCFE)
+   ICC_NEIGH = M%CCVAR(IN,JN,KN,CC_IDCC)
+   IF (ICC_NEIGH > 0) THEN
+      IF (M%CUT_CELL(ICC_NEIGH)%NCELL == 1) THEN
+         FACE_HAS_NEIGHBOR = .TRUE.
+         FACE_NEIGHBOR_XYZCEN(IAXIS:KAXIS) = M%CUT_CELL(ICC_NEIGH)%XYZCEN(IAXIS:KAXIS,1)
+      ENDIF
+   ENDIF
+END SELECT
+END SUBROUTINE CC_GRID_GET_REGULAR_CELL_FACE_GEOMETRY
+
+SUBROUTINE CC_GRID_APPEND_CUT_CELL_EXTERNAL_FACES(NM,ICC,JCC,N_SKIP_IFACE,SKIP_IFACE,N_FACE,FACE_XYZCEN,FACE_NVEC, &
+                                                  FACE_HAS_NEIGHBOR,FACE_NEIGHBOR_XYZCEN,SUPPORTED)
+INTEGER, INTENT(IN) :: NM,ICC,JCC,N_SKIP_IFACE
+INTEGER, INTENT(IN) :: SKIP_IFACE(:)
+INTEGER, INTENT(INOUT) :: N_FACE
+REAL(EB), INTENT(INOUT) :: FACE_XYZCEN(:,:),FACE_NVEC(:,:),FACE_NEIGHBOR_XYZCEN(:,:)
+LOGICAL, INTENT(INOUT) :: FACE_HAS_NEIGHBOR(:)
+LOGICAL, INTENT(INOUT) :: SUPPORTED
+TYPE(MESH_TYPE), POINTER :: M
+TYPE(CC_CUTCELL_TYPE), POINTER :: CC
+TYPE(CC_CUTFACE_TYPE), POINTER :: CF
+INTEGER :: IFC,IFACE,FTYPE,SIDE,X1AXIS,ICFX,JFCX,CUR_CF_SIDE,OPP_CF_SIDE,ICC_NEIGH,JCC_NEIGH
+REAL(EB) :: CUR_CENTER(IAXIS:KAXIS)
+
+CALL POINT_TO_MESH(NM)
+M => MESHES(NM)
+CC => M%CUT_CELL(ICC)
+IF (.NOT.ALLOCATED(CC%CCELEM) .OR. .NOT.ALLOCATED(CC%FACE_LIST) .OR. .NOT.ALLOCATED(CC%XYZCEN)) THEN
+   SUPPORTED=.FALSE.
+   RETURN
+ENDIF
+CUR_CENTER(IAXIS:KAXIS) = CC%XYZCEN(IAXIS:KAXIS,JCC)
+
+DO IFC=1,CC%CCELEM(1,JCC)
+   IFACE = CC%CCELEM(IFC+1,JCC)
+   IF (N_SKIP_IFACE > 0) THEN
+      IF (ANY(SKIP_IFACE(1:N_SKIP_IFACE) == IFACE)) CYCLE
+   ENDIF
+   FTYPE = CC%FACE_LIST(1,IFACE)
+   SELECT CASE(FTYPE)
+   CASE(CC_FTYPE_RCGAS)
+      SIDE = CC%FACE_LIST(2,IFACE)
+      X1AXIS = CC%FACE_LIST(3,IFACE)
+      N_FACE = N_FACE + 1
+      CALL CC_GRID_GET_RCGAS_FACE_GEOMETRY(NM,ICC,SIDE,X1AXIS,FACE_XYZCEN(IAXIS:KAXIS,N_FACE), &
+                                           FACE_NVEC(IAXIS:KAXIS,N_FACE),FACE_NEIGHBOR_XYZCEN(IAXIS:KAXIS,N_FACE))
+      FACE_HAS_NEIGHBOR(N_FACE) = .TRUE.
+
+   CASE(CC_FTYPE_CFGAS)
+      SIDE = CC%FACE_LIST(2,IFACE)
+      ICFX = CC%FACE_LIST(4,IFACE)
+      JFCX = CC%FACE_LIST(5,IFACE)
+      IF (.NOT.ALLOCATED(M%CUT_FACE)) THEN
+         SUPPORTED=.FALSE.
+         RETURN
+      ENDIF
+      IF (ICFX<1 .OR. ICFX>SIZE(M%CUT_FACE)) THEN
+         SUPPORTED=.FALSE.
+         RETURN
+      ENDIF
+      CF => M%CUT_FACE(ICFX)
+      IF (.NOT.ALLOCATED(CF%CELL_LIST) .OR. .NOT.ALLOCATED(CF%XYZCEN) .OR. &
+          .NOT.ALLOCATED(CF%CFELEM) .OR. .NOT.ALLOCATED(CF%XYZVERT)) THEN
+         SUPPORTED=.FALSE.
+         RETURN
+      ENDIF
+      CUR_CF_SIDE = LOW_IND
+      IF (SIDE == LOW_IND) CUR_CF_SIDE = HIGH_IND
+      OPP_CF_SIDE = LOW_IND + HIGH_IND - CUR_CF_SIDE
+      ICC_NEIGH = CF%CELL_LIST(2,OPP_CF_SIDE,JFCX)
+      JCC_NEIGH = CF%CELL_LIST(3,OPP_CF_SIDE,JFCX)
+
+      N_FACE = N_FACE + 1
+      FACE_XYZCEN(IAXIS:KAXIS,N_FACE) = CF%XYZCEN(IAXIS:KAXIS,JFCX)
+      CALL CC_GRID_GET_CUTFACE_UNIT_NORMAL(CF,JFCX,FACE_NVEC(IAXIS:KAXIS,N_FACE))
+      ! CFGAS vertices are oriented so the raw geometric normal points to the cut-face +axis side.
+      ! FACE_LIST(2,IFACE) tells whether this face lies on the LOW/HIGH side of the current cut-cell,
+      ! so flip only when the current cut-cell is on the HIGH side of the cut-face.
+      IF (CUR_CF_SIDE == HIGH_IND) FACE_NVEC(IAXIS:KAXIS,N_FACE) = -FACE_NVEC(IAXIS:KAXIS,N_FACE)
+
+      FACE_HAS_NEIGHBOR(N_FACE) = (ICC_NEIGH > 0 .AND. JCC_NEIGH > 0)
+      IF (FACE_HAS_NEIGHBOR(N_FACE)) THEN
+         IF (ICC_NEIGH>SIZE(M%CUT_CELL)) THEN
+            SUPPORTED=.FALSE.
+            RETURN
+         ENDIF
+         IF (.NOT.ALLOCATED(M%CUT_CELL(ICC_NEIGH)%XYZCEN)) THEN
+            SUPPORTED=.FALSE.
+            RETURN
+         ENDIF
+         IF (JCC_NEIGH>SIZE(M%CUT_CELL(ICC_NEIGH)%XYZCEN,2)) THEN
+            SUPPORTED=.FALSE.
+            RETURN
+         ENDIF
+         FACE_NEIGHBOR_XYZCEN(IAXIS:KAXIS,N_FACE)=M%CUT_CELL(ICC_NEIGH)%XYZCEN(IAXIS:KAXIS,JCC_NEIGH)
+      ENDIF
+
+   CASE(CC_FTYPE_CFINB)
+      ICFX = CC%FACE_LIST(4,IFACE)
+      JFCX = CC%FACE_LIST(5,IFACE)
+      IF (.NOT.ALLOCATED(M%CUT_FACE)) THEN
+         SUPPORTED=.FALSE.
+         RETURN
+      ENDIF
+      IF (ICFX<1 .OR. ICFX>SIZE(M%CUT_FACE)) THEN
+         SUPPORTED=.FALSE.
+         RETURN
+      ENDIF
+      CF => M%CUT_FACE(ICFX)
+      IF (.NOT.ALLOCATED(CF%XYZCEN) .OR. .NOT.ALLOCATED(CF%CFELEM) .OR. .NOT.ALLOCATED(CF%XYZVERT)) THEN
+         SUPPORTED=.FALSE.
+         RETURN
+      ENDIF
+      N_FACE = N_FACE + 1
+      FACE_XYZCEN(IAXIS:KAXIS,N_FACE) = CF%XYZCEN(IAXIS:KAXIS,JFCX)
+      CALL CC_GRID_GET_CUTFACE_UNIT_NORMAL(CF,JFCX,FACE_NVEC(IAXIS:KAXIS,N_FACE))
+      FACE_HAS_NEIGHBOR(N_FACE) = .FALSE.
+      IF (DOT_PRODUCT(FACE_NVEC(IAXIS:KAXIS,N_FACE),FACE_XYZCEN(IAXIS:KAXIS,N_FACE)-CUR_CENTER) < 0._EB) &
+         FACE_NVEC(IAXIS:KAXIS,N_FACE) = -FACE_NVEC(IAXIS:KAXIS,N_FACE)
+   END SELECT
+ENDDO
+END SUBROUTINE CC_GRID_APPEND_CUT_CELL_EXTERNAL_FACES
+
+SUBROUTINE CC_GRID_CHECK_CV_LINK_FRACTION
+! Every CV holds at least CCVOL_LINK of its Cartesian cell. A miss stops the run.
+INTEGER :: NM,ICV,I,J,K,NFAIL,NFAIL_G,IERR
+REAL(EB) :: C_LINK,CELL_VOL,FRAC
+CHARACTER(MESSAGE_LENGTH) :: MESSAGE
+TYPE(MESH_TYPE), POINTER :: M
+C_LINK = CCVOL_LINK - GEOMEPS
+NFAIL = 0
+DO NM=1,NMESHES
+   M => MESHES(NM)
+   IF (.NOT.ALLOCATED(M%FV%CV%N_MEMBER)) CYCLE
+   DO ICV=1,M%FV%CV%N
+      IF (M%FV%CV%N_MEMBER(ICV) < 1) CYCLE
+      I = M%FV%CV%IJK(IAXIS,ICV)
+      J = M%FV%CV%IJK(JAXIS,ICV)
+      K = M%FV%CV%IJK(KAXIS,ICV)
+      IF (I < 1 .OR. I > M%IBAR) CYCLE
+      IF (J < 1 .OR. J > M%JBAR) CYCLE
+      IF (K < 1 .OR. K > M%KBAR) CYCLE
+      CELL_VOL = M%DX(I)*M%DY(J)*M%DZ(K)
+      IF (CELL_VOL <= TWENTY_EPSILON_EB) CYCLE
+      FRAC = M%FV%CV%VOLUME(ICV) / CELL_VOL
+      IF (FRAC + 1.E-5_EB >= C_LINK) CYCLE
+      NFAIL = NFAIL + 1
+      WRITE(LU_ERR,'(A,I0,A,I0,A,ES12.4)') 'ERROR: CV below CCVOL_LINK. mesh=',NM,' cv=',ICV,' frac=',FRAC
+   ENDDO
+ENDDO
+NFAIL_G = NFAIL
+IF (N_MPI_PROCESSES > 1) CALL MPI_ALLREDUCE(NFAIL,NFAIL_G,1,MPI_INTEGER,MPI_SUM,MPI_COMM_WORLD,IERR)
+IF (NFAIL_G > 0) THEN
+   WRITE(MESSAGE,'(A)') 'ERROR: CV volume fraction below CCVOL_LINK'
+   CALL SHUTDOWN(MESSAGE)
+   STOP_STATUS = SETUP_STOP
+ENDIF
+END SUBROUTINE CC_GRID_CHECK_CV_LINK_FRACTION
+
+SUBROUTINE CC_GRID_BUILD_GCELLS
+! Build mesh-owned GCELLs: one per active cut piece, the regular halo around the cut cells and the coupling layer
+! around the halo, by face-neighbor distance on the cell graph of all meshes.
+
+TYPE HALO_LEVEL_TYPE
+   INTEGER, ALLOCATABLE, DIMENSION(:,:,:) :: L
+END TYPE HALO_LEVEL_TYPE
+TYPE(HALO_LEVEL_TYPE), ALLOCATABLE, DIMENSION(:) :: HL
+INTEGER :: NM, ICC, JCC, IG, ICAND, N_CUT, N_REG, N_CUT_GHOST, N_REG_GHOST, I, J, K
+TYPE(MESH_TYPE), POINTER :: M
+INTEGER, ALLOCATABLE, DIMENSION(:) :: REG_LAYER
+INTEGER, ALLOCATABLE, DIMENSION(:,:) :: REG_IJK,REG_GHOST_IJK
+
+CALL HALO_LEVELS
+DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   CALL POINT_TO_MESH(NM)
+   M => MESHES(NM)
+
+   M%FV%GCELL = CC_GCELL_TYPE()
+   ! Count surviving cut GCELLs.
+   N_CUT = 0
+   DO ICC=1,M%N_CUTCELL_MESH
+      DO JCC=1,M%CUT_CELL(ICC)%NCELL
+         IF (.NOT.CC_GRID_CUT_PIECE_IS_ACTIVE(NM,ICC,JCC)) CYCLE
+         N_CUT = N_CUT + 1
+      ENDDO
+   ENDDO
+   ! Guard-cut tail: NOADVANCE and CCGUARD hosts outside 0:IBP1 (no ALLOC_CELL_STATE_VARS / HP).
+   N_CUT_GHOST = 0
+   IF (ALLOCATED(M%CUT_CELL) .AND. M%N_GCCUTCELL_MESH>0) THEN
+      DO ICC=M%N_CUTCELL_MESH+1,M%N_CUTCELL_MESH+M%N_GCCUTCELL_MESH
+         I = M%CUT_CELL(ICC)%IJK(IAXIS); J = M%CUT_CELL(ICC)%IJK(JAXIS); K = M%CUT_CELL(ICC)%IJK(KAXIS)
+         IF (I<0 .OR. I>M%IBP1 .OR. J<0 .OR. J>M%JBP1 .OR. K<0 .OR. K>M%KBP1) CYCLE
+         DO JCC=1,M%CUT_CELL(ICC)%NCELL
+            IF (M%CUT_CELL(ICC)%NOADVANCE(JCC) /= NOT_BLOCKED) CYCLE
+            N_CUT_GHOST = N_CUT_GHOST + 1
+         ENDDO
+      ENDDO
+   ENDIF
+
+   CALL HALO_LISTS(NM,N_REG,REG_IJK,REG_LAYER,N_REG_GHOST,REG_GHOST_IJK)
+
+   M%FV%GCELL%N_CUT = N_CUT
+   M%FV%GCELL%N_REG = N_REG
+   M%FV%GCELL%N_CUT_GHOST = N_CUT_GHOST
+   M%FV%GCELL%N_REG_GHOST = N_REG_GHOST
+   M%FV%GCELL%N_INT = N_CUT + N_REG
+   M%FV%GCELL%N = N_CUT + N_REG + N_CUT_GHOST + N_REG_GHOST
+   IF (M%FV%GCELL%N == 0) CYCLE
+
+   ALLOCATE(M%FV%GCELL%CELL_TYPE(1:M%FV%GCELL%N))
+   ALLOCATE(M%FV%GCELL%LAYER(1:M%FV%GCELL%N))
+   ALLOCATE(M%FV%GCELL%IJK(IAXIS:KAXIS,1:M%FV%GCELL%N))
+   ALLOCATE(M%FV%GCELL%ICC(1:M%FV%GCELL%N))
+   ALLOCATE(M%FV%GCELL%JCC(1:M%FV%GCELL%N))
+   ALLOCATE(M%FV%GCELL%STATUS(1:M%FV%GCELL%N))
+   ALLOCATE(M%FV%GCELL%MASTER_NM(1:M%FV%GCELL%N))
+   ALLOCATE(M%FV%GCELL%MASTER_CELL_TYPE(1:M%FV%GCELL%N))
+   ALLOCATE(M%FV%GCELL%MASTER_IG(1:M%FV%GCELL%N))
+   ALLOCATE(M%FV%GCELL%MASTER_IJK(IAXIS:KAXIS,1:M%FV%GCELL%N))
+   ALLOCATE(M%FV%GCELL%MASTER_ICC(1:M%FV%GCELL%N))
+   ALLOCATE(M%FV%GCELL%MASTER_JCC(1:M%FV%GCELL%N))
+   ALLOCATE(M%FV%GCELL%CV_DECISION(1:M%FV%GCELL%N))
+   ALLOCATE(M%FV%GCELL%CENTER_SOURCE(1:M%FV%GCELL%N))
+   ALLOCATE(M%FV%GCELL%CONN_AXIS(1:M%FV%GCELL%N))
+   ALLOCATE(M%FV%GCELL%VOLUME(1:M%FV%GCELL%N))
+   ALLOCATE(M%FV%GCELL%CV_VOLUME(1:M%FV%GCELL%N))
+   ALLOCATE(M%FV%GCELL%XYZCEN(IAXIS:KAXIS,1:M%FV%GCELL%N))
+   ALLOCATE(M%FV%GCELL%XCV(IAXIS:KAXIS,1:M%FV%GCELL%N))
+   ALLOCATE(M%FV%GCELL%XBAR_CV(IAXIS:KAXIS,1:M%FV%GCELL%N))
+   ALLOCATE(M%FV%GCELL%CONN_AREA(1:M%FV%GCELL%N))
+   ALLOCATE(M%FV%GCELL%MAX_THETA(1:M%FV%GCELL%N))
+   ALLOCATE(M%FV%GCELL%MAX_SKEW(1:M%FV%GCELL%N))
+   ALLOCATE(M%FV%GCELL%MIN_DFDIAM(1:M%FV%GCELL%N))
+   ALLOCATE(M%FV%GCELL%ABSORBED(1:M%FV%GCELL%N))
+   ALLOCATE(M%FV%GCELL%CLAIMED(1:M%FV%GCELL%N))
+
+   M%FV%GCELL%CELL_TYPE = CC_UNDEFINED
+   M%FV%GCELL%LAYER     = -1
+   M%FV%GCELL%IJK       = 0
+   M%FV%GCELL%ICC       = 0
+   M%FV%GCELL%JCC       = 0
+   M%FV%GCELL%STATUS    = 0
+   M%FV%GCELL%MASTER_NM = 0
+   M%FV%GCELL%MASTER_CELL_TYPE = 0
+   M%FV%GCELL%MASTER_IG = 0
+   M%FV%GCELL%MASTER_IJK = 0
+   M%FV%GCELL%MASTER_ICC = 0
+   M%FV%GCELL%MASTER_JCC = 0
+   M%FV%GCELL%CV_DECISION = CC_CV_DECISION_NONE
+   M%FV%GCELL%CENTER_SOURCE = 0
+   M%FV%GCELL%CONN_AXIS = 0
+   M%FV%GCELL%VOLUME    = 0._EB
+   M%FV%GCELL%CV_VOLUME = 0._EB
+   M%FV%GCELL%XYZCEN    = 0._EB
+   M%FV%GCELL%XCV       = 0._EB
+   M%FV%GCELL%XBAR_CV   = 0._EB
+   M%FV%GCELL%CONN_AREA = 0._EB
+   M%FV%GCELL%MAX_THETA = 0._EB
+   M%FV%GCELL%MAX_SKEW = 0._EB
+   M%FV%GCELL%MIN_DFDIAM = 0._EB
+   M%FV%GCELL%ABSORBED = .FALSE.
+   M%FV%GCELL%CLAIMED  = .FALSE.
+
+   ! Reset reverse (ICC,JCC)->IG/ICV maps before rebuild; ICV filled after CV maps exist.
+   IF (ALLOCATED(M%CUT_CELL)) THEN
+      DO ICC=1,M%N_CUTCELL_MESH+M%N_GCCUTCELL_MESH
+         IF (.NOT.ALLOCATED(M%CUT_CELL(ICC)%IG)) THEN
+            ALLOCATE(M%CUT_CELL(ICC)%IG(1:M%CUT_CELL(ICC)%NCELL),M%CUT_CELL(ICC)%ICV(1:M%CUT_CELL(ICC)%NCELL))
+         ENDIF
+         IF (.NOT.ALLOCATED(M%CUT_CELL(ICC)%ICV)) ALLOCATE(M%CUT_CELL(ICC)%ICV(1:M%CUT_CELL(ICC)%NCELL))
+         M%CUT_CELL(ICC)%IG = 0
+         M%CUT_CELL(ICC)%ICV = 0
+      ENDDO
+   ENDIF
+
+   IG = 0
+   DO ICC=1,M%N_CUTCELL_MESH
+      DO JCC=1,M%CUT_CELL(ICC)%NCELL
+         IF (.NOT.CC_GRID_CUT_PIECE_IS_ACTIVE(NM,ICC,JCC)) CYCLE
+         IG = IG + 1
+         M%FV%GCELL%CELL_TYPE(IG)        = CC_GCELL_CUT
+         M%FV%GCELL%LAYER(IG)            = 0
+         M%FV%GCELL%IJK(IAXIS:KAXIS,IG)  = M%CUT_CELL(ICC)%IJK(IAXIS:KAXIS)
+         M%FV%GCELL%ICC(IG)              = ICC
+         M%FV%GCELL%JCC(IG)              = JCC
+         M%FV%GCELL%STATUS(IG)           = NOT_BLOCKED
+         M%FV%GCELL%VOLUME(IG)           = M%CUT_CELL(ICC)%VOLUME(JCC)
+         M%FV%GCELL%XYZCEN(IAXIS:KAXIS,IG) = M%CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,JCC)
+         M%CUT_CELL(ICC)%IG(JCC) = IG
+      ENDDO
+   ENDDO
+   DO ICAND=1,N_REG
+      IG = IG + 1
+      M%FV%GCELL%CELL_TYPE(IG) = CC_GCELL_REG
+      M%FV%GCELL%LAYER(IG) = REG_LAYER(ICAND)
+      M%FV%GCELL%IJK(IAXIS:KAXIS,IG) = REG_IJK(IAXIS:KAXIS,ICAND)
+      M%FV%GCELL%STATUS(IG) = NOT_BLOCKED
+      M%FV%GCELL%VOLUME(IG) = M%DX(REG_IJK(IAXIS,ICAND))*M%DY(REG_IJK(JAXIS,ICAND))*M%DZ(REG_IJK(KAXIS,ICAND))
+      M%FV%GCELL%XYZCEN(IAXIS:KAXIS,IG) = (/ M%XC(REG_IJK(IAXIS,ICAND)), M%YC(REG_IJK(JAXIS,ICAND)), &
+                                          M%ZC(REG_IJK(KAXIS,ICAND)) /)
+   ENDDO
+   IF (ALLOCATED(M%CUT_CELL) .AND. M%N_GCCUTCELL_MESH>0) THEN
+      DO ICC=M%N_CUTCELL_MESH+1,M%N_CUTCELL_MESH+M%N_GCCUTCELL_MESH
+         I = M%CUT_CELL(ICC)%IJK(IAXIS); J = M%CUT_CELL(ICC)%IJK(JAXIS); K = M%CUT_CELL(ICC)%IJK(KAXIS)
+         IF (I<0 .OR. I>M%IBP1 .OR. J<0 .OR. J>M%JBP1 .OR. K<0 .OR. K>M%KBP1) CYCLE
+         DO JCC=1,M%CUT_CELL(ICC)%NCELL
+            IF (M%CUT_CELL(ICC)%NOADVANCE(JCC) /= NOT_BLOCKED) CYCLE
+            IG = IG + 1
+            M%FV%GCELL%CELL_TYPE(IG) = CC_GCELL_CUT
+            M%FV%GCELL%LAYER(IG) = -1
+            M%FV%GCELL%IJK(IAXIS:KAXIS,IG) = M%CUT_CELL(ICC)%IJK(IAXIS:KAXIS)
+            M%FV%GCELL%ICC(IG) = ICC
+            M%FV%GCELL%JCC(IG) = JCC
+            M%FV%GCELL%STATUS(IG) = NOT_BLOCKED
+            M%FV%GCELL%VOLUME(IG) = M%CUT_CELL(ICC)%VOLUME(JCC)
+            M%FV%GCELL%XYZCEN(IAXIS:KAXIS,IG) = M%CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,JCC)
+            M%CUT_CELL(ICC)%IG(JCC) = IG
+         ENDDO
+      ENDDO
+   ENDIF
+   DO ICAND=1,N_REG_GHOST
+      IG = IG + 1
+      M%FV%GCELL%CELL_TYPE(IG) = CC_GCELL_REG
+      M%FV%GCELL%LAYER(IG) = CC_FV_GCELL_HALO_LAYERS + 1
+      M%FV%GCELL%IJK(IAXIS:KAXIS,IG) = REG_GHOST_IJK(IAXIS:KAXIS,ICAND)
+      M%FV%GCELL%ICC(IG) = 0
+      M%FV%GCELL%JCC(IG) = 0
+      M%FV%GCELL%STATUS(IG) = NOT_BLOCKED
+      M%FV%GCELL%VOLUME(IG) = M%DX(REG_GHOST_IJK(IAXIS,ICAND))*M%DY(REG_GHOST_IJK(JAXIS,ICAND))* &
+                             M%DZ(REG_GHOST_IJK(KAXIS,ICAND))
+      M%FV%GCELL%XYZCEN(IAXIS:KAXIS,IG) = (/ M%XC(REG_GHOST_IJK(IAXIS,ICAND)), M%YC(REG_GHOST_IJK(JAXIS,ICAND)), &
+                                          M%ZC(REG_GHOST_IJK(KAXIS,ICAND)) /)
+   ENDDO
+
+ENDDO
+
+CONTAINS
+
+SUBROUTINE HALO_LEVELS
+! HL(NM)%L: 0 on a host of an active cut piece, n on a regular gas cell n faces away, up to the coupling layer
+! CC_FV_GCELL_HALO_LAYERS+1, -1 beyond. Each layer grows inside every mesh and across conforming mesh faces.
+INTEGER :: NM,ICC,JCC,I,J,K,AX,SGN,LEVEL,IW,NS,NR,N,IJK(IAXIS:KAXIS)
+INTEGER, ALLOCATABLE :: DEST(:)
+REAL(EB), ALLOCATABLE :: SB(:,:),RB(:,:)
+TYPE(MESH_TYPE), POINTER :: M
+TYPE(EXTERNAL_WALL_TYPE), POINTER :: EWC
+TYPE(BOUNDARY_COORD_TYPE), POINTER :: BC
+ALLOCATE(HL(LOWER_MESH_INDEX:UPPER_MESH_INDEX))
+N = 0
+DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   M => MESHES(NM)
+   ALLOCATE(HL(NM)%L(M%IBAR,M%JBAR,M%KBAR))
+   HL(NM)%L = -1
+   DO ICC=1,M%N_CUTCELL_MESH
+      I = M%CUT_CELL(ICC)%IJK(IAXIS); J = M%CUT_CELL(ICC)%IJK(JAXIS); K = M%CUT_CELL(ICC)%IJK(KAXIS)
+      IF (I<1 .OR. I>M%IBAR .OR. J<1 .OR. J>M%JBAR .OR. K<1 .OR. K>M%KBAR) CYCLE
+      DO JCC=1,M%CUT_CELL(ICC)%NCELL
+         IF (CC_GRID_CUT_PIECE_IS_ACTIVE(NM,ICC,JCC)) HL(NM)%L(I,J,K) = 0
+      ENDDO
+   ENDDO
+   N = N + M%N_EXTERNAL_WALL_CELLS
+ENDDO
+ALLOCATE(SB(4,MAX(N,1)),DEST(MAX(N,1)))
+DO LEVEL=1,CC_FV_GCELL_HALO_LAYERS+1
+   ! Across a conforming mesh face: a cell of the last layer passes this layer to the cell on the other side.
+   NS = 0
+   DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+      M => MESHES(NM)
+      DO IW=1,M%N_EXTERNAL_WALL_CELLS
+         IF (M%WALL(IW)%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY .OR. M%WALL(IW)%BC_INDEX<1) CYCLE
+         EWC => M%EXTERNAL_WALL(IW)
+         IF (EWC%NOM<1 .OR. EWC%NOM==NM .OR. EWC%NIC/=1 .OR. ABS(EWC%AREA_RATIO-1._EB)>1.E-10_EB) CYCLE
+         BC => M%BOUNDARY_COORD(M%WALL(IW)%BC_INDEX)
+         IF (HL(NM)%L(BC%IIG,BC%JJG,BC%KKG)/=LEVEL-1) CYCLE
+         IJK = (/EWC%IIO_MIN,EWC%JJO_MIN,EWC%KKO_MIN/)
+         IF (PROCESS(EWC%NOM)==MY_RANK) THEN
+            CALL SET_LEVEL(EWC%NOM,IJK,LEVEL)
+         ELSE
+            NS = NS+1
+            SB(:,NS) = REAL((/EWC%NOM,IJK/),EB)
+            DEST(NS) = PROCESS(EWC%NOM)
+         ENDIF
+      ENDDO
+   ENDDO
+   CALL CC_GRID_SEAM_EXCHANGE(4,NS,SB,DEST,NR,RB)
+   DO N=1,NR
+      IJK = NINT(RB(2:4,N))
+      CALL SET_LEVEL(NINT(RB(1,N)),IJK,LEVEL)
+   ENDDO
+   ! Inside each mesh.
+   DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+      M => MESHES(NM)
+      DO K=1,M%KBAR
+         DO J=1,M%JBAR
+            DO I=1,M%IBAR
+               IF (HL(NM)%L(I,J,K)/=LEVEL-1) CYCLE
+               DO AX=IAXIS,KAXIS
+                  DO SGN=-1,1,2
+                     IJK = (/I,J,K/)
+                     IJK(AX) = IJK(AX)+SGN
+                     CALL SET_LEVEL(NM,IJK,LEVEL)
+                  ENDDO
+               ENDDO
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDDO
+ENDDO
+END SUBROUTINE HALO_LEVELS
+
+SUBROUTINE SET_LEVEL(NM,IJK,LEVEL)
+! A regular gas cell not reached yet joins this layer.
+INTEGER, INTENT(IN) :: NM,IJK(IAXIS:KAXIS),LEVEL
+IF (.NOT.CC_GRID_REGULAR_GCELL_CANDIDATE_IS_VALID(NM,IJK)) RETURN
+IF (HL(NM)%L(IJK(IAXIS),IJK(JAXIS),IJK(KAXIS))<0) HL(NM)%L(IJK(IAXIS),IJK(JAXIS),IJK(KAXIS)) = LEVEL
+END SUBROUTINE SET_LEVEL
+
+SUBROUTINE HALO_LISTS(NM,N_REG,REG_IJK,REG_LAYER,N_GH,GH_IJK)
+! Halo cells (layers 1 to CC_FV_GCELL_HALO_LAYERS) in K,J,I order. Coupling cells (the next layer): those next to a
+! halo cell of this mesh, in halo order, then those next to a halo cell of another mesh.
+INTEGER, INTENT(IN) :: NM
+INTEGER, INTENT(OUT) :: N_REG,N_GH
+INTEGER, ALLOCATABLE, INTENT(OUT) :: REG_IJK(:,:),REG_LAYER(:),GH_IJK(:,:)
+INTEGER :: I,J,K,P,AX,SGN,NL,IJK(IAXIS:KAXIS)
+NL = CC_FV_GCELL_HALO_LAYERS
+N_REG = COUNT(HL(NM)%L>=1 .AND. HL(NM)%L<=NL)
+ALLOCATE(REG_IJK(IAXIS:KAXIS,N_REG),REG_LAYER(N_REG),GH_IJK(IAXIS:KAXIS,COUNT(HL(NM)%L==NL+1)))
+P = 0
+DO K=1,SIZE(HL(NM)%L,3)
+   DO J=1,SIZE(HL(NM)%L,2)
+      DO I=1,SIZE(HL(NM)%L,1)
+         IF (HL(NM)%L(I,J,K)<1 .OR. HL(NM)%L(I,J,K)>NL) CYCLE
+         P = P+1
+         REG_IJK(IAXIS:KAXIS,P) = (/I,J,K/)
+         REG_LAYER(P) = HL(NM)%L(I,J,K)
+      ENDDO
+   ENDDO
+ENDDO
+N_GH = 0
+DO P=1,N_REG
+   DO AX=IAXIS,KAXIS
+      DO SGN=-1,1,2
+         IJK = REG_IJK(IAXIS:KAXIS,P)
+         IJK(AX) = IJK(AX)+SGN
+         IF (IJK(AX)<1 .OR. IJK(AX)>SIZE(HL(NM)%L,AX)) CYCLE
+         IF (HL(NM)%L(IJK(IAXIS),IJK(JAXIS),IJK(KAXIS))/=NL+1) CYCLE
+         N_GH = N_GH+1
+         GH_IJK(IAXIS:KAXIS,N_GH) = IJK
+         HL(NM)%L(IJK(IAXIS),IJK(JAXIS),IJK(KAXIS)) = -1
+      ENDDO
+   ENDDO
+ENDDO
+DO K=1,SIZE(HL(NM)%L,3)
+   DO J=1,SIZE(HL(NM)%L,2)
+      DO I=1,SIZE(HL(NM)%L,1)
+         IF (HL(NM)%L(I,J,K)/=NL+1) CYCLE
+         N_GH = N_GH+1
+         GH_IJK(IAXIS:KAXIS,N_GH) = (/I,J,K/)
+      ENDDO
+   ENDDO
+ENDDO
+END SUBROUTINE HALO_LISTS
+
 END SUBROUTINE CC_GRID_BUILD_GCELLS
 
+
+SUBROUTINE CC_GRID_BUILD_IDENTITY_CVS
+! Build the first CV layer directly from the verified GCELL map. In this identity
+! stage, each active GCELL owns exactly one CV with the same volume and centroid.
+TYPE(MESH_TYPE), POINTER :: M
+INTEGER :: NM, ICV, IG, MASTER_IG, MAX_MEMBERS, N_INT
+INTEGER, ALLOCATABLE, DIMENSION(:) :: OWNER_MEMBER_COUNT
+
+DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   M => MESHES(NM)
+
+   M%FV%CV = CC_CV_TYPE()
+   IF (.NOT.ALLOCATED(M%FV%GCELL%CELL_TYPE)) CYCLE
+   IF (M%FV%GCELL%N < 1) CYCLE
+
+   M%FV%CV%N = M%FV%GCELL%N
+   N_INT = M%FV%GCELL%N_INT
+   ALLOCATE(M%FV%CV%GCELL_TO_CV_NM(1:M%FV%GCELL%N))
+   ALLOCATE(M%FV%CV%GCELL_TO_CV(1:M%FV%GCELL%N))
+   ALLOCATE(M%FV%CV%OWNER_NM(1:M%FV%CV%N))
+   ALLOCATE(M%FV%CV%OWNER_GCELL(1:M%FV%CV%N))
+   ALLOCATE(M%FV%CV%N_MEMBER(1:M%FV%CV%N))
+   ! Count members-per-CV from the same GCELL merge records the apply path
+   ! consumes. At identity time those records are empty, so this is the floor
+   ! of 2; Phase 5 reallocates after it recounts the accepted proposals.
+   MAX_MEMBERS = 1
+   ALLOCATE(OWNER_MEMBER_COUNT(1:M%FV%CV%N))
+   OWNER_MEMBER_COUNT = 1
+   IF (ALLOCATED(M%FV%GCELL%CV_DECISION) .AND. ALLOCATED(M%FV%GCELL%MASTER_NM) .AND. &
+       ALLOCATED(M%FV%GCELL%MASTER_IG)) THEN
+      DO IG=1,N_INT
+         IF (M%FV%GCELL%CV_DECISION(IG) /= CC_CV_DECISION_MERGE) CYCLE
+         IF (M%FV%GCELL%MASTER_NM(IG) /= NM) CYCLE
+         MASTER_IG = M%FV%GCELL%MASTER_IG(IG)
+         IF (MASTER_IG < 1 .OR. MASTER_IG > M%FV%CV%N) CYCLE
+         OWNER_MEMBER_COUNT(MASTER_IG) = OWNER_MEMBER_COUNT(MASTER_IG) + 1
+      ENDDO
+   ENDIF
+   MAX_MEMBERS = MAX(2, MAXVAL(OWNER_MEMBER_COUNT))
+   DEALLOCATE(OWNER_MEMBER_COUNT)
+   ALLOCATE(M%FV%CV%MEMBER_NM(1:MAX_MEMBERS,1:M%FV%CV%N))
+   ALLOCATE(M%FV%CV%MEMBER_GCELL(1:MAX_MEMBERS,1:M%FV%CV%N))
+   ALLOCATE(M%FV%CV%CELL_TYPE(1:M%FV%CV%N))
+   ALLOCATE(M%FV%CV%IJK(IAXIS:KAXIS,1:M%FV%CV%N))
+   ALLOCATE(M%FV%CV%ICC(1:M%FV%CV%N))
+   ALLOCATE(M%FV%CV%JCC(1:M%FV%CV%N))
+   ALLOCATE(M%FV%CV%STATUS(1:M%FV%CV%N))
+   ALLOCATE(M%FV%CV%CENTER_SOURCE(1:M%FV%CV%N))
+   ALLOCATE(M%FV%CV%UNKH(1:M%FV%CV%N))
+   ALLOCATE(M%FV%CV%UNKZ(1:M%FV%CV%N))
+   ALLOCATE(M%FV%CV%VOLUME(1:M%FV%CV%N))
+   ALLOCATE(M%FV%CV%XCV(IAXIS:KAXIS,1:M%FV%CV%N))
+   ALLOCATE(M%FV%CV%XBAR_CV(IAXIS:KAXIS,1:M%FV%CV%N))
+   ALLOCATE(M%FV%CV%RHO(1:M%FV%CV%N),M%FV%CV%RHOS(1:M%FV%CV%N),M%FV%CV%TMP(1:M%FV%CV%N), &
+            M%FV%CV%RSUM(1:M%FV%CV%N),M%FV%CV%RTRM(1:M%FV%CV%N),M%FV%CV%R_H_G(1:M%FV%CV%N), &
+            M%FV%CV%RHO_0(1:M%FV%CV%N),M%FV%CV%WVEL(1:M%FV%CV%N))
+   ALLOCATE(M%FV%CV%H(1:M%FV%CV%N),M%FV%CV%HS(1:M%FV%CV%N),M%FV%CV%KRES(1:M%FV%CV%N))
+   ALLOCATE(M%FV%CV%D(1:M%FV%CV%N),M%FV%CV%DS(1:M%FV%CV%N),M%FV%CV%DVOL(1:M%FV%CV%N), &
+            M%FV%CV%DVOL_PR(1:M%FV%CV%N),M%FV%CV%DDDTVOL(1:M%FV%CV%N))
+   ALLOCATE(M%FV%CV%Q(1:M%FV%CV%N),M%FV%CV%QR(1:M%FV%CV%N),M%FV%CV%CHI_R(1:M%FV%CV%N), &
+            M%FV%CV%MIX_TIME(1:M%FV%CV%N),M%FV%CV%D_SOURCE(1:M%FV%CV%N))
+   ALLOCATE(M%FV%CV%Q_REAC(1:N_REACTIONS,1:M%FV%CV%N))
+   ALLOCATE(M%FV%CV%DELTA_RHO(1:M%FV%CV%N),M%FV%CV%DELTA_RHO_ZZ(1:M%FV%CV%N))
+   ALLOCATE(M%FV%CV%ZZ(1:N_TOTAL_SCALARS,1:M%FV%CV%N),M%FV%CV%ZZS(1:N_TOTAL_SCALARS,1:M%FV%CV%N))
+   ALLOCATE(M%FV%CV%M_DOT_PPP(1:N_TOTAL_SCALARS,1:M%FV%CV%N))
+   ALLOCATE(M%FV%CV%DEL_RHO_D_DEL_Z_VOL(1:N_TOTAL_SCALARS,1:M%FV%CV%N))
+   ALLOCATE(M%FV%CV%U_DOT_DEL_RHO_Z_VOL(1:N_TOTAL_SCALARS,1:M%FV%CV%N))
+
+   M%FV%CV%UNKZ = CC_UNDEFINED
+   M%FV%CV%RHO = 0._EB; M%FV%CV%RHOS = 0._EB; M%FV%CV%TMP = 0._EB
+   M%FV%CV%RSUM = 0._EB; M%FV%CV%RTRM = 0._EB; M%FV%CV%R_H_G = 0._EB; M%FV%CV%RHO_0 = 0._EB
+   M%FV%CV%WVEL = 0._EB
+   M%FV%CV%H = 0._EB; M%FV%CV%HS = 0._EB; M%FV%CV%KRES = 0._EB
+   M%FV%CV%D = 0._EB; M%FV%CV%DS = 0._EB; M%FV%CV%DVOL = 0._EB
+   M%FV%CV%DVOL_PR = 0._EB; M%FV%CV%DDDTVOL = 0._EB
+   M%FV%CV%Q = 0._EB; M%FV%CV%QR = 0._EB; M%FV%CV%CHI_R = 0._EB
+   M%FV%CV%Q_REAC = 0._EB
+   M%FV%CV%DELTA_RHO = 0._EB; M%FV%CV%DELTA_RHO_ZZ = 0._EB
+   M%FV%CV%MIX_TIME = 0._EB; M%FV%CV%D_SOURCE = 0._EB
+   M%FV%CV%ZZ = 0._EB; M%FV%CV%ZZS = 0._EB
+   M%FV%CV%M_DOT_PPP = 0._EB
+   M%FV%CV%DEL_RHO_D_DEL_Z_VOL = 0._EB; M%FV%CV%U_DOT_DEL_RHO_Z_VOL = 0._EB
+
+   DO ICV=1,M%FV%CV%N
+      M%FV%CV%MEMBER_NM(1:MAX_MEMBERS,ICV) = 0
+      M%FV%CV%MEMBER_GCELL(1:MAX_MEMBERS,ICV) = 0
+      IF (ICV > N_INT) THEN
+         ! Tail rows are local storage CVs (restriction dest / dump / INIT);
+         ! they are not in-mesh partition members.
+         M%FV%CV%GCELL_TO_CV_NM(ICV) = NM
+         M%FV%CV%GCELL_TO_CV(ICV) = ICV
+         M%FV%CV%OWNER_NM(ICV) = 0
+         M%FV%CV%OWNER_GCELL(ICV) = 0
+         M%FV%CV%N_MEMBER(ICV) = 0
+      ELSE
+         M%FV%CV%GCELL_TO_CV_NM(ICV) = NM
+         M%FV%CV%GCELL_TO_CV(ICV) = ICV
+         M%FV%CV%OWNER_NM(ICV) = NM
+         M%FV%CV%OWNER_GCELL(ICV) = ICV
+         M%FV%CV%N_MEMBER(ICV) = 1
+         CALL CC_GRID_WRITE_CV_MEMBER(M,ICV,1,NM,ICV)
+      ENDIF
+      M%FV%CV%CELL_TYPE(ICV) = M%FV%GCELL%CELL_TYPE(ICV)
+      M%FV%CV%IJK(IAXIS:KAXIS,ICV) = M%FV%GCELL%IJK(IAXIS:KAXIS,ICV)
+      M%FV%CV%ICC(ICV) = M%FV%GCELL%ICC(ICV)
+      M%FV%CV%JCC(ICV) = M%FV%GCELL%JCC(ICV)
+      M%FV%CV%STATUS(ICV) = M%FV%GCELL%STATUS(ICV)
+      M%FV%CV%CENTER_SOURCE(ICV) = 0
+      M%FV%CV%UNKH(ICV) = CC_UNDEFINED
+      M%FV%CV%VOLUME(ICV) = M%FV%GCELL%VOLUME(ICV)
+      M%FV%CV%XCV(IAXIS:KAXIS,ICV) = M%FV%GCELL%XYZCEN(IAXIS:KAXIS,ICV)
+      M%FV%CV%XBAR_CV(IAXIS:KAXIS,ICV) = M%FV%GCELL%XYZCEN(IAXIS:KAXIS,ICV)
+   ENDDO
+   CALL CC_GRID_SYNC_CUT_CELL_FV_INDEXES(NM)
+ENDDO
+END SUBROUTINE CC_GRID_BUILD_IDENTITY_CVS
+
+
+SUBROUTINE CC_FACE_STORE_RADIATION_NORMAL(M,ICF,JCF,IFACE)
+! Upstream's cut-cell radiation normal, on the in-boundary FV row.
+! A blocked face uses the polygon area vector. Otherwise the triangle normal, then BC%NVEC.
+USE MATH_FUNCTIONS, ONLY: CROSS_PRODUCT
+TYPE(MESH_TYPE), POINTER :: M
+INTEGER, INTENT(IN) :: ICF,JCF,IFACE
+TYPE(CC_CUTFACE_TYPE), POINTER :: CF
+TYPE(BOUNDARY_COORD_TYPE), POINTER :: BC
+INTEGER :: NV,IV,IBOD,IWSEL
+REAL(EB) :: V1(IAXIS:KAXIS),V2(IAXIS:KAXIS),V3(IAXIS:KAXIS),NRAD(IAXIS:KAXIS)
+CF => M%CUT_FACE(ICF)
+! A blocked face with no area falls through. Upstream does the same.
+IF (CF%CFACE_ORIGIN(JCF)>NOT_BLOCKED) THEN
+   NRAD = 0._EB
+   NV = CF%CFELEM(1,JCF)
+   DO IV=1,NV
+      V2(IAXIS:KAXIS) = CF%XYZVERT(IAXIS:KAXIS,CF%CFELEM(IV+1,JCF))-CF%XYZCEN(IAXIS:KAXIS,JCF)
+      V3(IAXIS:KAXIS) = CF%XYZVERT(IAXIS:KAXIS,CF%CFELEM(MOD(IV,NV)+2,JCF))-CF%XYZCEN(IAXIS:KAXIS,JCF)
+      CALL CROSS_PRODUCT(V1,V2,V3)
+      NRAD = NRAD + V1
+   ENDDO
+   IF (NORM2(NRAD)>TWENTY_EPSILON_EB) THEN
+      M%FV%FACE%NVEC_RAD(IAXIS:KAXIS,IFACE) = NRAD/NORM2(NRAD)
+      RETURN
+   ENDIF
+ENDIF
+IBOD = CF%BODTRI(1,JCF)
+IWSEL = CF%BODTRI(2,JCF)
+IF (IBOD>=1 .AND. IWSEL>=1) THEN
+   M%FV%FACE%NVEC_RAD(IAXIS:KAXIS,IFACE) = GEOMETRY(IBOD)%FACES_NORMAL(IAXIS:KAXIS,IWSEL)
+   RETURN
+ENDIF
+! The cface loop skips a cut face whose Cartesian cell is solid, so CFACE_INDEX stays CC_UNDEFINED.
+IF (CF%CFACE_INDEX(JCF)>0) THEN
+   BC => M%BOUNDARY_COORD(M%CFACE(CF%CFACE_INDEX(JCF))%BC_INDEX)
+   M%FV%FACE%NVEC_RAD(IAXIS:KAXIS,IFACE) = BC%NVEC(IAXIS:KAXIS)
+ELSE
+   M%FV%FACE%NVEC_RAD(IAXIS:KAXIS,IFACE) = 0._EB
+ENDIF
+END SUBROUTINE CC_FACE_STORE_RADIATION_NORMAL
+
+SUBROUTINE CC_GRID_BUILD_FACES
+! Build the mesh-owned finite-volume FACE topology from the frozen GCELL/CV maps.
+TYPE(MESH_TYPE), POINTER :: M
+INTEGER :: NM,IG,IG_N,IG2,IG_MATCH,N_MATCH,PASS,IFACE_LOC,NF,IF_,MAXF,NFACE,OC,NC,ICC,JCC,JCC2,ICF,JCF,I,J,K,IN,JN,KN,N_INT
+INTEGER :: N_GUARD_FACE,N_ORPHAN,MAX_NF,N_FC0,N_FC0_GLOBAL,IERR
+INTEGER :: NBR_CV_NM
+LOGICAL :: SKIP_FACE
+LOGICAL, ALLOCATABLE, DIMENSION(:,:) :: PIECE_SEEN
+INTEGER, ALLOCATABLE, DIMENSION(:,:,:) :: REG_G_AT,REG_GHOST_AT
+INTEGER, ALLOCATABLE, DIMENSION(:) :: PIECE_PTR,PIECE_IG
+INTEGER, ALLOCATABLE, DIMENSION(:) :: F_FTYPE,F_ICF,F_JFC,F_X1AXIS,F_KIND,F_NBR_TYPE,F_NBR_ICC,F_NBR_JCC,F_IWC
+INTEGER, ALLOCATABLE, DIMENSION(:,:) :: F_IJKFACE,F_NBR_IJK
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: F_AREA
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: F_XYZCEN,F_NVEC
+LOGICAL, ALLOCATABLE, DIMENSION(:) :: F_BARRIER
+LOGICAL :: EMIT,BUILD_INTERIOR
+INTEGER :: N_BARRIER
+LOGICAL, SAVE :: THIN_BARRIER_WARNED=.FALSE.
+
+DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   M => MESHES(NM)
+
+   M%FV%FACE = CC_FACE_TYPE()
+   IF (ALLOCATED(M%FV%CV%FACE_PTR))  DEALLOCATE(M%FV%CV%FACE_PTR)
+   IF (ALLOCATED(M%FV%CV%FACE_LIST)) DEALLOCATE(M%FV%CV%FACE_LIST)
+   ! A mesh with guard cut faces but no interior control volumes still needs tail rows.
+   ! N_INT stays 0, so the interior walks never see them. The guard fill below is the only copy.
+   BUILD_INTERIOR = ALLOCATED(M%FV%GCELL%CELL_TYPE) .AND. M%FV%GCELL%N_INT>=1 .AND. &
+                    ALLOCATED(M%FV%CV%GCELL_TO_CV)
+   N_INT = M%FV%GCELL%N_INT
+   N_GUARD_FACE = 0
+   IF (ALLOCATED(M%CUT_FACE) .AND. M%N_GCCUTFACE_MESH>0) THEN
+      DO ICF=M%N_CUTFACE_MESH+1,M%N_CUTFACE_MESH+M%N_GCCUTFACE_MESH
+         N_GUARD_FACE = N_GUARD_FACE + M%CUT_FACE(ICF)%NFACE
+      ENDDO
+   ENDIF
+   IF (BUILD_INTERIOR) THEN
+
+      ! Reverse lookups: regular GCELL by host cell, cut GCELL by (ICC,JCC) via a small CSR table.
+      ALLOCATE(REG_G_AT(1:M%IBAR,1:M%JBAR,1:M%KBAR)); REG_G_AT = 0
+      ALLOCATE(PIECE_PTR(1:M%N_CUTCELL_MESH+1)); PIECE_PTR(1) = 1
+      DO ICC=1,M%N_CUTCELL_MESH
+         PIECE_PTR(ICC+1) = PIECE_PTR(ICC) + M%CUT_CELL(ICC)%NCELL
+      ENDDO
+      ALLOCATE(PIECE_IG(1:MAX(1,PIECE_PTR(M%N_CUTCELL_MESH+1)-1))); PIECE_IG = 0
+      MAXF = 6
+      DO IG=1,N_INT
+         IF (M%FV%GCELL%CELL_TYPE(IG) == CC_GCELL_CUT) THEN
+            ICC = M%FV%GCELL%ICC(IG); JCC = M%FV%GCELL%JCC(IG)
+            PIECE_IG(PIECE_PTR(ICC)+JCC-1) = IG
+            MAXF = MAX(MAXF,M%CUT_CELL(ICC)%CCELEM(1,JCC))
+         ELSE
+            I = M%FV%GCELL%IJK(IAXIS,IG); J = M%FV%GCELL%IJK(JAXIS,IG); K = M%FV%GCELL%IJK(KAXIS,IG)
+            IF (I>=1.AND.I<=M%IBAR .AND. J>=1.AND.J<=M%JBAR .AND. K>=1.AND.K<=M%KBAR) REG_G_AT(I,J,K) = IG
+         ENDIF
+      ENDDO
+      ALLOCATE(REG_GHOST_AT(1:M%IBAR,1:M%JBAR,1:M%KBAR)); REG_GHOST_AT = 0
+      DO IG=N_INT+M%FV%GCELL%N_CUT_GHOST+1,M%FV%GCELL%N
+         I = M%FV%GCELL%IJK(IAXIS,IG); J = M%FV%GCELL%IJK(JAXIS,IG); K = M%FV%GCELL%IJK(KAXIS,IG)
+         IF (I>=1.AND.I<=M%IBAR .AND. J>=1.AND.J<=M%JBAR .AND. K>=1.AND.K<=M%KBAR) REG_GHOST_AT(I,J,K) = IG
+      ENDDO
+
+      ALLOCATE(F_FTYPE(MAXF),F_ICF(MAXF),F_JFC(MAXF),F_X1AXIS(MAXF),F_KIND(MAXF),F_NBR_TYPE(MAXF), &
+               F_NBR_ICC(MAXF),F_NBR_JCC(MAXF),F_AREA(MAXF),F_IWC(MAXF),F_BARRIER(MAXF))
+      ALLOCATE(F_IJKFACE(IAXIS:KAXIS,MAXF),F_NBR_IJK(IAXIS:KAXIS,MAXF),F_XYZCEN(IAXIS:KAXIS,MAXF),F_NVEC(IAXIS:KAXIS,MAXF))
+
+      ! Guard cut-face pieces have no interior GCELL, so the emit below never sees them.
+      ! Their rows are a tail, N_INT+1:N, the same split GCELL uses.
+      ! Interior pieces that the emit also skips (solid on every side, FC would stay 0)
+      ! take the same tail, after the guard rows.
+      MAX_NF = 1
+      IF (ALLOCATED(M%CUT_FACE)) THEN
+         DO ICF=1,M%N_CUTFACE_MESH
+            MAX_NF = MAX(MAX_NF,M%CUT_FACE(ICF)%NFACE)
+         ENDDO
+      ENDIF
+      ALLOCATE(PIECE_SEEN(MAX_NF,MAX(1,M%N_CUTFACE_MESH)))
+      PIECE_SEEN = .FALSE.
+
+      ! PASS 1 counts the emitted faces; PASS 2 fills the SoA rows with the identical emit logic.
+      N_BARRIER = 0
+      DO PASS=1,2
+         NFACE = 0
+         DO IG=1,N_INT
+            CALL CC_GRID_ENUMERATE_GCELL_FACES(NM,IG,MAXF,NF,F_FTYPE,F_ICF,F_JFC,F_X1AXIS,F_IJKFACE,F_AREA, &
+                                               F_XYZCEN,F_NVEC,F_KIND,F_NBR_TYPE,F_NBR_ICC,F_NBR_JCC,F_NBR_IJK, &
+                                               F_IWC,F_BARRIER)
+            DO IF_=1,NF
+               ! Resolve neighbor GCELL (mesh-local); 0 = boundary/wall/region boundary/remote.
+               IG_N = 0
+               SKIP_FACE = .FALSE.
+               SELECT CASE(F_NBR_TYPE(IF_))
+               CASE(CC_GCELL_REG)
+                  IN = F_NBR_IJK(IAXIS,IF_); JN = F_NBR_IJK(JAXIS,IF_); KN = F_NBR_IJK(KAXIS,IF_)
+                  IF (IN>=1.AND.IN<=M%IBAR .AND. JN>=1.AND.JN<=M%JBAR .AND. KN>=1.AND.KN<=M%KBAR) IG_N = REG_G_AT(IN,JN,KN)
+               CASE(CC_GCELL_CUT)
+                  ICC = F_NBR_ICC(IF_); JCC = F_NBR_JCC(IF_)
+                  IF (JCC >= 1) THEN
+                     ! Authoritative cut neighbor from a cut-cell CFGAS face.
+                     IF (ICC>=1 .AND. ICC<=M%N_CUTCELL_MESH) THEN
+                        IF (JCC<=M%CUT_CELL(ICC)%NCELL) IG_N = PIECE_IG(PIECE_PTR(ICC)+JCC-1)
+                     ELSE IF (ICC > M%N_CUTCELL_MESH .AND. ICC <= M%N_CUTCELL_MESH+M%N_GCCUTCELL_MESH) THEN
+                        IF (ALLOCATED(M%CUT_CELL(ICC)%IG) .AND. JCC<=M%CUT_CELL(ICC)%NCELL) &
+                           IG_N = M%CUT_CELL(ICC)%IG(JCC)
+                     ENDIF
+                  ELSE
+                     ! Regular-side -> cut Cartesian face: the cut side owns it whenever the neighbor cut
+                     ! cell has any surviving gas piece; otherwise this regular face abuts solid (wall).
+                     IF (ICC>=1 .AND. ICC<=M%N_CUTCELL_MESH) THEN
+                        DO JCC2=1,M%CUT_CELL(ICC)%NCELL
+                           IF (PIECE_IG(PIECE_PTR(ICC)+JCC2-1) >= 1) THEN
+                              SKIP_FACE = .TRUE.; EXIT
+                           ENDIF
+                        ENDDO
+                     ENDIF
+                  ENDIF
+               END SELECT
+               ! A regular GCELL face can be tagged as a legacy region boundary even though its adjacent
+               ! regular gas cell is also present in the FV inventory. Resolve that neighbor from the FV
+               ! reverse map so the two outward representations are canonically deduplicated.
+               IF (IG_N == 0 .AND. F_FTYPE(IF_) == CC_FTYPE_RGGAS .AND. .NOT.F_BARRIER(IF_)) THEN
+                  IN = F_NBR_IJK(IAXIS,IF_); JN = F_NBR_IJK(JAXIS,IF_); KN = F_NBR_IJK(KAXIS,IF_)
+                  IF (IN>=1 .AND. IN<=M%IBAR .AND. JN>=1 .AND. JN<=M%JBAR .AND. KN>=1 .AND. KN<=M%KBAR) THEN
+                     IG_N = REG_G_AT(IN,JN,KN)
+                     IF (IG_N >= 1) F_KIND(IF_) = CC_FACE_KIND_GAS
+                  ENDIF
+               ENDIF
+               ! Legacy RCGAS metadata can also occur on both sides of a full Cartesian face between
+               ! adjacent cut cells. If the neighboring cut cell has one FV gas piece, resolve it
+               ! unambiguously and let the normal canonical-owner rule emit that face once.
+               IF (IG_N == 0 .AND. F_FTYPE(IF_) == CC_FTYPE_RCGAS .AND. .NOT.F_BARRIER(IF_)) THEN
+                  N_MATCH = 0; IG_MATCH = 0
+                  DO IG2=1,N_INT
+                     IF (M%FV%GCELL%CELL_TYPE(IG2) /= CC_GCELL_CUT) CYCLE
+                     IF (ANY(M%FV%GCELL%IJK(IAXIS:KAXIS,IG2) /= F_NBR_IJK(IAXIS:KAXIS,IF_))) CYCLE
+                     N_MATCH = N_MATCH + 1; IG_MATCH = IG2
+                  ENDDO
+                  IF (N_MATCH == 1) IG_N = IG_MATCH
+               ENDIF
+               IF (SKIP_FACE) CYCLE
+
+               ! An unresolved gas neighbor inside this mesh is the Cartesian row just outside the FV halo.
+               IF (IG_N==0 .AND. F_KIND(IF_)==CC_FACE_KIND_GAS .AND. F_NBR_TYPE(IF_)==CC_GCELL_REG) THEN
+                  IF (CC_GRID_REGULAR_GCELL_CANDIDATE_IS_VALID(NM,F_NBR_IJK(IAXIS:KAXIS,IF_))) &
+                     F_KIND(IF_)=CC_FACE_KIND_COUPLING
+               ENDIF
+               IF (F_KIND(IF_)==CC_FACE_KIND_COUPLING .AND. IG_N==0) THEN
+                  IN = F_NBR_IJK(IAXIS,IF_); JN = F_NBR_IJK(JAXIS,IF_); KN = F_NBR_IJK(KAXIS,IF_)
+                  IF (IN>=1.AND.IN<=M%IBAR .AND. JN>=1.AND.JN<=M%JBAR .AND. KN>=1.AND.KN<=M%KBAR) &
+                     IG_N = REG_GHOST_AT(IN,JN,KN)
+               ENDIF
+               IF (F_KIND(IF_)==CC_FACE_KIND_COUPLING .AND. IG_N==0) THEN
+                  WRITE(LU_ERR,'(A,I0,A,3I6)') &
+                     'ERROR: CC_IBM: COUPLING face has no REG ghost GCELL: mesh ',NM, &
+                     ' NBR_IJK=',F_NBR_IJK(IAXIS,IF_),F_NBR_IJK(JAXIS,IF_),F_NBR_IJK(KAXIS,IF_)
+                  STOP_STATUS=SETUP_STOP
+                  DEALLOCATE(F_FTYPE,F_ICF,F_JFC,F_X1AXIS,F_KIND,F_NBR_TYPE,F_NBR_ICC,F_NBR_JCC,F_AREA,F_IWC,F_BARRIER)
+                  DEALLOCATE(F_IJKFACE,F_NBR_IJK,F_XYZCEN,F_NVEC)
+                  DEALLOCATE(REG_G_AT,REG_GHOST_AT,PIECE_PTR,PIECE_IG,PIECE_SEEN)
+                  RETURN
+               ENDIF
+
+               ! Emission: cut<->regular faces are owned by the cut (RCGAS) side; regular-regular and
+               ! cut-cut gas faces are emitted once from the smaller-key canonical owner; every
+               ! boundary/wall/region-boundary face is emitted from its single active side.
+               IF (IG_N >= 1 .AND. IG_N <= N_INT) THEN
+                  IF (F_FTYPE(IF_) == CC_FTYPE_RCGAS .AND. M%FV%GCELL%CELL_TYPE(IG_N) == CC_GCELL_REG) THEN
+                     EMIT = .TRUE.
+                  ELSE
+                     EMIT = CC_GRID_GCELL_KEY_LESS(NM,IG,IG_N)
+                  ENDIF
+               ELSE
+                  EMIT = .TRUE.   ! IG_N==0 or IG_N>N_INT (ghost neighbor)
+               ENDIF
+               IF (.NOT.EMIT) CYCLE
+               IF (F_ICF(IF_)>=1 .AND. F_ICF(IF_)<=M%N_CUTFACE_MESH) THEN
+                  IF (F_JFC(IF_)>=1 .AND. F_JFC(IF_)<=M%CUT_FACE(F_ICF(IF_))%NFACE) &
+                     PIECE_SEEN(F_JFC(IF_),F_ICF(IF_)) = .TRUE.
+               ENDIF
+
+               NFACE = NFACE + 1
+               IF (PASS == 2) THEN
+                  IF (F_BARRIER(IF_)) N_BARRIER = N_BARRIER + 1
+                  IFACE_LOC = NFACE
+                  OC = M%FV%CV%GCELL_TO_CV(IG)
+                  NC = 0
+                  NBR_CV_NM = 0
+                  IF (IG_N >= 1) THEN
+                     NC = M%FV%CV%GCELL_TO_CV(IG_N)
+                     NBR_CV_NM = M%FV%CV%GCELL_TO_CV_NM(IG_N)
+                  ENDIF
+                  M%FV%FACE%OWNER_CV_NM(IFACE_LOC) = M%FV%CV%GCELL_TO_CV_NM(IG)
+                  M%FV%FACE%OWNER_CV(IFACE_LOC)    = OC
+                  M%FV%FACE%NBR_CV_NM(IFACE_LOC) = NBR_CV_NM
+                  M%FV%FACE%NBR_CV(IFACE_LOC)      = NC
+                  M%FV%FACE%OWNER_GCELL(IFACE_LOC) = IG
+                  M%FV%FACE%NBR_GCELL(IFACE_LOC)   = IG_N
+                  IF (NC >= 1 .AND. NC == OC .AND. &
+                      M%FV%FACE%NBR_CV_NM(IFACE_LOC) == M%FV%FACE%OWNER_CV_NM(IFACE_LOC)) THEN
+                     M%FV%FACE%ROLE(IFACE_LOC) = CC_FACE_ROLE_INTERNAL
+                  ELSE
+                     M%FV%FACE%ROLE(IFACE_LOC) = CC_FACE_ROLE_EXTERNAL
+                  ENDIF
+                  M%FV%FACE%KIND(IFACE_LOC)   = F_KIND(IF_)
+                  M%FV%FACE%FTYPE(IFACE_LOC)  = F_FTYPE(IF_)
+                  M%FV%FACE%SRC_ICF(IFACE_LOC)= F_ICF(IF_)
+                  M%FV%FACE%SRC_JCF(IFACE_LOC)= F_JFC(IF_)
+                  M%FV%FACE%IWC(IFACE_LOC)    = F_IWC(IF_)
+                  M%FV%FACE%X1AXIS(IFACE_LOC) = F_X1AXIS(IF_)
+                  M%FV%FACE%IJK_FACE(IAXIS:KAXIS,IFACE_LOC) = F_IJKFACE(IAXIS:KAXIS,IF_)
+                  M%FV%FACE%NBR_IJK(IAXIS:KAXIS,IFACE_LOC) = F_NBR_IJK(IAXIS:KAXIS,IF_)
+                  M%FV%FACE%AREA(IFACE_LOC)   = F_AREA(IF_)
+                  M%FV%FACE%NVEC(IAXIS:KAXIS,IFACE_LOC)   = F_NVEC(IAXIS:KAXIS,IF_)
+                  M%FV%FACE%XYZCEN(IAXIS:KAXIS,IFACE_LOC) = F_XYZCEN(IAXIS:KAXIS,IF_)
+               ENDIF
+            ENDDO
+         ENDDO
+         IF (PASS == 1) THEN
+            N_ORPHAN = 0
+            IF (ALLOCATED(M%CUT_FACE)) THEN
+               DO ICF=1,M%N_CUTFACE_MESH
+                  DO JCF=1,M%CUT_FACE(ICF)%NFACE
+                     IF (.NOT.PIECE_SEEN(JCF,ICF)) N_ORPHAN = N_ORPHAN + 1
+                  ENDDO
+               ENDDO
+            ENDIF
+            M%FV%FACE%N_INT = NFACE
+            M%FV%FACE%N = NFACE + N_GUARD_FACE + N_ORPHAN
+            CALL CC_GRID_ALLOCATE_FACE(M,M%FV%FACE%N)
+         ENDIF
+      ENDDO
+   ELSE
+      IF (N_GUARD_FACE < 1) CYCLE
+      N_BARRIER = 0
+      M%FV%FACE%N = N_GUARD_FACE
+      CALL CC_GRID_ALLOCATE_FACE(M,N_GUARD_FACE)
+   ENDIF
+
+   ! Thin obstructions: upstream's cut-cell layer has no notion of WALL%THIN and lets flux through; the FV layer
+   ! blocks it.
+   IF (N_BARRIER > 0 .AND. .NOT.THIN_BARRIER_WARNED) THEN
+      THIN_BARRIER_WARNED = .TRUE.
+      WRITE(LU_ERR,'(A)') ' WARNING: CC_IBM: a zero-thickness obstruction bounds the cut-cell region.'
+      WRITE(LU_ERR,'(A)') '          The FV control-volume solver blocks these faces, the legacy cut-cell'
+      WRITE(LU_ERR,'(A)') '          solver does not, so results here will differ from legacy at any scope.'
+   ENDIF
+
+   ! Tail rows for guard cut-face pieces. No CV, so the interior walks (1:N_INT) never
+   ! see them. UNKF is CC_UNDEFINED when the piece has state arrays, and guard pieces
+   ! join no link group; pieces past the ghost layer have no state arrays and keep 0.
+   IFACE_LOC = M%FV%FACE%N_INT
+   DO ICF=M%N_CUTFACE_MESH+1,M%N_CUTFACE_MESH+M%N_GCCUTFACE_MESH
+      DO JCF=1,M%CUT_FACE(ICF)%NFACE
+         IFACE_LOC = IFACE_LOC + 1
+         IF (M%CUT_FACE(ICF)%STATUS==CC_GASPHASE) THEN
+            M%FV%FACE%FTYPE(IFACE_LOC) = CC_FTYPE_CFGAS
+         ELSE
+            M%FV%FACE%FTYPE(IFACE_LOC) = CC_FTYPE_CFINB
+         ENDIF
+         M%FV%FACE%SRC_ICF(IFACE_LOC) = ICF
+         M%FV%FACE%SRC_JCF(IFACE_LOC) = JCF
+         IF (ALLOCATED(M%CUT_FACE(ICF)%JDH)) M%FV%FACE%UNKF(IFACE_LOC) = CC_UNDEFINED
+         M%FV%FACE%IWC(IFACE_LOC) = M%CUT_FACE(ICF)%IWC
+         M%FV%FACE%X1AXIS(IFACE_LOC) = M%CUT_FACE(ICF)%IJK(KAXIS+1)
+         M%FV%FACE%IJK_FACE(IAXIS:KAXIS,IFACE_LOC) = M%CUT_FACE(ICF)%IJK(IAXIS:KAXIS)
+         M%FV%FACE%AREA(IFACE_LOC) = M%CUT_FACE(ICF)%AREA(JCF)
+         M%FV%FACE%XYZCEN(IAXIS:KAXIS,IFACE_LOC) = M%CUT_FACE(ICF)%XYZCEN(IAXIS:KAXIS,JCF)
+      ENDDO
+   ENDDO
+
+   ! Interior pieces the gas-cell emit never sees. Same tail as the guard rows:
+   ! no CV, so 1:N_INT walks skip them, and the piece's FC points here.
+   IF (BUILD_INTERIOR) THEN
+      DO ICF=1,M%N_CUTFACE_MESH
+         DO JCF=1,M%CUT_FACE(ICF)%NFACE
+            IF (PIECE_SEEN(JCF,ICF)) CYCLE
+            IFACE_LOC = IFACE_LOC + 1
+            IF (M%CUT_FACE(ICF)%STATUS==CC_GASPHASE) THEN
+               M%FV%FACE%FTYPE(IFACE_LOC) = CC_FTYPE_CFGAS
+            ELSE
+               M%FV%FACE%FTYPE(IFACE_LOC) = CC_FTYPE_CFINB
+            ENDIF
+            M%FV%FACE%SRC_ICF(IFACE_LOC) = ICF
+            M%FV%FACE%SRC_JCF(IFACE_LOC) = JCF
+            IF (ALLOCATED(M%CUT_FACE(ICF)%JDH)) M%FV%FACE%UNKF(IFACE_LOC) = CC_UNDEFINED
+            M%FV%FACE%IWC(IFACE_LOC) = M%CUT_FACE(ICF)%IWC
+            M%FV%FACE%X1AXIS(IFACE_LOC) = M%CUT_FACE(ICF)%IJK(KAXIS+1)
+            M%FV%FACE%IJK_FACE(IAXIS:KAXIS,IFACE_LOC) = M%CUT_FACE(ICF)%IJK(IAXIS:KAXIS)
+            M%FV%FACE%AREA(IFACE_LOC) = M%CUT_FACE(ICF)%AREA(JCF)
+            M%FV%FACE%XYZCEN(IAXIS:KAXIS,IFACE_LOC) = M%CUT_FACE(ICF)%XYZCEN(IAXIS:KAXIS,JCF)
+         ENDDO
+      ENDDO
+   ENDIF
+
+   ! Cache reverse provenance once so runtime CUT_FACE producer loops can address the
+   ! canonical FACE SoA without repeated searches. The linker writes FACE%UNKF afterwards.
+   DO ICF=1,M%N_CUTFACE_MESH+M%N_GCCUTFACE_MESH
+      M%CUT_FACE(ICF)%FC = 0
+   ENDDO
+   DO IF_=1,M%FV%FACE%N
+      ICF=M%FV%FACE%SRC_ICF(IF_); JCC=M%FV%FACE%SRC_JCF(IF_)
+      IF (ICF<1) CYCLE
+      M%CUT_FACE(ICF)%FC(JCC)=IF_
+   ENDDO
+   DO IF_=1,M%FV%FACE%N
+      IF (M%FV%FACE%FTYPE(IF_)/=CC_FTYPE_CFINB) CYCLE
+      CALL CC_FACE_STORE_RADIATION_NORMAL(M,M%FV%FACE%SRC_ICF(IF_),M%FV%FACE%SRC_JCF(IF_),IF_)
+   ENDDO
+   DO ICF=1,M%N_CUTFACE_MESH+M%N_GCCUTFACE_MESH
+      IF (ALLOCATED(M%CUT_FACE(ICF)%CFACE_ORIGIN)) DEALLOCATE(M%CUT_FACE(ICF)%CFACE_ORIGIN)
+   ENDDO
+   IF (BUILD_INTERIOR) THEN
+      DEALLOCATE(F_FTYPE,F_ICF,F_JFC,F_X1AXIS,F_KIND,F_NBR_TYPE,F_NBR_ICC,F_NBR_JCC,F_AREA,F_IWC,F_BARRIER)
+      DEALLOCATE(F_IJKFACE,F_NBR_IJK,F_XYZCEN,F_NVEC)
+      DEALLOCATE(REG_G_AT,REG_GHOST_AT,PIECE_PTR,PIECE_IG,PIECE_SEEN)
+   ENDIF
+
+ENDDO
+
+! A piece with FC=0 has no FACE row.
+N_FC0=0
+DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   IF (.NOT.ALLOCATED(MESHES(NM)%CUT_FACE)) CYCLE
+   DO ICF=1,MESHES(NM)%N_CUTFACE_MESH+MESHES(NM)%N_GCCUTFACE_MESH
+      DO JCF=1,MESHES(NM)%CUT_FACE(ICF)%NFACE
+         IF (MESHES(NM)%CUT_FACE(ICF)%FC(JCF)<1) N_FC0=N_FC0+1
+      ENDDO
+   ENDDO
+ENDDO
+N_FC0_GLOBAL=N_FC0
+IF (N_MPI_PROCESSES>1) &
+   CALL MPI_ALLREDUCE(N_FC0,N_FC0_GLOBAL,1,MPI_INTEGER,MPI_SUM,MPI_COMM_WORLD,IERR)
+IF (N_FC0_GLOBAL>0) THEN
+   IF (MY_RANK==0) WRITE(LU_ERR,'(A,I0)') &
+      'ERROR: SET_CVS_3D cut-face pieces without a FACE row = ',N_FC0_GLOBAL
+   STOP_STATUS=SETUP_STOP
+   RETURN
+ENDIF
+
+CALL CC_GRID_RECONCILE_CROSS_MESH_FACES
+IF (STOP_STATUS==SETUP_STOP) RETURN
+CALL CC_GRID_SET_REMOTE_NEIGHBOR_POINTS
+CALL CC_GRID_SET_FACE_COEFFICIENTS
+DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   IF (.NOT.ALLOCATED(MESHES(NM)%FV%FACE%OWNER_CV)) CYCLE
+   CALL CC_GRID_BUILD_CV_FACE_ADJACENCY(NM)
+ENDDO
+
+END SUBROUTINE CC_GRID_BUILD_FACES
+
+
+SUBROUTINE CC_GRID_ALLOCATE_FACE(M,NFACE)
+! Allocate the FACE SoA to hold NFACE rows and zero the topology/geometry/coefficient fields.
+TYPE(MESH_TYPE), POINTER :: M
+INTEGER, INTENT(IN) :: NFACE
+
+CALL CC_GRID_SIZE_FACE(M,MAX(1,NFACE),0)
+END SUBROUTINE CC_GRID_ALLOCATE_FACE
+
+SUBROUTINE CC_GRID_SIZE_FACE(M,NA,NKEEP)
+! One line per FACE field. First allocation passes NKEEP=0. Growth passes the rows to copy.
+! A field added here is both allocated and grown; there is no second list to forget.
+TYPE(MESH_TYPE), POINTER :: M
+INTEGER, INTENT(IN) :: NA,NKEEP
+
+CALL FACE_NEW_INT1(M%FV%FACE%OWNER_CV_NM,NA,NKEEP,0)
+CALL FACE_NEW_INT1(M%FV%FACE%OWNER_CV,NA,NKEEP,0)
+CALL FACE_NEW_INT1(M%FV%FACE%NBR_CV_NM,NA,NKEEP,0)
+CALL FACE_NEW_INT1(M%FV%FACE%NBR_CV,NA,NKEEP,0)
+CALL FACE_NEW_INT1(M%FV%FACE%OWNER_GCELL,NA,NKEEP,0)
+CALL FACE_NEW_INT1(M%FV%FACE%NBR_GCELL,NA,NKEEP,0)
+CALL FACE_NEW_INT1(M%FV%FACE%PARTNER,NA,NKEEP,0)
+CALL FACE_NEW_INT1(M%FV%FACE%KIND,NA,NKEEP,CC_FACE_KIND_GAS)
+CALL FACE_NEW_INT1(M%FV%FACE%ROLE,NA,NKEEP,CC_FACE_ROLE_EXTERNAL)
+CALL FACE_NEW_INT1(M%FV%FACE%FTYPE,NA,NKEEP,0)
+CALL FACE_NEW_INT1(M%FV%FACE%SRC_IRC,NA,NKEEP,0)
+CALL FACE_NEW_INT1(M%FV%FACE%SRC_IREG,NA,NKEEP,0)
+CALL FACE_NEW_INT1(M%FV%FACE%SRC_ICF,NA,NKEEP,0)
+CALL FACE_NEW_INT1(M%FV%FACE%SRC_JCF,NA,NKEEP,0)
+CALL FACE_NEW_INT1(M%FV%FACE%IWC,NA,NKEEP,0)
+CALL FACE_NEW_INT1(M%FV%FACE%X1AXIS,NA,NKEEP,0)
+CALL FACE_NEW_INT2_AX(M%FV%FACE%IJK_FACE,NA,NKEEP)
+CALL FACE_NEW_INT2_AX(M%FV%FACE%NBR_IJK,NA,NKEEP)
+CALL FACE_NEW_INT1(M%FV%FACE%UNKF,NA,NKEEP,0)
+CALL FACE_NEW_INT1(M%FV%FACE%UNKZ_OWN,NA,NKEEP,CC_UNDEFINED)
+CALL FACE_NEW_INT1(M%FV%FACE%UNKZ_NBR,NA,NKEEP,CC_UNDEFINED)
+CALL FACE_NEW_INT1(M%FV%FACE%UNKH_OWN,NA,NKEEP,CC_UNDEFINED)
+CALL FACE_NEW_INT1(M%FV%FACE%UNKH_NBR,NA,NKEEP,CC_UNDEFINED)
+CALL FACE_NEW_INT1(M%FV%FACE%ZONE_OWN,NA,NKEEP,-1)
+CALL FACE_NEW_INT1(M%FV%FACE%ZONE_NBR,NA,NKEEP,-1)
+CALL FACE_NEW_REAL1(M%FV%FACE%AREA,NA,NKEEP)
+CALL FACE_NEW_REAL1(M%FV%FACE%FLUX_AREA,NA,NKEEP)
+CALL FACE_NEW_REAL2_AX(M%FV%FACE%NVEC,NA,NKEEP)
+CALL FACE_NEW_REAL2_AX(M%FV%FACE%NVEC_RAD,NA,NKEEP)
+CALL FACE_NEW_REAL2_AX(M%FV%FACE%XYZCEN,NA,NKEEP)
+CALL FACE_NEW_REAL2_AX(M%FV%FACE%X_FACE_REF,NA,NKEEP)
+CALL FACE_NEW_REAL2_AX(M%FV%FACE%XN_FACE_REF,NA,NKEEP)
+CALL FACE_NEW_REAL1(M%FV%FACE%D_LR,NA,NKEEP)
+CALL FACE_NEW_REAL1(M%FV%FACE%RDN,NA,NKEEP)
+CALL FACE_NEW_REAL1(M%FV%FACE%INTERP_W,NA,NKEEP)
+CALL FACE_NEW_REAL1(M%FV%FACE%VEL,NA,NKEEP)
+CALL FACE_NEW_REAL1(M%FV%FACE%VELS,NA,NKEEP)
+CALL FACE_NEW_REAL1(M%FV%FACE%FN,NA,NKEEP)
+CALL FACE_NEW_REAL1(M%FV%FACE%FN_B,NA,NKEEP)
+CALL FACE_NEW_REAL1(M%FV%FACE%VEL_SAVE,NA,NKEEP)
+CALL FACE_NEW_REAL1(M%FV%FACE%VEL_LNK,NA,NKEEP)
+CALL FACE_NEW_REAL2_SPEC(M%FV%FACE%DIFF_FLUX,NA,NKEEP)
+CALL FACE_NEW_REAL1(M%FV%FACE%DIFF_H_FLUX,NA,NKEEP)
+CALL FACE_NEW_INT3_JDH(M%FV%FACE%JDH,NA,NKEEP)
+END SUBROUTINE CC_GRID_SIZE_FACE
+
+SUBROUTINE FACE_NEW_INT1(A,NA,NKEEP,IDEF)
+INTEGER, ALLOCATABLE, INTENT(INOUT) :: A(:)
+INTEGER, INTENT(IN) :: NA,NKEEP,IDEF
+INTEGER, ALLOCATABLE :: TMP(:)
+
+ALLOCATE(TMP(NA)); TMP=IDEF
+IF (NKEEP>0) TMP(1:NKEEP)=A(1:NKEEP)
+CALL MOVE_ALLOC(TMP,A)
+END SUBROUTINE FACE_NEW_INT1
+
+SUBROUTINE FACE_NEW_REAL1(A,NA,NKEEP)
+REAL(EB), ALLOCATABLE, INTENT(INOUT) :: A(:)
+INTEGER, INTENT(IN) :: NA,NKEEP
+REAL(EB), ALLOCATABLE :: TMP(:)
+
+ALLOCATE(TMP(NA)); TMP=0._EB
+IF (NKEEP>0) TMP(1:NKEEP)=A(1:NKEEP)
+CALL MOVE_ALLOC(TMP,A)
+END SUBROUTINE FACE_NEW_REAL1
+
+SUBROUTINE FACE_NEW_INT2_AX(A,NA,NKEEP)
+INTEGER, ALLOCATABLE, INTENT(INOUT) :: A(:,:)
+INTEGER, INTENT(IN) :: NA,NKEEP
+INTEGER, ALLOCATABLE :: TMP(:,:)
+
+ALLOCATE(TMP(IAXIS:KAXIS,NA)); TMP=0
+IF (NKEEP>0) TMP(:,1:NKEEP)=A(:,1:NKEEP)
+CALL MOVE_ALLOC(TMP,A)
+END SUBROUTINE FACE_NEW_INT2_AX
+
+SUBROUTINE FACE_NEW_REAL2_AX(A,NA,NKEEP)
+REAL(EB), ALLOCATABLE, INTENT(INOUT) :: A(:,:)
+INTEGER, INTENT(IN) :: NA,NKEEP
+REAL(EB), ALLOCATABLE :: TMP(:,:)
+
+ALLOCATE(TMP(IAXIS:KAXIS,NA)); TMP=0._EB
+IF (NKEEP>0) TMP(:,1:NKEEP)=A(:,1:NKEEP)
+CALL MOVE_ALLOC(TMP,A)
+END SUBROUTINE FACE_NEW_REAL2_AX
+
+SUBROUTINE FACE_NEW_REAL2_SPEC(A,NA,NKEEP)
+REAL(EB), ALLOCATABLE, INTENT(INOUT) :: A(:,:)
+INTEGER, INTENT(IN) :: NA,NKEEP
+REAL(EB), ALLOCATABLE :: TMP(:,:)
+
+ALLOCATE(TMP(1:N_TOTAL_SCALARS,NA)); TMP=0._EB
+IF (NKEEP>0) TMP(:,1:NKEEP)=A(:,1:NKEEP)
+CALL MOVE_ALLOC(TMP,A)
+END SUBROUTINE FACE_NEW_REAL2_SPEC
+
+SUBROUTINE FACE_NEW_INT3_JDH(A,NA,NKEEP)
+INTEGER, ALLOCATABLE, INTENT(INOUT) :: A(:,:,:)
+INTEGER, INTENT(IN) :: NA,NKEEP
+INTEGER, ALLOCATABLE :: TMP(:,:,:)
+
+ALLOCATE(TMP(LOW_IND:HIGH_IND,LOW_IND:HIGH_IND,NA)); TMP=0
+IF (NKEEP>0) TMP(:,:,1:NKEEP)=A(:,:,1:NKEEP)
+CALL MOVE_ALLOC(TMP,A)
+END SUBROUTINE FACE_NEW_INT3_JDH
+
+SUBROUTINE CC_GRID_APPEND_REGFACE_TAIL(NM)
+! One storage row per REGFACE_Z entry the interior grid did not claim. Appended after the
+! cut-face tail, in (axis, IREG) order. No CV, no link number, not in the CC_FROW map.
+INTEGER, INTENT(IN) :: NM
+INTEGER :: X1AXIS,IREG,I,J,K,NADD,NOLD,IFACE
+TYPE(MESH_TYPE), POINTER :: M
+TYPE(CC_REGFACEZ_TYPE), POINTER, DIMENSION(:) :: REGFACE_Z
+
+M => MESHES(NM)
+NADD=0
+DO X1AXIS=IAXIS,KAXIS
+   IF (M%CC_NREGFACE_Z(X1AXIS)<1) CYCLE
+   SELECT CASE(X1AXIS)
+   CASE(IAXIS); REGFACE_Z => M%CC_REGFACE_IAXIS_Z
+   CASE(JAXIS); REGFACE_Z => M%CC_REGFACE_JAXIS_Z
+   CASE(KAXIS); REGFACE_Z => M%CC_REGFACE_KAXIS_Z
+   END SELECT
+   DO IREG=1,M%CC_NREGFACE_Z(X1AXIS)
+      IF (REGFACE_Z(IREG)%FC==0) NADD=NADD+1
+   ENDDO
+ENDDO
+IF (NADD<1) RETURN
+NOLD=M%FV%FACE%N
+CALL CC_GRID_SIZE_FACE(M,NOLD+NADD,NOLD)
+M%FV%FACE%N=NOLD+NADD
+IFACE=NOLD
+DO X1AXIS=IAXIS,KAXIS
+   IF (M%CC_NREGFACE_Z(X1AXIS)<1) CYCLE
+   SELECT CASE(X1AXIS)
+   CASE(IAXIS); REGFACE_Z => M%CC_REGFACE_IAXIS_Z
+   CASE(JAXIS); REGFACE_Z => M%CC_REGFACE_JAXIS_Z
+   CASE(KAXIS); REGFACE_Z => M%CC_REGFACE_KAXIS_Z
+   END SELECT
+   DO IREG=1,M%CC_NREGFACE_Z(X1AXIS)
+      IF (REGFACE_Z(IREG)%FC>0) CYCLE
+      IFACE=IFACE+1
+      I=REGFACE_Z(IREG)%IJK(IAXIS); J=REGFACE_Z(IREG)%IJK(JAXIS); K=REGFACE_Z(IREG)%IJK(KAXIS)
+      M%FV%FACE%FTYPE(IFACE)=CC_FTYPE_RGGAS
+      M%FV%FACE%SRC_IREG(IFACE)=IREG
+      M%FV%FACE%X1AXIS(IFACE)=X1AXIS
+      M%FV%FACE%IJK_FACE(IAXIS:KAXIS,IFACE)=(/I,J,K/)
+      M%FV%FACE%IWC(IFACE)=REGFACE_Z(IREG)%IWC
+      M%FV%FACE%AREA(IFACE)=CC_GRID_GET_REGULAR_FACE_AREA(NM,I,J,K,X1AXIS)
+      REGFACE_Z(IREG)%FC=IFACE
+   ENDDO
+ENDDO
+END SUBROUTINE CC_GRID_APPEND_REGFACE_TAIL
+
+SUBROUTINE CC_GRID_APPEND_SEAM_RCFACE(NM)
+! One row per unclaimed RC face, IRC order, between the cut and regular tails. Geometry from its guard cut cell.
+INTEGER, INTENT(IN) :: NM
+INTEGER :: IRC,I,J,K,X1AXIS,NADD,NOLD,IFACE,ICC,IFACE_CC,SIDE
+REAL(EB) :: SPAN,AREA,FACE_XYZ(IAXIS:KAXIS),FACE_NV(IAXIS:KAXIS),FACE_NBR(IAXIS:KAXIS)
+TYPE(MESH_TYPE), POINTER :: M
+TYPE(CC_FACE_TYPE), POINTER :: FACE
+TYPE(CC_RCFACE_TYPE), POINTER :: RCF
+
+M => MESHES(NM)
+FACE => M%FV%FACE
+IF (.NOT.ALLOCATED(M%RC_FACE) .OR. M%CC_NRCFACE_Z<1) RETURN
+NADD=0
+DO IRC=1,M%CC_NRCFACE_Z
+   IF (M%RC_FACE(IRC)%FC<1) NADD=NADD+1
+ENDDO
+IF (NADD<1) RETURN
+NOLD=FACE%N
+CALL CC_GRID_SIZE_FACE(M,NOLD+NADD,NOLD)
+FACE%N=NOLD+NADD
+FACE%SEAM_RC_LO=NOLD+1
+FACE%SEAM_RC_HI=NOLD+NADD
+IFACE=NOLD
+DO IRC=1,M%CC_NRCFACE_Z
+   IF (M%RC_FACE(IRC)%FC>0) CYCLE
+   IFACE=IFACE+1
+   RCF => M%RC_FACE(IRC)
+   I=RCF%IJK(IAXIS); J=RCF%IJK(JAXIS); K=RCF%IJK(KAXIS); X1AXIS=RCF%IJK(KAXIS+1)
+   ICC=RCF%CELL_LIST(2,LOW_IND)
+   IFACE_CC=RCF%CELL_LIST(KAXIS+1,LOW_IND)
+   IF (RCF%CELL_LIST(1,LOW_IND)/=CC_FTYPE_CFGAS) THEN
+      ICC=RCF%CELL_LIST(2,HIGH_IND)
+      IFACE_CC=RCF%CELL_LIST(KAXIS+1,HIGH_IND)
+   ENDIF
+   SIDE=M%CUT_CELL(ICC)%FACE_LIST(2,IFACE_CC)
+   CALL CC_GRID_GET_RCGAS_FACE_GEOMETRY(NM,ICC,SIDE,X1AXIS,FACE_XYZ,FACE_NV,FACE_NBR)
+   FACE%FTYPE(IFACE)=CC_FTYPE_RCGAS
+   FACE%SRC_IRC(IFACE)=IRC
+   FACE%X1AXIS(IFACE)=X1AXIS
+   FACE%IJK_FACE(IAXIS:KAXIS,IFACE)=(/I,J,K/)
+   FACE%NBR_IJK(IAXIS:KAXIS,IFACE)=(/I,J,K/)
+   FACE%NBR_IJK(X1AXIS,IFACE)=FACE%NBR_IJK(X1AXIS,IFACE)+1
+   FACE%IWC(IFACE)=RCF%IWC
+   FACE%KIND(IFACE)=CC_FACE_KIND_GAS
+   FACE%ROLE(IFACE)=CC_FACE_ROLE_EXTERNAL
+   FACE%XYZCEN(IAXIS:KAXIS,IFACE)=FACE_XYZ
+   FACE%NVEC(IAXIS:KAXIS,IFACE)=FACE_NV
+   AREA=CC_GRID_GET_REGULAR_FACE_AREA(NM,I,J,K,X1AXIS)
+   FACE%AREA(IFACE)=AREA
+   FACE%FLUX_AREA(IFACE)=AREA
+   SPAN=RCF%XCEN(X1AXIS,HIGH_IND)-RCF%XCEN(X1AXIS,LOW_IND)
+   FACE%D_LR(IFACE)=SPAN
+   FACE%RDN(IFACE)=1._EB/SPAN
+   RCF%FC=IFACE
+ENDDO
+END SUBROUTINE CC_GRID_APPEND_SEAM_RCFACE
+
+LOGICAL FUNCTION CC_GRID_GCELL_KEY_LESS(NM,IGA,IGB)
+! Strict total order on GCELLs by (IJK,ICC,JCC). Used to pick the single canonical owner of a
+! gas-gas face so it is emitted exactly once regardless of which side enumerates it.
+INTEGER, INTENT(IN) :: NM,IGA,IGB
+TYPE(MESH_TYPE), POINTER :: M
+INTEGER :: A(5),B(5),N
+
+M => MESHES(NM)
+A = (/ M%FV%GCELL%IJK(IAXIS,IGA),M%FV%GCELL%IJK(JAXIS,IGA),M%FV%GCELL%IJK(KAXIS,IGA), &
+       M%FV%GCELL%ICC(IGA),M%FV%GCELL%JCC(IGA) /)
+B = (/ M%FV%GCELL%IJK(IAXIS,IGB),M%FV%GCELL%IJK(JAXIS,IGB),M%FV%GCELL%IJK(KAXIS,IGB), &
+       M%FV%GCELL%ICC(IGB),M%FV%GCELL%JCC(IGB) /)
+CC_GRID_GCELL_KEY_LESS = .FALSE.
+DO N=1,5
+   IF (A(N) /= B(N)) THEN
+      CC_GRID_GCELL_KEY_LESS = (A(N) < B(N))
+      RETURN
+   ENDIF
+ENDDO
+END FUNCTION CC_GRID_GCELL_KEY_LESS
+
+
+SUBROUTINE CC_GRID_ENUMERATE_GCELL_FACES(NM,IG,MAXF,NF,F_FTYPE,F_ICF,F_JFC,F_X1AXIS,F_IJKFACE,F_AREA, &
+                                         F_XYZCEN,F_NVEC,F_KIND,F_NBR_TYPE,F_NBR_ICC,F_NBR_JCC,F_NBR_IJK, &
+                                         F_IWC,F_BARRIER)
+INTEGER, INTENT(IN) :: NM,IG,MAXF
+INTEGER, INTENT(OUT) :: NF
+INTEGER, INTENT(OUT) :: F_FTYPE(MAXF),F_ICF(MAXF),F_JFC(MAXF),F_X1AXIS(MAXF),F_KIND(MAXF), &
+                        F_NBR_TYPE(MAXF),F_NBR_ICC(MAXF),F_NBR_JCC(MAXF),F_IWC(MAXF)
+LOGICAL, INTENT(OUT) :: F_BARRIER(MAXF)
+INTEGER, INTENT(OUT) :: F_IJKFACE(IAXIS:KAXIS,MAXF),F_NBR_IJK(IAXIS:KAXIS,MAXF)
+REAL(EB), INTENT(OUT) :: F_AREA(MAXF),F_XYZCEN(IAXIS:KAXIS,MAXF),F_NVEC(IAXIS:KAXIS,MAXF)
+
+TYPE(MESH_TYPE), POINTER :: M
+TYPE(CC_CUTCELL_TYPE), POINTER :: CC
+TYPE(CC_CUTFACE_TYPE), POINTER :: CF
+INTEGER :: ICC,JCC,I,J,K,IFC,IFACE,FTYPE,SIDE,X1AXIS,ILH,ICFX,JFCX,CUR_CF_SIDE,OPP_CF_SIDE,ICC2,JCC2,IN,JN,KN,IFCART,ICCN, &
+           IBOD,IWSEL
+REAL(EB) :: FXYZ(IAXIS:KAXIS),FNVEC(IAXIS:KAXIS),FNB(IAXIS:KAXIS),CUR_CENTER(IAXIS:KAXIS),AVEC(IAXIS:KAXIS),ARMAG
+
+M => MESHES(NM)
+NF = 0
+F_IWC(1:MAXF) = 0; F_BARRIER(1:MAXF) = .FALSE.
+IF (M%FV%GCELL%CELL_TYPE(IG) == CC_GCELL_CUT) THEN
+   ICC = M%FV%GCELL%ICC(IG); JCC = M%FV%GCELL%JCC(IG)
+   CC => M%CUT_CELL(ICC)
+   I = CC%IJK(IAXIS); J = CC%IJK(JAXIS); K = CC%IJK(KAXIS)
+   CUR_CENTER(IAXIS:KAXIS) = CC%XYZCEN(IAXIS:KAXIS,JCC)
+
+   DO IFC=1,CC%CCELEM(1,JCC)
+      IFACE = CC%CCELEM(IFC+1,JCC)
+      FTYPE = CC%FACE_LIST(1,IFACE)
+      SELECT CASE(FTYPE)
+      CASE(CC_FTYPE_RCGAS)
+         SIDE = CC%FACE_LIST(2,IFACE); X1AXIS = CC%FACE_LIST(3,IFACE); ILH = 2*SIDE-3
+         CALL CC_GRID_GET_RCGAS_FACE_GEOMETRY(NM,ICC,SIDE,X1AXIS,FXYZ,FNVEC,FNB)
+         NF = NF + 1
+         F_FTYPE(NF) = CC_FTYPE_RCGAS; F_ICF(NF) = 0; F_JFC(NF) = 0; F_X1AXIS(NF) = X1AXIS
+         F_IJKFACE(IAXIS:KAXIS,NF) = (/ I,J,K /)
+         IF (SIDE == LOW_IND) F_IJKFACE(X1AXIS,NF) = F_IJKFACE(X1AXIS,NF) - 1
+         F_AREA(NF) = CC_GRID_GET_REGULAR_FACE_AREA(NM,I,J,K,X1AXIS)
+         F_XYZCEN(IAXIS:KAXIS,NF) = FXYZ(IAXIS:KAXIS); F_NVEC(IAXIS:KAXIS,NF) = FNVEC(IAXIS:KAXIS)
+         F_KIND(NF) = CC_FACE_KIND_GAS
+         IN = I; JN = J; KN = K
+         SELECT CASE(X1AXIS)
+         CASE(IAXIS); IN = I + ILH
+         CASE(JAXIS); JN = J + ILH
+         CASE(KAXIS); KN = K + ILH
+         END SELECT
+         F_NBR_TYPE(NF) = CC_GCELL_REG; F_NBR_ICC(NF) = 0; F_NBR_JCC(NF) = 0
+         F_NBR_IJK(IAXIS:KAXIS,NF) = (/ IN,JN,KN /)
+         F_IWC(NF) = CC_GRID_GET_CARTESIAN_FACE_WALL(NM,I,J,K,X1AXIS,SIDE)
+         ! A regular neighbor hosted in an OBST carries no solver row, so this face bounds a wall.
+         IF (CC_GRID_CARTESIAN_HOST_IS_SOLID(NM,IN,JN,KN)) THEN
+            F_KIND(NF) = CC_FACE_KIND_WALL; F_NBR_TYPE(NF) = 0
+         ELSEIF (CC_GRID_WALL_IS_THIN_BARRIER(NM,F_IWC(NF))) THEN
+            F_KIND(NF) = CC_FACE_KIND_WALL; F_NBR_TYPE(NF) = 0; F_BARRIER(NF) = .TRUE.
+         ENDIF
+
+      CASE(CC_FTYPE_CFGAS)
+         SIDE = CC%FACE_LIST(2,IFACE); X1AXIS = CC%FACE_LIST(3,IFACE)
+         ICFX = CC%FACE_LIST(4,IFACE); JFCX = CC%FACE_LIST(5,IFACE)
+         CF => M%CUT_FACE(ICFX)
+         CUR_CF_SIDE = LOW_IND
+         IF (SIDE == LOW_IND) CUR_CF_SIDE = HIGH_IND
+         OPP_CF_SIDE = LOW_IND + HIGH_IND - CUR_CF_SIDE
+         ICC2 = CF%CELL_LIST(2,OPP_CF_SIDE,JFCX); JCC2 = CF%CELL_LIST(3,OPP_CF_SIDE,JFCX)
+         NF = NF + 1
+         F_FTYPE(NF) = CC_FTYPE_CFGAS; F_ICF(NF) = ICFX; F_JFC(NF) = JFCX; F_X1AXIS(NF) = X1AXIS
+         F_IJKFACE(IAXIS:KAXIS,NF) = (/ I,J,K /)
+         F_XYZCEN(IAXIS:KAXIS,NF) = CF%XYZCEN(IAXIS:KAXIS,JFCX)
+         CALL CC_GRID_GET_CUTFACE_AREA_VECTOR(CF,JFCX,AVEC)
+         IF (CUR_CF_SIDE == HIGH_IND) AVEC(IAXIS:KAXIS) = -AVEC(IAXIS:KAXIS)
+         ARMAG = NORM2(AVEC(IAXIS:KAXIS))
+         F_AREA(NF) = ARMAG
+         IF (ARMAG > TWO_EPSILON_EB) THEN
+            F_NVEC(IAXIS:KAXIS,NF) = AVEC(IAXIS:KAXIS)/ARMAG
+         ELSE
+            F_NVEC(IAXIS:KAXIS,NF) = 0._EB
+         ENDIF
+         F_KIND(NF) = CC_FACE_KIND_GAS
+         IF (ICC2 > 0 .AND. JCC2 > 0) THEN
+            F_NBR_TYPE(NF) = CC_GCELL_CUT; F_NBR_ICC(NF) = ICC2; F_NBR_JCC(NF) = JCC2
+            IF (ICC2 <= M%N_CUTCELL_MESH) THEN
+               F_NBR_IJK(IAXIS:KAXIS,NF) = M%CUT_CELL(ICC2)%IJK(IAXIS:KAXIS)
+               IN = M%CUT_CELL(ICC2)%IJK(IAXIS); JN = M%CUT_CELL(ICC2)%IJK(JAXIS); KN = M%CUT_CELL(ICC2)%IJK(KAXIS)
+               ! A neighbor cut piece hosted in an OBST carries no solver row, as above.
+               IF (CC_GRID_CARTESIAN_HOST_IS_SOLID(NM,IN,JN,KN)) THEN
+                  F_KIND(NF) = CC_FACE_KIND_WALL
+                  F_NBR_TYPE(NF) = 0; F_NBR_ICC(NF) = 0; F_NBR_JCC(NF) = 0
+               ENDIF
+            ELSE
+               F_NBR_IJK(IAXIS:KAXIS,NF) = 0
+            ENDIF
+         ELSE
+            F_NBR_TYPE(NF) = 0; F_NBR_ICC(NF) = 0; F_NBR_JCC(NF) = 0; F_NBR_IJK(IAXIS:KAXIS,NF) = 0
+         ENDIF
+         F_IWC(NF) = CC_GRID_GET_CARTESIAN_FACE_WALL(NM,I,J,K,X1AXIS,SIDE)
+         IF (CC_GRID_WALL_IS_THIN_BARRIER(NM,F_IWC(NF))) THEN
+            F_KIND(NF) = CC_FACE_KIND_WALL; F_BARRIER(NF) = .TRUE.
+            F_NBR_TYPE(NF) = 0; F_NBR_ICC(NF) = 0; F_NBR_JCC(NF) = 0
+         ENDIF
+
+      CASE(CC_FTYPE_CFINB)
+         ICFX = CC%FACE_LIST(4,IFACE); JFCX = CC%FACE_LIST(5,IFACE)
+         CF => M%CUT_FACE(ICFX)
+         NF = NF + 1
+         F_FTYPE(NF) = CC_FTYPE_CFINB; F_ICF(NF) = ICFX; F_JFC(NF) = JFCX; F_X1AXIS(NF) = 0
+         F_IJKFACE(IAXIS:KAXIS,NF) = (/ I,J,K /)
+         F_XYZCEN(IAXIS:KAXIS,NF) = CF%XYZCEN(IAXIS:KAXIS,JFCX)
+         CALL CC_GRID_GET_CUTFACE_AREA_VECTOR(CF,JFCX,AVEC)
+         ARMAG = NORM2(AVEC(IAXIS:KAXIS))
+         IBOD = CF%BODTRI(1,JFCX); IWSEL = CF%BODTRI(2,JFCX)
+         IF (IBOD >= 1 .AND. IWSEL >= 1 .AND. ARMAG > TWO_EPSILON_EB) THEN
+            IF (VALID_GEOMETRY_FACE_DONOR(IBOD,IWSEL) .AND. &
+                ABS(DOT_PRODUCT(AVEC(IAXIS:KAXIS),GEOMETRY(IBOD)%FACES_NORMAL(IAXIS:KAXIS,IWSEL)))/ARMAG >= 0.5_EB) THEN
+               IF (DOT_PRODUCT(AVEC(IAXIS:KAXIS),GEOMETRY(IBOD)%FACES_NORMAL(IAXIS:KAXIS,IWSEL)) > 0._EB) &
+                  AVEC(IAXIS:KAXIS) = -AVEC(IAXIS:KAXIS)
+            ELSE
+               ! Stored vertex winding gives the into-gas normal, so outward is its negative.
+               AVEC(IAXIS:KAXIS) = -AVEC(IAXIS:KAXIS)
+            ENDIF
+         ELSE
+            AVEC(IAXIS:KAXIS) = -AVEC(IAXIS:KAXIS)
+         ENDIF
+         ARMAG = NORM2(AVEC(IAXIS:KAXIS))
+         F_AREA(NF) = ARMAG
+         IF (ARMAG > TWO_EPSILON_EB) THEN
+            F_NVEC(IAXIS:KAXIS,NF) = AVEC(IAXIS:KAXIS)/ARMAG
+         ELSE
+            F_NVEC(IAXIS:KAXIS,NF) = 0._EB
+         ENDIF
+         F_KIND(NF) = CC_FACE_KIND_WALL
+         F_NBR_TYPE(NF) = 0; F_NBR_ICC(NF) = 0; F_NBR_JCC(NF) = 0; F_NBR_IJK(IAXIS:KAXIS,NF) = 0
+      END SELECT
+   ENDDO
+
+ELSE  ! Regular GCELL: six full Cartesian faces.
+   I = M%FV%GCELL%IJK(IAXIS,IG); J = M%FV%GCELL%IJK(JAXIS,IG); K = M%FV%GCELL%IJK(KAXIS,IG)
+   DO X1AXIS=IAXIS,KAXIS
+      DO SIDE=LOW_IND,HIGH_IND
+         ILH = 2*SIDE-3
+         NF = NF + 1
+         F_FTYPE(NF) = CC_FTYPE_RGGAS; F_ICF(NF) = 0; F_JFC(NF) = 0; F_X1AXIS(NF) = X1AXIS
+         F_IJKFACE(IAXIS:KAXIS,NF) = (/ I,J,K /)
+         IF (SIDE == LOW_IND) F_IJKFACE(X1AXIS,NF) = F_IJKFACE(X1AXIS,NF) - 1
+         F_AREA(NF) = CC_GRID_GET_REGULAR_FACE_AREA(NM,I,J,K,X1AXIS)
+         FNVEC(IAXIS:KAXIS) = 0._EB; FNVEC(X1AXIS) = REAL(ILH,EB)
+         IN = I; JN = J; KN = K
+         SELECT CASE(X1AXIS)
+         CASE(IAXIS)
+            IFCART = I-1; IF (SIDE == HIGH_IND) IFCART = I
+            FXYZ(IAXIS:KAXIS) = (/ M%X(IFCART),M%YC(J),M%ZC(K) /); IN = I + ILH
+         CASE(JAXIS)
+            IFCART = J-1; IF (SIDE == HIGH_IND) IFCART = J
+            FXYZ(IAXIS:KAXIS) = (/ M%XC(I),M%Y(IFCART),M%ZC(K) /); JN = J + ILH
+         CASE(KAXIS)
+            IFCART = K-1; IF (SIDE == HIGH_IND) IFCART = K
+            FXYZ(IAXIS:KAXIS) = (/ M%XC(I),M%YC(J),M%Z(IFCART) /); KN = K + ILH
+         END SELECT
+         F_XYZCEN(IAXIS:KAXIS,NF) = FXYZ(IAXIS:KAXIS); F_NVEC(IAXIS:KAXIS,NF) = FNVEC(IAXIS:KAXIS)
+         F_NBR_ICC(NF) = 0; F_NBR_JCC(NF) = 0; F_NBR_IJK(IAXIS:KAXIS,NF) = (/ IN,JN,KN /)
+         F_IWC(NF) = CC_GRID_GET_CARTESIAN_FACE_WALL(NM,I,J,K,X1AXIS,SIDE)
+
+         IF (IN<1 .OR. IN>M%IBAR .OR. JN<1 .OR. JN>M%JBAR .OR. KN<1 .OR. KN>M%KBAR) THEN
+            ! Domain edge stays EXTERNAL. An interpolated wall is the other mesh's Cartesian cell,
+            ! owned by the legacy wall operator: GAS, no FV neighbor. A later reconcile promotes
+            ! it to REMOTE when that mesh has a gas row at the same place.
+            F_KIND(NF) = CC_FACE_KIND_EXTERNAL; F_NBR_TYPE(NF) = 0
+            IF (F_IWC(NF)>0) THEN
+               IF (M%WALL(F_IWC(NF))%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) F_KIND(NF)=CC_FACE_KIND_GAS
+            ENDIF
+            CYCLE
+         ENDIF
+         SELECT CASE(M%CCVAR(IN,JN,KN,CC_CGSC))
+         CASE(CC_GASPHASE)
+            ! CCVAR is GEOM-derived, so a gas-phase neighbor may still be made solid by an OBST,
+            ! and two gas neighbors may still be separated by a zero-thickness obstruction.
+            IF (CC_GRID_CARTESIAN_HOST_IS_SOLID(NM,IN,JN,KN)) THEN
+               F_KIND(NF) = CC_FACE_KIND_WALL; F_NBR_TYPE(NF) = 0
+            ELSEIF (CC_GRID_WALL_IS_THIN_BARRIER(NM,F_IWC(NF))) THEN
+               F_KIND(NF) = CC_FACE_KIND_WALL; F_NBR_TYPE(NF) = 0; F_BARRIER(NF) = .TRUE.
+            ELSE
+               F_KIND(NF) = CC_FACE_KIND_GAS; F_NBR_TYPE(NF) = CC_GCELL_REG
+            ENDIF
+         CASE(CC_CUTCFE)
+
+            ICCN = M%CCVAR(IN,JN,KN,CC_IDCC)
+            F_KIND(NF) = CC_FACE_KIND_WALL
+            IF (CC_GRID_CARTESIAN_HOST_IS_SOLID(NM,IN,JN,KN)) THEN
+               F_NBR_TYPE(NF) = 0
+            ELSEIF (CC_GRID_WALL_IS_THIN_BARRIER(NM,F_IWC(NF))) THEN
+               F_NBR_TYPE(NF) = 0; F_BARRIER(NF) = .TRUE.
+            ELSEIF (ICCN >= 1 .AND. ICCN <= M%N_CUTCELL_MESH) THEN
+               F_NBR_TYPE(NF) = CC_GCELL_CUT; F_NBR_ICC(NF) = ICCN; F_NBR_JCC(NF) = 0
+            ELSE
+               F_NBR_TYPE(NF) = 0
+            ENDIF
+         CASE DEFAULT
+            F_KIND(NF) = CC_FACE_KIND_WALL; F_NBR_TYPE(NF) = 0
+         END SELECT
+      ENDDO
+   ENDDO
+ENDIF
+END SUBROUTINE CC_GRID_ENUMERATE_GCELL_FACES
+
+
+SUBROUTINE CC_GRID_FACE_OWNER_POINT(M,NM,IF_,XREF)
+
+! Owner support point: the local owner CV center, or the owner GCELL centroid when this mesh
+! does not hold that CV. The coefficient pass stores the same point in X_FACE_REF.
+
+TYPE(MESH_TYPE), POINTER :: M
+INTEGER, INTENT(IN) :: NM,IF_
+REAL(EB), INTENT(OUT) :: XREF(IAXIS:KAXIS)
+INTEGER :: OG,OC
+
+XREF = 0._EB
+OG = M%FV%FACE%OWNER_GCELL(IF_)
+IF (OG>=1 .AND. OG<=M%FV%GCELL%N) XREF(IAXIS:KAXIS) = M%FV%GCELL%XYZCEN(IAXIS:KAXIS,OG)
+OC = M%FV%FACE%OWNER_CV(IF_)
+IF (M%FV%FACE%OWNER_CV_NM(IF_)==NM .AND. OC>=1 .AND. OC<=M%FV%CV%N) &
+   XREF(IAXIS:KAXIS) = M%FV%CV%XCV(IAXIS:KAXIS,OC)
+
+END SUBROUTINE CC_GRID_FACE_OWNER_POINT
+
+
+SUBROUTINE CC_GRID_SEAM_EXCHANGE(NW,NS,SBUF,DEST,NR,RBUF,PEERS)
+! One message per peer. SBUF(:,I) goes to rank DEST(I); RBUF(:,1:NR) is what those peers sent here.
+! PEERS, when passed, replaces the neighbor ranks and is symmetric. Every peer posts, even to send nothing.
+USE MPI_F08
+INTEGER, INTENT(IN) :: NW,NS,DEST(:)
+REAL(EB), INTENT(IN) :: SBUF(:,:)
+INTEGER, INTENT(OUT) :: NR
+REAL(EB), ALLOCATABLE, INTENT(OUT) :: RBUF(:,:)
+INTEGER, INTENT(IN), OPTIONAL :: PEERS(:)
+INTEGER, PARAMETER :: TAGN=27021,TAGR=27023
+INTEGER :: NM,IN,IR,IP,I,NP,NREQ,IERR
+INTEGER, ALLOCATABLE :: PEER(:),IPEER(:),NOUT(:),NIN(:),POS(:)
+REAL(EB), ALLOCATABLE :: SB(:,:)
+TYPE(MPI_REQUEST), ALLOCATABLE :: REQ(:)
+IF (PRESENT(PEERS)) THEN
+   NP = SIZE(PEERS)
+   ALLOCATE(PEER(NP))
+   PEER = PEERS
+ELSE
+   ALLOCATE(PEER(SUM(MESHES(LOWER_MESH_INDEX:UPPER_MESH_INDEX)%N_NEIGHBORING_MESHES)))
+   NP = 0
+   DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+      DO IN=1,MESHES(NM)%N_NEIGHBORING_MESHES
+         IR = PROCESS(MESHES(NM)%NEIGHBORING_MESH(IN))
+         IF (IR==MY_RANK .OR. ANY(PEER(1:NP)==IR)) CYCLE
+         NP = NP+1
+         PEER(NP) = IR
+      ENDDO
+   ENDDO
+ENDIF
+! Records grouped by peer, in their order. A record for a rank that is not a peer is a caller error.
+ALLOCATE(IPEER(NS),NOUT(NP),NIN(NP),POS(NP+1),REQ(2*NP))
+NOUT = 0
+DO I=1,NS
+   IF (DEST(I) == -1) THEN
+      IPEER(I) = 0
+      NOUT = NOUT+1
+   ELSE
+      IPEER(I) = FINDLOC(PEER(1:NP),DEST(I),1)
+      IF (IPEER(I)>0) THEN
+         NOUT(IPEER(I)) = NOUT(IPEER(I))+1
+      ELSE
+         WRITE(LU_ERR,'(A,I0)') 'ERROR: CC_GRID_SEAM_EXCHANGE: a record for rank ',DEST(I),', not a neighbor of this rank'
+         STOP_STATUS = SETUP_STOP
+      ENDIF
+   ENDIF
+ENDDO
+POS(1) = 0
+DO IP=1,NP
+   POS(IP+1) = POS(IP)+NOUT(IP)
+ENDDO
+ALLOCATE(SB(NW,POS(NP+1)))
+DO I=1,NS
+   IF (DEST(I) == -1) THEN
+      DO IP=1,NP
+         POS(IP) = POS(IP)+1
+         SB(:,POS(IP)) = SBUF(1:NW,I)
+      ENDDO
+   ELSE
+      IP = IPEER(I)
+      IF (IP<1) CYCLE
+      POS(IP) = POS(IP)+1
+      SB(:,POS(IP)) = SBUF(1:NW,I)
+   ENDIF
+ENDDO
+! Counts, then records. POS(IP) is now the last record for peer IP.
+NREQ = 0
+DO IP=1,NP
+   CALL MPI_IRECV(NIN(IP),1,MPI_INTEGER,PEER(IP),TAGN,MPI_COMM_WORLD,REQ(NREQ+1),IERR)
+   CALL MPI_ISEND(NOUT(IP),1,MPI_INTEGER,PEER(IP),TAGN,MPI_COMM_WORLD,REQ(NREQ+2),IERR)
+   NREQ = NREQ+2
+ENDDO
+CALL MPI_WAITALL(NREQ,REQ,MPI_STATUSES_IGNORE,IERR)
+NR = SUM(NIN)
+ALLOCATE(RBUF(NW,NR))
+NREQ = 0
+I = 0
+DO IP=1,NP
+   IF (NIN(IP)>0) THEN
+      NREQ = NREQ+1
+      CALL MPI_IRECV(RBUF(1,I+1),NW*NIN(IP),MPI_DOUBLE_PRECISION,PEER(IP),TAGR,MPI_COMM_WORLD,REQ(NREQ),IERR)
+   ENDIF
+   I = I+NIN(IP)
+   IF (NOUT(IP)>0) THEN
+      NREQ = NREQ+1
+      CALL MPI_ISEND(SB(1,POS(IP)-NOUT(IP)+1),NW*NOUT(IP),MPI_DOUBLE_PRECISION,PEER(IP),TAGR,MPI_COMM_WORLD, &
+                     REQ(NREQ),IERR)
+   ENDIF
+ENDDO
+CALL MPI_WAITALL(NREQ,REQ,MPI_STATUSES_IGNORE,IERR)
+END SUBROUTINE CC_GRID_SEAM_EXCHANGE
+
+
+LOGICAL FUNCTION CC_GRID_FACE_IS_OPEN(MODE,NM,IF_)
+! MODE 1: reconcile candidates. MODE 2: faces whose neighbor CV is already remote.
+INTEGER, INTENT(IN) :: MODE,NM,IF_
+TYPE(MESH_TYPE), POINTER :: M
+INTEGER :: NC
+M => MESHES(NM)
+CC_GRID_FACE_IS_OPEN = .FALSE.
+IF (MODE==1) THEN
+   IF (M%FV%FACE%NBR_CV(IF_)>0) THEN
+      NC = M%FV%FACE%NBR_CV(IF_)
+      IF (.NOT.(M%FV%FACE%NBR_CV_NM(IF_)==NM .AND. M%FV%CV%N_MEMBER(NC)==0)) RETURN
+   ENDIF
+ELSE
+   NC = M%FV%FACE%NBR_CV(IF_)
+   IF (NC<1) RETURN
+   IF (M%FV%FACE%NBR_CV_NM(IF_)==NM) RETURN
+ENDIF
+IF (M%FV%FACE%KIND(IF_)==CC_FACE_KIND_WALL) RETURN
+IF (M%FV%FACE%KIND(IF_)==CC_FACE_KIND_COUPLING) RETURN
+CC_GRID_FACE_IS_OPEN = .TRUE.
+END FUNCTION CC_GRID_FACE_IS_OPEN
+
+
+LOGICAL FUNCTION CC_GRID_FACE_OPPOSES(A,B,DIST)
+! Records A and B (see CC_GRID_EXCHANGE_OPEN_FACES): same area, same centroid, opposing normals.
+! DIST is the centroid separation.
+REAL(EB), INTENT(IN) :: A(:),B(:)
+REAL(EB), INTENT(OUT) :: DIST
+DIST = NORM2(A(9:11)-B(9:11))
+CC_GRID_FACE_OPPOSES = ABS(A(5)-B(5))<=MAX(CC_CV_CANON_VOLUME_TOL,CC_CV_CANON_VOLUME_TOL*MAX(ABS(A(5)),ABS(B(5)))) &
+                       .AND. DIST<=CC_CV_CANON_XYZ_TOL .AND. DOT_PRODUCT(A(6:8),B(6:8))<=-0.5_EB
+END FUNCTION CC_GRID_FACE_OPPOSES
+
+
+SUBROUTINE CC_GRID_FACE_PICK(R,NT,ME,OWNM,OWNC,NMATCH,BEST)
+! The face opposing record ME among records 1:NT, scanned in order (local, then received). NMATCH>1 is ambiguous;
+! BEST is the closest. OWNM>0 keeps only faces owned by CV (OWNM,OWNC).
+REAL(EB), INTENT(IN) :: R(:,:)
+INTEGER, INTENT(IN) :: NT,ME,OWNM,OWNC
+INTEGER, INTENT(OUT) :: NMATCH,BEST
+INTEGER :: J
+REAL(EB) :: DIST,BESTD
+NMATCH = 0
+BEST = 0
+BESTD = HUGE(BESTD)
+DO J=1,NT
+   IF (R(1,J)==R(1,ME) .AND. R(2,J)==R(2,ME)) CYCLE
+   IF (OWNM>0 .AND. (NINT(R(3,J))/=OWNM .OR. NINT(R(4,J))/=OWNC)) CYCLE
+   IF (.NOT.CC_GRID_FACE_OPPOSES(R(:,ME),R(:,J),DIST)) CYCLE
+   NMATCH = NMATCH+1
+   IF (DIST<BESTD) THEN
+      BESTD = DIST
+      BEST = J
+   ENDIF
+ENDDO
+END SUBROUTINE CC_GRID_FACE_PICK
+
+
+SUBROUTINE CC_GRID_EXCHANGE_OPEN_FACES(MODE,HAVE,NL,NT,R)
+! The open faces of this rank's meshes (records 1:NL), then the open faces that the ranks across them sent (NL+1:NT).
+! Record: mesh, face, owner mesh, owner CV, area, normal (3), centroid (3), owner point (3). A face goes to the ranks
+! of the neighbor meshes whose box, widened by the match tolerance, holds its centroid.
+! HAVE is false when the whole job has fewer than the minimum (2, or 1 for MODE 2).
+INTEGER, INTENT(IN) :: MODE
+LOGICAL, INTENT(OUT) :: HAVE
+INTEGER, INTENT(OUT) :: NL,NT
+REAL(EB), ALLOCATABLE, INTENT(OUT) :: R(:,:)
+INTEGER :: NM,IF_,ILOC,NS,NS0,NOM,IN,IR,NR,NTOT,IERR
+INTEGER, ALLOCATABLE :: DEST(:)
+REAL(EB), ALLOCATABLE :: L(:,:),SB(:,:),RB(:,:)
+REAL(EB) :: XREF(IAXIS:KAXIS),T
+TYPE(MESH_TYPE), POINTER :: M,M2
+NL = 0
+DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   IF (.NOT.ALLOCATED(MESHES(NM)%FV%FACE%OWNER_CV)) CYCLE
+   DO IF_=1,MESHES(NM)%FV%FACE%N_INT
+      IF (CC_GRID_FACE_IS_OPEN(MODE,NM,IF_)) NL = NL+1
+   ENDDO
+ENDDO
+NTOT = NL
+IF (N_MPI_PROCESSES>1) CALL MPI_ALLREDUCE(NL,NTOT,1,MPI_INTEGER,MPI_SUM,MPI_COMM_WORLD,IERR)
+HAVE = NTOT>=MERGE(1,2,MODE==2)
+IF (.NOT.HAVE) RETURN
+ALLOCATE(L(CC_SEAM_NW,NL))
+ILOC = 0
+DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   M => MESHES(NM)
+   IF (.NOT.ALLOCATED(M%FV%FACE%OWNER_CV)) CYCLE
+   DO IF_=1,M%FV%FACE%N_INT
+      IF (.NOT.CC_GRID_FACE_IS_OPEN(MODE,NM,IF_)) CYCLE
+      ILOC = ILOC+1
+      CALL CC_GRID_FACE_OWNER_POINT(M,NM,IF_,XREF)
+      L(:,ILOC) = (/REAL(NM,EB),REAL(IF_,EB),REAL(M%FV%FACE%OWNER_CV_NM(IF_),EB),REAL(M%FV%FACE%OWNER_CV(IF_),EB), &
+                    M%FV%FACE%AREA(IF_),M%FV%FACE%NVEC(IAXIS:KAXIS,IF_),M%FV%FACE%XYZCEN(IAXIS:KAXIS,IF_),XREF/)
+   ENDDO
+ENDDO
+! One copy per neighbor rank across the face (same-rank neighbors already hold it).
+T = CC_CV_CANON_XYZ_TOL
+ALLOCATE(SB(CC_SEAM_NW,NL*MAXVAL(MESHES(LOWER_MESH_INDEX:UPPER_MESH_INDEX)%N_NEIGHBORING_MESHES)))
+ALLOCATE(DEST(SIZE(SB,2)))
+NS = 0
+DO ILOC=1,NL
+   NM = NINT(L(1,ILOC))
+   NS0 = NS
+   DO IN=1,MESHES(NM)%N_NEIGHBORING_MESHES
+      NOM = MESHES(NM)%NEIGHBORING_MESH(IN)
+      M2 => MESHES(NOM)
+      IF (L(9,ILOC)<M2%XS-T .OR. L(9,ILOC)>M2%XF+T) CYCLE
+      IF (L(10,ILOC)<M2%YS-T .OR. L(10,ILOC)>M2%YF+T) CYCLE
+      IF (L(11,ILOC)<M2%ZS-T .OR. L(11,ILOC)>M2%ZF+T) CYCLE
+      IR = PROCESS(NOM)
+      IF (IR==MY_RANK .OR. ANY(DEST(NS0+1:NS)==IR)) CYCLE
+      NS = NS+1
+      DEST(NS) = IR
+      SB(:,NS) = L(:,ILOC)
+   ENDDO
+ENDDO
+CALL CC_GRID_SEAM_EXCHANGE(CC_SEAM_NW,NS,SB,DEST,NR,RB)
+NT = NL+NR
+ALLOCATE(R(CC_SEAM_NW,NT))
+R(:,1:NL) = L
+R(:,NL+1:NT) = RB
+END SUBROUTINE CC_GRID_EXCHANGE_OPEN_FACES
+
+
+SUBROUTINE CC_GRID_RECONCILE_CROSS_MESH_FACES
+! Pair the two mesh-local representations of every gas face on a mesh interface by physical
+! geometry. Populate the remote CV reference and the partner row on each side and recognize faces
+! whose two GCELLs were merged into the same cross-mesh CV as intra-CV faces.
+! Each open face is sent to the ranks across that face. Same-rank faces stay in the local list.
+INTEGER :: NM,IF_,ILOC,J,K,NL,NT,NS2,NR2,NMATCH,N_AMBIGUOUS,N_AMBIGUOUS_GLOBAL,N_ASYMMETRIC,N_ASYMMETRIC_GLOBAL,IERR
+INTEGER, ALLOCATABLE :: PICK(:),DEST2(:)
+REAL(EB), ALLOCATABLE :: R(:,:),S2(:,:),R2(:,:)
+LOGICAL :: HAVE,FOUND
+TYPE(MESH_TYPE), POINTER :: M
+
+CALL CC_GRID_EXCHANGE_OPEN_FACES(1,HAVE,NL,NT,R)
+IF (.NOT.HAVE) RETURN
+ALLOCATE(PICK(NL))
+PICK = 0
+N_AMBIGUOUS = 0
+DO ILOC=1,NL
+   CALL CC_GRID_FACE_PICK(R,NT,ILOC,0,0,NMATCH,J)
+   IF (NMATCH>1) N_AMBIGUOUS = N_AMBIGUOUS+1
+   IF (NMATCH/=1) CYCLE
+   PICK(ILOC) = J
+   NM = NINT(R(1,ILOC))
+   IF_ = NINT(R(2,ILOC))
+   M => MESHES(NM)
+   M%FV%FACE%NBR_CV_NM(IF_) = NINT(R(3,J))
+   M%FV%FACE%NBR_CV(IF_) = NINT(R(4,J))
+   M%FV%FACE%PARTNER(IF_) = NINT(R(2,J))
+   M%FV%FACE%XN_FACE_REF(IAXIS:KAXIS,IF_) = R(12:14,J)
+   M%FV%FACE%KIND(IF_) = CC_FACE_KIND_REMOTE
+   IF (R(3,J)==R(3,ILOC) .AND. R(4,J)==R(4,ILOC)) THEN
+      M%FV%FACE%ROLE(IF_) = CC_FACE_ROLE_INTERNAL
+   ELSE
+      M%FV%FACE%ROLE(IF_) = CC_FACE_ROLE_EXTERNAL
+   ENDIF
+ENDDO
+N_AMBIGUOUS_GLOBAL = N_AMBIGUOUS
+IF (N_MPI_PROCESSES>1) &
+   CALL MPI_ALLREDUCE(N_AMBIGUOUS,N_AMBIGUOUS_GLOBAL,1,MPI_INTEGER,MPI_SUM,MPI_COMM_WORLD,IERR)
+IF (N_AMBIGUOUS_GLOBAL>0) THEN
+   IF (GET_CUTCELLS_VERBOSE) WRITE(LU_SETCC,'(A,I10)') '   Phase 6 ambiguous remote face rows =',N_AMBIGUOUS_GLOBAL
+   IF (MY_RANK==0) WRITE(LU_ERR,'(A,I0)') &
+      'ERROR: SET_CVS_3D remote FACE reconciliation is not one-to-one; ambiguous rows = ',N_AMBIGUOUS_GLOBAL
+   STOP_STATUS = SETUP_STOP
+ENDIF
+! Partners must be mutual. A partner on this rank is checked here; one elsewhere gets (face, its pick) back.
+ALLOCATE(S2(4,NL),DEST2(NL))
+NS2 = 0
+DO ILOC=1,NL
+   J = PICK(ILOC)
+   IF (J<=NL) CYCLE
+   NS2 = NS2+1
+   S2(:,NS2) = (/R(1,ILOC),R(2,ILOC),R(1,J),R(2,J)/)
+   DEST2(NS2) = PROCESS(NINT(R(1,J)))
+ENDDO
+CALL CC_GRID_SEAM_EXCHANGE(4,NS2,S2,DEST2,NR2,R2)
+N_ASYMMETRIC = 0
+DO ILOC=1,NL
+   J = PICK(ILOC)
+   IF (J<1) CYCLE
+   IF (J<=NL) THEN
+      FOUND = PICK(J)==ILOC
+   ELSE
+      FOUND = .FALSE.
+      DO K=1,NR2
+         IF (ALL(R2(:,K)==(/R(1,J),R(2,J),R(1,ILOC),R(2,ILOC)/))) FOUND = .TRUE.
+      ENDDO
+   ENDIF
+   IF (.NOT.FOUND) N_ASYMMETRIC = N_ASYMMETRIC+1
+ENDDO
+N_ASYMMETRIC_GLOBAL = N_ASYMMETRIC
+IF (N_MPI_PROCESSES>1) &
+   CALL MPI_ALLREDUCE(N_ASYMMETRIC,N_ASYMMETRIC_GLOBAL,1,MPI_INTEGER,MPI_SUM,MPI_COMM_WORLD,IERR)
+IF (N_ASYMMETRIC_GLOBAL>0) THEN
+   IF (MY_RANK==0) WRITE(LU_ERR,'(A,I0)') &
+      'ERROR: SET_CVS_3D remote FACE partners are not mutual; rows = ',N_ASYMMETRIC_GLOBAL
+   STOP_STATUS = SETUP_STOP
+ENDIF
+
+END SUBROUTINE CC_GRID_RECONCILE_CROSS_MESH_FACES
+
+
+SUBROUTINE CC_GRID_SET_REMOTE_NEIGHBOR_POINTS
+! A face whose neighbor CV is already on another mesh is not re-paired above. Its neighbor
+! center is that CV's owner point, taken from the partner row and stored in XN_FACE_REF.
+INTEGER :: NM,IF_,ILOC,J,NL,NT,NMATCH
+REAL(EB), ALLOCATABLE :: R(:,:)
+LOGICAL :: HAVE
+TYPE(MESH_TYPE), POINTER :: M
+
+CALL CC_GRID_EXCHANGE_OPEN_FACES(2,HAVE,NL,NT,R)
+IF (.NOT.HAVE) RETURN
+DO ILOC=1,NL
+   NM = NINT(R(1,ILOC))
+   IF_ = NINT(R(2,ILOC))
+   M => MESHES(NM)
+   CALL CC_GRID_FACE_PICK(R,NT,ILOC,M%FV%FACE%NBR_CV_NM(IF_),M%FV%FACE%NBR_CV(IF_),NMATCH,J)
+   IF (NMATCH/=1) CYCLE
+   M%FV%FACE%PARTNER(IF_) = NINT(R(2,J))
+   M%FV%FACE%XN_FACE_REF(IAXIS:KAXIS,IF_) = R(12:14,J)
+ENDDO
+
+END SUBROUTINE CC_GRID_SET_REMOTE_NEIGHBOR_POINTS
+
+
+SUBROUTINE CC_GRID_SET_FACE_COEFFICIENTS
+! Freeze the compact owner-neighbor geometry used by FV pressure/scalar operators. At identity
+! scope XCV is the GCELL centroid, so AREA/D_LR/RDN reproduces the legacy RC_FACE/CUT_FACE coefficient.
+INTEGER :: NM,IF_,NC,OG,NG,I,J,K,MC
+REAL(EB) :: DV(IAXIS:KAXIS),DN,DOF
+LOGICAL :: REMOTE,KEEP_PARTNER
+TYPE(MESH_TYPE), POINTER :: M
+
+DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   M => MESHES(NM)
+   IF (.NOT.ALLOCATED(M%FV%FACE%OWNER_CV)) CYCLE
+   DO IF_=1,M%FV%FACE%N_INT
+      NC = M%FV%FACE%NBR_CV(IF_)
+      OG = M%FV%FACE%OWNER_GCELL(IF_)
+      NG = M%FV%FACE%NBR_GCELL(IF_)
+      M%FV%FACE%FLUX_AREA(IF_) = M%FV%FACE%AREA(IF_)
+      SELECT CASE(M%FV%FACE%FTYPE(IF_))
+      CASE(CC_FTYPE_CFGAS,CC_FTYPE_CFINB)
+         IF (M%FV%FACE%SRC_ICF(IF_) > 0 .AND. M%FV%FACE%SRC_JCF(IF_) > 0) &
+            M%FV%FACE%FLUX_AREA(IF_) = M%CUT_FACE(M%FV%FACE%SRC_ICF(IF_))%AREA(M%FV%FACE%SRC_JCF(IF_))
+      CASE(CC_FTYPE_RCGAS,CC_FTYPE_RGGAS)
+         M%FV%FACE%FLUX_AREA(IF_) = CC_GRID_GET_REGULAR_FACE_AREA(NM,M%FV%FACE%IJK_FACE(IAXIS,IF_), &
+            M%FV%FACE%IJK_FACE(JAXIS,IF_),M%FV%FACE%IJK_FACE(KAXIS,IF_),M%FV%FACE%X1AXIS(IF_))
+         ! RCGAS SRC_IRC / RC_FACE%FC are assigned later in GET_GASPHASE_REGRCFACES_DATA once RC_FACE exists.
+      END SELECT
+      ! A zero-thickness obstruction blocks the entire Cartesian face, so no flux crosses it.
+      IF (M%FV%FACE%KIND(IF_) == CC_FACE_KIND_WALL .AND. &
+          CC_GRID_WALL_IS_THIN_BARRIER(NM,M%FV%FACE%IWC(IF_))) M%FV%FACE%FLUX_AREA(IF_) = 0._EB
+
+      CALL CC_GRID_FACE_OWNER_POINT(M,NM,IF_,M%FV%FACE%X_FACE_REF(IAXIS:KAXIS,IF_))
+
+      REMOTE = NC>=1 .AND. M%FV%FACE%NBR_CV_NM(IF_)/=NM
+      KEEP_PARTNER = REMOTE .AND. M%FV%FACE%PARTNER(IF_)>0
+      IF (.NOT.KEEP_PARTNER) THEN
+         IF (NG >= 1 .AND. NG <= M%FV%GCELL%N) &
+            M%FV%FACE%XN_FACE_REF(IAXIS:KAXIS,IF_) = M%FV%GCELL%XYZCEN(IAXIS:KAXIS,NG)
+         IF (M%FV%FACE%KIND(IF_) == CC_FACE_KIND_COUPLING) THEN
+            I=M%FV%FACE%NBR_IJK(IAXIS,IF_); J=M%FV%FACE%NBR_IJK(JAXIS,IF_); K=M%FV%FACE%NBR_IJK(KAXIS,IF_)
+            IF (I>=1 .AND. I<=M%IBAR .AND. J>=1 .AND. J<=M%JBAR .AND. K>=1 .AND. K<=M%KBAR) THEN
+               M%FV%FACE%XN_FACE_REF(IAXIS:KAXIS,IF_) = (/M%XC(I),M%YC(J),M%ZC(K)/)
+            ENDIF
+         ENDIF
+         IF (M%FV%FACE%NBR_CV_NM(IF_) == NM .AND. NC >= 1 .AND. NC <= M%FV%CV%N) THEN
+            IF (M%FV%CV%N_MEMBER(NC) > 0) THEN
+               M%FV%FACE%XN_FACE_REF(IAXIS:KAXIS,IF_) = M%FV%CV%XCV(IAXIS:KAXIS,NC)
+            ENDIF
+         ENDIF
+      ENDIF
+
+      ! Remote, missing, or empty neighbors have no local CV center: the distance is skipped, RDN stays 0 and
+      ! GET_FV_FACE_RDN keeps the GCELL span.
+      IF (REMOTE) THEN
+         IF (.NOT.KEEP_PARTNER) THEN
+            IF (NG<1) CYCLE
+         ENDIF
+      ELSE IF (M%FV%FACE%KIND(IF_)/=CC_FACE_KIND_COUPLING) THEN
+         IF (NC<1) THEN
+            IF (NG<1) CYCLE
+         ELSE IF (M%FV%CV%N_MEMBER(NC)==0) THEN
+            MC = 0
+            IF (NG>=1 .AND. NG<=M%FV%GCELL%N .AND. ALLOCATED(M%FV%CV%GCELL_TO_CV)) THEN
+               IF (M%FV%CV%GCELL_TO_CV_NM(NG)==NM) MC = M%FV%CV%GCELL_TO_CV(NG)
+            ENDIF
+            IF (MC>=1 .AND. MC<=M%FV%CV%N) THEN
+               IF (M%FV%CV%N_MEMBER(MC)>0) THEN
+                  M%FV%FACE%XN_FACE_REF(IAXIS:KAXIS,IF_) = M%FV%CV%XCV(IAXIS:KAXIS,MC)
+               ENDIF
+            ELSE IF (NG<1) THEN
+               CYCLE
+            ENDIF
+         ENDIF
+      ENDIF
+      DV(IAXIS:KAXIS) = M%FV%FACE%XN_FACE_REF(IAXIS:KAXIS,IF_) - M%FV%FACE%X_FACE_REF(IAXIS:KAXIS,IF_)
+      DN = ABS(DOT_PRODUCT(DV(IAXIS:KAXIS),M%FV%FACE%NVEC(IAXIS:KAXIS,IF_)))
+      IF (DN <= TWO_EPSILON_EB) DN = NORM2(DV(IAXIS:KAXIS))
+      ! Two CV centers at one point. The piece centroids still define a distance.
+      IF (DN<=TWO_EPSILON_EB .AND. OG>=1 .AND. NG>=1 .AND. &
+          OG<=M%FV%GCELL%N .AND. NG<=M%FV%GCELL%N .AND. OG/=NG) THEN
+         DV(IAXIS:KAXIS) = M%FV%GCELL%XYZCEN(IAXIS:KAXIS,NG) - M%FV%GCELL%XYZCEN(IAXIS:KAXIS,OG)
+         DN = ABS(DOT_PRODUCT(DV(IAXIS:KAXIS),M%FV%FACE%NVEC(IAXIS:KAXIS,IF_)))
+         IF (DN<=TWO_EPSILON_EB) DN = NORM2(DV(IAXIS:KAXIS))
+         IF (DN>TWO_EPSILON_EB) THEN
+            M%FV%FACE%X_FACE_REF(IAXIS:KAXIS,IF_) = M%FV%GCELL%XYZCEN(IAXIS:KAXIS,OG)
+            M%FV%FACE%XN_FACE_REF(IAXIS:KAXIS,IF_) = M%FV%GCELL%XYZCEN(IAXIS:KAXIS,NG)
+         ENDIF
+      ENDIF
+      M%FV%FACE%D_LR(IF_) = DN
+      IF (DN <= TWO_EPSILON_EB) CYCLE
+      M%FV%FACE%RDN(IF_) = 1._EB/DN
+      DOF = ABS(DOT_PRODUCT(M%FV%FACE%XYZCEN(IAXIS:KAXIS,IF_)-M%FV%FACE%X_FACE_REF(IAXIS:KAXIS,IF_), &
+                            M%FV%FACE%NVEC(IAXIS:KAXIS,IF_)))
+      M%FV%FACE%INTERP_W(IF_) = MIN(1._EB,MAX(0._EB,DOF/DN))
+   ENDDO
+ENDDO
+END SUBROUTINE CC_GRID_SET_FACE_COEFFICIENTS
+
+
+SUBROUTINE CC_GRID_BUILD_CV_MEMBER_LISTS
+! Build the CV -> local-GCELL membership in CSR form.
+! A local GCELL IG is a member of local CV GCELL_TO_CV(IG) iff GCELL_TO_CV_NM(IG)==NM.
+! Fill walks IG ascending so each CSR slice matches the linear-scan order.
+TYPE(MESH_TYPE), POINTER :: M
+INTEGER :: NM,NCV,NGCELL,IG,ICV,NLIST
+INTEGER, ALLOCATABLE, DIMENSION(:) :: CURSOR
+
+DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   M => MESHES(NM)
+   IF (ALLOCATED(M%FV%CV%MEMBER_PTR))  DEALLOCATE(M%FV%CV%MEMBER_PTR)
+   IF (ALLOCATED(M%FV%CV%MEMBER_LIST)) DEALLOCATE(M%FV%CV%MEMBER_LIST)
+   NCV = M%FV%CV%N
+   IF (NCV < 1) CYCLE
+   IF (.NOT.ALLOCATED(M%FV%CV%GCELL_TO_CV) .OR. .NOT.ALLOCATED(M%FV%CV%GCELL_TO_CV_NM)) CYCLE
+   NGCELL = M%FV%GCELL%N_INT
+
+   ALLOCATE(M%FV%CV%MEMBER_PTR(NCV+1)); M%FV%CV%MEMBER_PTR = 0
+
+   DO IG=1,NGCELL
+      IF (M%FV%CV%GCELL_TO_CV_NM(IG) == NM) THEN
+         ICV = M%FV%CV%GCELL_TO_CV(IG)
+         IF (ICV >= 1 .AND. ICV <= NCV) M%FV%CV%MEMBER_PTR(ICV+1) = M%FV%CV%MEMBER_PTR(ICV+1) + 1
+      ENDIF
+   ENDDO
+   M%FV%CV%MEMBER_PTR(1) = 1
+   DO ICV=1,NCV
+      M%FV%CV%MEMBER_PTR(ICV+1) = M%FV%CV%MEMBER_PTR(ICV+1) + M%FV%CV%MEMBER_PTR(ICV)
+   ENDDO
+
+   NLIST = M%FV%CV%MEMBER_PTR(NCV+1) - 1
+   ALLOCATE(M%FV%CV%MEMBER_LIST(MAX(1,NLIST))); M%FV%CV%MEMBER_LIST = 0
+   ALLOCATE(CURSOR(NCV)); CURSOR(1:NCV) = M%FV%CV%MEMBER_PTR(1:NCV)
+
+   DO IG=1,NGCELL
+      ICV = M%FV%CV%GCELL_TO_CV(IG)
+      IF (M%FV%CV%GCELL_TO_CV_NM(IG) == NM .AND. ICV >= 1 .AND. ICV <= NCV) THEN
+         M%FV%CV%MEMBER_LIST(CURSOR(ICV)) = IG
+         CURSOR(ICV) = CURSOR(ICV) + 1
+      ENDIF
+   ENDDO
+   DEALLOCATE(CURSOR)
+ENDDO
+END SUBROUTINE CC_GRID_BUILD_CV_MEMBER_LISTS
+
+
+SUBROUTINE CC_GRID_BUILD_CV_FACE_ADJACENCY(NM)
+! Build the CV -> FACE incidence in CSR form.
+INTEGER, INTENT(IN) :: NM
+TYPE(MESH_TYPE), POINTER :: M
+INTEGER :: NCV,IF_,OC,NC,OCNM,NCNM,ICV,NLIST
+INTEGER, ALLOCATABLE, DIMENSION(:) :: CURSOR
+
+M => MESHES(NM)
+NCV = M%FV%CV%N
+IF (NCV < 1) RETURN
+ALLOCATE(M%FV%CV%FACE_PTR(NCV+1)); M%FV%CV%FACE_PTR = 0
+
+DO IF_=1,M%FV%FACE%N_INT
+   OCNM = M%FV%FACE%OWNER_CV_NM(IF_); OC = M%FV%FACE%OWNER_CV(IF_)
+   NCNM = M%FV%FACE%NBR_CV_NM(IF_); NC = M%FV%FACE%NBR_CV(IF_)
+   IF (OCNM == NM .AND. OC >= 1 .AND. OC <= NCV) &
+      M%FV%CV%FACE_PTR(OC+1) = M%FV%CV%FACE_PTR(OC+1) + 1
+   IF (NCNM == NM .AND. NC >= 1 .AND. NC <= NCV .AND. (NCNM /= OCNM .OR. NC /= OC)) &
+      M%FV%CV%FACE_PTR(NC+1) = M%FV%CV%FACE_PTR(NC+1) + 1
+ENDDO
+M%FV%CV%FACE_PTR(1) = 1
+DO ICV=1,NCV
+   M%FV%CV%FACE_PTR(ICV+1) = M%FV%CV%FACE_PTR(ICV+1) + M%FV%CV%FACE_PTR(ICV)
+ENDDO
+
+NLIST = M%FV%CV%FACE_PTR(NCV+1) - 1
+ALLOCATE(M%FV%CV%FACE_LIST(MAX(1,NLIST))); M%FV%CV%FACE_LIST = 0
+ALLOCATE(CURSOR(NCV)); CURSOR(1:NCV) = M%FV%CV%FACE_PTR(1:NCV)
+
+DO IF_=1,M%FV%FACE%N_INT
+   OCNM = M%FV%FACE%OWNER_CV_NM(IF_); OC = M%FV%FACE%OWNER_CV(IF_)
+   NCNM = M%FV%FACE%NBR_CV_NM(IF_); NC = M%FV%FACE%NBR_CV(IF_)
+   IF (OCNM == NM .AND. OC >= 1 .AND. OC <= NCV) THEN
+      M%FV%CV%FACE_LIST(CURSOR(OC)) = IF_; CURSOR(OC) = CURSOR(OC) + 1
+   ENDIF
+   IF (NCNM == NM .AND. NC >= 1 .AND. NC <= NCV .AND. (NCNM /= OCNM .OR. NC /= OC)) THEN
+      M%FV%CV%FACE_LIST(CURSOR(NC)) = IF_; CURSOR(NC) = CURSOR(NC) + 1
+   ENDIF
+ENDDO
+DEALLOCATE(CURSOR)
+END SUBROUTINE CC_GRID_BUILD_CV_FACE_ADJACENCY
+
+
+SUBROUTINE CC_CV_GET_SOLVER_KEY(NM,I,J,K,ICC,JCC,KEY_NM,KEY_IJK,KEY_ICC,KEY_JCC)
+! Return the canonical solver key (owner mesh + owner host Cartesian indices) for the gas cell
+! (I,J,K) / cut piece (ICC,JCC) on mesh NM. When the gate is off or the cell is uncovered the
+! key is the cell itself.
+INTEGER, INTENT(IN)  :: NM,I,J,K,ICC,JCC
+INTEGER, INTENT(OUT) :: KEY_NM,KEY_IJK(IAXIS:KAXIS)
+INTEGER, INTENT(OUT), OPTIONAL :: KEY_ICC,KEY_JCC
+TYPE(MESH_TYPE), POINTER :: M,MO
+INTEGER :: IG,ICV,OWN_NM,CELL_TYPE
+
+! Default: the cell is its own key (identity / legacy baseline).
+KEY_NM = NM
+KEY_IJK(IAXIS) = I; KEY_IJK(JAXIS) = J; KEY_IJK(KAXIS) = K
+IF (PRESENT(KEY_ICC)) KEY_ICC = ICC
+IF (PRESENT(KEY_JCC)) KEY_JCC = JCC
+
+IF (NM < 1 .OR. NM > NMESHES) RETURN
+M => MESHES(NM)
+IF (.NOT.ALLOCATED(M%FV%CV%GCELL_TO_CV)) RETURN
+
+! Locate the GCELL for this entity, then follow the CV ownership.
+IF (ICC > 0 .AND. JCC > 0) THEN
+   CELL_TYPE = CC_GCELL_CUT
+   IG = CC_GRID_GET_GCELL_INDEX_FROM_PIECE(M,ICC,JCC)
+ELSE
+   CELL_TYPE = CC_GCELL_REG
+   IG = CC_GRID_GET_GCELL_INDEX_FROM_ENTITY(NM,CC_GCELL_REG,KEY_IJK,0,0)
+ENDIF
+IF (IG < 1 .OR. IG > M%FV%GCELL%N) RETURN
+
+OWN_NM = M%FV%CV%GCELL_TO_CV_NM(IG)
+ICV    = M%FV%CV%GCELL_TO_CV(IG)
+IF (OWN_NM < 1 .OR. OWN_NM > NMESHES) RETURN
+
+
+MO => MESHES(OWN_NM)
+IF (.NOT.ALLOCATED(MO%FV%CV%IJK)) THEN
+   ! On the child rank the remote owner's FV arrays are not allocated. The globally arbitrated
+   ! canonical entity key is retained on the local child GCELL and is authoritative for L2.
+   IF (OWN_NM/=NM .AND. &
+       M%FV%GCELL%CV_DECISION(IG)==CC_CV_DECISION_MERGE .AND. M%FV%GCELL%MASTER_NM(IG)==OWN_NM .AND. &
+       (M%FV%GCELL%MASTER_CELL_TYPE(IG)==CC_GCELL_REG .OR. M%FV%GCELL%MASTER_CELL_TYPE(IG)==CC_GCELL_CUT)) THEN
+      KEY_NM=OWN_NM
+      KEY_IJK(IAXIS:KAXIS)=M%FV%GCELL%MASTER_IJK(IAXIS:KAXIS,IG)
+      IF (PRESENT(KEY_ICC)) KEY_ICC=M%FV%GCELL%MASTER_ICC(IG)
+      IF (PRESENT(KEY_JCC)) KEY_JCC=M%FV%GCELL%MASTER_JCC(IG)
+      RETURN
+   ENDIF
+   CALL SHUTDOWN('ERROR: CC_CV_GET_SOLVER_KEY could not resolve a mapped cross-rank CV owner.')
+   RETURN
+ENDIF
+IF (ICV < 1 .OR. ICV > MO%FV%CV%N) THEN
+   CALL SHUTDOWN('ERROR: CC_CV_GET_SOLVER_KEY found an invalid canonical CV index.')
+   RETURN
+ENDIF
+
+KEY_NM = OWN_NM
+KEY_IJK(IAXIS:KAXIS) = MO%FV%CV%IJK(IAXIS:KAXIS,ICV)
+IF (PRESENT(KEY_ICC)) KEY_ICC = MO%FV%CV%ICC(ICV)
+IF (PRESENT(KEY_JCC)) KEY_JCC = MO%FV%CV%JCC(ICV)
+END SUBROUTINE CC_CV_GET_SOLVER_KEY
+
+
+LOGICAL FUNCTION CC_CV_CELL_IS_CV_MASTER(NM,I,J,K,ICC,JCC)
+! .TRUE. if the gas cell (I,J,K)/piece (ICC,JCC) is the canonical owner (master) of its CV.
+INTEGER, INTENT(IN) :: NM,I,J,K,ICC,JCC
+INTEGER :: KEY_NM,KEY_IJK(IAXIS:KAXIS),KEY_ICC,KEY_JCC
+
+CALL CC_CV_GET_SOLVER_KEY(NM,I,J,K,ICC,JCC,KEY_NM,KEY_IJK,KEY_ICC,KEY_JCC)
+CC_CV_CELL_IS_CV_MASTER = (KEY_NM==NM .AND. KEY_IJK(IAXIS)==I .AND. KEY_IJK(JAXIS)==J .AND. &
+                           KEY_IJK(KAXIS)==K .AND. KEY_ICC==ICC .AND. KEY_JCC==JCC)
+END FUNCTION CC_CV_CELL_IS_CV_MASTER
+
+LOGICAL FUNCTION CC_GRID_REGULAR_GCELL_CANDIDATE_IS_VALID(NM,IJK)
+INTEGER, INTENT(IN) :: NM,IJK(IAXIS:KAXIS)
+TYPE(MESH_TYPE), POINTER :: M
+INTEGER :: I,J,K,ICELL
+
+CC_GRID_REGULAR_GCELL_CANDIDATE_IS_VALID = .FALSE.
+
+M => MESHES(NM)
+I = IJK(IAXIS); J = IJK(JAXIS); K = IJK(KAXIS)
+IF (I < 1 .OR. I > M%IBAR) RETURN
+IF (J < 1 .OR. J > M%JBAR) RETURN
+IF (K < 1 .OR. K > M%KBAR) RETURN
+IF (.NOT.ALLOCATED(M%CCVAR)) RETURN
+IF (M%CCVAR(I,J,K,CC_CGSC) /= CC_GASPHASE) RETURN
+IF (M%CCVAR(I,J,K,CC_IDCC) > 0) RETURN
+
+ICELL = M%CELL_INDEX(I,J,K)
+IF (ICELL > 0) THEN
+   IF (M%CELL(ICELL)%SOLID) RETURN
+ENDIF
+CC_GRID_REGULAR_GCELL_CANDIDATE_IS_VALID = .TRUE.
+END FUNCTION CC_GRID_REGULAR_GCELL_CANDIDATE_IS_VALID
+
+
+LOGICAL FUNCTION CC_GRID_CUT_PIECE_IS_ACTIVE(NM,ICC,JCC)
+! A cut piece whose host Cartesian cell is made solid by an OBST carries no legacy solver row
+! (see GET_LINKED_MATRIX_INDEXES_Z and NUMBER_UNKH_CUTCELLS), so it must not become a CV either.
+INTEGER, INTENT(IN) :: NM,ICC,JCC
+TYPE(MESH_TYPE), POINTER :: M
+INTEGER :: I,J,K,ICELL
+
+CC_GRID_CUT_PIECE_IS_ACTIVE = .FALSE.
+M => MESHES(NM)
+IF (M%CUT_CELL(ICC)%NOADVANCE(JCC) /= NOT_BLOCKED) RETURN
+
+I = M%CUT_CELL(ICC)%IJK(IAXIS); J = M%CUT_CELL(ICC)%IJK(JAXIS); K = M%CUT_CELL(ICC)%IJK(KAXIS)
+IF (I < 1 .OR. I > M%IBAR) RETURN
+IF (J < 1 .OR. J > M%JBAR) RETURN
+IF (K < 1 .OR. K > M%KBAR) RETURN
+ICELL = M%CELL_INDEX(I,J,K)
+IF (ICELL > 0) THEN
+   IF (M%CELL(ICELL)%SOLID) RETURN
+ENDIF
+CC_GRID_CUT_PIECE_IS_ACTIVE = .TRUE.
+END FUNCTION CC_GRID_CUT_PIECE_IS_ACTIVE
+
+
+LOGICAL FUNCTION CC_GRID_CARTESIAN_HOST_IS_SOLID(NM,I,J,K)
+! True when an in-mesh Cartesian cell is made solid by an OBST. Guard cells report false so that
+! mesh-interface faces keep the classification they are given elsewhere.
+INTEGER, INTENT(IN) :: NM,I,J,K
+TYPE(MESH_TYPE), POINTER :: M
+INTEGER :: ICELL
+
+CC_GRID_CARTESIAN_HOST_IS_SOLID = .FALSE.
+M => MESHES(NM)
+IF (I < 1 .OR. I > M%IBAR) RETURN
+IF (J < 1 .OR. J > M%JBAR) RETURN
+IF (K < 1 .OR. K > M%KBAR) RETURN
+ICELL = M%CELL_INDEX(I,J,K)
+IF (ICELL > 0) THEN
+   IF (M%CELL(ICELL)%SOLID) CC_GRID_CARTESIAN_HOST_IS_SOLID = .TRUE.
+ENDIF
+END FUNCTION CC_GRID_CARTESIAN_HOST_IS_SOLID
+
+
+INTEGER FUNCTION CC_GRID_GET_CARTESIAN_FACE_WALL(NM,I,J,K,X1AXIS,SIDE)
+! WALL index carried by the Cartesian face on SIDE of cell (I,J,K) along X1AXIS, as seen from that
+! cell, or 0 when the face carries no wall. WALL_INDEX(+n) is the high face of the cell along axis n.
+INTEGER, INTENT(IN) :: NM,I,J,K,X1AXIS,SIDE
+TYPE(MESH_TYPE), POINTER :: M
+INTEGER :: ICELL,IOR,IW
+
+CC_GRID_GET_CARTESIAN_FACE_WALL = 0
+M => MESHES(NM)
+IF (I < 1 .OR. I > M%IBAR) RETURN
+IF (J < 1 .OR. J > M%JBAR) RETURN
+IF (K < 1 .OR. K > M%KBAR) RETURN
+ICELL = M%CELL_INDEX(I,J,K)
+IF (ICELL < 1) RETURN
+
+IOR = X1AXIS
+IF (SIDE == LOW_IND) IOR = -X1AXIS
+IW = M%CELL(ICELL)%WALL_INDEX(IOR)
+IF (IW < 1) RETURN
+CC_GRID_GET_CARTESIAN_FACE_WALL = IW
+END FUNCTION CC_GRID_GET_CARTESIAN_FACE_WALL
+
+
+LOGICAL FUNCTION CC_GRID_WALL_IS_THIN_BARRIER(NM,IW)
+! A zero-thickness obstruction leaves both adjacent Cartesian cells gas (WALL%THIN, set in
+! INIT_WALL_CELL), so it is invisible to the GEOM-derived CCVAR/FCVAR state that otherwise drives
+! the FV face classification. Such a face still blocks flow and must be carried as a wall.
+INTEGER, INTENT(IN) :: NM,IW
+TYPE(MESH_TYPE), POINTER :: M
+
+CC_GRID_WALL_IS_THIN_BARRIER = .FALSE.
+IF (IW < 1) RETURN
+M => MESHES(NM)
+IF (M%WALL(IW)%BOUNDARY_TYPE /= SOLID_BOUNDARY) RETURN
+CC_GRID_WALL_IS_THIN_BARRIER = M%WALL(IW)%THIN
+END FUNCTION CC_GRID_WALL_IS_THIN_BARRIER
+
+
+SUBROUTINE CC_GRID_DUMP_CV_MAP
+! Partition-invariance comparison harness. Write four normalized tables per rank:
+!   GCELL  : physical inventory of normalized gas polyhedra,
+!   CV     : active owner rows and aggregate geometry,
+!   MEMBER : complete GCELL -> final CV grouping (scanned from GCELL_TO_CV, not the pairwise diagnostic),
+!   FACE   : physical face geometry plus GCELL and CV adjacency.
+! The companion Verification/Complex_Geometry/diff_fv_topology.py tool unions the rank files, replaces
+! run-local mesh/index identifiers by physical keys, and compares one- and multi-mesh partitions.
+INTEGER :: NM,ICV,IG,IF_,LU,OWN_NM,OWN_CV,NBR_NM,NBR_CV,OWNER_IG,NBR_IG
+CHARACTER(255) :: FN
+TYPE(MESH_TYPE), POINTER :: M
+IF (.NOT.GET_CUTCELLS_VERBOSE) RETURN
+
+! GCELL physical inventory.
+LU = GET_FILE_NUMBER()
+WRITE(FN,'(A,A,I0,A)') TRIM(RESULTS_DIR)//TRIM(CHID),'_fv_gcell_',MY_RANK,'.csv'
+OPEN(UNIT=LU,FILE=TRIM(FN),STATUS='REPLACE')
+WRITE(LU,'(A)') 'mesh_nm,gcell,cell_type,layer,status,i,j,k,icc,jcc,cv_decision,master_nm,master_cell_type,master_gcell,'// &
+                 'master_i,master_j,master_k,master_icc,master_jcc,conn_axis,volume,x,y,z,conn_area,max_theta,max_skew,min_dfdiam'
+DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   M => MESHES(NM)
+   IF (.NOT.ALLOCATED(M%FV%GCELL%CELL_TYPE)) CYCLE
+   DO IG=1,M%FV%GCELL%N_INT
+      WRITE(LU,'(I0,19(",",I0),8(",",ES23.15))') NM,IG,M%FV%GCELL%CELL_TYPE(IG),M%FV%GCELL%LAYER(IG), &
+         M%FV%GCELL%STATUS(IG), &
+         M%FV%GCELL%IJK(IAXIS:KAXIS,IG),M%FV%GCELL%ICC(IG),M%FV%GCELL%JCC(IG),M%FV%GCELL%CV_DECISION(IG), &
+         M%FV%GCELL%MASTER_NM(IG),M%FV%GCELL%MASTER_CELL_TYPE(IG),M%FV%GCELL%MASTER_IG(IG), &
+         M%FV%GCELL%MASTER_IJK(IAXIS:KAXIS,IG),M%FV%GCELL%MASTER_ICC(IG),M%FV%GCELL%MASTER_JCC(IG), &
+         M%FV%GCELL%CONN_AXIS(IG),M%FV%GCELL%VOLUME(IG),M%FV%GCELL%XYZCEN(IAXIS:KAXIS,IG), &
+         M%FV%GCELL%CONN_AREA(IG),M%FV%GCELL%MAX_THETA(IG),M%FV%GCELL%MAX_SKEW(IG),M%FV%GCELL%MIN_DFDIAM(IG)
+   ENDDO
+ENDDO
+CLOSE(LU)
+
+! Active CV owner rows.
+LU = GET_FILE_NUMBER()
+WRITE(FN,'(A,A,I0,A)') TRIM(RESULTS_DIR)//TRIM(CHID),'_fv_cv_',MY_RANK,'.csv'
+OPEN(UNIT=LU,FILE=TRIM(FN),STATUS='REPLACE')
+WRITE(LU,'(A)') 'owner_nm,cv,owner_gcell,n_member,cell_type,i,j,k,icc,jcc,center_source,'// &
+                 'volume,xcv_x,xcv_y,xcv_z,xbar_x,xbar_y,xbar_z'
+DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   M => MESHES(NM)
+   IF (.NOT.ALLOCATED(M%FV%CV%N_MEMBER)) CYCLE
+   DO ICV=1,M%FV%CV%N
+      IF (M%FV%CV%N_MEMBER(ICV) < 1) CYCLE
+      IF (M%FV%CV%OWNER_NM(ICV) /= NM) CYCLE
+      WRITE(LU,'(I0,10(",",I0),7(",",ES23.15))') M%FV%CV%OWNER_NM(ICV),ICV,M%FV%CV%OWNER_GCELL(ICV), &
+         M%FV%CV%N_MEMBER(ICV),M%FV%CV%CELL_TYPE(ICV),M%FV%CV%IJK(IAXIS:KAXIS,ICV),M%FV%CV%ICC(ICV), &
+         M%FV%CV%JCC(ICV),M%FV%CV%CENTER_SOURCE(ICV),M%FV%CV%VOLUME(ICV),M%FV%CV%XCV(IAXIS:KAXIS,ICV), &
+         M%FV%CV%XBAR_CV(IAXIS:KAXIS,ICV)
+   ENDDO
+ENDDO
+CLOSE(LU)
+
+! Complete final member relation. Scanning every local GCELL also captures members whose final CV owner
+! is on another mesh/process; the (cv_owner_nm,cv_owner) pair is the run-local distributed group key.
+LU = GET_FILE_NUMBER()
+WRITE(FN,'(A,A,I0,A)') TRIM(RESULTS_DIR)//TRIM(CHID),'_fv_member_',MY_RANK,'.csv'
+OPEN(UNIT=LU,FILE=TRIM(FN),STATUS='REPLACE')
+WRITE(LU,'(A)') 'cv_owner_nm,cv_owner,member_nm,member_gcell,cell_type,layer,i,j,k,icc,jcc,volume,x,y,z'
+DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   M => MESHES(NM)
+   IF (.NOT.ALLOCATED(M%FV%CV%GCELL_TO_CV)) CYCLE
+   DO IG=1,M%FV%GCELL%N
+      OWN_NM = M%FV%CV%GCELL_TO_CV_NM(IG)
+      OWN_CV = M%FV%CV%GCELL_TO_CV(IG)
+      IF (OWN_NM < 1 .OR. OWN_CV < 1) CYCLE
+      WRITE(LU,'(I0,10(",",I0),4(",",ES23.15))') OWN_NM,OWN_CV,NM,IG,M%FV%GCELL%CELL_TYPE(IG),M%FV%GCELL%LAYER(IG), &
+         M%FV%GCELL%IJK(IAXIS:KAXIS,IG),M%FV%GCELL%ICC(IG),M%FV%GCELL%JCC(IG),M%FV%GCELL%VOLUME(IG), &
+         M%FV%GCELL%XYZCEN(IAXIS:KAXIS,IG)
+   ENDDO
+ENDDO
+CLOSE(LU)
+
+! FACE geometry and adjacency, including the outside Cartesian cell of compact-region coupling rows.
+LU = GET_FILE_NUMBER()
+WRITE(FN,'(A,A,I0,A)') TRIM(RESULTS_DIR)//TRIM(CHID),'_fv_face_',MY_RANK,'.csv'
+OPEN(UNIT=LU,FILE=TRIM(FN),STATUS='REPLACE')
+WRITE(LU,'(A)') 'mesh_nm,face,owner_cv_nm,owner_cv,nbr_cv_nm,nbr_cv,owner_gcell,nbr_gcell,'// &
+                       'kind,role,ftype,src_icf,src_jcf,x1axis,face_i,face_j,face_k,nbr_i,nbr_j,nbr_k,'// &
+                       'area,flux_area,nx,ny,nz,x,y,z,d_lr,interp_w'
+DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   M => MESHES(NM)
+   IF (.NOT.ALLOCATED(M%FV%FACE%OWNER_CV)) CYCLE
+   ! Interior rows only. The guard tail is partition-local and is not part of this map.
+   DO IF_=1,M%FV%FACE%N_INT
+      OWNER_IG = M%FV%FACE%OWNER_GCELL(IF_)
+      NBR_IG = M%FV%FACE%NBR_GCELL(IF_)
+      OWN_NM = M%FV%FACE%OWNER_CV_NM(IF_); OWN_CV = M%FV%FACE%OWNER_CV(IF_)
+      NBR_NM = M%FV%FACE%NBR_CV_NM(IF_); NBR_CV = M%FV%FACE%NBR_CV(IF_)
+         WRITE(LU,'(I0,19(",",I0),10(",",ES23.15))') NM,IF_,OWN_NM,OWN_CV,NBR_NM,NBR_CV,OWNER_IG,NBR_IG, &
+         M%FV%FACE%KIND(IF_),M%FV%FACE%ROLE(IF_),M%FV%FACE%FTYPE(IF_),M%FV%FACE%SRC_ICF(IF_), &
+         M%FV%FACE%SRC_JCF(IF_),M%FV%FACE%X1AXIS(IF_),M%FV%FACE%IJK_FACE(IAXIS:KAXIS,IF_), &
+            M%FV%FACE%NBR_IJK(IAXIS:KAXIS,IF_), &
+            M%FV%FACE%AREA(IF_),M%FV%FACE%FLUX_AREA(IF_),M%FV%FACE%NVEC(IAXIS:KAXIS,IF_),M%FV%FACE%XYZCEN(IAXIS:KAXIS,IF_), &
+            M%FV%FACE%D_LR(IF_),M%FV%FACE%INTERP_W(IF_)
+   ENDDO
+ENDDO
+CLOSE(LU)
+END SUBROUTINE CC_GRID_DUMP_CV_MAP
 
 SUBROUTINE CC_GRID_GLOBAL_INIT(ISTR,IEND,JSTR,JEND,KSTR,KEND,CC_COMPUTE_MESH,TNOW,CPUTIME_START_MESH, &
                                GEOM_AREA_SURF_OLD,GEOM_AREA_SURF_NEW)
@@ -15124,7 +20096,6 @@ CC_NEDGECROSS = 0
 CC_NCUTEDGE   = 0
 CC_NCUTFACE   = 0
 CC_NCUTCELL   = 0
-
 ! Check Meshes Boundaries match, requirement to get consistent ghost and internal cut-cells.
 CALL CHECK_WALL_CELL_PLANE_MATCH; IF (STOP_STATUS==SETUP_STOP) RETURN
 
@@ -15362,7 +20333,7 @@ ENDIF REGCC_REGION_IF
 CALL CC_GRID_FINALIZE_TERRAIN(NM,GEOM_ZMAX_AUX)
 CALL CC_GRID_STORE_SPECIAL_CELLS_TO_BLOCK(NM)
 CALL DEFINE_XYZFACE_CELL(NM,ALLOC_FLG=.FALSE.,ISTR=ISTR,IEND=IEND,JSTR=JSTR,JEND=JEND,KSTR=KSTR,KEND=KEND)
-CALL CC_GRID_RELEASE_CELLRT
+IF (ALLOCATED(CELLRT)) DEALLOCATE(CELLRT)
 
 END SUBROUTINE CC_GRID_BUILD_CUTCELL_MESH
 
@@ -22175,6 +27146,10 @@ IF(SIZE(MESHES(NM)%CUT_FACE(ICF)%AREA,DIM=1)<NFACE+NSFACE) THEN
    CALL MOVE_ALLOC(FROM=AREA,TO=MESHES(NM)%CUT_FACE(ICF)%AREA)
    CALL MOVE_ALLOC(FROM=XYZCEN,TO=MESHES(NM)%CUT_FACE(ICF)%XYZCEN)
 
+   ALLOCATE(INT1D(1:NFACE+NSFACE)); INT1D = 0
+   IF (ALLOCATED(MESHES(NM)%CUT_FACE(ICF)%FC)) INT1D(1:NFACE)=MESHES(NM)%CUT_FACE(ICF)%FC(1:NFACE)
+   CALL MOVE_ALLOC(FROM=INT1D,TO=MESHES(NM)%CUT_FACE(ICF)%FC)
+
    ! This is only used for reallocation of INB faces when blocking cut-cells:
    IF (MESHES(NM)%CUT_FACE(ICF)%STATUS == CC_INBOUNDARY) THEN
 
@@ -22190,9 +27165,6 @@ IF(SIZE(MESHES(NM)%CUT_FACE(ICF)%AREA,DIM=1)<NFACE+NSFACE) THEN
       INT2D(1:2,1:NFACE)=MESHES(NM)%CUT_FACE(ICF)%BODTRI(1:2,1:NFACE)
       CALL MOVE_ALLOC(FROM=INT2D,TO=MESHES(NM)%CUT_FACE(ICF)%BODTRI)
 
-      ALLOCATE(INT2D(LOW_IND:HIGH_IND,1:NFACE+NSFACE)); INT2D = CC_UNDEFINED
-      INT2D(LOW_IND:HIGH_IND,1:NFACE) = MESHES(NM)%CUT_FACE(ICF)%UNKZ(LOW_IND:HIGH_IND,1:NFACE)
-      CALL MOVE_ALLOC(FROM=INT2D,TO=MESHES(NM)%CUT_FACE(ICF)%UNKZ)
 
       ALLOCATE(REAL2D(IAXIS:KAXIS,1:NFACE+NSFACE)); REAL2D = 0._EB
       REAL2D(IAXIS:KAXIS,1:NFACE) = MESHES(NM)%CUT_FACE(ICF)%XCENLOW(IAXIS:KAXIS,1:NFACE)
@@ -22270,6 +27242,7 @@ CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%CFELEM,           TO=CUT_FACE_TO%CFELEM)
 CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%CEDGES,           TO=CUT_FACE_TO%CEDGES)
 CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%AREA,             TO=CUT_FACE_TO%AREA)
 CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%AREA_ADJUST,      TO=CUT_FACE_TO%AREA_ADJUST)
+CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%FC,               TO=CUT_FACE_TO%FC)
 CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%XYZCEN,           TO=CUT_FACE_TO%XYZCEN)
 CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%SHARED,           TO=CUT_FACE_TO%SHARED)
 CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%BLK_TAG,          TO=CUT_FACE_TO%BLK_TAG)
@@ -22280,42 +27253,12 @@ CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%INXSQAREA,        TO=CUT_FACE_TO%INXSQAREA)
 CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%JNYSQAREA,        TO=CUT_FACE_TO%JNYSQAREA)
 CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%KNZSQAREA,        TO=CUT_FACE_TO%KNZSQAREA)
 CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%BODTRI,           TO=CUT_FACE_TO%BODTRI)
-CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%UNKH,             TO=CUT_FACE_TO%UNKH)
-CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%UNKZ,             TO=CUT_FACE_TO%UNKZ)
 CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%XCENLOW,          TO=CUT_FACE_TO%XCENLOW)
 CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%XCENHIGH,         TO=CUT_FACE_TO%XCENHIGH)
-CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%ZZ_FACE,          TO=CUT_FACE_TO%ZZ_FACE)
-CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%TMP_FACE,         TO=CUT_FACE_TO%TMP_FACE)
-CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%RHO_D_DZDN,       TO=CUT_FACE_TO%RHO_D_DZDN)
-CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%H_RHO_D_DZDN,     TO=CUT_FACE_TO%H_RHO_D_DZDN)
-CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%VEL,              TO=CUT_FACE_TO%VEL)
-CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%VELS,             TO=CUT_FACE_TO%VELS)
-CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%FN,               TO=CUT_FACE_TO%FN)
-CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%FN_B,             TO=CUT_FACE_TO%FN_B)
-CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%VEL_SAVE,         TO=CUT_FACE_TO%VEL_SAVE)
-CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%VEL_LNK,          TO=CUT_FACE_TO%VEL_LNK)
-CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%VEL_OMESH,        TO=CUT_FACE_TO%VEL_OMESH)
-CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%VELS_OMESH,       TO=CUT_FACE_TO%VELS_OMESH)
-CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%VEL_LNK_OMESH,    TO=CUT_FACE_TO%VEL_LNK_OMESH)
-CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%FN_OMESH,         TO=CUT_FACE_TO%FN_OMESH)
 CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%JDH,              TO=CUT_FACE_TO%JDH)
 CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%EDGE_LIST,        TO=CUT_FACE_TO%EDGE_LIST)
 CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%CELL_LIST,        TO=CUT_FACE_TO%CELL_LIST)
 
-CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%INT_IJK,          TO=CUT_FACE_TO%INT_IJK)
-CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%INT_COEF,         TO=CUT_FACE_TO%INT_COEF)
-CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%INT_DCOEF,        TO=CUT_FACE_TO%INT_DCOEF)
-CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%INT_XYZBF,        TO=CUT_FACE_TO%INT_XYZBF)
-CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%INT_NOUT,         TO=CUT_FACE_TO%INT_NOUT)
-CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%INT_INBFC,        TO=CUT_FACE_TO%INT_INBFC)
-CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%INT_NPE,          TO=CUT_FACE_TO%INT_NPE)
-CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%INT_XN,           TO=CUT_FACE_TO%INT_XN)
-CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%INT_CN,           TO=CUT_FACE_TO%INT_CN)
-CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%INT_FVARS,        TO=CUT_FACE_TO%INT_FVARS)
-CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%INT_NOMIND,       TO=CUT_FACE_TO%INT_NOMIND)
-
-CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%INT_CVARS,        TO=CUT_FACE_TO%INT_CVARS)
-CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%UNKF,             TO=CUT_FACE_TO%UNKF)
 CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%CFACE_INDEX,      TO=CUT_FACE_TO%CFACE_INDEX)
 CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%SURF_INDEX,       TO=CUT_FACE_TO%SURF_INDEX)
 CALL MOVE_ALLOC(FROM=CUT_FACE_FROM%NOMICF,           TO=CUT_FACE_TO%NOMICF)
@@ -22336,6 +27279,7 @@ IF(ALLOCATED(MESHES(NM)%CUT_FACE(ICF)%CFELEM))  DEALLOCATE(MESHES(NM)%CUT_FACE(I
 IF(ALLOCATED(MESHES(NM)%CUT_FACE(ICF)%CEDGES))  DEALLOCATE(MESHES(NM)%CUT_FACE(ICF)%CEDGES)
 IF(ALLOCATED(MESHES(NM)%CUT_FACE(ICF)%AREA))    DEALLOCATE(MESHES(NM)%CUT_FACE(ICF)%AREA)
 IF(ALLOCATED(MESHES(NM)%CUT_FACE(ICF)%AREA_ADJUST)) DEALLOCATE(MESHES(NM)%CUT_FACE(ICF)%AREA_ADJUST)
+IF(ALLOCATED(MESHES(NM)%CUT_FACE(ICF)%FC))      DEALLOCATE(MESHES(NM)%CUT_FACE(ICF)%FC)
 IF(.NOT.PRESENT(DO_BNCF)) THEN
    MESHES(NM)%CUT_FACE(ICF)%NFACE = 0
    IF(ALLOCATED(MESHES(NM)%CUT_FACE(ICF)%XYZCEN))  DEALLOCATE(MESHES(NM)%CUT_FACE(ICF)%XYZCEN)
@@ -22351,8 +27295,6 @@ IF(ALLOCATED(MESHES(NM)%CUT_FACE(ICF)%KNZSQAREA)) DEALLOCATE(MESHES(NM)%CUT_FACE
 
 IF(ALLOCATED(MESHES(NM)%CUT_FACE(ICF)%BODTRI))    DEALLOCATE(MESHES(NM)%CUT_FACE(ICF)%BODTRI)
 
-IF(ALLOCATED(MESHES(NM)%CUT_FACE(ICF)%UNKH))      DEALLOCATE(MESHES(NM)%CUT_FACE(ICF)%UNKH)
-IF(ALLOCATED(MESHES(NM)%CUT_FACE(ICF)%UNKZ))      DEALLOCATE(MESHES(NM)%CUT_FACE(ICF)%UNKZ)
 
 IF(ALLOCATED(MESHES(NM)%CUT_FACE(ICF)%XCENLOW))   DEALLOCATE(MESHES(NM)%CUT_FACE(ICF)%XCENLOW)
 IF(ALLOCATED(MESHES(NM)%CUT_FACE(ICF)%XCENHIGH))  DEALLOCATE(MESHES(NM)%CUT_FACE(ICF)%XCENHIGH)
@@ -22379,6 +27321,7 @@ ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%XYZVERT(IAXIS:KAXIS,1:NVERT)); MESHES(NM)%CUT_
 ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%CFELEM(1:NVERTFACE,1:NFACE)); MESHES(NM)%CUT_FACE(ICF)%CFELEM = CC_UNDEFINED
 ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%AREA(1:NFACE)); MESHES(NM)%CUT_FACE(ICF)%AREA = 0._EB
 ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%XYZCEN(IAXIS:KAXIS,1:NFACE)); MESHES(NM)%CUT_FACE(ICF)%XYZCEN = 0._EB
+ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%FC(1:NFACE)); MESHES(NM)%CUT_FACE(ICF)%FC = 0
 ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%SHARED(1:NFACE)); MESHES(NM)%CUT_FACE(ICF)%SHARED = .FALSE.
 ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%BLK_TAG(1:NFACE));MESHES(NM)%CUT_FACE(ICF)%BLK_TAG= .FALSE.
 ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%LINK_LEV(1:NFACE)); MESHES(NM)%CUT_FACE(ICF)%LINK_LEV = CC_UNDEFINED
@@ -22391,7 +27334,6 @@ ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%KNZSQAREA(1:NFACE)); MESHES(NM)%CUT_FACE(ICF)%
 
 ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%BODTRI(1:2,1:NFACE));MESHES(NM)%CUT_FACE(ICF)%BODTRI = CC_UNDEFINED
 
-ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%UNKZ(LOW_IND:HIGH_IND,1:NFACE));MESHES(NM)%CUT_FACE(ICF)%UNKZ = CC_UNDEFINED
 
 ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%XCENLOW(IAXIS:KAXIS,1:NFACE)); MESHES(NM)%CUT_FACE(ICF)%XCENLOW  = 0._EB
 ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%XCENHIGH(IAXIS:KAXIS,1:NFACE));MESHES(NM)%CUT_FACE(ICF)%XCENHIGH = 0._EB
@@ -22426,24 +27368,7 @@ IF(ALLOCATED(MESHES(NM)%CUT_FACE(ICF)%INXSQAREA)) DEALLOCATE(MESHES(NM)%CUT_FACE
 IF(ALLOCATED(MESHES(NM)%CUT_FACE(ICF)%JNYSQAREA)) DEALLOCATE(MESHES(NM)%CUT_FACE(ICF)%JNYSQAREA)
 IF(ALLOCATED(MESHES(NM)%CUT_FACE(ICF)%KNZSQAREA)) DEALLOCATE(MESHES(NM)%CUT_FACE(ICF)%KNZSQAREA)
 
-ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%UNKH(LOW_IND:HIGH_IND,1:NFACE));MESHES(NM)%CUT_FACE(ICF)%UNKH = CC_UNDEFINED
-ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%RHO_D_DZDN(1:N_TOTAL_SCALARS,1:NFACE))
-ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%H_RHO_D_DZDN(1:N_TOTAL_SCALARS,1:NFACE))
-MESHES(NM)%CUT_FACE(ICF)%RHO_D_DZDN   = 0._EB
-MESHES(NM)%CUT_FACE(ICF)%H_RHO_D_DZDN = 0._EB
-
-ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%ZZ_FACE(1:N_TOTAL_SCALARS,1:NFACE)); MESHES(NM)%CUT_FACE(ICF)%ZZ_FACE = 0._EB
-ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%TMP_FACE(1:NFACE)); MESHES(NM)%CUT_FACE(ICF)%TMP_FACE = 0._EB
-
-ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%VEL(1:NFACE), MESHES(NM)%CUT_FACE(ICF)%VELS(1:NFACE), &
-         MESHES(NM)%CUT_FACE(ICF)%FN(1:NFACE),  MESHES(NM)%CUT_FACE(ICF)%FN_B(1:NFACE), &
-         MESHES(NM)%CUT_FACE(ICF)%VEL_SAVE(1:NFACE))
-MESHES(NM)%CUT_FACE(ICF)%VEL    = 0._EB; MESHES(NM)%CUT_FACE(ICF)%VELS   = 0._EB
-MESHES(NM)%CUT_FACE(ICF)%FN     = 0._EB; MESHES(NM)%CUT_FACE(ICF)%VEL_SAVE = 0._EB
-MESHES(NM)%CUT_FACE(ICF)%FN_B   = 0._EB;
-
 ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%JDH(1:2,1:2,1:NFACE)); MESHES(NM)%CUT_FACE(ICF)%JDH  = CC_UNDEFINED
-ALLOCATE(MESHES(NM)%CUT_FACE(ICF)%UNKF(1:NFACE));        MESHES(NM)%CUT_FACE(ICF)%UNKF = CC_UNDEFINED
 
 IF (MESHES(NM)%CUT_FACE(ICF)%STATUS /= CC_INBOUNDARY) THEN
    IF(PRESENT(IBNDINT)) THEN
@@ -25704,7 +30629,8 @@ DO K=KLO,KHI
                IF(DO_NOADVANCE .AND. VOL(ICELL)/(DXCELL(I)*DYCELL(J)*DZCELL(K))<MIN_VOL_FACTOR) &
                   NOADVANCE(ICELL) = BLOCKED_SMALL_CELL
                IF(VOL(ICELL)>DXCELL(I)*DYCELL(J)*DZCELL(K)) VOL(ICELL) = DXCELL(I)*DYCELL(J)*DZCELL(K)
-               IF(VOL(ICELL) < GEOMEPS) THEN ! Volume too small for correct calculation of XYZCEN-> take cartcell centroid.
+               ! Volume below a GEOMEPS thick skin on the cell is too small for correct XYZCEN -> take cartcell centroid.
+               IF(VOL(ICELL) < GEOMEPS*(DXCELL(I)*DYCELL(J)+DYCELL(J)*DZCELL(K)+DZCELL(K)*DXCELL(I))) THEN
                   IF(.NOT.DO_NOADVANCE .AND. VOL(ICELL)<TWENTY_EPSILON_EB) VOL(ICELL) = DXCELL(I)*DYCELL(J)*DZCELL(K)
                   XYZCEN(IAXIS:KAXIS,ICELL) = (/ XCELL(I), YCELL(J), ZCELL(K) /)
                ELSE
@@ -26568,12 +31494,6 @@ CELLRT(:,:,:) = .FALSE.
 
 END SUBROUTINE CC_GRID_ALLOCATE_CELLRT
 
-
-SUBROUTINE CC_GRID_RELEASE_CELLRT
-
-IF (ALLOCATED(CELLRT)) DEALLOCATE(CELLRT)
-
-END SUBROUTINE CC_GRID_RELEASE_CELLRT
 
 
 SUBROUTINE CC_GRID_BUILD_CUTCELL_MESH_WORK(NM,ISTR,IEND,JSTR,JEND,KSTR,KEND,GEOM_ZMAX_AUX)
