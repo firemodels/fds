@@ -496,7 +496,7 @@ class WorkflowTests(unittest.TestCase):
 
     def test_every_build_depends_on_admission_and_uses_exact_event_merge(self):
         jobs = self.workflows["pr-builds.yml"]["jobs"]
-        for name in ("linux", "macos", "windows", "cmake", "line-endings"):
+        for name in ("linux", "macos", "windows", "line-endings"):
             with self.subTest(job=name):
                 self.assertEqual(jobs[name]["needs"], "admission")
                 self.assertNotIn("always()", jobs[name].get("if", ""))
@@ -533,7 +533,7 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(job["if"], "always()")
         script = job["steps"][0]["run"].split("\n", 1)[1].rsplit("PYTHON", 1)[0]
         results = {name: {"result": "success"} for name in job["needs"]}
-        results["admission"]["outputs"] = {"conventional": "true", "cmake": "true"}
+        results["admission"]["outputs"] = {"conventional": "true"}
 
         def run(value):
             return subprocess.run([sys.executable, "-c", script],
@@ -546,8 +546,8 @@ class WorkflowTests(unittest.TestCase):
                 changed[name]["result"] = state
                 with self.subTest(job=name, state=state):
                     self.assertNotEqual(run(changed), 0)
-        results["admission"]["outputs"] = {"conventional": "false", "cmake": "false"}
-        for name in ("linux", "macos", "windows", "cmake"):
+        results["admission"]["outputs"] = {"conventional": "false"}
+        for name in ("linux", "macos", "windows"):
             results[name]["result"] = "skipped"
         self.assertEqual(run(results), 0)
 
