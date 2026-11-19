@@ -2,6 +2,16 @@ name: github-windows
 
 
 on:
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: Build type
+        required: true
+        default: Release
+        type: choice
+        options:
+        - Debug
+        - Release
   push:
     paths:
     - .github/**
@@ -66,11 +76,13 @@ jobs:
         rd /s/q "webimage_extracted"
 
     - name: build fds debug
+      if: github.event_name != 'workflow_dispatch' || inputs.build_type == 'Debug'
       run: |
         cd Build\impi_intel_win_db
         call make_fds.bat
         fds_impi_intel_win_db.exe
     - name: build fds release
+      if: github.event_name == 'workflow_dispatch' && inputs.build_type == 'Release'
       run: |
         cd Build\impi_intel_win
         call make_fds.bat

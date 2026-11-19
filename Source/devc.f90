@@ -46,13 +46,13 @@ TYPE SUBDEVICE_TYPE
    !> Subdevice point, line, or bounding box grid index
    INTEGER :: I1=-1,I2=-1,J1=-1,J2=-1,K1=-1,K2=-1
    !> @}
-   INTEGER :: N_PATH=0 !< Number of grid cells along subdevice path for TRANSMISSION or PATH OBSCURATION
+   INTEGER :: N_PATH=0 !< Number of grid cells along subdevice path for TRANSMISSIVITY, PATH OBSCURATION, etc.
    !> @{
-   !> Grid index for a grid cell along subdevice path for TRANSMISSION or PATH OBSCURATION
+   !> Grid index for a grid cell along subdevice path for TRANSMISSIVITY, PATH OBSCURATION, etc.
    INTEGER, ALLOCATABLE, DIMENSION(:) :: I_PATH,J_PATH,K_PATH
    !> @}
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: D_PATH
-   !< Segment length in a grid cell along subdevice path for TRANSMISSION or PATH OBSCURATION
+   !< Segment length in a grid cell along subdevice path for TRANSMISSIVITY, PATH OBSCURATION, etc.
 END TYPE SUBDEVICE_TYPE
 
 !> \brief Derived type for a measurement device (DEVC)
