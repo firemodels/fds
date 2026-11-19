@@ -2,6 +2,16 @@ name: github-linux
 
 
 on:
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: Build type
+        required: true
+        default: Release
+        type: choice
+        options:
+        - Debug
+        - Release
   push:
     paths:
     - .github/**
@@ -46,6 +56,7 @@ jobs:
         persist-credentials: false
 
     - name: build fds debug
+      if: github.event_name != 'workflow_dispatch' || inputs.build_type == 'Debug'
       run: |
         source /opt/intel/oneapi/setvars.sh
         cd ./Build/impi_intel_linux_db
@@ -53,6 +64,7 @@ jobs:
         ./fds_impi_intel_linux_db
 
     - name: build fds release
+      if: github.event_name == 'workflow_dispatch' && inputs.build_type == 'Release'
       run: |
         source /opt/intel/oneapi/setvars.sh
         cd ./Build/impi_intel_linux
@@ -119,12 +131,14 @@ jobs:
         ref: ${{ inputs.ref || github.sha }}
         persist-credentials: false
     - name: build fds debug
+      if: github.event_name != 'workflow_dispatch' || inputs.build_type == 'Debug'
       run: |
         source /opt/intel/oneapi/setvars.sh
         cd ./Build/ompi_gnu_linux_db
         ./make_fds.sh
         ./fds_ompi_gnu_linux_db
     - name: build fds release
+      if: github.event_name == 'workflow_dispatch' && inputs.build_type == 'Release'
       run: |
         source /opt/intel/oneapi/setvars.sh
         cd ./Build/ompi_gnu_linux

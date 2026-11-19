@@ -2,6 +2,16 @@ name: github-osx
 
 
 on:
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: Build type
+        required: true
+        default: Release
+        type: choice
+        options:
+        - Debug
+        - Release
   push:
     paths:
     - .github/**
@@ -45,11 +55,13 @@ jobs:
         echo "OMPI_FC=gfortran" >> $GITHUB_ENV
 
     - name: build fds debug
+      if: github.event_name != 'workflow_dispatch' || inputs.build_type == 'Debug'
       run: |
         cd ./Build/ompi_gnu_osx_db
         sh ./make_fds.sh
         ./fds_ompi_gnu_osx_db
     - name: build fds release
+      if: github.event_name == 'workflow_dispatch' && inputs.build_type == 'Release'
       run: |
         cd ./Build/ompi_gnu_osx
         sh ./make_fds.sh
