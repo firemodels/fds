@@ -15436,6 +15436,14 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
                   SDV%K_PATH(NN) = K
                ENDDO
                SDV%N_PATH = NN
+               ! If the number of path points is zero, assume that the devices was originally specified with XYZ instead of XB
+               IF (SDV%N_PATH==0) THEN
+                  SDV%N_PATH = 1
+                  SDV%D_PATH(1) = 0.01_EB
+                  SDV%I_PATH(1) = DV%I(1)
+                  SDV%J_PATH(1) = DV%J(1)
+                  SDV%K_PATH(1) = DV%K(1)
+               ENDIF
             ENDDO
          ENDIF
 
