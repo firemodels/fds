@@ -154,7 +154,7 @@ def hot_chimney():
         table.append(label + ' & ' + ' & '.join(f'{value:.{precision}f}' for value in values) + r' \\')
     table.extend([r'\hline', r'\end{tabular}', r'\end{table}'])
 
-    outfile = fds_dir / 'Manuals' / 'FDS_Verification_Guide' / 'hot_chimney.tex'
+    outfile = fds_dir / 'Manuals' / 'FDS_Verification_Guide' / 'SCRIPT_FIGURES' / 'hot_chimney.tex'
     outfile.write_text('\n'.join(table) + '\n', encoding='utf-8')
 
 hot_chimney()
