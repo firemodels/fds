@@ -7361,6 +7361,20 @@ The maximum spread rate as a function of wind speed is plotted in Figure~\ref{fi
 \end{figure}
 
 
+\subsection{Terrain Cut by Open Boundaries}
+\label{LS_terrain_open_boundary}
+
+With \ct{LEVEL_SET_MODE=3} the wind follows the terrain, and the level set model samples it at a height of 6.1~m above the ground by default (\ct{VEG_LSET_WIND_HEIGHT}). The case \ct{LS_terrain_open_boundary} tests this with terrain that is cut by \ct{OPEN} boundaries. A 30~\unit{\degree} slope, made with a \ct{GEOM}, rises to 8.2~m in a domain 10~m on a side and 10~m high, with a 5~\unit{m/s} wind from the west. The vertical boundary planes and the top of the domain are \ct{OPEN}, so that the terrain is cut by the \ct{XMIN} and \ct{YMIN} boundaries, and where the terrain is higher than 2.9~m the sample height lies above the top cell center of the domain. The grid has 5 cells in the vertical direction, and the fire is ignited at the origin at the start of the run, which ends at 3~s. The fire front must advance, the run must complete, and the divergence $\nabla \cdot \mathbf{u}$ must remain small. Figure~\ref{fig:LS_terrain_open_boundary} shows the largest and smallest divergence in the domain, which stay below 0.002~\unit{s^{-1}} in magnitude. The test requires that they remain between $-0.01$ and $0.01$~\unit{s^{-1}}. A numerical instability at the cut boundary cells ends the run in the second time step, and a wind sample height that is not found over high terrain stops the run in a debug build, or reads values outside the wind arrays.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/LS_terrain_open_boundary}
+\caption[The \ct{LS_terrain_open_boundary} test case]{Largest and smallest divergence in the domain of the \ct{LS_terrain_open_boundary} case.}
+\label{fig:LS_terrain_open_boundary}
+\end{figure}
+
+\FloatBarrier
+
 \subsection{Ember Generation}
 \label{LS4_ember_yield}
 

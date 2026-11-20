@@ -1,0 +1,37 @@
+&HEAD CHID='LS_terrain_open_boundary', TITLE='Level set fire spread over a slope that is cut by OPEN boundaries' /
+
+A 30 degree slope, made of a GEOM, rises to 8.2 m inside a 10 m domain whose sides and top are OPEN. The terrain is
+cut by the XMIN and YMIN boundaries, and it is higher than the level set wind sample height (6.1 m) below the top
+of the domain. The wind follows the terrain (LEVEL_SET_MODE=3) and the fire front is tracked from t=0. The run must
+complete and the divergence must remain small.
+
+&MESH IJK=50,50,5, XB=-5,5,-5,5,0,10 /
+
+&TIME T_END=3. /
+&MISC LEVEL_SET_MODE=3 /
+&RADI RADIATION=F /
+
+&WIND DIRECTION=270, SPEED=5 /
+
+&VENT DB='XMIN', SURF_ID='OPEN' /
+&VENT DB='XMAX', SURF_ID='OPEN' /
+&VENT DB='YMIN', SURF_ID='OPEN' /
+&VENT DB='YMAX', SURF_ID='OPEN' /
+&VENT DB='ZMAX', SURF_ID='OPEN' /
+
+&SURF ID='ignition', VEG_LSET_IGNITE_TIME=0., COLOR='RED' /
+&VENT XB=-0.1,0.1,-0.1,0.1,0,0, SURF_ID='ignition', GEOM=T /
+
+&SURF ID='fuel', VEG_LSET_ROS_00=0.05 /
+
+&GEOM ID='terrain', SURF_ID='fuel', IJK=2,2, XB=-5,5,-5,5, ZVALS=0.0,4.0825,4.0825,8.165 /
+
+&SLCF AGL_SLICE=0.1, QUANTITY='LEVEL SET VALUE' /
+&BNDF QUANTITY='FIRE ARRIVAL TIME' /
+
+&DUMP DT_DEVC=0.25 /
+
+&DEVC XB=-5,5,-5,5,0,10, QUANTITY='DIVERGENCE', SPATIAL_STATISTIC='MAX', ID='div_max' /
+&DEVC XB=-5,5,-5,5,0,10, QUANTITY='DIVERGENCE', SPATIAL_STATISTIC='MIN', ID='div_min' /
+
+&TAIL /

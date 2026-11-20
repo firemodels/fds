@@ -886,6 +886,7 @@ $QFDS -d WUI LS_ellipse_0ms_00deg.fds
 $QFDS -d WUI LS_ellipse_5ms_00deg.fds
 $QFDS -d WUI LS_ellipse_0ms_30deg.fds
 $QFDS -d WUI LS_ellipse_5ms_30deg.fds
+$QFDS -d WUI LS_terrain_open_boundary.fds
 $QFDS -d WUI LS_wind_ramp_lin.fds
 $QFDS -d WUI LS_wind_ramp_quad.fds
 $QFDS -d WUI LS4_ember_ignition.fds
