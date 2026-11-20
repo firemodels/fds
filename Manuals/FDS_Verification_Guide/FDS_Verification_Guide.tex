@@ -1903,6 +1903,25 @@ where $k$ is the $z$ index. The value $u_k$ represents the FDS result for $u$ at
 \end{figure}
 
 
+\section{Stokes' First Problem with an Accelerating Plate}
+\label{stokes_accelerated_plate}
+
+A flat plate lies under a fluid at rest. At $t=0$ it starts to move in its own plane with the velocity $U(t)=a\,t$. The fluid velocity parallel to the plate, $u(z,t)$, obeys the diffusion equation $\partial u/\partial t = \nu \, \partial^2 u/\partial z^2$ with $u(0,t)=a\,t$ at the plate and $u \to 0$ far from it. The exact solution is
+\be
+u(z,t) = a\,t \left[ \left( 1+2\eta^2 \right) \mathrm{erfc}(\eta) - \frac{2}{\sqrt{\pi}} \, \eta \, \mathrm{e}^{-\eta^2} \right] \quad ; \quad \eta = \frac{z}{2\sqrt{\nu t}}
+\ee
+The case \ct{stokes_accelerated_plate} solves this problem in a column of fluid 8~cm by 8~cm wide and 1.2~m tall, with periodic side boundaries and an \ct{OPEN} top. The plate is a \ct{VENT} on the floor of the domain whose tangential velocity, \ct{VEL_T}, is ramped linearly in time with \ct{RAMP_V}, so that $a=1$~\unit{m/s^2}. The viscosity is constant, $\nu=0.01$~\unit{m^2/s}, and the flow is computed without a turbulence model (\ct{SIMULATION_MODE='DNS'}). The grid has 4 by 4 by 240 cells (5~mm in the vertical direction), and the time step is fixed at $1/1024$~s. The simulation ends at 1~s, when the velocity profile has diffused about 20~cm into the fluid.
+
+The prescribed wall velocity enters the momentum equation through the tangential velocity in the ghost cell beyond the plate. The predictor step of the time integration uses the wall velocity at the start of the time step, and the corrector step uses the wall velocity at the end of the time step. A wall velocity that lags by one time step in the corrector reduces the scheme to first-order accuracy in time, and at this time step it would cause an error of 1.4~\unit{mm/s} next to the plate. Figure~\ref{fig:stokes_accelerated_plate} compares the computed velocity profile at 1~s with the exact solution. The largest difference, 0.32~\unit{mm/s}, is mostly the error of the spatial discretization: with a time step 64 times smaller, the largest difference is 0.31~\unit{mm/s}. The error of the time integration is second order: it falls by a factor of four each time the time step is halved. The test requires that the computed velocity is within $5 \times 10^{-4}$~\unit{m/s} of the exact solution at every point compared.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/stokes_accelerated_plate}
+\caption[The \ct{stokes_accelerated_plate} test case]{Velocity above a plate that moves with the velocity $U(t)=a\,t$, at $t=1$~s, for the \ct{stokes_accelerated_plate} case.}
+\label{fig:stokes_accelerated_plate}
+\end{figure}
+
+
 \section{Pohlhausen thermal boundary layer}
 \label{sec:Pohlhausen}
 

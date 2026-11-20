@@ -261,6 +261,7 @@ $QFDS -d Flowfields jet_fan.fds
 $QFDS -d Flowfields symmetry_test.fds
 $QFDS -d Flowfields symmetry_test_2.fds
 $QFDS -d Flowfields tangential_velocity.fds
+$QFDS -d Flowfields stokes_accelerated_plate.fds
 $QFDS -d Flowfields velocity_bc_test.fds
 $QFDS -d Flowfields blasius_16.fds
 $QFDS -d Flowfields blasius_32.fds

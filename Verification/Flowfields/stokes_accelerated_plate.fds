@@ -1,0 +1,33 @@
+&HEAD CHID='stokes_accelerated_plate', TITLE='Stokes first problem, plate velocity U=a*t' /
+
+&MESH IJK=4,4,240, XB=0.0,0.08,0.0,0.08,0.0,1.2 /
+
+&TIME DT=9.765625E-04, T_END=1.0, LOCK_TIME_STEP=.TRUE. /
+
+&MISC SIMULATION_MODE='DNS', NOISE=.FALSE., GVEC=0.,0.,0., STRATIFICATION=.FALSE., TMPA=20.0 /
+
+&DUMP DT_DEVC=1.0, NFRAMES=1 /
+
+Constant properties: kinematic viscosity NU = 0.01 m2/s, MU = NU*RHO, RHO = P_INF*MW/(R0*TMPA)
+
+&SPEC ID='GAS', MW=28.8, VISCOSITY=1.1972491201E-02, CONDUCTIVITY=0.026, SPECIFIC_HEAT=1.0, BACKGROUND=.TRUE. /
+
+The plate velocity is U(t) = a*t with a = 1 m/s2: VEL_T = 2 m/s times a ramp from 0 to 1 over 2 s. The ramp table is
+fine enough that its lookup adds no measurable error.
+
+&RAMP ID='plate', T=0.0, F=0.0, NUMBER_INTERPOLATION_POINTS=1000000 /
+&RAMP ID='plate', T=2.0, F=1.0 /
+
+&SURF ID='PLATE', VEL_T=2.0,0.0, RAMP_V='plate', COLOR='RED' /
+
+&VENT MB='XMIN', SURF_ID='PERIODIC' /
+&VENT MB='XMAX', SURF_ID='PERIODIC' /
+&VENT MB='YMIN', SURF_ID='PERIODIC' /
+&VENT MB='YMAX', SURF_ID='PERIODIC' /
+&VENT MB='ZMIN', SURF_ID='PLATE' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+
+&DEVC XB=0.04,0.04,0.03,0.03,0.0025,1.1975, POINTS=240, QUANTITY='U-VELOCITY', ID='u',
+      TIME_AVERAGED=.FALSE., SPATIAL_STATISTIC='INTERPOLATION' /
+
+&TAIL /
