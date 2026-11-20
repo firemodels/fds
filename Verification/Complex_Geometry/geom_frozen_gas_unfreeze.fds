@@ -1,0 +1,27 @@
+&HEAD CHID='geom_frozen_gas_unfreeze', TITLE='GEOM box in a warm block, gas phase frozen until UNFREEZE_TIME' /
+
+Two meshes split through the box, one process each. The gas phase is frozen until UNFREEZE_TIME: only the solid
+phase is updated, and the divergence must keep the value computed at the start. After UNFREEZE_TIME the warm gas
+rises around the box, and the divergence stays small and finite.
+
+&MESH IJK=8,16,16, XB=0.0,0.5,0.0,1.0,0.0,1.0 /
+&MESH IJK=8,16,16, XB=0.5,1.0,0.0,1.0,0.0,1.0 /
+
+&TIME T_END=1.0, DT=0.002 /
+&MISC UNFREEZE_TIME=0.5 /
+&RADI RADIATION=F /
+
+&INIT XB=0.2,0.8,0.2,0.8,0.2,0.8, TEMPERATURE=100. /
+
+&GEOM ID='box', SURF_ID='INERT', XB=0.33,0.67,0.33,0.67,0.33,0.67 /
+
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+
+&DEVC XB=0.0,1.0,0.0,1.0,0.0,1.0, QUANTITY='DIVERGENCE', SPATIAL_STATISTIC='MAX', ID='div_max' /
+&DEVC XB=0.0,1.0,0.0,1.0,0.0,1.0, QUANTITY='DIVERGENCE', SPATIAL_STATISTIC='MIN', ID='div_min' /
+&DEVC XYZ=0.5,0.5,0.75, QUANTITY='TEMPERATURE', ID='T_above' /
+&DEVC XYZ=0.5,0.5,0.85, QUANTITY='W-VELOCITY', ID='w_above' /
+
+&DUMP DT_DEVC=0.01 /
+
+&TAIL /

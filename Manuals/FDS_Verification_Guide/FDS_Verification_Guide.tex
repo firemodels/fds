@@ -7935,6 +7935,20 @@ This verification case consists of six meshes (6~m by 6~m by 3~m) with a 10~cm g
 \label{fig:obst_geom_sprk}
 \end{figure}
 
+\subsection{Gas Phase Frozen Until the Unfreeze Time}
+\label{geom_frozen_gas_unfreeze}
+
+With \ct{UNFREEZE_TIME} on the \ct{MISC} line, FDS updates only the solid phase until that time. The gas phase keeps its initial state, and the gas-phase solver starts at \ct{UNFREEZE_TIME}. The case \ct{geom_frozen_gas_unfreeze} tests this sequence with a \ct{GEOM}. An inert box 0.34~m on a side sits in a block of air at 100~\unit{\degreeCelsius}, inside a 1~m cube of air at 20~\unit{\degreeCelsius} that is open at the top. The grid has 16 cells in each direction, so that the faces of the box cut through the cells, and the domain is split at $x=0.5$~m, through the box, into two meshes run on two processes. The gas phase is frozen until 0.5~s and the run ends at 1~s. While the gas phase is frozen, the divergence $\nabla \cdot \mathbf{u}$ must keep, in every cell, the value computed at the start of the run, including the cut cells around the box and the cells whose divergence is evaluated together with them. After the unfreeze time, the warm air rises around the box and cools against it, and the divergence follows. Figure~\ref{fig:geom_frozen_gas_unfreeze} shows the largest and the smallest divergence in the domain. They are constant up to 0.5~s, and they change gradually after it; their magnitude stays below 0.15~\unit{s^{-1}}. The test requires that the divergence remain between $-0.5$ and $0.5$~\unit{s^{-1}} over the whole run, the range of the plot. A divergence that is not held fixed while the gas phase is frozen grows without bound within a few time steps and stops the run at the unfreeze time.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/geom_frozen_gas_unfreeze}
+\caption[The \ct{geom_frozen_gas_unfreeze} test case]{Largest and smallest divergence in the domain of the \ct{geom_frozen_gas_unfreeze} case. The gas phase is frozen until 0.5~s.}
+\label{fig:geom_frozen_gas_unfreeze}
+\end{figure}
+
+\FloatBarrier
+
 \section{Restart Function}
 \label{geom_restart}
 \label{geom_ls_restart}
