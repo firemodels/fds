@@ -672,6 +672,10 @@ MAIN_LOOP: DO
       CALL MASS_FINITE_DIFFERENCES(NM)
    ENDDO COMPUTE_FINITE_DIFFERENCES_1
 
+   ! Advance the synthetic eddies to the end of the step, the time of the predicted boundary velocities
+
+   IF (SYNTHETIC_EDDY_METHOD) CALL SYNTHETIC_TURBULENCE(DT,T)
+
    ! Estimate quantities at next time step, and decrease/increase time step if necessary based on CFL condition
 
    FIRST_PASS = .TRUE.
@@ -829,11 +833,10 @@ MAIN_LOOP: DO
       CALL MATCH_VELOCITY(NM)
    ENDDO
 
-   ! Apply tangential velocity boundary conditions
+   ! Apply tangential velocity boundary conditions to the estimated velocities, which belong to the end of the step
 
-   IF (SYNTHETIC_EDDY_METHOD) CALL SYNTHETIC_TURBULENCE(DT,T)
    VELOCITY_BC_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-      CALL VELOCITY_BC(T,NM,APPLY_TO_ESTIMATED_VARIABLES=.TRUE.)
+      CALL VELOCITY_BC(T+DT,NM,APPLY_TO_ESTIMATED_VARIABLES=.TRUE.)
    ENDDO VELOCITY_BC_LOOP
 
    !================================================================================================================================
