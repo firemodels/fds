@@ -15011,6 +15011,7 @@ MESH_LOOP: DO NM=1,NMESHES
                 OB%J2<=OB2%J1 .OR. OB%J1>=OB2%J2 .OR. &
                 OB%K2<=OB2%K1 .OR. OB%K1>=OB2%K2) CYCLE OBST_LOOP_2
             IF (OB%REMOVABLE .EQV. OB2%REMOVABLE) CYCLE OBST_LOOP_2  ! If both obstructions can be removed, that is OK.
+            IF ((OB%THIN .AND. OB%REMOVABLE) .OR. (OB2%THIN .AND. OB2%REMOVABLE)) CYCLE OBST_LOOP_2
             WRITE(MESSAGE,'(4A)')  'ERROR(615): OBST ',TRIM(OB%ID),' cannot overlap OBST ',TRIM(OB2%ID)
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDDO OBST_LOOP_2
