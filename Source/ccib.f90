@@ -21097,7 +21097,8 @@ END SUBROUTINE END_FV_L2_SCALAR_RHS
 SUBROUTINE BEGIN_FV_L2_THERMODYNAMIC_ROWS
 ! Face integrals of this process's thermodynamic rows (slots, CC_SET_THERMO_ROWS) start from zero. The gradients of
 ! the skew correction of the scalar fluxes, from the stage's values (guard rows and ghost cells already filled).
-IF (.NOT.CC_IBM) RETURN
+! Nothing to open while the gas phase is frozen: DIVERGENCE_PART_1 computes no divergence then.
+IF (.NOT.CC_IBM .OR. SOLID_PHASE_ONLY) RETURN
 FV_L2_DVOL_FACE=0._EB
 FV_L2_DEL_RHO_D_DEL_Z_FACE=0._EB
 CALL CC_SKEW_GRADIENTS
@@ -21307,6 +21308,7 @@ SUBROUTINE FINALIZE_FV_L2_THERMODYNAMIC_ROWS
 ! Reduce volume-integrated divergence and thermodynamic coefficients by scalar row after all local meshes have
 ! completed CC_DIVERGENCE_PART_1, then scatter the common state to every member. The rows are this process's slots
 ! (CC_SET_THERMO_ROWS); a row shared with other processes is summed on its owner's process, which returns it finished.
+! Nothing to close while the gas phase is frozen: D then keeps the finished divergence of the last computed stage.
 USE PHYSICAL_FUNCTIONS, ONLY: GET_SENSIBLE_ENTHALPY_Z
 INTEGER :: NM,I,J,K,ICC,JCC,IS,ICV,IG,N,IPTR,NS,L,NR,NB,IPZ
 REAL(EB) :: VOL,DIVVOL,RTRMVOL,H_S,RHO_CELL,TMP_CELL,RSUM_CELL,R_H_G_CELL,KSUM,VSUM,DPOLD
@@ -21315,7 +21317,7 @@ TYPE(SPECIES_MIXTURE_TYPE), POINTER :: SM
 TYPE(MESH_TYPE), POINTER :: MFV
 TYPE(CC_FV_TYPE), POINTER :: FV
 
-IF (.NOT.CC_IBM) RETURN
+IF (.NOT.CC_IBM .OR. SOLID_PHASE_ONLY) RETURN
 TH_DIV=0._EB; TH_RTRM=0._EB; TH_VOL=0._EB; TH_ORTRM=0._EB; TH_OCOEFF=0._EB
 
 DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX

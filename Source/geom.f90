@@ -19609,11 +19609,15 @@ END SUBROUTINE CC_GRID_SET_REMOTE_NEIGHBOR_POINTS
 SUBROUTINE CC_GRID_SET_FACE_COEFFICIENTS
 ! Freeze the compact owner-neighbor geometry used by FV pressure/scalar operators. At identity
 ! scope XCV is the GCELL centroid, so AREA/D_LR/RDN reproduces the legacy RC_FACE/CUT_FACE coefficient.
+! The span DN is the normal projection of the center-to-center vector, but not less than that of a center at the
+! admissible angle CC_CV_THETA_MAX. A force-linked CV can see a face almost edge-on; there 1/DN stays bounded and
+! changes continuously with the geometry.
 INTEGER :: NM,IF_,NC,OG,NG,I,J,K,MC
-REAL(EB) :: DV(IAXIS:KAXIS),DN,DOF
+REAL(EB) :: DV(IAXIS:KAXIS),DN,DOF,COS_THETA_MAX
 LOGICAL :: REMOTE,KEEP_PARTNER
 TYPE(MESH_TYPE), POINTER :: M
 
+COS_THETA_MAX = COS(CC_CV_THETA_MAX*PI/180._EB)
 DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    M => MESHES(NM)
    IF (.NOT.ALLOCATED(M%FV%FACE%OWNER_CV)) CYCLE
@@ -19679,14 +19683,12 @@ DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          ENDIF
       ENDIF
       DV(IAXIS:KAXIS) = M%FV%FACE%XN_FACE_REF(IAXIS:KAXIS,IF_) - M%FV%FACE%X_FACE_REF(IAXIS:KAXIS,IF_)
-      DN = ABS(DOT_PRODUCT(DV(IAXIS:KAXIS),M%FV%FACE%NVEC(IAXIS:KAXIS,IF_)))
-      IF (DN <= TWO_EPSILON_EB) DN = NORM2(DV(IAXIS:KAXIS))
+      DN = MAX(ABS(DOT_PRODUCT(DV(IAXIS:KAXIS),M%FV%FACE%NVEC(IAXIS:KAXIS,IF_))),COS_THETA_MAX*NORM2(DV(IAXIS:KAXIS)))
       ! Two CV centers at one point. The piece centroids still define a distance.
       IF (DN<=TWO_EPSILON_EB .AND. OG>=1 .AND. NG>=1 .AND. &
           OG<=M%FV%GCELL%N .AND. NG<=M%FV%GCELL%N .AND. OG/=NG) THEN
          DV(IAXIS:KAXIS) = M%FV%GCELL%XYZCEN(IAXIS:KAXIS,NG) - M%FV%GCELL%XYZCEN(IAXIS:KAXIS,OG)
-         DN = ABS(DOT_PRODUCT(DV(IAXIS:KAXIS),M%FV%FACE%NVEC(IAXIS:KAXIS,IF_)))
-         IF (DN<=TWO_EPSILON_EB) DN = NORM2(DV(IAXIS:KAXIS))
+         DN = MAX(ABS(DOT_PRODUCT(DV(IAXIS:KAXIS),M%FV%FACE%NVEC(IAXIS:KAXIS,IF_))),COS_THETA_MAX*NORM2(DV(IAXIS:KAXIS)))
          IF (DN>TWO_EPSILON_EB) THEN
             M%FV%FACE%X_FACE_REF(IAXIS:KAXIS,IF_) = M%FV%GCELL%XYZCEN(IAXIS:KAXIS,OG)
             M%FV%FACE%XN_FACE_REF(IAXIS:KAXIS,IF_) = M%FV%GCELL%XYZCEN(IAXIS:KAXIS,NG)

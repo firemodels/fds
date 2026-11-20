@@ -176,6 +176,7 @@ $QFDS -d Complex_Geometry cone_1mesh.fds
 $QFDS -d Complex_Geometry geom_mass_file_test.fds
 $QFDS -p 5 -d Complex_Geometry geom_stretched_grid.fds
 $QFDS -p 3 -d Complex_Geometry thin_object_mass.fds
+$QFDS -p 2 -d Complex_Geometry geom_frozen_gas_unfreeze.fds
 
 $QFDS -d Controls activate_vents.fds
 $QFDS -d Controls bi_dir.fds
@@ -260,6 +261,7 @@ $QFDS -d Flowfields jet_fan.fds
 $QFDS -d Flowfields symmetry_test.fds
 $QFDS -d Flowfields symmetry_test_2.fds
 $QFDS -d Flowfields tangential_velocity.fds
+$QFDS -d Flowfields stokes_accelerated_plate.fds
 $QFDS -d Flowfields velocity_bc_test.fds
 $QFDS -d Flowfields blasius_16.fds
 $QFDS -d Flowfields blasius_32.fds
@@ -885,6 +887,7 @@ $QFDS -d WUI LS_ellipse_0ms_00deg.fds
 $QFDS -d WUI LS_ellipse_5ms_00deg.fds
 $QFDS -d WUI LS_ellipse_0ms_30deg.fds
 $QFDS -d WUI LS_ellipse_5ms_30deg.fds
+$QFDS -d WUI LS_terrain_open_boundary.fds
 $QFDS -d WUI LS_wind_ramp_lin.fds
 $QFDS -d WUI LS_wind_ramp_quad.fds
 $QFDS -d WUI LS4_ember_ignition.fds

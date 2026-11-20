@@ -1903,6 +1903,25 @@ where $k$ is the $z$ index. The value $u_k$ represents the FDS result for $u$ at
 \end{figure}
 
 
+\section{Stokes' First Problem with an Accelerating Plate}
+\label{stokes_accelerated_plate}
+
+A flat plate lies under a fluid at rest. At $t=0$ it starts to move in its own plane with the velocity $U(t)=a\,t$. The fluid velocity parallel to the plate, $u(z,t)$, obeys the diffusion equation $\partial u/\partial t = \nu \, \partial^2 u/\partial z^2$ with $u(0,t)=a\,t$ at the plate and $u \to 0$ far from it. The exact solution is
+\be
+u(z,t) = a\,t \left[ \left( 1+2\eta^2 \right) \mathrm{erfc}(\eta) - \frac{2}{\sqrt{\pi}} \, \eta \, \mathrm{e}^{-\eta^2} \right] \quad ; \quad \eta = \frac{z}{2\sqrt{\nu t}}
+\ee
+The case \ct{stokes_accelerated_plate} solves this problem in a column of fluid 8~cm by 8~cm wide and 1.2~m tall, with periodic side boundaries and an \ct{OPEN} top. The plate is a \ct{VENT} on the floor of the domain whose tangential velocity, \ct{VEL_T}, is ramped linearly in time with \ct{RAMP_V}, so that $a=1$~\unit{m/s^2}. The viscosity is constant, $\nu=0.01$~\unit{m^2/s}, and the flow is computed without a turbulence model (\ct{SIMULATION_MODE='DNS'}). The grid has 4 by 4 by 240 cells (5~mm in the vertical direction), and the time step is fixed at $1/1024$~s. The simulation ends at 1~s, when the velocity profile has diffused about 20~cm into the fluid.
+
+The prescribed wall velocity enters the momentum equation through the tangential velocity in the ghost cell beyond the plate. The predictor step of the time integration uses the wall velocity at the start of the time step, and the corrector step uses the wall velocity at the end of the time step. A wall velocity that lags by one time step in the corrector reduces the scheme to first-order accuracy in time, and at this time step it would cause an error of 1.4~\unit{mm/s} next to the plate. Figure~\ref{fig:stokes_accelerated_plate} compares the computed velocity profile at 1~s with the exact solution. The largest difference, 0.32~\unit{mm/s}, is mostly the error of the spatial discretization: with a time step 64 times smaller, the largest difference is 0.31~\unit{mm/s}. The error of the time integration is second order: it falls by a factor of four each time the time step is halved. The test requires that the computed velocity is within $5 \times 10^{-4}$~\unit{m/s} of the exact solution at every point compared.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/stokes_accelerated_plate}
+\caption[The \ct{stokes_accelerated_plate} test case]{Velocity above a plate that moves with the velocity $U(t)=a\,t$, at $t=1$~s, for the \ct{stokes_accelerated_plate} case.}
+\label{fig:stokes_accelerated_plate}
+\end{figure}
+
+
 \section{Pohlhausen thermal boundary layer}
 \label{sec:Pohlhausen}
 
@@ -7361,6 +7380,20 @@ The maximum spread rate as a function of wind speed is plotted in Figure~\ref{fi
 \end{figure}
 
 
+\subsection{Terrain Cut by Open Boundaries}
+\label{LS_terrain_open_boundary}
+
+With \ct{LEVEL_SET_MODE=3} the wind follows the terrain, and the level set model samples it at a height of 6.1~m above the ground by default (\ct{VEG_LSET_WIND_HEIGHT}). The case \ct{LS_terrain_open_boundary} tests this with terrain that is cut by \ct{OPEN} boundaries. A 30~\unit{\degree} slope, made with a \ct{GEOM}, rises to 8.2~m in a domain 10~m on a side and 10~m high, with a 5~\unit{m/s} wind from the west. The vertical boundary planes and the top of the domain are \ct{OPEN}, so that the terrain is cut by the \ct{XMIN} and \ct{YMIN} boundaries, and where the terrain is higher than 2.9~m the sample height lies above the top cell center of the domain. The grid has 5 cells in the vertical direction, and the fire is ignited at the origin at the start of the run, which ends at 3~s. The fire front must advance, the run must complete, and the divergence $\nabla \cdot \mathbf{u}$ must remain small. Figure~\ref{fig:LS_terrain_open_boundary} shows the largest and smallest divergence in the domain, which stay below 0.002~\unit{s^{-1}} in magnitude. The test requires that they remain between $-0.01$ and $0.01$~\unit{s^{-1}}. A numerical instability at the cut boundary cells ends the run in the second time step, and a wind sample height that is not found over high terrain stops the run in a debug build, or reads values outside the wind arrays.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/LS_terrain_open_boundary}
+\caption[The \ct{LS_terrain_open_boundary} test case]{Largest and smallest divergence in the domain of the \ct{LS_terrain_open_boundary} case.}
+\label{fig:LS_terrain_open_boundary}
+\end{figure}
+
+\FloatBarrier
+
 \subsection{Ember Generation}
 \label{LS4_ember_yield}
 
@@ -7934,6 +7967,20 @@ This verification case consists of six meshes (6~m by 6~m by 3~m) with a 10~cm g
 \caption[The \ct{obst_geom_sprk} test case]{Test of plume and ceiling jet dynamics for complex geometry.}
 \label{fig:obst_geom_sprk}
 \end{figure}
+
+\subsection{Gas Phase Frozen Until the Unfreeze Time}
+\label{geom_frozen_gas_unfreeze}
+
+With \ct{UNFREEZE_TIME} on the \ct{MISC} line, FDS updates only the solid phase until that time. The gas phase keeps its initial state, and the gas-phase solver starts at \ct{UNFREEZE_TIME}. The case \ct{geom_frozen_gas_unfreeze} tests this sequence with a \ct{GEOM}. An inert box 0.34~m on a side sits in a block of air at 100~\unit{\degreeCelsius}, inside a 1~m cube of air at 20~\unit{\degreeCelsius} that is open at the top. The grid has 16 cells in each direction, so that the faces of the box cut through the cells, and the domain is split at $x=0.5$~m, through the box, into two meshes run on two processes. The gas phase is frozen until 0.5~s and the run ends at 1~s. While the gas phase is frozen, the divergence $\nabla \cdot \mathbf{u}$ must keep, in every cell, the value computed at the start of the run, including the cut cells around the box and the cells whose divergence is evaluated together with them. After the unfreeze time, the warm air rises around the box and cools against it, and the divergence follows. Figure~\ref{fig:geom_frozen_gas_unfreeze} shows the largest and the smallest divergence in the domain. They are constant up to 0.5~s, and they change gradually after it; their magnitude stays below 0.15~\unit{s^{-1}}. The test requires that the divergence remain between $-0.5$ and $0.5$~\unit{s^{-1}} over the whole run, the range of the plot. A divergence that is not held fixed while the gas phase is frozen grows without bound within a few time steps and stops the run at the unfreeze time.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/geom_frozen_gas_unfreeze}
+\caption[The \ct{geom_frozen_gas_unfreeze} test case]{Largest and smallest divergence in the domain of the \ct{geom_frozen_gas_unfreeze} case. The gas phase is frozen until 0.5~s.}
+\label{fig:geom_frozen_gas_unfreeze}
+\end{figure}
+
+\FloatBarrier
 
 \section{Restart Function}
 \label{geom_restart}
