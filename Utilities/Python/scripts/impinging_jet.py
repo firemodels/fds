@@ -69,7 +69,7 @@ fig = fdsplotlib.plot_to_fig(x_data=RE, y_data=NU, marker_style='k-', data_label
                              y_label='Nu')
 
 
-markers = {'coarse': ('b', 's'), 'medium': ('r', 's'), 'fine': ('g', 's')}
+markers = {'coarse': 'bs', 'medium': 'rs', 'fine': 'gs'}
 
 E_FDS = np.zeros((2, 3))  # shape: (len(Re_str), len(res_list))
 
