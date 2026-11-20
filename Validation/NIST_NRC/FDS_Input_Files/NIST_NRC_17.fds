@@ -502,6 +502,7 @@ Bidirectional Probes
 Smoke Obscuration/Concentration
 
 &DEVC XB=21.10,21.30, 0.40, 0.60, 3.62, 3.62, QUANTITY='TRANSMISSIVITY', ID='Trans' /
+&DEVC XB=21.10,21.30, 0.40, 0.60, 3.62, 3.62, QUANTITY='EXTINCTION COEFFICIENT', ID='K' /
 
 Compartment Pressure
 
