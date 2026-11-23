@@ -1952,6 +1952,7 @@ def scatplot(saved_data, drange, **kwargs):
     Stats_Output = kwargs.get("Stats_Output", "Validation")
     Scatterplot_Dir = kwargs.get("Scatterplot_Dir", "")
     verbose = kwargs.get("verbose", True)
+    model_prefix = kwargs.get("model_prefix", "FDS")
 
     plot_style = get_plot_style("fds")
     scat_figure_size = (plot_style["Scat_Paper_Width"],plot_style["Scat_Paper_Height"])
@@ -2069,6 +2070,7 @@ def scatplot(saved_data, drange, **kwargs):
                     Save_Dataname,
                     Save_Measured_Metric,
                     Save_Predicted_Metric,
+                    model_prefix=model_prefix,
                 )
 
             # if verbose:
@@ -2396,6 +2398,7 @@ def _write_raw_scatter_csv(
     Save_Dataname,
     Save_Measured_Metric,
     Save_Predicted_Metric,
+    model_prefix="FDS",
 ):
     """
     Write raw (pre-mask) measured/predicted values used by scatplot.
@@ -2407,7 +2410,7 @@ def _write_raw_scatter_csv(
 
     # Match histogram naming convention
     fname = (
-        "FDS_"
+        f"{model_prefix}_"
         + scatter_title
         .replace(" ", "_")
         .replace(";", "")
