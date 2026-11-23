@@ -1,4 +1,5 @@
 # requirements.txt for pip install
+# Requires Python 3.9 through 3.14; enforced by python_requires in ../Utilities/Python/setup.py
 
 # User's minimal environment for FDS
 

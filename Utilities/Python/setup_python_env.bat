@@ -1,7 +1,7 @@
 @echo off
 REM Configure Python Virtual Environment for FDS (WINDOWS)
 REM Usage (Windows Command Prompt):
-REM    1. Install Python 3.7 or higher and add its "python.exe" folder to PATH
+REM    1. Install Python 3.9 through 3.14 and add its "python.exe" folder to PATH
 REM    2. Open a normal Windows Command Prompt
 REM    3. call setup_python_env.bat [--batchmode]
 REM
@@ -20,7 +20,7 @@ if errorlevel 1 (
     goto :ERROR_EXIT
 )
 
-REM === Ensure Python version >= 3.7 ===
+REM === Ensure Python version is 3.9 through 3.14 ===
 set "PY_MAJOR="
 set "PY_MINOR="
 for /f "tokens=1,2" %%a in ('python -c "import sys; print(sys.version_info.major, sys.version_info.minor)"') do (
@@ -33,12 +33,16 @@ if not defined PY_MAJOR (
     goto :ERROR_EXIT
 )
 
-if %PY_MAJOR% LSS 3 (
-    set "ERROR_MSG=Python 3.7 or higher is required. Found %PY_MAJOR%.%PY_MINOR%."
+if not %PY_MAJOR%==3 (
+    set "ERROR_MSG=Python 3.9 through 3.14 is required. Found %PY_MAJOR%.%PY_MINOR%."
     goto :ERROR_EXIT
 )
-if %PY_MAJOR%==3 if %PY_MINOR% LSS 7 (
-    set "ERROR_MSG=Python 3.7 or higher is required. Found %PY_MAJOR%.%PY_MINOR%."
+if %PY_MINOR% LSS 9 (
+    set "ERROR_MSG=Python 3.9 through 3.14 is required. Found %PY_MAJOR%.%PY_MINOR%."
+    goto :ERROR_EXIT
+)
+if %PY_MINOR% GTR 14 (
+    set "ERROR_MSG=Python 3.9 through 3.14 is required. Found %PY_MAJOR%.%PY_MINOR%."
     goto :ERROR_EXIT
 )
 

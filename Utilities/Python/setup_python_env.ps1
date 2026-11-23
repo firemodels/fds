@@ -18,7 +18,7 @@ function Invoke-FdsPythonEnvSetup {
             throw "python is not installed or not in PATH"
         }
 
-        # === Ensure Python version >= 3.7 ===
+        # === Ensure Python version is 3.9 through 3.14 ===
         $VersionText = & python -c "import sys; print(sys.version_info.major, sys.version_info.minor)"
         if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($VersionText)) {
             throw "Failed to determine Python version"
@@ -32,8 +32,8 @@ function Invoke-FdsPythonEnvSetup {
         $PyMajor = [int]$VersionParts[0]
         $PyMinor = [int]$VersionParts[1]
 
-        if ($PyMajor -lt 3 -or ($PyMajor -eq 3 -and $PyMinor -lt 7)) {
-            throw "Python 3.7 or higher is required. Found $PyMajor.$PyMinor."
+        if ($PyMajor -ne 3 -or $PyMinor -lt 9 -or $PyMinor -gt 14) {
+            throw "Python 3.9 through 3.14 is required. Found $PyMajor.$PyMinor."
         }
 
         Write-Host "Python version is OK: $PyMajor.$PyMinor"

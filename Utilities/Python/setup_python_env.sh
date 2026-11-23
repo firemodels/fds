@@ -21,12 +21,12 @@ function error_exit {
 }
 
 
-# Check Python version > 3.7
+# Check Python version is 3.9 through 3.14
 major=$(python3 -c 'import sys; print(sys.version_info.major)')
 minor=$(python3 -c 'import sys; print(sys.version_info.minor)')
 
-if (( major < 3 || (major == 3 && minor < 7) )); then
-    echo "Python 3.7 or higher is required. Found $major.$minor."
+if (( major != 3 || minor < 9 || minor > 14 )); then
+    echo "Python 3.9 through 3.14 is required. Found $major.$minor."
     echo "Stopping python environment setup."
     return
 else
