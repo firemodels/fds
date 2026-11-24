@@ -45,7 +45,11 @@ endif
 GIT_VERSION := $(GIT_HASH)$(GIT_STAT)-$(GIT_BRANCH)
 
 .git_hash_stamp: FORCE
+ifeq ($(shell echo "check_quotes"),"check_quotes")
+	@powershell -NoProfile -Command "$$version = '$(GIT_VERSION)' + [Environment]::NewLine; if (-not [IO.File]::Exists('$@') -or [IO.File]::ReadAllText('$@') -cne $$version) { [IO.File]::WriteAllText('$@', $$version) }"
+else
 	@printf '%s\n' '$(GIT_VERSION)' | cmp -s - $@ || printf '%s\n' '$(GIT_VERSION)' > $@
+endif
 
 .PHONY: FORCE
 FORCE:
