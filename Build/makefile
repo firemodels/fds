@@ -40,6 +40,12 @@ else
   CLT_VERSION := $(shell ../Scripts/osx_clt.sh)
 endif
 
+# Rewritten only when the hash differs from the stored value
+.git_hash_stamp: FORCE
+	@echo '$(GIT_HASH)' | cmp -s - $@ || echo '$(GIT_HASH)' > $@
+
+FORCE:
+
 HYPRE_INFO=-DHYPRE_PP=\"$(HYPRE_VERSION)\"
 SUNDIALS_INFO=-DSUNDIALS_PP=\"$(SUNDIALS_VERSION)\"
 
@@ -401,7 +407,7 @@ ompi_gnu_osx_dv : setup $(obj_mpi)
 
 # *** Object Dependencies ***
 
-vers.o :
+vers.o : .git_hash_stamp
 prec.o :
 imkl.o :
 cons.o : prec.o
@@ -436,7 +442,7 @@ read.o : func.o prec.o cons.o type.o mesh.o devc.o ctrl.o radi.o hvac.o data.o g
 divg.o : func.o prec.o cons.o type.o mesh.o mass.o ccib.o
 main.o : vers.o func.o prec.o cons.o type.o mesh.o devc.o smvv.o mass.o divg.o velo.o wall.o fire.o radi.o part.o vege.o dump.o read.o init.o pres.o pois.o ctrl.o turb.o hvac.o data.o geom.o ccib.o soot.o prop.o chem.o
 
-vers.obj :
+vers.obj : .git_hash_stamp
 prec.obj :
 imkl.obj :
 cons.obj : prec.obj
