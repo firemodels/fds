@@ -1,12 +1,3 @@
-#ifndef GITHASH_PP
-#define GITHASH_PP "unknown"
-#endif
-#ifndef GITDATE_PP
-#define GITDATE_PP "unknown"
-#endif
-#ifndef BUILDDATE_PP
-#define BUILDDATE_PP "unknown"
-#endif
 
 !> \brief A collection of utility routines used throughout FDS.
 
@@ -6962,50 +6953,6 @@ RAMP_ID(RAMP_INDEX)   = ID
 RAMP_TYPE(RAMP_INDEX) = TYPE
 
 END SUBROUTINE GET_RAMP_INDEX
-
-
-SUBROUTINE WRITE_SUMMARY_INFO(LU,INPUT_FILE_INCLUDED)
-
-USE GLOBAL_CONSTANTS
-USE COMP_FUNCTIONS, ONLY : GET_DATE
-USE MPI_F08
-USE ISO_FORTRAN_ENV
-CHARACTER(LABEL_LENGTH) :: DATE
-INTEGER, INTENT(IN) :: LU
-INTEGER :: MPIVERSION,MPISUBVERSION,MPILIBLENGTH,IERR
-CHARACTER(LEN=MPI_MAX_LIBRARY_VERSION_STRING) :: MPILIBVERSION
-LOGICAL, INTENT(IN) :: INPUT_FILE_INCLUDED
-
-CALL GET_DATE(DATE)
-
-WRITE(LU,'(/A/)')      ' Fire Dynamics Simulator'
-WRITE(LU,'(A,A)')      ' Current Date     : ',TRIM(DATE)
-WRITE(LU,'(A,A)')      ' Revision         : ',TRIM(GITHASH_PP)
-WRITE(LU,'(A,A)')      ' Revision Date    : ',TRIM(GITDATE_PP)
-WRITE(LU,'(A,A)')      ' Compiler         : ',TRIM(COMPILER_VERSION())
-WRITE(LU,'(A,A/)')     ' Compilation Date : ',TRIM(BUILDDATE_PP)
-
-IF (INPUT_FILE_INCLUDED) THEN
-                   WRITE(LU,'(A,I0)')  ' Number of MPI Processes:  ',N_MPI_PROCESSES
-   IF (USE_OPENMP) WRITE(LU,'(A,I0)')  ' Number of OpenMP Threads: ',OPENMP_AVAILABLE_THREADS
-ENDIF
-
-CALL MPI_GET_LIBRARY_VERSION(MPILIBVERSION,MPILIBLENGTH,IERR)
-CALL MPI_GET_VERSION(MPIVERSION,MPISUBVERSION,IERR)
-WRITE(LU,'(/A,I1,A,I1)') ' MPI version: ',MPIVERSION,'.',MPISUBVERSION
-WRITE(LU,'(A,A)') ' MPI library version: ',TRIM(MPILIBVERSION)
-#ifdef HYPRE_PP
-WRITE(LU,'(A,A)') ' Hypre library version: ',TRIM(HYPRE_PP)
-#else
-WRITE(LU,'(A)') ' Hypre library: not used '
-#endif
-#ifdef SUNDIALS_PP
-WRITE(LU,'(A,A)') ' Sundials library version: ',TRIM(SUNDIALS_PP)
-#else
-WRITE(LU,'(A)') ' Sundials library: not used'
-#endif
-
-END SUBROUTINE WRITE_SUMMARY_INFO
 
 
 !> \brief Write VERBOSE diagnostic output
