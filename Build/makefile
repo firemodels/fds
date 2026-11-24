@@ -41,9 +41,13 @@ else
 endif
 
 # Rewritten only when the hash differs from the stored value
-.git_hash_stamp: FORCE
-	@echo '$(GIT_HASH)' | cmp -s - $@ || echo '$(GIT_HASH)' > $@
 
+GIT_VERSION := $(GIT_HASH)$(GIT_STAT)-$(GIT_BRANCH)
+
+.git_hash_stamp: FORCE
+	@printf '%s\n' '$(GIT_VERSION)' | cmp -s - $@ || printf '%s\n' '$(GIT_VERSION)' > $@
+
+.PHONY: FORCE
 FORCE:
 
 HYPRE_INFO=-DHYPRE_PP=\"$(HYPRE_VERSION)\"
