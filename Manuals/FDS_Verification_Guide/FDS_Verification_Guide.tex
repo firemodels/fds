@@ -6168,9 +6168,10 @@ $r_{\alpha,{\rm p}}/Y_{\alpha,0}$ (s$^{-1}$)    & 0.0384        & 0.2426        
 
 \section{Scaling Pyrolysis (SPyro) Model}
 \label{spyro_cone_demo_2}
-\label{spyro_cone_demo_3}
 
-This section uses two cases to test a model for scaling heat release rate data from a cone calorimeter to heat fluxes other than the one used during the cone test. The first case tests the interpolation of a single cone curve to a heat flux different than the one the sample was tested at. A surface is assigned an \ct{HRRPUA} and \ct{RAMP_Q} from an inert cone test performed at 50~\unit{kW/m^2}. The surface is given an \ct{IGNITION_TEMPERATURE} of 0~\unit{\degreeCelsius} so it ignites immediately. The surface is exposed to a sawtooth \ct{EXTERNAL_FLUX} that varies between 10~\unit{kW/m^2} and 110~\unit{kW/m^2}. The results are shown below in Fig~\ref{fig:spyro_cone_demo_2}.
+This section uses three cases to test a model for scaling heat release rate data from a cone calorimeter to heat fluxes other than the one used during the cone test.
+
+The first case tests the interpolation of a single cone curve to a heat flux different than the one the sample was tested at. A surface is assigned an \ct{HRRPUA} and \ct{RAMP_Q} from an inert cone test performed at 50~\unit{kW/m^2}. The surface is given an \ct{IGNITION_TEMPERATURE} of 0~\unit{\degreeCelsius} so it ignites immediately. The surface is exposed to a sawtooth \ct{EXTERNAL_FLUX} that varies between 10~\unit{kW/m^2} and 110~\unit{kW/m^2}. The results are shown below in Fig~\ref{fig:spyro_cone_demo_2}.
 
 \begin{figure}[!ht]
     \centering
@@ -6179,6 +6180,8 @@ This section uses two cases to test a model for scaling heat release rate data f
     \label{fig:spyro_cone_demo_2}
 \end{figure}
 
+\label{spyro_cone_demo_3}
+
 The second case tests the interpolation of multiple cone tests. In the case four cone curves (two each at two thicknesses) are defined for a surface which is then simulated at an intermediate heat flux and thickness. The results are shown below in Fig~\ref{fig:spyro_cone_demo_3}.
 
 \begin{figure}[!ht]
@@ -6186,6 +6189,19 @@ The second case tests the interpolation of multiple cone tests. In the case four
     \includegraphics[height=2.2in]{SCRIPT_FIGURES/spyro_cone_demo_3}
     \caption[Check of the Scaling Pyrolysis (SPyro) model (the \ct{spyro_cone_demo_3} case)]{Interpolating a set of cone data to an intermediate surface thickness and exposure (the \ct{spyro_cone_demo_3} case).}
     \label{fig:spyro_cone_demo_3}
+\end{figure}
+
+\label{spyro_hoc}
+
+The third case checks the mass loss scaling that occurs when a \ct{MATL HEAT_OF_COMBUSTION} input differs from the \ct{REAC HEAT_OF_COMBUSTION} input. Four 1~\unit{m^3} meshes are defined each with a 0.001~\unit{m^3} obstruction. All the obstructions are given a \ct{BULK_DENSITY} of 50~\unit{kg/m^3}. In two meshes a fixed \ct{HRRPUA} is used and in the other two meshes Spyro is used with a \ct{RAMP} and \ct{EXTERNAL_FLUX} that gives the same fixed \ct{HRRPUA}.  One mesh of each type has no \ct{HEAT_OF_COMBUSTION} input for the \ct{MATL} being consumed. The other mesh of each type is given a \ct{MATL HEAT_OF_COMBUSTION} that is 1/3 the \ct{REAC HEAT_OF_COMBUSTION}. For the cases without \ct{MATL HEAT_OF_COMBUSTION} input, we expect the same gas phase fuel mass and time to burn away the \ct{OBST}. For the cases with \ct{MATL HEAT_OF_COMBUSTION}, we expect the same gas phase fuel mass and time to burn away the \ct{OBST}.  Since the ratio is 1/3, we also expect to see this case have 1/3 the time to burn away and 1/3 the fuel gas. The results are shown below in Fig~\ref{fig:spyro_hoc}.
+
+\begin{figure}[ht]
+    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+        \includegraphics[height=2.2in]{SCRIPT_FIGURES/spyro_hoc_fuel} &
+        \includegraphics[height=2.2in]{SCRIPT_FIGURES/spyro_hoc_time}
+    \end{tabular*}
+    \caption[Results of\ct{spyro_hoc}]{Results of the \ct{spyro_hoc} case. (Left) Fuel mass (kg). (Right) \ct{OBST} removal time (s).}
+    \label{fig:spyro_hoc}
 \end{figure}
 
 \section{Melting Ice Cube}
