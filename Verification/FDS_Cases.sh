@@ -509,6 +509,7 @@ $QFDS -d Pyrolysis shrink_swell.fds
 $QFDS -d Pyrolysis spyro_cone_demo.fds
 $QFDS -d Pyrolysis spyro_cone_demo_2.fds
 $QFDS -d Pyrolysis spyro_cone_demo_3.fds
+$QFDS -p 4 -d Pyrolysis spyro_hoc.fds
 $QFDS -d Pyrolysis surf_mass_vent_liquid_fuel.fds
 $QFDS -d Pyrolysis surf_mass_vent_liquid_fuel_nonconforming.fds
 $QFDS -d Pyrolysis surf_mass_part_char_cart_fuel.fds

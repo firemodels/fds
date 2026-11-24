@@ -1295,11 +1295,14 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
             ENDIF
             ! Check for cone data burning rate and compute scaled rate and time
             IF (SF%N_QDOTPP_REF > 0 .AND. N_REACTIONS>=1) THEN
-               IF (PREDICTOR) THEN
-                  IF (B1%T_IGN <=T) THEN
+               IF (B1%T_IGN > T) THEN
+                  B1%M_DOT_G_PP_ACTUAL(N) = 0._EB
+               ELSE
+                  IF (PREDICTOR) THEN
                      B1%M_DOT_G_PP_ACTUAL(N) = QDOTPP*SF%MASS_FLUX(N)
                   ELSE
-                     B1%M_DOT_G_PP_ACTUAL(N) = 0._EB
+                     ! Reset the mass flux to the actual value for the corrector step 
+                     B1%M_DOT_G_PP_ACTUAL(N) = B1%M_DOT_G_PP_ACTUAL(N) / SF%M_DOT_G_PP_ACTUAL_FAC
                   ENDIF
                ENDIF
             ! Trapezoidal HRR curve for level set spread
