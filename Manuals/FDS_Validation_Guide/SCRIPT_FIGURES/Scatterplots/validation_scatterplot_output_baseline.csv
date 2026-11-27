@@ -1,8 +1,8 @@
 Quantity,Number of Datasets,Number of Points,Sigma_Experiment,Sigma_Model,Bias
 HGL Temperature; Forced Ventilation,6,158,0.07,0.18,1.16
 HGL Temperature; Natural Ventilation,18,349,0.07,0.11,1.06
-HGL Temperature; No Ventilation,3,32,0.07,0.08,1.1
-HGL Depth,15,297,0.05,0.13,1.09
+HGL Temperature; No Ventilation,4,58,0.06,0.06,1.15
+HGL Depth,16,323,0.05,0.13,1.08
 Ceiling Jet Temperature,22,1105,0.07,0.15,1.05
 Plume Temperature,16,480,0.07,0.42,1
 Oxygen Concentration,14,323,0.08,0.19,1
@@ -29,8 +29,8 @@ Carbon Monoxide Concentration,8,172,0.19,0.68,1.28
 Entrainment,2,87,0.05,0.05,1.13
 Extinction Time,2,45,0.1,0.46,1.2
 Species Concentration,2,126,0.08,0.15,0.97
-Smoke Obscuration,3,44,0.07,0.71,1.27
-Extinction Coefficient,3,43,0.10,0.92,1.81
+Smoke Obscuration,4,98,0.12,0.45,1.14
+Extinction Coefficient,4,97,0.14,0.61,1.34
 Mass Flow Rate,1,40,0.06,0.06,0.66
 Atmospheric Dispersion,13,47,0.5,0.84,1.66
 Minimum Extinguishing Concentration,46,46,0.04,0.04,1.07
